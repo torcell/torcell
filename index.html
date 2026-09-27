@@ -390,6 +390,8 @@
 
 <div id="liqPrintArea"></div>
 
+<button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:22px;right:22px;width:54px;height:54px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:22px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.35);cursor:pointer;z-index:70;">💾</button>
+
 <div class="overlay" id="retencionesOverlay">
   <div class="modal" style="max-width:420px;">
     <h3>🔒 Retenciones pendientes</h3>
@@ -449,6 +451,7 @@ function applyRoleUI(){
   badge.textContent = isAdmin ? 'Conectado como ADMIN' : 'Conectado como INVITADO';
   badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'guest');
   document.getElementById('adminLoginBtn').style.display = isAdmin ? 'none' : 'inline-flex';
+  if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 }
 
 function rate1For(categoria, trabajador){
@@ -481,6 +484,42 @@ let workerDocs = {}; // {nombre: [{name, type, dataUrl}, ...]} — fotos/pdfs, s
 const AFP_OPTIONS = ['Capital','Cuprum','Habitat','Modelo','PlanVital','ProVida','Uno','No especificada'];
 let customWorkers = [];
 let saveTimer = null;
+// para no pisar cambios de otro Admin: marco qué toqué YO desde el último guardado,
+// y antes de guardar de verdad, cargo lo último de Sheets y solo dejo que gane lo remoto
+// en lo que YO no toqué -- así dos personas editando cosas distintas no se pisan
+let dirtyCellIds = new Set();
+let settingsDirty = false; // trabajadores/tarifas/precios-invitado/historial de pagos, como grupo
+function markCellDirty(id){ dirtyCellIds.add(id); }
+function markSettingsDirty(){ settingsDirty = true; }
+
+async function mergeRemoteBeforeSave(){
+  if(!SHEETS_URL) return;
+  const remote = await sheetsLoad();
+  if(!remote) return; // si no se pudo cargar, mejor seguir con lo local que bloquear el guardado
+  if(remote.items){
+    Object.keys(remote.items).forEach(id => {
+      if(!dirtyCellIds.has(id) && cellById[id]) state[id] = remote.items[id];
+    });
+  }
+  if(!settingsDirty){
+    const oldWs = workerStatus;
+    if(remote.workerStatus){
+      workerStatus = remote.workerStatus;
+      // el rut/telefono/correo/etc no viaja a Sheets (ver sanitizedWorkerStatusForSheets),
+      // así que lo tengo que volver a pegar encima de lo que llegó
+      Object.keys(oldWs).forEach(w => {
+        if(!workerStatus[w]) return;
+        ['rut','telefono','correo','nacionalidad','direccion'].forEach(f => {
+          if(oldWs[w][f]) workerStatus[w][f] = oldWs[w][f];
+        });
+      });
+    }
+    if(remote.customWorkers) customWorkers = remote.customWorkers;
+    if(remote.rates) RATES = {...RATES, ...remote.rates};
+    if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
+    if(Array.isArray(remote.paymentHistory)) paymentHistory = remote.paymentHistory;
+  }
+}
 
 function defaultStateFor(cell){
   return { partida:false, terminado:false, pagado:false, retenido:false, trabajador: cell.trabajadorInicial || '',
@@ -638,20 +677,26 @@ function scheduleSave(){
   if(!isAdmin) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
+    await mergeRemoteBeforeSave();
     const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, workerDocs};
     try{ await window.storage.set(STORAGE_KEY, JSON.stringify(payload), true); }
     catch(e){ console.error('No se pudo guardar local', e); }
     if(SHEETS_URL){ await sheetsSave(); }
+    dirtyCellIds.clear(); settingsDirty = false;
+    render();
   }, 250);
 }
 async function saveNow(){
   if(!isAdmin) return;
   clearTimeout(saveTimer);
+  await mergeRemoteBeforeSave();
   const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, workerDocs};
   let localOk = true;
   try{ await window.storage.set(STORAGE_KEY, JSON.stringify(payload), true); } catch(e){ localOk = false; }
   let sheetsOk = true;
   if(SHEETS_URL){ sheetsOk = await sheetsSave(); }
+  dirtyCellIds.clear(); settingsDirty = false;
+  render();
   const msgEl = document.getElementById('ioMsg');
   if((SHEETS_URL && sheetsOk) || (!SHEETS_URL && localOk)){
     msgEl.style.color = 'var(--entregado)';
@@ -727,6 +772,7 @@ function renderWorkerPanel(){
       const field = e.target.getAttribute('data-field');
       if(!workerStatus[w]) workerStatus[w] = defaultWorkerEntry(w);
       workerStatus[w][field] = e.target.value;
+      markSettingsDirty();
       scheduleSave(); populateFilters(); render();
     });
   });
@@ -750,8 +796,9 @@ function renderWorkerPanel(){
           if(cIdx >= 0) customWorkers[cIdx] = newName;
           if(workerDocs[oldName]){ workerDocs[newName] = workerDocs[oldName]; delete workerDocs[oldName]; }
           Object.keys(state).forEach(id => {
-            if(state[id].trabajador === oldName) state[id].trabajador = newName;
+            if(state[id].trabajador === oldName){ state[id].trabajador = newName; markCellDirty(id); }
           });
+          markSettingsDirty();
           scheduleSave();
           populateFilters(); renderWorkerPanel(); render();
         });
@@ -848,12 +895,14 @@ document.getElementById('addWorkerBtn').addEventListener('click', () => {
   ALL_WORKERS.push(name);
   workerStatus[name] = {estado:'activo', especialidad:'ceramista'};
   customWorkers.push(name);
+  markSettingsDirty();
   scheduleSave();
   input.value = '';
   populateFilters(); renderWorkerPanel(); render();
 });
 document.getElementById('allowGuestPricesChk').addEventListener('change', (e) => {
   allowGuestPrices = e.target.checked;
+  markSettingsDirty();
   scheduleSave();
   applyRoleUI();
   render();
@@ -1106,6 +1155,7 @@ document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.cerRafael = parseFloat(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
   RATES.cerAlt = parseFloat(document.getElementById('rateCerAlt').value) || RATES.cerAlt;
   RATES.frague = parseFloat(document.getElementById('rateFrague').value) || RATES.frague;
+  markSettingsDirty();
   scheduleSave(); updateRateFootnote(); render();
   ratesOverlay.classList.remove('show');
 });
@@ -1231,6 +1281,7 @@ function render(){
           if(flag === 'terminado' && !willBeOn){ state[id].pagado = false; }
           if(turboMode && flag === 'pagado' && willBeOn){ state[id].partida = true; state[id].terminado = true; }
           if(turboMode && flag === 'terminado' && willBeOn){ state[id].partida = true; }
+          markCellDirty(id);
           scheduleSave(); render();
         });
       });
@@ -1251,6 +1302,7 @@ function render(){
           <select id="assignSelect" style="width:100%;">${options.join('')}</select>`;
         openInputModal(current ? 'Reasignar trabajador' : 'Asignar trabajador', bodyHtml, () => {
           state[id].trabajador = document.getElementById('assignSelect').value;
+          markCellDirty(id);
           scheduleSave(); render();
         });
       });
@@ -1266,6 +1318,7 @@ function render(){
         openInputModal('Editar metraje (m²)', bodyHtml, () => {
           const v = parseFloat(document.getElementById('m2Input').value);
           state[id].m2 = isNaN(v) ? null : v;
+          markCellDirty(id);
           scheduleSave(); render();
         });
       });
@@ -1281,6 +1334,7 @@ function render(){
           <p style="margin:8px 0 0;font-size:11.5px;color:var(--sub);">Deja el campo vacío y guarda para quitar la observación.</p>`;
         openInputModal(current ? 'Editar observación' : 'Agregar observación', bodyHtml, () => {
           state[id].nota = document.getElementById('notaInput').value.trim();
+          markCellDirty(id);
           scheduleSave(); render();
         });
       });
@@ -1422,9 +1476,11 @@ function renderLiqHistoryBox(worker, containerId){
         entry.itemIds.forEach(id => {
           if(!state[id]) return;
           state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
+          markCellDirty(id);
         });
         entry.liberado = true;
         entry.liberadoTs = Date.now();
+        markSettingsDirty();
         scheduleSave(); render();
         renderLiqHistoryBox(worker, relBox);
       });
@@ -1755,13 +1811,16 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
     payIds.forEach(id => {
       state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
       payTotal += liqCurrentMeta.rows.find(r => r.id === id).precio;
+      markCellDirty(id);
     });
     retainIds.forEach(id => {
       state[id].retenido = true;
       retainTotal += liqCurrentMeta.rows.find(r => r.id === id).precio;
+      markCellDirty(id);
     });
     if(payIds.length) liqRegisterHistory('pago', payIds, payTotal);
     if(retainIds.length) liqRegisterHistory('retencion', retainIds, retainTotal);
+    markSettingsDirty();
     scheduleSave();
     render();
     document.getElementById('ioMsg').style.color = 'var(--entregado)';
@@ -1958,10 +2017,12 @@ function renderRetencionesList(){
             h.itemIds.forEach(id => {
               if(!state[id]) return;
               state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
+              markCellDirty(id);
             });
             h.liberado = true; h.liberadoTs = Date.now();
           }
         });
+        markSettingsDirty();
         scheduleSave(); render();
         renderRetencionesList();
         updateRetencionesIndicator();
@@ -1982,6 +2043,16 @@ document.getElementById('statsOpenBtn').addEventListener('click', () => {
   statsOverlay.classList.add('show');
 });
 document.getElementById('statsCloseBtn').addEventListener('click', () => statsOverlay.classList.remove('show'));
+
+// botón flotante de guardar: aparece si estás como Admin y ya bajaste lo suficiente
+// como para no ver el botón "Guardar ahora" de arriba
+const floatingSaveBtn = document.getElementById('floatingSaveBtn');
+function updateFloatingSaveBtn(){
+  const show = isAdmin && window.scrollY > 260;
+  floatingSaveBtn.style.display = show ? 'flex' : 'none';
+}
+window.addEventListener('scroll', updateFloatingSaveBtn);
+floatingSaveBtn.addEventListener('click', saveNow);
 
 (async function init(){
   await loadState();
