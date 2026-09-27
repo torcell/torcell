@@ -346,6 +346,7 @@
 <div class="overlay" id="liqConfigOverlay">
   <div class="modal" style="max-width:460px;">
     <h3>Generar liquidación</h3>
+    <div id="liqSinAsignarWarn" style="display:none;font-size:12px;color:#8a6a1f;background:#fbf3de;border:1px solid #e6d6a3;padding:8px 10px;margin-bottom:12px;"></div>
     <div class="rate-row"><label>Trabajador</label><select id="liqWorkerSelect" style="width:220px;"></select></div>
     <button class="btn small" id="liqHistoryToggleBtn" style="margin-bottom:12px;">Ver historial de pagos de este trabajador</button>
     <div id="liqHistoryBox" style="display:none;max-height:180px;overflow-y:auto;border:1px solid var(--border);padding:8px;margin-bottom:12px;background:var(--panel-soft);"></div>
@@ -1454,6 +1455,23 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
   document.getElementById('liqIncRetenido').checked = false;
   document.getElementById('liqConfigError').textContent = '';
   document.getElementById('liqHistoryBox').style.display = 'none';
+
+  // aviso: departamentos marcados Terminado (o Pagado) sin nadie asignado -- ese trabajo
+  // se puede "perder" porque nunca va a salir en la liquidación de nadie
+  const sinAsignar = ALL_CELLS.filter(c => {
+    const st = getState(c.id);
+    const e = resolveEstado(st);
+    return (e === 'entregado' || e === 'pagado') && !st.trabajador;
+  });
+  const warnEl = document.getElementById('liqSinAsignarWarn');
+  if(sinAsignar.length){
+    const ejemplos = sinAsignar.slice(0,5).map(c => `${c.dpto==='Pasillo'?'Pasillo':'Dpto '+c.dpto} (${c.piso})`).join(', ');
+    warnEl.innerHTML = `⚠️ Hay <b>${sinAsignar.length}</b> partida(s) Terminada(s) o Pagada(s) sin trabajador asignado — no van a aparecer en ninguna liquidación hasta que las asignes. Ej: ${ejemplos}${sinAsignar.length>5?'…':''}`;
+    warnEl.style.display = 'block';
+  } else {
+    warnEl.style.display = 'none';
+  }
+
   liqConfigOverlay.classList.add('show');
 });
 document.getElementById('liqConfigCancel').addEventListener('click', () => liqConfigOverlay.classList.remove('show'));
@@ -1547,7 +1565,6 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
 function liqRebuildDoc(){
   const m = liqCurrentMeta;
   if(!m) return;
-  const hoyFmt = new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'});
 
   const afpRow = m.tipoPago === 'finmes'
     ? `<tr class="liq-afp"><td colspan="5">Descuento AFP (${m.dias} día(s) × ${money(m.afpTarifa)})</td><td class="num">- ${money(m.afpDescuento)}</td></tr>`
@@ -1606,7 +1623,6 @@ function liqRebuildDoc(){
   const docHtmlScreen = `
     <div class="liq-doc">
       <h2>Liquidación de pago — Obra La Florida Bellavista</h2>
-      <div class="liq-sub">Generado el ${hoyFmt}</div>
       <div class="liq-meta">
         <div>Trabajador: <b>${m.worker}</b></div>
         <div>Fecha de pago: <b>${m.fechaFmt}</b></div>
@@ -1630,7 +1646,6 @@ function liqRebuildDoc(){
   const docHtmlPrint = `
     <div class="liq-doc">
       <h2>Liquidación de pago — Obra La Florida Bellavista</h2>
-      <div class="liq-sub">Generado el ${hoyFmt}</div>
       <div class="liq-meta">
         <div>Trabajador: <b>${m.worker}</b></div>
         <div>Fecha de pago: <b>${m.fechaFmt}</b></div>
