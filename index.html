@@ -356,6 +356,7 @@
       </select>
     </div>
     <div class="grp"><label>Buscar Dpto</label><input type="text" id="search" placeholder="Ej: 502"></div>
+    <div class="grp"><label>&nbsp;</label><button class="btn small" id="btnLimpiarFiltros">✕ Limpiar filtros</button></div>
     <div class="counter-pill" id="resultCount"></div>
   </div>
 
@@ -431,7 +432,16 @@
     </div>
     <div id="liqAfpFields">
       <div class="rate-row"><label>Días trabajados (mes)</label><input type="number" id="liqDias" style="width:220px;" min="0"></div>
-      <div class="rate-row"><label>AFP por día ($)</label><input type="number" id="liqAfpTarifa" style="width:220px;" value="6500"></div>
+      <div class="rate-row"><label>Cómo calcular la AFP</label>
+        <select id="liqAfpMetodo" style="width:220px;">
+          <option value="fijo">Monto fijo por día</option>
+          <option value="pct">% según su AFP registrada</option>
+        </select>
+      </div>
+      <div id="liqAfpFijoBox" class="rate-row"><label>AFP por día ($)</label><input type="number" id="liqAfpTarifa" style="width:220px;" value="6500"></div>
+      <div id="liqAfpPctBox" style="display:none;">
+        <p id="liqAfpPctInfo" style="font-size:12px;color:var(--sub);margin:0 0 10px;"></p>
+      </div>
     </div>
 
     <p style="margin:12px 0 6px;font-size:12.5px;color:var(--text);">Incluir partidas en estado:</p>
@@ -461,7 +471,9 @@
 
 <div id="liqPrintArea"></div>
 
-<button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:22px;right:22px;width:54px;height:54px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:22px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.35);cursor:pointer;z-index:70;">💾</button>
+<button id="scrollTopBtn" title="Subir" style="position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);font-size:16px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;z-index:69;">⬆</button>
+<button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:70px;right:26px;width:36px;height:36px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:15px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;z-index:70;">💾</button>
+<div id="savedToast" style="position:fixed;bottom:112px;right:22px;background:var(--presente,#1f7a3d);background:#1f7a3d;color:#fff;padding:8px 14px;font-size:12.5px;font-weight:700;border-radius:var(--radius);box-shadow:0 3px 12px rgba(0,0,0,.35);display:none;z-index:71;">✓ Guardado</div>
 
 <div class="overlay" id="retencionesOverlay">
   <div class="modal" style="max-width:420px;">
@@ -507,6 +519,12 @@ const TERMINADO_LABEL = {'Piso':'Terminado', 'Muro Baños':'Terminado', 'Muro Co
 const FLAG_LABEL = {partida:'Partida', pagado:'Pagado'};
 
 let RATES = { cerBase: 4000, cerRafael: 4300, cerAlt: 6750, frague: 500 };
+// comisiones AFP (Chile) -- lo que se descuenta del propio pago del trabajador es
+// 10% (cotización obligatoria) + esta comisión. El Seguro de Invalidez y Sobrevivencia
+// y el aporte nuevo del empleador (subiendo hasta 7% al 2033) los paga el empleador
+// aparte, no se descuentan de acá. Valores según spensiones.cl, consultado 09/2026.
+let AFP_RATES = { Capital:1.44, Cuprum:1.44, Habitat:1.27, Modelo:0.58, PlanVital:1.16, ProVida:1.45, Uno:0.46 };
+const AFP_COTIZACION_OBLIGATORIA = 10; // % fijo, igual para todas las AFP
 let allowGuestPrices = false;
 let isAdmin = false;
 let turboMode = false; // si está prendido, marcar Pagado o Terminado también marca lo de antes solo
@@ -717,7 +735,7 @@ function sanitizedWorkerStatusForSheets(){
 async function sheetsSave(){
   if(!SHEETS_URL) return false;
   try{
-    const body = { action:'save', records: buildRecords(), workerStatus: sanitizedWorkerStatusForSheets(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory };
+    const body = { action:'save', records: buildRecords(), workerStatus: sanitizedWorkerStatusForSheets(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES };
     const res = await fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok) throw new Error('bad status');
     const json = await res.json();
@@ -739,6 +757,7 @@ function applyLoadedPayload(parsed){
   if(parsed.rates) RATES = {...RATES, ...parsed.rates};
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
+  if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
   rebuildWorkerList(); // OJO: va antes de rellenar las partidas que faltan (esas traen nombres viejos de fábrica)
   ALL_CELLS.forEach(c => { if(!state[c.id]) state[c.id] = defaultStateFor(c); });
@@ -831,9 +850,16 @@ async function doSaveCycle(){
     if(settingsVersion === versionSnap) settingsDirty = false;
   }
   render();
+  if(localOk && (!SHEETS_URL || sheetsOk)) mostrarGuardadoToast();
   return {localOk, sheetsOk};
 }
 
+function mostrarGuardadoToast(){
+  const t = document.getElementById('savedToast');
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+}
 function enqueueSave(){
   const p = saveChain.then(doSaveCycle);
   saveChain = p.catch(e => { console.error('Error al guardar', e); });
@@ -1559,6 +1585,7 @@ function render(){
 
   renderStats();
   updateRetencionesIndicator();
+  if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 }
 
 [document.getElementById('filterPiso'), document.getElementById('filterTrabajador'), document.getElementById('filterEstado')]
@@ -1567,6 +1594,14 @@ document.getElementById('filterPiso').addEventListener('change', (e) => {
   try{ localStorage.setItem('progresoObraPiso', e.target.value); }catch(err){}
 });
 document.getElementById('search').addEventListener('input', render);
+document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
+  document.getElementById('filterPiso').value = '';
+  document.getElementById('filterTrabajador').value = '';
+  document.getElementById('filterEstado').value = '';
+  document.getElementById('search').value = '';
+  try{ localStorage.setItem('progresoObraPiso', ''); }catch(err){}
+  render();
+});
 document.getElementById('toggleWorkerPanel').addEventListener('click', (e) => {
   const nowShown = document.getElementById('workerPanel').classList.toggle('show');
   e.target.classList.toggle('primary', nowShown);
@@ -1725,6 +1760,9 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
   document.getElementById('liqTipoPago').value = 'quincena';
   document.getElementById('liqAfpFields').style.display = 'none';
   document.getElementById('liqDias').value = '';
+  document.getElementById('liqAfpMetodo').value = 'fijo';
+  document.getElementById('liqAfpFijoBox').style.display = '';
+  document.getElementById('liqAfpPctBox').style.display = 'none';
   document.getElementById('liqIncTerminado').checked = true;
   document.getElementById('liqIncProceso').checked = false;
   document.getElementById('liqIncPagado').checked = false;
@@ -1748,12 +1786,40 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
     warnEl.style.display = 'none';
   }
 
+  updateAfpPctInfo();
   liqConfigOverlay.classList.add('show');
 });
 document.getElementById('liqConfigCancel').addEventListener('click', () => closeOverlayAnimated(liqConfigOverlay));
 document.getElementById('liqTipoPago').addEventListener('change', (e) => {
   document.getElementById('liqAfpFields').style.display = e.target.value === 'finmes' ? 'block' : 'none';
 });
+// según la AFP que el trabajador tenga registrada en "Datos del trabajador", muestro el
+// desglose (10% + comisión) y bloqueo el método por % si no tiene AFP registrada
+function updateAfpPctInfo(){
+  const worker = document.getElementById('liqWorkerSelect').value;
+  const metodo = document.getElementById('liqAfpMetodo').value;
+  const afp = worker ? (workerStatus[worker] || {}).afp : '';
+  const info = document.getElementById('liqAfpPctInfo');
+  const pctOpt = document.querySelector('#liqAfpMetodo option[value="pct"]');
+  const tieneAfp = afp && AFP_RATES[afp] !== undefined;
+  pctOpt.disabled = !tieneAfp;
+  if(!tieneAfp && metodo === 'pct'){
+    document.getElementById('liqAfpMetodo').value = 'fijo';
+    document.getElementById('liqAfpFijoBox').style.display = '';
+    document.getElementById('liqAfpPctBox').style.display = 'none';
+    info.innerHTML = worker ? `<span style="color:#c0546f;">${worker} no tiene una AFP registrada (ponla en "Datos del trabajador"). Se usará el monto fijo por día.</span>` : '';
+    return;
+  }
+  if(tieneAfp){
+    const comision = AFP_RATES[afp];
+    const total = AFP_COTIZACION_OBLIGATORIA + comision;
+    info.innerHTML = `${worker} está en <b>${afp}</b>: ${AFP_COTIZACION_OBLIGATORIA}% cotización obligatoria + ${comision}% comisión = <b>${total.toFixed(2).replace('.',',')}%</b> a descontar del "Precio Total" de esta liquidación. (El Seguro de Invalidez y Sobrevivencia y el aporte del empleador no se descuentan de aquí, los paga aparte quien contrata.)`;
+  }
+  document.getElementById('liqAfpFijoBox').style.display = metodo === 'pct' ? 'none' : '';
+  document.getElementById('liqAfpPctBox').style.display = metodo === 'pct' ? 'block' : 'none';
+}
+document.getElementById('liqAfpMetodo').addEventListener('change', updateAfpPctInfo);
+document.getElementById('liqWorkerSelect').addEventListener('change', updateAfpPctInfo);
 document.getElementById('liqHistoryToggleBtn').addEventListener('click', () => {
   const box = document.getElementById('liqHistoryBox');
   const worker = document.getElementById('liqWorkerSelect').value;
@@ -1773,7 +1839,10 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
   const fecha = document.getElementById('liqFecha').value;
   const tipoPago = document.getElementById('liqTipoPago').value;
   const dias = parseInt(document.getElementById('liqDias').value) || 0;
+  const afpMetodo = document.getElementById('liqAfpMetodo').value;
   const afpTarifa = parseFloat(document.getElementById('liqAfpTarifa').value) || 0;
+  const afpNombre = (workerStatus[worker] || {}).afp || '';
+  const afpPct = (afpMetodo === 'pct' && AFP_RATES[afpNombre] !== undefined) ? (AFP_COTIZACION_OBLIGATORIA + AFP_RATES[afpNombre]) : 0;
   const incTerminado = document.getElementById('liqIncTerminado').checked;
   const incProceso = document.getElementById('liqIncProceso').checked;
   const incPagado = document.getElementById('liqIncPagado').checked;
@@ -1819,13 +1888,13 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
   const subtotal = rowsPagables.reduce((s,r) => s + r.precio, 0);
   const totalYaPagado = rowsPagadas.reduce((s,r) => s + r.precio, 0);
   const totalRetenido = rowsRetenidas.reduce((s,r) => s + r.precio, 0);
-  const afpDescuento = tipoPago === 'finmes' ? dias * afpTarifa : 0;
+  const afpDescuento = tipoPago !== 'finmes' ? 0 : (afpPct > 0 ? subtotal * afpPct / 100 : dias * afpTarifa);
   const totalFinal = subtotal - afpDescuento;
   const fechaFmt = fecha ? new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}) : '—';
   const tipoPagoLabel = tipoPago === 'finmes' ? 'Fin de mes' : 'Quincena';
 
   liqExtraDetails = []; // cada liquidación nueva arranca sin detalles agregados
-  liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento,
+  liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
     subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas };
 
   liqRebuildDoc();
@@ -1850,8 +1919,11 @@ function liqRebuildDoc(){
   // "span" = cuántas columnas ocupa la etiqueta de cada fila de totales:
   // 5 en la tabla completa (computador / PDF / imagen) y 3 en la compacta de celular
   const padCell = (withRetainCol) => withRetainCol ? '<td class="liq-retain-col"></td>' : '';
+  const afpEtiqueta = m.afpPct > 0
+    ? `Descuento AFP (${m.afpNombre}: ${AFP_COTIZACION_OBLIGATORIA}% + ${AFP_RATES[m.afpNombre]}% = ${m.afpPct.toFixed(2).replace('.',',')}%)`
+    : `Descuento AFP (${m.dias} día(s) × ${money(m.afpTarifa)})`;
   const afpRowHtml = (withRetainCol, span) => m.tipoPago === 'finmes'
-    ? `<tr class="liq-afp"><td colspan="${span}">Descuento AFP (${m.dias} día(s) × ${money(m.afpTarifa)})</td><td class="num">- ${money(m.afpDescuento)}</td>${padCell(withRetainCol)}</tr>`
+    ? `<tr class="liq-afp"><td colspan="${span}">${afpEtiqueta}</td><td class="num">- ${money(m.afpDescuento)}</td>${padCell(withRetainCol)}</tr>`
     : '';
   const detailRowsHtml = (withRetainCol, span) => liqExtraDetails.map(d => {
     const signo = d.tipo === 'suma' ? '+' : '-';
@@ -2337,7 +2409,9 @@ document.getElementById('statsCloseBtn').addEventListener('click', () => closeOv
 // como para no ver el botón "Guardar ahora" de arriba
 const floatingSaveBtn = document.getElementById('floatingSaveBtn');
 function updateFloatingSaveBtn(){
-  const show = isAdmin && window.scrollY > 260;
+  const hayPendiente = dirtyCellIds.size > 0 || settingsDirty;
+  document.getElementById('scrollTopBtn').style.display = window.scrollY > 260 ? 'flex' : 'none';
+  const show = isAdmin && window.scrollY > 260 && hayPendiente;
   floatingSaveBtn.style.display = show ? 'flex' : 'none';
 }
 window.addEventListener('scroll', updateFloatingSaveBtn);
@@ -2386,6 +2460,7 @@ function updateLiveClock(){
 updateLiveClock();
 setInterval(updateLiveClock, 30000);
 floatingSaveBtn.addEventListener('click', saveNow);
+document.getElementById('scrollTopBtn').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
 (async function init(){
   await loadState();
