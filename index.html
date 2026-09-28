@@ -71,7 +71,7 @@
   .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
   select, input[type=text], input[type=number]{background:var(--panel);border:1px solid var(--border-strong);color:var(--text);padding:7px 9px;border-radius:var(--radius);font-size:13px;outline:none;min-width:140px;}
   select:focus, input:focus{border-color:var(--accent);}
-  .tabs{display:flex;gap:0;margin-left:auto;border:1px solid var(--border-strong);}
+  .tabs{display:flex;gap:0;border:1px solid var(--border-strong);}
   .tab{padding:8px 14px;background:var(--panel);color:var(--sub);font-size:13px;cursor:pointer;border-right:1px solid var(--border-strong);}
   .tab:last-child{border-right:none;}
   .tab.active{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:600;}
@@ -140,7 +140,21 @@
   #overlay{z-index:90;} /* la de "confirmar" siempre por encima de cualquier otra ventana abierta */
   #inputOverlay{z-index:85;} /* la de "asignar / observación / agregar detalle" etc, por encima de liquidación, retenciones, etc */
   .overlay.show{display:flex;}
-  .modal{background:var(--panel);border:1px solid var(--border-strong);border-radius:0;max-width:420px;width:100%;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+  .modal{background:var(--panel);border:1px solid var(--border-strong);border-radius:0;max-width:420px;width:100%;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:modalPop .16s ease;}
+  @keyframes modalPop{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
+  @keyframes modalPopOut{ from{opacity:1; transform:scale(1);} to{opacity:0; transform:scale(.96);} }
+  .modal.modalClosing{ animation:modalPopOut .14s ease forwards; }
+  .overlay.closingBg{ transition:background-color .14s ease; background:rgba(20,22,20,0) !important; }
+  @keyframes roleFlash{ 0%{filter:brightness(1);} 40%{filter:brightness(1.7);} 100%{filter:brightness(1);} }
+  .role-flash{ animation:roleFlash .5s ease; }
+  /* modo día/noche: en vez de un flash, todo lo que cambia de color lo hace en una
+     transición pareja y progresiva, para que no canse la vista con el uso diario */
+  body, .panel, .stat-card, .toolbar, .modal, .worker-panel, table.dept-table,
+  table.dept-table th, table.dept-table td.dpto-col, select, input, textarea, .btn,
+  .chk-pill, .price-line, .assign-btn, .nota-btn-single, .nota-line, .sheets-badge,
+  .role-badge, .counter-pill, .tab {
+    transition: background-color .6s ease, color .5s ease, border-color .5s ease;
+  }
   .modal h3{margin:0 0 10px;font-size:15px;color:var(--text);}
   .modal p{margin:0 0 18px;font-size:13.5px;color:var(--sub);}
   .modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
@@ -226,6 +240,7 @@
     <div class="titles">
       <h1>Panel de Progreso — Obra La Florida Bellavista</h1>
       <p>Piso/Pavimento, Muro Baño, Muro Cocina y Pasillos</p>
+      <p id="liveClock" style="font-size:12px;color:var(--sub);margin-top:3px;"></p>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <span id="sheetsBadge" class="sheets-badge off">Guardado local</span>
@@ -272,7 +287,7 @@
 
   <div class="toolbar">
     <div class="tabs" id="catTabs"></div>
-    <div class="grp"><label>Piso</label><select id="filterPiso"></select></div>
+    <div class="grp" style="margin-left:auto;"><label>Piso</label><select id="filterPiso"></select></div>
     <div class="grp"><label>Trabajador</label><select id="filterTrabajador"></select></div>
     <div class="grp">
       <label>Estado</label>
@@ -429,6 +444,9 @@ const DEFAULT_WORKER_STATUS = {"Anthony": {"estado": "inactivo", "especialidad":
 const STORAGE_KEY = "progreso-obra-la-florida-v8";
 
 const AREA_LABEL = {'Piso':'Piso', 'Muro Baños':'Muro Baño', 'Muro Cocina':'Muro Cocina', 'Pasillos':'Pasillo'};
+const OBS_PRESETS = ['Falta Dintel','Falta Terraza','Piso Incompleto','Muro Incompleto','Palmetas Cabeceadas',
+  'Palmetas Sopladas','Falta Tina','Pavimento en mal estado','Tabiquería en mal estado',
+  'No se puede hacer Piso','No se puede hacer baño','No se puede hacer terraza'];
 const TERMINADO_LABEL = {'Piso':'Terminado', 'Muro Baños':'Terminado', 'Muro Cocina':'Terminado', 'Pasillos':'Terminado'};
 const FLAG_LABEL = {partida:'Partida', pagado:'Pagado'};
 
@@ -450,6 +468,7 @@ function applyRoleUI(){
   const badge = document.getElementById('roleBadge');
   badge.textContent = isAdmin ? 'Conectado como ADMIN' : 'Conectado como INVITADO';
   badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'guest');
+  badge.classList.remove('role-flash'); void badge.offsetWidth; badge.classList.add('role-flash');
   document.getElementById('adminLoginBtn').style.display = isAdmin ? 'none' : 'inline-flex';
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 }
@@ -716,8 +735,35 @@ function updateRateFootnote(){
   document.getElementById('rateFootNote').textContent = 'Versión Alpha 0.1.1';
 }
 
+// efecto tipo "pasar la hoja de un libro": si voy hacia la derecha en el orden de pestañas
+// (Cerámica -> Frague -> Pasillos), el contenido se va hacia la izquierda y lo nuevo entra
+// desde la derecha; si voy para atrás, al revés
+function switchCategoria(newCat){
+  if(newCat === activeCategoria) return;
+  const order = ['Cerámica', 'Frague', 'Pasillos'];
+  const dir = order.indexOf(newCat) > order.indexOf(activeCategoria) ? 1 : -1;
+  const contentEl = document.getElementById('content');
+  contentEl.style.transition = 'transform .16s ease, opacity .16s ease';
+  contentEl.style.transform = `translateX(${dir * -30}px)`;
+  contentEl.style.opacity = '0';
+  setTimeout(() => {
+    activeCategoria = newCat;
+    try{ localStorage.setItem('progresoObraCategoria', activeCategoria); }catch(err){}
+    populateFilters();
+    render();
+    contentEl.style.transition = 'none';
+    contentEl.style.transform = `translateX(${dir * 30}px)`;
+    requestAnimationFrame(() => {
+      contentEl.style.transition = 'transform .16s ease, opacity .16s ease';
+      contentEl.style.transform = 'translateX(0)';
+      contentEl.style.opacity = '1';
+    });
+  }, 160);
+}
+
 function populateFilters(){
   const pisoSel = document.getElementById('filterPiso');
+  const pisoPrevia = pisoSel.value; // para no perderla al cambiar de pestaña
   let pisos;
   if(activeCategoria === 'Pasillos'){
     pisos = ALL_FLOOR_NUMS.map(n => 'Piso ' + n);
@@ -726,6 +772,7 @@ function populateFilters(){
       .sort((a,b) => parseInt(a.match(/\d+/)) - parseInt(b.match(/\d+/)));
   }
   pisoSel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${p}">${p}</option>`).join('');
+  if(pisos.includes(pisoPrevia)) pisoSel.value = pisoPrevia;
 
   const trabSel = document.getElementById('filterTrabajador');
   trabSel.innerHTML = '<option value="">Todos los trabajadores</option>' +
@@ -736,9 +783,7 @@ function populateFilters(){
   tabsEl.innerHTML = cats.map(c => `<div class="tab ${c===activeCategoria?'active':''}" data-cat="${c}">${c}</div>`).join('');
   tabsEl.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
-      activeCategoria = t.getAttribute('data-cat');
-      try{ localStorage.setItem('progresoObraCategoria', activeCategoria); }catch(err){}
-      populateFilters(); render();
+      switchCategoria(t.getAttribute('data-cat'));
     });
   });
 }
@@ -1056,7 +1101,7 @@ function renderFloorTable(fb){
       <div class="table-wrap">
         <table class="dept-table">
           <colgroup><col class="col-dpto">${fb.areas.map(() => `<col style="width:${Math.floor(100/fb.areas.length)}%">`).join('')}</colgroup>
-          <thead><tr><th>Dpto</th>${fb.areas.map(a => `<th>${AREA_LABEL[a]}</th>`).join('')}</tr></thead>
+          <thead><tr><th>Dpto</th>${fb.areas.map(a => `<th>${(fb.categoria==='Frague'?'FRAGUE':'CERÁMICA')+' - '+AREA_LABEL[a]}</th>`).join('')}</tr></thead>
           <tbody>
             ${deptRows.map(d => `
               <tr>
@@ -1120,7 +1165,17 @@ const modalConfirm = document.getElementById('modalConfirm');
 const modalCancel = document.getElementById('modalCancel');
 let pendingAction = null;
 function askConfirm(text, onConfirm){ modalText.textContent = text; pendingAction = onConfirm; overlay.classList.add('show'); }
-function closeModal(){ overlay.classList.remove('show'); pendingAction = null; }
+// para que cerrar cualquier ventana se vea bien también (no solo abrirla)
+function closeOverlayAnimated(overlayEl){
+  const modal = overlayEl.querySelector('.modal');
+  if(!modal){ overlayEl.classList.remove('show'); return; }
+  modal.classList.add('modalClosing');
+  setTimeout(() => {
+    overlayEl.classList.remove('show');
+    modal.classList.remove('modalClosing');
+  }, 140);
+}
+function closeModal(){ closeOverlayAnimated(overlay); pendingAction = null; }
 modalCancel.addEventListener('click', closeModal);
 modalConfirm.addEventListener('click', () => { if(pendingAction) pendingAction(); closeModal(); });
 
@@ -1137,7 +1192,7 @@ function openInputModal(title, bodyHtml, onConfirm, confirmLabel){
   inputModalConfirm.textContent = confirmLabel || 'Guardar';
   inputOverlay.classList.add('show');
 }
-function closeInputModal(){ inputOverlay.classList.remove('show'); inputConfirmHandler = null; }
+function closeInputModal(){ closeOverlayAnimated(inputOverlay); inputConfirmHandler = null; }
 inputModalCancel.addEventListener('click', closeInputModal);
 inputModalConfirm.addEventListener('click', () => { if(inputConfirmHandler) inputConfirmHandler(); closeInputModal(); });
 
@@ -1149,7 +1204,7 @@ document.getElementById('ratesBtn').addEventListener('click', () => {
   document.getElementById('rateFrague').value = RATES.frague;
   ratesOverlay.classList.add('show');
 });
-document.getElementById('ratesCancel').addEventListener('click', () => ratesOverlay.classList.remove('show'));
+document.getElementById('ratesCancel').addEventListener('click', () => closeOverlayAnimated(ratesOverlay));
 document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.cerBase = parseFloat(document.getElementById('rateCerBase').value) || RATES.cerBase;
   RATES.cerRafael = parseFloat(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
@@ -1157,7 +1212,7 @@ document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.frague = parseFloat(document.getElementById('rateFrague').value) || RATES.frague;
   markSettingsDirty();
   scheduleSave(); updateRateFootnote(); render();
-  ratesOverlay.classList.remove('show');
+  closeOverlayAnimated(ratesOverlay);
 });
 
 const pinOverlay = document.getElementById('pinOverlay');
@@ -1167,7 +1222,7 @@ document.getElementById('adminLoginBtn').addEventListener('click', () => {
   pinInput.value = ''; pinError.textContent = '';
   pinOverlay.classList.add('show');
 });
-document.getElementById('pinCancel').addEventListener('click', () => pinOverlay.classList.remove('show'));
+document.getElementById('pinCancel').addEventListener('click', () => closeOverlayAnimated(pinOverlay));
 // si Sheets está conectado, el PIN se revisa ALLÁ (nunca viaja el pin real en el html);
 // si no hay Sheets conectado todavía, uso el de respaldo de más arriba (ese sí queda visible
 // si alguien inspecciona el código -- por eso conviene conectar Sheets para el de verdad)
@@ -1200,7 +1255,7 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
   if(ok){
     isAdmin = true;
     try{ sessionStorage.setItem('progresoObraAdmin','1'); }catch(err){}
-    pinOverlay.classList.remove('show');
+    closeOverlayAnimated(pinOverlay);
     applyRoleUI(); renderWorkerPanel(); updateSheetsBadge(); render();
   } else {
     pinError.textContent = 'PIN incorrecto.';
@@ -1283,6 +1338,8 @@ function render(){
           if(turboMode && flag === 'terminado' && willBeOn){ state[id].partida = true; }
           markCellDirty(id);
           scheduleSave(); render();
+          const freshTd = document.querySelector(`[data-cellid="${id}"]`)?.closest('.cell-td');
+          if(freshTd){ freshTd.classList.add('flash'); setTimeout(() => freshTd.classList.remove('flash'), 650); }
         });
       });
     });
@@ -1329,11 +1386,25 @@ function render(){
         const id = e.currentTarget.getAttribute('data-id');
         const cell = cellById[id];
         const current = state[id].nota || '';
+        // separo lo que sea de la lista de observaciones frecuentes, del texto libre aparte
+        const parts = current.split(' | ');
+        const presetPart = parts[0] || '';
+        const freePart = parts.slice(1).join(' | ');
+        const selected = new Set(presetPart.split(',').map(s => s.trim()).filter(Boolean));
+        const presetsHtml = OBS_PRESETS.map(p => `
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;">
+            <input type="checkbox" class="obsPresetChk" value="${p}" ${selected.has(p)?'checked':''}> ${p}
+          </label>`).join('');
         const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
-          <textarea id="notaInput" rows="3" style="width:100%;padding:8px;border:1px solid var(--border-strong);font-family:inherit;font-size:13px;border-radius:var(--radius);background:var(--panel);color:var(--text);">${current.replace(/</g,'&lt;')}</textarea>
-          <p style="margin:8px 0 0;font-size:11.5px;color:var(--sub);">Deja el campo vacío y guarda para quitar la observación.</p>`;
+          <div style="max-height:190px;overflow-y:auto;border:1px solid var(--border);padding:6px 10px;margin-bottom:10px;">${presetsHtml}</div>
+          <textarea id="notaInput" rows="2" placeholder="Observación libre (opcional)" style="width:100%;padding:8px;border:1px solid var(--border-strong);font-family:inherit;font-size:13px;border-radius:var(--radius);background:var(--panel);color:var(--text);">${freePart.replace(/</g,'&lt;')}</textarea>
+          <p style="margin:8px 0 0;font-size:11.5px;color:var(--sub);">Deja todo vacío y guarda para quitar la observación.</p>`;
         openInputModal(current ? 'Editar observación' : 'Agregar observación', bodyHtml, () => {
-          state[id].nota = document.getElementById('notaInput').value.trim();
+          const checked = [...document.querySelectorAll('.obsPresetChk:checked')].map(c => c.value);
+          const libre = document.getElementById('notaInput').value.trim();
+          state[id].nota = checked.length && libre ? checked.join(', ') + ' | ' + libre
+                          : checked.length ? checked.join(', ')
+                          : libre;
           markCellDirty(id);
           scheduleSave(); render();
         });
@@ -1530,7 +1601,7 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
 
   liqConfigOverlay.classList.add('show');
 });
-document.getElementById('liqConfigCancel').addEventListener('click', () => liqConfigOverlay.classList.remove('show'));
+document.getElementById('liqConfigCancel').addEventListener('click', () => closeOverlayAnimated(liqConfigOverlay));
 document.getElementById('liqTipoPago').addEventListener('change', (e) => {
   document.getElementById('liqAfpFields').style.display = e.target.value === 'finmes' ? 'block' : 'none';
 });
@@ -1609,7 +1680,7 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
     subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas };
 
   liqRebuildDoc();
-  liqConfigOverlay.classList.remove('show');
+  closeOverlayAnimated(liqConfigOverlay);
   liqViewOverlay.classList.add('show');
   // se pide que abra viendo el final de la lista (el total), no el principio
   const scrollBox = document.getElementById('liqModalBody');
@@ -1751,7 +1822,7 @@ function liqRebuildDoc(){
   });
 }
 
-document.getElementById('liqCloseBtn').addEventListener('click', () => liqViewOverlay.classList.remove('show'));
+document.getElementById('liqCloseBtn').addEventListener('click', () => closeOverlayAnimated(liqViewOverlay));
 document.getElementById('liqPrintBtn').addEventListener('click', () => window.print());
 
 document.getElementById('liqImageBtn').addEventListener('click', () => {
@@ -1826,7 +1897,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
     document.getElementById('ioMsg').style.color = 'var(--entregado)';
     document.getElementById('ioMsg').textContent = retainIds.length ? 'Liquidación confirmada (con retención).' : 'Partidas marcadas como Pagadas.';
     setTimeout(() => { document.getElementById('ioMsg').textContent=''; }, 3000);
-    liqViewOverlay.classList.remove('show');
+    closeOverlayAnimated(liqViewOverlay);
   });
 });
 
@@ -2035,14 +2106,14 @@ document.getElementById('retencionesBtn').addEventListener('click', () => {
   document.getElementById('retencionesOverlay').classList.add('show');
 });
 document.getElementById('retencionesCloseBtn').addEventListener('click', () => {
-  document.getElementById('retencionesOverlay').classList.remove('show');
+  closeOverlayAnimated(document.getElementById('retencionesOverlay'));
 });
 
 document.getElementById('statsOpenBtn').addEventListener('click', () => {
   renderStatsView();
   statsOverlay.classList.add('show');
 });
-document.getElementById('statsCloseBtn').addEventListener('click', () => statsOverlay.classList.remove('show'));
+document.getElementById('statsCloseBtn').addEventListener('click', () => closeOverlayAnimated(statsOverlay));
 
 // botón flotante de guardar: aparece si estás como Admin y ya bajaste lo suficiente
 // como para no ver el botón "Guardar ahora" de arriba
@@ -2052,6 +2123,22 @@ function updateFloatingSaveBtn(){
   floatingSaveBtn.style.display = show ? 'flex' : 'none';
 }
 window.addEventListener('scroll', updateFloatingSaveBtn);
+
+// reloj en vivo -- la hora siempre en Santiago de Chile, sin importar en qué huso horario
+// esté el navegador de quien lo mira
+function updateLiveClock(){
+  const now = new Date();
+  const dia = now.toLocaleDateString('es-CL', {weekday:'long', timeZone:'America/Santiago'});
+  const num = now.toLocaleDateString('es-CL', {day:'numeric', timeZone:'America/Santiago'});
+  const mes = now.toLocaleDateString('es-CL', {month:'long', timeZone:'America/Santiago'});
+  const anio = now.toLocaleDateString('es-CL', {year:'numeric', timeZone:'America/Santiago'});
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const hora = now.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', timeZone:'America/Santiago'});
+  document.getElementById('liveClock').textContent =
+    `${cap(dia)} ${num} - ${cap(mes)} - ${anio}  ·  ${hora} (Santiago de Chile)`;
+}
+updateLiveClock();
+setInterval(updateLiveClock, 30000);
 floatingSaveBtn.addEventListener('click', saveNow);
 
 (async function init(){
