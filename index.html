@@ -77,6 +77,7 @@
   select, input[type=text], input[type=number]{background:var(--panel);border:1px solid var(--border-strong);color:var(--text);padding:7px 9px;border-radius:var(--radius);font-size:13px;outline:none;min-width:140px;}
   select:focus, input:focus{border-color:var(--accent);}
   .tabs{display:flex;gap:0;border:1px solid var(--border-strong);}
+  .grp-piso{margin-left:auto;}
   .tab{padding:8px 14px;background:var(--panel);color:var(--sub);font-size:13px;cursor:pointer;border-right:1px solid var(--border-strong);}
   .tab:last-child{border-right:none;}
   .tab.active{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:600;}
@@ -146,6 +147,7 @@
   .overlay.show{animation:overlayIn .16s ease;}
   .overlay.overlayClosing{animation:overlayOut .14s ease forwards;}
   @keyframes overlayIn{ from{opacity:0;} to{opacity:1;} }
+  @keyframes girar{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   @keyframes overlayOut{ from{opacity:1;} to{opacity:0;} }
   #overlay{z-index:90;} /* la de "confirmar" siempre por encima de cualquier otra ventana abierta */
   #inputOverlay{z-index:85;} /* la de "asignar / observación / agregar detalle" etc, por encima de liquidación, retenciones, etc */
@@ -201,8 +203,9 @@
     .cell-block{min-width:0;padding:4px;}
     .checks-row{flex-direction:column;align-items:stretch;justify-content:flex-start;}
     .chk-pill{width:100%;font-size:11px;padding:6px 8px;box-sizing:border-box;}
-    table.dept-table td.dpto-col{width:34px;font-size:11px;padding:3px 2px;white-space:normal;line-height:1.15;}
-    col.col-dpto{width:34px;}
+    table.dept-table td.dpto-col{width:26px;font-size:11px;padding:4px 2px;white-space:normal;line-height:1.15;writing-mode:vertical-rl;text-orientation:upright;letter-spacing:1px;text-align:center;}
+    col.col-dpto{width:26px;}
+    .grp-piso{margin-left:0;}
     .worker-name{font-size:12px;}
     body.is-admin .worker-name{padding-right:34px;}
     .worker-row-top{gap:6px;}
@@ -343,7 +346,7 @@
 
   <div class="toolbar">
     <div class="tabs" id="catTabs"></div>
-    <div class="grp" style="margin-left:auto;"><label>Piso</label><select id="filterPiso"></select></div>
+    <div class="grp grp-piso"><label>Piso</label><select id="filterPiso"></select></div>
     <div class="grp"><label>Trabajador</label><select id="filterTrabajador"></select></div>
     <div class="grp">
       <label>Estado</label>
@@ -474,6 +477,23 @@
 <button id="scrollTopBtn" title="Subir" style="position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);font-size:16px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;z-index:69;">⬆</button>
 <button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:70px;right:26px;width:36px;height:36px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:15px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;z-index:70;">💾</button>
 <div id="savedToast" style="position:fixed;bottom:112px;right:22px;background:var(--presente,#1f7a3d);background:#1f7a3d;color:#fff;padding:8px 14px;font-size:12.5px;font-weight:700;border-radius:var(--radius);box-shadow:0 3px 12px rgba(0,0,0,.35);display:none;z-index:71;">✓ Guardado</div>
+<div id="cargandoToast" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--text);border:1px solid var(--border-strong);padding:9px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;align-items:center;gap:9px;z-index:95;">
+  <span class="spinner" style="width:13px;height:13px;border:2px solid var(--border-strong);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:girar .7s linear infinite;"></span>
+  <span id="cargandoTexto">Cargando…</span>
+</div>
+
+<div class="overlay" id="liqObsOverlay">
+  <div class="modal" style="max-width:460px;">
+    <h3>📝 Hay observaciones registradas</h3>
+    <p id="liqObsIntro" style="margin:0 0 10px;font-size:12.5px;color:var(--sub);"></p>
+    <div id="liqObsLista" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);padding:8px 10px;margin-bottom:6px;"></div>
+    <p style="margin:0;font-size:12px;color:var(--sub);">¿Las dejas pasar, o las agregas a esta liquidación como observación?</p>
+    <div class="actions">
+      <button class="btn" id="liqObsPasar">Dejar pasar</button>
+      <button class="btn primary" id="liqObsAgregar">Agregar a la liquidación</button>
+    </div>
+  </div>
+</div>
 
 <div class="overlay" id="retencionesOverlay">
   <div class="modal" style="max-width:420px;">
@@ -512,7 +532,7 @@ const DEFAULT_WORKER_STATUS = {"Anthony": {"estado": "inactivo", "especialidad":
 const STORAGE_KEY = "progreso-obra-la-florida-v8";
 
 const AREA_LABEL = {'Piso':'Piso', 'Muro Baños':'Muro Baño', 'Muro Cocina':'Muro Cocina', 'Pasillos':'Pasillo'};
-const OBS_PRESETS = ['Falta Dintel','Falta Terraza','Piso Incompleto','Muro Incompleto','Palmetas Cabeceadas',
+let OBS_PRESETS = ['Falta Dintel','Falta Terraza','Piso Incompleto','Muro Incompleto','Palmetas Cabeceadas',
   'Palmetas Sopladas','Falta Tina','Pavimento en mal estado','Tabiquería en mal estado',
   'No se puede hacer Piso','No se puede hacer baño','No se puede hacer terraza'];
 const TERMINADO_LABEL = {'Piso':'Terminado', 'Muro Baños':'Terminado', 'Muro Cocina':'Terminado', 'Pasillos':'Terminado'};
@@ -735,7 +755,7 @@ function sanitizedWorkerStatusForSheets(){
 async function sheetsSave(){
   if(!SHEETS_URL) return false;
   try{
-    const body = { action:'save', records: buildRecords(), workerStatus: sanitizedWorkerStatusForSheets(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES };
+    const body = { action:'save', records: buildRecords(), workerStatus: sanitizedWorkerStatusForSheets(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS };
     const res = await fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok) throw new Error('bad status');
     const json = await res.json();
@@ -758,6 +778,7 @@ function applyLoadedPayload(parsed){
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
+  if(Array.isArray(parsed.obsPresets) && parsed.obsPresets.length) OBS_PRESETS = parsed.obsPresets;
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
   rebuildWorkerList(); // OJO: va antes de rellenar las partidas que faltan (esas traen nombres viejos de fábrica)
   ALL_CELLS.forEach(c => { if(!state[c.id]) state[c.id] = defaultStateFor(c); });
@@ -767,7 +788,21 @@ function applyLoadedPayload(parsed){
   });
 }
 
+let cargandoContador = 0;
+function mostrarCargando(texto){
+  cargandoContador++;
+  const el = document.getElementById('cargandoToast');
+  document.getElementById('cargandoTexto').textContent = texto || 'Cargando…';
+  el.style.display = 'flex';
+}
+function ocultarCargando(){
+  cargandoContador = Math.max(0, cargandoContador - 1);
+  if(cargandoContador === 0) document.getElementById('cargandoToast').style.display = 'none';
+}
+
 async function loadState(){
+  mostrarCargando('Cargando base de datos…');
+  try{
   let parsed = null;
   let fromSheets = false;
   if(SHEETS_URL){
@@ -818,6 +853,7 @@ async function loadState(){
       document.getElementById('toggleDark').textContent = '☀️';
     }
   }catch(e){}
+  } finally { ocultarCargando(); }
 }
 
 // ===== guardado =====
@@ -835,10 +871,12 @@ async function saveDocsIfChanged(){
 }
 
 async function doSaveCycle(){
+  mostrarCargando('Cargando…');
+  try{
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
   await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let sheetsOk = true;
@@ -852,6 +890,7 @@ async function doSaveCycle(){
   render();
   if(localOk && (!SHEETS_URL || sheetsOk)) mostrarGuardadoToast();
   return {localOk, sheetsOk};
+  } finally { ocultarCargando(); }
 }
 
 function mostrarGuardadoToast(){
@@ -1398,6 +1437,7 @@ document.getElementById('pinCancel').addEventListener('click', () => closeOverla
 // si no hay Sheets conectado todavía, uso el de respaldo de más arriba (ese sí queda visible
 // si alguien inspecciona el código -- por eso conviene conectar Sheets para el de verdad)
 async function checkPinRemote(pin){
+  mostrarCargando('Cargando…');
   try{
     const res = await fetch(SHEETS_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -1406,7 +1446,7 @@ async function checkPinRemote(pin){
     if(!res.ok) return null;
     const json = await res.json();
     return typeof json.ok === 'boolean' ? json.ok : null;
-  }catch(err){ return null; }
+  }catch(err){ return null; } finally { ocultarCargando(); }
 }
 
 document.getElementById('pinConfirm').addEventListener('click', async () => {
@@ -1458,6 +1498,84 @@ function equalizeRowNameHeights(){
       els.forEach(el => { maxH = Math.max(maxH, el.offsetHeight); });
       els.forEach(el => { el.style.minHeight = maxH + 'px'; });
     });
+  });
+}
+
+// una sola función para poder reabrirla (ej: después de editar la lista de opciones, o desde la liquidación)
+function abrirObservacionModal(id){
+  const cell = cellById[id];
+  const current = state[id].nota || '';
+  // separo lo que sea de la lista de observaciones frecuentes, del texto libre aparte --
+  // pero solo si la primera parte es realmente una lista de presets conocidos; si no
+  // (por ejemplo notas viejas o importadas de Excel, tipo "Sin terraza"), todo el texto
+  // se trata como libre, para no perderlo al abrir/guardar esta ventana
+  const rawParts = current.split(' | ');
+  let presetPart = '', freePart = current;
+  if(rawParts.length > 1){
+    const tokens = rawParts[0].split(',').map(t => t.trim()).filter(Boolean);
+    if(tokens.length && tokens.every(t => OBS_PRESETS.includes(t))){
+      presetPart = rawParts[0];
+      freePart = rawParts.slice(1).join(' | ');
+    }
+  }
+  const selected = new Set(presetPart.split(',').map(s => s.trim()).filter(Boolean));
+  const presetsHtml = OBS_PRESETS.length ? OBS_PRESETS.map(p => `
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;">
+        <input type="checkbox" class="obsPresetChk" value="${p}" ${selected.has(p)?'checked':''}> ${p}
+      </label>`).join('') : '<p style="font-size:12px;color:var(--sub);margin:0;">No hay opciones frecuentes todavía.</p>';
+  const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:6px;"><button class="btn small" id="btnEditarPresets" type="button">✎ Editar opciones</button></div>
+      <div style="max-height:190px;overflow-y:auto;border:1px solid var(--border);padding:6px 10px;margin-bottom:10px;">${presetsHtml}</div>
+      <textarea id="notaInput" rows="2" placeholder="Observación libre (opcional)" style="width:100%;padding:8px;border:1px solid var(--border-strong);font-family:inherit;font-size:13px;border-radius:var(--radius);background:var(--panel);color:var(--text);">${freePart.replace(/</g,'&lt;')}</textarea>
+      <p style="margin:8px 0 0;font-size:11.5px;color:var(--sub);">Deja todo vacío y guarda para quitar la observación.</p>`;
+  openInputModal(current ? 'Editar observación' : 'Agregar observación', bodyHtml, () => {
+    const checked = [...document.querySelectorAll('.obsPresetChk:checked')].map(c => c.value);
+    const libre = document.getElementById('notaInput').value.trim();
+    state[id].nota = checked.length && libre ? checked.join(', ') + ' | ' + libre
+                    : checked.length ? checked.join(', ')
+                    : libre;
+    markCellDirty(id);
+    scheduleSave(); render();
+  });
+  document.getElementById('btnEditarPresets').addEventListener('click', () => abrirEditorPresets(id));
+}
+
+// administrar la lista de opciones frecuentes de observación (agregar/quitar) -- al terminar,
+// vuelve a abrir la observación del depto que se estaba editando, para no perder el lugar
+function abrirEditorPresets(volverAId){
+  const listaHtml = () => OBS_PRESETS.length ? OBS_PRESETS.map((p,i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:12.5px;">${p}</span>
+        <button class="btn small" data-quitar-preset="${i}" type="button">Quitar</button>
+      </div>`).join('') : '<p style="font-size:12px;color:var(--sub);">No queda ninguna opción.</p>';
+  const bodyHtml = `
+    <div id="presetsListaBox" style="max-height:220px;overflow-y:auto;margin-bottom:12px;">${listaHtml()}</div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="nuevoPresetInput" placeholder="Nueva opción" style="flex:1;">
+      <button class="btn small" id="btnAgregarPreset" type="button">Agregar</button>
+    </div>`;
+  openInputModal('Editar opciones de observación', bodyHtml, () => {
+    if(volverAId) abrirObservacionModal(volverAId);
+  }, 'Listo');
+  function refrescar(){
+    document.getElementById('presetsListaBox').innerHTML = listaHtml();
+    document.getElementById('presetsListaBox').querySelectorAll('[data-quitar-preset]').forEach(b => {
+      b.addEventListener('click', () => {
+        OBS_PRESETS.splice(parseInt(b.getAttribute('data-quitar-preset')), 1);
+        markSettingsDirty(); scheduleSave();
+        refrescar();
+      });
+    });
+  }
+  refrescar();
+  document.getElementById('btnAgregarPreset').addEventListener('click', () => {
+    const input = document.getElementById('nuevoPresetInput');
+    const val = input.value.trim();
+    if(!val || OBS_PRESETS.includes(val)) return;
+    OBS_PRESETS.push(val);
+    markSettingsDirty(); scheduleSave();
+    input.value = '';
+    refrescar();
   });
 }
 
@@ -1553,33 +1671,7 @@ function render(){
     });
 
     contentEl.querySelectorAll('.nota-btn-single').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        const cell = cellById[id];
-        const current = state[id].nota || '';
-        // separo lo que sea de la lista de observaciones frecuentes, del texto libre aparte
-        const parts = current.split(' | ');
-        const presetPart = parts[0] || '';
-        const freePart = parts.slice(1).join(' | ');
-        const selected = new Set(presetPart.split(',').map(s => s.trim()).filter(Boolean));
-        const presetsHtml = OBS_PRESETS.map(p => `
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;">
-            <input type="checkbox" class="obsPresetChk" value="${p}" ${selected.has(p)?'checked':''}> ${p}
-          </label>`).join('');
-        const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
-          <div style="max-height:190px;overflow-y:auto;border:1px solid var(--border);padding:6px 10px;margin-bottom:10px;">${presetsHtml}</div>
-          <textarea id="notaInput" rows="2" placeholder="Observación libre (opcional)" style="width:100%;padding:8px;border:1px solid var(--border-strong);font-family:inherit;font-size:13px;border-radius:var(--radius);background:var(--panel);color:var(--text);">${freePart.replace(/</g,'&lt;')}</textarea>
-          <p style="margin:8px 0 0;font-size:11.5px;color:var(--sub);">Deja todo vacío y guarda para quitar la observación.</p>`;
-        openInputModal(current ? 'Editar observación' : 'Agregar observación', bodyHtml, () => {
-          const checked = [...document.querySelectorAll('.obsPresetChk:checked')].map(c => c.value);
-          const libre = document.getElementById('notaInput').value.trim();
-          state[id].nota = checked.length && libre ? checked.join(', ') + ' | ' + libre
-                          : checked.length ? checked.join(', ')
-                          : libre;
-          markCellDirty(id);
-          scheduleSave(); render();
-        });
-      });
+      btn.addEventListener('click', (e) => abrirObservacionModal(e.currentTarget.getAttribute('data-id')));
     });
   }
 
@@ -1637,6 +1729,7 @@ document.getElementById('sheetsBtn').addEventListener('click', () => {
     document.getElementById('ioMsg').textContent = SHEETS_URL ? 'Conectado a Google Sheets.' : 'Desconectado de Google Sheets.';
     setTimeout(() => { document.getElementById('ioMsg').textContent=''; }, 3000);
     if(SHEETS_URL){
+      mostrarCargando('Cargando…');
       const remote = await sheetsLoad();
       // solo piso encima de lo que ya tengo cargado si la Sheet realmente trae datos;
       // si está recién creada (vacía), mejor mantengo lo que ya tenía en el panel
@@ -1645,13 +1738,14 @@ document.getElementById('sheetsBtn').addEventListener('click', () => {
       }
       populateFilters(); renderWorkerPanel(); updateRateFootnote(); render();
       scheduleSave();
+      ocultarCargando();
     } else { sheetsStatus = 'off'; }
     updateSheetsBadge();
   });
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1691,6 +1785,16 @@ document.getElementById('importFile').addEventListener('change', (e) => {
 ------------------------------------------------------------- */
 const liqConfigOverlay = document.getElementById('liqConfigOverlay');
 const liqViewOverlay = document.getElementById('liqViewOverlay');
+const liqObsOverlay = document.getElementById('liqObsOverlay');
+let pendingLiqFinalize = null;
+document.getElementById('liqObsPasar').addEventListener('click', () => {
+  closeOverlayAnimated(liqObsOverlay);
+  if(pendingLiqFinalize) pendingLiqFinalize(false);
+});
+document.getElementById('liqObsAgregar').addEventListener('click', () => {
+  closeOverlayAnimated(liqObsOverlay);
+  if(pendingLiqFinalize) pendingLiqFinalize(true);
+});
 let liqCurrentIds = [];
 let liqCurrentMeta = null;
 let paymentHistory = []; // {ts, worker, fechaPago, tipoPago, dias, afpTarifa, afpDescuento, subtotal, totalFinal, type:'pago'|'retencion', itemIds:[...], itemsSnapshot:[...]}
@@ -1868,7 +1972,7 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
     rows.push({
       id: cell.id, categoria: cell.categoria, piso: cell.piso, pisoNum: cell.pisoNum,
       label: liqLabelForCell(cell), area: AREA_LABEL[cell.area] || cell.area,
-      m2: st.m2, precio: precio,
+      m2: st.m2, precio: precio, nota: st.nota || '',
       estadoLabel: st.retenido ? 'Retenido' : (estado === 'entregado' ? 'Terminado' : (estado === 'pagado' ? 'Pagado' : 'En proceso'))
     });
   });
@@ -1892,17 +1996,29 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
   const totalFinal = subtotal - afpDescuento;
   const fechaFmt = fecha ? new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}) : '—';
   const tipoPagoLabel = tipoPago === 'finmes' ? 'Fin de mes' : 'Quincena';
+  const rowsConNota = rows.filter(r => r.nota);
 
-  liqExtraDetails = []; // cada liquidación nueva arranca sin detalles agregados
-  liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
-    subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas };
+  pendingLiqFinalize = function(incluirObs){
+    liqExtraDetails = []; // cada liquidación nueva arranca sin detalles agregados
+    liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
+      subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas,
+      observaciones: incluirObs ? rowsConNota.map(r => ({label:r.label, area:r.area, piso:r.piso, nota:r.nota})) : [] };
+    liqRebuildDoc();
+    closeOverlayAnimated(liqConfigOverlay);
+    liqViewOverlay.classList.add('show');
+    // se pide que abra viendo el final de la lista (el total), no el principio
+    const scrollBox = document.getElementById('liqModalBody');
+    scrollBox.scrollTop = scrollBox.scrollHeight;
+  };
 
-  liqRebuildDoc();
-  closeOverlayAnimated(liqConfigOverlay);
-  liqViewOverlay.classList.add('show');
-  // se pide que abra viendo el final de la lista (el total), no el principio
-  const scrollBox = document.getElementById('liqModalBody');
-  scrollBox.scrollTop = scrollBox.scrollHeight;
+  if(rowsConNota.length){
+    document.getElementById('liqObsIntro').textContent = `${worker} tiene ${rowsConNota.length} partida(s) con una observación registrada:`;
+    document.getElementById('liqObsLista').innerHTML = rowsConNota.map(r =>
+      `<div style="font-size:12px;margin-bottom:6px;"><b>${r.label} — ${r.area}</b> (${r.piso}): <i>${r.nota}</i></div>`).join('');
+    liqObsOverlay.classList.add('show');
+  } else {
+    pendingLiqFinalize(false);
+  }
 });
 
 // arma (o vuelve a armar) el documento de la liquidación -- se llama al generar y también
@@ -1968,6 +2084,11 @@ function liqRebuildDoc(){
 
   const retainCellHtml = (r) => (r.estadoLabel==='Terminado'||r.estadoLabel==='En proceso')
     ? `<input type="checkbox" class="liq-retain-chk" data-id="${r.id}">` : '—';
+  const obsHtml = (m.observaciones && m.observaciones.length) ? `
+      <div class="liq-obs-block">
+        <h4 style="margin:14px 0 6px;font-size:12.5px;">Observaciones</h4>
+        ${m.observaciones.map(o => `<div style="font-size:11.5px;margin-bottom:4px;"><b>${o.label} — ${o.area}</b> (${o.piso}): <i>${o.nota}</i></div>`).join('')}
+      </div>` : '';
   const metaHtml = `
       <div class="liq-meta">
         <div>Trabajador: <b>${m.worker}</b></div>
@@ -2007,6 +2128,7 @@ function liqRebuildDoc(){
           ${totalRowsHtml(true, 3)}
         </tbody>
       </table></div></div>
+      ${obsHtml}
     </div>`;
 
   // fecha en que se hizo (solo día, sin hora), Santiago de Chile -- sale únicamente en el PDF impreso
@@ -2034,6 +2156,7 @@ function liqRebuildDoc(){
         </tbody>
         <tfoot class="liq-spacer"><tr><td colspan="6"></td></tr></tfoot>
       </table>
+      ${obsHtml}
     </div>`;
 
   // antes de redibujar, recuerdo qué partidas estaban marcadas para retener (antes se perdían
