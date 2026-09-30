@@ -778,14 +778,15 @@ async function sheetsLoad(){
     return null;
   }
 }
+function recordForCell(c){
+  const st = getState(c.id);
+  return { id:c.id, categoria:c.categoria, piso:c.piso, dpto:c.dpto, area:c.area,
+    areaLabel: AREA_LABEL[c.area]||c.area, trabajador: st.trabajador||'',
+    partida: !!st.partida, terminado: !!st.terminado, pagado: !!st.pagado, retenido: !!st.retenido,
+    nota: st.nota||'', m2: (st.m2===undefined||st.m2===null) ? null : st.m2 };
+}
 function buildRecords(){
-  return ALL_CELLS.map(c => {
-    const st = getState(c.id);
-    return { id:c.id, categoria:c.categoria, piso:c.piso, dpto:c.dpto, area:c.area,
-      areaLabel: AREA_LABEL[c.area]||c.area, trabajador: st.trabajador||'',
-      partida: !!st.partida, terminado: !!st.terminado, pagado: !!st.pagado, retenido: !!st.retenido,
-      nota: st.nota||'', m2: (st.m2===undefined||st.m2===null) ? null : st.m2 };
-  });
+  return ALL_CELLS.map(recordForCell);
 }
 // los datos personales (RUT, teléfono, correo, nacionalidad, dirección) NO se mandan a Sheets:
 // esa URL queda pública para que cualquiera con el link cargue el panel, así que mejor esa
@@ -799,10 +800,21 @@ function sanitizedWorkerStatusForSheets(){
   return clean;
 }
 
-async function sheetsSave(){
+// dirtyIds (opcional): si viene con algo, solo esas partidas se mandan y el Apps Script actualiza
+// nada más esas filas (mucho más rápido que reescribir la hoja completa cada vez). Sin dirtyIds
+// (o vacío) se manda todo -- para el primer "Conectar Google Sheets" o cuando no sé bien qué cambió.
+async function sheetsSave(dirtyIds){
   if(!SHEETS_URL) return false;
+  const hayCeldas = dirtyIds && dirtyIds.size > 0;
+  // si lo único que cambió fue configuración (tarifas, cierre de quincena, un trabajador...) y
+  // ninguna celda, ni siquiera toco la hoja de datos -- el guardado más rápido posible
+  const soloConfig = !hayCeldas && settingsDirty;
   try{
-    const body = { action:'save', records: buildRecords(), workerStatus: sanitizedWorkerStatusForSheets(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena };
+    let action = 'save', records = [];
+    if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
+    else if(soloConfig){ action = 'saveConfigOnly'; }
+    else { records = buildRecords(); }
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForSheets(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena };
     const res = await fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok) throw new Error('bad status');
     const json = await res.json();
@@ -924,7 +936,7 @@ async function saveDocsIfChanged(){
 }
 
 async function doSaveCycle(){
-  mostrarCargando('Cargando…');
+  mostrarCargando('Guardando…');
   try{
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
@@ -933,7 +945,7 @@ async function doSaveCycle(){
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let sheetsOk = true;
-  if(SHEETS_URL){ sheetsOk = await sheetsSave(); }
+  if(SHEETS_URL){ sheetsOk = await sheetsSave(dirtySnap); }
   // solo "limpio" lo que ya quedó guardado de verdad: si Sheets falló, esas marcas se quedan para
   // que el próximo intento no deje que lo remoto pise cambios que todavía no subieron
   if(!SHEETS_URL || sheetsOk){
@@ -961,8 +973,18 @@ function enqueueSave(){
 function scheduleSave(){
   if(!isAdmin) return;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { enqueueSave(); }, 250);
+  saveTimer = setTimeout(() => { enqueueSave(); }, 1200);
 }
+// último intento de guardar si cierras la pestaña con algo pendiente. No es 100% garantizado
+// (el navegador puede cortar la petición a medio camino), por eso el botón de guardar y el
+// aviso de "guardado" siguen siendo la manera segura -- esto es solo una red de seguridad extra.
+window.addEventListener('beforeunload', (e) => {
+  if(!isAdmin || (dirtyCellIds.size === 0 && !settingsDirty)) return;
+  clearTimeout(saveTimer);
+  enqueueSave();
+  e.preventDefault();
+  e.returnValue = '';
+});
 
 async function saveNow(){
   if(!isAdmin) return;
@@ -1495,7 +1517,7 @@ document.getElementById('pinCancel').addEventListener('click', () => closeOverla
 // si no hay Sheets conectado todavía, uso el de respaldo de más arriba (ese sí queda visible
 // si alguien inspecciona el código -- por eso conviene conectar Sheets para el de verdad)
 async function checkPinRemote(pin){
-  mostrarCargando('Cargando…');
+  mostrarCargando('Verificando PIN…');
   try{
     const res = await fetch(SHEETS_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -1775,11 +1797,26 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
   const actualTxt = cierreQuincena
     ? new Date(cierreQuincena).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})
     : null;
+  // lista de lo que quedaría afuera de una liquidación ahora mismo, para revisar antes de pagar
+  let pendientesHtml = '';
+  if(cierreQuincena){
+    const pendientes = ALL_CELLS.filter(c => {
+      const st = getState(c.id);
+      return resolveEstado(st) === 'entregado' && st.terminadoTs && st.terminadoTs > cierreQuincena;
+    }).sort((a,b) => a.pisoNum - b.pisoNum);
+    pendientesHtml = pendientes.length
+      ? `<div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);padding:6px 10px;margin-bottom:12px;">
+          <p style="margin:2px 0 6px;font-size:11.5px;font-weight:600;">${pendientes.length} DPTO(s) Terminado(s) después del cierre (no entran hasta el próximo):</p>
+          ${pendientes.map(c => `<div style="font-size:11.5px;margin-bottom:3px;">${liqLabelForCell(c)} — ${AREA_LABEL[c.area]||c.area} (${c.piso}) · ${getState(c.id).trabajador||'sin asignar'}</div>`).join('')}
+        </div>`
+      : `<p style="margin:0 0 12px;font-size:11.5px;color:var(--sub);">No hay ningún DPTO Terminado después del cierre por ahora.</p>`;
+  }
   const bodyHtml = `
     <p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">
       Lo que se marque "Terminado" DESPUÉS de la fecha que pongas acá no va a salir en las liquidaciones hasta que muevas el cierre más adelante (o lo quites).
     </p>
-    ${actualTxt ? `<p style="margin:0 0 12px;font-size:12.5px;">Cierre activo: <b>${actualTxt}</b> · <button class="btn small" id="quitarCierreBtn" type="button">Quitar cierre</button></p>` : ''}
+    ${actualTxt ? `<p style="margin:0 0 10px;font-size:12.5px;">Cierre activo: <b>${actualTxt}</b> · <button class="btn small" id="quitarCierreBtn" type="button">Quitar cierre</button></p>` : ''}
+    ${pendientesHtml}
     <div class="rate-row"><label>Nueva fecha de cierre</label><input type="datetime-local" id="cierreInput" style="width:220px;"></div>`;
   openInputModal(cierreQuincena ? 'Cambiar cierre de quincena/mes' : 'Cerrar quincena/mes', bodyHtml, () => {
     const v = document.getElementById('cierreInput').value;
@@ -1838,7 +1875,7 @@ document.getElementById('sheetsBtn').addEventListener('click', () => {
     document.getElementById('ioMsg').textContent = SHEETS_URL ? 'Conectado a Google Sheets.' : 'Desconectado de Google Sheets.';
     setTimeout(() => { document.getElementById('ioMsg').textContent=''; }, 3000);
     if(SHEETS_URL){
-      mostrarCargando('Cargando…');
+      mostrarCargando('Conectando…');
       try{
         const remote = await sheetsLoad();
         // solo piso encima de lo que ya tengo cargado si la Sheet realmente trae datos;
@@ -2006,6 +2043,7 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
 document.getElementById('liqConfigCancel').addEventListener('click', () => closeOverlayAnimated(liqConfigOverlay));
 document.getElementById('liqTipoPago').addEventListener('change', (e) => {
   document.getElementById('liqAfpFields').style.display = e.target.value === 'finmes' ? 'block' : 'none';
+  updateAfpPctInfo(); // por si acaso, vuelvo a chequear la AFP del trabajador justo ahora
 });
 // según la AFP que el trabajador tenga registrada en "Datos del trabajador", muestro el
 // desglose (10% + comisión) y bloqueo el método por % si no tiene AFP registrada
