@@ -53,6 +53,7 @@
   .role-badge.guest{color:#fff;background:#6c716a;}
   .role-badge.admin{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));}
   .role-badge.supervisor{color:#fff;background:#8a6a1f;}
+  .role-badge.worker{color:#fff;background:#2f6f3f;}
   .db-badge{font-size:11px;font-weight:700;padding:6px 10px;border-radius:var(--radius);border:1px solid var(--border-strong);}
   .db-badge.off{color:var(--sub);background:var(--panel-soft);}
   .db-badge.online{color:#fff;background:var(--entregado);border-color:var(--entregado);}
@@ -356,11 +357,10 @@
 
   <div class="role-bar">
     <span class="role-badge guest" id="roleBadge">Conectado como INVITADO</span>
-    <button class="btn small" id="adminLoginBtn">Conectarse como Admin</button>
-    <button class="btn small" id="supervisorLoginBtn">Conectarse como Supervisor</button>
-    <button class="btn small" id="supervisorLogoutBtn" style="display:none;">Cerrar sesión Supervisor</button>
+    <button class="btn small" id="loginBtn">Iniciar sesión</button>
+    <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
-    <button class="btn small admin-only" id="adminLogoutBtn">Cerrar sesión Admin</button>
+
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
   </div>
 
@@ -442,9 +442,22 @@
 
 <div class="overlay" id="pinOverlay">
   <div class="modal">
-    <h3 id="pinTitle">Conectarse como Admin</h3>
-    <p id="pinSubtitle">Ingresa el PIN de administrador.</p>
-    <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="off">
+    <h3>Iniciar sesión</h3>
+    <div class="rate-row"><label>Ingresar como</label>
+      <select id="loginRoleSelect" style="width:220px;">
+        <option value="admin">Admin</option>
+        <option value="supervisor">Supervisor</option>
+        <option value="trabajador">Trabajador</option>
+      </select>
+    </div>
+    <div id="loginPinBox">
+      <p id="pinSubtitle">Ingresa el PIN de administrador.</p>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="off">
+    </div>
+    <div id="loginWorkerBox" style="display:none;">
+      <div class="rate-row"><label>RUT</label><input type="text" id="workerLoginRut" style="width:220px;" placeholder="12345678-9" autocomplete="off"></div>
+      <div class="rate-row"><label>Contraseña</label><input type="password" id="workerLoginPass" style="width:220px;" autocomplete="off"></div>
+    </div>
     <div class="modal-error" id="pinError"></div>
     <div class="actions">
       <button class="btn" id="pinCancel">Cancelar</button>
@@ -591,9 +604,11 @@ const AFP_COTIZACION_OBLIGATORIA = 10; // % fijo, igual para todas las AFP
 let allowGuestPrices = false;
 let isAdmin = false;
 let isSupervisor = false; // "Supervisión de Jefes": ve como invitado + Estadísticas + Trabajadores (solo lectura) + puede poner Observaciones
+let workerSession = null; // nombre del trabajador con sesión iniciada, o null si no hay
 let turboMode = false; // si está prendido, marcar Pagado o Terminado también marca lo de antes solo
 try{ isAdmin = sessionStorage.getItem('progresoObraAdmin') === '1'; }catch(err){}
 try{ isSupervisor = !isAdmin && sessionStorage.getItem('progresoObraSupervisor') === '1'; }catch(err){}
+try{ workerSession = (!isAdmin && !isSupervisor) ? (sessionStorage.getItem('progresoObraWorker') || null) : null; }catch(err){}
 
 let DB_URL = '';
 try{ DB_URL = localStorage.getItem('progresoObraDbUrl') || DEFAULT_DB_URL; }catch(err){ DB_URL = DEFAULT_DB_URL; }
@@ -604,23 +619,40 @@ function canSeePrices(){ return isAdmin || allowGuestPrices; }
 function applyRoleUI(){
   document.body.classList.toggle('is-admin', isAdmin);
   document.body.classList.toggle('is-supervisor', isSupervisor);
+  document.body.classList.toggle('is-worker', !!workerSession);
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
   const badge = document.getElementById('roleBadge');
-  const label = isAdmin ? 'Conectado como ADMIN' : isSupervisor ? 'Conectado como SUPERVISOR' : 'Conectado como INVITADO';
-  const cls = isAdmin ? 'admin' : isSupervisor ? 'supervisor' : 'guest';
+  const loggedIn = isAdmin || isSupervisor || workerSession;
+  let label = 'Conectado como INVITADO', cls = 'guest';
+  if(isAdmin){ label = 'Conectado como: Admin'; cls = 'admin'; }
+  else if(isSupervisor){ label = 'Conectado como: Supervisor'; cls = 'supervisor'; }
+  else if(workerSession){
+    const especialidad = (workerStatus[workerSession]||{}).especialidad === 'fraguador' ? 'Fraguador' : 'Ceramista';
+    label = `Conectado como: ${especialidad} - ${workerSession}`; cls = 'worker';
+  }
   badge.textContent = label;
   badge.className = 'role-badge ' + cls;
   badge.classList.remove('role-flash'); void badge.offsetWidth; badge.classList.add('role-flash');
-  document.getElementById('adminLoginBtn').style.display = (isAdmin || isSupervisor) ? 'none' : 'inline-flex';
-  document.getElementById('supervisorLoginBtn').style.display = (isAdmin || isSupervisor) ? 'none' : 'inline-flex';
-  document.getElementById('supervisorLogoutBtn').style.display = isSupervisor ? 'inline-flex' : 'none';
+  document.getElementById('loginBtn').style.display = loggedIn ? 'none' : 'inline-flex';
+  document.getElementById('logoutBtn').style.display = loggedIn ? 'inline-flex' : 'none';
   document.getElementById('supervisorWorkersBtn').style.display = isSupervisor ? 'inline-flex' : 'none';
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 }
 
 function rate1For(categoria, trabajador){
   if(categoria === 'Frague') return RATES.frague;
-  return trabajador === 'Rafael' ? RATES.cerRafael : RATES.cerBase;
+  const propia = trabajador && workerStatus[trabajador] && workerStatus[trabajador].tarifaPropia;
+  if(propia) return propia;
+  return trabajador === 'Rafael' ? RATES.cerRafael : RATES.cerBase; // compatibilidad con lo de antes
+}
+// lo que el propio trabajador ve como precio de SU partida, si inició sesión: su precio real
+// solo si tiene el permiso (vePrecioReal); si no, ve el mismo cálculo pero con la tarifa base
+function rate1ForDisplay(categoria, trabajador){
+  if(workerSession && workerSession === trabajador){
+    const ws = workerStatus[trabajador] || {};
+    if(!ws.vePrecioReal) return categoria === 'Frague' ? RATES.frague : RATES.cerBase;
+  }
+  return rate1For(categoria, trabajador);
 }
 
 const ALL_CELLS = [];
@@ -1202,6 +1234,20 @@ function openWorkerDatosModal(worker){
     <div class="rate-row"><label>Correo</label><input type="text" id="datosCorreo" style="width:220px;" value="${ws.correo||''}"></div>
     <div class="rate-row"><label>Nacionalidad</label><input type="text" id="datosNacionalidad" style="width:220px;" value="${ws.nacionalidad||''}"></div>
     <div class="rate-row"><label>Dirección</label><input type="text" id="datosDireccion" style="width:220px;" value="${ws.direccion||''}"></div>
+
+    <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Acceso de este trabajador al panel</p>
+    <div class="rate-row"><label>RUT de acceso</label><input type="text" id="datosLoginRut" style="width:220px;" placeholder="12345678-9" autocomplete="off"></div>
+    <div class="rate-row"><label>Nueva contraseña</label><input type="password" id="datosLoginPass" style="width:220px;" placeholder="dejar en blanco para no cambiar" autocomplete="off"></div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;">
+      <button class="btn small" id="datosGuardarAccesoBtn" type="button">Guardar acceso</button>
+      <button class="btn small" id="datosQuitarAccesoBtn" type="button">Quitar acceso</button>
+    </div>
+    <p id="datosAccesoMsg" style="font-size:11.5px;color:var(--sub);margin:0 0 10px;"></p>
+
+    <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Precio que ve este trabajador si inicia sesión</p>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;"><input type="checkbox" id="datosVePrecioReal" ${ws.vePrecioReal?'checked':''}> Puede ver su precio real (si no, ve el precio base)</label>
+    <div class="rate-row"><label>Tarifa propia Cerámica ($/m², opcional)</label><input type="number" id="datosTarifaPropia" style="width:220px;" value="${ws.tarifaPropia||''}" placeholder="vacío = precio base"></div>
+
     <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Archivos (foto carnet, contrato, etc.)</p>
     <div id="datosDocsList"></div>
     <input type="file" id="datosFileInput" accept="image/*,application/pdf" style="margin-top:6px;">
@@ -1215,9 +1261,39 @@ function openWorkerDatosModal(worker){
     workerStatus[worker].correo = document.getElementById('datosCorreo').value.trim();
     workerStatus[worker].nacionalidad = document.getElementById('datosNacionalidad').value.trim();
     workerStatus[worker].direccion = document.getElementById('datosDireccion').value.trim();
+    workerStatus[worker].vePrecioReal = document.getElementById('datosVePrecioReal').checked;
+    const tarifaVal = parseFloat(document.getElementById('datosTarifaPropia').value);
+    workerStatus[worker].tarifaPropia = isNaN(tarifaVal) ? null : tarifaVal;
+    markSettingsDirty();
     scheduleSave();
   });
   renderWorkerDocsList(worker);
+  // el acceso (RUT/contraseña) se guarda directo en la base de datos, aparte del resto --
+  // la contraseña nunca pasa por acá por el localStorage ni por el export
+  document.getElementById('datosGuardarAccesoBtn').addEventListener('click', async () => {
+    const rut = document.getElementById('datosLoginRut').value.trim();
+    const pass = document.getElementById('datosLoginPass').value;
+    const msgEl = document.getElementById('datosAccesoMsg');
+    if(!DB_URL){ msgEl.textContent = 'Conecta la base de datos primero para poder guardar accesos.'; return; }
+    if(!rut || !pass){ msgEl.textContent = 'Completa el RUT y la contraseña.'; return; }
+    msgEl.textContent = 'Guardando…';
+    try{
+      const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({action:'setWorkerLogin', worker, rut, password:pass}) });
+      msgEl.textContent = res.ok ? 'Acceso guardado.' : 'No se pudo guardar.';
+    }catch(err){ msgEl.textContent = 'No se pudo guardar (revisa la conexión).'; }
+    document.getElementById('datosLoginPass').value = '';
+  });
+  document.getElementById('datosQuitarAccesoBtn').addEventListener('click', async () => {
+    const msgEl = document.getElementById('datosAccesoMsg');
+    if(!DB_URL){ msgEl.textContent = 'Conecta la base de datos primero.'; return; }
+    msgEl.textContent = 'Quitando…';
+    try{
+      const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({action:'setWorkerLogin', worker, rut:'', password:''}) });
+      msgEl.textContent = res.ok ? 'Acceso quitado.' : 'No se pudo quitar.';
+    }catch(err){ msgEl.textContent = 'No se pudo quitar (revisa la conexión).'; }
+  });
   document.getElementById('datosFileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -1334,7 +1410,7 @@ function priceLinesHtml(cell, st){
   if(!m2){
     return `<div class="price-block">${editBtn}<div class="meta-line">Sin m² registrados</div></div>`;
   }
-  const p1 = m2 * rate1For(cell.categoria, st.trabajador);
+  const p1 = m2 * rate1ForDisplay(cell.categoria, st.trabajador);
   const altHtml = cell.categoria === 'Cerámica'
     ? `<span class="price-money"><span class="sep"> · </span><span class="alt">${money(m2 * RATES.cerAlt)}</span></span>` : '';
   return `<div class="price-block">${editBtn}<div class="price-line" data-priceof="${cell.id}"><span class="pl-m2">${m2} m²</span><span class="price-money"><span class="sep"> · </span>${money(p1)}</span>${altHtml}</div></div>`;
@@ -1373,6 +1449,16 @@ function checksHtml(cell, st){
 function cellHtml(cell){
   const st = getState(cell.id);
   const hasWorker = !!st.trabajador;
+  // si hay un trabajador con sesión iniciada y esta celda es de OTRO trabajador, solo se le
+  // muestra el nombre -- nada de checks, m², precio ni observación (eso es privado de cada uno)
+  if(workerSession && st.trabajador !== workerSession){
+    return `
+    <div class="cell-block" data-cellid="${cell.id}">
+      <div class="worker-row-top">
+        <div class="worker-name ${hasWorker?'':'unassigned'}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>
+      </div>
+    </div>`;
+  }
   const assignBtn = isAdmin ? `<button class="assign-btn" data-id="${cell.id}">
       <span class="assign-txt">${hasWorker ? 'Reasignar' : 'Asignar'}</span>
       <svg class="assign-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h12l-3.5-3.5M17 16H5l3.5 3.5"/></svg>
@@ -1530,19 +1616,20 @@ document.getElementById('ratesSave').addEventListener('click', () => {
 const pinOverlay = document.getElementById('pinOverlay');
 const pinInput = document.getElementById('pinInput');
 const pinError = document.getElementById('pinError');
-let pinRole = 'admin';
-document.getElementById('adminLoginBtn').addEventListener('click', () => {
-  pinRole = 'admin';
-  document.getElementById('pinTitle').textContent = 'Conectarse como Admin';
-  document.getElementById('pinSubtitle').textContent = 'Ingresa el PIN de administrador.';
-  pinInput.value = ''; pinError.textContent = '';
-  pinOverlay.classList.add('show');
+document.getElementById('loginRoleSelect').addEventListener('change', (e) => {
+  const role = e.target.value;
+  document.getElementById('loginPinBox').style.display = role === 'trabajador' ? 'none' : 'block';
+  document.getElementById('loginWorkerBox').style.display = role === 'trabajador' ? 'block' : 'none';
+  document.getElementById('pinSubtitle').textContent = role === 'supervisor' ? 'Ingresa el PIN de supervisión.' : 'Ingresa el PIN de administrador.';
+  pinError.textContent = '';
 });
-document.getElementById('supervisorLoginBtn').addEventListener('click', () => {
-  pinRole = 'supervisor';
-  document.getElementById('pinTitle').textContent = 'Conectarse como Supervisor';
-  document.getElementById('pinSubtitle').textContent = 'Ingresa el PIN de supervisión.';
-  pinInput.value = ''; pinError.textContent = '';
+document.getElementById('loginBtn').addEventListener('click', () => {
+  document.getElementById('loginRoleSelect').value = 'admin';
+  document.getElementById('loginPinBox').style.display = 'block';
+  document.getElementById('loginWorkerBox').style.display = 'none';
+  document.getElementById('pinSubtitle').textContent = 'Ingresa el PIN de administrador.';
+  pinInput.value = ''; document.getElementById('workerLoginRut').value = ''; document.getElementById('workerLoginPass').value = '';
+  pinError.textContent = '';
   pinOverlay.classList.add('show');
 });
 document.getElementById('pinCancel').addEventListener('click', () => closeOverlayAnimated(pinOverlay));
@@ -1550,7 +1637,7 @@ document.getElementById('pinCancel').addEventListener('click', () => closeOverla
 // sin conexión no se puede entrar como Admin/Supervisor -- es la única forma de que el PIN
 // no quede visible para quien inspeccione el código
 async function checkPinRemote(pin, role){
-  mostrarCargando('Verificando PIN…');
+  mostrarCargando('Verificando…');
   try{
     const res = await fetch(DB_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -1561,20 +1648,53 @@ async function checkPinRemote(pin, role){
     return typeof json.ok === 'boolean' ? json.ok : null;
   }catch(err){ return null; } finally { ocultarCargando(); }
 }
+// lo mismo que el PIN: el RUT/contraseña se revisan en la base de datos, nunca viajan comparados
+// en el html -- si calzan, vuelve el nombre del trabajador (nada más)
+async function checkWorkerLoginRemote(rut, password){
+  mostrarCargando('Verificando…');
+  try{
+    const res = await fetch(DB_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({action:'checkWorkerLogin', rut, password})
+    });
+    if(!res.ok) return null;
+    const json = await res.json();
+    return json; // {ok:true, worker:'Edgardo'} | {ok:false}
+  }catch(err){ return null; } finally { ocultarCargando(); }
+}
 
 document.getElementById('pinConfirm').addEventListener('click', async () => {
-  const entered = pinInput.value;
+  const role = document.getElementById('loginRoleSelect').value;
   pinError.textContent = '';
   if(!DB_URL){
-    pinError.textContent = 'Conecta la base de datos primero (arriba) para poder validar el PIN.';
+    pinError.textContent = 'Conecta la base de datos primero (arriba) para poder iniciar sesión.';
     return;
   }
-  const ok = await checkPinRemote(entered, pinRole);
+
+  if(role === 'trabajador'){
+    const rut = document.getElementById('workerLoginRut').value.trim();
+    const password = document.getElementById('workerLoginPass').value;
+    if(!rut || !password){ pinError.textContent = 'Completa el RUT y la contraseña.'; return; }
+    const res = await checkWorkerLoginRemote(rut, password);
+    if(res === null){ pinError.textContent = 'No se pudo comprobar con la base de datos (revisa la conexión). Prueba de nuevo.'; return; }
+    if(res.ok && res.worker){
+      workerSession = res.worker;
+      try{ sessionStorage.setItem('progresoObraWorker', workerSession); }catch(err){}
+      closeOverlayAnimated(pinOverlay);
+      applyRoleUI(); populateFilters(); render();
+    } else {
+      pinError.textContent = 'RUT o contraseña incorrectos.';
+    }
+    return;
+  }
+
+  const entered = pinInput.value;
+  const ok = await checkPinRemote(entered, role);
   if(ok === null){
     pinError.textContent = 'No se pudo comprobar el PIN con la base de datos (revisa la conexión). Prueba de nuevo.';
     return;
   }
-  if(ok && pinRole === 'supervisor'){
+  if(ok && role === 'supervisor'){
     isSupervisor = true;
     try{ sessionStorage.setItem('progresoObraSupervisor','1'); }catch(err){}
     closeOverlayAnimated(pinOverlay);
@@ -1590,17 +1710,16 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     pinError.textContent = 'PIN incorrecto.';
   }
 });
-document.getElementById('adminLogoutBtn').addEventListener('click', () => {
-  isAdmin = false;
-  try{ sessionStorage.removeItem('progresoObraAdmin'); }catch(err){}
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  isAdmin = false; isSupervisor = false; workerSession = null;
+  try{
+    sessionStorage.removeItem('progresoObraAdmin');
+    sessionStorage.removeItem('progresoObraSupervisor');
+    sessionStorage.removeItem('progresoObraWorker');
+  }catch(err){}
   document.getElementById('workerPanel').classList.remove('show');
   document.getElementById('toggleWorkerPanel').classList.remove('primary');
-  applyRoleUI(); render();
-});
-document.getElementById('supervisorLogoutBtn').addEventListener('click', () => {
-  isSupervisor = false;
-  try{ sessionStorage.removeItem('progresoObraSupervisor'); }catch(err){}
-  applyRoleUI(); render();
+  applyRoleUI(); populateFilters(); render();
 });
 document.getElementById('supervisorWorkersBtn').addEventListener('click', () => {
   renderSupervisorWorkersList();
