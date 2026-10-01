@@ -593,6 +593,7 @@ let isAdmin = false;
 let isSupervisor = false; // "Supervisión de Jefes": ve como invitado + Estadísticas + Trabajadores (solo lectura) + puede poner Observaciones
 let turboMode = false; // si está prendido, marcar Pagado o Terminado también marca lo de antes solo
 try{ isAdmin = sessionStorage.getItem('progresoObraAdmin') === '1'; }catch(err){}
+try{ isSupervisor = !isAdmin && sessionStorage.getItem('progresoObraSupervisor') === '1'; }catch(err){}
 
 let DB_URL = '';
 try{ DB_URL = localStorage.getItem('progresoObraDbUrl') || DEFAULT_DB_URL; }catch(err){ DB_URL = DEFAULT_DB_URL; }
@@ -991,7 +992,7 @@ function enqueueSave(){
 }
 
 function scheduleSave(){
-  if(!isAdmin) return;
+  if(!isAdmin && !isSupervisor) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { enqueueSave(); }, 1200);
 }
@@ -999,7 +1000,7 @@ function scheduleSave(){
 // (el navegador puede cortar la petición a medio camino), por eso el botón de guardar y el
 // aviso de "guardado" siguen siendo la manera segura -- esto es solo una red de seguridad extra.
 window.addEventListener('beforeunload', (e) => {
-  if(!isAdmin || (dirtyCellIds.size === 0 && !settingsDirty)) return;
+  if((!isAdmin && !isSupervisor) || (dirtyCellIds.size === 0 && !settingsDirty)) return;
   clearTimeout(saveTimer);
   enqueueSave();
   e.preventDefault();
@@ -1340,7 +1341,7 @@ function priceLinesHtml(cell, st){
 }
 
 function notaHtml(cell, st){
-  if(isAdmin){
+  if(isAdmin || isSupervisor){
     const label = st.nota ? ('Observación: ' + st.nota) : '+ Observación';
     return `<button class="nota-btn-single" data-id="${cell.id}" title="${st.nota ? st.nota.replace(/"/g,'&quot;') : 'Agregar observación'}">${label}</button>`;
   }
@@ -1824,6 +1825,10 @@ function render(){
       });
     });
 
+
+  }
+
+  if(isAdmin || isSupervisor){
     contentEl.querySelectorAll('.nota-btn-single').forEach(btn => {
       btn.addEventListener('click', (e) => abrirObservacionModal(e.currentTarget.getAttribute('data-id')));
     });
