@@ -613,6 +613,8 @@ try{ workerSession = (!isAdmin && !isSupervisor) ? (sessionStorage.getItem('prog
 let DB_URL = '';
 try{ DB_URL = localStorage.getItem('progresoObraDbUrl') || DEFAULT_DB_URL; }catch(err){ DB_URL = DEFAULT_DB_URL; }
 let dbStatus = 'off';
+let dbErrorReason = ''; // por qué está en ese estado, para mostrarlo al pasar el mouse
+let dbLastOkTs = null; // cuándo fue la última vez que respondió bien
 
 function canSeePrices(){ return isAdmin || allowGuestPrices; }
 
@@ -800,9 +802,21 @@ function defaultWorkerEntry(w){
 function updateDbBadge(){
   const el = document.getElementById('dbBadge');
   if(!el) return;
-  if(!DB_URL){ el.textContent = 'Guardado local'; el.className = 'db-badge off'; return; }
-  if(dbStatus === 'online'){ el.textContent = 'En línea'; el.className = 'db-badge online'; }
-  else { el.textContent = 'Sin conexión'; el.className = 'db-badge error'; }
+  if(!DB_URL){
+    el.textContent = 'Guardado local';
+    el.className = 'db-badge off';
+    el.title = 'No hay una base de datos conectada: todo se guarda solo en este navegador. Conéctala arriba si quieres compartir los datos entre dispositivos.';
+    return;
+  }
+  if(dbStatus === 'online'){
+    el.textContent = 'En línea';
+    el.className = 'db-badge online';
+    el.title = dbLastOkTs ? `Conectado bien. Última respuesta correcta: ${new Date(dbLastOkTs).toLocaleTimeString('es-CL')}.` : 'Conectado bien.';
+  } else {
+    el.textContent = 'Sin conexión';
+    el.className = 'db-badge error';
+    el.title = dbErrorReason || 'No se pudo conectar con la base de datos, por un motivo que no quedó registrado. Prueba guardar de nuevo.';
+  }
 }
 // chequeo liviano y periódico (no recarga datos, no muestra "Cargando") para que "En línea" /
 // "Sin conexión" refleje la realidad aunque no hayas tocado nada -- antes solo se actualizaba
@@ -810,24 +824,35 @@ function updateDbBadge(){
 // de perder la conexión de verdad
 async function pingDb(){
   if(!DB_URL) return;
+  dbErrorReason = '';
   try{
     const res = await fetch(DB_URL + '?action=ping');
-    dbStatus = (res.ok && (await res.json()).ok) ? 'online' : 'error';
-  }catch(err){ dbStatus = 'error'; }
+    if(res.ok && (await res.json()).ok){
+      dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = '';
+    } else {
+      dbStatus = 'error'; dbErrorReason = `El servidor respondió, pero con un error (código ${res.status}). Puede que la URL esté mal, o que la implementación de la base de datos esté desactualizada o borrada.`;
+    }
+  }catch(err){
+    dbStatus = 'error';
+    dbErrorReason = 'No se pudo contactar al servidor. Revisa tu conexión a internet, o si la URL de la base de datos sigue siendo válida.';
+  }
   updateDbBadge();
 }
 setInterval(pingDb, 40000);
 async function dbLoad(){
   if(!DB_URL) return null;
+  dbErrorReason = '';
   try{
     const res = await fetch(DB_URL + '?action=load');
-    if(!res.ok) throw new Error('bad status');
+    if(!res.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const data = await res.json();
-    dbStatus = 'online'; updateDbBadge();
+    dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = ''; updateDbBadge();
     return data;
   }catch(err){
     console.error('Base de datos: no se pudo cargar', err);
-    dbStatus = 'error'; updateDbBadge();
+    dbStatus = 'error';
+    if(!dbErrorReason) dbErrorReason = 'No se pudo cargar: la respuesta no se pudo leer (revisa tu conexión a internet, o si la URL sigue siendo válida).';
+    updateDbBadge();
     return null;
   }
 }
@@ -862,6 +887,7 @@ async function dbSave(dirtyIds){
   // si lo único que cambió fue configuración (tarifas, cierre de quincena, un trabajador...) y
   // ninguna celda, ni siquiera toco la hoja de datos -- el guardado más rápido posible
   const soloConfig = !hayCeldas && settingsDirty;
+  dbErrorReason = '';
   try{
     let action = 'save', records = [];
     if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
@@ -869,14 +895,16 @@ async function dbSave(dirtyIds){
     else { records = buildRecords(); }
     const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena };
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
-    if(!res.ok) throw new Error('bad status');
+    if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
-    if(!json || json.ok !== true) throw new Error('respuesta no ok');
-    dbStatus = 'online'; updateDbBadge();
+    if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
+    dbStatus = 'online'; dbLastOkTs = Date.now(); updateDbBadge();
     return true;
   }catch(err){
     console.error('Base de datos: no se pudo guardar', err);
-    dbStatus = 'error'; updateDbBadge();
+    dbStatus = 'error';
+    if(!dbErrorReason) dbErrorReason = 'No se pudo guardar: no hubo respuesta (revisa tu conexión a internet, o si la URL sigue siendo válida).';
+    updateDbBadge();
     return false;
   }
 }
@@ -993,7 +1021,12 @@ async function doSaveCycle(){
   try{
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
-  await mergeRemoteBeforeSave();
+  // si es solo una o varias celdas puntuales (sin tocar configuración), el guardado incremental
+  // ya es seguro por sí solo -- cada fila se escribe por su ID, no puede pisar nada más -- así que
+  // no hace falta traer TODA la base de datos antes, solo para comparar. Eso era lo que hacía
+  // sentir pesado cada guardado: antes de escribir 1 casilla, igual leía las ~1000 filas enteras.
+  const soloCeldas = dirtySnap.size > 0 && !settingsDirty;
+  if(!soloCeldas) await mergeRemoteBeforeSave();
   const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
