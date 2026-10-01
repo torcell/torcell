@@ -443,21 +443,8 @@
 <div class="overlay" id="pinOverlay">
   <div class="modal">
     <h3>Iniciar sesión</h3>
-    <div class="rate-row"><label>Ingresar como</label>
-      <select id="loginRoleSelect" style="width:220px;">
-        <option value="admin">Admin</option>
-        <option value="supervisor">Supervisor</option>
-        <option value="trabajador">Trabajador</option>
-      </select>
-    </div>
-    <div id="loginPinBox">
-      <p id="pinSubtitle">Ingresa el PIN de administrador.</p>
-      <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="off">
-    </div>
-    <div id="loginWorkerBox" style="display:none;">
-      <div class="rate-row"><label>RUT</label><input type="text" id="workerLoginRut" style="width:220px;" placeholder="12345678-9" autocomplete="off"></div>
-      <div class="rate-row"><label>Contraseña</label><input type="password" id="workerLoginPass" style="width:220px;" autocomplete="off"></div>
-    </div>
+    <p>Ingresa tu PIN.</p>
+    <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="off">
     <div class="modal-error" id="pinError"></div>
     <div class="actions">
       <button class="btn" id="pinCancel">Cancelar</button>
@@ -576,7 +563,7 @@
    solos, sin tener que pegar el link cada uno -- vacío mientras no lo tenga listo */
 // subo esto en cada modificación (el último dígito para cambios chicos, agrego o subo uno
 // de más atrás si es algo más grande) -- mientras no llegue a la versión 1
-const APP_VERSION = '0.2.1';
+const APP_VERSION = '0.3.1';
 let backendVersion = null; // la versión del .gs, se completa sola apenas responde la base de datos
 const DEFAULT_DB_URL = '';
 /* esto es el progreso que ya tenía cargado -- se usa solo si abro el panel en un navegador nuevo sin nada guardado todavía */
@@ -610,11 +597,16 @@ let isAdmin = false;
 let isSupervisor = false; // "Supervisión de Jefes": ve como invitado + Estadísticas + Trabajadores (solo lectura) + puede poner Observaciones
 let workerSession = null; // nombre del trabajador con sesión iniciada, o null si no hay
 let sessionToken = null; // lo entrega la base de datos al iniciar sesión -- sin esto, ya no deja guardar nada
+let sessionName = null; // el "Nombre" de la fila de Usuarios que calzó con el PIN (para Admin/Supervisor también, no solo trabajador)
 let turboMode = false; // si está prendido, marcar Pagado o Terminado también marca lo de antes solo
-try{ isAdmin = sessionStorage.getItem('progresoObraAdmin') === '1'; }catch(err){}
-try{ isSupervisor = !isAdmin && sessionStorage.getItem('progresoObraSupervisor') === '1'; }catch(err){}
-try{ workerSession = (!isAdmin && !isSupervisor) ? (sessionStorage.getItem('progresoObraWorker') || null) : null; }catch(err){}
-try{ sessionToken = sessionStorage.getItem('progresoObraToken') || null; }catch(err){}
+try{
+  const rolGuardado = sessionStorage.getItem('progresoObraRol');
+  isAdmin = rolGuardado === '1';
+  isSupervisor = rolGuardado === '2';
+  sessionName = sessionStorage.getItem('progresoObraName') || null;
+  workerSession = rolGuardado === '3' ? sessionName : null;
+  sessionToken = sessionStorage.getItem('progresoObraToken') || null;
+}catch(err){}
 
 let DB_URL = '';
 try{ DB_URL = localStorage.getItem('progresoObraDbUrl') || DEFAULT_DB_URL; }catch(err){ DB_URL = DEFAULT_DB_URL; }
@@ -632,8 +624,8 @@ function applyRoleUI(){
   const badge = document.getElementById('roleBadge');
   const loggedIn = isAdmin || isSupervisor || workerSession;
   let label = 'Conectado como INVITADO', cls = 'guest';
-  if(isAdmin){ label = 'Conectado como: Admin'; cls = 'admin'; }
-  else if(isSupervisor){ label = 'Conectado como: Supervisor'; cls = 'supervisor'; }
+  if(isAdmin){ label = 'Conectado como: Admin' + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
+  else if(isSupervisor){ label = 'Conectado como: Supervisor' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(workerSession){
     const especialidad = (workerStatus[workerSession]||{}).especialidad === 'fraguador' ? 'Fraguador' : 'Ceramista';
     label = `Conectado como: ${especialidad} - ${workerSession}`; cls = 'worker';
@@ -1279,14 +1271,7 @@ function openWorkerDatosModal(worker){
     <div class="rate-row"><label>Nacionalidad</label><input type="text" id="datosNacionalidad" style="width:220px;" value="${ws.nacionalidad||''}"></div>
     <div class="rate-row"><label>Dirección</label><input type="text" id="datosDireccion" style="width:220px;" value="${ws.direccion||''}"></div>
 
-    <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Acceso de este trabajador al panel</p>
-    <div class="rate-row"><label>RUT de acceso</label><input type="text" id="datosLoginRut" style="width:220px;" placeholder="12345678-9" autocomplete="off"></div>
-    <div class="rate-row"><label>Nueva contraseña</label><input type="password" id="datosLoginPass" style="width:220px;" placeholder="dejar en blanco para no cambiar" autocomplete="off"></div>
-    <div style="display:flex;gap:8px;margin-bottom:6px;">
-      <button class="btn small" id="datosGuardarAccesoBtn" type="button">Guardar acceso</button>
-      <button class="btn small" id="datosQuitarAccesoBtn" type="button">Quitar acceso</button>
-    </div>
-    <p id="datosAccesoMsg" style="font-size:11.5px;color:var(--sub);margin:0 0 10px;"></p>
+    <p style="margin:14px 0 6px;font-size:11.5px;color:var(--sub);">El PIN de acceso de ${worker} se agrega directo en la pestaña "Usuarios" de la base de datos (PIN, Nombre = "${worker}" exacto, Rol = 3).</p>
 
     <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Precio que ve este trabajador si inicia sesión</p>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;"><input type="checkbox" id="datosVePrecioReal" ${ws.vePrecioReal?'checked':''}> Puede ver su precio real (si no, ve el precio base)</label>
@@ -1312,36 +1297,6 @@ function openWorkerDatosModal(worker){
     scheduleSave();
   });
   renderWorkerDocsList(worker);
-  // el acceso (RUT/contraseña) se guarda directo en la base de datos, aparte del resto --
-  // la contraseña nunca pasa por acá por el localStorage ni por el export
-  document.getElementById('datosGuardarAccesoBtn').addEventListener('click', async () => {
-    const rut = document.getElementById('datosLoginRut').value.trim();
-    const pass = document.getElementById('datosLoginPass').value;
-    const msgEl = document.getElementById('datosAccesoMsg');
-    if(!DB_URL){ msgEl.textContent = 'Conecta la base de datos primero para poder guardar accesos.'; return; }
-    if(!rut || !pass){ msgEl.textContent = 'Completa el RUT y la contraseña.'; return; }
-    msgEl.textContent = 'Guardando…';
-    try{
-      const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify({action:'setWorkerLogin', worker, rut, password:pass, token:sessionToken}) });
-      const json = res.ok ? await res.json() : null;
-      msgEl.textContent = (json && json.error === 'sin_sesion') ? 'Tu sesión venció. Vuelve a iniciar sesión e inténtalo de nuevo.'
-        : (json && json.ok) ? 'Acceso guardado.' : 'No se pudo guardar.';
-    }catch(err){ msgEl.textContent = 'No se pudo guardar (revisa la conexión).'; }
-    document.getElementById('datosLoginPass').value = '';
-  });
-  document.getElementById('datosQuitarAccesoBtn').addEventListener('click', async () => {
-    const msgEl = document.getElementById('datosAccesoMsg');
-    if(!DB_URL){ msgEl.textContent = 'Conecta la base de datos primero.'; return; }
-    msgEl.textContent = 'Quitando…';
-    try{
-      const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify({action:'setWorkerLogin', worker, rut:'', password:'', token:sessionToken}) });
-      const json = res.ok ? await res.json() : null;
-      msgEl.textContent = (json && json.error === 'sin_sesion') ? 'Tu sesión venció. Vuelve a iniciar sesión e inténtalo de nuevo.'
-        : (json && json.ok) ? 'Acceso quitado.' : 'No se pudo quitar.';
-    }catch(err){ msgEl.textContent = 'No se pudo quitar (revisa la conexión).'; }
-  });
   document.getElementById('datosFileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -1664,113 +1619,74 @@ document.getElementById('ratesSave').addEventListener('click', () => {
 const pinOverlay = document.getElementById('pinOverlay');
 const pinInput = document.getElementById('pinInput');
 const pinError = document.getElementById('pinError');
-document.getElementById('loginRoleSelect').addEventListener('change', (e) => {
-  const role = e.target.value;
-  document.getElementById('loginPinBox').style.display = role === 'trabajador' ? 'none' : 'block';
-  document.getElementById('loginWorkerBox').style.display = role === 'trabajador' ? 'block' : 'none';
-  document.getElementById('pinSubtitle').textContent = role === 'supervisor' ? 'Ingresa el PIN de supervisión.' : 'Ingresa el PIN de administrador.';
-  pinError.textContent = '';
-});
 document.getElementById('loginBtn').addEventListener('click', () => {
-  document.getElementById('loginRoleSelect').value = 'admin';
-  document.getElementById('loginPinBox').style.display = 'block';
-  document.getElementById('loginWorkerBox').style.display = 'none';
-  document.getElementById('pinSubtitle').textContent = 'Ingresa el PIN de administrador.';
-  pinInput.value = ''; document.getElementById('workerLoginRut').value = ''; document.getElementById('workerLoginPass').value = '';
+  pinInput.value = '';
   pinError.textContent = '';
   pinOverlay.classList.add('show');
 });
 document.getElementById('pinCancel').addEventListener('click', () => closeOverlayAnimated(pinOverlay));
-// si la base de datos está conectada, el PIN se revisa allá (nunca viaja el pin real en el html);
-// sin conexión no se puede entrar como Admin/Supervisor -- es la única forma de que el PIN
-// no quede visible para quien inspeccione el código
-async function checkPinRemote(pin, role){
+// un solo PIN para todos los roles -- la base de datos dice a quién pertenece (Admin,
+// Supervisor o un trabajador puntual) y con qué nombre. Se revisa allá, nunca viaja
+// comparado en el html; sin conexión no se puede entrar, es la única forma de que
+// ningún PIN quede visible para quien inspeccione el código.
+async function checkLoginRemote(pin){
   mostrarCargando('Verificando…');
   try{
     const res = await fetch(DB_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({action:'checkPin', pin, role})
+      body: JSON.stringify({action:'login', pin})
     });
     if(!res.ok) return null;
     const json = await res.json();
-    return (json && typeof json.ok === 'boolean') ? json : null; // {ok, token}
-  }catch(err){ return null; } finally { ocultarCargando(); }
-}
-// lo mismo que el PIN: el RUT/contraseña se revisan en la base de datos, nunca viajan comparados
-// en el html -- si calzan, vuelve el nombre del trabajador (nada más)
-async function checkWorkerLoginRemote(rut, password){
-  mostrarCargando('Verificando…');
-  try{
-    const res = await fetch(DB_URL, {
-      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({action:'checkWorkerLogin', rut, password})
-    });
-    if(!res.ok) return null;
-    const json = await res.json();
-    return json; // {ok:true, worker:'Edgardo'} | {ok:false}
+    return (json && typeof json.ok === 'boolean') ? json : null; // {ok, nombre, rol, token}
   }catch(err){ return null; } finally { ocultarCargando(); }
 }
 
 document.getElementById('pinConfirm').addEventListener('click', async () => {
-  const role = document.getElementById('loginRoleSelect').value;
   pinError.textContent = '';
   if(!DB_URL){
     pinError.textContent = 'Conecta la base de datos primero (arriba) para poder iniciar sesión.';
     return;
   }
-
-  if(role === 'trabajador'){
-    const rut = document.getElementById('workerLoginRut').value.trim();
-    const password = document.getElementById('workerLoginPass').value;
-    if(!rut || !password){ pinError.textContent = 'Completa el RUT y la contraseña.'; return; }
-    const res = await checkWorkerLoginRemote(rut, password);
-    if(res === null){ pinError.textContent = 'No se pudo comprobar con la base de datos (revisa la conexión). Prueba de nuevo.'; return; }
-    if(res.ok && res.worker){
-      workerSession = res.worker;
-      sessionToken = res.token || null;
-      try{
-        sessionStorage.setItem('progresoObraWorker', workerSession);
-        sessionStorage.setItem('progresoObraToken', sessionToken || '');
-      }catch(err){}
-      closeOverlayAnimated(pinOverlay);
-      applyRoleUI(); populateFilters(); render();
-    } else {
-      pinError.textContent = 'RUT o contraseña incorrectos.';
-    }
-    return;
-  }
-
   const entered = pinInput.value;
-  const res = await checkPinRemote(entered, role);
+  if(!entered){ pinError.textContent = 'Ingresa un PIN.'; return; }
+  const res = await checkLoginRemote(entered);
   if(res === null){
     pinError.textContent = 'No se pudo comprobar el PIN con la base de datos (revisa la conexión). Prueba de nuevo.';
     return;
   }
-  if(res.ok && role === 'supervisor'){
-    isSupervisor = true;
-    sessionToken = res.token || null;
-    try{ sessionStorage.setItem('progresoObraSupervisor','1'); sessionStorage.setItem('progresoObraToken', sessionToken || ''); }catch(err){}
-    closeOverlayAnimated(pinOverlay);
-    applyRoleUI(); render();
+  if(!res.ok){
+    pinError.textContent = 'PIN incorrecto.';
     return;
   }
-  if(res.ok){
+  sessionToken = res.token || null;
+  sessionName = res.nombre || '';
+  try{ sessionStorage.setItem('progresoObraToken', sessionToken || ''); sessionStorage.setItem('progresoObraName', sessionName || ''); }catch(err){}
+  if(res.rol === 1){
     isAdmin = true;
-    sessionToken = res.token || null;
-    try{ sessionStorage.setItem('progresoObraAdmin','1'); sessionStorage.setItem('progresoObraToken', sessionToken || ''); }catch(err){}
+    try{ sessionStorage.setItem('progresoObraRol', '1'); }catch(err){}
     closeOverlayAnimated(pinOverlay);
     applyRoleUI(); renderWorkerPanel(); updateDbBadge(); render();
+  } else if(res.rol === 2){
+    isSupervisor = true;
+    try{ sessionStorage.setItem('progresoObraRol', '2'); }catch(err){}
+    closeOverlayAnimated(pinOverlay);
+    applyRoleUI(); render();
+  } else if(res.rol === 3){
+    workerSession = sessionName;
+    try{ sessionStorage.setItem('progresoObraRol', '3'); }catch(err){}
+    closeOverlayAnimated(pinOverlay);
+    applyRoleUI(); populateFilters(); render();
   } else {
-    pinError.textContent = 'PIN incorrecto.';
+    pinError.textContent = 'Ese PIN no tiene un Rol válido en la pestaña "Usuarios" (tiene que ser 1, 2 o 3).';
   }
 });
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  isAdmin = false; isSupervisor = false; workerSession = null; sessionToken = null;
+  isAdmin = false; isSupervisor = false; workerSession = null; sessionToken = null; sessionName = null;
   try{
-    sessionStorage.removeItem('progresoObraAdmin');
-    sessionStorage.removeItem('progresoObraSupervisor');
-    sessionStorage.removeItem('progresoObraWorker');
+    sessionStorage.removeItem('progresoObraRol');
     sessionStorage.removeItem('progresoObraToken');
+    sessionStorage.removeItem('progresoObraName');
   }catch(err){}
   document.getElementById('workerPanel').classList.remove('show');
   document.getElementById('toggleWorkerPanel').classList.remove('primary');
