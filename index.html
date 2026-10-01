@@ -563,7 +563,7 @@
    solos, sin tener que pegar el link cada uno -- vacío mientras no lo tenga listo */
 // subo esto en cada modificación (el último dígito para cambios chicos, agrego o subo uno
 // de más atrás si es algo más grande) -- mientras no llegue a la versión 1
-const APP_VERSION = '0.3.1';
+const APP_VERSION = '0.4.1';
 let backendVersion = null; // la versión del .gs, se completa sola apenas responde la base de datos
 const DEFAULT_DB_URL = '';
 /* esto es el progreso que ya tenía cargado -- se usa solo si abro el panel en un navegador nuevo sin nada guardado todavía */
@@ -591,6 +591,24 @@ let AFP_RATES = { Capital:1.44, Cuprum:1.44, Habitat:1.27, Modelo:0.58, PlanVita
 // en las liquidaciones hasta el próximo cierre (para que no se cuele dinero de un piso que se
 // terminó tarde, cuando el pago de este período ya se cerró)
 let cierreQuincena = null;
+// m2 que hizo cada trabajador entre un cierre y el siguiente (de pago a pago) -- se va guardando
+// solo, cada vez que se mueve el cierre, para más adelante armar un gráfico de avance por período
+let historialM2 = [];
+function guardarM2DelPeriodo(desde, hasta){
+  const porTrabajador = {};
+  ALL_CELLS.forEach(c => {
+    const st = getState(c.id);
+    const e = resolveEstado(st);
+    if(e !== 'entregado' && e !== 'pagado') return;
+    if(!st.terminadoTs) return; // partidas de antes de tener esta fecha -- no sé en qué período cayeron, las dejo fuera
+    if(desde !== null && st.terminadoTs <= desde) return;
+    if(st.terminadoTs > hasta) return;
+    if(!st.trabajador || !st.m2) return;
+    porTrabajador[st.trabajador] = (porTrabajador[st.trabajador] || 0) + st.m2;
+  });
+  if(Object.keys(porTrabajador).length === 0) return; // nada que anotar en este período
+  historialM2.push({ desde: desde, hasta: hasta, porTrabajador: porTrabajador });
+}
 const AFP_COTIZACION_OBLIGATORIA = 10; // % fijo, igual para todas las AFP
 let allowGuestPrices = false;
 let isAdmin = false;
@@ -751,6 +769,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
+    if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
   }
   // si otro Admin agregó o renombró a alguien, que aparezca en filtros y listas sin recargar
@@ -894,7 +913,7 @@ async function dbSave(dirtyIds){
     if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, historialM2, token: sessionToken };
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
@@ -921,6 +940,7 @@ function applyLoadedPayload(parsed){
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
+  if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
   if(Array.isArray(parsed.obsPresets) && parsed.obsPresets.length) OBS_PRESETS = parsed.obsPresets;
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
   rebuildWorkerList(); // OJO: va antes de rellenar las partidas que faltan (esas traen nombres viejos de fábrica)
@@ -1029,7 +1049,7 @@ async function doSaveCycle(){
   // sentir pesado cada guardado: antes de escribir 1 casilla, igual leía las ~1000 filas enteras.
   const soloCeldas = dirtySnap.size > 0 && !settingsDirty;
   if(!soloCeldas) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, historialM2};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -1058,11 +1078,16 @@ function enqueueSave(){
   return p.catch(() => ({localOk:false, dbOk:false}));
 }
 
-function scheduleSave(){
-  if(!isAdmin && !isSupervisor) return;
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { enqueueSave(); }, 1200);
-}
+// guardado SOLO manual ahora (botón "Guardar ahora") -- esta función ya no programa nada sola,
+// pero la dejo (sin hacer nada) porque se sigue llamando desde todos los lugares que marcan un
+// cambio, y de ahí sale si hay algo pendiente para el aviso antes de liquidar y para el respaldo
+// de los 10 minutos.
+function scheduleSave(){}
+// red de seguridad: si pasan 10 minutos sin que nadie apriete "Guardar ahora" y queda algo
+// pendiente, se guarda solo -- para no perder nada si alguien se olvida
+setInterval(() => {
+  if((isAdmin || isSupervisor) && (dirtyCellIds.size > 0 || settingsDirty)) enqueueSave();
+}, 10 * 60 * 1000);
 // último intento de guardar si cierras la pestaña con algo pendiente. No es 100% garantizado
 // (el navegador puede cortar la petición a medio camino), por eso el botón de guardar y el
 // aviso de "guardado" siguen siendo la manera segura -- esto es solo una red de seguridad extra.
@@ -1979,7 +2004,12 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
   openInputModal(cierreQuincena ? 'Cambiar cierre de quincena/mes' : 'Cerrar quincena/mes', bodyHtml, () => {
     const v = document.getElementById('cierreInput').value;
     if(!v) return;
-    cierreQuincena = new Date(v).getTime();
+    const cierreAnterior = cierreQuincena;
+    // el campo de fecha no tiene segundos -- cuento hasta el FINAL de ese minuto, para que algo
+    // marcado Terminado en el mismo minuto que se cierra no quede excluido por unos segundos
+    const cierreNuevo = new Date(v).getTime() + 59999;
+    guardarM2DelPeriodo(cierreAnterior, cierreNuevo); // para el gráfico de avance por quincena, más adelante
+    cierreQuincena = cierreNuevo;
     markSettingsDirty(); scheduleSave(); render();
   });
   // dejo el campo listo con la fecha/hora de ahora mismo, para que baste con apretar Guardar
@@ -2050,7 +2080,7 @@ document.getElementById('dbBtn').addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, historialM2, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2160,6 +2190,13 @@ function openWorkerHistorialModal(worker){
 }
 
 document.getElementById('liqOpenBtn').addEventListener('click', () => {
+  if(dirtyCellIds.size > 0 || settingsDirty){
+    askConfirm('Hay cambios sin guardar todavía. Si generas la liquidación ahora, va a usar lo que tienes en pantalla igual, pero conviene guardar primero para que quede en la base de datos. ¿Continuar de todas formas?', abrirConfigLiquidacion);
+    return;
+  }
+  abrirConfigLiquidacion();
+});
+function abrirConfigLiquidacion(){
   const sel = document.getElementById('liqWorkerSelect');
   // los finiquitados no salen aquí, para eso queda el botón de historial en Gestionar Trabajadores
   const liqWorkers = ALL_WORKERS.filter(w => !workerStatus[w] || workerStatus[w].estado !== 'finiquitado');
@@ -2178,6 +2215,7 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
   document.getElementById('liqIncRetenido').checked = false;
   document.getElementById('liqConfigError').textContent = '';
   document.getElementById('liqHistoryBox').style.display = 'none';
+  liqIgnorarCierre = false; // cada liquidación nueva vuelve a respetar el cierre, a menos que se elija lo contrario
 
   // aviso: departamentos marcados Terminado (o Pagado) sin nadie asignado -- ese trabajo
   // se puede "perder" porque nunca va a salir en la liquidación de nadie
@@ -2197,7 +2235,7 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
 
   updateAfpPctInfo();
   liqConfigOverlay.classList.add('show');
-});
+}
 document.getElementById('liqConfigCancel').addEventListener('click', () => closeOverlayAnimated(liqConfigOverlay));
 document.getElementById('liqTipoPago').addEventListener('change', (e) => {
   document.getElementById('liqAfpFields').style.display = e.target.value === 'finmes' ? 'block' : 'none';
@@ -2244,8 +2282,10 @@ document.getElementById('liqWorkerSelect').addEventListener('change', (e) => {
 });
 
 let liqExtraDetails = []; // detalles que agrega el admin a mano: {desc, monto, tipo:'suma'|'resta'}
+let liqIgnorarCierre = false; // true si el admin eligió "agregar de todas formas" lo excluido por el cierre
 
-document.getElementById('liqConfigGenerar').addEventListener('click', () => {
+document.getElementById('liqConfigGenerar').addEventListener('click', generarLiquidacionInterna);
+function generarLiquidacionInterna(){
   const worker = document.getElementById('liqWorkerSelect').value;
   const fecha = document.getElementById('liqFecha').value;
   const tipoPago = document.getElementById('liqTipoPago').value;
@@ -2270,7 +2310,7 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
     if(st.retenido && !incRetenido) return;
     const estado = resolveEstado(st);
     // lo Terminado después del cierre de quincena/mes no entra a esta liquidación
-    if(estado === 'entregado' && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena){
+    if(estado === 'entregado' && !liqIgnorarCierre && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena){
       excluidosPorCierre++;
       return;
     }
@@ -2332,7 +2372,7 @@ document.getElementById('liqConfigGenerar').addEventListener('click', () => {
   } else {
     pendingLiqFinalize(false);
   }
-});
+}
 
 // arma (o vuelve a armar) el documento de la liquidación -- se llama al generar y también
 // cada vez que se agrega o quita un "detalle adicional" (adelanto, hombre día, etc.)
@@ -2403,9 +2443,10 @@ function liqRebuildDoc(){
         ${m.observaciones.map(o => `<div style="font-size:11.5px;margin-bottom:4px;"><b>${o.label} — ${o.area}</b> (${o.piso}): <i>${o.nota}</i></div>`).join('')}
       </div>` : '';
   const cierreHtml = (m.excluidosPorCierre > 0) ? `
-      <p style="margin:12px 0 0;font-size:11px;color:var(--sub);font-style:italic;">
+      <div style="margin:12px 0 0;font-size:11px;color:var(--sub);font-style:italic;">
         ${m.excluidosPorCierre} partida(s) Terminada(s) después del cierre de quincena/mes no se incluyeron en esta liquidación.
-      </p>` : '';
+        <button class="btn small" id="liqAgregarFueraCierreBtn" type="button" style="font-style:normal;margin-left:6px;">Agregar de todas formas</button>
+      </div>` : '';
   const metaHtml = `
       <div class="liq-meta">
         <div>Trabajador: <b>${m.worker}</b></div>
@@ -2492,6 +2533,14 @@ function liqRebuildDoc(){
   document.getElementById('liqPrintArea').innerHTML = docHtmlPrint;
   const liqScrollBox = document.getElementById('liqModalBody');
   liqScrollBox.scrollTop = liqScrollBox.scrollHeight; // que después de agregar/quitar un detalle no vuelva al principio
+
+  const btnFueraCierre = document.getElementById('liqAgregarFueraCierreBtn');
+  if(btnFueraCierre) btnFueraCierre.addEventListener('click', () => {
+    askConfirm(`¿Agregar las ${m.excluidosPorCierre} partida(s) Terminada(s) después del cierre? Vas a estar pagando algo que quedó fuera del corte de esta quincena/mes a propósito.`, () => {
+      liqIgnorarCierre = true;
+      generarLiquidacionInterna();
+    });
+  });
 
   document.getElementById('liqAddDetailBtn').addEventListener('click', () => {
     const bodyHtml = `
