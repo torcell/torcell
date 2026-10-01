@@ -52,6 +52,7 @@
   .role-badge{font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:var(--radius);letter-spacing:.4px;}
   .role-badge.guest{color:#fff;background:#6c716a;}
   .role-badge.admin{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  .role-badge.supervisor{color:#fff;background:#8a6a1f;}
   .db-badge{font-size:11px;font-weight:700;padding:6px 10px;border-radius:var(--radius);border:1px solid var(--border-strong);}
   .db-badge.off{color:var(--sub);background:var(--panel-soft);}
   .db-badge.online{color:#fff;background:var(--entregado);border-color:var(--entregado);}
@@ -199,6 +200,7 @@
   .worker-row .wcontrols{display:flex;gap:8px;}
   .worker-row select{min-width:130px;}
   .rename-btn{border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);font-size:10.5px;padding:2px 6px;cursor:pointer;border-radius:var(--radius);}
+  .rename-btn:disabled{opacity:.45;cursor:not-allowed;}
   .rename-btn:hover{color:var(--accent);border-color:var(--accent);}
   .guest-price-toggle{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);}
 
@@ -302,6 +304,11 @@
     .liq-retain-col{width:44px;}
     .liq-only-desktop{display:none;}
     .liq-only-mobile{display:block;}
+    /* la fila de cada trabajador (nombre + especialidad + estado + Datos + Historial) no
+       entraba en una pantalla angosta y se salía del panel -- ahora se acomoda en dos líneas */
+    .worker-row{flex-wrap:wrap;}
+    .worker-row .wcontrols{flex-wrap:wrap;width:100%;justify-content:flex-start;row-gap:6px;}
+    .worker-row .wcontrols select{flex:1 1 110px;min-width:90px;}
   }
   /* teléfonos angostos (360px o menos): botones de estado un poco más compactos para que "Terminado" no se corte */
   @media (max-width:380px){
@@ -350,6 +357,9 @@
   <div class="role-bar">
     <span class="role-badge guest" id="roleBadge">Conectado como INVITADO</span>
     <button class="btn small" id="adminLoginBtn">Conectarse como Admin</button>
+    <button class="btn small" id="supervisorLoginBtn">Conectarse como Supervisor</button>
+    <button class="btn small" id="supervisorLogoutBtn" style="display:none;">Cerrar sesión Supervisor</button>
+    <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
     <button class="btn small admin-only" id="adminLogoutBtn">Cerrar sesión Admin</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
   </div>
@@ -432,8 +442,8 @@
 
 <div class="overlay" id="pinOverlay">
   <div class="modal">
-    <h3>Conectarse como Admin</h3>
-    <p>Ingresa el PIN de administrador.</p>
+    <h3 id="pinTitle">Conectarse como Admin</h3>
+    <p id="pinSubtitle">Ingresa el PIN de administrador.</p>
     <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="off">
     <div class="modal-error" id="pinError"></div>
     <div class="actions">
@@ -508,6 +518,15 @@
   <span id="cargandoTexto">Cargando…</span>
 </div>
 
+<div class="overlay" id="supervisorWorkersOverlay">
+  <div class="modal" style="max-width:480px;">
+    <h3>Trabajadores</h3>
+    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Solo lectura -- nombre, cargo y estado. "Datos" e "Historial" los maneja Admin.</p>
+    <div id="supervisorWorkersList" style="max-height:min(60vh,420px);overflow-y:auto;"></div>
+    <div class="actions"><button class="btn primary" id="supervisorWorkersCloseBtn">Cerrar</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="liqObsOverlay">
   <div class="modal" style="max-width:460px;">
     <h3>📝 Hay observaciones registradas</h3>
@@ -571,6 +590,7 @@ let cierreQuincena = null;
 const AFP_COTIZACION_OBLIGATORIA = 10; // % fijo, igual para todas las AFP
 let allowGuestPrices = false;
 let isAdmin = false;
+let isSupervisor = false; // "Supervisión de Jefes": ve como invitado + Estadísticas + Trabajadores (solo lectura) + puede poner Observaciones
 let turboMode = false; // si está prendido, marcar Pagado o Terminado también marca lo de antes solo
 try{ isAdmin = sessionStorage.getItem('progresoObraAdmin') === '1'; }catch(err){}
 
@@ -582,12 +602,18 @@ function canSeePrices(){ return isAdmin || allowGuestPrices; }
 
 function applyRoleUI(){
   document.body.classList.toggle('is-admin', isAdmin);
+  document.body.classList.toggle('is-supervisor', isSupervisor);
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
   const badge = document.getElementById('roleBadge');
-  badge.textContent = isAdmin ? 'Conectado como ADMIN' : 'Conectado como INVITADO';
-  badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'guest');
+  const label = isAdmin ? 'Conectado como ADMIN' : isSupervisor ? 'Conectado como SUPERVISOR' : 'Conectado como INVITADO';
+  const cls = isAdmin ? 'admin' : isSupervisor ? 'supervisor' : 'guest';
+  badge.textContent = label;
+  badge.className = 'role-badge ' + cls;
   badge.classList.remove('role-flash'); void badge.offsetWidth; badge.classList.add('role-flash');
-  document.getElementById('adminLoginBtn').style.display = isAdmin ? 'none' : 'inline-flex';
+  document.getElementById('adminLoginBtn').style.display = (isAdmin || isSupervisor) ? 'none' : 'inline-flex';
+  document.getElementById('supervisorLoginBtn').style.display = (isAdmin || isSupervisor) ? 'none' : 'inline-flex';
+  document.getElementById('supervisorLogoutBtn').style.display = isSupervisor ? 'inline-flex' : 'none';
+  document.getElementById('supervisorWorkersBtn').style.display = isSupervisor ? 'inline-flex' : 'none';
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 }
 
@@ -1503,20 +1529,31 @@ document.getElementById('ratesSave').addEventListener('click', () => {
 const pinOverlay = document.getElementById('pinOverlay');
 const pinInput = document.getElementById('pinInput');
 const pinError = document.getElementById('pinError');
+let pinRole = 'admin';
 document.getElementById('adminLoginBtn').addEventListener('click', () => {
+  pinRole = 'admin';
+  document.getElementById('pinTitle').textContent = 'Conectarse como Admin';
+  document.getElementById('pinSubtitle').textContent = 'Ingresa el PIN de administrador.';
+  pinInput.value = ''; pinError.textContent = '';
+  pinOverlay.classList.add('show');
+});
+document.getElementById('supervisorLoginBtn').addEventListener('click', () => {
+  pinRole = 'supervisor';
+  document.getElementById('pinTitle').textContent = 'Conectarse como Supervisor';
+  document.getElementById('pinSubtitle').textContent = 'Ingresa el PIN de supervisión.';
   pinInput.value = ''; pinError.textContent = '';
   pinOverlay.classList.add('show');
 });
 document.getElementById('pinCancel').addEventListener('click', () => closeOverlayAnimated(pinOverlay));
 // si la base de datos está conectada, el PIN se revisa allá (nunca viaja el pin real en el html);
-// sin conexión no se puede entrar como Admin -- es la única forma de que el PIN
+// sin conexión no se puede entrar como Admin/Supervisor -- es la única forma de que el PIN
 // no quede visible para quien inspeccione el código
-async function checkPinRemote(pin){
+async function checkPinRemote(pin, role){
   mostrarCargando('Verificando PIN…');
   try{
     const res = await fetch(DB_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({action:'checkPin', pin})
+      body: JSON.stringify({action:'checkPin', pin, role})
     });
     if(!res.ok) return null;
     const json = await res.json();
@@ -1531,9 +1568,16 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     pinError.textContent = 'Conecta la base de datos primero (arriba) para poder validar el PIN.';
     return;
   }
-  const ok = await checkPinRemote(entered);
+  const ok = await checkPinRemote(entered, pinRole);
   if(ok === null){
     pinError.textContent = 'No se pudo comprobar el PIN con la base de datos (revisa la conexión). Prueba de nuevo.';
+    return;
+  }
+  if(ok && pinRole === 'supervisor'){
+    isSupervisor = true;
+    try{ sessionStorage.setItem('progresoObraSupervisor','1'); }catch(err){}
+    closeOverlayAnimated(pinOverlay);
+    applyRoleUI(); render();
     return;
   }
   if(ok){
@@ -1552,6 +1596,32 @@ document.getElementById('adminLogoutBtn').addEventListener('click', () => {
   document.getElementById('toggleWorkerPanel').classList.remove('primary');
   applyRoleUI(); render();
 });
+document.getElementById('supervisorLogoutBtn').addEventListener('click', () => {
+  isSupervisor = false;
+  try{ sessionStorage.removeItem('progresoObraSupervisor'); }catch(err){}
+  applyRoleUI(); render();
+});
+document.getElementById('supervisorWorkersBtn').addEventListener('click', () => {
+  renderSupervisorWorkersList();
+  document.getElementById('supervisorWorkersOverlay').classList.add('show');
+});
+document.getElementById('supervisorWorkersCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('supervisorWorkersOverlay')));
+function renderSupervisorWorkersList(){
+  const especialidadLabel = {ceramista:'Ceramista', fraguador:'Fraguador'};
+  const estadoLabel = {activo:'Activo', inactivo:'Inactivo', finiquitado:'Finiquitado'};
+  document.getElementById('supervisorWorkersList').innerHTML = ALL_WORKERS.map(w => {
+    const ws = workerStatus[w] || defaultWorkerEntry(w);
+    return `<div class="worker-row">
+      <div class="wname">${w}</div>
+      <div class="wcontrols">
+        <span style="font-size:12px;color:var(--sub);min-width:72px;">${especialidadLabel[ws.especialidad]||'Ceramista'}</span>
+        <span style="font-size:12px;color:var(--sub);min-width:72px;">${estadoLabel[ws.estado]||'Activo'}</span>
+        <button class="rename-btn" disabled title="Solo Admin">Datos</button>
+        <button class="rename-btn" disabled title="Solo Admin">Historial</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 // mismo truco que nivelar cerámica en un piso desnivelado: tomo la casilla más alta de
 // la fila (el nombre más largo) como referencia, y le doy esa misma altura a las demás
@@ -2185,7 +2255,7 @@ function liqRebuildDoc(){
   const padCell = (withRetainCol) => withRetainCol ? '<td class="liq-retain-col"></td>' : '';
   const afpEtiqueta = m.afpPct > 0
     ? `Descuento AFP (${m.afpNombre}: ${AFP_COTIZACION_OBLIGATORIA}% + ${AFP_RATES[m.afpNombre]}% = ${m.afpPct.toFixed(2).replace('.',',')}%)`
-    : `Descuento AFP (${m.dias} día(s) × ${money(m.afpTarifa)})`;
+    : `Descuento AFP (${m.dias} día(s))`;
   const afpRowHtml = (withRetainCol, span) => m.tipoPago === 'finmes'
     ? `<tr class="liq-afp"><td colspan="${span}">${afpEtiqueta}</td><td class="num">- ${money(m.afpDescuento)}</td>${padCell(withRetainCol)}</tr>`
     : '';
@@ -2212,12 +2282,12 @@ function liqRebuildDoc(){
       html += `<tr class="liq-total liq-subtle"><td colspan="${span}">Total ya pagado (informativo)</td><td class="num">${money(m.totalYaPagado)}</td>${pad}</tr>`;
     }
     if(m.rowsRetenidas.length){
-      html += `<tr class="liq-total liq-subtle"><td colspan="${span}">Total retenido para finiquito</td><td class="num">${money(m.totalRetenido)}</td>${pad}</tr>`;
+      html += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retención para Finiquito</b> — este monto no se paga ahora, queda guardado</td><td class="num">${money(m.totalRetenido)}</td>${pad}</tr>`;
     }
     return html;
   }
   function estadoCellText(r){
-    return r.estadoLabel === 'Retenido' ? 'Retenido (finiquito)' : r.estadoLabel;
+    return r.estadoLabel === 'Retenido' ? 'Retención para Finiquito' : r.estadoLabel;
   }
 
   const detallesUiHtml = `
