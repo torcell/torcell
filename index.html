@@ -406,6 +406,7 @@
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
+    <button class="btn admin-only" id="diagnosticoBtn">🩺 Diagnóstico</button>
 
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
   </div>
@@ -564,6 +565,21 @@
   <span id="cargandoTexto">Cargando…</span>
 </div>
 
+<div id="avisoDatosViejos" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#8a6a1f;color:#fff;padding:9px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;align-items:center;gap:12px;z-index:94;max-width:90vw;">
+  <span>⏱ Esto se cargó hace rato -- puede que alguien más haya guardado algo mientras tanto.</span>
+  <button class="btn small" id="avisoDatosViejosRecargar" style="flex-shrink:0;">Recargar</button>
+  <button class="btn small" id="avisoDatosViejosCerrar" style="flex-shrink:0;">✕</button>
+</div>
+
+<div class="overlay" id="diagnosticoOverlay">
+  <div class="modal" style="max-width:520px;">
+    <h3>🩺 Diagnóstico</h3>
+    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Cosas que conviene revisar a mano -- ninguna se corrige sola, esto solo las señala.</p>
+    <div id="diagnosticoLista" style="max-height:min(60vh,420px);overflow-y:auto;"></div>
+    <div class="actions"><button class="btn primary" id="diagnosticoCloseBtn">Cerrar</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="supervisorWorkersOverlay">
   <div class="modal" style="max-width:480px;">
     <h3>Trabajadores</h3>
@@ -609,7 +625,7 @@
    solos, sin tener que pegar el link cada uno -- vacío mientras no lo tenga listo */
 // subo esto en cada modificación (el último dígito para cambios chicos, agrego o subo uno
 // de más atrás si es algo más grande) -- mientras no llegue a la versión 1
-const APP_VERSION = '0.5.1';
+const APP_VERSION = '0.6.1';
 let backendVersion = null; // la versión del .gs, se completa sola apenas responde la base de datos
 const DEFAULT_DB_URL = '';
 /* esto es el progreso que ya tenía cargado -- se usa solo si abro el panel en un navegador nuevo sin nada guardado todavía */
@@ -675,6 +691,8 @@ try{
 let DB_URL = '';
 try{ DB_URL = localStorage.getItem('progresoObraDbUrl') || DEFAULT_DB_URL; }catch(err){ DB_URL = DEFAULT_DB_URL; }
 let dbStatus = 'off';
+let datosCargadosTs = null; // cuándo se trajeron los datos de verdad por última vez (para el aviso de "esto es viejo")
+let avisoDatosViejosDescartado = false;
 let dbErrorReason = ''; // por qué está en ese estado, para mostrarlo al pasar el mouse
 let dbLastOkTs = null; // cuándo fue la última vez que respondió bien
 
@@ -711,12 +729,17 @@ function rate1For(categoria, trabajador){
 }
 // lo que el propio trabajador ve como precio de SU partida, si inició sesión: su precio real
 // solo si tiene el permiso (vePrecioReal); si no, ve el mismo cálculo pero con la tarifa base
+// la tarifa REAL de cada trabajador (ej: Rafael gana más por m² que la base) es un trato privado
+// entre el Admin y esa persona -- nadie más debe poder verlo, ni Invitado, ni Supervisor, ni un
+// trabajador mirando el depto de otro. Solo Admin ve siempre la real; un trabajador ve la suya
+// propia nada más si tiene el permiso explícito (vePrecioReal); todo lo demás ve la tarifa base.
 function rate1ForDisplay(categoria, trabajador){
+  if(isAdmin) return rate1For(categoria, trabajador);
   if(workerSession && workerSession === trabajador){
     const ws = workerStatus[trabajador] || {};
-    if(!ws.vePrecioReal) return categoria === 'Frague' ? RATES.frague : RATES.cerBase;
+    if(ws.vePrecioReal) return rate1For(categoria, trabajador);
   }
-  return rate1For(categoria, trabajador);
+  return categoria === 'Frague' ? RATES.frague : RATES.cerBase;
 }
 
 const ALL_CELLS = [];
@@ -906,6 +929,21 @@ async function pingDb(){
   updateDbBadge();
 }
 setInterval(pingDb, 40000);
+// si llevas horas con la página abierta sin recargar, lo que ves podría estar desactualizado
+// si alguien más guardó algo mientras tanto -- un aviso chico, se puede cerrar y no vuelve a
+// insistir en esta misma sesión
+const DATOS_VIEJOS_MS = 2 * 60 * 60 * 1000; // 2 horas
+function revisarDatosViejos(){
+  if(!DB_URL || !datosCargadosTs || avisoDatosViejosDescartado) return;
+  const el = document.getElementById('avisoDatosViejos');
+  el.style.display = (Date.now() - datosCargadosTs > DATOS_VIEJOS_MS) ? 'flex' : 'none';
+}
+setInterval(revisarDatosViejos, 60000);
+document.getElementById('avisoDatosViejosRecargar').addEventListener('click', () => location.reload());
+document.getElementById('avisoDatosViejosCerrar').addEventListener('click', () => {
+  avisoDatosViejosDescartado = true;
+  document.getElementById('avisoDatosViejos').style.display = 'none';
+});
 async function dbLoad(){
   if(!DB_URL) return null;
   dbErrorReason = '';
@@ -950,6 +988,22 @@ function sanitizedWorkerStatusForDb(){
 // dirtyIds (opcional): si viene con algo, solo esas partidas se mandan y el Apps Script actualiza
 // nada más esas filas (mucho más rápido que reescribir la hoja completa cada vez). Sin dirtyIds
 // (o vacío) se manda todo -- para el primer "Conectar base de datos" o cuando no sé bien qué cambió.
+// copia completa aparte (no es el guardado normal) cada vez que se cierra una quincena/mes --
+// si después algo sale mal, hay de dónde volver sin depender de que alguien exportó a mano.
+// se manda y listo, si falla no interrumpe nada (no es parte del guardado de todos los días)
+async function respaldarAntesDelCierre(){
+  if(!DB_URL || !sessionToken) return;
+  try{
+    await fetch(DB_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({
+        action:'respaldoCierre', token: sessionToken,
+        datos: buildRecords(),
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, historialM2 }
+      })
+    });
+  }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
+}
 async function dbSave(dirtyIds){
   if(!DB_URL) return false;
   const hayCeldas = dirtyIds && dirtyIds.size > 0;
@@ -1070,6 +1124,7 @@ async function loadState(){
       document.getElementById('toggleDark').textContent = '☀️';
     }
   }catch(e){}
+  datosCargadosTs = Date.now();
   } finally { ocultarCargando(); }
 }
 
@@ -1765,7 +1820,9 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     return;
   }
   if(!res.ok){
-    pinError.textContent = 'PIN incorrecto.';
+    pinError.textContent = res.error === 'demasiados_intentos'
+      ? 'Demasiados PIN incorrectos seguidos. Espera 2 minutos y vuelve a intentar.'
+      : 'PIN incorrecto.';
     return;
   }
   sessionToken = res.token || null;
@@ -1806,6 +1863,48 @@ document.getElementById('supervisorWorkersBtn').addEventListener('click', () => 
   document.getElementById('supervisorWorkersOverlay').classList.add('show');
 });
 document.getElementById('supervisorWorkersCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('supervisorWorkersOverlay')));
+
+document.getElementById('diagnosticoBtn').addEventListener('click', () => {
+  const avisos = [];
+
+  // partidas Terminado/Pagado de antes de que existiera la fecha -- no se pueden ubicar en
+  // ningún período de quincena (el gráfico de m2 por período las va a dejar fuera)
+  const sinFecha = ALL_CELLS.filter(c => {
+    const st = getState(c.id); const e = resolveEstado(st);
+    return (e === 'entregado' || e === 'pagado') && !st.terminadoTs;
+  });
+  if(sinFecha.length) avisos.push({tipo:'aviso', texto: `${sinFecha.length} partida(s) Terminada(s)/Pagada(s) no tienen fecha registrada (son de antes de esa función). No van a aparecer en el historial de m² por período.`});
+
+  // trabajadores activos con m2 asignados pero que calculan a $0 -- probablemente una tarifa mal puesta
+  const tarifaCero = activeWorkers().filter(w => {
+    return ALL_CELLS.some(c => getState(c.id).trabajador === w && getState(c.id).m2 && rate1For(c.categoria, w) === 0);
+  });
+  if(tarifaCero.length) avisos.push({tipo:'alerta', texto: `${tarifaCero.length} trabajador(es) con partidas asignadas pero la tarifa calcula en $0: ${tarifaCero.join(', ')}. Revisa "Precios y metrajes" o su tarifa propia en "Datos".`});
+
+  // cierre de quincena puesto en el futuro -- probablemente un error de tipeo en la fecha
+  if(cierreQuincena && cierreQuincena > Date.now() + 86400000){
+    avisos.push({tipo:'alerta', texto: `El cierre de quincena/mes está puesto para ${new Date(cierreQuincena).toLocaleString('es-CL')}, más de un día en el futuro. Si fue sin querer, puede estar dejando afuera partidas que sí deberían liquidarse ahora.`});
+  }
+
+  // trabajadores activos sin AFP registrada (no van a poder usar el método "% según su AFP")
+  const sinAfp = activeWorkers().filter(w => !(workerStatus[w] && workerStatus[w].afp));
+  if(sinAfp.length) avisos.push({tipo:'info', texto: `${sinAfp.length} trabajador(es) activo(s) sin AFP registrada: ${sinAfp.join(', ')}. Para ellos, la liquidación de fin de mes solo puede usar el monto fijo por día.`});
+
+  // retenciones que llevan mucho tiempo esperando (más de 60 días) -- por si se olvidó liberarlas
+  const retenidasViejas = ALL_CELLS.filter(c => {
+    const st = getState(c.id);
+    return st.retenido;
+  });
+  if(retenidasViejas.length) avisos.push({tipo:'info', texto: `Hay ${retenidasViejas.length} partida(s) retenida(s) para finiquito en este momento. Revisa "🔒 Retenciones pendientes" si alguna ya debería liberarse.`});
+
+  const colorPorTipo = {alerta:'#c0546f', aviso:'#a97e00', info:'var(--sub)'};
+  const iconoPorTipo = {alerta:'⚠️', aviso:'📌', info:'ℹ️'};
+  document.getElementById('diagnosticoLista').innerHTML = avisos.length
+    ? avisos.map(a => `<div style="border-left:3px solid ${colorPorTipo[a.tipo]};padding:8px 10px;margin-bottom:8px;background:var(--panel-soft);font-size:12.5px;">${iconoPorTipo[a.tipo]} ${a.texto}</div>`).join('')
+    : `<div class="empty" style="border:1px dashed var(--border-strong);padding:24px;text-align:center;color:var(--sub);">No encontré nada raro por ahora. ✅</div>`;
+  document.getElementById('diagnosticoOverlay').classList.add('show');
+});
+document.getElementById('diagnosticoCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('diagnosticoOverlay')));
 function renderSupervisorWorkersList(){
   const especialidadLabel = {ceramista:'Ceramista', fraguador:'Fraguador'};
   const estadoLabel = {activo:'Activo', inactivo:'Inactivo', finiquitado:'Finiquitado'};
@@ -2111,6 +2210,7 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
     guardarM2DelPeriodo(cierreAnterior, cierreNuevo); // para el gráfico de avance por quincena, más adelante
     cierreQuincena = cierreNuevo;
     markSettingsDirty(); scheduleSave(); render();
+    respaldarAntesDelCierre(); // copia completa aparte, por si algo sale mal después
   });
   // dejo el campo listo con la fecha/hora de ahora mismo, para que baste con apretar Guardar
   const ahora = new Date(); ahora.setSeconds(0,0);
@@ -2173,6 +2273,7 @@ document.getElementById('dbBtn').addEventListener('click', () => {
         }
         populateFilters(); renderWorkerPanel(); updateRateFootnote(); render();
         scheduleSave();
+        datosCargadosTs = Date.now(); avisoDatosViejosDescartado = false;
       } finally { ocultarCargando(); } // pase lo que pase, que no se quede pegado en "Cargando"
     } else { dbStatus = 'off'; }
     updateDbBadge();
