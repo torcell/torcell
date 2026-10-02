@@ -2085,7 +2085,7 @@ document.getElementById('saveNowBtn').addEventListener('click', saveNow);
 document.getElementById('dbBtn').addEventListener('click', () => {
   const bodyHtml = `
     <p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Pega aquí la URL de tu backend/base de datos. Déjalo vacío para volver a guardar solo en este panel.</p>
-    <p style="margin:0 0 10px;font-size:12.5px;color:#a97e00;">Nota: la conexión con la base de datos solo funciona con la página ya publicada en un hosting (Netlify, GitHub Pages, etc), no abriendo el archivo suelto.</p>
+    <p style="margin:0 0 10px;font-size:12.5px;color:#a97e00;">Nota: la conexión con la base de datos solo funciona con el link dado por Ismael.</p>
     <input type="text" id="dbUrlInput" style="width:100%;" placeholder="https://tu-servidor.com/XXXX" value="${DB_URL}">`;
   openInputModal('Conectar base de datos', bodyHtml, async () => {
     DB_URL = document.getElementById('dbUrlInput').value.trim();
