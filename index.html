@@ -37,6 +37,29 @@
     border-bottom:3px solid transparent;border-image:linear-gradient(90deg,var(--accent),var(--accent2)) 1;padding-bottom:14px;
   }
   header.top .titles h1{font-size:22px;margin:0 0 4px;color:var(--text);font-weight:700;letter-spacing:.2px;}
+  /* cintita tipo banderín, con la puntita doblada -- la del título es solo decorativa;
+     la versión "estado-badge" reemplaza los 3 botones cuando no se puede editar */
+  .ribbon-flag{
+    display:inline-block;vertical-align:middle;position:relative;top:-2px;
+    font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#fff;
+    padding:5px 20px 5px 12px;margin-left:8px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    clip-path:polygon(0 0, 82% 0, 100% 50%, 82% 100%, 0 100%);
+    box-shadow:0 2px 6px rgba(0,0,0,.3);
+  }
+  /* rectángulo simple, sin la puntita -- nunca más ancho que su celda (max-width:100%) para
+     que no se pueda salir de la ventana, y sin márgenes negativos que la hagan sangrar afuera */
+  .ribbon-flag.estado-badge{
+    top:0;font-size:12px;padding:6px 12px;letter-spacing:.3px;
+    max-width:100%;box-sizing:border-box;text-align:center;margin:0;
+    border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    clip-path:none;align-self:flex-end;
+    box-shadow:0 2px 5px rgba(0,0,0,.25);
+  }
+  .ribbon-flag.estado-pendiente{background:var(--pendiente);}
+  .ribbon-flag.estado-proceso{background:var(--proceso);color:#4a3900;}
+  .ribbon-flag.estado-entregado{background:var(--entregado);}
+  .ribbon-flag.estado-pagado{background:var(--pagado);}
   header.top .titles p{margin:0;color:var(--sub);font-size:13px;}
   .btn{border:1px solid var(--border-strong);background:var(--panel);color:var(--text);padding:9px 14px;font-size:13px;cursor:pointer;border-radius:var(--radius);}
   .btn:hover{background:var(--panel-soft);}
@@ -52,7 +75,7 @@
   .role-badge{font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:var(--radius);letter-spacing:.4px;}
   .role-badge.guest{color:#fff;background:#6c716a;}
   .role-badge.admin{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));}
-  .role-badge.supervisor{color:#fff;background:#8a1f1f;}
+  .role-badge.supervisor{color:#fff;background:#8a6a1f;}
   .role-badge.worker{color:#fff;background:#2f6f3f;}
   .db-badge{font-size:11px;font-weight:700;padding:6px 10px;border-radius:var(--radius);border:1px solid var(--border-strong);}
   .db-badge.off{color:var(--sub);background:var(--panel-soft);}
@@ -220,6 +243,7 @@
     .tab{flex:1;text-align:center;padding:9px 6px;}
     .stats{grid-template-columns:repeat(2,1fr);}
     .cell-block{min-width:0;padding:4px;}
+    .ribbon-flag.estado-badge{padding:4px 7px;font-size:9px;letter-spacing:0;}
     .checks-row{flex-direction:column;align-items:stretch;justify-content:flex-start;}
     .chk-pill{width:100%;font-size:11px;padding:6px 8px;box-sizing:border-box;}
     table.dept-table td.dpto-col{width:26px;padding:4px 2px;text-align:center;vertical-align:middle;}
@@ -324,7 +348,7 @@
 <div class="wrap">
   <header class="top">
     <div class="titles">
-      <h1>Panel de Progreso — Obra La Florida Bellavista</h1>
+      <h1>Panel de Progreso — Obra La Florida Bellavista <span class="ribbon-flag">Alpha</span></h1>
       <p>Piso/Pavimento, Muro Baño, Muro Cocina y Pasillos</p>
       <p id="liveClock" style="font-size:12px;color:var(--sub);margin-top:3px;"></p>
     </div>
@@ -1456,6 +1480,13 @@ function notaHtml(cell, st){
 
 function checksHtml(cell, st){
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
+  // quien no puede modificar (Invitado, Supervisor, Trabajador en lo suyo) ve solo una cintita
+  // con el estado actual, en vez de los 3 botones -- no tiene caso mostrarle algo que no puede tocar
+  if(!isAdmin){
+    const estado = resolveEstado(st);
+    const label = estado==='pagado' ? 'Pagado' : estado==='entregado' ? terminadoLabel : estado==='proceso' ? 'Partida' : 'Pendiente';
+    return `<div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${label}</span></div>`;
+  }
   // sin Turbo: Terminado pide Partida primero, y Pagado pide Terminado primero (uno por uno)
   // con Turbo: se puede marcar cualquiera directo y los de abajo se activan solos
   const terminadoDisabled = !isAdmin || (!turboMode && !st.partida);
