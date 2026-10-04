@@ -64,6 +64,9 @@
   .tb-tabs{display:none;}
   .tb-group[data-oculto]{display:none !important;}
   .chk-linea{display:flex;align-items:center;gap:6px;font-size:12.5px;margin:6px 0;}
+  .rep-campos{margin:6px 0 8px;}
+  .rep-campos label{display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin:6px 0 3px;}
+  .rep-campos input, .rep-campos textarea{width:100%;font-size:13px;}
   .prog-fila{display:flex;gap:8px;margin:6px 0;}
   .prog-fila select{flex:1;min-width:0;}
   .tb-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin-bottom:6px;}
@@ -653,6 +656,12 @@
     <h3>📧 Reporte semanal</h3>
     <p id="reporteInfo" style="margin:0 0 8px;font-size:12px;color:var(--sub);line-height:1.5;"></p>
     <label class="chk-linea"><input type="checkbox" id="reporteTodoChk"> Incluir también lo que ya se envió antes (para ver o probar)</label>
+    <div class="rep-campos">
+      <label for="reporteAsunto">Asunto del correo</label>
+      <input type="text" id="reporteAsunto" maxlength="150" autocomplete="off">
+      <label for="reporteMensaje">Mensaje que va antes del reporte</label>
+      <textarea id="reporteMensaje" rows="4" maxlength="2000"></textarea>
+    </div>
     <div id="reporteContenido" style="max-height:min(52vh,440px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
     <div class="actions" style="flex-wrap:wrap;">
       <button class="btn" id="reporteDestBtn">⚙ Envío y correos</button>
@@ -675,6 +684,10 @@
     <div class="prog-fila"><select id="progDia"></select><select id="progHora"></select></div>
     <label class="chk-linea"><input type="checkbox" id="progSinNov"> Enviarlo aunque no haya novedades</label>
     <p style="margin:4px 0 0;font-size:11px;color:var(--sub);">Google revisa cada hora: sale en algún momento dentro de la hora elegida (por ejemplo, entre las 13:00 y las 13:59).</p>
+    <div style="margin:14px 0 4px;font-weight:700;font-size:12.5px;">Asunto y mensaje de siempre</div>
+    <input type="text" id="plantAsunto" style="width:100%;" maxlength="150" autocomplete="off">
+    <textarea id="plantMensaje" rows="5" style="width:100%;margin-top:6px;" maxlength="2000"></textarea>
+    <p style="margin:4px 0 0;font-size:11px;color:var(--sub);">Escribe <b>{semana}</b> y se cambia solo por "primera semana de octubre", "segunda semana de octubre"… Esto sale en los envíos automáticos, y es lo que aparece de partida cuando envías a mano (ahí lo puedes cambiar solo para ese envío).</p>
     <div class="modal-error" id="reporteDestError"></div>
     <div class="actions">
       <button class="btn" id="reporteDestCancel">Cancelar</button>
@@ -734,7 +747,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.10.1';
+const APP_VERSION = '0.11.1';
+const BACKEND_REQUERIDO = 14;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -1949,14 +1963,15 @@ const ERRORES_PETICION = {
 async function llamarDb(accion, extra){
   const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({action: accion, token: sessionToken, ...extra})});
-  return res.ok ? res.json() : null;
+  if(!res.ok) return null;
+  try{ return JSON.parse(await res.text()); }catch(e){ return {ok: false, error: 'respuesta_invalida'}; }
 }
 let avisoToastTimer = null;
 function avisoToast(texto){
   const el = document.getElementById('avisoToast');
   el.textContent = texto; el.style.display = 'block';
   clearTimeout(avisoToastTimer);
-  avisoToastTimer = setTimeout(() => { el.style.display = 'none'; }, 4500);
+  avisoToastTimer = setTimeout(() => { el.style.display = 'none'; }, Math.min(15000, Math.max(4500, texto.length * 70)));
 }
 function tienePeticionMia(celdaId, tipo){ return misPeticiones.some(p => p.celda === celdaId && p.tipo === tipo); }
 function peticionBtnHtml(cell, st){
@@ -2161,7 +2176,10 @@ document.getElementById('histCsvBtn').addEventListener('click', () => {
   document.body.appendChild(a); a.click(); a.remove();
 });
 
-let reporteEstado = {destinatarios: [], base: null, miCorreo: '', programacion: null};
+let reporteEstado = {destinatarios: [], base: null, miCorreo: '', programacion: null, plantilla: null};
+let reporteCamposEditados = false;
+const ASUNTO_BASE = 'Avance de obra La Florida Bellavista — {semana}';
+const MENSAJE_BASE = 'Hola, les comparto el avance de la obra La Florida Bellavista correspondiente a la {semana}.\n\nAbajo va el detalle de los pisos que tuvieron movimiento: quién está trabajando en cada departamento y cómo va cada parte (piso, muro baño y muro cocina).\n\nSaludos.';
 let reporteVista = null;
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 const DIAS_PROG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -2173,7 +2191,10 @@ const ERRORES_REPORTE = {
   sin_cuota: 'Se acabó el cupo diario de correos de Google. Se renueva en 24 horas.',
   sin_correo_propio: 'No pude saber cuál es tu correo para la prueba.',
   programacion_invalida: 'El día o la hora no son válidos.',
-  error_envio: 'Google no pudo enviar el correo. Prueba de nuevo en un rato.'
+  plantilla_invalida: 'El asunto no puede quedar vacío (máximo 150 letras).',
+  error_envio: 'Google no pudo enviar el correo.',
+  ocupado: 'Hay otro envío en curso. Prueba de nuevo en unos segundos.',
+  respuesta_invalida: 'El Apps Script respondió algo que el panel no entiende. Revisa que hayas publicado la última "Nueva versión".'
 };
 const sinGuardar = () => dirtyCellIds.size > 0 || settingsDirty;
 const plural = t => /s$/.test(t) ? t : t + 's';
@@ -2187,16 +2208,24 @@ async function cargarEstadoReporte(){
   if(!DB_URL || !isAdmin || !sessionToken) return;
   try{
     const j = await llamarDb('reporteConfig');
-    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || '', programacion: j.programacion || null};
+    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || '', programacion: j.programacion || null, plantilla: j.plantilla || null};
   }catch(e){}
 }
+let reporteVistaFallo = '';
 async function cargarVistaReporte(){
-  reporteVista = null;
+  reporteVista = null; reporteVistaFallo = '';
   if(!DB_URL || !isAdmin || !sessionToken) return;
   try{
     const j = await llamarDb('reporteVista', {todo: document.getElementById('reporteTodoChk').checked});
-    if(j && j.ok) reporteVista = j;
-  }catch(e){}
+    if(j && j.ok){ reporteVista = j; rellenarCamposCorreo(); }
+    else reporteVistaFallo = !j ? 'sin_respuesta' : (j.error || 'version_vieja');
+  }catch(e){ reporteVistaFallo = 'sin_respuesta'; }
+}
+function mensajeFalloVista(){
+  if(reporteVistaFallo === 'sin_sesion') return 'Tu sesión venció. Vuelve a iniciar sesión.';
+  if(reporteVistaFallo === 'version_vieja') return 'El Apps Script publicado es una versión anterior y no sabe armar el reporte. En Apps Script: Implementar → Administrar implementaciones → lápiz → Nueva versión.';
+  if(reporteVistaFallo === 'sin_respuesta') return 'No hubo respuesta del servidor. Revisa tu conexión.';
+  return ERRORES_REPORTE[reporteVistaFallo] || 'No se pudo armar el reporte. Prueba de nuevo.';
 }
 function pintarReporte(cargando){
   const cont = document.getElementById('reporteContenido'), info = document.getElementById('reporteInfo');
@@ -2209,10 +2238,12 @@ function pintarReporte(cargando){
     ['reportePruebaBtn', 'reporteDestBtn', 'reporteEnviarBtn', 'reporteTextoBtn', 'reporteImagenBtn'].forEach(i => { btn(i).disabled = true; });
     return;
   }
-  cont.innerHTML = cargando ? msg('Armando el reporte…') : (v ? v.html : msg('No se pudo armar el reporte. Prueba de nuevo.'));
+  cont.innerHTML = '<div id="reporteMsgPrevia"></div>' + (cargando ? msg('Armando el reporte…') : (v ? v.html : msg(mensajeFalloVista())));
+  pintarMensajePrevia();
   info.innerHTML = `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Envío y correos")</i>'}<br>${esc(textoProgramacion(reporteEstado.programacion))}` +
-    (v ? `<br>${!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra solo lo nuevo desde el reporte del ${v.desde}.`)} (${v.novedades} partida(s))` : '') +
-    (sinGuardar() ? '<br><b>⚠ Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '');
+    (v ? `<br>${!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra los pisos con movimiento desde el reporte del ${v.desde}.`)} (${v.pisos} piso(s) con movimiento, ${v.novedades} partida(s) nueva(s))` : '') +
+    (sinGuardar() ? '<br><b>⚠ Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '') +
+    (backendVersion && Number(backendVersion) < BACKEND_REQUERIDO ? `<br><b>⚠ Tu Apps Script publicado es la v${esc(backendVersion)} y este panel necesita la v${BACKEND_REQUERIDO}. Publica una "Nueva versión".</b>` : '');
   const listo = !cargando && !!v;
   btn('reporteDestBtn').disabled = false;
   btn('reportePruebaBtn').disabled = !listo;
@@ -2220,6 +2251,19 @@ function pintarReporte(cargando){
   btn('reporteTextoBtn').disabled = !listo;
   btn('reporteImagenBtn').disabled = !listo;
 }
+function rellenarCamposCorreo(){
+  if(reporteCamposEditados || !reporteVista) return;
+  document.getElementById('reporteAsunto').value = reporteVista.asunto || '';
+  document.getElementById('reporteMensaje').value = reporteVista.mensaje || '';
+}
+function pintarMensajePrevia(){
+  const el = document.getElementById('reporteMsgPrevia'); if(!el) return;
+  const txt = document.getElementById('reporteMensaje').value.trim();
+  el.style.cssText = txt ? 'max-width:640px;margin:0 auto 12px;font-size:13.5px;line-height:1.55;color:#222;background:#fff;padding:12px 14px;border:1px solid #d7dad3;' : 'display:none;';
+  el.innerHTML = txt ? esc(txt).replace(/\n/g, '<br>') : '';
+}
+document.getElementById('reporteMensaje').addEventListener('input', () => { reporteCamposEditados = true; pintarMensajePrevia(); });
+document.getElementById('reporteAsunto').addEventListener('input', () => { reporteCamposEditados = true; });
 async function refrescarReporte(){
   pintarReporte(true);
   await Promise.all([cargarEstadoReporte(), cargarVistaReporte()]);
@@ -2228,11 +2272,11 @@ async function refrescarReporte(){
 async function enviarReporte(modo){
   mostrarCargando('Enviando…');
   try{
-    const j = await llamarDb('reporteEnviar', {modo, todo: document.getElementById('reporteTodoChk').checked});
+    const j = await llamarDb('reporteEnviar', {modo, todo: document.getElementById('reporteTodoChk').checked, asunto: document.getElementById('reporteAsunto').value, mensaje: document.getElementById('reporteMensaje').value});
     if(j && j.ok){
       avisoToast(modo === 'prueba' ? `Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).` : `Reporte enviado a ${j.enviados} correo(s).`);
       if(modo === 'real') await refrescarReporte();
-    } else avisoToast(ERRORES_REPORTE[j && j.error] || 'No se pudo enviar el reporte.');
+    } else avisoToast((ERRORES_REPORTE[j && j.error] || 'No se pudo enviar el reporte.') + (j && j.detalle ? ` (Google dijo: ${j.detalle})` : ''));
   }catch(e){ avisoToast('No se pudo enviar (revisa la conexión).'); }
   finally{ ocultarCargando(); }
 }
@@ -2240,6 +2284,7 @@ document.getElementById('progDia').innerHTML = DIAS_PROG.map((d, i) => `<option 
 document.getElementById('progHora').innerHTML = Array.from({length: 24}, (_, h) => `<option value="${h}">${String(h).padStart(2, '0')}:00</option>`).join('');
 document.getElementById('reporteBtn').addEventListener('click', () => {
   document.getElementById('reporteTodoChk').checked = false;
+  reporteCamposEditados = false;
   document.getElementById('reporteOverlay').classList.add('show');
   refrescarReporte();
 });
@@ -2250,8 +2295,8 @@ document.getElementById('reporteCloseBtn').addEventListener('click', () => close
 document.getElementById('reportePruebaBtn').addEventListener('click', () => enviarReporte('prueba'));
 document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
   const n = reporteEstado.destinatarios.length;
-  askConfirm(`¿Enviar el reporte ahora a ${n} correo(s)? ` +
-    (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, estas partidas no se repiten en el próximo reporte.') +
+  askConfirm(`¿Enviar el reporte ahora a ${n} correo(s) con el asunto "${document.getElementById('reporteAsunto').value.trim()}"? ` +
+    (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, estos pisos no se repiten hasta que haya movimiento nuevo.') +
     (sinGuardar() ? ' Ojo: tienes cambios sin guardar que no van incluidos.' : ''), () => enviarReporte('real'));
 });
 document.getElementById('reporteDestBtn').addEventListener('click', () => {
@@ -2261,6 +2306,8 @@ document.getElementById('reporteDestBtn').addEventListener('click', () => {
   document.getElementById('progDia').value = p.dia;
   document.getElementById('progHora').value = p.hora;
   document.getElementById('progSinNov').checked = p.sinNovedades;
+  document.getElementById('plantAsunto').value = (reporteEstado.plantilla || {}).asunto || ASUNTO_BASE;
+  document.getElementById('plantMensaje').value = reporteEstado.plantilla ? reporteEstado.plantilla.mensaje : MENSAJE_BASE;
   document.getElementById('reporteDestError').textContent = '';
   document.getElementById('reporteDestOverlay').classList.add('show');
 });
@@ -2280,6 +2327,13 @@ document.getElementById('reporteDestGuardar').addEventListener('click', async ()
       return;
     }
     reporteEstado.destinatarios = j1.destinatarios;
+    const j3 = await llamarDb('reportePlantilla', {asunto: document.getElementById('plantAsunto').value, mensaje: document.getElementById('plantMensaje').value});
+    if(!(j3 && j3.ok)){
+      err.textContent = ERRORES_REPORTE[j3 && j3.error] || 'Guardé los correos, pero no se pudo guardar el asunto y el mensaje.';
+      pintarReporte(false);
+      return;
+    }
+    reporteEstado.plantilla = j3.plantilla;
     const j2 = await llamarDb('reporteProgramacion', prog);
     if(!(j2 && j2.ok)){
       err.textContent = ERRORES_REPORTE[j2 && j2.error] || 'Guardé los correos, pero no se pudo guardar el envío automático.';
@@ -2287,18 +2341,19 @@ document.getElementById('reporteDestGuardar').addEventListener('click', async ()
       return;
     }
     reporteEstado.programacion = j2.programacion;
+    await cargarVistaReporte();
     pintarReporte(false);
     closeOverlayAnimated(document.getElementById('reporteDestOverlay'));
     avisoToast(prog.activo ? `Listo: se enviará los ${plural(DIAS_PROG[prog.dia - 1].toLowerCase())} a las ${String(prog.hora).padStart(2, '0')}:00.` : 'Guardado. El envío automático está apagado.');
   }catch(e){ err.textContent = 'No se pudo guardar (revisa la conexión).'; }
 });
 document.getElementById('reporteTextoBtn').addEventListener('click', async () => {
-  try{ await navigator.clipboard.writeText(reporteVista.texto); avisoToast('Texto copiado. Ya lo puedes pegar donde quieras.'); }
+  try{ await navigator.clipboard.writeText(document.getElementById('reporteMensaje').value.trim() + '\n\n' + reporteVista.texto); avisoToast('Texto copiado. Ya lo puedes pegar donde quieras.'); }
   catch(e){ avisoToast('No se pudo copiar automáticamente.'); }
 });
 document.getElementById('reporteImagenBtn').addEventListener('click', () => {
   if(typeof html2canvas === 'undefined'){ avisoToast('No se pudo cargar la herramienta de imagen (revisa tu conexión a internet).'); return; }
-  html2canvas(document.querySelector('#reporteContenido > div'), {scale: 2, backgroundColor: '#ffffff'}).then(canvas => {
+  html2canvas(document.querySelector('#reporteContenido > div:last-child'), {scale: 2, backgroundColor: '#ffffff'}).then(canvas => {
     canvas.toBlob(blob => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
