@@ -61,6 +61,11 @@
   .status-cluster select{padding:8px;font-size:13px;}
   .tb-groups{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
   .tb-group{flex:1 1 330px;min-width:0;border:1px solid var(--border);background:var(--panel);padding:8px 10px 10px;}
+  .tb-tabs{display:none;}
+  .tb-group[data-oculto]{display:none !important;}
+  .chk-linea{display:flex;align-items:center;gap:6px;font-size:12.5px;margin:6px 0;}
+  .prog-fila{display:flex;gap:8px;margin:6px 0;}
+  .prog-fila select{flex:1;min-width:0;}
   .tb-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin-bottom:6px;}
   .tb-btns{display:flex;flex-wrap:wrap;gap:6px;}
   .tb-btns .btn{padding:7px 11px;font-size:12.5px;text-align:center;justify-content:center;align-items:center;}
@@ -269,8 +274,16 @@
     header.top .titles h1{font-size:19px;}
     .status-cluster{width:100%;}
     .status-cluster select{flex:1;min-width:0;}
-    .tb-groups{flex-direction:column;gap:8px;}
-    .tb-group{width:100%;}
+    .tb-groups{display:block;margin-bottom:12px;}
+    .tb-tabs{display:flex;border:1px solid var(--border-strong);border-bottom:none;background:var(--panel);}
+    .tb-tab{flex:1;padding:9px 4px;font-size:12px;font-weight:700;background:transparent;border:none;border-right:1px solid var(--border-strong);color:var(--sub);cursor:pointer;}
+    .tb-tab:last-child{border-right:none;}
+    .tb-tab.activa{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}
+    .tb-groups .tb-group{display:none;width:100%;padding:8px;}
+    .tb-groups .tb-group.tb-activo{display:block;}
+    .tb-title{display:none;}
+    .tb-groups[data-una] .tb-tabs{display:none;}
+    .tb-groups[data-una] .tb-group:not([data-oculto]){display:block;border:none;background:none;padding:0;margin-bottom:6px;}
     .tb-btns .btn{flex:1 1 calc(50% - 6px);}
     .hist-row{grid-template-columns:1fr 1fr 1fr;}
     .hist-row .hist-donde, .hist-row .hist-m2{grid-column:1/-1;}
@@ -408,6 +421,7 @@
   </div>
 
   <nav class="tb-groups" id="tbGroups">
+    <div class="tb-tabs" id="tbTabs"></div>
     <div class="tb-group">
       <div class="tb-title">Datos</div>
       <div class="tb-btns">
@@ -638,10 +652,10 @@
   <div class="modal" style="max-width:740px;">
     <h3>📧 Reporte semanal</h3>
     <p id="reporteInfo" style="margin:0 0 8px;font-size:12px;color:var(--sub);line-height:1.5;"></p>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:0 0 8px;"><input type="checkbox" id="reporteTodoChk"> Incluir también lo que ya se envió antes (para ver o probar)</label>
-    <div id="reporteContenido" style="max-height:min(54vh,460px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
+    <label class="chk-linea"><input type="checkbox" id="reporteTodoChk"> Incluir también lo que ya se envió antes (para ver o probar)</label>
+    <div id="reporteContenido" style="max-height:min(52vh,440px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
     <div class="actions" style="flex-wrap:wrap;">
-      <button class="btn" id="reporteDestBtn">✉ Correos</button>
+      <button class="btn" id="reporteDestBtn">⚙ Envío y correos</button>
       <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
       <button class="btn primary" id="reporteEnviarBtn">Enviar ahora</button>
       <button class="btn" id="reporteTextoBtn">Copiar texto</button>
@@ -652,14 +666,19 @@
 </div>
 
 <div class="overlay" id="reporteDestOverlay">
-  <div class="modal" style="max-width:440px;">
-    <h3>✉ Correos del reporte</h3>
-    <p style="margin:0 0 8px;font-size:12px;color:var(--sub);">Uno por línea (o separados por coma). A estos correos llegará el reporte cuando se envíe.</p>
-    <textarea id="reporteDestInput" rows="6" style="width:100%;" placeholder="nombre@correo.com"></textarea>
+  <div class="modal" style="max-width:460px;">
+    <h3>⚙ Envío del reporte</h3>
+    <p style="margin:0 0 6px;font-size:12px;color:var(--sub);">Correos que lo reciben (uno por línea o separados por coma)</p>
+    <textarea id="reporteDestInput" rows="5" style="width:100%;" placeholder="nombre@correo.com"></textarea>
+    <div style="margin:14px 0 4px;font-weight:700;font-size:12.5px;">Envío automático</div>
+    <label class="chk-linea"><input type="checkbox" id="progActivo"> Enviarlo solo, una vez por semana</label>
+    <div class="prog-fila"><select id="progDia"></select><select id="progHora"></select></div>
+    <label class="chk-linea"><input type="checkbox" id="progSinNov"> Enviarlo aunque no haya novedades</label>
+    <p style="margin:4px 0 0;font-size:11px;color:var(--sub);">Google revisa cada hora: sale en algún momento dentro de la hora elegida (por ejemplo, entre las 13:00 y las 13:59).</p>
     <div class="modal-error" id="reporteDestError"></div>
     <div class="actions">
       <button class="btn" id="reporteDestCancel">Cancelar</button>
-      <button class="btn primary" id="reporteDestGuardar">Guardar correos</button>
+      <button class="btn primary" id="reporteDestGuardar">Guardar</button>
     </div>
   </div>
 </div>
@@ -715,7 +734,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.9.1';
+const APP_VERSION = '0.10.1';
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -809,11 +828,21 @@ function applyRoleUI(){
   cargarMisPeticiones(); cargarPeticionesAdmin();
   actualizarGruposBarra();
 }
+let tbGrupoActivo = null;
 function actualizarGruposBarra(){
-  document.querySelectorAll('.tb-group').forEach(g => {
+  const grupos = [...document.querySelectorAll('.tb-group')];
+  grupos.forEach(g => {
     const hay = [...g.querySelectorAll('.btn')].some(b => getComputedStyle(b).display !== 'none');
-    g.style.display = hay ? '' : 'none';
+    if(hay) delete g.dataset.oculto; else g.dataset.oculto = '1';
   });
+  const visibles = grupos.filter(g => !g.dataset.oculto);
+  if(!visibles.includes(tbGrupoActivo)) tbGrupoActivo = visibles[0] || null;
+  grupos.forEach(g => g.classList.toggle('tb-activo', g === tbGrupoActivo));
+  const botones = visibles.reduce((t, g) => t + [...g.querySelectorAll('.btn')].filter(b => getComputedStyle(b).display !== 'none').length, 0);
+  const tabs = document.getElementById('tbTabs');
+  tabs.innerHTML = visibles.map((g, i) => `<button type="button" class="tb-tab ${g === tbGrupoActivo ? 'activa' : ''}" data-i="${i}">${g.querySelector('.tb-title').textContent}</button>`).join('');
+  tabs.querySelectorAll('.tb-tab').forEach(b => b.addEventListener('click', () => { tbGrupoActivo = visibles[Number(b.getAttribute('data-i'))]; actualizarGruposBarra(); }));
+  document.getElementById('tbGroups').toggleAttribute('data-una', visibles.length < 2 || botones <= 4);
 }
 
 function rate1For(categoria, trabajador){
@@ -2132,171 +2161,106 @@ document.getElementById('histCsvBtn').addEventListener('click', () => {
   document.body.appendChild(a); a.click(); a.remove();
 });
 
-let reporteEstado = {destinatarios: [], base: null, miCorreo: ''};
+let reporteEstado = {destinatarios: [], base: null, miCorreo: '', programacion: null};
+let reporteVista = null;
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
-const ORDEN_AREAS = ['Piso', 'Muro Baño', 'Muro Cocina', 'Muro', 'Pasillo'];
+const DIAS_PROG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const ERRORES_REPORTE = {
   sin_sesion: 'Tu sesión venció. Vuelve a iniciar sesión.',
-  sin_destinatarios: 'Todavía no hay correos guardados. Agrégalos con el botón "Correos".',
+  sin_destinatarios: 'Todavía no hay correos guardados. Agrégalos en "Envío y correos".',
   sin_permiso_correo: 'El Apps Script todavía no tiene permiso para enviar correos. Ábrelo, ejecuta la función "autorizarCorreo" una vez, acepta los permisos y publica una Nueva versión.',
+  sin_permiso_disparador: 'El Apps Script todavía no tiene permiso para programar envíos. Ábrelo, ejecuta la función "autorizarCorreo" una vez, acepta los permisos y publica una Nueva versión.',
   sin_cuota: 'Se acabó el cupo diario de correos de Google. Se renueva en 24 horas.',
   sin_correo_propio: 'No pude saber cuál es tu correo para la prueba.',
-  contenido_invalido: 'El reporte quedó demasiado grande o vacío.',
+  programacion_invalida: 'El día o la hora no son válidos.',
   error_envio: 'Google no pudo enviar el correo. Prueba de nuevo en un rato.'
 };
-function numeroDepto(c){ return c.dpto === 'Pasillo' ? 'Pasillo' : c.dpto; }
-function datosReporte(incluirTodo){
-  const tz = {timeZone:'America/Santiago'};
-  const ahora = new Date();
-  const previas = (!incluirTodo && reporteEstado.base && reporteEstado.base.firmas) ? reporteEstado.base.firmas : {};
-  const conteo = {pendiente:0, proceso:0, entregado:0, pagado:0};
-  const firmasTodas = {};
-  ALL_CELLS.forEach(c => {
-    const st = getState(c.id), e = resolveEstado(st);
-    conteo[e]++;
-    if((e === 'proceso' || e === 'entregado') && st.trabajador) firmasTodas[c.id] = e + '|' + st.trabajador;
-  });
-  let novedades = 0;
-  const secciones = ['Cerámica', 'Frague'].map(cat => {
-    const porPiso = {};
-    ALL_CELLS.filter(c => c.categoria === cat).forEach(c => {
-      const firma = firmasTodas[c.id];
-      if(!firma || previas[c.id] === firma) return;
-      const st = getState(c.id), e = resolveEstado(st);
-      const piso = porPiso[c.pisoNum] = porPiso[c.pisoNum] || {piso: c.piso, grupos: {}};
-      const g = piso.grupos[c.dpto + '|' + st.trabajador] = piso.grupos[c.dpto + '|' + st.trabajador] || {trabajador: st.trabajador, dpto: numeroDepto(c), porEstado: {}};
-      const l = g.porEstado[e] = g.porEstado[e] || {areas: [], fecha: null};
-      l.areas.push(AREA_LABEL[c.area] || c.area);
-      const ts = e === 'entregado' ? st.terminadoTs : st.partidaTs;
-      if(ts && (!l.fecha || ts < l.fecha)) l.fecha = ts;
-      novedades++;
-    });
-    const pisos = Object.keys(porPiso).map(Number).sort((a, b) => b - a).map(n => {
-      const p = porPiso[n];
-      const filas = Object.values(p.grupos).map(g => ({
-        trabajador: g.trabajador, dpto: g.dpto,
-        lineas: ['entregado', 'proceso'].filter(k => g.porEstado[k]).map(k => ({
-          estado: k === 'entregado' ? 'Terminado' : 'Partida', terminado: k === 'entregado', fecha: g.porEstado[k].fecha,
-          areas: g.porEstado[k].areas.sort((x, y) => ORDEN_AREAS.indexOf(x) - ORDEN_AREAS.indexOf(y)).join(', ')
-        }))
-      }));
-      filas.sort((x, y) => String(x.dpto).localeCompare(String(y.dpto), 'es', {numeric: true}) || x.trabajador.localeCompare(y.trabajador));
-      return {piso: p.piso, filas};
-    });
-    return {cat, pisos};
-  });
-  return {
-    fecha: ahora.toLocaleDateString('es-CL', {weekday:'long', day:'numeric', month:'long', year:'numeric', ...tz}),
-    fechaCorta: ahora.toLocaleDateString('es-CL', {day:'numeric', month:'long', year:'numeric', ...tz}),
-    hora: ahora.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', ...tz}),
-    desde: (reporteEstado.base && reporteEstado.base.ts) ? fechaCorta(reporteEstado.base.ts) : null, todo: !!incluirTodo,
-    conteo, secciones, novedades, firmasTodas
-  };
-}
-function construirReporteHtml(d){
-  d = d || datosReporte(false);
-  const pill = (txt, fin) => `<span style="display:inline-block;padding:2px 9px;font-size:11px;font-weight:700;line-height:16px;background:${fin ? '#43a047' : '#ffc400'};color:${fin ? '#ffffff' : '#4a3900'};">${txt}</span>`;
-  const linea = txt => `<div style="height:24px;line-height:24px;white-space:nowrap;">${txt}</div>`;
-  const caja = (n, label, color) => `<td align="center" width="25%" style="padding:12px 4px;border-top:3px solid ${color};background:#f6f7f5;"><div style="font-size:22px;font-weight:700;color:${color};">${n}</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#6c716a;">${label}</div></td>`;
-  const th = (t, w) => `<td width="${w}" style="padding:6px 8px;">${t}</td>`;
-  const sec = d.secciones.map(s => {
-    const cuerpo = s.pisos.length ? s.pisos.map(p => `
-      <div style="font-size:13px;font-weight:700;margin:14px 0 6px;color:#2c302c;">${esc(p.piso)}</div>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;table-layout:fixed;">
-        <tr style="background:#eef0ed;color:#6c716a;font-size:10px;letter-spacing:.5px;text-transform:uppercase;">
-          ${th('Trabajador','18%')}${th('Departamento','19%')}${th('Área','30%')}${th('Estado','18%')}${th('Desde','15%')}
-        </tr>` + p.filas.map(f => `
-        <tr style="border-bottom:1px solid #e3e5e0;">
-          <td style="padding:6px 8px;font-weight:600;vertical-align:top;line-height:24px;">${esc(f.trabajador)}</td>
-          <td style="padding:6px 8px;vertical-align:top;line-height:24px;">${esc(f.dpto)}</td>
-          <td style="padding:6px 8px;vertical-align:top;">${f.lineas.map(l => linea(esc(l.areas))).join('')}</td>
-          <td style="padding:6px 8px;vertical-align:top;">${f.lineas.map(l => linea(pill(l.estado, l.terminado))).join('')}</td>
-          <td style="padding:6px 8px;color:#6c716a;vertical-align:top;">${f.lineas.map(l => linea(l.fecha ? fechaCorta(l.fecha) : '—')).join('')}</td>
-        </tr>`).join('') + '</table>').join('')
-      : '<div style="font-size:12px;color:#6c716a;font-style:italic;padding:8px 0;">Sin novedades en esta categoría.</div>';
-    return `<div style="padding:4px 22px 14px;"><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2f4f66;border-bottom:2px solid #2f4f66;padding-bottom:4px;margin-top:14px;">${s.cat}</div>${cuerpo}</div>`;
-  }).join('');
-  const sub = !d.desde ? 'Primer reporte: todo el trabajo en curso o terminado sin pagar' : (d.todo ? `Resumen completo, incluye lo ya informado el ${d.desde}` : `Novedades desde el reporte del ${d.desde}`);
-  return `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;background:#ffffff;color:#222222;border:1px solid #d7dad3;">
-    <div style="background:#2f4f66;color:#ffffff;padding:18px 22px;">
-      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;opacity:.8;">Reporte semanal de avance</div>
-      <div style="font-size:20px;font-weight:700;margin-top:2px;">Obra La Florida Bellavista</div>
-      <div style="font-size:12px;opacity:.85;margin-top:4px;">${d.fecha.charAt(0).toUpperCase() + d.fecha.slice(1)} · ${d.hora} (Santiago de Chile)</div>
-      <div style="font-size:12px;opacity:.85;margin-top:2px;">${sub}</div>
-    </div>
-    <table width="100%" cellpadding="0" cellspacing="6" style="padding:8px 16px;table-layout:fixed;"><tr>
-      ${caja(d.conteo.pendiente, 'Pendiente', '#6c716a')}${caja(d.conteo.proceso, 'Partida', '#c49800')}${caja(d.conteo.entregado, 'Terminado', '#43a047')}${caja(d.conteo.pagado, 'Pagado', '#2461a8')}
-    </tr></table>
-    ${d.novedades ? sec : '<div style="padding:18px 22px;font-size:13px;color:#6c716a;font-style:italic;">No hay partidas nuevas en Partida ni Terminado desde el último reporte.</div>'}
-    <div style="padding:10px 22px;background:#f6f7f5;font-size:10.5px;color:#8a8f88;border-top:1px solid #e3e5e0;">Panel de Progreso · versión ${APP_VERSION}. Lo que ya se informó en un reporte anterior no se vuelve a repetir.</div>
-  </div>`;
-}
-function construirReporteTexto(d){
-  d = d || datosReporte(false);
-  const lineas = [`REPORTE SEMANAL — Obra La Florida Bellavista`, `${d.fecha}, ${d.hora}`,
-    !d.desde ? 'Primer reporte: todo el trabajo en curso o terminado sin pagar' : (d.todo ? `Resumen completo, incluye lo ya informado el ${d.desde}` : `Novedades desde el reporte del ${d.desde}`), '',
-    `Pendiente: ${d.conteo.pendiente} · Partida: ${d.conteo.proceso} · Terminado: ${d.conteo.entregado} · Pagado: ${d.conteo.pagado}`];
-  if(!d.novedades) lineas.push('', 'No hay partidas nuevas en Partida ni Terminado desde el último reporte.');
-  d.secciones.forEach(s => {
-    if(!s.pisos.length) return;
-    lineas.push('', s.cat.toUpperCase());
-    s.pisos.forEach(p => {
-      lineas.push(p.piso);
-      p.filas.forEach(f => f.lineas.forEach(l => lineas.push(`  • ${f.trabajador} — ${f.dpto} (${l.areas}): ${l.estado}${l.fecha ? ' desde ' + fechaCorta(l.fecha) : ''}`)));
-    });
-  });
-  return lineas.join('\n');
+const sinGuardar = () => dirtyCellIds.size > 0 || settingsDirty;
+const plural = t => /s$/.test(t) ? t : t + 's';
+function textoProgramacion(p){
+  if(!p) return '';
+  const hh = String(p.hora).padStart(2, '0');
+  return (p.activo ? `Envío automático: ${DIAS_PROG[p.dia - 1]} entre las ${hh}:00 y las ${hh}:59` : 'Envío automático apagado') +
+    (p.ultimoResultado ? ` · Último: ${p.ultimoResultado}` : '');
 }
 async function cargarEstadoReporte(){
   if(!DB_URL || !isAdmin || !sessionToken) return;
   try{
     const j = await llamarDb('reporteConfig');
-    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || ''};
+    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || '', programacion: j.programacion || null};
   }catch(e){}
 }
-function pintarReporte(){
-  const todo = document.getElementById('reporteTodoChk').checked;
-  const d = datosReporte(todo);
-  const dest = reporteEstado.destinatarios;
-  document.getElementById('reporteContenido').innerHTML = construirReporteHtml(d);
-  document.getElementById('reporteInfo').innerHTML =
-    `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Correos")</i>'}<br>` +
-    `${!d.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (d.todo ? `Mostrando todo, incluso lo ya informado el ${d.desde}.` : `Muestra solo lo nuevo desde el reporte del ${d.desde}.`)} (${d.novedades} partida(s))` +
-    (DB_URL ? '' : '<br><b>Conecta la base de datos para poder enviar.</b>');
-  document.getElementById('reportePruebaBtn').disabled = !DB_URL;
-  document.getElementById('reporteDestBtn').disabled = !DB_URL;
-  document.getElementById('reporteEnviarBtn').disabled = !DB_URL || !dest.length || !d.novedades;
+async function cargarVistaReporte(){
+  reporteVista = null;
+  if(!DB_URL || !isAdmin || !sessionToken) return;
+  try{
+    const j = await llamarDb('reporteVista', {todo: document.getElementById('reporteTodoChk').checked});
+    if(j && j.ok) reporteVista = j;
+  }catch(e){}
+}
+function pintarReporte(cargando){
+  const cont = document.getElementById('reporteContenido'), info = document.getElementById('reporteInfo');
+  const dest = reporteEstado.destinatarios, v = reporteVista;
+  const btn = id => document.getElementById(id);
+  const msg = t => `<p style="margin:0;padding:18px;text-align:center;color:#6c716a;font-size:13px;">${t}</p>`;
+  if(!DB_URL){
+    cont.innerHTML = msg('Conecta la base de datos para ver y enviar el reporte.');
+    info.textContent = '';
+    ['reportePruebaBtn', 'reporteDestBtn', 'reporteEnviarBtn', 'reporteTextoBtn', 'reporteImagenBtn'].forEach(i => { btn(i).disabled = true; });
+    return;
+  }
+  cont.innerHTML = cargando ? msg('Armando el reporte…') : (v ? v.html : msg('No se pudo armar el reporte. Prueba de nuevo.'));
+  info.innerHTML = `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Envío y correos")</i>'}<br>${esc(textoProgramacion(reporteEstado.programacion))}` +
+    (v ? `<br>${!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra solo lo nuevo desde el reporte del ${v.desde}.`)} (${v.novedades} partida(s))` : '') +
+    (sinGuardar() ? '<br><b>⚠ Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '');
+  const listo = !cargando && !!v;
+  btn('reporteDestBtn').disabled = false;
+  btn('reportePruebaBtn').disabled = !listo;
+  btn('reporteEnviarBtn').disabled = !listo || !dest.length;
+  btn('reporteTextoBtn').disabled = !listo;
+  btn('reporteImagenBtn').disabled = !listo;
+}
+async function refrescarReporte(){
+  pintarReporte(true);
+  await Promise.all([cargarEstadoReporte(), cargarVistaReporte()]);
+  pintarReporte(false);
 }
 async function enviarReporte(modo){
-  const d = datosReporte(document.getElementById('reporteTodoChk').checked);
   mostrarCargando('Enviando…');
   try{
-    const j = await llamarDb('reporteEnviar', {
-      modo, asunto: `Reporte semanal de avance — Obra La Florida Bellavista — ${d.fechaCorta}`,
-      html: construirReporteHtml(d), texto: construirReporteTexto(d), firmas: d.firmasTodas
-    });
+    const j = await llamarDb('reporteEnviar', {modo, todo: document.getElementById('reporteTodoChk').checked});
     if(j && j.ok){
-      if(modo === 'prueba') avisoToast(`Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).`);
-      else { avisoToast(`Reporte enviado a ${j.enviados} correo(s).`); await cargarEstadoReporte(); pintarReporte(); }
+      avisoToast(modo === 'prueba' ? `Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).` : `Reporte enviado a ${j.enviados} correo(s).`);
+      if(modo === 'real') await refrescarReporte();
     } else avisoToast(ERRORES_REPORTE[j && j.error] || 'No se pudo enviar el reporte.');
   }catch(e){ avisoToast('No se pudo enviar (revisa la conexión).'); }
   finally{ ocultarCargando(); }
 }
-document.getElementById('reporteBtn').addEventListener('click', async () => {
+document.getElementById('progDia').innerHTML = DIAS_PROG.map((d, i) => `<option value="${i + 1}">${d}</option>`).join('');
+document.getElementById('progHora').innerHTML = Array.from({length: 24}, (_, h) => `<option value="${h}">${String(h).padStart(2, '0')}:00</option>`).join('');
+document.getElementById('reporteBtn').addEventListener('click', () => {
   document.getElementById('reporteTodoChk').checked = false;
   document.getElementById('reporteOverlay').classList.add('show');
-  pintarReporte();
-  await cargarEstadoReporte();
-  pintarReporte();
+  refrescarReporte();
 });
-document.getElementById('reporteTodoChk').addEventListener('change', pintarReporte);
+document.getElementById('reporteTodoChk').addEventListener('change', async () => {
+  pintarReporte(true); await cargarVistaReporte(); pintarReporte(false);
+});
 document.getElementById('reporteCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('reporteOverlay')));
 document.getElementById('reportePruebaBtn').addEventListener('click', () => enviarReporte('prueba'));
 document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
-  askConfirm(`¿Enviar el reporte ahora a ${reporteEstado.destinatarios.length} correo(s)? Después de enviarlo, estas partidas no se van a repetir en el próximo reporte.`, () => enviarReporte('real'));
+  const n = reporteEstado.destinatarios.length;
+  askConfirm(`¿Enviar el reporte ahora a ${n} correo(s)? ` +
+    (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, estas partidas no se repiten en el próximo reporte.') +
+    (sinGuardar() ? ' Ojo: tienes cambios sin guardar que no van incluidos.' : ''), () => enviarReporte('real'));
 });
 document.getElementById('reporteDestBtn').addEventListener('click', () => {
+  const p = reporteEstado.programacion || {activo: false, dia: 5, hora: 13, sinNovedades: false};
   document.getElementById('reporteDestInput').value = reporteEstado.destinatarios.join('\n');
+  document.getElementById('progActivo').checked = p.activo;
+  document.getElementById('progDia').value = p.dia;
+  document.getElementById('progHora').value = p.hora;
+  document.getElementById('progSinNov').checked = p.sinNovedades;
   document.getElementById('reporteDestError').textContent = '';
   document.getElementById('reporteDestOverlay').classList.add('show');
 });
@@ -2304,25 +2268,37 @@ document.getElementById('reporteDestCancel').addEventListener('click', () => clo
 document.getElementById('reporteDestGuardar').addEventListener('click', async () => {
   const err = document.getElementById('reporteDestError');
   const lista = document.getElementById('reporteDestInput').value.split(/[\s,;]+/).filter(Boolean);
+  const prog = {activo: document.getElementById('progActivo').checked, dia: Number(document.getElementById('progDia').value),
+    hora: Number(document.getElementById('progHora').value), sinNovedades: document.getElementById('progSinNov').checked};
   err.textContent = 'Guardando…';
   try{
-    const j = await llamarDb('reporteDestinatarios', {destinatarios: lista});
-    if(j && j.ok){
-      reporteEstado.destinatarios = j.destinatarios; pintarReporte();
-      closeOverlayAnimated(document.getElementById('reporteDestOverlay'));
-      avisoToast(j.destinatarios.length ? `Guardé ${j.destinatarios.length} correo(s).` : 'Quedó sin correos.');
-    } else if(j && j.error === 'correo_invalido') err.textContent = 'Estos correos no parecen válidos: ' + j.invalidos.join(', ');
-    else if(j && j.error === 'demasiados_correos') err.textContent = 'El máximo son 15 correos.';
-    else err.textContent = ERRORES_REPORTE[j && j.error] || 'No se pudo guardar. Prueba de nuevo.';
+    const j1 = await llamarDb('reporteDestinatarios', {destinatarios: lista});
+    if(!(j1 && j1.ok)){
+      err.textContent = j1 && j1.error === 'correo_invalido' ? 'Estos correos no parecen válidos: ' + j1.invalidos.join(', ')
+        : j1 && j1.error === 'demasiados_correos' ? 'El máximo son 15 correos.'
+        : (ERRORES_REPORTE[j1 && j1.error] || 'No se pudo guardar. Prueba de nuevo.');
+      return;
+    }
+    reporteEstado.destinatarios = j1.destinatarios;
+    const j2 = await llamarDb('reporteProgramacion', prog);
+    if(!(j2 && j2.ok)){
+      err.textContent = ERRORES_REPORTE[j2 && j2.error] || 'Guardé los correos, pero no se pudo guardar el envío automático.';
+      pintarReporte(false);
+      return;
+    }
+    reporteEstado.programacion = j2.programacion;
+    pintarReporte(false);
+    closeOverlayAnimated(document.getElementById('reporteDestOverlay'));
+    avisoToast(prog.activo ? `Listo: se enviará los ${plural(DIAS_PROG[prog.dia - 1].toLowerCase())} a las ${String(prog.hora).padStart(2, '0')}:00.` : 'Guardado. El envío automático está apagado.');
   }catch(e){ err.textContent = 'No se pudo guardar (revisa la conexión).'; }
 });
 document.getElementById('reporteTextoBtn').addEventListener('click', async () => {
-  try{ await navigator.clipboard.writeText(construirReporteTexto(datosReporte(document.getElementById('reporteTodoChk').checked))); avisoToast('Texto copiado. Ya lo puedes pegar donde quieras.'); }
+  try{ await navigator.clipboard.writeText(reporteVista.texto); avisoToast('Texto copiado. Ya lo puedes pegar donde quieras.'); }
   catch(e){ avisoToast('No se pudo copiar automáticamente.'); }
 });
 document.getElementById('reporteImagenBtn').addEventListener('click', () => {
   if(typeof html2canvas === 'undefined'){ avisoToast('No se pudo cargar la herramienta de imagen (revisa tu conexión a internet).'); return; }
-  html2canvas(document.querySelector('#reporteContenido > div'), {scale:2, backgroundColor:'#ffffff'}).then(canvas => {
+  html2canvas(document.querySelector('#reporteContenido > div'), {scale: 2, backgroundColor: '#ffffff'}).then(canvas => {
     canvas.toBlob(blob => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
