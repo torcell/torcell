@@ -161,6 +161,7 @@
   .flip-sin-fechas{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:var(--sub);font-style:italic;margin:0;}
   .flip-back-btn{border:1px solid var(--border-strong);background:var(--panel);color:var(--text);padding:4px;font-size:11.5px;font-weight:600;cursor:pointer;border-radius:var(--radius);flex-shrink:0;}
   .ribbon-flag.estado-badge{border:none;cursor:pointer;font-family:inherit;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
   .pet-tabs{display:flex;gap:6px;margin-bottom:10px;}
   .hist-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
   .hist-trab{font-size:13px;font-weight:700;margin:12px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--border-strong);display:flex;justify-content:space-between;gap:8px;}
@@ -525,7 +526,7 @@
   <div class="modal">
     <h3>Iniciar sesión</h3>
     <p>Ingresa tu PIN.</p>
-    <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="off">
+    <input type="password" inputmode="numeric" id="pinInput" style="width:100%;" placeholder="PIN" autocomplete="new-password">
     <div class="modal-error" id="pinError"></div>
     <div class="actions">
       <button class="btn" id="pinCancel">Cancelar</button>
@@ -634,14 +635,31 @@
 </div>
 
 <div class="overlay" id="reporteOverlay">
-  <div class="modal" style="max-width:720px;">
+  <div class="modal" style="max-width:740px;">
     <h3>📧 Reporte semanal</h3>
-    <p style="margin:0 0 10px;font-size:12px;color:var(--sub);">Así se vería el resumen que se enviaría. Se arma con lo que hay en pantalla ahora.</p>
-    <div id="reporteContenido" style="max-height:min(62vh,520px);overflow-y:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
+    <p id="reporteInfo" style="margin:0 0 8px;font-size:12px;color:var(--sub);line-height:1.5;"></p>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:0 0 8px;"><input type="checkbox" id="reporteTodoChk"> Incluir también lo que ya se envió antes (para ver o probar)</label>
+    <div id="reporteContenido" style="max-height:min(54vh,460px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
+    <div class="actions" style="flex-wrap:wrap;">
+      <button class="btn" id="reporteDestBtn">✉ Correos</button>
+      <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
+      <button class="btn primary" id="reporteEnviarBtn">Enviar ahora</button>
+      <button class="btn" id="reporteTextoBtn">Copiar texto</button>
+      <button class="btn" id="reporteImagenBtn">Guardar imagen</button>
+      <button class="btn" id="reporteCloseBtn">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="reporteDestOverlay">
+  <div class="modal" style="max-width:440px;">
+    <h3>✉ Correos del reporte</h3>
+    <p style="margin:0 0 8px;font-size:12px;color:var(--sub);">Uno por línea (o separados por coma). A estos correos llegará el reporte cuando se envíe.</p>
+    <textarea id="reporteDestInput" rows="6" style="width:100%;" placeholder="nombre@correo.com"></textarea>
+    <div class="modal-error" id="reporteDestError"></div>
     <div class="actions">
-      <button class="btn" id="reporteTextoBtn">Copiar como texto</button>
-      <button class="btn" id="reporteImagenBtn">Guardar como imagen</button>
-      <button class="btn primary" id="reporteCloseBtn">Cerrar</button>
+      <button class="btn" id="reporteDestCancel">Cancelar</button>
+      <button class="btn primary" id="reporteDestGuardar">Guardar correos</button>
     </div>
   </div>
 </div>
@@ -697,7 +715,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.8.1';
+const APP_VERSION = '0.9.1';
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -1066,7 +1084,7 @@ async function dbSave(dirtyIds){
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
-    if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció (dura 6 horas). Vuelve a iniciar sesión para poder seguir guardando.'; throw new Error('sin sesion'); }
+    if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Vuelve a iniciar sesión para poder seguir guardando.'; throw new Error('sin sesion'); }
     if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
     dbStatus = 'online'; dbLastOkTs = Date.now(); updateDbBadge();
     return true;
@@ -1532,7 +1550,7 @@ function renderStats(){
   const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>
     <div class="l">Pagado de ${money(totalMonto1)}</div>
     <div class="bar"><div style="width:${totalMonto1?Math.round(pagadoMonto1/totalMonto1*100):0}%; background:var(--pagado);"></div></div></div>`;
-  statsEl.innerHTML = cards + terminadoMoneyCard + pagadoMoneyCard;
+  statsEl.innerHTML = cards + (isAdmin ? terminadoMoneyCard + pagadoMoneyCard : '');
 }
 
 function passesFilters(cell){
@@ -1873,6 +1891,7 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
   }
 });
 document.getElementById('logoutBtn').addEventListener('click', () => {
+  if(DB_URL && sessionToken) llamarDb('logout').catch(() => {});
   isAdmin = false; isSupervisor = false; workerSession = null; sessionToken = null; sessionName = null;
   try{
     sessionStorage.removeItem('progresoObraRol');
@@ -2113,84 +2132,192 @@ document.getElementById('histCsvBtn').addEventListener('click', () => {
   document.body.appendChild(a); a.click(); a.remove();
 });
 
-function datosReporte(){
+let reporteEstado = {destinatarios: [], base: null, miCorreo: ''};
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const ORDEN_AREAS = ['Piso', 'Muro Baño', 'Muro Cocina', 'Muro', 'Pasillo'];
+const ERRORES_REPORTE = {
+  sin_sesion: 'Tu sesión venció. Vuelve a iniciar sesión.',
+  sin_destinatarios: 'Todavía no hay correos guardados. Agrégalos con el botón "Correos".',
+  sin_permiso_correo: 'El Apps Script todavía no tiene permiso para enviar correos. Ábrelo, ejecuta la función "autorizarCorreo" una vez, acepta los permisos y publica una Nueva versión.',
+  sin_cuota: 'Se acabó el cupo diario de correos de Google. Se renueva en 24 horas.',
+  sin_correo_propio: 'No pude saber cuál es tu correo para la prueba.',
+  contenido_invalido: 'El reporte quedó demasiado grande o vacío.',
+  error_envio: 'Google no pudo enviar el correo. Prueba de nuevo en un rato.'
+};
+function numeroDepto(c){ return c.dpto === 'Pasillo' ? 'Pasillo' : c.dpto; }
+function datosReporte(incluirTodo){
   const tz = {timeZone:'America/Santiago'};
   const ahora = new Date();
+  const previas = (!incluirTodo && reporteEstado.base && reporteEstado.base.firmas) ? reporteEstado.base.firmas : {};
   const conteo = {pendiente:0, proceso:0, entregado:0, pagado:0};
-  ALL_CELLS.forEach(c => { conteo[resolveEstado(getState(c.id))]++; });
+  const firmasTodas = {};
+  ALL_CELLS.forEach(c => {
+    const st = getState(c.id), e = resolveEstado(st);
+    conteo[e]++;
+    if((e === 'proceso' || e === 'entregado') && st.trabajador) firmasTodas[c.id] = e + '|' + st.trabajador;
+  });
+  let novedades = 0;
   const secciones = ['Cerámica', 'Frague'].map(cat => {
     const porPiso = {};
     ALL_CELLS.filter(c => c.categoria === cat).forEach(c => {
+      const firma = firmasTodas[c.id];
+      if(!firma || previas[c.id] === firma) return;
       const st = getState(c.id), e = resolveEstado(st);
-      if((e !== 'proceso' && e !== 'entregado') || !st.trabajador) return;
-      (porPiso[c.pisoNum] = porPiso[c.pisoNum] || {piso: c.piso, filas: []}).filas.push({
-        trabajador: st.trabajador, dpto: liqLabelForCell(c), area: AREA_LABEL[c.area] || c.area,
-        estado: e === 'entregado' ? (TERMINADO_LABEL[c.area] || 'Terminado') : 'Partida', terminado: e === 'entregado',
-        fecha: e === 'entregado' ? st.terminadoTs : st.partidaTs
-      });
+      const piso = porPiso[c.pisoNum] = porPiso[c.pisoNum] || {piso: c.piso, grupos: {}};
+      const g = piso.grupos[c.dpto + '|' + st.trabajador] = piso.grupos[c.dpto + '|' + st.trabajador] || {trabajador: st.trabajador, dpto: numeroDepto(c), porEstado: {}};
+      const l = g.porEstado[e] = g.porEstado[e] || {areas: [], fecha: null};
+      l.areas.push(AREA_LABEL[c.area] || c.area);
+      const ts = e === 'entregado' ? st.terminadoTs : st.partidaTs;
+      if(ts && (!l.fecha || ts < l.fecha)) l.fecha = ts;
+      novedades++;
     });
-    const pisos = Object.keys(porPiso).map(Number).sort((a, b) => b - a).slice(0, 4).map(n => porPiso[n]);
-    pisos.forEach(p => p.filas.sort((a, b) => a.dpto.localeCompare(b.dpto, 'es', {numeric:true}) || a.area.localeCompare(b.area)));
+    const pisos = Object.keys(porPiso).map(Number).sort((a, b) => b - a).map(n => {
+      const p = porPiso[n];
+      const filas = Object.values(p.grupos).map(g => ({
+        trabajador: g.trabajador, dpto: g.dpto,
+        lineas: ['entregado', 'proceso'].filter(k => g.porEstado[k]).map(k => ({
+          estado: k === 'entregado' ? 'Terminado' : 'Partida', terminado: k === 'entregado', fecha: g.porEstado[k].fecha,
+          areas: g.porEstado[k].areas.sort((x, y) => ORDEN_AREAS.indexOf(x) - ORDEN_AREAS.indexOf(y)).join(', ')
+        }))
+      }));
+      filas.sort((x, y) => String(x.dpto).localeCompare(String(y.dpto), 'es', {numeric: true}) || x.trabajador.localeCompare(y.trabajador));
+      return {piso: p.piso, filas};
+    });
     return {cat, pisos};
   });
   return {
     fecha: ahora.toLocaleDateString('es-CL', {weekday:'long', day:'numeric', month:'long', year:'numeric', ...tz}),
+    fechaCorta: ahora.toLocaleDateString('es-CL', {day:'numeric', month:'long', year:'numeric', ...tz}),
     hora: ahora.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', ...tz}),
-    conteo, secciones
+    desde: (reporteEstado.base && reporteEstado.base.ts) ? fechaCorta(reporteEstado.base.ts) : null, todo: !!incluirTodo,
+    conteo, secciones, novedades, firmasTodas
   };
 }
-function construirReporteHtml(){
-  const d = datosReporte();
-  const pill = (txt, fin) => `<span style="display:inline-block;padding:2px 9px;font-size:11px;font-weight:700;background:${fin ? '#43a047' : '#ffc400'};color:${fin ? '#ffffff' : '#4a3900'};">${txt}</span>`;
+function construirReporteHtml(d){
+  d = d || datosReporte(false);
+  const pill = (txt, fin) => `<span style="display:inline-block;padding:2px 9px;font-size:11px;font-weight:700;line-height:16px;background:${fin ? '#43a047' : '#ffc400'};color:${fin ? '#ffffff' : '#4a3900'};">${txt}</span>`;
+  const linea = txt => `<div style="height:24px;line-height:24px;white-space:nowrap;">${txt}</div>`;
   const caja = (n, label, color) => `<td align="center" width="25%" style="padding:12px 4px;border-top:3px solid ${color};background:#f6f7f5;"><div style="font-size:22px;font-weight:700;color:${color};">${n}</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#6c716a;">${label}</div></td>`;
+  const th = (t, w) => `<td width="${w}" style="padding:6px 8px;">${t}</td>`;
   const sec = d.secciones.map(s => {
     const cuerpo = s.pisos.length ? s.pisos.map(p => `
-      <div style="font-size:13px;font-weight:700;margin:14px 0 6px;color:#2c302c;">${p.piso}</div>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;">
+      <div style="font-size:13px;font-weight:700;margin:14px 0 6px;color:#2c302c;">${esc(p.piso)}</div>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;table-layout:fixed;">
         <tr style="background:#eef0ed;color:#6c716a;font-size:10px;letter-spacing:.5px;text-transform:uppercase;">
-          <td style="padding:6px 8px;">Trabajador</td><td style="padding:6px 8px;">Departamento</td><td style="padding:6px 8px;">Área</td><td style="padding:6px 8px;">Estado</td><td style="padding:6px 8px;">Desde</td>
+          ${th('Trabajador','18%')}${th('Departamento','19%')}${th('Área','30%')}${th('Estado','18%')}${th('Desde','15%')}
         </tr>` + p.filas.map(f => `
         <tr style="border-bottom:1px solid #e3e5e0;">
-          <td style="padding:6px 8px;font-weight:600;">${f.trabajador}</td><td style="padding:6px 8px;">${f.dpto}</td><td style="padding:6px 8px;">${f.area}</td>
-          <td style="padding:6px 8px;">${pill(f.estado, f.terminado)}</td><td style="padding:6px 8px;color:#6c716a;">${f.fecha ? fechaCorta(f.fecha) : '—'}</td>
+          <td style="padding:6px 8px;font-weight:600;vertical-align:top;line-height:24px;">${esc(f.trabajador)}</td>
+          <td style="padding:6px 8px;vertical-align:top;line-height:24px;">${esc(f.dpto)}</td>
+          <td style="padding:6px 8px;vertical-align:top;">${f.lineas.map(l => linea(esc(l.areas))).join('')}</td>
+          <td style="padding:6px 8px;vertical-align:top;">${f.lineas.map(l => linea(pill(l.estado, l.terminado))).join('')}</td>
+          <td style="padding:6px 8px;color:#6c716a;vertical-align:top;">${f.lineas.map(l => linea(l.fecha ? fechaCorta(l.fecha) : '—')).join('')}</td>
         </tr>`).join('') + '</table>').join('')
-      : '<div style="font-size:12px;color:#6c716a;font-style:italic;padding:8px 0;">Sin trabajo en curso ni terminado por pagar en esta categoría.</div>';
+      : '<div style="font-size:12px;color:#6c716a;font-style:italic;padding:8px 0;">Sin novedades en esta categoría.</div>';
     return `<div style="padding:4px 22px 14px;"><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2f4f66;border-bottom:2px solid #2f4f66;padding-bottom:4px;margin-top:14px;">${s.cat}</div>${cuerpo}</div>`;
   }).join('');
+  const sub = !d.desde ? 'Primer reporte: todo el trabajo en curso o terminado sin pagar' : (d.todo ? `Resumen completo, incluye lo ya informado el ${d.desde}` : `Novedades desde el reporte del ${d.desde}`);
   return `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;background:#ffffff;color:#222222;border:1px solid #d7dad3;">
     <div style="background:#2f4f66;color:#ffffff;padding:18px 22px;">
       <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;opacity:.8;">Reporte semanal de avance</div>
       <div style="font-size:20px;font-weight:700;margin-top:2px;">Obra La Florida Bellavista</div>
       <div style="font-size:12px;opacity:.85;margin-top:4px;">${d.fecha.charAt(0).toUpperCase() + d.fecha.slice(1)} · ${d.hora} (Santiago de Chile)</div>
+      <div style="font-size:12px;opacity:.85;margin-top:2px;">${sub}</div>
     </div>
     <table width="100%" cellpadding="0" cellspacing="6" style="padding:8px 16px;table-layout:fixed;"><tr>
       ${caja(d.conteo.pendiente, 'Pendiente', '#6c716a')}${caja(d.conteo.proceso, 'Partida', '#c49800')}${caja(d.conteo.entregado, 'Terminado', '#43a047')}${caja(d.conteo.pagado, 'Pagado', '#2461a8')}
     </tr></table>
-    ${sec}
-    <div style="padding:10px 22px;background:#f6f7f5;font-size:10.5px;color:#8a8f88;border-top:1px solid #e3e5e0;">Panel de Progreso · versión ${APP_VERSION}. Se muestran los 4 pisos más altos con trabajo en curso o terminado sin pagar.</div>
+    ${d.novedades ? sec : '<div style="padding:18px 22px;font-size:13px;color:#6c716a;font-style:italic;">No hay partidas nuevas en Partida ni Terminado desde el último reporte.</div>'}
+    <div style="padding:10px 22px;background:#f6f7f5;font-size:10.5px;color:#8a8f88;border-top:1px solid #e3e5e0;">Panel de Progreso · versión ${APP_VERSION}. Lo que ya se informó en un reporte anterior no se vuelve a repetir.</div>
   </div>`;
 }
-function construirReporteTexto(){
-  const d = datosReporte();
-  const lineas = [`REPORTE SEMANAL — Obra La Florida Bellavista`, `${d.fecha}, ${d.hora}`, '',
+function construirReporteTexto(d){
+  d = d || datosReporte(false);
+  const lineas = [`REPORTE SEMANAL — Obra La Florida Bellavista`, `${d.fecha}, ${d.hora}`,
+    !d.desde ? 'Primer reporte: todo el trabajo en curso o terminado sin pagar' : (d.todo ? `Resumen completo, incluye lo ya informado el ${d.desde}` : `Novedades desde el reporte del ${d.desde}`), '',
     `Pendiente: ${d.conteo.pendiente} · Partida: ${d.conteo.proceso} · Terminado: ${d.conteo.entregado} · Pagado: ${d.conteo.pagado}`];
+  if(!d.novedades) lineas.push('', 'No hay partidas nuevas en Partida ni Terminado desde el último reporte.');
   d.secciones.forEach(s => {
+    if(!s.pisos.length) return;
     lineas.push('', s.cat.toUpperCase());
-    if(!s.pisos.length) lineas.push('Sin trabajo en curso.');
     s.pisos.forEach(p => {
       lineas.push(p.piso);
-      p.filas.forEach(f => lineas.push(`  • ${f.trabajador} — ${f.dpto} (${f.area}): ${f.estado}${f.fecha ? ' desde ' + fechaCorta(f.fecha) : ''}`));
+      p.filas.forEach(f => f.lineas.forEach(l => lineas.push(`  • ${f.trabajador} — ${f.dpto} (${l.areas}): ${l.estado}${l.fecha ? ' desde ' + fechaCorta(l.fecha) : ''}`)));
     });
   });
   return lineas.join('\n');
 }
-document.getElementById('reporteBtn').addEventListener('click', () => {
-  document.getElementById('reporteContenido').innerHTML = construirReporteHtml();
+async function cargarEstadoReporte(){
+  if(!DB_URL || !isAdmin || !sessionToken) return;
+  try{
+    const j = await llamarDb('reporteConfig');
+    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || ''};
+  }catch(e){}
+}
+function pintarReporte(){
+  const todo = document.getElementById('reporteTodoChk').checked;
+  const d = datosReporte(todo);
+  const dest = reporteEstado.destinatarios;
+  document.getElementById('reporteContenido').innerHTML = construirReporteHtml(d);
+  document.getElementById('reporteInfo').innerHTML =
+    `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Correos")</i>'}<br>` +
+    `${!d.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (d.todo ? `Mostrando todo, incluso lo ya informado el ${d.desde}.` : `Muestra solo lo nuevo desde el reporte del ${d.desde}.`)} (${d.novedades} partida(s))` +
+    (DB_URL ? '' : '<br><b>Conecta la base de datos para poder enviar.</b>');
+  document.getElementById('reportePruebaBtn').disabled = !DB_URL;
+  document.getElementById('reporteDestBtn').disabled = !DB_URL;
+  document.getElementById('reporteEnviarBtn').disabled = !DB_URL || !dest.length || !d.novedades;
+}
+async function enviarReporte(modo){
+  const d = datosReporte(document.getElementById('reporteTodoChk').checked);
+  mostrarCargando('Enviando…');
+  try{
+    const j = await llamarDb('reporteEnviar', {
+      modo, asunto: `Reporte semanal de avance — Obra La Florida Bellavista — ${d.fechaCorta}`,
+      html: construirReporteHtml(d), texto: construirReporteTexto(d), firmas: d.firmasTodas
+    });
+    if(j && j.ok){
+      if(modo === 'prueba') avisoToast(`Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).`);
+      else { avisoToast(`Reporte enviado a ${j.enviados} correo(s).`); await cargarEstadoReporte(); pintarReporte(); }
+    } else avisoToast(ERRORES_REPORTE[j && j.error] || 'No se pudo enviar el reporte.');
+  }catch(e){ avisoToast('No se pudo enviar (revisa la conexión).'); }
+  finally{ ocultarCargando(); }
+}
+document.getElementById('reporteBtn').addEventListener('click', async () => {
+  document.getElementById('reporteTodoChk').checked = false;
   document.getElementById('reporteOverlay').classList.add('show');
+  pintarReporte();
+  await cargarEstadoReporte();
+  pintarReporte();
 });
+document.getElementById('reporteTodoChk').addEventListener('change', pintarReporte);
 document.getElementById('reporteCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('reporteOverlay')));
+document.getElementById('reportePruebaBtn').addEventListener('click', () => enviarReporte('prueba'));
+document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
+  askConfirm(`¿Enviar el reporte ahora a ${reporteEstado.destinatarios.length} correo(s)? Después de enviarlo, estas partidas no se van a repetir en el próximo reporte.`, () => enviarReporte('real'));
+});
+document.getElementById('reporteDestBtn').addEventListener('click', () => {
+  document.getElementById('reporteDestInput').value = reporteEstado.destinatarios.join('\n');
+  document.getElementById('reporteDestError').textContent = '';
+  document.getElementById('reporteDestOverlay').classList.add('show');
+});
+document.getElementById('reporteDestCancel').addEventListener('click', () => closeOverlayAnimated(document.getElementById('reporteDestOverlay')));
+document.getElementById('reporteDestGuardar').addEventListener('click', async () => {
+  const err = document.getElementById('reporteDestError');
+  const lista = document.getElementById('reporteDestInput').value.split(/[\s,;]+/).filter(Boolean);
+  err.textContent = 'Guardando…';
+  try{
+    const j = await llamarDb('reporteDestinatarios', {destinatarios: lista});
+    if(j && j.ok){
+      reporteEstado.destinatarios = j.destinatarios; pintarReporte();
+      closeOverlayAnimated(document.getElementById('reporteDestOverlay'));
+      avisoToast(j.destinatarios.length ? `Guardé ${j.destinatarios.length} correo(s).` : 'Quedó sin correos.');
+    } else if(j && j.error === 'correo_invalido') err.textContent = 'Estos correos no parecen válidos: ' + j.invalidos.join(', ');
+    else if(j && j.error === 'demasiados_correos') err.textContent = 'El máximo son 15 correos.';
+    else err.textContent = ERRORES_REPORTE[j && j.error] || 'No se pudo guardar. Prueba de nuevo.';
+  }catch(e){ err.textContent = 'No se pudo guardar (revisa la conexión).'; }
+});
 document.getElementById('reporteTextoBtn').addEventListener('click', async () => {
-  try{ await navigator.clipboard.writeText(construirReporteTexto()); avisoToast('Texto copiado. Ya lo puedes pegar donde quieras.'); }
+  try{ await navigator.clipboard.writeText(construirReporteTexto(datosReporte(document.getElementById('reporteTodoChk').checked))); avisoToast('Texto copiado. Ya lo puedes pegar donde quieras.'); }
   catch(e){ avisoToast('No se pudo copiar automáticamente.'); }
 });
 document.getElementById('reporteImagenBtn').addEventListener('click', () => {
@@ -3277,7 +3404,7 @@ function renderStatsView(){
     : '<p style="font-size:12px;color:var(--sub);">Todavía no hay partidas Terminadas o Pagadas con trabajador asignado.</p>';
 
   let moneyChart = '<p style="font-size:12px;color:var(--sub);">Todavía no hay liquidaciones pagadas registradas.</p>';
-  if(canSeePrices()){
+  if(isAdmin){
     const pagos = paymentHistory.filter(h => h.type === 'pago').sort((a,b) => a.ts - b.ts);
     if(pagos.length){
       let acumulado = 0;
@@ -3289,10 +3416,10 @@ function renderStatsView(){
       moneyChart = barsHtml(moneyItems, v => money(v));
     }
   } else {
-    moneyChart = '<p style="font-size:12px;color:var(--sub);">No tienes permiso para ver montos. Pídeselo al administrador.</p>';
+    moneyChart = '<p style="font-size:12px;color:var(--sub);">Los montos solo los ve el Admin.</p>';
   }
 
-  const proyeccion = canSeePrices() ? computeProjection(cells) : 'No tienes permiso para ver esta información.';
+  const proyeccion = isAdmin ? computeProjection(cells) : 'Esta información solo la ve el Admin.';
 
   document.getElementById('statsBody').innerHTML = `
     <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:22px;">
