@@ -664,6 +664,7 @@
     </div>
     <div id="reporteContenido" style="max-height:min(52vh,440px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
     <div class="actions" style="flex-wrap:wrap;">
+      <button class="btn" id="reporteCompletarBtn" style="display:none;">Completar hoja de datos</button>
       <button class="btn" id="reporteDestBtn">⚙ Envío y correos</button>
       <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
       <button class="btn primary" id="reporteEnviarBtn">Enviar ahora</button>
@@ -747,8 +748,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.11.1';
-const BACKEND_REQUERIDO = 14;
+const APP_VERSION = '0.12.1';
+const BACKEND_REQUERIDO = 15;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -1067,6 +1068,7 @@ async function dbLoad(){
     const res = await fetch(DB_URL + '?action=load');
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const data = await res.json();
+    if(data && data.items) ultimoConteoHoja = Object.keys(data.items).length;
     dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = ''; updateDbBadge();
     if(data && data.backendVersion){ backendVersion = data.backendVersion; updateRateFootnote(); }
     return data;
@@ -1112,6 +1114,8 @@ async function respaldarAntesDelCierre(){
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
 }
+let forzarGuardadoCompleto = false;
+let ultimoConteoHoja = null;
 async function dbSave(dirtyIds){
   if(!DB_URL) return false;
   const hayCeldas = dirtyIds && dirtyIds.size > 0;
@@ -1120,7 +1124,8 @@ async function dbSave(dirtyIds){
   dbErrorReason = '';
   try{
     let action = 'save', records = [];
-    if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
+    if(forzarGuardadoCompleto){ action = 'save'; records = buildRecords(); }
+    else if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
     const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, historialM2, token: sessionToken };
@@ -1130,6 +1135,7 @@ async function dbSave(dirtyIds){
     if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Vuelve a iniciar sesión para poder seguir guardando.'; throw new Error('sin sesion'); }
     if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
     dbStatus = 'online'; dbLastOkTs = Date.now(); updateDbBadge();
+    if(forzarGuardadoCompleto){ forzarGuardadoCompleto = false; ultimoConteoHoja = ALL_CELLS.length; }
     return true;
   }catch(err){
     console.error('Base de datos: no se pudo guardar', err);
@@ -1247,7 +1253,7 @@ async function doSaveCycle(){
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
 
-  const soloCeldas = dirtySnap.size > 0 && !settingsDirty;
+  const soloCeldas = dirtySnap.size > 0 && !settingsDirty && !forzarGuardadoCompleto;
   if(!soloCeldas) await mergeRemoteBeforeSave();
   const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, historialM2};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
@@ -2192,6 +2198,7 @@ const ERRORES_REPORTE = {
   sin_correo_propio: 'No pude saber cuál es tu correo para la prueba.',
   programacion_invalida: 'El día o la hora no son válidos.',
   plantilla_invalida: 'El asunto no puede quedar vacío (máximo 150 letras).',
+  hoja_incompleta: 'La hoja de datos no tiene todos los departamentos. Pulsa "Completar hoja de datos" y vuelve a intentar.',
   error_envio: 'Google no pudo enviar el correo.',
   ocupado: 'Hay otro envío en curso. Prueba de nuevo en unos segundos.',
   respuesta_invalida: 'El Apps Script respondió algo que el panel no entiende. Revisa que hayas publicado la última "Nueva versión".'
@@ -2216,7 +2223,7 @@ async function cargarVistaReporte(){
   reporteVista = null; reporteVistaFallo = '';
   if(!DB_URL || !isAdmin || !sessionToken) return;
   try{
-    const j = await llamarDb('reporteVista', {todo: document.getElementById('reporteTodoChk').checked});
+    const j = await llamarDb('reporteVista', {todo: document.getElementById('reporteTodoChk').checked, esperadas: ALL_CELLS.length});
     if(j && j.ok){ reporteVista = j; rellenarCamposCorreo(); }
     else reporteVistaFallo = !j ? 'sin_respuesta' : (j.error || 'version_vieja');
   }catch(e){ reporteVistaFallo = 'sin_respuesta'; }
@@ -2236,15 +2243,18 @@ function pintarReporte(cargando){
     cont.innerHTML = msg('Conecta la base de datos para ver y enviar el reporte.');
     info.textContent = '';
     ['reportePruebaBtn', 'reporteDestBtn', 'reporteEnviarBtn', 'reporteTextoBtn', 'reporteImagenBtn'].forEach(i => { btn(i).disabled = true; });
+    btn('reporteCompletarBtn').style.display = 'none';
     return;
   }
   cont.innerHTML = '<div id="reporteMsgPrevia"></div>' + (cargando ? msg('Armando el reporte…') : (v ? v.html : msg(mensajeFalloVista())));
   pintarMensajePrevia();
   info.innerHTML = `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Envío y correos")</i>'}<br>${esc(textoProgramacion(reporteEstado.programacion))}` +
     (v ? `<br>${!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra los pisos con movimiento desde el reporte del ${v.desde}.`)} (${v.pisos} piso(s) con movimiento, ${v.novedades} partida(s) nueva(s))` : '') +
+    (v && v.incompleta ? `<br><b>⚠ La hoja de datos tiene solo ${v.celdasEnHoja} de ${v.esperadas} departamentos: por eso un piso no puede salir completo y el envío está bloqueado. Pulsa "Completar hoja de datos".</b>` : '') +
     (sinGuardar() ? '<br><b>⚠ Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '') +
     (backendVersion && Number(backendVersion) < BACKEND_REQUERIDO ? `<br><b>⚠ Tu Apps Script publicado es la v${esc(backendVersion)} y este panel necesita la v${BACKEND_REQUERIDO}. Publica una "Nueva versión".</b>` : '');
   const listo = !cargando && !!v;
+  btn('reporteCompletarBtn').style.display = (v && v.incompleta) ? '' : 'none';
   btn('reporteDestBtn').disabled = false;
   btn('reportePruebaBtn').disabled = !listo;
   btn('reporteEnviarBtn').disabled = !listo || !dest.length;
@@ -2272,7 +2282,7 @@ async function refrescarReporte(){
 async function enviarReporte(modo){
   mostrarCargando('Enviando…');
   try{
-    const j = await llamarDb('reporteEnviar', {modo, todo: document.getElementById('reporteTodoChk').checked, asunto: document.getElementById('reporteAsunto').value, mensaje: document.getElementById('reporteMensaje').value});
+    const j = await llamarDb('reporteEnviar', {modo, esperadas: ALL_CELLS.length, todo: document.getElementById('reporteTodoChk').checked, asunto: document.getElementById('reporteAsunto').value, mensaje: document.getElementById('reporteMensaje').value});
     if(j && j.ok){
       avisoToast(modo === 'prueba' ? `Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).` : `Reporte enviado a ${j.enviados} correo(s).`);
       if(modo === 'real') await refrescarReporte();
@@ -2298,6 +2308,13 @@ document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
   askConfirm(`¿Enviar el reporte ahora a ${n} correo(s) con el asunto "${document.getElementById('reporteAsunto').value.trim()}"? ` +
     (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, estos pisos no se repiten hasta que haya movimiento nuevo.') +
     (sinGuardar() ? ' Ojo: tienes cambios sin guardar que no van incluidos.' : ''), () => enviarReporte('real'));
+});
+document.getElementById('reporteCompletarBtn').addEventListener('click', async () => {
+  forzarGuardadoCompleto = true;
+  const r = await enqueueSave();
+  if(!r.dbOk){ forzarGuardadoCompleto = false; avisoToast('No se pudo completar la hoja de datos. Prueba de nuevo.'); return; }
+  avisoToast('Listo: la hoja de datos quedó con todos los departamentos.');
+  await refrescarReporte();
 });
 document.getElementById('reporteDestBtn').addEventListener('click', () => {
   const p = reporteEstado.programacion || {activo: false, dia: 5, hora: 13, sinNovedades: false};
@@ -2389,6 +2406,8 @@ document.getElementById('diagnosticoBtn').addEventListener('click', () => {
     return st.retenido;
   });
   if(retenidasViejas.length) avisos.push({tipo:'info', texto: `Hay ${retenidasViejas.length} partida(s) retenida(s) para finiquito en este momento. Revisa "🔒 Retenciones pendientes" si alguna ya debería liberarse.`});
+
+  if(DB_URL && ultimoConteoHoja !== null && ultimoConteoHoja < ALL_CELLS.length) avisos.push({tipo:'alerta', texto: `La hoja de datos tiene ${ultimoConteoHoja} de ${ALL_CELLS.length} departamentos. El reporte semanal y las peticiones de los trabajadores necesitan la hoja completa. Entra a 📧 Reporte semanal y pulsa "Completar hoja de datos".`});
 
   const colorPorTipo = {alerta:'#c0546f', aviso:'#a97e00', info:'var(--sub)'};
   const iconoPorTipo = {alerta:'⚠️', aviso:'📌', info:'ℹ️'};
