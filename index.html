@@ -111,6 +111,8 @@
   .stat-card .sub2{font-size:11px;color:var(--sub);margin-top:3px;}
   .c-pendiente{color:var(--pendiente)} .c-proceso{color:#a97e00} .c-entregado{color:var(--entregado)} .c-pagado{color:var(--pagado)}
   .money-card .n{font-size:16.5px;}
+  .recordatorio-cierre{margin:0 0 12px;padding:8px 10px;background:var(--panel-soft);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.6;}
+  .stat-card.cierre-nuevo{border-style:dashed;border-top-style:solid;background:var(--panel-soft);}
 
   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px;}
   .toolbar .grp{display:flex;flex-direction:column;gap:4px;}
@@ -150,7 +152,7 @@
   .cell-td.flash{ animation: neonFlash .6s ease; }
   @keyframes neonFlash{ 0%{filter:brightness(1.9) saturate(1.4);} 100%{filter:brightness(1) saturate(1);} }
   body.hide-prices .price-money, body.guest-hide-prices .price-money{display:none;}
-  body.guest-hide-prices .money-card{display:none;}
+  body.guest-hide-prices .money-card, body.hide-prices .money-card{display:none;}
 
   .cell-block{display:flex;flex-direction:column;gap:7px;min-width:0;padding:6px;height:100%;}
 
@@ -200,12 +202,20 @@
   .peticion-item .sub{color:var(--sub);font-size:11.5px;margin:2px 0 6px;}
   .peticion-item .acciones{display:flex;gap:6px;}
   .worker-row-top{position:relative;display:block;min-height:38px;}
-  .worker-name{font-size:15px;font-weight:700;color:var(--text);min-width:0;overflow-wrap:break-word;}
-  body.is-admin .worker-name{padding-right:104px;}
-  .worker-name.unassigned{color:var(--sub);font-weight:600;font-style:italic;}
-  .assign-btn{position:absolute;top:0;right:0;border:1px solid var(--accent);background:var(--panel);color:var(--accent);padding:4px 9px;font-size:11px;cursor:pointer;border-radius:var(--radius);display:inline-flex;align-items:center;justify-content:center;gap:5px;}
-  .assign-btn:hover{background:var(--accent);color:#fff;}
-  .assign-icon{display:none;flex:none;}
+  .worker-name{display:block;font-size:18px;font-weight:800;line-height:1.2;color:var(--text);min-width:0;overflow-wrap:anywhere;padding:6px 10px;background:var(--panel-soft);border:1px solid var(--border-strong);border-radius:var(--radius);cursor:default;user-select:none;}
+  .worker-name.unassigned{color:var(--sub);font-weight:600;font-style:italic;border-style:dashed;background:transparent;}
+  .asignar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+  .asig-op{min-height:56px;font-family:inherit;font-size:17px;font-weight:700;padding:8px;border:2px solid var(--border-strong);background:var(--panel);color:var(--text);cursor:pointer;border-radius:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+  .asig-op small{font-size:11px;font-weight:500;color:var(--sub);}
+  .asig-op:hover{border-color:var(--accent);}
+  .asig-op.actual{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .asig-op.actual small{color:#fff;}
+  .asig-op.piso{grid-column:1/-1;border-style:dashed;border-color:var(--accent);color:var(--accent);}
+  .asig-op.nadie{grid-column:1/-1;min-height:52px;font-size:14px;font-weight:600;color:var(--sub);}
+  .asignar-fila{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .assign-btn, .mismo-piso-btn{flex:1 1 auto;min-width:0;text-align:center;border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);font-size:12px;font-weight:600;padding:6px 8px;cursor:pointer;border-radius:var(--radius);font-family:inherit;white-space:nowrap;}
+  .assign-btn:hover, .mismo-piso-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .mismo-piso-btn .t-corto{display:none;}
 
   .checks-row{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;}
   .chk-pill{display:flex;align-items:center;justify-content:flex-start;gap:6px;border:1.5px solid var(--border-strong);background:var(--panel);color:var(--sub);padding:6px 8px;font-size:10.5px;line-height:1.2;font-weight:600;cursor:pointer;border-radius:var(--radius);user-select:none;transition:background .2s, border-color .2s, color .2s, opacity .2s;width:120px;text-align:left;white-space:normal;}
@@ -337,12 +347,10 @@
     table.dept-table td.dpto-col.dpto-largo .dpto-inner{font-size:10.5px;letter-spacing:0;}
     col.col-dpto{width:26px;}
     .grp-piso{margin-left:0;}
-    .worker-name{font-size:12px;}
-    body.is-admin .worker-name{padding-right:34px;}
-    .worker-row-top{gap:6px;}
-    .assign-btn{padding:0;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;flex:none;}
-    .assign-txt{display:none;}
-    .assign-icon{display:block;}
+    .worker-name{font-size:14px;padding:5px 6px;}
+    .assign-btn, .mismo-piso-btn{font-size:11px;padding:6px 4px;}
+    .mismo-piso-btn .t-largo{display:none;}
+    .mismo-piso-btn .t-corto{display:inline;}
   }
 
   #liqPrintArea{position:fixed;left:-10000px;top:0;width:800px;background:#fff;}
@@ -652,6 +660,15 @@
   <button class="btn small" id="avisoDatosViejosCerrar" style="flex-shrink:0;">✕</button>
 </div>
 
+<div class="overlay" id="asignarOverlay">
+  <div class="modal" style="max-width:480px;">
+    <h3 id="asignarTitulo">Asignar trabajador</h3>
+    <p id="asignarSub" style="margin:0 0 12px;font-size:12.5px;color:var(--sub);"></p>
+    <div class="asignar-grid" id="asignarGrid"></div>
+    <div class="actions"><button class="btn" id="asignarCancelar">Cancelar</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="peticionesOverlay">
   <div class="modal" style="max-width:520px;">
     <h3>📥 Peticiones de trabajadores</h3>
@@ -775,8 +792,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.13.2';
-const BACKEND_REQUERIDO = 15;
+const APP_VERSION = '0.14.2';
+const BACKEND_REQUERIDO = 16;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -799,6 +816,7 @@ let RATES = { cerBase: 4000, cerRafael: 4300, cerAlt: 6750, frague: 500 };
 let AFP_RATES = { Capital:1.44, Cuprum:1.44, Habitat:1.27, Modelo:0.58, PlanVital:1.16, ProVida:1.45, Uno:0.46 };
 
 let cierreQuincena = null;
+let cierreAnterior = null;
 
 let historialM2 = [];
 function guardarM2DelPeriodo(desde, hasta){
@@ -988,6 +1006,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
+    if(remote.cierreAnterior !== undefined) cierreAnterior = remote.cierreAnterior;
     if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
   }
@@ -1136,7 +1155,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, historialM2 }
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2 }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -1155,7 +1174,7 @@ async function dbSave(dirtyIds){
     else if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, historialM2, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, token: sessionToken };
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
@@ -1183,6 +1202,7 @@ function applyLoadedPayload(parsed){
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
+  if(parsed.cierreAnterior !== undefined) cierreAnterior = parsed.cierreAnterior;
   if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
   if(Array.isArray(parsed.obsPresets) && parsed.obsPresets.length) OBS_PRESETS = parsed.obsPresets;
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
@@ -1282,7 +1302,7 @@ async function doSaveCycle(){
 
   const soloCeldas = dirtySnap.size > 0 && !settingsDirty && !forzarGuardadoCompleto;
   if(!soloCeldas) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, historialM2};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -1581,7 +1601,9 @@ document.getElementById('allowGuestPricesChk').addEventListener('change', (e) =>
   render();
 });
 
-function money(n){ if(n===null||n===undefined) return '—'; const r = Math.round(n); return (r < 0 ? '-' : '') + '$' + Math.abs(r).toLocaleString('es-CL'); }
+const preciosOcultos = () => document.body.classList.contains('hide-prices');
+function moneyReal(n){ if(n===null||n===undefined) return '—'; const r = Math.round(n); return (r < 0 ? '-' : '') + '$' + Math.abs(r).toLocaleString('es-CL'); }
+function money(n){ return (preciosOcultos() && n !== null && n !== undefined) ? '$ ••••' : moneyReal(n); }
 
 function renderStats(){
   let cells;
@@ -1592,16 +1614,23 @@ function renderStats(){
   }
   const counts = {pendiente:0, proceso:0, entregado:0, pagado:0};
   let totalMonto1 = 0, pagadoMonto1 = 0, terminadoMonto1 = 0, terminadoMonto2 = 0;
+  let tDentro1 = 0, tDentro2 = 0, nDentro = 0, tNuevo1 = 0, tNuevo2 = 0, nNuevo = 0;
   cells.forEach(c => {
     const st = getState(c.id);
     const estado = resolveEstado(st);
     counts[estado] = (counts[estado]||0)+1;
+    const nuevoTrasCierre = estado === 'entregado' && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena;
+    if(estado === 'entregado'){ if(nuevoTrasCierre) nNuevo++; else nDentro++; }
     if(st.m2){
       const p1 = st.m2 * rate1For(c.categoria, st.trabajador);
       const p2 = st.m2 * RATES.cerAlt;
       totalMonto1 += p1;
       if(estado==='pagado') pagadoMonto1 += p1;
-      if(estado==='entregado'){ terminadoMonto1 += p1; if(c.categoria==='Cerámica') terminadoMonto2 += p2; }
+      if(estado==='entregado'){
+        terminadoMonto1 += p1; if(c.categoria==='Cerámica') terminadoMonto2 += p2;
+        if(nuevoTrasCierre){ tNuevo1 += p1; if(c.categoria==='Cerámica') tNuevo2 += p2; }
+        else { tDentro1 += p1; if(c.categoria==='Cerámica') tDentro2 += p2; }
+      }
     }
   });
   const total = cells.length;
@@ -1626,7 +1655,13 @@ function renderStats(){
   const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>
     <div class="l">Pagado de ${money(totalMonto1)}</div>
     <div class="bar"><div style="width:${totalMonto1?Math.round(pagadoMonto1/totalMonto1*100):0}%; background:var(--pagado);"></div></div></div>`;
-  statsEl.innerHTML = cards + (isAdmin ? terminadoMoneyCard + pagadoMoneyCard : '');
+  const fechaHoraCierre = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+  const refDentro = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tDentro2)} con tarifa referencia</div>` : '';
+  const refNuevo = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tNuevo2)} con tarifa referencia</div>` : '';
+  const terminadoDentroCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(tDentro1)}</div><div class="l">Terminado dentro del cierre</div><div class="sub2">${nDentro} partida(s) · entran en la próxima liquidación</div>${refDentro}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div></div>`;
+  const terminadoNuevoCard = `<div class="stat-card money-card st-entregado cierre-nuevo"><div class="n c-entregado">${money(tNuevo1)}</div><div class="l">Terminado nuevo, después del cierre</div><div class="sub2">${nNuevo} partida(s) · no entran hasta el próximo cierre</div>${refNuevo}</div>`;
+  const terminadoCards = cierreQuincena ? terminadoDentroCard + terminadoNuevoCard : terminadoMoneyCard;
+  statsEl.innerHTML = cards + (isAdmin ? terminadoCards + pagadoMoneyCard : '');
 }
 
 function passesFilters(cell){
@@ -1782,6 +1817,35 @@ function confirmarEstadoAdmin(id, destino){
   const freshTd = document.querySelector(`[data-cellid="${id}"]`)?.closest('.cell-td');
   if(freshTd){ freshTd.classList.add('flash'); setTimeout(() => freshTd.classList.remove('flash'), 650); }
 }
+let indicePisos = null;
+function celdaPisoDe(cell){
+  if(!indicePisos){
+    indicePisos = {};
+    ALL_CELLS.forEach(c => { if(c.area === 'Piso') indicePisos[c.categoria + '|' + c.piso + '|' + c.dpto] = c; });
+  }
+  return cell.area === 'Piso' ? null : (indicePisos[cell.categoria + '|' + cell.piso + '|' + cell.dpto] || null);
+}
+function asignarTrabajador(id, w){
+  state[id].trabajador = w;
+  markCellDirty(id);
+  scheduleSave(); render();
+}
+function abrirAsignar(id){
+  const cell = cellById[id], actual = state[id].trabajador || '';
+  const especialidad = cell.categoria === 'Frague' ? 'fraguador' : 'ceramista';
+  const activos = activeWorkers().filter(w => (workerStatus[w] || {}).especialidad === especialidad);
+  const pisoCell = celdaPisoDe(cell), pw = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
+  document.getElementById('asignarTitulo').textContent = actual ? 'Reasignar trabajador' : 'Asignar trabajador';
+  document.getElementById('asignarSub').textContent = `Depto ${cell.dpto} · ${AREA_LABEL[cell.area] || cell.area} · ${cell.piso}`;
+  let html = '';
+  if(pisoCell && pw && pw !== actual) html += `<button type="button" class="asig-op piso" data-w="${esc(pw)}">Igual al Piso: ${esc(pw)}</button>`;
+  html += activos.map(w => `<button type="button" class="asig-op${w === actual ? ' actual' : ''}" data-w="${esc(w)}">${w === actual ? '✓ ' : ''}${esc(w)}</button>`).join('');
+  if(actual && !activos.includes(actual)) html += `<button type="button" class="asig-op actual" data-w="${esc(actual)}">✓ ${esc(actual)}<small>(inactivo o de otra especialidad)</small></button>`;
+  if(actual) html += '<button type="button" class="asig-op nadie" data-w="">Dejar sin asignar</button>';
+  const grid = document.getElementById('asignarGrid');
+  grid.innerHTML = html; grid.dataset.id = id;
+  document.getElementById('asignarOverlay').classList.add('show');
+}
 function cellHtml(cell){
   const st = getState(cell.id);
   const hasWorker = !!st.trabajador;
@@ -1795,10 +1859,11 @@ function cellHtml(cell){
       ${peticionBtnHtml(cell, st)}
     </div>`;
   }
-  const assignBtn = isAdmin ? `<button class="assign-btn" data-id="${cell.id}">
-      <span class="assign-txt">${hasWorker ? 'Reasignar' : 'Asignar'}</span>
-      <svg class="assign-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h12l-3.5-3.5M17 16H5l3.5 3.5"/></svg>
-    </button>` : '';
+  const pisoCell = isAdmin ? celdaPisoDe(cell) : null;
+  const pisoWorker = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
+  const mismoBtn = (pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador)
+    ? `<button type="button" class="mismo-piso-btn" data-id="${cell.id}" title="Poner a ${pisoWorker}, el mismo del Piso"><span class="t-largo">Igual al Piso</span><span class="t-corto">Igual Piso</span></button>` : '';
+  const assignBtn = isAdmin ? `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button>${mismoBtn}</div>` : '';
   const frontInner = `
       <div class="worker-row-top">
         <div class="worker-name ${hasWorker?'':'unassigned'}" data-namefor="${cell.id}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>
@@ -2469,6 +2534,13 @@ document.getElementById('reporteImagenBtn').addEventListener('click', () => {
   });
 });
 
+document.getElementById('asignarGrid').addEventListener('click', (e) => {
+  const b = e.target.closest('.asig-op'); if(!b) return;
+  const id = document.getElementById('asignarGrid').dataset.id, w = b.getAttribute('data-w');
+  closeOverlayAnimated(document.getElementById('asignarOverlay'));
+  if(w !== (state[id].trabajador || '')) asignarTrabajador(id, w);
+});
+document.getElementById('asignarCancelar').addEventListener('click', () => closeOverlayAnimated(document.getElementById('asignarOverlay')));
 document.getElementById('diagnosticoBtn').addEventListener('click', () => {
   const avisos = [];
 
@@ -2678,22 +2750,15 @@ function render(){
     });
 
     contentEl.querySelectorAll('.assign-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => abrirAsignar(e.currentTarget.getAttribute('data-id')));
+    });
+    contentEl.querySelectorAll('.mismo-piso-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        const cell = cellById[id];
-        const current = state[id].trabajador || '';
-
-        const especialidadNecesaria = cell.categoria === 'Frague' ? 'fraguador' : 'ceramista';
-        const activos = activeWorkers().filter(w => (workerStatus[w]||{}).especialidad === especialidadNecesaria);
-        const options = ['<option value="">Sin asignar</option>'].concat(activos.map(w => `<option value="${w}" ${current===w?'selected':''}>${w}</option>`));
-        if(current && !activos.includes(current)) options.push(`<option value="${current}" selected>${current} (inactivo o de otra especialidad)</option>`);
-        const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
-          <select id="assignSelect" style="width:100%;">${options.join('')}</select>`;
-        openInputModal(current ? 'Reasignar trabajador' : 'Asignar trabajador', bodyHtml, () => {
-          state[id].trabajador = document.getElementById('assignSelect').value;
-          markCellDirty(id);
-          scheduleSave(); render();
-        });
+        const id = e.currentTarget.getAttribute('data-id'), pisoCell = celdaPisoDe(cellById[id]);
+        const w = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
+        if(!w) return;
+        asignarTrabajador(id, w);
+        avisoToast(`${w} asignado: es el mismo del Piso.`);
       });
     });
 
@@ -2763,15 +2828,27 @@ document.getElementById('toggleWorkerPanel').addEventListener('click', (e) => {
   const nowShown = document.getElementById('workerPanel').classList.toggle('show');
   e.target.classList.toggle('primary', nowShown);
 });
-document.getElementById('togglePrices').addEventListener('click', (e) => {
-  const hidden = document.body.classList.toggle('hide-prices');
-  e.target.textContent = hidden ? 'Mostrar precios' : 'Ocultar precios';
-});
+function aplicarOcultarPrecios(oculto){
+  document.body.classList.toggle('hide-prices', oculto);
+  document.getElementById('togglePrices').textContent = oculto ? 'Mostrar precios' : 'Ocultar precios';
+  try{ localStorage.setItem('progresoObraOcultarPrecios', oculto ? '1' : '0'); }catch(e){}
+  render();
+}
+document.getElementById('togglePrices').addEventListener('click', () => aplicarOcultarPrecios(!preciosOcultos()));
+try{
+  if(localStorage.getItem('progresoObraOcultarPrecios') === '1'){
+    document.body.classList.add('hide-prices');
+    document.getElementById('togglePrices').textContent = 'Mostrar precios';
+  }
+}catch(e){}
 document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
   const actualTxt = cierreQuincena
     ? new Date(cierreQuincena).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})
     : null;
 
+  const anteriorTxt = cierreAnterior
+    ? new Date(cierreAnterior).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})
+    : null;
   let pendientesHtml = '';
   if(cierreQuincena){
     const pendientes = ALL_CELLS.filter(c => {
@@ -2790,18 +2867,21 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
       Lo que se marque "Terminado" DESPUÉS de la fecha que pongas acá no va a salir en las liquidaciones hasta que muevas el cierre más adelante (o lo quites).
     </p>
     ${actualTxt ? `<p style="margin:0 0 10px;font-size:12.5px;">Cierre activo: <b>${actualTxt}</b> · <button class="btn small" id="quitarCierreBtn" type="button">Quitar cierre</button></p>` : ''}
+    <div class="recordatorio-cierre">🔔 <b>Recordatorio:</b> ${anteriorTxt ? `el cierre anterior ${actualTxt ? 'a ese' : ''} fue el <b>${anteriorTxt}</b> ${actualTxt ? '<button class="btn small" id="volverCierreBtn" type="button">Volver al cierre anterior</button>' : ''}` : 'todavía no hay un cierre anterior guardado.'}</div>
     ${pendientesHtml}
     <div class="rate-row"><label>Nueva fecha de cierre</label><input type="datetime-local" id="cierreInput" style="width:220px;"></div>`;
   openInputModal(cierreQuincena ? 'Cambiar cierre de quincena/mes' : 'Cerrar quincena/mes', bodyHtml, () => {
     const v = document.getElementById('cierreInput').value;
     if(!v) return;
-    const cierreAnterior = cierreQuincena;
+    const cierrePrevio = cierreQuincena;
 
     const cierreNuevo = new Date(v).getTime() + 59999;
-    guardarM2DelPeriodo(cierreAnterior, cierreNuevo);
+    guardarM2DelPeriodo(cierrePrevio, cierreNuevo);
+    if(cierrePrevio) cierreAnterior = cierrePrevio;
     cierreQuincena = cierreNuevo;
     markSettingsDirty(); enqueueSave(); render();
     respaldarAntesDelCierre();
+    avisoToast(cierrePrevio ? `Cierre guardado. Recuerda: el cierre anterior era el ${new Date(cierrePrevio).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})}` : 'Cierre guardado.');
   });
 
   const ahora = new Date(); ahora.setSeconds(0,0);
@@ -2809,7 +2889,17 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
   const quitarBtn = document.getElementById('quitarCierreBtn');
   if(quitarBtn) quitarBtn.addEventListener('click', () => {
     askConfirm('¿Quitar el cierre de quincena/mes? Todo lo Terminado va a poder liquidarse de nuevo.', () => {
-      cierreQuincena = null; markSettingsDirty(); scheduleSave(); render();
+      cierreAnterior = cierreQuincena; cierreQuincena = null; markSettingsDirty(); scheduleSave(); render();
+      closeInputModal();
+    });
+  });
+  const volverBtn = document.getElementById('volverCierreBtn');
+  if(volverBtn) volverBtn.addEventListener('click', () => {
+    askConfirm(`¿Volver al cierre anterior (${anteriorTxt})? El cierre activo (${actualTxt}) se descarta y lo Terminado después del anterior vuelve a quedar fuera hasta el próximo cierre.`, () => {
+      const ultimo = historialM2[historialM2.length - 1];
+      if(ultimo && ultimo.hasta === cierreQuincena) historialM2.pop();
+      cierreQuincena = cierreAnterior; cierreAnterior = null;
+      markSettingsDirty(); enqueueSave(); render();
       closeInputModal();
     });
   });
@@ -2871,7 +2961,7 @@ document.getElementById('dbBtn').addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, historialM2, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3166,32 +3256,32 @@ function liqRebuildDoc(){
     ? `Descuento AFP (${m.afpNombre}: ${AFP_COTIZACION_OBLIGATORIA}% + ${AFP_RATES[m.afpNombre]}% = ${m.afpPct.toFixed(2).replace('.',',')}%)`
     : `Descuento AFP (${m.dias} día(s))`;
   const afpRowHtml = (withRetainCol, span) => m.tipoPago === 'finmes'
-    ? `<tr class="liq-afp"><td colspan="${span}">${afpEtiqueta}</td><td class="num">- ${money(m.afpDescuento)}</td>${padCell(withRetainCol)}</tr>`
+    ? `<tr class="liq-afp"><td colspan="${span}">${afpEtiqueta}</td><td class="num">- ${moneyReal(m.afpDescuento)}</td>${padCell(withRetainCol)}</tr>`
     : '';
   const detailRowsHtml = (withRetainCol, span) => liqExtraDetails.map(d => {
     const signo = d.tipo === 'suma' ? '+' : '-';
-    return `<tr class="liq-afp"><td colspan="${span}">${d.desc}</td><td class="num">${signo} ${money(d.monto)}</td>${padCell(withRetainCol)}</tr>`;
+    return `<tr class="liq-afp"><td colspan="${span}">${d.desc}</td><td class="num">${signo} ${moneyReal(d.monto)}</td>${padCell(withRetainCol)}</tr>`;
   }).join('');
 
   function totalRowsHtml(withRetainCol, span){
     const pad = padCell(withRetainCol);
     let html = '';
     if(m.rowsPagables.length){
-      html += `<tr class="liq-total"><td colspan="${span}">PRECIO TOTAL</td><td class="num">${money(m.subtotal)}</td>${pad}</tr>`;
+      html += `<tr class="liq-total"><td colspan="${span}">PRECIO TOTAL</td><td class="num">${moneyReal(m.subtotal)}</td>${pad}</tr>`;
       if(m.tipoPago === 'finmes'){
         html += afpRowHtml(withRetainCol, span);
-        html += `<tr class="liq-total"><td colspan="${span}">TOTAL NETO</td><td class="num">${money(m.totalFinal)}</td>${pad}</tr>`;
+        html += `<tr class="liq-total"><td colspan="${span}">TOTAL NETO</td><td class="num">${moneyReal(m.totalFinal)}</td>${pad}</tr>`;
       }
       html += detailRowsHtml(withRetainCol, span);
       if(liqExtraDetails.length){
-        html += `<tr class="liq-total"><td colspan="${span}">TOTAL A PAGAR</td><td class="num">${money(totalConAjustes)}</td>${pad}</tr>`;
+        html += `<tr class="liq-total"><td colspan="${span}">TOTAL A PAGAR</td><td class="num">${moneyReal(totalConAjustes)}</td>${pad}</tr>`;
       }
     }
     if(m.rowsPagadas.length){
-      html += `<tr class="liq-total liq-subtle"><td colspan="${span}">Total ya pagado (informativo)</td><td class="num">${money(m.totalYaPagado)}</td>${pad}</tr>`;
+      html += `<tr class="liq-total liq-subtle"><td colspan="${span}">Total ya pagado (informativo)</td><td class="num">${moneyReal(m.totalYaPagado)}</td>${pad}</tr>`;
     }
     if(m.rowsRetenidas.length){
-      html += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retención para Finiquito</b> — este monto no se paga ahora, queda guardado</td><td class="num">${money(m.totalRetenido)}</td>${pad}</tr>`;
+      html += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retención para Finiquito</b> — este monto no se paga ahora, queda guardado</td><td class="num">${moneyReal(m.totalRetenido)}</td>${pad}</tr>`;
     }
     return html;
   }
@@ -3203,7 +3293,7 @@ function liqRebuildDoc(){
     <div style="margin-top:10px;">
       ${liqExtraDetails.map((d,i) => `
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);">
-          <span>${d.desc} <b style="color:${d.tipo==='suma'?'var(--entregado)':'#c0546f'};">${d.tipo==='suma'?'+':'-'} ${money(d.monto)}</b> <small style="color:var(--sub);">(${d.destino==='retencion'?'a lo retenido':'al pago'})</small></span>
+          <span>${d.desc} <b style="color:${d.tipo==='suma'?'var(--entregado)':'#c0546f'};">${d.tipo==='suma'?'+':'-'} ${moneyReal(d.monto)}</b> <small style="color:var(--sub);">(${d.destino==='retencion'?'a lo retenido':'al pago'})</small></span>
           <button class="btn small" data-remove-detail="${i}">Quitar</button>
         </div>`).join('')}
       <button class="btn small" id="liqAddDetailBtn" style="margin-top:8px;">+ Agregar detalle</button>
@@ -3238,7 +3328,7 @@ function liqRebuildDoc(){
         <tbody>
           ${m.rows.map(r => `<tr>
             <td>${r.piso}</td><td>${r.label} — ${r.area}</td><td>${r.categoria}</td>
-            <td>${r.m2}</td><td>${estadoCellText(r)}</td><td class="num">${money(r.precio)}</td>
+            <td>${r.m2}</td><td>${estadoCellText(r)}</td><td class="num">${moneyReal(r.precio)}</td>
             <td class="liq-retain-col">${retainCellHtml(r)}</td>
           </tr>`).join('')}
           ${totalRowsHtml(true, 5)}
@@ -3249,7 +3339,7 @@ function liqRebuildDoc(){
         <tbody>
           ${m.rows.map(r => `<tr>
             <td><b>${r.label} — ${r.area}</b><div class="liq-sub2">${r.piso} · ${r.categoria}</div></td>
-            <td>${r.m2}</td><td>${estadoCellText(r)}</td><td class="num">${money(r.precio)}</td>
+            <td>${r.m2}</td><td>${estadoCellText(r)}</td><td class="num">${moneyReal(r.precio)}</td>
             <td class="liq-retain-col">${retainCellHtml(r)}</td>
           </tr>`).join('')}
           ${totalRowsHtml(true, 3)}
@@ -3277,7 +3367,7 @@ function liqRebuildDoc(){
           <tr class="liq-labels"><th>Piso</th><th>Depto / Área</th><th>Categoría</th><th>m²</th><th>Estado</th><th class="num">Precio</th></tr>
           ${m.rows.map(r => `<tr>
             <td>${r.piso}</td><td>${r.label} — ${r.area}</td><td>${r.categoria}</td>
-            <td>${r.m2}</td><td>${estadoCellText(r)}</td><td class="num">${money(r.precio)}</td>
+            <td>${r.m2}</td><td>${estadoCellText(r)}</td><td class="num">${moneyReal(r.precio)}</td>
           </tr>`).join('')}
           ${totalRowsHtml(false, 5)}
         </tbody>
@@ -3409,7 +3499,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
     if(dest === 'pago' && !hasPay) dest = 'retencion';
     (dest === 'retencion' ? detRet : detPago).push(d);
   });
-  const descr = arr => arr.map(d => `${d.tipo === 'resta' ? '-' : '+'}${money(d.monto)} ${d.desc}`).join(', ');
+  const descr = arr => arr.map(d => `${d.tipo === 'resta' ? '-' : '+'}${moneyReal(d.monto)} ${d.desc}`).join(', ');
   let extra = '';
   if(detPago.length) extra += ` Detalles aplicados al pago: ${descr(detPago)}.`;
   if(detRet.length) extra += ` Detalles aplicados a lo retenido: ${descr(detRet)}.`;
@@ -3546,7 +3636,7 @@ function renderStatsView(){
     : '<p style="font-size:12px;color:var(--sub);">Todavía no hay partidas Terminadas o Pagadas con trabajador asignado.</p>';
 
   let moneyChart = '<p style="font-size:12px;color:var(--sub);">Todavía no hay liquidaciones pagadas registradas.</p>';
-  if(isAdmin){
+  if(isAdmin && !preciosOcultos()){
     const pagos = paymentHistory.filter(h => h.type === 'pago').sort((a,b) => a.ts - b.ts);
     if(pagos.length){
       let acumulado = 0;
@@ -3558,10 +3648,10 @@ function renderStatsView(){
       moneyChart = barsHtml(moneyItems, v => money(v));
     }
   } else {
-    moneyChart = '<p style="font-size:12px;color:var(--sub);">Los montos solo los ve el Admin.</p>';
+    moneyChart = `<p style="font-size:12px;color:var(--sub);">${isAdmin ? 'Los precios están ocultos. Pulsa "Mostrar precios" para verlos.' : 'Los montos solo los ve el Admin.'}</p>`;
   }
 
-  const proyeccion = isAdmin ? computeProjection(cells) : 'Esta información solo la ve el Admin.';
+  const proyeccion = isAdmin ? (preciosOcultos() ? 'Los precios están ocultos. Pulsa "Mostrar precios" para verlo.' : computeProjection(cells)) : 'Esta información solo la ve el Admin.';
 
   document.getElementById('statsBody').innerHTML = `
     <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:22px;">
