@@ -169,6 +169,24 @@
   .flip-sin-fechas{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:var(--sub);font-style:italic;margin:0;}
   .flip-back-btn{border:1px solid var(--border-strong);background:var(--panel);color:var(--text);padding:4px;font-size:11.5px;font-weight:600;cursor:pointer;border-radius:var(--radius);flex-shrink:0;}
   .ribbon-flag.estado-badge{border:none;cursor:pointer;font-family:inherit;}
+  :root{--ancho-estado:112px;}
+  .ribbon-flag.estado-badge{width:var(--ancho-estado);}
+  .cell-flip-front.front-admin{min-height:152px;}
+  .est-lista{flex:1;display:flex;flex-direction:column;gap:3px;justify-content:center;min-height:0;}
+  .est-fila{display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;padding:3px 6px;font-size:11.5px;line-height:1.3;border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);cursor:pointer;border-radius:0;text-align:left;font-family:inherit;}
+  .est-fila:disabled{opacity:.4;cursor:not-allowed;}
+  .est-caja{width:13px;height:13px;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none;}
+  .est-nombre{font-weight:700;flex:1;white-space:nowrap;}
+  .est-fecha{font-size:10.5px;white-space:nowrap;}
+  .est-fila .f-corto{display:none;}
+  .est-fila.on.partida{background:var(--proceso);border-color:var(--proceso);color:#4a3900;}
+  .est-fila.on.terminado{background:var(--entregado);border-color:var(--entregado);color:#fff;}
+  .est-fila.on.pagado{background:var(--pagado-pill-bg);border-color:var(--pagado);color:var(--pagado-pill-text);}
+  .est-fila.cambio{outline:2px dashed var(--accent);outline-offset:1px;}
+  .est-botones{display:flex;gap:4px;flex-shrink:0;}
+  .est-botones .flip-back-btn{flex:1;border-radius:0;min-width:0;white-space:nowrap;}
+  .est-confirmar{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+  .est-confirmar:disabled{opacity:.45;cursor:not-allowed;}
   .btn:disabled{opacity:.5;cursor:not-allowed;}
   .pet-tabs{display:flex;gap:6px;margin-bottom:10px;}
   .hist-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
@@ -299,6 +317,15 @@
     .stats{grid-template-columns:repeat(2,1fr);}
     .cell-block{min-width:0;padding:4px;}
     .ribbon-flag.estado-badge{padding:4px 7px;font-size:9px;letter-spacing:0;}
+    :root{--ancho-estado:78px;}
+    .cell-flip-front.front-admin{min-height:158px;}
+    .est-fila{font-size:9.5px;padding:3px 4px;gap:4px;}
+    .est-fecha{font-size:9px;}
+    .est-fila .f-largo{display:none;}
+    .est-fila .f-corto{display:inline;}
+    .est-caja{display:none;}
+    .est-botones{gap:3px;}
+    .est-botones .flip-back-btn{font-size:10px;padding:4px 1px;}
 
     .flip-fecha-row{flex-direction:column;gap:0;white-space:normal;font-size:10px;}
     .flip-fecha-row span:first-child{font-size:9.5px;}
@@ -748,7 +775,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.12.1';
+const APP_VERSION = '0.13.2';
 const BACKEND_REQUERIDO = 15;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
@@ -1650,10 +1677,10 @@ function notaHtml(cell, st){
 function checksHtml(cell, st){
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
 
-  if(!isAdmin){
+  if(!isAdmin || vistaCompactaAdmin()){
     const estado = resolveEstado(st);
     const label = estado==='pagado' ? 'Pagado' : estado==='entregado' ? terminadoLabel : estado==='proceso' ? 'Partida' : 'Pendiente';
-    return `<div class="checks-row" data-checksof="${cell.id}"><button type="button" class="ribbon-flag estado-badge estado-${estado}" data-flipbtn="${cell.id}">${label}</button></div>`;
+    return `<div class="checks-row" data-checksof="${cell.id}"><button type="button" class="ribbon-flag estado-badge estado-${estado}" data-flipbtn="${cell.id}"${isAdmin ? ' title="Toca para cambiar el estado"' : ''}>${label}</button></div>`;
   }
 
   const terminadoDisabled = !isAdmin || (!turboMode && !st.partida);
@@ -1694,6 +1721,67 @@ function fechasHtml(st, terminadoLabel){
   if(!filas.length) return `<p class="flip-sin-fechas">Todavía no hay ningún cambio de estado registrado.</p>`;
   return filas.map(([label, ts]) => `<div class="flip-fecha-row"><span>${label}</span><span>${fechaCortaHora(ts)}</span></div>`).join('');
 }
+const vistaCompactaAdmin = () => isAdmin && document.body.classList.contains('tema1');
+const estadoNumero = st => st.pagado ? 3 : st.terminado ? 2 : st.partida ? 1 : 0;
+function fechaCortaMovil(ts){
+  return new Date(ts).toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'2-digit'});
+}
+function aplicarEstadoDestino(id, destino){
+  const st = getState(id), actual = estadoNumero(st), ahora = Date.now();
+  if(destino > actual){
+    for(let n = actual + 1; n <= destino; n++){
+      if(n === 1){ st.partida = true; st.partidaTs = st.partidaTs || ahora; }
+      if(n === 2){ st.terminado = true; st.terminadoTs = ahora; if(!st.partidaTs) st.partidaTs = ahora; }
+      if(n === 3){ st.pagado = true; st.pagadoTs = ahora; if(!st.terminadoTs) st.terminadoTs = ahora; if(!st.partidaTs) st.partidaTs = ahora; }
+    }
+  } else {
+    if(destino < 3){ st.pagado = false; st.pagadoTs = null; }
+    if(destino < 2){ st.terminado = false; st.terminadoTs = null; }
+    if(destino < 1){ st.partida = false; st.partidaTs = null; }
+  }
+}
+function filasEstadoAdminHtml(cell, st, destino){
+  const actual = estadoNumero(st);
+  const nombres = ['Partida', TERMINADO_LABEL[cell.area] || 'Terminado', 'Pagado'];
+  const clases = ['partida', 'terminado', 'pagado'];
+  const fechas = [st.partidaTs, st.terminadoTs, st.pagadoTs];
+  const hoy = Date.now();
+  return [1, 2, 3].map(n => {
+    const activo = destino >= n, cambio = activo !== (actual >= n);
+    const habilitado = destino >= n || turboMode || destino === n - 1;
+    let largo = '—', corto = '—';
+    if(activo){
+      const ts = cambio ? hoy : fechas[n - 1];
+      largo = ts ? fechaCorta(ts) : 'sin fecha';
+      corto = ts ? fechaCortaMovil(ts) : 'sin fecha';
+    }
+    return `<button type="button" class="est-fila ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-estn="${n}" ${habilitado ? '' : 'disabled'}><span class="est-caja">${activo ? '✓' : ''}</span><span class="est-nombre">${nombres[n - 1]}</span><span class="est-fecha"><span class="f-largo">${largo}</span><span class="f-corto">${corto}</span></span></button>`;
+  }).join('');
+}
+function reversoAdminHtml(cell, st){
+  const hasWorker = !!st.trabajador;
+  return `<div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}">${hasWorker ? st.trabajador : 'Sin asignar'}</div></div>
+    <div class="est-lista">${filasEstadoAdminHtml(cell, st, estadoNumero(st))}</div>
+    <div class="est-botones">
+      <button type="button" class="flip-back-btn" data-estcancelar="${cell.id}">Cancelar</button>
+      <button type="button" class="flip-back-btn est-confirmar" data-estconfirmar="${cell.id}" disabled>Confirmar</button>
+    </div>`;
+}
+function pintarReversoAdmin(id){
+  const flip = document.querySelector(`.cell-flip[data-cellid="${id}"]`);
+  if(!flip || !flip.querySelector('.est-lista')) return;
+  const st = getState(id);
+  const destino = flip.dataset.destino === undefined ? estadoNumero(st) : Number(flip.dataset.destino);
+  flip.querySelector('.est-lista').innerHTML = filasEstadoAdminHtml(cellById[id], st, destino);
+  flip.querySelector('.est-confirmar').disabled = destino === estadoNumero(st);
+}
+function confirmarEstadoAdmin(id, destino){
+  aplicarEstadoDestino(id, destino);
+  markCellDirty(id);
+  scheduleSave(); render();
+  const freshTd = document.querySelector(`[data-cellid="${id}"]`)?.closest('.cell-td');
+  if(freshTd){ freshTd.classList.add('flash'); setTimeout(() => freshTd.classList.remove('flash'), 650); }
+}
 function cellHtml(cell){
   const st = getState(cell.id);
   const hasWorker = !!st.trabajador;
@@ -1722,19 +1810,20 @@ function cellHtml(cell){
         ${priceLinesHtml(cell, st)}
         ${notaHtml(cell, st)}
       </div>`;
-  if(isAdmin){
+  if(isAdmin && !vistaCompactaAdmin()){
     return `<div class="cell-block" data-cellid="${cell.id}">${frontInner}</div>`;
   }
 
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
+  const reverso = isAdmin ? reversoAdminHtml(cell, st) : `
+          <div class="worker-row-top"><div class="worker-name ${hasWorker?'':'unassigned'}">${hasWorker ? st.trabajador : 'Sin asignar'}</div></div>
+          <div class="flip-dates">${fechasHtml(st, terminadoLabel)}</div>
+          <button type="button" class="flip-back-btn" data-flipback="${cell.id}">⬅ Volver</button>`;
   return `
     <div class="cell-flip" data-cellid="${cell.id}">
       <div class="cell-flip-inner">
-        <div class="cell-block cell-flip-front">${frontInner}</div>
-        <div class="cell-block cell-flip-back">
-          <div class="worker-row-top"><div class="worker-name ${hasWorker?'':'unassigned'}">${hasWorker ? st.trabajador : 'Sin asignar'}</div></div>
-          <div class="flip-dates">${fechasHtml(st, terminadoLabel)}</div>
-          <button type="button" class="flip-back-btn" data-flipback="${cell.id}">⬅ Volver</button>
+        <div class="cell-block cell-flip-front${isAdmin ? ' front-admin' : ''}">${frontInner}</div>
+        <div class="cell-block cell-flip-back">${reverso}
         </div>
       </div>
     </div>`;
@@ -2634,7 +2723,9 @@ function render(){
 
   contentEl.querySelectorAll('[data-flipbtn]').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      e.currentTarget.closest('.cell-flip')?.classList.add('is-flipped');
+      const flip = e.currentTarget.closest('.cell-flip');
+      if(isAdmin && flip){ const id = flip.getAttribute('data-cellid'); flip.dataset.destino = estadoNumero(getState(id)); pintarReversoAdmin(id); }
+      flip?.classList.add('is-flipped');
     });
   });
   contentEl.querySelectorAll('[data-flipback]').forEach(btn => {
@@ -2741,6 +2832,7 @@ document.getElementById('temaSelector').addEventListener('change', (e) => {
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
   document.body.classList.remove('tema1', 'tema2');
   if(e.target.value) document.body.classList.add(e.target.value);
+  render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
   try{ localStorage.setItem('progresoObraTema', e.target.value); }catch(err){}
 });
@@ -2753,7 +2845,7 @@ document.getElementById('saveNowBtn').addEventListener('click', saveNow);
 document.getElementById('dbBtn').addEventListener('click', () => {
   const bodyHtml = `
     <p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Pega aquí la URL de tu backend/base de datos. Déjalo vacío para volver a guardar solo en este panel.</p>
-    <p style="margin:0 0 10px;font-size:12.5px;color:#a97e00;">Nota: la conexión con la base de datos solo funciona con la página ya publicada en un hosting (Netlify, GitHub Pages, etc), no abriendo el archivo suelto.</p>
+    <p style="margin:0 0 10px;font-size:12.5px;color:#a97e00;">Nota: la conexión con la base de datos solo funciona desde el link oficial de la página. Pídeselo al administrador.</p>
     <input type="text" id="dbUrlInput" style="width:100%;" placeholder="https://tu-servidor.com/XXXX" value="${DB_URL}">`;
   openInputModal('Conectar base de datos', bodyHtml, async () => {
     DB_URL = document.getElementById('dbUrlInput').value.trim();
@@ -3604,6 +3696,31 @@ setInterval(updateLiveClock, 30000);
 floatingSaveBtn.addEventListener('click', saveNow);
 document.getElementById('scrollTopBtn').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
+document.getElementById('content').addEventListener('click', (e) => {
+  if(!isAdmin) return;
+  const fila = e.target.closest('[data-estn]');
+  if(fila){
+    if(fila.disabled) return;
+    const flip = fila.closest('.cell-flip'), id = flip.getAttribute('data-cellid'), n = Number(fila.getAttribute('data-estn'));
+    const actual = flip.dataset.destino === undefined ? estadoNumero(getState(id)) : Number(flip.dataset.destino);
+    flip.dataset.destino = actual >= n ? n - 1 : n;
+    pintarReversoAdmin(id);
+    return;
+  }
+  const cancelar = e.target.closest('[data-estcancelar]');
+  if(cancelar){
+    const flip = cancelar.closest('.cell-flip');
+    delete flip.dataset.destino;
+    pintarReversoAdmin(flip.getAttribute('data-cellid'));
+    flip.classList.remove('is-flipped');
+    return;
+  }
+  const confirmar = e.target.closest('[data-estconfirmar]');
+  if(confirmar && !confirmar.disabled){
+    const flip = confirmar.closest('.cell-flip');
+    confirmarEstadoAdmin(flip.getAttribute('data-cellid'), Number(flip.dataset.destino));
+  }
+});
 (async function init(){
   await loadState();
   try{ const savedCat = localStorage.getItem('progresoObraCategoria'); if(savedCat) activeCategoria = savedCat; }catch(err){}
