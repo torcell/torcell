@@ -128,6 +128,8 @@
   .stat-card .bar{height:5px;background:var(--panel-soft);margin-top:9px;border:1px solid var(--border);}
   .stat-card .bar > div{height:100%;}
   .stat-card .sub2{font-size:11px;color:var(--sub);margin-top:3px;}
+  .stat-card .ganancia{font-weight:700;color:var(--entregado);}
+  .stat-card .ganancia span{font-weight:500;color:var(--sub);white-space:nowrap;}
   .c-pendiente{color:var(--pendiente)} .c-proceso{color:#a97e00} .c-entregado{color:var(--entregado)} .c-pagado{color:var(--pagado)}
   .money-card .n{font-size:16.5px;}
   .recordatorio-cierre{margin:0 0 12px;padding:8px 10px;background:var(--panel-soft);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.6;}
@@ -220,8 +222,11 @@
   .peticion-item{border:1px solid var(--border);padding:8px 10px;margin-bottom:8px;background:var(--panel-soft);font-size:12.5px;}
   .peticion-item .sub{color:var(--sub);font-size:11.5px;margin:2px 0 6px;}
   .peticion-item .acciones{display:flex;gap:6px;}
-  .worker-row-top{position:relative;display:block;min-height:38px;}
-  .worker-name{display:block;font-size:18px;font-weight:800;line-height:1.2;color:var(--text);min-width:0;overflow-wrap:anywhere;padding:6px 10px;background:var(--panel-soft);border:1px solid var(--border-strong);border-radius:var(--radius);cursor:default;user-select:none;}
+  .worker-row-top{position:relative;display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;min-height:34px;}
+  .worker-row-top .worker-name{flex:1 1 84px;}
+  .worker-row-top .asignar-fila{margin:0;flex:0 0 auto;flex-wrap:nowrap;}
+  .worker-row-top .assign-btn{flex:0 0 auto;height:100%;}
+  .worker-name{display:block;font-size:16px;font-weight:800;line-height:1.2;color:var(--text);min-width:0;overflow-wrap:anywhere;padding:4px 8px;background:var(--panel-soft);border:1px solid var(--border-strong);border-radius:var(--radius);cursor:default;user-select:none;}
   .worker-name.unassigned{color:var(--sub);font-weight:600;font-style:italic;border-style:dashed;background:transparent;}
   .asignar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
   .asig-op{min-height:56px;font-family:inherit;font-size:17px;font-weight:700;padding:8px;border:2px solid var(--border-strong);background:var(--panel);color:var(--text);cursor:pointer;border-radius:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
@@ -368,7 +373,9 @@
     table.dept-table td.dpto-col.dpto-largo .dpto-inner{font-size:10.5px;letter-spacing:0;}
     col.col-dpto{width:26px;}
     .grp-piso{margin-left:0;}
-    .worker-name{font-size:14px;padding:5px 6px;}
+    .worker-name{font-size:14px;padding:4px 6px;}
+    .worker-row-top .assign-btn{width:100%;padding:6px 4px;}
+    .worker-row-top .asignar-fila{flex:1 1 100%;}
     .assign-btn, .mismo-piso-btn{font-size:11px;padding:6px 4px;}
     .mismo-piso-btn .t-largo{display:none;}
     .mismo-piso-btn .t-corto{display:inline;}
@@ -824,7 +831,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.14.4';
+const APP_VERSION = '0.14.7';
 const BACKEND_REQUERIDO = 16;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
@@ -1087,9 +1094,15 @@ function defaultWorkerEntry(w){
   return DEFAULT_WORKER_STATUS[w] ? {...DEFAULT_WORKER_STATUS[w]} : {estado:'activo', especialidad:'ceramista'};
 }
 
+let dbPrevStatus = null;
 function updateDbBadge(){
   const el = document.getElementById('dbBadge');
   if(!el) return;
+  if(DB_URL && dbStatus !== dbPrevStatus){
+    if(dbStatus === 'error') avisoToast('Sin conexión con la base de datos. ' + (dbErrorReason || 'Prueba guardar de nuevo.'), 'error');
+    else if(dbStatus === 'online' && dbPrevStatus === 'error') avisoToast('Conexión con la base de datos recuperada.', 'ok');
+  }
+  dbPrevStatus = DB_URL ? dbStatus : null;
   if(!DB_URL){
     el.textContent = 'Guardado local';
     el.className = 'db-badge off';
@@ -1126,6 +1139,8 @@ async function pingDb(){
   updateDbBadge();
 }
 setInterval(pingDb, 40000);
+window.addEventListener('offline', () => { dbStatus = 'error'; dbErrorReason = 'Tu dispositivo se quedó sin internet.'; updateDbBadge(); });
+window.addEventListener('online', () => { pingDb(); });
 
 const DATOS_VIEJOS_MS = 2 * 60 * 60 * 1000;
 function revisarDatosViejos(){
@@ -1346,6 +1361,8 @@ async function doSaveCycle(){
   }
   render();
   if(localOk && (!DB_URL || dbOk)) mostrarGuardadoToast();
+  else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error');
+  else if(!localOk) avisoToast('No se pudo guardar en este navegador. Descarga un respaldo para no perder los cambios.', 'error');
   return {localOk, dbOk};
   } finally { ocultarCargando(); }
 }
@@ -1354,7 +1371,7 @@ function mostrarGuardadoToast(){
   const t = document.getElementById('savedToast');
   t.style.display = 'block';
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+  t._timer = setTimeout(() => { t.style.display = 'none'; }, 5000);
 }
 function enqueueSave(){
   const p = saveChain.then(doSaveCycle);
@@ -1682,14 +1699,15 @@ function renderStats(){
     return `<div class="stat-card st-${s.cls}"><div class="n c-${s.cls}">${n}</div><div class="l">${s.label}</div>
       ${barHtml}</div>`;
   }).join('');
-  const terminadoSub = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>` : '';
+  const gananciaLinea = (r, b) => `<div class="sub2 ganancia">Se gana: ${money(r - b)} <span>(${money(r)} − ${money(b)})</span></div>`;
+  const terminadoSub = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>${gananciaLinea(terminadoMonto2, terminadoMonto1)}` : '';
   const terminadoMoneyCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(terminadoMonto1)}</div><div class="l">Terminado</div>${terminadoSub}</div>`;
   const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>
     <div class="l">Pagado de ${money(totalMonto1)}</div>
     <div class="bar"><div style="width:${totalMonto1?Math.round(pagadoMonto1/totalMonto1*100):0}%; background:var(--pagado);"></div></div></div>`;
   const fechaHoraCierre = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  const refDentro = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tDentro2)} con tarifa referencia</div>` : '';
-  const refNuevo = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tNuevo2)} con tarifa referencia</div>` : '';
+  const refDentro = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tDentro2)} con tarifa referencia</div>${gananciaLinea(tDentro2, tDentro1)}` : '';
+  const refNuevo = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tNuevo2)} con tarifa referencia</div>${gananciaLinea(tNuevo2, tNuevo1)}` : '';
   const terminadoDentroCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(tDentro1)}</div><div class="l">Terminado dentro del cierre</div><div class="sub2">${nDentro} partida(s) · entran en la próxima liquidación</div>${refDentro}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div></div>`;
   const terminadoNuevoCard = `<div class="stat-card money-card st-entregado cierre-nuevo"><div class="n c-entregado">${money(tNuevo1)}</div><div class="l">Terminado nuevo, después del cierre</div><div class="sub2">${nNuevo} partida(s) · no entran hasta el próximo cierre</div>${refNuevo}</div>`;
   const terminadoCards = cierreQuincena ? terminadoDentroCard + terminadoNuevoCard : terminadoMoneyCard;
@@ -1893,14 +1911,16 @@ function cellHtml(cell){
   }
   const pisoCell = isAdmin ? celdaPisoDe(cell) : null;
   const pisoWorker = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
-  const mismoBtn = (pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador)
+  const mismoBtn = (!st.pagado && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador)
     ? `<button type="button" class="mismo-piso-btn" data-id="${cell.id}" title="Poner a ${pisoWorker}, el mismo del Piso"><span class="t-largo">Igual al Piso</span><span class="t-corto">Igual Piso</span></button>` : '';
-  const assignBtn = isAdmin ? `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button>${mismoBtn}</div>` : '';
+  const assignBtn = (isAdmin && !st.pagado) ? `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button></div>` : '';
+  const mismoFila = mismoBtn ? `<div class="asignar-fila">${mismoBtn}</div>` : '';
   const frontInner = `
       <div class="worker-row-top">
         <div class="worker-name ${hasWorker?'':'unassigned'}" data-namefor="${cell.id}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>
         ${assignBtn}
       </div>
+      ${mismoFila}
       ${checksHtml(cell, st)}
       ${peticionBtnHtml(cell, st)}
       <div class="bottom-group">
@@ -2159,11 +2179,12 @@ async function llamarDb(accion, extra){
   try{ return JSON.parse(await res.text()); }catch(e){ return {ok: false, error: 'respuesta_invalida'}; }
 }
 let avisoToastTimer = null;
-function avisoToast(texto){
+function avisoToast(texto, tipo){
   const el = document.getElementById('avisoToast');
   el.textContent = texto; el.style.display = 'block';
+  el.style.borderLeft = tipo === 'error' ? '5px solid #c0392b' : tipo === 'ok' ? '5px solid #43a047' : '1px solid var(--border-strong)';
   clearTimeout(avisoToastTimer);
-  avisoToastTimer = setTimeout(() => { el.style.display = 'none'; }, Math.min(15000, Math.max(4500, texto.length * 70)));
+  avisoToastTimer = setTimeout(() => { el.style.display = 'none'; }, Math.min(15000, Math.max(5500, texto.length * 70)));
 }
 function tienePeticionMia(celdaId, tipo){ return misPeticiones.some(p => p.celda === celdaId && p.tipo === tipo); }
 function peticionBtnHtml(cell, st){
@@ -2986,6 +3007,7 @@ document.getElementById('dbBtn').addEventListener('click', () => {
         populateFilters(); renderWorkerPanel(); updateRateFootnote(); render();
         scheduleSave();
         datosCargadosTs = Date.now(); avisoDatosViejosDescartado = false;
+        if(dbStatus === 'online') avisoToast('Conectado a la base de datos.', 'ok');
       } finally { ocultarCargando(); }
     } else { dbStatus = 'off'; }
     updateDbBadge();
