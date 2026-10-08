@@ -830,8 +830,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.14.8';
-const BACKEND_REQUERIDO = 16;
+const APP_VERSION = '0.15.0';
+const BACKEND_REQUERIDO = 17;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -1157,9 +1157,25 @@ async function dbLoad(){
   if(!DB_URL) return null;
   dbErrorReason = '';
   try{
-    const res = await fetch(DB_URL + '?action=load');
-    if(!res.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
-    const data = await res.json();
+    let data = null;
+    if(sessionToken){
+      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', token: sessionToken})});
+      if(!resP.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${resP.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
+      const jp = await resP.json();
+      if(jp && jp.ok === true){ data = jp; }
+      else if(jp && jp.error === 'sin_sesion'){
+        avisoToast('Tu sesión venció. Vuelve a iniciar sesión para ver todos los datos.', 'error');
+        document.getElementById('logoutBtn').click();
+      } else if(isAdmin){
+        dbErrorReason = 'El servidor no entregó los datos completos. Prueba recargar la página.';
+        throw new Error('carga privada fallida');
+      }
+    }
+    if(!data){
+      const res = await fetch(DB_URL + '?action=load');
+      if(!res.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
+      data = await res.json();
+    }
     if(data && data.items) ultimoConteoHoja = Object.keys(data.items).length;
     dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = ''; updateDbBadge();
     if(data && data.backendVersion){ backendVersion = data.backendVersion; updateRateFootnote(); }
@@ -1225,6 +1241,8 @@ async function dbSave(dirtyIds){
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
     if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Vuelve a iniciar sesión para poder seguir guardando.'; throw new Error('sin sesion'); }
+    if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = 'El servidor frenó el guardado porque iba a borrar la mayoría de las partidas. No se guardó nada: recarga la página y revisa tus datos.'; throw new Error('reduccion'); }
+    if(json && json.error === 'muy_grande'){ dbErrorReason = 'El servidor rechazó el guardado porque los datos son demasiado grandes.'; throw new Error('muy grande'); }
     if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
     dbStatus = 'online'; dbLastOkTs = Date.now(); updateDbBadge();
     if(forzarGuardadoCompleto){ forzarGuardadoCompleto = false; ultimoConteoHoja = ALL_CELLS.length; }
@@ -2090,12 +2108,28 @@ document.getElementById('loginBtn').addEventListener('click', () => {
 });
 document.getElementById('pinCancel').addEventListener('click', () => closeOverlayAnimated(pinOverlay));
 
+function dispositivoId(){
+  try{ return localStorage.getItem('progresoObraDisp') || ''; }catch(err){ return ''; }
+}
+async function recargarTrasLogin(){
+  if(!DB_URL || !sessionToken) return;
+  const remote = await dbLoad();
+  if(!remote || !remote.items || !Object.keys(remote.items).length) return;
+  const oldWs = workerStatus;
+  applyLoadedPayload(remote);
+  Object.keys(oldWs).forEach(w => {
+    if(!workerStatus[w]) return;
+    ['rut','telefono','correo','nacionalidad','direccion'].forEach(f => { if(oldWs[w][f]) workerStatus[w][f] = oldWs[w][f]; });
+  });
+  populateFilters(); renderWorkerPanel(); updateRateFootnote();
+  datosCargadosTs = Date.now(); render();
+}
 async function checkLoginRemote(pin){
   mostrarCargando('Verificando…');
   try{
     const res = await fetch(DB_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({action:'login', pin})
+      body: JSON.stringify({action:'login', pin, dispositivo: dispositivoId()})
     });
     if(!res.ok) return null;
     const json = await res.json();
@@ -2118,28 +2152,33 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
   }
   if(!res.ok){
     pinError.textContent = res.error === 'demasiados_intentos'
-      ? 'Demasiados PIN incorrectos seguidos. Espera 2 minutos y vuelve a intentar.'
+      ? 'Demasiados PIN incorrectos seguidos. Espera unos minutos y vuelve a intentar.'
       : 'PIN incorrecto.';
     return;
   }
   sessionToken = res.token || null;
   sessionName = res.nombre || '';
+  try{ if(res.dispositivo) localStorage.setItem('progresoObraDisp', res.dispositivo); }catch(err){}
   try{ sessionStorage.setItem('progresoObraToken', sessionToken || ''); sessionStorage.setItem('progresoObraName', sessionName || ''); }catch(err){}
+  if(res.debil && [1,2,3].indexOf(res.rol) !== -1) setTimeout(() => avisoToast('Tu PIN tiene menos de 6 dígitos y es fácil de adivinar. Pídele al administrador que lo cambie por uno más largo.', 'error'), 600);
   if(res.rol === 1){
     isAdmin = true;
     try{ sessionStorage.setItem('progresoObraRol', '1'); }catch(err){}
     closeOverlayAnimated(pinOverlay);
     applyRoleUI(); renderWorkerPanel(); updateDbBadge(); render();
+    await recargarTrasLogin();
   } else if(res.rol === 2){
     isSupervisor = true;
     try{ sessionStorage.setItem('progresoObraRol', '2'); }catch(err){}
     closeOverlayAnimated(pinOverlay);
     applyRoleUI(); render();
+    await recargarTrasLogin();
   } else if(res.rol === 3){
     workerSession = sessionName;
     try{ sessionStorage.setItem('progresoObraRol', '3'); }catch(err){}
     closeOverlayAnimated(pinOverlay);
     applyRoleUI(); populateFilters(); render();
+    await recargarTrasLogin();
   } else {
     pinError.textContent = 'Ese PIN no tiene un Rol válido en la pestaña "Usuarios" (tiene que ser 1, 2 o 3).';
   }
