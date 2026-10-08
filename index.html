@@ -129,7 +129,6 @@
   .stat-card .bar > div{height:100%;}
   .stat-card .sub2{font-size:11px;color:var(--sub);margin-top:3px;}
   .stat-card .ganancia{font-weight:700;color:var(--entregado);}
-  .stat-card .ganancia span{font-weight:500;color:var(--sub);white-space:nowrap;}
   .c-pendiente{color:var(--pendiente)} .c-proceso{color:#a97e00} .c-entregado{color:var(--entregado)} .c-pagado{color:var(--pagado)}
   .money-card .n{font-size:16.5px;}
   .recordatorio-cierre{margin:0 0 12px;padding:8px 10px;background:var(--panel-soft);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.6;}
@@ -831,7 +830,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.14.7';
+const APP_VERSION = '0.14.8';
 const BACKEND_REQUERIDO = 16;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
@@ -1699,7 +1698,7 @@ function renderStats(){
     return `<div class="stat-card st-${s.cls}"><div class="n c-${s.cls}">${n}</div><div class="l">${s.label}</div>
       ${barHtml}</div>`;
   }).join('');
-  const gananciaLinea = (r, b) => `<div class="sub2 ganancia">Se gana: ${money(r - b)} <span>(${money(r)} − ${money(b)})</span></div>`;
+  const gananciaLinea = (r, b) => `<div class="sub2 ganancia">Margen: ${money(r - b)}</div>`;
   const terminadoSub = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>${gananciaLinea(terminadoMonto2, terminadoMonto1)}` : '';
   const terminadoMoneyCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(terminadoMonto1)}</div><div class="l">Terminado</div>${terminadoSub}</div>`;
   const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>
