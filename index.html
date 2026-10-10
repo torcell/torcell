@@ -110,6 +110,18 @@
   td.dpto-col[data-matkey]{cursor:pointer;}
   td.dpto-col.mat-pend{padding-top:28px;}
   td.dpto-col.mat-pend::before{content:'!';position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#c0546f;color:#fff;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
+  td.dpto-col.mat-prep{padding-top:28px;}
+  td.dpto-col.mat-prep::before{content:'!';position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
+  .mat-tabla tr.mat-prep td.mat-nombre::before{content:'!';display:inline-block;width:16px;height:16px;margin-right:6px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:11px;line-height:16px;text-align:center;}
+  #cambiosOverlay .modal{max-width:620px;display:flex;flex-direction:column;max-height:90vh;}
+  .cambios-barra{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap;}
+  .cambios-barra select{flex:1 1 220px;min-width:0;}
+  #cambiosLista{overflow-y:auto;min-height:0;flex:1 1 auto;}
+  .cambio-item{border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;margin-bottom:6px;font-size:12.5px;}
+  .cambio-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--sub);font-size:11.5px;margin-bottom:3px;}
+  .cambio-cuenta{font-weight:700;color:var(--text);}
+  .cambio-celda{font-weight:700;}
+  .cambio-det{margin-top:2px;overflow-wrap:anywhere;}
   .avisos-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#c0546f;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;}
   .aviso-grupo{border:1px solid var(--border);margin-bottom:10px;background:var(--panel-soft);}
   .aviso-grupo h4{margin:0;padding:8px 10px;font-size:13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;}
@@ -554,6 +566,7 @@
       <div class="tb-title">Vista</div>
       <div class="tb-btns">
         <button class="btn" id="statsOpenBtn">📊 Estadísticas</button>
+        <button class="btn admin-only" id="cambiosBtn">🕘 Cambios por cuenta</button>
         <button class="btn admin-only" id="avisosBtn">🔔 Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
@@ -847,6 +860,16 @@
   </div>
 </div>
 
+<div class="overlay" id="cambiosOverlay">
+  <div class="modal">
+    <h3>Cambios por cuenta</h3>
+    <div class="cambios-barra"><select id="cambiosCuenta"><option value="">Todas las cuentas</option></select><button type="button" class="btn small" id="cambiosRefrescarBtn">Actualizar</button></div>
+    <p id="cambiosMsg" style="margin:0 0 8px;font-size:12px;color:var(--sub);"></p>
+    <div id="cambiosLista"></div>
+    <div class="actions"><button class="btn primary" id="cambiosCerrarBtn">Cerrar</button></div>
+  </div>
+</div>
+
 <div class="overlay" id="avisosOverlay">
   <div class="modal" style="max-width:480px;">
     <h3>Avisos</h3>
@@ -907,8 +930,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.17.1';
-const BACKEND_REQUERIDO = 21;
+const APP_VERSION = '0.18.0';
+const BACKEND_REQUERIDO = 22;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -2322,9 +2345,9 @@ function matUnidades(){
   FLOOR_BLOCKS.filter(fb => fb.categoria === 'Cerámica').sort((a, b) => a.pisoNum - b.pisoNum).forEach(fb => {
     fb.depts.forEach(d => {
       const celdas = fb.areas.map(a => d.cells[a] ? {id: d.cells[a].id, area: a} : null).filter(Boolean);
-      lista.push({key: fb.piso + '|' + d.dpto, piso: fb.piso, nombre: d.dpto, celdas});
+      lista.push({key: fb.piso + '|' + d.dpto, piso: fb.piso, pisoNum: fb.pisoNum, nombre: d.dpto, celdas});
     });
-    if(fb.pasillo) lista.push({key: fb.piso + '|Pasillo', piso: fb.piso, nombre: 'Pasillo', celdas: [{id: fb.pasillo.id, area: 'Pasillos'}]});
+    if(fb.pasillo) lista.push({key: fb.piso + '|Pasillo', piso: fb.piso, pisoNum: fb.pisoNum, nombre: 'Pasillo', celdas: [{id: fb.pasillo.id, area: 'Pasillos'}]});
   });
   return lista;
 }
@@ -2334,11 +2357,31 @@ function matTerminada(u){
   return u.celdas.length > 0 && u.celdas.every(c => { const st = getState(c.id); return st.terminado || st.pagado; });
 }
 function matPendiente(u){ return !MATERIALES.ok[u.key] && !matTerminada(u); }
+let matNivelesCache = null;
+function matNiveles(){
+  if(matNivelesCache) return matNivelesCache;
+  const unidades = matUnidadesTodas();
+  const pisos = [...new Set(unidades.map(u => u.pisoNum))].sort((a, b) => a - b);
+  const mov = new Set();
+  unidades.forEach(u => u.celdas.forEach(c => { const st = getState(c.id); if(st.partida && !st.pagado) mov.add(u.pisoNum); }));
+  const niv = {};
+  pisos.forEach((n, i) => {
+    if(!mov.has(n)) return;
+    niv[n] = 'rojo';
+    if(i > 0) niv[pisos[i - 1]] = 'rojo';
+    if(i < pisos.length - 1 && !niv[pisos[i + 1]]) niv[pisos[i + 1]] = 'amarillo';
+  });
+  matNivelesCache = niv;
+  return niv;
+}
+function matNivel(u){ return matPendiente(u) ? (matNiveles()[u.pisoNum] || null) : null; }
+const matTitulo = (nv) => nv === 'rojo' ? 'Materiales sin confirmar: piso en movimiento o el de abajo' : nv === 'amarillo' ? 'Piso de arriba: empieza a preparar y pedir materiales' : 'Ver materiales';
 function matAtributos(key){
   if(!isAdmin || !key) return ' class="dpto-col"';
   const u = matUnidadesTodas().find(x => x.key === key);
-  const pend = u && matPendiente(u);
-  return ` class="dpto-col${pend ? ' mat-pend' : ''}" data-matkey="${esc(key)}" title="${pend ? 'Materiales sin confirmar' : 'Ver materiales'}"`;
+  const nv = u ? matNivel(u) : null;
+  const cls = nv === 'rojo' ? ' mat-pend' : nv === 'amarillo' ? ' mat-prep' : '';
+  return ` class="dpto-col${cls}" data-matkey="${esc(key)}" title="${matTitulo(nv)}"`;
 }
 function matCalculo(celda){
   const m2 = Number(getState(celda.id).m2) || 0;
@@ -2393,13 +2436,14 @@ function renderMateriales(){
   const filas = todas.filter(u => (!sel.value || u.piso === sel.value) && (!soloPend || matPendiente(u)));
   const porArea = (u, a) => u.celdas.find(c => c.area === a);
   document.getElementById('matLista').innerHTML = `<tr><th>Piso / Dpto</th><th>Piso o Pasillo</th><th>Muro Baño</th><th>Muro Cocina</th><th>Materiales listos</th></tr>` +
-    (filas.map(u => `<tr data-matfila="${esc(u.key)}" class="${matPendiente(u) ? 'mat-pend' : ''}${matFoco === u.key ? ' mat-resalta' : ''}">
+    (filas.map(u => `<tr data-matfila="${esc(u.key)}" title="${matTitulo(matNivel(u))}" class="${matNivel(u) === 'rojo' ? 'mat-pend' : matNivel(u) === 'amarillo' ? 'mat-prep' : ''}${matFoco === u.key ? ' mat-resalta' : ''}">
       <td class="mat-nombre">${esc(u.piso)} · ${esc(u.nombre)}</td>
       ${matCeldaHtml(porArea(u, 'Piso') || porArea(u, 'Pasillos'))}${matCeldaHtml(porArea(u, 'Muro Baños'))}${matCeldaHtml(porArea(u, 'Muro Cocina'))}
       <td><input type="checkbox" data-matok="${esc(u.key)}" ${MATERIALES.ok[u.key] ? 'checked' : ''} aria-label="Materiales listos"></td></tr>`).join('') || '<tr><td colspan="5" style="color:var(--sub);">No hay departamentos para mostrar.</td></tr>');
 }
 let matGuardarTimer = null;
 function matCambio(){
+  matNivelesCache = null;
   markSettingsDirty();
   clearTimeout(matGuardarTimer);
   matGuardarTimer = setTimeout(() => { enqueueSave(); }, 1200);
@@ -2430,15 +2474,22 @@ document.getElementById('matLista').addEventListener('change', (e) => {
   matCambio(); renderMateriales();
 });
 
+const matItemAviso = (u) => ({texto: `${u.piso} · ${u.nombre === 'Pasillo' ? 'Pasillo' : 'Dpto ' + u.nombre}`, accion: () => abrirMateriales(u.key), boton: 'Ver'});
 const AVISO_REGLAS = [
   {
-    id: 'materiales',
-    titulo: 'Materiales sin confirmar',
-    calcular: () => matUnidadesTodas().filter(matPendiente).map(u => ({texto: `${u.piso} · ${u.nombre === 'Pasillo' ? 'Pasillo' : 'Dpto ' + u.nombre}`, accion: () => abrirMateriales(u.key), boton: 'Ver'}))
+    id: 'materiales-rojo',
+    titulo: '🔴 Materiales sin confirmar (piso en movimiento y el de abajo)',
+    calcular: () => matUnidadesTodas().filter(u => matNivel(u) === 'rojo').map(matItemAviso)
+  },
+  {
+    id: 'materiales-amarillo',
+    titulo: '🟡 Preparar materiales (piso de arriba)',
+    calcular: () => matUnidadesTodas().filter(u => matNivel(u) === 'amarillo').map(matItemAviso)
   }
 ];
 let avisosVistos = false;
 function calcularAvisos(){
+  matNivelesCache = null;
   return AVISO_REGLAS.map(r => ({regla: r, items: r.calcular()})).filter(g => g.items.length);
 }
 function actualizarAvisos(){
@@ -2463,6 +2514,27 @@ document.getElementById('avisosLista').addEventListener('click', (e) => {
   closeOverlayAnimated(document.getElementById('avisosOverlay'));
   const fn = avisosAcciones[Number(b.dataset.aviso)]; if(fn) setTimeout(fn, 200);
 });
+
+function fechaHoraCambio(ts){ return new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}); }
+async function cargarCambios(){
+  const msg = document.getElementById('cambiosMsg'), lista = document.getElementById('cambiosLista'), sel = document.getElementById('cambiosCuenta');
+  const cuenta = sel.value;
+  msg.textContent = 'Cargando…';
+  let j = null;
+  try{ j = await llamarDb('cambiosListar', {cuenta}); }catch(e){ j = null; }
+  if(!j || !j.ok){
+    msg.textContent = (j && j.error === 'sin_sesion') ? 'Tu sesión venció. Vuelve a iniciar sesión.' : 'No se pudo cargar. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.';
+    lista.innerHTML = ''; return;
+  }
+  sel.innerHTML = '<option value="">Todas las cuentas</option>' + (j.cuentas || []).map(c => `<option value="${esc(c)}"${c === cuenta ? ' selected' : ''}>${esc(c)}</option>`).join('');
+  msg.textContent = j.cambios.length ? `Últimos ${j.cambios.length} cambios${cuenta ? ' de ' + cuenta : ''}.` : '';
+  lista.innerHTML = j.cambios.length ? j.cambios.map(c => `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${esc(c.cuenta)}</span><span>${fechaHoraCambio(c.ts)}</span></div><div class="cambio-celda">${esc(c.celda)}</div><div class="cambio-det"><b>${esc(c.campo)}:</b> ${esc(c.antes === '' ? '—' : c.antes)} → ${esc(c.despues === '' ? '—' : c.despues)}</div></div>`).join('')
+    : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay cambios registrados.</p>';
+}
+document.getElementById('cambiosBtn').addEventListener('click', () => { document.getElementById('cambiosCuenta').value = ''; document.getElementById('cambiosOverlay').classList.add('show'); cargarCambios(); });
+document.getElementById('cambiosCuenta').addEventListener('change', cargarCambios);
+document.getElementById('cambiosRefrescarBtn').addEventListener('click', cargarCambios);
+document.getElementById('cambiosCerrarBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('cambiosOverlay')));
 
 const PERMISOS_FILAS = [
   ['notas', 'Escribir observaciones', 'Agregar o editar la observación de cada partida'],
@@ -3096,6 +3168,7 @@ function abrirEditorPresets(volverAId){
 }
 
 function render(){
+  matNivelesCache = null;
   const contentEl = document.getElementById('content');
   let html;
   if(activeCategoria === 'Pasillos'){
