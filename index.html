@@ -106,6 +106,37 @@
   .role-badge.guest{color:#fff;background:#6c716a;}
   .role-badge.admin{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));}
   .role-badge.supervisor{color:#fff;background:#8a6a1f;}
+  td.dpto-col{position:relative;}
+  td.dpto-col[data-matkey]{cursor:pointer;}
+  td.dpto-col.mat-pend{padding-top:28px;}
+  td.dpto-col.mat-pend::before{content:'!';position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#c0546f;color:#fff;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
+  .avisos-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#c0546f;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;}
+  .aviso-grupo{border:1px solid var(--border);margin-bottom:10px;background:var(--panel-soft);}
+  .aviso-grupo h4{margin:0;padding:8px 10px;font-size:13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;}
+  .aviso-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;font-size:12.5px;border-bottom:1px solid var(--border);}
+  .aviso-item:last-child{border-bottom:0;}
+  .aviso-item button{flex:0 0 auto;}
+  #materialesOverlay .modal{max-width:1000px;display:flex;flex-direction:column;max-height:90vh;}
+  .mat-scroll{overflow:auto;min-height:0;flex:1 1 auto;}
+  .mat-tabla{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .mat-tabla th, .mat-tabla td{border:1px solid var(--border);padding:6px 7px;text-align:center;vertical-align:middle;}
+  .mat-tabla th{background:var(--panel-soft);font-size:11.5px;color:var(--sub);position:sticky;top:0;z-index:1;}
+  .mat-tabla td.mat-nombre{text-align:left;font-weight:700;white-space:nowrap;}
+  .mat-tabla tr.mat-pend td.mat-nombre::before{content:'!';display:inline-block;width:16px;height:16px;margin-right:6px;border-radius:50%;background:#c0546f;color:#fff;font-size:11px;line-height:16px;text-align:center;}
+  .mat-tabla tr.mat-resalta td{background:rgba(255,193,7,.22);}
+  .mat-tabla .mat-m2{display:block;color:var(--sub);font-size:11px;}
+  .mat-tabla .mat-falta{display:block;color:#c0546f;font-size:11px;}
+  .mat-tabla.mat-ajustes input{width:64px;text-align:center;padding:4px;}
+  .mat-tabla input[type=checkbox]{width:20px;height:20px;cursor:pointer;}
+  .mat-resumen{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+  .mat-resumen > div{flex:1 1 220px;border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;font-size:12.5px;}
+  .mat-resumen > div > b{display:block;font-size:12px;color:var(--sub);margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px;}
+  .permisos-tabla{width:100%;border-collapse:collapse;font-size:13px;}
+  .permisos-tabla th, .permisos-tabla td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:center;}
+  .permisos-tabla th:first-child, .permisos-tabla td:first-child{text-align:left;}
+  .permisos-tabla th{font-size:11.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;}
+  .permisos-tabla td small{display:block;color:var(--sub);font-size:11px;margin-top:2px;}
+  .permisos-tabla input[type=checkbox]{width:20px;height:20px;cursor:pointer;}
   .role-badge.worker{color:#fff;background:#2f6f3f;}
   .db-badge{font-size:11px;font-weight:700;padding:6px 10px;border-radius:var(--radius);border:1px solid var(--border-strong);}
   .db-badge.off{color:var(--sub);background:var(--panel-soft);}
@@ -221,10 +252,12 @@
   .peticion-item{border:1px solid var(--border);padding:8px 10px;margin-bottom:8px;background:var(--panel-soft);font-size:12.5px;}
   .peticion-item .sub{color:var(--sub);font-size:11.5px;margin:2px 0 6px;}
   .peticion-item .acciones{display:flex;gap:6px;}
-  .worker-row-top{position:relative;display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;min-height:34px;}
+  .worker-row-top{position:relative;display:flex;align-items:stretch;align-content:flex-start;gap:6px;flex-wrap:wrap;min-height:34px;}
   .worker-row-top .worker-name{flex:1 1 84px;}
   .worker-row-top .asignar-fila{margin:0;flex:0 0 auto;flex-wrap:nowrap;}
-  .worker-row-top .assign-btn{flex:0 0 auto;height:100%;}
+  .worker-row-top .asignar-fila.fila-completa{flex:1 1 100%;}
+  .worker-row-top .assign-btn{flex:0 0 auto;height:100%;min-width:78px;}
+  .asignar-fila.fantasma{visibility:hidden;pointer-events:none;}
   .worker-name{display:block;font-size:16px;font-weight:800;line-height:1.2;color:var(--text);min-width:0;overflow-wrap:anywhere;padding:4px 8px;background:var(--panel-soft);border:1px solid var(--border-strong);border-radius:var(--radius);cursor:default;user-select:none;}
   .worker-name.unassigned{color:var(--sub);font-weight:600;font-style:italic;border-style:dashed;background:transparent;}
   .asignar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
@@ -373,7 +406,7 @@
     col.col-dpto{width:26px;}
     .grp-piso{margin-left:0;}
     .worker-name{font-size:14px;padding:4px 6px;}
-    .worker-row-top .assign-btn{width:100%;padding:6px 4px;}
+    .worker-row-top .assign-btn{width:100%;min-width:0;padding:6px 4px;}
     .worker-row-top .asignar-fila{flex:1 1 100%;}
     .assign-btn, .mismo-piso-btn{font-size:11px;padding:6px 4px;}
     .mismo-piso-btn .t-largo{display:none;}
@@ -512,6 +545,8 @@
           🔒 Retenciones pendientes
           <span id="retencionesBadgeDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span>
         </button>
+        <button class="btn admin-only" id="materialesBtn">🧱 Materiales</button>
+        <button class="btn admin-only" id="permisosBtn">🔑 Permisos por cargo</button>
         <button class="btn admin-only" id="peticionesBtn">📥 Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
       </div>
     </div>
@@ -519,6 +554,7 @@
       <div class="tb-title">Vista</div>
       <div class="tb-btns">
         <button class="btn" id="statsOpenBtn">📊 Estadísticas</button>
+        <button class="btn admin-only" id="avisosBtn">🔔 Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
         <button class="btn admin-only" id="turboBtn" title="Marcar Pagado activa Terminado y Partida; marcar Terminado activa Partida">⚡ Turbo</button>
@@ -767,6 +803,10 @@
     <div class="prog-fila"><select id="progDia"></select><select id="progHora"></select></div>
     <label class="chk-linea"><input type="checkbox" id="progSinNov"> Enviarlo aunque no haya novedades</label>
     <p style="margin:4px 0 0;font-size:11px;color:var(--sub);">Google revisa cada hora: sale en algún momento dentro de la hora elegida (por ejemplo, entre las 13:00 y las 13:59).</p>
+    <div style="margin:14px 0 4px;font-weight:700;font-size:12.5px;">Pisos que salen completos</div>
+    <div class="prog-fila" style="align-items:center;"><span style="font-size:12.5px;">Cantidad de pisos enteros</span><input type="number" id="repPisosN" min="0" max="12" style="width:70px;"></div>
+    <input type="text" id="repPisosLista" style="width:100%;margin-top:6px;" maxlength="60" autocomplete="off" placeholder="O elige cuáles, por ejemplo: 13, 12">
+    <p style="margin:4px 0 0;font-size:11px;color:var(--sub);">Sale entero (con departamentos pendientes incluidos) el número de pisos más altos que tuvieron movimiento. En los demás pisos, y en todo Frague, solo salen los departamentos y pasillos con partida o terminado. Si escribes pisos en la segunda casilla, esos son los que salen enteros y la cantidad se ignora.</p>
     <div style="margin:14px 0 4px;font-weight:700;font-size:12.5px;">Asunto y mensaje de siempre</div>
     <input type="text" id="plantAsunto" style="width:100%;" maxlength="150" autocomplete="off">
     <textarea id="plantMensaje" rows="5" style="width:100%;margin-top:6px;" maxlength="2000"></textarea>
@@ -785,6 +825,43 @@
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Cosas que conviene revisar a mano -- ninguna se corrige sola, esto solo las señala.</p>
     <div id="diagnosticoLista" style="max-height:min(60vh,420px);overflow-y:auto;"></div>
     <div class="actions"><button class="btn primary" id="diagnosticoCloseBtn">Cerrar</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="materialesOverlay">
+  <div class="modal">
+    <h3>Materiales por departamento</h3>
+    <p style="margin:0 0 8px;font-size:12px;color:var(--sub);">Se calcula con los m² de cada partida más la merma. Edita los datos de cada material; los que dejes en 0 aparecen como "falta dato".</p>
+    <div class="mat-scroll">
+      <details id="matAjustesBox" open><summary style="cursor:pointer;font-weight:700;font-size:13px;margin-bottom:6px;">Ajustes por material</summary>
+        <table class="mat-tabla mat-ajustes" id="matAjustes"></table>
+      </details>
+      <div class="mat-resumen" id="matResumen"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0;font-size:12.5px;">
+        <select id="matFiltroPiso"></select>
+        <label style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="matSoloPend"> Solo sin confirmar</label>
+      </div>
+      <table class="mat-tabla" id="matLista"></table>
+    </div>
+    <div class="actions"><button class="btn primary" id="matCerrarBtn">Cerrar</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="avisosOverlay">
+  <div class="modal" style="max-width:480px;">
+    <h3>Avisos</h3>
+    <div id="avisosLista" style="max-height:min(62vh,460px);overflow-y:auto;"></div>
+    <div class="actions"><button class="btn primary" id="avisosCerrarBtn">Cerrar</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="permisosOverlay">
+  <div class="modal" style="max-width:520px;">
+    <h3>Permisos por cargo</h3>
+    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca lo que puede hacer cada cargo. Admin siempre puede todo. Marcar Pagado, precios, liquidaciones y peticiones son solo de Admin.</p>
+    <div style="overflow-x:auto;"><table class="permisos-tabla" id="permisosTabla"></table></div>
+    <p id="permisosMsg" style="min-height:16px;margin:10px 0 0;font-size:12px;color:#c0546f;"></p>
+    <div class="actions"><button class="btn" id="permisosCancelBtn">Cancelar</button><button class="btn primary" id="permisosGuardarBtn">Guardar</button></div>
   </div>
 </div>
 
@@ -830,8 +907,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.15.0';
-const BACKEND_REQUERIDO = 17;
+const APP_VERSION = '0.17.0';
+const BACKEND_REQUERIDO = 20;
 let backendVersion = null;
 const DEFAULT_DB_URL = '';
 
@@ -857,6 +934,23 @@ let cierreQuincena = null;
 let cierreAnterior = null;
 
 let historialM2 = [];
+const MAT_TIPOS = [['piso','Piso'],['muroBano','Muro Baño'],['muroCocina','Muro Cocina'],['pasillo','Pasillo']];
+const MAT_DE_AREA = {'Piso':'piso','Muro Baños':'muroBano','Muro Cocina':'muroCocina','Pasillos':'pasillo'};
+const MAT_CAMPOS = [['ancho','Ancho (cm)'],['largo','Largo (cm)'],['porCaja','Piezas por caja'],['kgSaco','kg por saco'],['consumo','Consumo (kg/m²)'],['merma','Merma %']];
+function matPorDefecto(){
+  return {
+    piso:{ancho:15,largo:60,porCaja:14,kgSaco:25,consumo:5,merma:10},
+    muroBano:{ancho:30,largo:60,porCaja:0,kgSaco:25,consumo:4.5,merma:10},
+    muroCocina:{ancho:30,largo:60,porCaja:0,kgSaco:25,consumo:4.5,merma:10},
+    pasillo:{ancho:15,largo:60,porCaja:14,kgSaco:25,consumo:5,merma:10}
+  };
+}
+let MATERIALES = {params: matPorDefecto(), ok: {}};
+function mezclarMateriales(m){
+  const base = matPorDefecto();
+  if(m && m.params) MAT_TIPOS.forEach(([k]) => { if(m.params[k]) base[k] = {...base[k], ...m.params[k]}; });
+  MATERIALES = {params: base, ok: (m && m.ok && typeof m.ok === 'object') ? {...m.ok} : {}};
+}
 function guardarM2DelPeriodo(desde, hasta){
   const porTrabajador = {};
   ALL_CELLS.forEach(c => {
@@ -876,6 +970,9 @@ const AFP_COTIZACION_OBLIGATORIA = 10;
 let allowGuestPrices = false;
 let isAdmin = false;
 let isSupervisor = false;
+let isJefe = false;
+let misPermisos = {};
+let permisosCargos = null;
 let workerSession = null;
 let sessionToken = null;
 let sessionName = null;
@@ -884,6 +981,7 @@ try{
   const rolGuardado = sessionStorage.getItem('progresoObraRol');
   isAdmin = rolGuardado === '1';
   isSupervisor = rolGuardado === '2';
+  isJefe = rolGuardado === '4';
   sessionName = sessionStorage.getItem('progresoObraName') || null;
   workerSession = rolGuardado === '3' ? sessionName : null;
   sessionToken = sessionStorage.getItem('progresoObraToken') || null;
@@ -898,17 +996,24 @@ let dbErrorReason = '';
 let dbLastOkTs = null;
 
 function canSeePrices(){ return isAdmin || allowGuestPrices; }
+const esStaff = () => isAdmin || isSupervisor || isJefe;
+function puede(permiso){ return isAdmin || ((isSupervisor || isJefe) && misPermisos[permiso] === true); }
+function actualizarBotonesCargo(){
+  const b = document.getElementById('supervisorWorkersBtn');
+  if(b) b.style.display = ((isSupervisor || isJefe) && puede('trabajadores')) ? 'inline-flex' : 'none';
+}
 
 function applyRoleUI(){
   document.body.classList.toggle('is-admin', isAdmin);
-  document.body.classList.toggle('is-supervisor', isSupervisor);
+  document.body.classList.toggle('is-supervisor', isSupervisor || isJefe);
   document.body.classList.toggle('is-worker', !!workerSession);
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
   const badge = document.getElementById('roleBadge');
-  const loggedIn = isAdmin || isSupervisor || workerSession;
+  const loggedIn = isAdmin || isSupervisor || isJefe || workerSession;
   let label = 'Conectado como INVITADO', cls = 'guest';
   if(isAdmin){ label = 'Conectado como: Admin' + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
   else if(isSupervisor){ label = 'Conectado como: Supervisor' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
+  else if(isJefe){ label = 'Conectado como: Jefe de Terreno' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(workerSession){
     const especialidad = (workerStatus[workerSession]||{}).especialidad === 'fraguador' ? 'Fraguador' : 'Ceramista';
     label = `Conectado como: ${especialidad} - ${workerSession}`; cls = 'worker';
@@ -918,7 +1023,7 @@ function applyRoleUI(){
   badge.classList.remove('role-flash'); void badge.offsetWidth; badge.classList.add('role-flash');
   document.getElementById('loginBtn').style.display = loggedIn ? 'none' : 'inline-flex';
   document.getElementById('logoutBtn').style.display = loggedIn ? 'inline-flex' : 'none';
-  document.getElementById('supervisorWorkersBtn').style.display = isSupervisor ? 'inline-flex' : 'none';
+  actualizarBotonesCargo();
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 
   if(!workerSession) misPeticiones = [];
@@ -1046,6 +1151,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
     if(remote.cierreAnterior !== undefined) cierreAnterior = remote.cierreAnterior;
     if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
+    if(isAdmin && remote.materiales) mezclarMateriales(remote.materiales);
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
   }
 
@@ -1217,7 +1323,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2 }
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -1236,7 +1342,7 @@ async function dbSave(dirtyIds){
     else if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, token: sessionToken };
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
@@ -1268,8 +1374,12 @@ function applyLoadedPayload(parsed){
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
   if(parsed.cierreAnterior !== undefined) cierreAnterior = parsed.cierreAnterior;
   if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
+  if(isAdmin && parsed.materiales) mezclarMateriales(parsed.materiales);
   if(Array.isArray(parsed.obsPresets) && parsed.obsPresets.length) OBS_PRESETS = parsed.obsPresets;
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
+  if(isAdmin) permisosCargos = parsed.permisos || permisosCargos;
+  else misPermisos = (parsed.permisos && typeof parsed.permisos === 'object') ? parsed.permisos : {};
+  actualizarBotonesCargo();
   rebuildWorkerList();
   ALL_CELLS.forEach(c => { if(!state[c.id]) state[c.id] = defaultStateFor(c); });
   ALL_WORKERS.forEach(w => {
@@ -1366,7 +1476,7 @@ async function doSaveCycle(){
 
   const soloCeldas = dirtySnap.size > 0 && !settingsDirty && !forzarGuardadoCompleto;
   if(!soloCeldas) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -1399,11 +1509,11 @@ function enqueueSave(){
 function scheduleSave(){}
 
 setInterval(() => {
-  if((isAdmin || isSupervisor) && (dirtyCellIds.size > 0 || settingsDirty)) enqueueSave();
+  if(esStaff() && (dirtyCellIds.size > 0 || settingsDirty)) enqueueSave();
 }, 10 * 60 * 1000);
 
 window.addEventListener('beforeunload', (e) => {
-  if((!isAdmin && !isSupervisor) || (dirtyCellIds.size === 0 && !settingsDirty)) return;
+  if(!esStaff() || (dirtyCellIds.size === 0 && !settingsDirty)) return;
   clearTimeout(saveTimer);
   enqueueSave();
   e.preventDefault();
@@ -1767,7 +1877,7 @@ function priceLinesHtml(cell, st){
 }
 
 function notaHtml(cell, st){
-  if(isAdmin || isSupervisor){
+  if(puede('notas')){
     const label = st.nota ? ('Observación: ' + st.nota) : '+ Observación';
     return `<button class="nota-btn-single" data-id="${cell.id}" title="${st.nota ? st.nota.replace(/"/g,'&quot;') : 'Agregar observación'}">${label}</button>`;
   }
@@ -1779,15 +1889,15 @@ function notaHtml(cell, st){
 function checksHtml(cell, st){
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
 
-  if(!isAdmin || vistaCompactaAdmin()){
+  if(!puede('estados') || vistaCompactaAdmin()){
     const estado = resolveEstado(st);
     const label = estado==='pagado' ? 'Pagado' : estado==='entregado' ? terminadoLabel : estado==='proceso' ? 'Partida' : 'Pendiente';
     return `<div class="checks-row" data-checksof="${cell.id}"><button type="button" class="ribbon-flag estado-badge estado-${estado}" data-flipbtn="${cell.id}"${isAdmin ? ' title="Toca para cambiar el estado"' : ''}>${label}</button></div>`;
   }
 
-  const terminadoDisabled = !isAdmin || (!turboMode && !st.partida);
+  const terminadoDisabled = !puede('estados') || (!turboMode && !st.partida);
   const pagadoDisabled = !isAdmin || (!turboMode && !st.terminado);
-  const partidaDisabled = !isAdmin;
+  const partidaDisabled = !puede('estados');
   return `<div class="checks-row" data-checksof="${cell.id}">
     <label title="${st.pagadoTs ? fechaCortaHora(st.pagadoTs) : 'Sin fecha registrada'}" class="chk-pill pagado ${st.pagado?'on':''} ${pagadoDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="pagado" ${st.pagado?'checked':''} ${pagadoDisabled?'disabled':''}> Pagado
@@ -1926,25 +2036,27 @@ function cellHtml(cell){
       ${peticionBtnHtml(cell, st)}
     </div>`;
   }
-  const pisoCell = isAdmin ? celdaPisoDe(cell) : null;
+  const pisoCell = puede('asignar') ? celdaPisoDe(cell) : null;
   const pisoWorker = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
   const mismoBtn = (!st.pagado && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador)
     ? `<button type="button" class="mismo-piso-btn" data-id="${cell.id}" title="Poner a ${pisoWorker}, el mismo del Piso"><span class="t-largo">Igual al Piso</span><span class="t-corto">Igual Piso</span></button>` : '';
-  const assignBtn = (isAdmin && !st.pagado) ? `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button></div>` : '';
-  const mismoFila = mismoBtn ? `<div class="asignar-fila">${mismoBtn}</div>` : '';
+  const assignBtn = !puede('asignar') ? ''
+    : st.pagado ? `<div class="asignar-fila fantasma" aria-hidden="true"><button type="button" class="assign-btn" tabindex="-1" disabled>Reasignar</button></div>`
+    : `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button></div>`;
+  const mismoFila = mismoBtn ? `<div class="asignar-fila fila-completa">${mismoBtn}</div>` : '';
   const frontInner = `
       <div class="worker-row-top">
         <div class="worker-name ${hasWorker?'':'unassigned'}" data-namefor="${cell.id}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>
         ${assignBtn}
+        ${mismoFila}
       </div>
-      ${mismoFila}
       ${checksHtml(cell, st)}
       ${peticionBtnHtml(cell, st)}
       <div class="bottom-group">
         ${priceLinesHtml(cell, st)}
         ${notaHtml(cell, st)}
       </div>`;
-  if(isAdmin && !vistaCompactaAdmin()){
+  if(puede('estados') && !vistaCompactaAdmin()){
     return `<div class="cell-block" data-cellid="${cell.id}">${frontInner}</div>`;
   }
 
@@ -1985,7 +2097,7 @@ function renderFloorTable(fb){
           <tbody>
             ${deptRows.map(d => `
               <tr>
-                <td class="dpto-col"><span class="dpto-inner">${d.dpto}</span></td>
+                <td${matAtributos(fb.categoria === 'Cerámica' ? fb.piso + '|' + d.dpto : null)}><span class="dpto-inner">${d.dpto}</span></td>
                 ${fb.areas.map(area => {
                   const c = d.cells[area];
                   if(!c) return '<td><span class="cell-empty">—</span></td>';
@@ -2025,7 +2137,7 @@ function renderPasillosTable(){
           <tbody>
             ${rows.map(n => `
               <tr>
-                <td class="dpto-col"><span class="dpto-inner">Piso ${n}</span></td>
+                <td${matAtributos(byFloor[n+'|Cerámica'] ? 'Piso ' + n + '|Pasillo' : null)}><span class="dpto-inner">Piso ${n}</span></td>
                 ${cats.map(cat => {
                   const p = byFloor[n+'|'+cat];
                   if(!p) return '<td><span class="cell-empty">—</span></td>';
@@ -2160,7 +2272,7 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
   sessionName = res.nombre || '';
   try{ if(res.dispositivo) localStorage.setItem('progresoObraDisp', res.dispositivo); }catch(err){}
   try{ sessionStorage.setItem('progresoObraToken', sessionToken || ''); sessionStorage.setItem('progresoObraName', sessionName || ''); }catch(err){}
-  if(res.debil && [1,2,3].indexOf(res.rol) !== -1) setTimeout(() => avisoToast('Tu PIN tiene menos de 6 dígitos y es fácil de adivinar. Pídele al administrador que lo cambie por uno más largo.', 'error'), 600);
+  if(res.debil && [1,2,3,4].indexOf(res.rol) !== -1) setTimeout(() => avisoToast('Tu PIN tiene menos de 6 dígitos y es fácil de adivinar. Pídele al administrador que lo cambie por uno más largo.', 'error'), 600);
   if(res.rol === 1){
     isAdmin = true;
     try{ sessionStorage.setItem('progresoObraRol', '1'); }catch(err){}
@@ -2173,6 +2285,12 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     closeOverlayAnimated(pinOverlay);
     applyRoleUI(); render();
     await recargarTrasLogin();
+  } else if(res.rol === 4){
+    isJefe = true;
+    try{ sessionStorage.setItem('progresoObraRol', '4'); }catch(err){}
+    closeOverlayAnimated(pinOverlay);
+    applyRoleUI(); render();
+    await recargarTrasLogin();
   } else if(res.rol === 3){
     workerSession = sessionName;
     try{ sessionStorage.setItem('progresoObraRol', '3'); }catch(err){}
@@ -2180,12 +2298,12 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     applyRoleUI(); populateFilters(); render();
     await recargarTrasLogin();
   } else {
-    pinError.textContent = 'Ese PIN no tiene un Rol válido en la pestaña "Usuarios" (tiene que ser 1, 2 o 3).';
+    pinError.textContent = 'Ese PIN no tiene un Rol válido en la pestaña "Usuarios" (tiene que ser 1, 2, 3 o 4).';
   }
 });
 document.getElementById('logoutBtn').addEventListener('click', () => {
   if(DB_URL && sessionToken) llamarDb('logout').catch(() => {});
-  isAdmin = false; isSupervisor = false; workerSession = null; sessionToken = null; sessionName = null;
+  isAdmin = false; isSupervisor = false; isJefe = false; misPermisos = {}; permisosCargos = null; workerSession = null; sessionToken = null; sessionName = null;
   try{
     sessionStorage.removeItem('progresoObraRol');
     sessionStorage.removeItem('progresoObraToken');
@@ -2198,6 +2316,192 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 document.getElementById('supervisorWorkersBtn').addEventListener('click', () => {
   renderSupervisorWorkersList();
   document.getElementById('supervisorWorkersOverlay').classList.add('show');
+});
+function matUnidades(){
+  const lista = [];
+  FLOOR_BLOCKS.filter(fb => fb.categoria === 'Cerámica').sort((a, b) => a.pisoNum - b.pisoNum).forEach(fb => {
+    fb.depts.forEach(d => {
+      const celdas = fb.areas.map(a => d.cells[a] ? {id: d.cells[a].id, area: a} : null).filter(Boolean);
+      lista.push({key: fb.piso + '|' + d.dpto, piso: fb.piso, nombre: d.dpto, celdas});
+    });
+    if(fb.pasillo) lista.push({key: fb.piso + '|Pasillo', piso: fb.piso, nombre: 'Pasillo', celdas: [{id: fb.pasillo.id, area: 'Pasillos'}]});
+  });
+  return lista;
+}
+let matUnidadesCache = null;
+const matUnidadesTodas = () => matUnidadesCache || (matUnidadesCache = matUnidades());
+function matTerminada(u){
+  return u.celdas.length > 0 && u.celdas.every(c => { const st = getState(c.id); return st.terminado || st.pagado; });
+}
+function matPendiente(u){ return !MATERIALES.ok[u.key] && !matTerminada(u); }
+function matAtributos(key){
+  if(!isAdmin || !key) return ' class="dpto-col"';
+  const u = matUnidadesTodas().find(x => x.key === key);
+  const pend = u && matPendiente(u);
+  return ` class="dpto-col${pend ? ' mat-pend' : ''}" data-matkey="${esc(key)}" title="${pend ? 'Materiales sin confirmar' : 'Ver materiales'}"`;
+}
+function matCalculo(celda){
+  const m2 = Number(getState(celda.id).m2) || 0;
+  const p = MATERIALES.params[MAT_DE_AREA[celda.area]];
+  if(!p || m2 <= 0) return null;
+  const conMerma = m2 * (1 + (Number(p.merma) || 0) / 100);
+  const area = (Number(p.ancho) || 0) * (Number(p.largo) || 0) / 10000;
+  const piezas = area > 0 ? Math.ceil(conMerma / area) : 0;
+  const cajas = Number(p.porCaja) > 0 ? Math.ceil(piezas / Number(p.porCaja)) : null;
+  const sacos = Number(p.kgSaco) > 0 ? conMerma * (Number(p.consumo) || 0) / Number(p.kgSaco) : 0;
+  return {m2, piezas, cajas, sacos, tipo: MAT_DE_AREA[celda.area]};
+}
+const matNum = (n, d) => Number(n).toLocaleString('es-CL', {minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 1 : d});
+function matTotales(unidades){
+  const t = {};
+  MAT_TIPOS.forEach(([k]) => { t[k] = {piezas: 0, sacos: 0, m2: 0}; });
+  unidades.forEach(u => u.celdas.forEach(c => {
+    const r = matCalculo(c);
+    if(r){ t[r.tipo].piezas += r.piezas; t[r.tipo].sacos += r.sacos; t[r.tipo].m2 += r.m2; }
+  }));
+  return t;
+}
+function matTextoTotales(t){
+  return MAT_TIPOS.filter(([k]) => t[k].piezas > 0).map(([k, n]) => {
+    const p = MATERIALES.params[k];
+    const cajas = Number(p.porCaja) > 0 ? ` · ${matNum(Math.ceil(t[k].piezas / p.porCaja), 0)} cajas` : ' · cajas: falta dato';
+    return `<div style="margin-bottom:3px;"><b style="display:inline;margin-right:4px;text-transform:none;font-size:12.5px;color:var(--text);">${n}:</b>${matNum(t[k].piezas, 0)} piezas${cajas} · ${matNum(Math.ceil(t[k].sacos), 0)} sacos</div>`;
+  }).join('') || '<span style="color:var(--sub);">Sin metros registrados.</span>';
+}
+function matCeldaHtml(celda){
+  if(!celda) return '<td>—</td>';
+  const r = matCalculo(celda);
+  if(!r) return '<td><span style="color:var(--sub);">sin m²</span></td>';
+  const partes = [];
+  if(r.cajas !== null) partes.push(`${matNum(r.cajas, 0)} cajas`);
+  if(Number(MATERIALES.params[r.tipo].kgSaco) > 0) partes.push(`${matNum(Math.round(r.sacos * 10) / 10)} sacos`);
+  const falta = r.cajas === null ? '<span class="mat-falta">cajas: falta dato</span>' : '';
+  return `<td><span class="mat-m2">${matNum(r.m2, 2)} m²</span><b>${matNum(r.piezas, 0)} piezas</b><br>${partes.join(' · ')}${falta}</td>`;
+}
+let matFoco = null;
+function renderMateriales(){
+  document.getElementById('matAjustes').innerHTML = `<tr><th>Material</th>${MAT_CAMPOS.map(([, n]) => `<th>${n}</th>`).join('')}</tr>` +
+    MAT_TIPOS.map(([k, n]) => `<tr><td class="mat-nombre">${n}</td>${MAT_CAMPOS.map(([f]) => `<td><input type="number" min="0" step="any" inputmode="decimal" data-mat="${k}" data-campo="${f}" value="${MATERIALES.params[k][f]}"></td>`).join('')}</tr>`).join('');
+  const sel = document.getElementById('matFiltroPiso');
+  const pisoSel = sel.value;
+  const pisos = [...new Set(matUnidadesTodas().map(u => u.piso))];
+  sel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(x => `<option value="${esc(x)}"${x === pisoSel ? ' selected' : ''}>${esc(x)}</option>`).join('');
+  const todas = matUnidadesTodas();
+  const pend = todas.filter(matPendiente);
+  document.getElementById('matResumen').innerHTML = `<div><b>Sin confirmar (${pend.length} de ${todas.length})</b>${matTextoTotales(matTotales(pend))}</div><div><b>Total de la obra</b>${matTextoTotales(matTotales(todas))}</div>`;
+  const soloPend = document.getElementById('matSoloPend').checked;
+  const filas = todas.filter(u => (!sel.value || u.piso === sel.value) && (!soloPend || matPendiente(u)));
+  const porArea = (u, a) => u.celdas.find(c => c.area === a);
+  document.getElementById('matLista').innerHTML = `<tr><th>Piso / Dpto</th><th>Piso o Pasillo</th><th>Muro Baño</th><th>Muro Cocina</th><th>Materiales listos</th></tr>` +
+    (filas.map(u => `<tr data-matfila="${esc(u.key)}" class="${matPendiente(u) ? 'mat-pend' : ''}${matFoco === u.key ? ' mat-resalta' : ''}">
+      <td class="mat-nombre">${esc(u.piso)} · ${esc(u.nombre)}</td>
+      ${matCeldaHtml(porArea(u, 'Piso') || porArea(u, 'Pasillos'))}${matCeldaHtml(porArea(u, 'Muro Baños'))}${matCeldaHtml(porArea(u, 'Muro Cocina'))}
+      <td><input type="checkbox" data-matok="${esc(u.key)}" ${MATERIALES.ok[u.key] ? 'checked' : ''} aria-label="Materiales listos"></td></tr>`).join('') || '<tr><td colspan="5" style="color:var(--sub);">No hay departamentos para mostrar.</td></tr>');
+}
+let matGuardarTimer = null;
+function matCambio(){
+  markSettingsDirty();
+  clearTimeout(matGuardarTimer);
+  matGuardarTimer = setTimeout(() => { enqueueSave(); }, 1200);
+}
+function abrirMateriales(key){
+  if(!isAdmin) return;
+  matFoco = key || null;
+  renderMateriales();
+  document.getElementById('materialesOverlay').classList.add('show');
+  if(key){
+    const fila = document.querySelector(`#matLista tr[data-matfila="${CSS.escape(key)}"]`);
+    if(fila) fila.scrollIntoView({block:'center'});
+  }
+}
+document.getElementById('materialesBtn').addEventListener('click', () => abrirMateriales(null));
+document.getElementById('matCerrarBtn').addEventListener('click', () => { matFoco = null; closeOverlayAnimated(document.getElementById('materialesOverlay')); render(); });
+document.getElementById('matFiltroPiso').addEventListener('change', renderMateriales);
+document.getElementById('matSoloPend').addEventListener('change', renderMateriales);
+document.getElementById('matAjustes').addEventListener('change', (e) => {
+  const inp = e.target.closest('input[data-mat]'); if(!inp) return;
+  const v = parseFloat(String(inp.value).replace(',', '.'));
+  MATERIALES.params[inp.dataset.mat][inp.dataset.campo] = (isFinite(v) && v >= 0) ? v : 0;
+  matCambio(); renderMateriales();
+});
+document.getElementById('matLista').addEventListener('change', (e) => {
+  const cb = e.target.closest('input[data-matok]'); if(!cb) return;
+  if(cb.checked) MATERIALES.ok[cb.dataset.matok] = true; else delete MATERIALES.ok[cb.dataset.matok];
+  matCambio(); renderMateriales();
+});
+
+const AVISO_REGLAS = [
+  {
+    id: 'materiales',
+    titulo: 'Materiales sin confirmar',
+    calcular: () => matUnidadesTodas().filter(matPendiente).map(u => ({texto: `${u.piso} · ${u.nombre === 'Pasillo' ? 'Pasillo' : 'Dpto ' + u.nombre}`, accion: () => abrirMateriales(u.key), boton: 'Ver'}))
+  }
+];
+let avisosVistos = false;
+function calcularAvisos(){
+  return AVISO_REGLAS.map(r => ({regla: r, items: r.calcular()})).filter(g => g.items.length);
+}
+function actualizarAvisos(){
+  const b = document.getElementById('avisosBadge'); if(!b) return;
+  if(!isAdmin){ b.style.display = 'none'; return; }
+  const total = calcularAvisos().reduce((n, g) => n + g.items.length, 0);
+  b.textContent = total; b.style.display = total ? 'inline-block' : 'none';
+  if(total && !avisosVistos && datosCargadosTs){ avisosVistos = true; avisoToast(`Tienes ${total} aviso(s) pendiente(s). Revísalos en 🔔 Avisos.`); }
+}
+let avisosAcciones = [];
+function abrirAvisos(){
+  const grupos = calcularAvisos();
+  avisosAcciones = [];
+  document.getElementById('avisosLista').innerHTML = grupos.length ? grupos.map(g => `<div class="aviso-grupo"><h4><span>${g.regla.titulo}</span><span>${g.items.length}</span></h4>${g.items.map(it => { avisosAcciones.push(it.accion); return `<div class="aviso-item"><span>${esc(it.texto)}</span><button type="button" class="btn small" data-aviso="${avisosAcciones.length - 1}">${it.boton || 'Ver'}</button></div>`; }).join('')}</div>`).join('')
+    : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">No tienes avisos pendientes.</p>';
+  document.getElementById('avisosOverlay').classList.add('show');
+}
+document.getElementById('avisosBtn').addEventListener('click', abrirAvisos);
+document.getElementById('avisosCerrarBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('avisosOverlay')));
+document.getElementById('avisosLista').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-aviso]'); if(!b) return;
+  closeOverlayAnimated(document.getElementById('avisosOverlay'));
+  const fn = avisosAcciones[Number(b.dataset.aviso)]; if(fn) setTimeout(fn, 200);
+});
+
+const PERMISOS_FILAS = [
+  ['notas', 'Escribir observaciones', 'Agregar o editar la observación de cada partida'],
+  ['trabajadores', 'Ver lista de trabajadores', 'Solo lectura: nombre, cargo y estado'],
+  ['asignar', 'Asignar y reasignar', 'Elegir el trabajador de cada partida (no si ya está pagada)'],
+  ['estados', 'Marcar Partida y Terminado', 'Nunca puede marcar Pagado']
+];
+const PERMISOS_COLUMNAS = [['supervisor', 'Supervisor'], ['jefe', 'Jefe de Terreno']];
+function permisosPorDefecto(){
+  const o = {};
+  PERMISOS_COLUMNAS.forEach(([c]) => { o[c] = {notas:true, trabajadores:true, asignar:false, estados:false}; });
+  return o;
+}
+function abrirPermisos(){
+  const p = permisosCargos || permisosPorDefecto();
+  const cab = `<tr><th>Permiso</th>${PERMISOS_COLUMNAS.map(([, n]) => `<th>${n}</th>`).join('')}</tr>`;
+  const filas = PERMISOS_FILAS.map(([k, t, d]) => `<tr><td>${t}<small>${d}</small></td>${PERMISOS_COLUMNAS.map(([c]) => `<td><input type="checkbox" data-cargo="${c}" data-permiso="${k}" ${(p[c] || {})[k] ? 'checked' : ''} aria-label="${t}"></td>`).join('')}</tr>`).join('');
+  document.getElementById('permisosTabla').innerHTML = cab + filas;
+  document.getElementById('permisosMsg').textContent = '';
+  document.getElementById('permisosOverlay').classList.add('show');
+}
+document.getElementById('permisosBtn').addEventListener('click', abrirPermisos);
+document.getElementById('permisosCancelBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('permisosOverlay')));
+document.getElementById('permisosGuardarBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('permisosMsg');
+  const nuevo = permisosPorDefecto();
+  document.querySelectorAll('#permisosTabla input[type=checkbox]').forEach(cb => { nuevo[cb.dataset.cargo][cb.dataset.permiso] = cb.checked; });
+  msg.textContent = '';
+  let j = null;
+  try{ j = await llamarDb('permisosGuardar', {permisos: nuevo}); }catch(e){ j = null; }
+  if(j && j.ok){
+    permisosCargos = j.permisos || nuevo;
+    closeOverlayAnimated(document.getElementById('permisosOverlay'));
+    avisoToast('Permisos guardados. Cada cargo los verá al iniciar sesión o recargar.', 'ok');
+  } else if(j && j.error === 'sin_sesion'){
+    msg.textContent = 'Tu sesión venció. Vuelve a iniciar sesión.';
+  } else {
+    msg.textContent = 'No se pudo guardar. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.';
+  }
 });
 document.getElementById('supervisorWorkersCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('supervisorWorkersOverlay')));
 
@@ -2443,6 +2747,7 @@ const ERRORES_REPORTE = {
   sin_correo_propio: 'No pude saber cuál es tu correo para la prueba.',
   programacion_invalida: 'El día o la hora no son válidos.',
   plantilla_invalida: 'El asunto no puede quedar vacío (máximo 150 letras).',
+  opciones_invalidas: 'La cantidad de pisos enteros debe ser un número entre 0 y 12.',
   hoja_incompleta: 'La hoja de datos no tiene todos los departamentos. Pulsa "Completar hoja de datos" y vuelve a intentar.',
   error_envio: 'Google no pudo enviar el correo.',
   ocupado: 'Hay otro envío en curso. Prueba de nuevo en unos segundos.',
@@ -2460,7 +2765,7 @@ async function cargarEstadoReporte(){
   if(!DB_URL || !isAdmin || !sessionToken) return;
   try{
     const j = await llamarDb('reporteConfig');
-    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || '', programacion: j.programacion || null, plantilla: j.plantilla || null};
+    if(j && j.ok) reporteEstado = {destinatarios: j.destinatarios || [], base: (j.base && j.base.firmas) ? j.base : null, miCorreo: j.miCorreo || '', programacion: j.programacion || null, plantilla: j.plantilla || null, opciones: j.opciones || null};
   }catch(e){}
 }
 let reporteVistaFallo = '';
@@ -2551,7 +2856,7 @@ document.getElementById('reportePruebaBtn').addEventListener('click', () => envi
 document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
   const n = reporteEstado.destinatarios.length;
   askConfirm(`¿Enviar el reporte ahora a ${n} correo(s) con el asunto "${document.getElementById('reporteAsunto').value.trim()}"? ` +
-    (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, estos pisos no se repiten hasta que haya movimiento nuevo.') +
+    (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, lo marcado como NUEVO deja de serlo y los pisos no se repiten hasta que haya movimiento nuevo.') +
     (sinGuardar() ? ' Ojo: tienes cambios sin guardar que no van incluidos.' : ''), () => enviarReporte('real'));
 });
 document.getElementById('reporteCompletarBtn').addEventListener('click', async () => {
@@ -2568,6 +2873,9 @@ document.getElementById('reporteDestBtn').addEventListener('click', () => {
   document.getElementById('progDia').value = p.dia;
   document.getElementById('progHora').value = p.hora;
   document.getElementById('progSinNov').checked = p.sinNovedades;
+  const op = reporteEstado.opciones || {pisosEnteros: 2, pisosLista: []};
+  document.getElementById('repPisosN').value = op.pisosEnteros;
+  document.getElementById('repPisosLista').value = (op.pisosLista || []).join(', ');
   document.getElementById('plantAsunto').value = (reporteEstado.plantilla || {}).asunto || ASUNTO_BASE;
   document.getElementById('plantMensaje').value = reporteEstado.plantilla ? reporteEstado.plantilla.mensaje : MENSAJE_BASE;
   document.getElementById('reporteDestError').textContent = '';
@@ -2589,6 +2897,13 @@ document.getElementById('reporteDestGuardar').addEventListener('click', async ()
       return;
     }
     reporteEstado.destinatarios = j1.destinatarios;
+    const j4 = await llamarDb('reporteOpciones', {pisosEnteros: Number(document.getElementById('repPisosN').value), pisosLista: document.getElementById('repPisosLista').value});
+    if(!(j4 && j4.ok)){
+      err.textContent = j4 && j4.error === 'opciones_invalidas' ? 'La cantidad de pisos enteros debe ser un número entre 0 y 12.' : 'Guardé los correos, pero no se pudo guardar la opción de pisos enteros. ¿Publicaste la última versión del Apps Script?';
+      pintarReporte(false);
+      return;
+    }
+    reporteEstado.opciones = j4.opciones;
     const j3 = await llamarDb('reportePlantilla', {asunto: document.getElementById('plantAsunto').value, mensaje: document.getElementById('plantMensaje').value});
     if(!(j3 && j3.ok)){
       err.textContent = ERRORES_REPORTE[j3 && j3.error] || 'Guardé los correos, pero no se pudo guardar el asunto y el mensaje.';
@@ -2793,6 +3108,10 @@ function render(){
       '<p style="color:var(--sub);text-align:center;padding:40px 0;">No hay partidas que coincidan con el filtro.</p>';
   }
   contentEl.innerHTML = html;
+  contentEl.querySelectorAll('td.dpto-col[data-matkey]').forEach(td => {
+    td.addEventListener('click', () => abrirMateriales(td.getAttribute('data-matkey')));
+  });
+  actualizarAvisos();
   equalizeRowNameHeights();
   ajustarTamanoDpto();
   igualarAltoCeldasTrabajador();
@@ -2802,7 +3121,7 @@ function render(){
     : ALL_CELLS.filter(c => c.categoria === activeCategoria && c.area !== 'Pasillos' && passesFilters(c));
   document.getElementById('resultCount').textContent = cellsForCount.length + ' partidas visibles';
 
-  if(isAdmin){
+  if(puede('estados') || puede('asignar')){
     contentEl.querySelectorAll('.checks-row input[type=checkbox]').forEach(chk => {
       chk.addEventListener('change', (e) => {
         const cb = e.target;
@@ -2840,7 +3159,7 @@ function render(){
       });
     });
 
-    contentEl.querySelectorAll('.assign-btn').forEach(btn => {
+    contentEl.querySelectorAll('.assign-btn[data-id]').forEach(btn => {
       btn.addEventListener('click', (e) => abrirAsignar(e.currentTarget.getAttribute('data-id')));
     });
     contentEl.querySelectorAll('.mismo-piso-btn').forEach(btn => {
@@ -2871,7 +3190,7 @@ function render(){
 
   }
 
-  if(isAdmin || isSupervisor){
+  if(puede('notas')){
     contentEl.querySelectorAll('.nota-btn-single').forEach(btn => {
       btn.addEventListener('click', (e) => abrirObservacionModal(e.currentTarget.getAttribute('data-id')));
     });
@@ -3053,7 +3372,7 @@ document.getElementById('dbBtn').addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
