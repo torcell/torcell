@@ -277,6 +277,7 @@
   .worker-row-top .asignar-fila.fila-completa{flex:1 1 100%;}
   .worker-row-top .assign-btn{flex:0 0 auto;height:100%;min-width:78px;}
   .asignar-fila.fantasma{visibility:hidden;pointer-events:none;}
+  .worker-row-top .mismo-piso-btn.en-nombre{flex:1 1 84px;align-self:stretch;min-width:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;line-height:1.2;color:var(--accent);border:1px dashed var(--accent);padding:4px 8px;white-space:normal;}
   .worker-name{display:block;font-size:16px;font-weight:800;line-height:1.2;color:var(--text);min-width:0;overflow-wrap:anywhere;padding:4px 8px;background:var(--panel-soft);border:1px solid var(--border-strong);border-radius:var(--radius);cursor:default;user-select:none;}
   .worker-name.unassigned{color:var(--sub);font-weight:600;font-style:italic;border-style:dashed;background:transparent;}
   .asignar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
@@ -349,6 +350,14 @@
 
   .floor-block{content-visibility:auto;contain-intrinsic-size:auto 1250px;}
   @media (max-width:700px){ .floor-block{contain-intrinsic-size:auto 2100px;} }
+  .rec-bar{display:none;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .rec-item{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:10px;align-items:stretch;border:1px solid rgba(196,152,0,.7);border-left:6px solid var(--proceso);background:rgba(255,196,0,.16);padding:8px 10px;}
+  .rec-item.atrasado{border-color:rgba(192,57,43,.7);border-left-color:#c0392b;background:rgba(192,57,43,.14);}
+  .rec-txt{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;}
+  .rec-txt b{font-size:15px;color:var(--text);}
+  .rec-txt span{font-size:12.5px;color:var(--sub);}
+  .rec-item.atrasado .rec-txt span{color:#c0392b;font-weight:700;}
+  .rec-item .rec-hecho{width:100%;min-height:40px;font-weight:700;}
   .modal h3{margin:0 0 10px;font-size:15px;color:var(--text);}
   .modal p{margin:0 0 18px;font-size:13.5px;color:var(--sub);}
   .modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
@@ -542,6 +551,7 @@
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
   </div>
+  <div id="recordatoriosBar" class="rec-bar" style="display:none;"></div>
 
   <nav class="tb-groups" id="tbGroups">
     <div class="tb-tabs" id="tbTabs"></div>
@@ -940,8 +950,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.19.1';
-const BACKEND_REQUERIDO = 23;
+const APP_VERSION = '0.20.1';
+const BACKEND_REQUERIDO = 24;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -1030,6 +1040,7 @@ let cierreQuincena = null;
 let cierreAnterior = null;
 
 let historialM2 = [];
+let recordatoriosHechos = {};
 const MAT_TIPOS = [['piso','Piso'],['muroBano','Muro Baño'],['muroCocina','Muro Cocina'],['pasillo','Pasillo']];
 const MAT_DE_AREA = {'Piso':'piso','Muro Baños':'muroBano','Muro Cocina':'muroCocina','Pasillos':'pasillo'};
 const MAT_CAMPOS = [['ancho','Ancho (cm)'],['largo','Largo (cm)'],['porCaja','Piezas por caja'],['kgSaco','kg por saco'],['consumo','Consumo (kg/m²)'],['merma','Merma %']];
@@ -1254,6 +1265,7 @@ async function mergeRemoteBeforeSave(){
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
   }
 
+  if(isAdmin && remote.recordatorios && remote.recordatorios.hechos) recordatoriosHechos = {...remote.recordatorios.hechos, ...recordatoriosHechos};
   const antes = ALL_WORKERS.join('|');
   rebuildWorkerList();
   if(antes !== ALL_WORKERS.join('|')){
@@ -1422,7 +1434,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES }
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -1441,7 +1453,7 @@ async function dbSave(dirtyIds){
     else if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, token: sessionToken };
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
@@ -1474,6 +1486,7 @@ function applyLoadedPayload(parsed){
   if(parsed.cierreAnterior !== undefined) cierreAnterior = parsed.cierreAnterior;
   if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
   if(isAdmin && parsed.materiales) mezclarMateriales(parsed.materiales);
+  if(isAdmin && parsed.recordatorios && parsed.recordatorios.hechos) recordatoriosHechos = {...parsed.recordatorios.hechos, ...recordatoriosHechos};
   if(Array.isArray(parsed.obsPresets) && parsed.obsPresets.length) OBS_PRESETS = parsed.obsPresets;
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
   if(isAdmin) permisosCargos = parsed.permisos || permisosCargos;
@@ -1575,7 +1588,7 @@ async function doSaveCycle(){
 
   const soloCeldas = dirtySnap.size > 0 && !settingsDirty && !forzarGuardadoCompleto;
   if(!soloCeldas) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -1996,7 +2009,7 @@ function checksHtml(cell, st){
 
   const terminadoDisabled = !puede('estados') || (!turboMode && !st.partida);
   const pagadoDisabled = !isAdmin || (!turboMode && !st.terminado);
-  const partidaDisabled = !puede('estados');
+  const partidaDisabled = !puede('estados') || (!turboMode && st.terminado);
   return `<div class="checks-row" data-checksof="${cell.id}">
     <label title="${st.pagadoTs ? fechaCortaHora(st.pagadoTs) : 'Sin fecha registrada'}" class="chk-pill pagado ${st.pagado?'on':''} ${pagadoDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="pagado" ${st.pagado?'checked':''} ${pagadoDisabled?'disabled':''}> Pagado
@@ -2137,15 +2150,18 @@ function cellHtml(cell){
   }
   const pisoCell = puede('asignar') ? celdaPisoDe(cell) : null;
   const pisoWorker = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
-  const mismoBtn = (!st.pagado && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador)
-    ? `<button type="button" class="mismo-piso-btn" data-id="${cell.id}" title="Poner a ${pisoWorker}, el mismo del Piso"><span class="t-largo">Igual al Piso</span><span class="t-corto">Igual Piso</span></button>` : '';
+  const mismoOk = !st.pagado && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador;
+  const mismoBtn = mismoOk
+    ? `<button type="button" class="mismo-piso-btn${hasWorker ? '' : ' en-nombre'}" data-id="${cell.id}" title="Poner a ${pisoWorker}, el mismo del Piso"><span class="t-largo">Igual al Piso</span><span class="t-corto">Igual Piso</span></button>` : '';
+  const nombreHtml = mismoBtn && !hasWorker ? mismoBtn
+    : `<div class="worker-name ${hasWorker?'':'unassigned'}" data-namefor="${cell.id}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>`;
   const assignBtn = !puede('asignar') ? ''
     : st.pagado ? `<div class="asignar-fila fantasma" aria-hidden="true"><button type="button" class="assign-btn" tabindex="-1" disabled>Reasignar</button></div>`
     : `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button></div>`;
-  const mismoFila = mismoBtn ? `<div class="asignar-fila fila-completa">${mismoBtn}</div>` : '';
+  const mismoFila = mismoBtn && hasWorker ? `<div class="asignar-fila fila-completa">${mismoBtn}</div>` : '';
   const frontInner = `
       <div class="worker-row-top">
-        <div class="worker-name ${hasWorker?'':'unassigned'}" data-namefor="${cell.id}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>
+        ${nombreHtml}
         ${assignBtn}
         ${mismoFila}
       </div>
@@ -2556,7 +2572,59 @@ document.getElementById('matLista').addEventListener('change', (e) => {
 });
 
 const matItemAviso = (u) => ({texto: `${u.piso} · ${u.nombre === 'Pasillo' ? 'Pasillo' : 'Dpto ' + u.nombre}`, accion: () => abrirMateriales(u.key), boton: 'Ver'});
+const RECORDATORIOS = [
+  {id: 'f30', titulo: 'F30 y F30-1', tipo: 'antesMiercoles'},
+  {id: 'ruta1', titulo: 'Hoja de Ruta', tipo: 'miercoles'},
+  {id: 'ruta3', titulo: 'Hoja de Ruta', tipo: 'semana', desde: 15, hasta: 21, detalle: 'Tercera semana del mes'}
+];
+function primerMiercoles(y, m){
+  for(let x = 2; x <= 8; x++){ if(new Date(y, m, x).getDay() === 3) return x; }
+  return 8;
+}
+function recordatoriosActivos(ahora){
+  const f = ahora || new Date(), y = f.getFullYear(), m = f.getMonth(), d = f.getDate();
+  const mes = y + '-' + String(m + 1).padStart(2, '0');
+  const mie = primerMiercoles(y, m);
+  return RECORDATORIOS.map(r => {
+    const clave = mes + '|' + r.id;
+    if(recordatoriosHechos[clave]) return null;
+    let inicio, limite, detalle;
+    if(r.tipo === 'antesMiercoles'){ inicio = 1; limite = mie - 1; detalle = 'Primera semana · debe quedar listo antes del miércoles ' + mie; }
+    else if(r.tipo === 'miercoles'){ inicio = mie; limite = mie; detalle = 'Miércoles ' + mie + ' · primera semana del mes'; }
+    else { inicio = r.desde; limite = r.hasta; detalle = r.detalle; }
+    if(d < inicio) return null;
+    return {...r, clave, detalle, atrasado: d > limite};
+  }).filter(Boolean);
+}
+function marcarRecordatorioHecho(clave){
+  recordatoriosHechos[clave] = Date.now();
+  markSettingsDirty();
+  enqueueSave();
+  actualizarAvisos();
+}
+function pedirHechoRecordatorio(clave){
+  const r = recordatoriosActivos().find(x => x.clave === clave);
+  if(!r) return;
+  askConfirm(`¿Marcar "${r.titulo}" (${r.detalle.toLowerCase()}) como hecho este mes?`, () => marcarRecordatorioHecho(clave));
+}
+function pintarRecordatorios(){
+  const bar = document.getElementById('recordatoriosBar');
+  if(!bar) return;
+  const lista = isAdmin ? recordatoriosActivos() : [];
+  bar.style.display = lista.length ? 'flex' : 'none';
+  bar.innerHTML = lista.map(r => `<div class="rec-item${r.atrasado ? ' atrasado' : ''}"><div class="rec-txt"><b>⏰ ${esc(r.titulo)}</b><span>${esc(r.detalle)}${r.atrasado ? ' · ATRASADO' : ''}</span></div><button type="button" class="btn small rec-hecho" data-rec="${esc(r.clave)}">Hecho</button></div>`).join('');
+}
+document.getElementById('recordatoriosBar').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-rec]');
+  if(b) pedirHechoRecordatorio(b.getAttribute('data-rec'));
+});
+setInterval(() => { actualizarAvisos(); }, 3600000);
 const AVISO_REGLAS = [
+  {
+    id: 'recordatorios',
+    titulo: '⏰ Recordatorios importantes',
+    calcular: () => recordatoriosActivos().map(r => ({texto: `${r.titulo} · ${r.detalle}${r.atrasado ? ' (atrasado)' : ''}`, accion: () => pedirHechoRecordatorio(r.clave), boton: 'Hecho'}))
+  },
   {
     id: 'materiales-rojo',
     titulo: '🔴 Materiales sin confirmar (piso en movimiento y el de abajo)',
@@ -2574,6 +2642,7 @@ function calcularAvisos(){
   return AVISO_REGLAS.map(r => ({regla: r, items: r.calcular()})).filter(g => g.items.length);
 }
 function actualizarAvisos(){
+  pintarRecordatorios();
   const b = document.getElementById('avisosBadge'); if(!b) return;
   if(!isAdmin){ b.style.display = 'none'; return; }
   const total = calcularAvisos().reduce((n, g) => n + g.items.length, 0);
@@ -3561,7 +3630,7 @@ document.getElementById('dbBtn').addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
