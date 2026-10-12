@@ -564,7 +564,11 @@
   .lg-splash{background:var(--lg-azul);color:#fff;align-items:center;justify-content:center;gap:22px;text-align:center;padding:24px;}
   .lg-splash img{width:112px;height:112px;display:block;animation:lgEntra .5s ease-out both;}
   .lg-splash h1{margin:0;font-size:20px;font-weight:700;line-height:1.25;animation:lgEntra .5s .12s ease-out both;}
-  .lg-splash p{margin:0;font-size:13px;opacity:.8;min-height:18px;}
+  .lg-splash p{margin:0;font-size:15.5px;font-weight:600;letter-spacing:.2px;min-height:24px;color:#fff;transition:opacity .16s ease,transform .16s ease;}
+  .lg-splash p.out{opacity:0;transform:translateY(-8px);}
+  .lg-splash p.in{animation:lgMsgIn .34s cubic-bezier(.2,.9,.3,1.2) both;}
+  @keyframes lgMsgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .lg-splash p.lgfin{color:#9fe3a8;}
   .lg-carga{width:min(280px,76%);animation:lgEntra .5s .24s ease-out both;}
   @keyframes lgEntra{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   .lg-barra{position:relative;width:100%;height:36px;background:var(--lg-frague);overflow:hidden;border:1px solid var(--lg-frague);}
@@ -1068,7 +1072,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.23.0';
+const APP_VERSION = '0.24.0';
 const BACKEND_REQUERIDO = 26;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3726,16 +3730,37 @@ document.getElementById('toggleWorkerPanel').addEventListener('click', (e) => {
 function aplicarOcultarPrecios(oculto){
   document.body.classList.toggle('hide-prices', oculto);
   document.getElementById('togglePrices').textContent = oculto ? 'Mostrar precios' : 'Ocultar precios';
-  try{ localStorage.setItem('progresoObraOcultarPrecios', oculto ? '1' : '0'); }catch(e){}
+  document.getElementById('togglePrices').classList.toggle('primary', !oculto);
   render();
 }
 document.getElementById('togglePrices').addEventListener('click', () => aplicarOcultarPrecios(!preciosOcultos()));
-try{
-  if(localStorage.getItem('progresoObraOcultarPrecios') === '1'){
-    document.body.classList.add('hide-prices');
-    document.getElementById('togglePrices').textContent = 'Mostrar precios';
-  }
-}catch(e){}
+try{ localStorage.removeItem('progresoObraOcultarPrecios'); }catch(e){}
+document.body.classList.add('hide-prices');
+document.getElementById('togglePrices').textContent = 'Mostrar precios';
+(function activosBarra(){
+  const barra = document.getElementById('tbGroups');
+  const propios = ['toggleWorkerPanel', 'turboBtn', 'togglePrices', 'saveNowBtn', 'exportBtn'];
+  const mapa = {};
+  let ultimo = null, tUltimo = 0;
+  barra.addEventListener('click', (e) => {
+    const b = e.target.closest('.btn');
+    if(!b || b.classList.contains('bloq') || propios.includes(b.id)) return;
+    ultimo = b; tUltimo = Date.now();
+  }, true);
+  const obs = new MutationObserver((lista) => {
+    lista.forEach(m => {
+      const ov = m.target;
+      if(ov.classList.contains('show')){
+        if(!mapa[ov.id] && ultimo && Date.now() - tUltimo < 2500){
+          mapa[ov.id] = ultimo; ultimo.classList.add('primary'); ultimo = null;
+        }
+      } else if(mapa[ov.id]){
+        mapa[ov.id].classList.remove('primary'); delete mapa[ov.id];
+      }
+    });
+  });
+  document.querySelectorAll('.overlay').forEach(o => obs.observe(o, {attributes:true, attributeFilter:['class']}));
+})();
 document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
   const actualTxt = cierreQuincena
     ? new Date(cierreQuincena).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})
@@ -4732,7 +4757,7 @@ function aplicarRolDeLogin(res){
 const rolActual = () => isAdmin ? 1 : isSupervisor ? 2 : isJefe ? 4 : workerSession ? 3 : 0;
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 
-const gate = {el: lg('loginGate'), pin: '', fallos: 0, bloqueado: false, ocupado: false, resolver: null, meta: 88, prog: 0, raf: 0, barra: null, msgs: ['Preparando el piso…', 'Comprobando tu sesión…', 'Colocando cerámica…', 'Casi listo…']};
+const gate = {el: lg('loginGate'), pin: '', fallos: 0, bloqueado: false, ocupado: false, resolver: null, meta: 88, prog: 0, raf: 0, barra: null, t0: 0, msgs: [], msgActual: '', msgTimer: 0};
 function crearBarraCeramica(cont, alto, filas){
   const TONOS = [[176,140,98],[164,128,88],[188,152,110],[170,136,96],[154,120,84],[182,146,104],[160,124,86]];
   const azar = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
@@ -4773,19 +4798,40 @@ function gatePantalla(id){
   if(!appListo) document.body.classList.add('lg-on');
   ['lgSplash', 'lgPin', 'lgUrl'].forEach(x => lg(x).classList.toggle('on', x === id));
 }
+const GATE_MSG_PASO = 480;
+const GATE_MSGS_INICIO = ['Haciendo mezcla…', 'Colocando carga de pegamento…', 'Colocando cerámica…', 'Cortando cerámica…', 'Viendo cómo pisan antes de 48 hrs…', 'Comprobando tu sesión…'];
+function gateMensajeSplash(texto, fin){
+  const el = lg('lgSplashMsg');
+  if(gate.msgActual === texto) return;
+  gate.msgActual = texto;
+  clearTimeout(gate.msgTimer);
+  el.classList.remove('in'); el.classList.add('out');
+  gate.msgTimer = setTimeout(() => {
+    el.textContent = texto; el.classList.toggle('lgfin', !!fin);
+    el.classList.remove('out'); void el.offsetWidth; el.classList.add('in');
+  }, 150);
+}
 function gateBucle(){
-  gate.prog += (gate.meta - gate.prog) * 0.045;
+  const t = performance.now() - gate.t0;
+  const objetivo = gate.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 1100));
+  gate.prog += (objetivo - gate.prog) * (gate.meta >= 100 ? 0.25 : 0.12);
   if(gate.meta >= 100 && gate.prog > 99.5) gate.prog = 100;
   if(gate.barra) gate.barra.poner(gate.prog);
-  lg('lgSplashMsg').textContent = gate.prog >= 100 ? 'Listo' : gate.msgs[Math.min(gate.msgs.length - 1, Math.floor(gate.prog / 25))];
+  if(gate.meta < 100 && gate.msgs.length) gateMensajeSplash(gate.msgs[Math.min(gate.msgs.length - 1, Math.floor(t / GATE_MSG_PASO))]);
   if(!gate.el.classList.contains('off')) gate.raf = requestAnimationFrame(gateBucle);
 }
-function gateArrancarBarra(){
-  gate.prog = 0; gate.meta = 88;
+function gateArrancarBarra(msgs){
+  gate.msgs = msgs || GATE_MSGS_INICIO;
+  gate.prog = 0; gate.meta = 88; gate.t0 = performance.now(); gate.msgActual = '';
+  lg('lgSplashMsg').textContent = ''; lg('lgSplashMsg').classList.remove('lgfin', 'out');
   cancelAnimationFrame(gate.raf); gateBucle();
 }
 async function gateOcultar(){
-  if(lg('lgSplash').classList.contains('on')){ gate.meta = 100; await dormir(420); }
+  if(lg('lgSplash').classList.contains('on')){
+    const ult = gate.msgs[gate.msgs.length - 1];
+    if(gate.msgActual !== ult){ gateMensajeSplash(ult); await dormir(520); }
+    gate.meta = 100; gateMensajeSplash('¡Listo!', true); await dormir(560);
+  }
   gate.el.classList.add('off'); document.body.classList.remove('lg-on'); cancelAnimationFrame(gate.raf);
 }
 function gateIniciar(){
@@ -4913,16 +4959,16 @@ async function sesionVencida(){
     await dormir(1300);
     await gatePedirUrl();
     pidioUrl = true;
-    gatePantalla('lgSplash'); gateArrancarBarra();
+    gatePantalla('lgSplash'); gateArrancarBarra(['Haciendo mezcla…', 'Colocando carga de pegamento…', 'Comprobando tu sesión…']);
   }
   {
     if(!sessionToken){
-      await dormir(pidioUrl ? 400 : 1300);
+      await dormir(pidioUrl ? 400 : 1450);
       let aviso = '';
       try{ aviso = sessionStorage.getItem('progresoObraAvisoGate') || ''; sessionStorage.removeItem('progresoObraAvisoGate'); }catch(err){}
       const res = await gatePedirPin(aviso);
       aplicarRolDeLogin(res);
-      gatePantalla('lgSplash'); gateArrancarBarra();
+      gatePantalla('lgSplash'); gateArrancarBarra(['Colocando cerámica…', 'Cortando cerámica…', 'Viendo cómo pisan antes de 48 hrs…', 'Comprobando tu sesión…']);
     }
     await loadState();
     if(sesionInvalida){
@@ -4945,7 +4991,7 @@ async function sesionVencida(){
   updateDbBadge();
   render();
   appListo = true;
-  const falta = 1200 - (Date.now() - t0);
+  const falta = 2700 - (Date.now() - t0);
   if(falta > 0) await dormir(falta);
   gateOcultar();
 })();
