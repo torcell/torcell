@@ -83,8 +83,8 @@
   header.top .titles p{margin:0;color:var(--sub);font-size:13px;}
   .status-cluster{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .status-cluster select{padding:8px;font-size:13px;}
-  .tb-groups{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
-  .tb-group{flex:1 1 330px;min-width:0;border:1px solid var(--border);background:var(--panel);padding:8px 10px 10px;}
+  .tb-groups{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px;margin-bottom:16px;}
+  .tb-group{min-width:0;border:1px solid var(--border);background:var(--panel);padding:8px 10px 10px;}
   .tb-tabs{display:none;}
   .tb-group[data-oculto]{display:none !important;}
   .chk-linea{display:flex;align-items:center;gap:6px;font-size:12.5px;margin:6px 0;}
@@ -94,8 +94,8 @@
   .prog-fila{display:flex;gap:8px;margin:6px 0;}
   .prog-fila select{flex:1;min-width:0;}
   .tb-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin-bottom:6px;}
-  .tb-btns{display:flex;flex-wrap:wrap;gap:6px;}
-  .tb-btns .btn{padding:7px 11px;font-size:12.5px;text-align:center;justify-content:center;align-items:center;}
+  .tb-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+  .tb-btns .btn{width:100%;min-height:38px;padding:7px 8px;font-size:12.5px;line-height:1.2;text-align:center;justify-content:center;align-items:center;white-space:normal;}
   .btn{border:1px solid var(--border-strong);background:var(--panel);color:var(--text);padding:9px 14px;font-size:13px;cursor:pointer;border-radius:var(--radius);}
   .btn:hover{background:var(--panel-soft);}
 
@@ -153,6 +153,8 @@
   .permisos-tabla{width:100%;border-collapse:collapse;font-size:13px;}
   .permisos-tabla th, .permisos-tabla td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:center;}
   .permisos-tabla th:first-child, .permisos-tabla td:first-child{text-align:left;}
+  .permisos-tabla .perm-sec td{text-align:left;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--sub);background:var(--panel-soft);padding:7px 6px;}
+  .permisos-tabla small{display:block;font-size:11px;color:var(--sub);margin-top:1px;}
   .permisos-tabla th{font-size:11.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;}
   .permisos-tabla td small{display:block;color:var(--sub);font-size:11px;margin-top:2px;}
   .permisos-tabla input[type=checkbox]{width:20px;height:20px;cursor:pointer;}
@@ -165,6 +167,9 @@
   .admin-only{display:none;}
   body.is-admin .admin-only{display:inline-flex;}
   body.is-admin .admin-only.block{display:block;}
+  body.is-supervisor #tbGroups .admin-only{display:inline-flex;}
+  body.is-worker .tb-groups{display:none !important;}
+  #tbGroups .btn.bloq{opacity:.5;cursor:not-allowed;}
   body.is-admin .admin-only.flex{display:flex;}
 
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px;}
@@ -427,7 +432,6 @@
     .tb-title{display:none;}
     .tb-groups[data-una] .tb-tabs{display:none;}
     .tb-groups[data-una] .tb-group:not([data-oculto]){display:block;border:none;background:none;padding:0;margin-bottom:6px;}
-    .tb-btns .btn{flex:1 1 calc(50% - 6px);}
     .hist-row{grid-template-columns:1fr 1fr 1fr;}
     .hist-row .hist-donde, .hist-row .hist-m2{grid-column:1/-1;}
     .hist-row .hist-donde{font-weight:600;}
@@ -549,6 +553,7 @@
   .lg{--lg-azul:#0b2b36;--lg-mortero:#d9cdb8;--lg-frague:#8d8a84;position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--text);}
   body.dark .lg{--lg-mortero:#4a4338;--lg-frague:#2a2927;}
   .lg.off{display:none;}
+  body.lg-on > *:not(#loginGate){display:none !important;}
   .lg *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   .lg-app{position:relative;width:100%;max-width:440px;height:100dvh;max-height:860px;background:var(--panel);overflow:hidden;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
   @media (min-width:600px){.lg-app{border:1px solid var(--border-strong);box-shadow:0 10px 40px rgba(0,0,0,.18);}}
@@ -601,7 +606,7 @@
   .lg-modo{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-size:16px;padding:0;}
 </style>
 </head>
-<body>
+<body class="lg-on">
 <div class="lg" id="loginGate" role="dialog" aria-modal="true" aria-label="Inicio de sesión">
   <div class="lg-app">
     <button class="lg-modo" id="lgModo" type="button" aria-label="Modo día o noche">🌙</button>
@@ -656,7 +661,7 @@
   </header>
 
   <div class="role-bar">
-    <span class="role-badge guest" id="roleBadge">Conectado como INVITADO</span>
+    <span class="role-badge guest" id="roleBadge" style="display:none;"></span>
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
@@ -1010,10 +1015,11 @@
 </div>
 
 <div class="overlay" id="permisosOverlay">
-  <div class="modal" style="max-width:520px;">
+  <div class="modal" style="max-width:560px;">
     <h3>Permisos por cargo</h3>
-    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca lo que puede hacer cada cargo. Admin siempre puede todo. Marcar Pagado, precios, liquidaciones y peticiones son solo de Admin.</p>
+    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca lo que puede hacer cada cargo. Admin siempre puede todo. Los cargos ven todos los botones, pero los que no marques aparecen bloqueados. Los trabajadores no ven ningún botón. Marcar Pagado es solo de Admin.</p>
     <div style="overflow-x:auto;"><table class="permisos-tabla" id="permisosTabla"></table></div>
+    <p style="margin:12px 0 0;font-size:11.5px;color:var(--sub);line-height:1.5;"><b>Siempre solo Admin</b> (necesitan datos de pagos y tarifas que los cargos no reciben): <span id="permisosSoloAdmin"></span>.</p>
     <p id="permisosMsg" style="min-height:16px;margin:10px 0 0;font-size:12px;color:#c0546f;"></p>
     <p style="margin:12px 0 0;font-size:12px;color:var(--sub);">Sesiones: cada aparato recordado dura 30 días (Admin), 14 (Supervisor/Jefe) o 7 (trabajadores). Si perdiste un celular o cambiaste PINs, cierra todas: todos tendrán que ingresar el PIN de nuevo (tu sesión se mantiene).</p>
     <div class="actions"><button class="btn" id="permisosCerrarSesionesBtn" style="margin-right:auto;">Cerrar todas las sesiones</button><button class="btn" id="permisosCancelBtn">Cancelar</button><button class="btn primary" id="permisosGuardarBtn">Guardar</button></div>
@@ -1062,8 +1068,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.22.0';
-const BACKEND_REQUERIDO = 25;
+const APP_VERSION = '0.23.0';
+const BACKEND_REQUERIDO = 26;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -1219,9 +1225,22 @@ let dbLastOkTs = null;
 function canSeePrices(){ return isAdmin || allowGuestPrices; }
 const esStaff = () => isAdmin || isSupervisor || isJefe;
 function puede(permiso){ return isAdmin || ((isSupervisor || isJefe) && misPermisos[permiso] === true); }
+const MAPA_BOTONES = {saveNowBtn:'b_guardar', dbBtn:'b_dbUrl', exportBtn:'b_exportar', importBtn:'b_importar', statsOpenBtn:'b_estadisticas', togglePrices:'b_ocultarPrecios', turboBtn:'b_turbo', diagnosticoBtn:'b_diagnostico', supervisorWorkersBtn:'trabajadores'};
+function aplicarBotonesPorCargo(){
+  const cargo = isSupervisor || isJefe;
+  document.querySelectorAll('#tbGroups .btn[id]').forEach(b => {
+    if(b.dataset.tit0 === undefined) b.dataset.tit0 = b.getAttribute('title') || '';
+    if(!cargo){ b.disabled = false; b.classList.remove('bloq'); if(b.dataset.tit0) b.title = b.dataset.tit0; else b.removeAttribute('title'); return; }
+    const clave = MAPA_BOTONES[b.id];
+    const ok = !!clave && misPermisos[clave] === true;
+    b.disabled = !ok; b.classList.toggle('bloq', !ok);
+    if(ok){ if(b.dataset.tit0) b.title = b.dataset.tit0; else b.removeAttribute('title'); }
+    else b.title = clave ? 'Sin permiso: pídeselo al administrador' : 'Solo el administrador puede usar este botón';
+  });
+}
 function actualizarBotonesCargo(){
   const b = document.getElementById('supervisorWorkersBtn');
-  if(b) b.style.display = ((isSupervisor || isJefe) && puede('trabajadores')) ? 'inline-flex' : 'none';
+  if(b) b.style.display = (isSupervisor || isJefe) ? 'inline-flex' : 'none';
 }
 
 function applyRoleUI(){
@@ -1231,7 +1250,7 @@ function applyRoleUI(){
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
   const badge = document.getElementById('roleBadge');
   const loggedIn = isAdmin || isSupervisor || isJefe || workerSession;
-  let label = 'Conectado como INVITADO', cls = 'guest';
+  let label = '', cls = 'guest';
   if(isAdmin){ label = 'Conectado como: Admin' + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
   else if(isSupervisor){ label = 'Conectado como: Supervisor' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(isJefe){ label = 'Conectado como: Jefe de Terreno' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
@@ -1240,11 +1259,13 @@ function applyRoleUI(){
     label = `Conectado como: ${especialidad} - ${workerSession}`; cls = 'worker';
   }
   badge.textContent = label;
+  badge.style.display = label ? '' : 'none';
   badge.className = 'role-badge ' + cls;
   badge.classList.remove('role-flash'); void badge.offsetWidth; badge.classList.add('role-flash');
-  document.getElementById('loginBtn').style.display = loggedIn ? 'none' : 'inline-flex';
+  document.getElementById('loginBtn').style.display = 'none';
   document.getElementById('logoutBtn').style.display = loggedIn ? 'inline-flex' : 'none';
   actualizarBotonesCargo();
+  aplicarBotonesPorCargo();
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
 
   if(!workerSession) misPeticiones = [];
@@ -1601,6 +1622,7 @@ function applyLoadedPayload(parsed){
   if(parsed.workerDocs) workerDocs = parsed.workerDocs;
   if(isAdmin) permisosCargos = parsed.permisos || permisosCargos;
   else misPermisos = (parsed.permisos && typeof parsed.permisos === 'object') ? parsed.permisos : {};
+  if(typeof aplicarBotonesPorCargo === 'function') aplicarBotonesPorCargo();
   actualizarBotonesCargo();
   rebuildWorkerList();
   ALL_CELLS.forEach(c => { if(!state[c.id]) state[c.id] = defaultStateFor(c); });
@@ -1635,6 +1657,7 @@ async function loadState(){
     const remote = await dbLoad();
 
     if(remote && remote.items && Object.keys(remote.items).length){ parsed = remote; fromDb = true; }
+    if(remote && remote.permisos && typeof remote.permisos === 'object'){ if(isAdmin) permisosCargos = remote.permisos; else misPermisos = remote.permisos; }
   }
   let localParsed = null;
   try{
@@ -2870,21 +2893,34 @@ document.getElementById('cambiosCerrarBtn').addEventListener('click', () => clos
 
 const PERMISOS_FILAS = [
   ['notas', 'Escribir observaciones', 'Agregar o editar la observación de cada partida'],
-  ['trabajadores', 'Ver lista de trabajadores', 'Solo lectura: nombre, cargo y estado'],
   ['asignar', 'Asignar y reasignar', 'Elegir el trabajador de cada partida (no si ya está pagada)'],
   ['estados', 'Marcar Partida y Terminado', 'Nunca puede marcar Pagado']
 ];
+const PERMISOS_BOTONES = [
+  ['b_estadisticas', '📊 Estadísticas', 'Ver el resumen de avance'],
+  ['trabajadores', 'Trabajadores', 'Lista de trabajadores, solo lectura'],
+  ['b_guardar', '💾 Guardar ahora', 'Forzar el guardado de lo que cambió'],
+  ['b_exportar', 'Exportar datos', 'Descargar una copia (sin pagos ni tarifas)'],
+  ['b_importar', 'Importar datos', 'Cargar un archivo de respaldo'],
+  ['b_dbUrl', 'Conectar base de datos', 'Cambiar la dirección del servidor'],
+  ['b_ocultarPrecios', 'Ocultar precios', 'Esconder o mostrar los montos en pantalla'],
+  ['b_turbo', '⚡ Turbo', 'Marcar varios estados de una vez'],
+  ['b_diagnostico', '🩺 Diagnóstico', 'Ver datos técnicos de la conexión']
+];
+const PERMISOS_SOLO_ADMIN = ['Gestionar trabajadores', 'Precios y metrajes', 'Generar liquidación', 'Cerrar quincena/mes', 'Retenciones', 'Materiales', 'Permisos por cargo', 'Peticiones', 'Cambios por cuenta', 'Avisos', 'Reporte semanal'];
 const PERMISOS_COLUMNAS = [['supervisor', 'Supervisor'], ['jefe', 'Jefe de Terreno']];
 function permisosPorDefecto(){
   const o = {};
-  PERMISOS_COLUMNAS.forEach(([c]) => { o[c] = {notas:true, trabajadores:true, asignar:false, estados:false}; });
+  PERMISOS_COLUMNAS.forEach(([c]) => { o[c] = {notas:true, trabajadores:true, asignar:false, estados:false, b_guardar:false, b_dbUrl:false, b_exportar:false, b_importar:false, b_estadisticas:true, b_ocultarPrecios:false, b_turbo:false, b_diagnostico:false}; });
   return o;
 }
 function abrirPermisos(){
   const p = permisosCargos || permisosPorDefecto();
   const cab = `<tr><th>Permiso</th>${PERMISOS_COLUMNAS.map(([, n]) => `<th>${n}</th>`).join('')}</tr>`;
-  const filas = PERMISOS_FILAS.map(([k, t, d]) => `<tr><td>${t}<small>${d}</small></td>${PERMISOS_COLUMNAS.map(([c]) => `<td><input type="checkbox" data-cargo="${c}" data-permiso="${k}" ${(p[c] || {})[k] ? 'checked' : ''} aria-label="${t}"></td>`).join('')}</tr>`).join('');
-  document.getElementById('permisosTabla').innerHTML = cab + filas;
+  const fila = ([k, t, d]) => `<tr><td>${t}<small>${d}</small></td>${PERMISOS_COLUMNAS.map(([c]) => `<td><input type="checkbox" data-cargo="${c}" data-permiso="${k}" ${(p[c] || {})[k] ? 'checked' : ''} aria-label="${t} — ${c}"></td>`).join('')}</tr>`;
+  const sec = (t) => `<tr class="perm-sec"><td colspan="${PERMISOS_COLUMNAS.length + 1}">${t}</td></tr>`;
+  document.getElementById('permisosTabla').innerHTML = cab + sec('Acciones en las partidas') + PERMISOS_FILAS.map(fila).join('') + sec('Botones del panel') + PERMISOS_BOTONES.map(fila).join('');
+  document.getElementById('permisosSoloAdmin').textContent = PERMISOS_SOLO_ADMIN.join(' · ');
   document.getElementById('permisosMsg').textContent = '';
   document.getElementById('permisosOverlay').classList.add('show');
 }
@@ -4734,6 +4770,7 @@ function crearBarraCeramica(cont, alto, filas){
 }
 function gatePantalla(id){
   gate.el.classList.remove('off');
+  if(!appListo) document.body.classList.add('lg-on');
   ['lgSplash', 'lgPin', 'lgUrl'].forEach(x => lg(x).classList.toggle('on', x === id));
 }
 function gateBucle(){
@@ -4749,7 +4786,7 @@ function gateArrancarBarra(){
 }
 async function gateOcultar(){
   if(lg('lgSplash').classList.contains('on')){ gate.meta = 100; await dormir(420); }
-  gate.el.classList.add('off'); cancelAnimationFrame(gate.raf);
+  gate.el.classList.add('off'); document.body.classList.remove('lg-on'); cancelAnimationFrame(gate.raf);
 }
 function gateIniciar(){
   try{
