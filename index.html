@@ -571,6 +571,10 @@
   .lg-recordar b{font-size:14px;display:block;}
   .lg-recordar span span{font-size:12px;color:var(--sub);}
   .lg-pie{font-size:11.5px;color:var(--sub);text-align:center;margin:0;}
+  .lg-url{width:100%;min-height:54px;border:2px solid var(--border-strong);background:var(--bg);color:var(--text);padding:0 12px;font-size:14px;font-family:inherit;border-radius:0;}
+  .lg-url:focus{outline:none;border-color:var(--accent);}
+  .lg-btn{min-height:54px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:16px;font-weight:700;padding:0 16px;}
+  .lg-cuerpo p.lg-expl{margin:0;font-size:13px;color:var(--sub);line-height:1.45;}
   .lg-modo{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-size:16px;padding:0;}
 </style>
 </head>
@@ -593,6 +597,16 @@
         <div class="lg-teclas" id="lgTeclas"></div>
         <label class="lg-recordar"><input type="checkbox" id="lgRecordar" checked><span><b>Recordar este aparato</b><span id="lgTxtRecordar">Entrarás directo, sin PIN. Dura de 7 a 30 días según tu cuenta.</span></span></label>
         <p class="lg-pie">¿Olvidaste tu PIN? Pídeselo al administrador.</p>
+      </div>
+    </section>
+    <section class="lg-p" id="lgUrl">
+      <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Progreso</b><span>Obra Bellavista, La Florida</span></div></div>
+      <div class="lg-cuerpo">
+        <h2 class="lg-titulo">Conectar con el servidor</h2>
+        <p class="lg-expl">Este aparato aún no sabe dónde está la base de datos. Pega la dirección que te dio el administrador. Después se pedirá tu PIN.</p>
+        <input class="lg-url" id="lgUrlInput" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/…/exec">
+        <p class="lg-msg" id="lgMsgUrl" aria-live="polite"></p>
+        <button class="lg-btn" id="lgUrlBtn" type="button">Conectar</button>
       </div>
     </section>
   </div>
@@ -1024,7 +1038,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.21.2';
+const APP_VERSION = '0.21.4';
 const BACKEND_REQUERIDO = 25;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1090,7 +1104,7 @@ document.addEventListener('visibilitychange', () => {
 });
 setInterval(() => { if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionVersion > REVISAR_VERSION_CADA_MS) comprobarVersion(); }, REVISAR_VERSION_CADA_MS);
 let backendVersion = null;
-const DEFAULT_DB_URL = '';
+const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
 
 const SEED_DATA = null;
 
@@ -4625,7 +4639,7 @@ function crearBarraCeramica(cont, alto, filas){
 }
 function gatePantalla(id){
   gate.el.classList.remove('off');
-  ['lgSplash', 'lgPin'].forEach(x => lg(x).classList.toggle('on', x === id));
+  ['lgSplash', 'lgPin', 'lgUrl'].forEach(x => lg(x).classList.toggle('on', x === id));
 }
 function gateBucle(){
   gate.prog += (gate.meta - gate.prog) * 0.045;
@@ -4727,6 +4741,20 @@ function gatePedirPin(mensaje){
   });
 }
 let reautenticando = false;
+function gatePedirUrl(){
+  return new Promise(resolver => {
+    gatePantalla('lgUrl');
+    const inp = lg('lgUrlInput'), msg = lg('lgMsgUrl');
+    const ir = () => {
+      const v = inp.value.trim();
+      if(!/^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)[:\/])[^\s]+$/.test(v)){ msg.textContent = 'Pega la dirección completa, empieza con https://'; msg.className = 'lg-msg mal'; return; }
+      try{ localStorage.setItem('progresoObraDbUrl', v); }catch(err){}
+      DB_URL = v; resolver(v);
+    };
+    lg('lgUrlBtn').onclick = ir;
+    inp.onkeydown = (e) => { if(e.key === 'Enter') ir(); };
+  });
+}
 async function sesionVencida(){
   if(reautenticando) return;
   reautenticando = true;
@@ -4748,11 +4776,16 @@ async function sesionVencida(){
 (async function init(){
   gateIniciar();
   const t0 = Date.now();
+  let pidioUrl = false;
   if(!DB_URL){
-    await loadState();
-  } else {
+    await dormir(1300);
+    await gatePedirUrl();
+    pidioUrl = true;
+    gatePantalla('lgSplash'); gateArrancarBarra();
+  }
+  {
     if(!sessionToken){
-      await dormir(1300);
+      await dormir(pidioUrl ? 400 : 1300);
       let aviso = '';
       try{ aviso = sessionStorage.getItem('progresoObraAvisoGate') || ''; sessionStorage.removeItem('progresoObraAvisoGate'); }catch(err){}
       const res = await gatePedirPin(aviso);
