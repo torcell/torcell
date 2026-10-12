@@ -521,9 +521,82 @@
     .cell-td{padding:3px;}
     .cell-block{padding:3px;}
   }
+
+  /* ===== Pantalla de inicio de sesión ===== */
+  .lg{--lg-azul:#0b2b36;--lg-mortero:#d9cdb8;--lg-frague:#8d8a84;position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--text);}
+  body.dark .lg{--lg-mortero:#4a4338;--lg-frague:#2a2927;}
+  .lg.off{display:none;}
+  .lg *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  .lg-app{position:relative;width:100%;max-width:440px;height:100dvh;max-height:860px;background:var(--panel);overflow:hidden;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  @media (min-width:600px){.lg-app{border:1px solid var(--border-strong);box-shadow:0 10px 40px rgba(0,0,0,.18);}}
+  @media (max-width:500px){.lg-app{max-width:none;max-height:none;}}
+  .lg-p{position:absolute;inset:0;display:none;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
+  .lg-p.on{display:flex;}
+  .lg button{font-family:inherit;border-radius:0;cursor:pointer;}
+  .lg-splash{background:var(--lg-azul);color:#fff;align-items:center;justify-content:center;gap:22px;text-align:center;padding:24px;}
+  .lg-splash img{width:112px;height:112px;display:block;animation:lgEntra .5s ease-out both;}
+  .lg-splash h1{margin:0;font-size:20px;font-weight:700;line-height:1.25;animation:lgEntra .5s .12s ease-out both;}
+  .lg-splash p{margin:0;font-size:13px;opacity:.8;min-height:18px;}
+  .lg-carga{width:min(280px,76%);animation:lgEntra .5s .24s ease-out both;}
+  @keyframes lgEntra{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .lg-barra{position:relative;width:100%;height:36px;background:var(--lg-frague);overflow:hidden;border:1px solid var(--lg-frague);}
+  .lg-barra .mortero{position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--lg-mortero) 0 3px,color-mix(in srgb,var(--lg-mortero) 82%,#000) 3px 5px);}
+  .lg-barra .pl{position:absolute;opacity:0;transform:translateY(-9px) scale(1.07);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.18),0 1px 1px rgba(0,0,0,.25);}
+  .lg-barra .pl.on{opacity:1;transform:none;transition:opacity .16s ease-out,transform .26s cubic-bezier(.2,.9,.3,1.25);}
+  .lg-barra .pl::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 38%,rgba(0,0,0,.08) 100%);}
+  .lg-cab{background:var(--lg-azul);color:#fff;padding:18px 20px 16px;display:flex;align-items:center;gap:14px;}
+  .lg-cab img{width:44px;height:44px;display:block;flex:none;}
+  .lg-cab div{min-width:0;}
+  .lg-cab b{display:block;font-size:16px;line-height:1.2;}
+  .lg-cab span{font-size:12px;opacity:.8;}
+  .lg-cuerpo{flex:1;min-height:0;display:flex;flex-direction:column;padding:18px 16px 14px;gap:14px;}
+  .lg-titulo{margin:0;font-size:19px;}
+  .lg-visor{display:flex;align-items:center;justify-content:center;gap:9px;min-height:54px;border:2px solid var(--border-strong);background:var(--bg);padding:0 12px;}
+  .lg-visor i{width:14px;height:14px;background:var(--text);display:block;animation:lgPunto .12s ease-out;}
+  .lg-visor em{font-style:normal;color:var(--sub);font-size:14px;}
+  @keyframes lgPunto{from{transform:scale(.3)}to{transform:none}}
+  .lg-visor.error{border-color:#c0392b;animation:lgSacude .35s;}
+  @keyframes lgSacude{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .lg-msg{min-height:20px;font-size:13.5px;font-weight:600;margin:-6px 0 0;text-align:center;}
+  .lg-msg.mal{color:#c0392b;}
+  body.dark .lg-msg.mal{color:#ef7b6e;}
+  .lg-teclas{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,minmax(54px,1fr));gap:4px;max-height:420px;}
+  .lg-teclas button{font-size:26px;font-weight:700;border:2px solid var(--text);background:var(--panel);color:var(--text);padding:0;}
+  .lg-teclas button:active{background:var(--text);color:var(--panel);}
+  .lg-teclas button.aux{font-size:15px;border-color:var(--border-strong);color:var(--sub);}
+  .lg-teclas button.entrar{background:linear-gradient(90deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;font-size:17px;}
+  .lg-teclas button:disabled{opacity:.4;cursor:not-allowed;}
+  .lg-recordar{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:center;border:2px solid var(--border-strong);padding:10px 12px;cursor:pointer;user-select:none;}
+  .lg-recordar input{width:24px;height:24px;margin:0;accent-color:var(--accent);}
+  .lg-recordar b{font-size:14px;display:block;}
+  .lg-recordar span span{font-size:12px;color:var(--sub);}
+  .lg-pie{font-size:11.5px;color:var(--sub);text-align:center;margin:0;}
+  .lg-modo{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-size:16px;padding:0;}
 </style>
 </head>
 <body>
+<div class="lg" id="loginGate" role="dialog" aria-modal="true" aria-label="Inicio de sesión">
+  <div class="lg-app">
+    <button class="lg-modo" id="lgModo" type="button" aria-label="Modo día o noche">🌙</button>
+    <section class="lg-p lg-splash on" id="lgSplash">
+      <img class="lg-logo" alt="CA4" width="112" height="112">
+      <h1>Panel de Progreso<br>Obra La Florida Bellavista</h1>
+      <div class="lg-carga"><div class="lg-barra" id="lgBarra" role="progressbar" aria-label="Cargando"></div></div>
+      <p id="lgSplashMsg">Preparando el piso…</p>
+    </section>
+    <section class="lg-p" id="lgPin">
+      <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Progreso</b><span>Obra La Florida Bellavista</span></div></div>
+      <div class="lg-cuerpo">
+        <h2 class="lg-titulo">Ingresa tu PIN</h2>
+        <div class="lg-visor" id="lgVisor"><em>Toca los números</em></div>
+        <p class="lg-msg" id="lgMsgPin" aria-live="polite"></p>
+        <div class="lg-teclas" id="lgTeclas"></div>
+        <label class="lg-recordar"><input type="checkbox" id="lgRecordar" checked><span><b>Recordar este aparato</b><span id="lgTxtRecordar">Entrarás directo, sin PIN. Dura de 7 a 30 días según tu cuenta.</span></span></label>
+        <p class="lg-pie">¿Olvidaste tu PIN? Pídeselo al administrador.</p>
+      </div>
+    </section>
+  </div>
+</div>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -600,7 +673,7 @@
     <h3>Trabajadores</h3>
     <button class="btn small" id="histTodosBtn" style="margin-bottom:10px;">📜 Historial de trabajo de todos</button>
     <label class="guest-price-toggle">
-      <input type="checkbox" id="allowGuestPricesChk"> Dejar que el invitado pueda ver precios
+      <input type="checkbox" id="allowGuestPricesChk"> Dejar que supervisores y trabajadores vean los precios base
     </label>
     <div class="add-worker-row">
       <input type="text" id="newWorkerName" placeholder="Nombre del nuevo trabajador">
@@ -904,7 +977,8 @@
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca lo que puede hacer cada cargo. Admin siempre puede todo. Marcar Pagado, precios, liquidaciones y peticiones son solo de Admin.</p>
     <div style="overflow-x:auto;"><table class="permisos-tabla" id="permisosTabla"></table></div>
     <p id="permisosMsg" style="min-height:16px;margin:10px 0 0;font-size:12px;color:#c0546f;"></p>
-    <div class="actions"><button class="btn" id="permisosCancelBtn">Cancelar</button><button class="btn primary" id="permisosGuardarBtn">Guardar</button></div>
+    <p style="margin:12px 0 0;font-size:12px;color:var(--sub);">Sesiones: cada aparato recordado dura 30 días (Admin), 14 (Supervisor/Jefe) o 7 (trabajadores). Si perdiste un celular o cambiaste PINs, cierra todas: todos tendrán que ingresar el PIN de nuevo (tu sesión se mantiene).</p>
+    <div class="actions"><button class="btn" id="permisosCerrarSesionesBtn" style="margin-right:auto;">Cerrar todas las sesiones</button><button class="btn" id="permisosCancelBtn">Cancelar</button><button class="btn primary" id="permisosGuardarBtn">Guardar</button></div>
   </div>
 </div>
 
@@ -950,8 +1024,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.20.1';
-const BACKEND_REQUERIDO = 24;
+const APP_VERSION = '0.21.0';
+const BACKEND_REQUERIDO = 25;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -1084,15 +1158,17 @@ let workerSession = null;
 let sessionToken = null;
 let sessionName = null;
 let turboMode = false;
+function leerSes(k){ try{ return sessionStorage.getItem(k) || localStorage.getItem(k) || null; }catch(err){ return null; } }
 try{
-  const rolGuardado = sessionStorage.getItem('progresoObraRol');
+  const rolGuardado = leerSes('progresoObraRol');
   isAdmin = rolGuardado === '1';
   isSupervisor = rolGuardado === '2';
   isJefe = rolGuardado === '4';
-  sessionName = sessionStorage.getItem('progresoObraName') || null;
+  sessionName = leerSes('progresoObraName') || null;
   workerSession = rolGuardado === '3' ? sessionName : null;
-  sessionToken = sessionStorage.getItem('progresoObraToken') || null;
+  sessionToken = leerSes('progresoObraToken') || null;
 }catch(err){}
+let sesionInvalida = false, appListo = false;
 
 let DB_URL = '';
 try{ DB_URL = localStorage.getItem('progresoObraDbUrl') || DEFAULT_DB_URL; }catch(err){ DB_URL = DEFAULT_DB_URL; }
@@ -1381,18 +1457,14 @@ async function dbLoad(){
       const jp = await resP.json();
       if(jp && jp.ok === true){ data = jp; }
       else if(jp && jp.error === 'sin_sesion'){
-        avisoToast('Tu sesión venció. Vuelve a iniciar sesión para ver todos los datos.', 'error');
-        document.getElementById('logoutBtn').click();
+        if(appListo){ sesionVencida(); } else { sesionInvalida = true; limpiarSesionGuardada(); }
+        return null;
       } else if(isAdmin){
         dbErrorReason = 'El servidor no entregó los datos completos. Prueba recargar la página.';
         throw new Error('carga privada fallida');
       }
     }
-    if(!data){
-      const res = await fetch(DB_URL + '?action=load');
-      if(!res.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
-      data = await res.json();
-    }
+    if(!data) return null;
     if(data && data.items) ultimoConteoHoja = Object.keys(data.items).length;
     dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = ''; updateDbBadge();
     if(data && data.backendVersion){ backendVersion = data.backendVersion; updateRateFootnote(); }
@@ -1457,7 +1529,7 @@ async function dbSave(dirtyIds){
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
-    if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Vuelve a iniciar sesión para poder seguir guardando.'; throw new Error('sin sesion'); }
+    if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Ingresa tu PIN de nuevo para poder seguir guardando.'; sesionVencida(); throw new Error('sin sesion'); }
     if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = 'El servidor frenó el guardado porque iba a borrar la mayoría de las partidas. No se guardó nada: recarga la página y revisa tus datos.'; throw new Error('reduccion'); }
     if(json && json.error === 'muy_grande'){ dbErrorReason = 'El servidor rechazó el guardado porque los datos son demasiado grandes.'; throw new Error('muy grande'); }
     if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
@@ -2416,17 +2488,10 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     pinError.textContent = 'Ese PIN no tiene un Rol válido en la pestaña "Usuarios" (tiene que ser 1, 2, 3 o 4).';
   }
 });
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  if(DB_URL && sessionToken) llamarDb('logout').catch(() => {});
-  isAdmin = false; isSupervisor = false; isJefe = false; misPermisos = {}; permisosCargos = null; workerSession = null; sessionToken = null; sessionName = null;
-  try{
-    sessionStorage.removeItem('progresoObraRol');
-    sessionStorage.removeItem('progresoObraToken');
-    sessionStorage.removeItem('progresoObraName');
-  }catch(err){}
-  document.getElementById('workerPanel').classList.remove('show');
-  document.getElementById('toggleWorkerPanel').classList.remove('primary');
-  applyRoleUI(); populateFilters(); render();
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  if(DB_URL && sessionToken){ try{ await Promise.race([llamarDb('logout'), new Promise(r => setTimeout(r, 2500))]); }catch(e){} }
+  limpiarSesionGuardada();
+  location.reload();
 });
 document.getElementById('supervisorWorkersBtn').addEventListener('click', () => {
   renderSupervisorWorkersList();
@@ -2707,6 +2772,12 @@ function abrirPermisos(){
   document.getElementById('permisosOverlay').classList.add('show');
 }
 document.getElementById('permisosBtn').addEventListener('click', abrirPermisos);
+document.getElementById('permisosCerrarSesionesBtn').addEventListener('click', () => {
+  askConfirm('¿Cerrar todas las sesiones? Todos los trabajadores y cargos tendrán que ingresar su PIN otra vez. La tuya se mantiene.', async () => {
+    const j = await llamarDb('revocarSesiones').catch(() => null);
+    avisoToast(j && j.ok ? 'Listo: se cerraron todas las sesiones de los demás aparatos.' : 'No se pudo cerrar las sesiones. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.', j && j.ok ? 'ok' : 'error');
+  });
+});
 document.getElementById('permisosCancelBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('permisosOverlay')));
 document.getElementById('permisosGuardarBtn').addEventListener('click', async () => {
   const msg = document.getElementById('permisosMsg');
@@ -2740,7 +2811,10 @@ async function llamarDb(accion, extra){
   const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({action: accion, token: sessionToken, ...extra})});
   if(!res.ok) return null;
-  try{ return JSON.parse(await res.text()); }catch(e){ return {ok: false, error: 'respuesta_invalida'}; }
+  let j;
+  try{ j = JSON.parse(await res.text()); }catch(e){ return {ok: false, error: 'respuesta_invalida'}; }
+  if(j && j.error === 'sin_sesion' && sessionToken && accion !== 'logout') sesionVencida();
+  return j;
 }
 let avisoToastTimer = null;
 function avisoToast(texto, tipo){
@@ -4480,8 +4554,209 @@ document.getElementById('content').addEventListener('click', (e) => {
     confirmarEstadoAdmin(flip.getAttribute('data-cellid'), Number(flip.dataset.destino));
   }
 });
+
+/* ===== Inicio de sesión (pantalla de entrada) ===== */
+const lg = id => document.getElementById(id);
+function limpiarSesionGuardada(){
+  ['progresoObraToken','progresoObraName','progresoObraRol'].forEach(k => {
+    try{ sessionStorage.removeItem(k); }catch(err){}
+    try{ localStorage.removeItem(k); }catch(err){}
+  });
+}
+function guardarSesionLocal(res, recordar){
+  limpiarSesionGuardada();
+  const st = recordar ? localStorage : sessionStorage;
+  try{
+    st.setItem('progresoObraToken', res.token || ''); st.setItem('progresoObraName', res.nombre || ''); st.setItem('progresoObraRol', String(res.rol));
+    if(res.dispositivo) localStorage.setItem('progresoObraDisp', res.dispositivo);
+  }catch(err){}
+}
+function aplicarRolDeLogin(res){
+  sessionToken = res.token || null; sessionName = res.nombre || '';
+  isAdmin = res.rol === 1; isSupervisor = res.rol === 2; isJefe = res.rol === 4;
+  workerSession = res.rol === 3 ? sessionName : null;
+}
+const rolActual = () => isAdmin ? 1 : isSupervisor ? 2 : isJefe ? 4 : workerSession ? 3 : 0;
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+const gate = {el: lg('loginGate'), pin: '', fallos: 0, bloqueado: false, ocupado: false, resolver: null, meta: 88, prog: 0, raf: 0, barra: null, msgs: ['Preparando el piso…', 'Comprobando tu sesión…', 'Colocando cerámica…', 'Casi listo…']};
+function crearBarraCeramica(cont, alto, filas){
+  const TONOS = [[176,140,98],[164,128,88],[188,152,110],[170,136,96],[154,120,84],[182,146,104],[160,124,86]];
+  const azar = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  const h = alto, w = h * 4, g = 2;
+  let tablas = [], actual = 0;
+  cont.style.height = (filas * (h + g) + g + 2) + 'px';
+  const mortero = document.createElement('div'); mortero.className = 'mortero';
+  function construir(){
+    cont.innerHTML = ''; cont.appendChild(mortero); tablas = [];
+    const W = cont.clientWidth - 2;
+    for(let r = 0; r < filas; r++){
+      let x = g - (r % 2 ? w / 2 + g / 2 : 0), k = 0;
+      while(x < W){
+        const ini = Math.max(x, 0), fin = Math.min(x + w, W - g);
+        if(fin - ini > 3){
+          const d = document.createElement('div'); d.className = 'pl';
+          const t = TONOS[Math.floor(azar(r * 50 + k + 1) * TONOS.length)], v = (azar(r * 91 + k * 7) - 0.5) * 14;
+          d.style.cssText = `left:${ini}px;top:${g + r * (h + g)}px;width:${fin - ini}px;height:${h}px;background:rgb(${t[0] + v | 0},${t[1] + v | 0},${t[2] + v | 0})`;
+          cont.appendChild(d); tablas.push({el: d, cx: (ini + fin) / 2});
+        }
+        x += w + g; k++;
+      }
+    }
+    tablas.sort((a, b) => a.cx - b.cx); poner(actual);
+  }
+  function poner(pct){
+    actual = Math.max(0, Math.min(100, pct));
+    const lim = actual / 100 * (cont.clientWidth - 2);
+    tablas.forEach(t => t.el.classList.toggle('on', actual >= 100 || t.cx <= lim));
+    cont.setAttribute('aria-valuenow', Math.round(actual));
+  }
+  if(window.ResizeObserver) new ResizeObserver(construir).observe(cont);
+  construir();
+  return {poner};
+}
+function gatePantalla(id){
+  gate.el.classList.remove('off');
+  ['lgSplash', 'lgPin'].forEach(x => lg(x).classList.toggle('on', x === id));
+}
+function gateBucle(){
+  gate.prog += (gate.meta - gate.prog) * 0.045;
+  if(gate.meta >= 100 && gate.prog > 99.5) gate.prog = 100;
+  if(gate.barra) gate.barra.poner(gate.prog);
+  lg('lgSplashMsg').textContent = gate.prog >= 100 ? 'Listo' : gate.msgs[Math.min(gate.msgs.length - 1, Math.floor(gate.prog / 25))];
+  if(!gate.el.classList.contains('off')) gate.raf = requestAnimationFrame(gateBucle);
+}
+function gateArrancarBarra(){
+  gate.prog = 0; gate.meta = 88;
+  cancelAnimationFrame(gate.raf); gateBucle();
+}
+async function gateOcultar(){
+  if(lg('lgSplash').classList.contains('on')){ gate.meta = 100; await dormir(420); }
+  gate.el.classList.add('off'); cancelAnimationFrame(gate.raf);
+}
+function gateIniciar(){
+  try{
+    if(localStorage.getItem('progresoObraTheme') === 'dark'){
+      document.body.classList.add('dark'); document.documentElement.classList.add('dark'); lg('toggleDark').textContent = '☀️'; lg('lgModo').textContent = '☀️';
+    }
+  }catch(err){}
+  const icono = document.querySelector('link[rel="apple-touch-icon"]');
+  if(icono) document.querySelectorAll('.lg-logo').forEach(i => { i.src = icono.href; });
+  gate.barra = crearBarraCeramica(lg('lgBarra'), 17, 2);
+  lg('lgModo').addEventListener('click', () => lg('toggleDark').click());
+  const sincronizar = () => { lg('lgModo').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙'; };
+  lg('toggleDark').addEventListener('click', () => setTimeout(sincronizar, 0));
+  gateArrancarBarra();
+  const teclas = lg('lgTeclas');
+  ['1','2','3','4','5','6','7','8','9'].forEach(n => teclas.insertAdjacentHTML('beforeend', `<button type="button" data-n="${n}">${n}</button>`));
+  teclas.insertAdjacentHTML('beforeend', '<button type="button" class="aux" id="lgBorrar" aria-label="Borrar">⌫ Borrar</button><button type="button" data-n="0">0</button><button type="button" class="entrar" id="lgEntrar" disabled>Entrar</button>');
+  teclas.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if(!b || b.disabled) return;
+    if(b.dataset.n !== undefined) gateSumar(b.dataset.n);
+    else if(b.id === 'lgBorrar'){ gate.pin = gate.pin.slice(0, -1); gateMensaje(''); gatePintar(); }
+    else if(b.id === 'lgEntrar') gateIntentar();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(gate.el.classList.contains('off') || !lg('lgPin').classList.contains('on')) return;
+    if(/^\d$/.test(e.key)) gateSumar(e.key);
+    else if(e.key === 'Backspace'){ gate.pin = gate.pin.slice(0, -1); gatePintar(); }
+    else if(e.key === 'Enter') gateIntentar();
+  });
+  lg('lgRecordar').addEventListener('change', () => {
+    lg('lgTxtRecordar').textContent = lg('lgRecordar').checked ? 'Entrarás directo, sin PIN. Dura de 7 a 30 días según tu cuenta.' : 'Pedirá el PIN cada vez que cierres y abras el panel';
+  });
+}
+function gatePintar(){
+  lg('lgVisor').innerHTML = gate.pin ? gate.pin.split('').map(() => '<i></i>').join('') : '<em>Toca los números</em>';
+  const b = lg('lgEntrar'); b.disabled = gate.pin.length < 4 || gate.bloqueado || gate.ocupado;
+  b.textContent = gate.ocupado ? '…' : 'Entrar';
+}
+function gateMensaje(t, mal){ const m = lg('lgMsgPin'); m.textContent = t; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
+function gateSumar(n){ if(gate.bloqueado || gate.ocupado || gate.pin.length >= 12) return; gate.pin += n; gateMensaje(''); gatePintar(); }
+function gateBloquear(seg, texto){
+  gate.bloqueado = true; let q = seg; gatePintar();
+  gateMensaje(`${texto} Espera ${q} s`, true);
+  const t = setInterval(() => {
+    q--; gateMensaje(`${texto} Espera ${q} s`, true);
+    if(q <= 0){ clearInterval(t); gate.bloqueado = false; gate.fallos = 0; gateMensaje(''); gatePintar(); }
+  }, 1000);
+}
+async function gateLoginFetch(pin){
+  try{
+    const res = await fetch(DB_URL, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: 'login', pin, dispositivo: dispositivoId()})});
+    if(!res.ok) return null;
+    const json = await res.json();
+    return (json && typeof json.ok === 'boolean') ? json : null;
+  }catch(err){ return null; }
+}
+async function gateIntentar(){
+  if(gate.bloqueado || gate.ocupado || gate.pin.length < 4 || !gate.resolver) return;
+  gate.ocupado = true; gatePintar();
+  const pin = gate.pin;
+  const res = await gateLoginFetch(pin);
+  gate.ocupado = false;
+  const v = lg('lgVisor');
+  const fallo = (texto) => { v.classList.remove('error'); void v.offsetWidth; v.classList.add('error'); gate.pin = ''; gatePintar(); gateMensaje(texto, true); };
+  if(res === null){ gatePintar(); gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
+  if(!res.ok){
+    if(res.error === 'demasiados_intentos'){ fallo(''); gateBloquear(30, 'Demasiados PIN incorrectos seguidos.'); return; }
+    gate.fallos++;
+    if(gate.fallos >= 5){ fallo(''); gateBloquear(15, 'Demasiados intentos en este aparato.'); }
+    else fallo(`PIN incorrecto. Te quedan ${5 - gate.fallos} intentos`);
+    return;
+  }
+  if([1, 2, 3, 4].indexOf(res.rol) === -1){ fallo('Ese PIN no tiene un cargo válido en la pestaña "Usuarios" (1, 2, 3 o 4).'); return; }
+  guardarSesionLocal(res, lg('lgRecordar').checked);
+  gate.pin = ''; gate.fallos = 0; gatePintar();
+  if(res.debil) setTimeout(() => avisoToast('Tu PIN tiene menos de 6 dígitos y es fácil de adivinar. Pídele al administrador que lo cambie por uno más largo.', 'error'), 1800);
+  const f = gate.resolver; gate.resolver = null; f(res);
+}
+function gatePedirPin(mensaje){
+  return new Promise(resolver => {
+    gate.resolver = resolver; gate.pin = ''; gate.fallos = 0;
+    gatePintar(); gateMensaje(mensaje || '', !!mensaje);
+    gatePantalla('lgPin');
+  });
+}
+let reautenticando = false;
+async function sesionVencida(){
+  if(reautenticando) return;
+  reautenticando = true;
+  const rolPrev = rolActual(), nomPrev = sessionName || '';
+  sessionToken = null; limpiarSesionGuardada();
+  try{
+    const res = await gatePedirPin('Tu sesión venció. Ingresa tu PIN para seguir.');
+    if(res.rol === rolPrev && (rolPrev !== 3 || res.nombre === nomPrev)){
+      sessionToken = res.token || null;
+      await gateOcultar();
+      avisoToast('Sesión renovada.', 'ok');
+      if(typeof saveNow === 'function' && (dirtyCellIds.size > 0 || settingsDirty)) saveNow();
+    } else {
+      location.reload();
+    }
+  } finally { reautenticando = false; }
+}
+
 (async function init(){
-  await loadState();
+  gateIniciar();
+  const t0 = Date.now();
+  if(!DB_URL){
+    await loadState();
+  } else {
+    if(!sessionToken){
+      await dormir(1300);
+      let aviso = '';
+      try{ aviso = sessionStorage.getItem('progresoObraAvisoGate') || ''; sessionStorage.removeItem('progresoObraAvisoGate'); }catch(err){}
+      const res = await gatePedirPin(aviso);
+      aplicarRolDeLogin(res);
+      gatePantalla('lgSplash'); gateArrancarBarra();
+    }
+    await loadState();
+    if(sesionInvalida){
+      try{ sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(err){}
+      location.reload(); return;
+    }
+  }
   try{ const savedCat = localStorage.getItem('progresoObraCategoria'); if(savedCat) activeCategoria = savedCat; }catch(err){}
   populateFilters();
   try{
@@ -4496,6 +4771,10 @@ document.getElementById('content').addEventListener('click', (e) => {
   updateRateFootnote();
   updateDbBadge();
   render();
+  appListo = true;
+  const falta = 1200 - (Date.now() - t0);
+  if(falta > 0) await dormir(falta);
+  gateOcultar();
 })();
 </script>
 </body>
