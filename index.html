@@ -168,6 +168,29 @@
   body.is-admin .admin-only.flex{display:flex;}
 
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px;}
+  .pt{margin:-8px 0 20px;background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--border-strong);box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .pt > details > summary{cursor:pointer;padding:11px 15px;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .pt > details > summary::-webkit-details-marker{display:none;}
+  .pt > details > summary .pt-sub{font-weight:400;font-size:11.5px;color:var(--sub);margin-left:6px;}
+  .pt > details > summary::after{content:'▾';color:var(--sub);flex:none;}
+  .pt > details[open] > summary::after{content:'▴';}
+  .pt-cab,.pt-fila > summary,.pt-tot{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:8px 15px;align-items:start;}
+  .pt-cab{font-size:10.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--panel-soft);}
+  .pt-fila{border-bottom:1px solid var(--border);}
+  .pt-fila > summary{cursor:pointer;list-style:none;}
+  .pt-fila > summary::-webkit-details-marker{display:none;}
+  .pt-fila > summary:hover{background:var(--panel-soft);}
+  .pt-nom{font-weight:700;font-size:13.5px;overflow-wrap:anywhere;}
+  .pt-nom small{display:block;font-weight:400;font-size:11px;color:var(--sub);margin-top:2px;}
+  .pt-col b{display:block;font-size:14px;}
+  .pt-col span{display:block;font-size:11.5px;color:var(--sub);margin-top:1px;}
+  .pt-tot{background:var(--panel-soft);font-weight:700;}
+  .pt-det{padding:4px 15px 10px;font-size:12px;}
+  .pt-det table{width:100%;border-collapse:collapse;}
+  .pt-det td{padding:4px 6px 4px 0;border-bottom:1px dashed var(--border);vertical-align:top;}
+  .pt-det td:last-child{text-align:right;white-space:nowrap;}
+  .pt-det .e-ent{color:var(--entregado);font-weight:600;}
+  .pt-det .e-pag{color:var(--pagado);font-weight:600;}
   .stat-card{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--border-strong);border-radius:var(--radius);padding:13px 15px;box-shadow:0 2px 6px rgba(30,40,35,.06);}
   .stat-card.st-pendiente{border-top-color:var(--pendiente);}
   .stat-card.st-proceso{border-top-color:var(--proceso);}
@@ -698,6 +721,7 @@
   </div>
 
   <div class="stats" id="stats"></div>
+  <div id="porTrabajador" class="pt" style="display:none;"></div>
 
   <div class="toolbar">
     <div class="tabs" id="catTabs"></div>
@@ -1038,7 +1062,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.21.4';
+const APP_VERSION = '0.22.0';
 const BACKEND_REQUERIDO = 25;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2037,7 +2061,78 @@ function renderStats(){
   const terminadoNuevoCard = `<div class="stat-card money-card st-entregado cierre-nuevo"><div class="n c-entregado">${money(tNuevo1)}</div><div class="l">Terminado nuevo, después del cierre</div><div class="sub2">${nNuevo} partida(s) · no entran hasta el próximo cierre</div>${refNuevo}</div>`;
   const terminadoCards = cierreQuincena ? terminadoDentroCard + terminadoNuevoCard : terminadoMoneyCard;
   statsEl.innerHTML = cards + (isAdmin ? terminadoCards + pagadoMoneyCard : '');
+  renderPorTrabajador();
 }
+
+/* ===== Avance por trabajador (admin: todos · trabajador: solo lo suyo) ===== */
+const ptAbiertos = new Set();
+let ptSeccionAbierta = true;
+try{ ptSeccionAbierta = localStorage.getItem('progresoObraPorTrab') !== '0'; }catch(err){}
+function ptDatos(){
+  const por = {};
+  ALL_CELLS.forEach(c => {
+    const st = getState(c.id);
+    const w = st.trabajador;
+    if(!w) return;
+    if(!isAdmin && w !== workerSession) return;
+    const estado = resolveEstado(st);
+    if(estado !== 'entregado' && estado !== 'pagado' && estado !== 'proceso') return;
+    const o = por[w] || (por[w] = {nombre: w, ent: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []});
+    if(estado === 'proceso'){ o.partida++; return; }
+    const b = estado === 'entregado' ? o.ent : o.pag;
+    const m2 = Number(st.m2) || 0;
+    b.n++; b.m2 += m2; b.monto += m2 * rate1For(c.categoria, w);
+    o.celdas.push({c, estado, m2});
+  });
+  return Object.values(por);
+}
+const ptFm2 = n => (Math.round(n * 100) / 100).toLocaleString('es-CL');
+function ptCol(b, verPlata){
+  return `<div class="pt-col">${verPlata ? `<b>${money(b.monto)}</b>` : `<b>${b.n} partida${b.n === 1 ? '' : 's'}</b>`}<span>${verPlata ? b.n + ' partida' + (b.n === 1 ? '' : 's') + ' · ' : ''}${ptFm2(b.m2)} m²</span></div>`;
+}
+function ptDetalle(o, verPlata){
+  const filas = o.celdas.slice().sort((a, b) => (a.estado === b.estado ? 0 : a.estado === 'entregado' ? -1 : 1) || (a.c.pisoNum || 0) - (b.c.pisoNum || 0) || String(a.c.dpto).localeCompare(String(b.c.dpto), 'es', {numeric: true}));
+  return `<div class="pt-det"><table>${filas.map(f => {
+    const c = f.c, w = o.nombre;
+    const lugar = `${esc(c.categoria)} · ${esc(c.piso)} · ${c.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + esc(c.dpto)} · ${esc(AREA_LABEL[c.area] || c.area)}`;
+    const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1For(c.categoria, w)) : '';
+    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? 'e-ent' : 'e-pag'}">${f.estado === 'entregado' ? 'Terminado' : 'Pagado'}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span></td></tr>`;
+  }).join('')}</table></div>`;
+}
+function renderPorTrabajador(){
+  const el = document.getElementById('porTrabajador');
+  if(!el) return;
+  if(!isAdmin && !workerSession){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  const ws = workerSession ? (workerStatus[workerSession] || {}) : {};
+  const verPlata = isAdmin || (!!workerSession && !!ws.vePrecioReal);
+  let datos = ptDatos();
+  if(workerSession && !isAdmin && !datos.length) datos = [{nombre: workerSession, ent: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []}];
+  datos.sort((a, b) => (b.ent.monto - a.ent.monto) || (b.ent.m2 - a.ent.m2) || a.nombre.localeCompare(b.nombre, 'es'));
+  if(!datos.length){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  const tot = {ent: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}};
+  datos.forEach(o => ['ent', 'pag'].forEach(k => { tot[k].n += o[k].n; tot[k].m2 += o[k].m2; tot[k].monto += o[k].monto; }));
+  const filas = datos.map(o => `<details class="pt-fila" data-w="${esc(o.nombre)}"${ptAbiertos.has(o.nombre) ? ' open' : ''}>
+    <summary><div class="pt-nom">${esc(o.nombre)}${o.partida ? `<small>${o.partida} en partida</small>` : ''}</div>${ptCol(o.ent, verPlata)}${ptCol(o.pag, verPlata)}</summary>
+    ${ptAbiertos.has(o.nombre) ? ptDetalle(o, verPlata) : ''}</details>`).join('');
+  const totalFila = isAdmin && datos.length > 1 ? `<div class="pt-tot"><div class="pt-nom">Total</div>${ptCol(tot.ent, verPlata)}${ptCol(tot.pag, verPlata)}</div>` : '';
+  el.style.display = '';
+  el.innerHTML = `<details${ptSeccionAbierta ? ' open' : ''} id="ptDetalles"><summary>${isAdmin ? '👷 Avance por trabajador' : '👷 Mi avance'} <span class="pt-sub">todas las categorías</span></summary>
+    <div class="pt-cab"><div>Trabajador</div><div>Terminado (por pagar)</div><div>Pagado</div></div>${filas}${totalFila}</details>`;
+}
+document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
+  const d = e.target;
+  if(d.id === 'ptDetalles'){ ptSeccionAbierta = d.open; try{ localStorage.setItem('progresoObraPorTrab', d.open ? '1' : '0'); }catch(err){} return; }
+  if(!d.classList || !d.classList.contains('pt-fila')) return;
+  const w = d.getAttribute('data-w');
+  if(d.open){
+    ptAbiertos.add(w);
+    if(!d.querySelector('.pt-det')){
+      const o = ptDatos().find(x => x.nombre === w);
+      const ws = workerSession ? (workerStatus[workerSession] || {}) : {};
+      if(o) d.insertAdjacentHTML('beforeend', ptDetalle(o, isAdmin || (!!workerSession && !!ws.vePrecioReal)));
+    }
+  } else { ptAbiertos.delete(w); const x = d.querySelector('.pt-det'); if(x) x.remove(); }
+}, true);
 
 function passesFilters(cell){
   const piso = document.getElementById('filterPiso').value;
