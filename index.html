@@ -1077,8 +1077,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.24.1';
-const BACKEND_REQUERIDO = 26;
+const APP_VERSION = '0.25.0';
+const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -1365,7 +1365,32 @@ let dirtyCellIds = new Set();
 let settingsDirty = false;
 let settingsVersion = 0;
 function markCellDirty(id){ dirtyCellIds.add(id); }
-function markSettingsDirty(){ settingsDirty = true; settingsVersion++; }
+const seccionesSucias = new Set();
+let seccionesTodas = false;
+const matOpsPend = {set: new Set(), del: new Set()};
+function markSettingsDirty(seccion){
+  settingsDirty = true; settingsVersion++;
+  if(seccion) seccionesSucias.add(seccion); else seccionesTodas = true;
+}
+const baseRec = {};
+const CAMPOS_REG = ['trabajador', 'partida', 'terminado', 'pagado', 'retenido', 'nota', 'm2', 'partidaTs', 'terminadoTs', 'pagadoTs'];
+function fijarBases(){ ALL_CELLS.forEach(c => { baseRec[c.id] = recordForCell(c); }); }
+function camposCambiados(c){
+  const ahora = recordForCell(c), base = baseRec[c.id];
+  if(!base) return CAMPOS_REG.slice();
+  return CAMPOS_REG.filter(f => String(ahora[f] == null ? '' : ahora[f]) !== String(base[f] == null ? '' : base[f]));
+}
+let ultimaFusion = null, ultimaMatOk = null, ultimoEnvio = null;
+function aplicarFusion(fusion){
+  if(!fusion || typeof fusion !== 'object') return;
+  Object.keys(fusion).forEach(id => {
+    const c = cellById[id], it = fusion[id];
+    if(!c || !it || typeof it !== 'object') return;
+    if(!dirtyCellIds.has(id)) state[id] = {...it};
+    baseRec[id] = recordForCell(c, {...it});
+  });
+  matNivelesCache = null;
+}
 
 function rebuildWorkerList(){
   const workerSet = new Set(Object.keys(workerStatus));
@@ -1385,7 +1410,7 @@ async function mergeRemoteBeforeSave(){
   if(!remote || !remote.items || !Object.keys(remote.items).length) return;
 
   Object.keys(remote.items).forEach(id => {
-    if(!dirtyCellIds.has(id) && cellById[id]) state[id] = remote.items[id];
+    if(!dirtyCellIds.has(id) && cellById[id]){ state[id] = remote.items[id]; baseRec[id] = recordForCell(cellById[id]); }
   });
   if(!settingsDirty){
     const oldWs = workerStatus;
@@ -1545,8 +1570,8 @@ async function dbLoad(){
     return null;
   }
 }
-function recordForCell(c){
-  const st = getState(c.id);
+function recordForCell(c, stIn){
+  const st = stIn || getState(c.id);
   return { id:c.id, categoria:c.categoria, piso:c.piso, dpto:c.dpto, area:c.area,
     areaLabel: AREA_LABEL[c.area]||c.area, trabajador: st.trabajador||'',
     partida: !!st.partida, terminado: !!st.terminado, pagado: !!st.pagado, retenido: !!st.retenido,
@@ -1590,10 +1615,20 @@ async function dbSave(dirtyIds){
   try{
     let action = 'save', records = [];
     if(forzarGuardadoCompleto){ action = 'save'; records = buildRecords(); }
-    else if(hayCeldas){ action = 'saveIncremental'; records = [...dirtyIds].filter(id => cellById[id]).map(id => recordForCell(cellById[id])); }
+    else if(hayCeldas){
+      action = 'saveIncremental';
+      records = [...dirtyIds].filter(id => cellById[id]).map(id => ({...recordForCell(cellById[id]), campos: camposCambiados(cellById[id])})).filter(r => r.campos.length);
+    }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
+      body.secciones = [...seccionesSucias];
+      if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
+    }
+    const opsEnviadas = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
+    const seccionesEnviadas = [...seccionesSucias];
+    const eranTodas = seccionesTodas;
     const res = await fetch(DB_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
@@ -1603,6 +1638,10 @@ async function dbSave(dirtyIds){
     if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
     dbStatus = 'online'; dbLastOkTs = Date.now(); updateDbBadge();
     if(forzarGuardadoCompleto){ forzarGuardadoCompleto = false; ultimoConteoHoja = ALL_CELLS.length; }
+    if(action === 'save') fijarBases();
+    ultimaFusion = json.fusion || null;
+    ultimaMatOk = (json.matOk && typeof json.matOk === 'object') ? json.matOk : null;
+    ultimoEnvio = {ops: opsEnviadas, secciones: seccionesEnviadas, todas: eranTodas};
     return true;
   }catch(err){
     console.error('Base de datos: no se pudo guardar', err);
@@ -1657,6 +1696,7 @@ function ocultarCargando(){
   if(cargandoContador === 0){ document.getElementById('cargandoToast').style.display = 'none'; clearTimeout(cargandoWatchdog); }
 }
 
+let cargaFallo = false;
 async function loadState(){
   mostrarCargando('Cargando base de datos…');
   try{
@@ -1665,7 +1705,8 @@ async function loadState(){
   if(DB_URL){
     const remote = await dbLoad();
 
-    if(remote && remote.items && Object.keys(remote.items).length){ parsed = remote; fromDb = true; }
+    if(remote && remote.items){ parsed = remote; fromDb = true; }
+    else if(!sesionInvalida){ cargaFallo = true; }
     if(remote && remote.permisos && typeof remote.permisos === 'object'){ if(isAdmin) permisosCargos = remote.permisos; else misPermisos = remote.permisos; }
   }
   let localParsed = null;
@@ -1686,6 +1727,8 @@ async function loadState(){
         });
       });
     }
+  } else if(DB_URL){
+    parsed = null;
   } else if(localParsed){
     parsed = localParsed;
   } else if(typeof SEED_DATA !== 'undefined' && SEED_DATA){
@@ -1693,6 +1736,7 @@ async function loadState(){
     parsed = SEED_DATA;
   }
   applyLoadedPayload(parsed);
+  fijarBases();
 
   try{
     const d = await store.get(STORAGE_KEY + '-docs');
@@ -1728,8 +1772,8 @@ async function doSaveCycle(){
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
 
-  const soloCeldas = dirtySnap.size > 0 && !settingsDirty && !forzarGuardadoCompleto;
-  if(!soloCeldas) await mergeRemoteBeforeSave();
+  const guardadoCompleto = forzarGuardadoCompleto || (dirtySnap.size === 0 && !settingsDirty);
+  if(guardadoCompleto) await mergeRemoteBeforeSave();
   const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
@@ -1738,7 +1782,16 @@ async function doSaveCycle(){
 
   if(!DB_URL || dbOk){
     dirtySnap.forEach(id => dirtyCellIds.delete(id));
-    if(settingsVersion === versionSnap) settingsDirty = false;
+    if(DB_URL && ultimoEnvio){
+      ultimoEnvio.ops.set.forEach(k => matOpsPend.set.delete(k));
+      ultimoEnvio.ops.del.forEach(k => matOpsPend.del.delete(k));
+      ultimoEnvio.secciones.forEach(x => seccionesSucias.delete(x));
+      if(ultimoEnvio.todas) seccionesTodas = false;
+    }
+    if(settingsVersion === versionSnap){ settingsDirty = false; seccionesSucias.clear(); seccionesTodas = false; }
+    aplicarFusion(ultimaFusion);
+    if(ultimaMatOk && !matOpsPend.set.size && !matOpsPend.del.size){ MATERIALES.ok = {...ultimaMatOk}; matNivelesCache = null; }
+    ultimaFusion = null; ultimaMatOk = null; ultimoEnvio = null;
   }
   render();
   if(localOk && (!DB_URL || dbOk)) mostrarGuardadoToast();
@@ -2762,12 +2815,15 @@ function renderMateriales(){
       ${matCeldaHtml(porArea(u, 'Piso') || porArea(u, 'Pasillos'), u)}${matCeldaHtml(porArea(u, 'Muro Baños'), u)}${matCeldaHtml(porArea(u, 'Muro Cocina'), u)}
       </tr>`).join('') || '<tr><td colspan="4" style="color:var(--sub);">No hay departamentos para mostrar.</td></tr>');
 }
-let matGuardarTimer = null;
+let matSucio = false;
+function matOp(clave, valor){
+  if(valor){ matOpsPend.set.add(clave); matOpsPend.del.delete(clave); }
+  else { matOpsPend.del.add(clave); matOpsPend.set.delete(clave); }
+}
 function matCambio(){
   matNivelesCache = null;
-  markSettingsDirty();
-  clearTimeout(matGuardarTimer);
-  matGuardarTimer = setTimeout(() => { enqueueSave(); }, 1200);
+  matSucio = true;
+  markSettingsDirty('materiales');
 }
 function abrirMateriales(key){
   if(!isAdmin) return;
@@ -2780,7 +2836,12 @@ function abrirMateriales(key){
   }
 }
 document.getElementById('materialesBtn').addEventListener('click', () => abrirMateriales(null));
-document.getElementById('matCerrarBtn').addEventListener('click', () => { matFoco = null; closeOverlayAnimated(document.getElementById('materialesOverlay')); render(); });
+document.getElementById('matCerrarBtn').addEventListener('click', () => {
+  matFoco = null;
+  closeOverlayAnimated(document.getElementById('materialesOverlay'));
+  render();
+  if(matSucio){ matSucio = false; enqueueSave(); }
+});
 document.getElementById('matFiltroPiso').addEventListener('change', renderMateriales);
 document.getElementById('matSoloPend').addEventListener('change', renderMateriales);
 document.getElementById('matAjustes').addEventListener('change', (e) => {
@@ -2794,10 +2855,11 @@ document.getElementById('matLista').addEventListener('change', (e) => {
   const clave = cb.dataset.matok;
   const u = matUnidadPorClave()[clave.slice(0, clave.lastIndexOf('|'))];
   if(u && MATERIALES.ok[u.key]){
-    delete MATERIALES.ok[u.key];
-    u.celdas.forEach(c => { MATERIALES.ok[matClaveArea(u, c)] = true; });
+    delete MATERIALES.ok[u.key]; matOp(u.key, false);
+    u.celdas.forEach(c => { MATERIALES.ok[matClaveArea(u, c)] = true; matOp(matClaveArea(u, c), true); });
   }
   if(cb.checked) MATERIALES.ok[clave] = true; else delete MATERIALES.ok[clave];
+  matOp(clave, cb.checked);
   matCambio(); renderMateriales();
 });
 
@@ -2828,7 +2890,7 @@ function recordatoriosActivos(ahora){
 }
 function marcarRecordatorioHecho(clave){
   recordatoriosHechos[clave] = Date.now();
-  markSettingsDirty();
+  markSettingsDirty('recordatorios');
   enqueueSave();
   actualizarAvisos();
 }
@@ -4983,6 +5045,8 @@ async function sesionVencida(){
     gatePantalla('lgSplash'); gateArrancarBarra(['Haciendo mezcla…', 'Colocando carga de pegamento…', 'Comprobando tu sesión…']);
   }
   {
+    let reintentar = true;
+    while(reintentar){
     if(!sessionToken){
       await dormir(pidioUrl ? 400 : 1450);
       let aviso = '';
@@ -4995,6 +5059,13 @@ async function sesionVencida(){
     if(sesionInvalida){
       try{ sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(err){}
       location.reload(); return;
+    }
+    if(cargaFallo){
+      cargaFallo = false; sessionToken = null;
+      try{ sessionStorage.setItem('progresoObraAvisoGate', 'No se pudieron cargar los datos de la base de datos. Revisa tu conexión e ingresa tu PIN de nuevo.'); }catch(err){}
+      continue;
+    }
+    reintentar = false;
     }
   }
   try{ const savedCat = localStorage.getItem('progresoObraCategoria'); if(savedCat) activeCategoria = savedCat; }catch(err){}
