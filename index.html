@@ -1077,7 +1077,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.25.0';
+const APP_VERSION = '0.25.1';
 const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2721,7 +2721,8 @@ function matTerminada(u){
   return u.celdas.length > 0 && u.celdas.every(c => { const st = getState(c.id); return st.terminado || st.pagado; });
 }
 const matClaveArea = (u, c) => u.key + '|' + c.area;
-const matAreaListo = (u, c) => !!(MATERIALES.ok[u.key] || MATERIALES.ok[matClaveArea(u, c)]);
+const matAreaHecha = (c) => { const st = getState(c.id); return !!(st.terminado || st.pagado); };
+const matAreaListo = (u, c) => matAreaHecha(c) || !!(MATERIALES.ok[u.key] || MATERIALES.ok[matClaveArea(u, c)]);
 function matListo(u){
   const req = u.celdas.filter(c => matCalculo(c));
   return req.length ? req.every(c => matAreaListo(u, c)) : !!MATERIALES.ok[u.key];
@@ -2788,7 +2789,7 @@ function matCeldaHtml(celda, u){
   if(!r) return '<td><span style="color:var(--sub);">sin m²</span></td>';
   const clave = matClaveArea(u, celda);
   const listo = matAreaListo(u, celda);
-  const chk = `<label class="mat-ok"><input type="checkbox" data-matok="${esc(clave)}" ${listo ? 'checked' : ''} aria-label="Materiales listos"> Listo</label>`;
+  const chk = `<label class="mat-ok"><input type="checkbox" data-matok="${esc(clave)}" ${listo ? 'checked' : ''}${matAreaHecha(celda) ? ' disabled title="Área terminada: los materiales ya se usaron"' : ''} aria-label="Materiales listos"> Listo</label>`;
   const partes = [];
   if(r.cajas !== null) partes.push(`${matNum(r.cajas, 0)} cajas`);
   if(Number(MATERIALES.params[r.tipo].kgSaco) > 0) partes.push(`${matNum(Math.round(r.sacos * 10) / 10)} sacos`);
