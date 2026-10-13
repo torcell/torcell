@@ -50,15 +50,17 @@ main{max-width:860px;margin:0 auto;padding:16px;}
 .tile small{font-size:11px;font-weight:600;color:var(--warn);}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
-#vel,#velReg{position:fixed;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
-#vel.on,#velReg.on{display:flex;animation:overlayIn .16s ease;}
-#vel.out,#velReg.out{animation:overlayOut .14s ease forwards;}
+#vel,#velReg,#velOp{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+#vel::before,#velReg::before,#velOp::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+#velOp{z-index:60;}
+#vel.on,#velReg.on,#velOp.on{display:flex;animation:overlayIn .16s ease;}
+#vel.out,#velReg.out,#velOp.out{animation:overlayOut .14s ease forwards;}
 @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
 @keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
 @keyframes modalPop{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
 @keyframes modalPopOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.96);}}
-.modal{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--strong);padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;animation:modalPop .16s ease;}
-#vel.out .modal,#velReg.out .modal{animation:modalPopOut .14s ease forwards;}
+.modal{position:relative;width:100%;max-width:400px;background:var(--panel);border:1px solid var(--strong);padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;animation:modalPop .16s ease;}
+#vel.out .modal,#velReg.out .modal,#velOp.out .modal{animation:modalPopOut .14s ease forwards;}
 body.bloq{overflow:hidden;}
 .modal h2{margin:0;font-size:17px;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
@@ -71,14 +73,26 @@ body.bloq{overflow:hidden;}
 .seg button.on[data-e="revisado"]{background:var(--ok);border-color:var(--ok);}
 .seg button.on[data-e="observado"]{background:var(--bad);border-color:var(--bad);}
 .seg button.on[data-e="pendiente"]{background:var(--warn);border-color:var(--warn);color:#2c302c;}
-.campo{display:flex;flex-direction:column;gap:5px;}
-.campo label{font-size:12px;font-weight:600;color:var(--sub);}
-.campo input{min-height:42px;padding:8px 10px;font-size:15px;border:1px solid var(--strong);background:var(--soft);color:var(--text);width:100%;}
-.campo input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
-.fila2{display:grid;grid-template-columns:1fr 110px;gap:10px;overflow:hidden;max-height:90px;opacity:1;transition:max-height .22s ease,opacity .2s ease,margin .22s ease;}
-.fila2.oculto{max-height:0;opacity:0;margin-top:-12px;pointer-events:none;}
-.campo input[type=number]{-moz-appearance:textfield;appearance:textfield;}
-.campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.obswrap{display:grid;grid-template-rows:0fr;opacity:0;margin-top:-12px;transition:grid-template-rows .24s ease,opacity .2s ease,margin .24s ease;pointer-events:none;}
+.obswrap.on{grid-template-rows:1fr;opacity:1;margin-top:0;pointer-events:auto;}
+.obsin{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;}
+.obshead{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--sub);}
+.btn.small{padding:6px 10px;font-size:12px;min-height:34px;}
+.obslista{border:1px solid var(--border);background:var(--soft);padding:4px 10px;max-height:210px;overflow:auto;}
+.obsfila{display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+.obsfila:last-child{border-bottom:0;}
+.obsfila label{display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;min-width:0;}
+.obsfila input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex:0 0 auto;margin:0;}
+.obsfila .cant{min-height:36px;padding:5px 8px;font-size:14px;border:1px solid var(--strong);background:var(--panel);color:var(--text);width:100%;text-align:center;-moz-appearance:textfield;appearance:textfield;transition:opacity .15s ease;}
+.obsfila .cant:disabled{opacity:.35;}
+.obsfila .cant::-webkit-outer-spin-button,.obsfila .cant::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.obsfila .cant:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+.oplista{display:flex;flex-direction:column;max-height:220px;overflow:auto;}
+.opfila{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.opnuevo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;}
+.opnuevo input{min-height:40px;padding:8px 10px;font-size:14px;border:1px solid var(--strong);background:var(--soft);color:var(--text);width:100%;}
+.opnuevo input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+.vacio-op{font-size:12px;color:var(--sub);padding:8px 0;}
 .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .pestanas{display:grid;grid-template-columns:1fr 1fr;margin-bottom:12px;}
 .pestanas button{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:11px 4px;font-size:14px;font-weight:700;min-height:44px;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;}
@@ -152,6 +166,21 @@ body.bloq{overflow:hidden;}
     </div>
   </div>
 </div>
+<div id="velOp">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="oTit">
+    <h2 id="oTit">Editar opciones de observación</h2>
+    <div class="oplista" id="opLista"></div>
+    <div class="opnuevo">
+      <input id="opNueva" type="text" maxlength="40" placeholder="Nueva opción" autocomplete="off">
+      <button class="btn" id="opAgregar" type="button">Agregar</button>
+    </div>
+    <div class="err" id="opErr"></div>
+    <div class="acciones">
+      <button class="btn" id="opCancelar" type="button">Cancelar</button>
+      <button class="btn primary" id="opListo" type="button">Listo</button>
+    </div>
+  </div>
+</div>
 <div id="vel" class="vel">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTit">
     <h2 id="mTit"></h2>
@@ -162,9 +191,11 @@ body.bloq{overflow:hidden;}
       <button type="button" data-e="revisado">Revisado</button>
       <button type="button" data-e="observado">Observaciones</button>
     </div>
-    <div class="fila2 oculto" id="mObs">
-      <div class="campo"><label for="mDet">¿Qué está mal?</label><input id="mDet" type="text" maxlength="300" placeholder="Ej: cerámica con palmetas sopladas" autocomplete="off"></div>
-      <div class="campo"><label for="mCant">Cantidad</label><input id="mCant" type="number" min="1" max="999" step="1" inputmode="numeric" placeholder="1"></div>
+    <div class="obswrap" id="mObs">
+      <div class="obsin">
+        <div class="obshead"><span>¿Qué está mal?</span><button class="btn small" id="mEditar" type="button">✎ Editar opciones</button></div>
+        <div class="obslista" id="mLista"></div>
+      </div>
     </div>
     <div class="err" id="mErr"></div>
     <div class="acciones">
@@ -179,6 +210,9 @@ const LAYOUT = [{"n":-1,"p":"Piso -1","d":"Sala de basura","cer":[["cer-sub-basu
 const PISO_REVISADO_HASTA = 9;
 let celdas = {};
 let revisiones = {};
+const OPCIONES_BASE = ['Palmeta/s Sopladas', 'Palmeta/s Picadas', 'Palmeta/s Cabeceadas'];
+let opciones = OPCIONES_BASE.slice();
+let opcionesEdit = [];
 let cargando = false;
 let actual = null;
 let estadoSel = '';
@@ -220,7 +254,7 @@ function estado(d, sc){
 function revision(d){
   const r = revisiones[clave(d)];
   if(r) return r;
-  return d.n <= PISO_REVISADO_HASTA ? {e:'revisado', d:'', c:0, base:true} : {e:'pendiente', d:'', c:0};
+  return d.n <= PISO_REVISADO_HASTA && d.d !== 'Pasillo' ? {e:'revisado', d:'', c:0, base:true} : {e:'pendiente', d:'', c:0};
 }
 
 function nuevoNonce(){
@@ -302,13 +336,38 @@ function fechaHora(ts){
   return new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
 }
 
-function elegir(e, foco){
+function elegir(e){
   estadoSel = e;
   document.querySelectorAll('#mSeg button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
-  $('mObs').classList.toggle('oculto', e !== 'observado');
-  $('mDet').tabIndex = $('mCant').tabIndex = e === 'observado' ? 0 : -1;
+  $('mObs').classList.toggle('on', e === 'observado');
+  $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = e === 'observado' ? 0 : -1; });
+  $('mEditar').tabIndex = e === 'observado' ? 0 : -1;
   $('mErr').textContent = '';
-  if(e === 'observado' && foco) setTimeout(() => $('mDet').focus(), 230);
+}
+
+function parseItems(r){
+  if(!r || r.e !== 'observado') return {};
+  const out = {};
+  String(r.d || '').split(', ').forEach(x => {
+    const m = x.match(/^(.+) ×(\d+)$/);
+    if(m) out[m[1]] = Number(m[2]);
+  });
+  return out;
+}
+
+function pintarLista(sel){
+  const nombres = [...opciones, ...Object.keys(sel).filter(n => !opciones.includes(n))];
+  $('mLista').innerHTML = nombres.length ? nombres.map(n => `<div class="obsfila"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label><input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}></div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
+  $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = estadoSel === 'observado' ? 0 : -1; });
+}
+
+function seleccion(){
+  const sel = {};
+  $('mLista').querySelectorAll('.obsfila').forEach(f => {
+    const chk = f.querySelector('input[type=checkbox]');
+    if(chk.checked) sel[chk.value] = Math.max(1, Math.min(999, Math.floor(Number(f.querySelector('.cant').value) || 1)));
+  });
+  return sel;
 }
 
 function areasHtml(d){
@@ -337,8 +396,8 @@ function abrir(k){
   if(r.ts) partes.push('Última modificación: ' + fechaHora(r.ts));
   $('mSub').textContent = partes.filter(Boolean).join(' · ');
   $('mAreas').innerHTML = areasHtml(d);
-  $('mDet').value = r.e === 'observado' ? r.d : '';
-  $('mCant').value = r.e === 'observado' && r.c ? r.c : '';
+  estadoSel = r.e;
+  pintarLista(parseItems(r));
   elegir(r.e);
   document.body.classList.add('bloq');
   $('vel').classList.add('on');
@@ -353,12 +412,12 @@ function cerrarModal(){
 
 async function guardarRevision(){
   if(!actual) return;
-  const detalle = $('mDet').value.trim();
-  const cantidad = Math.floor(Number($('mCant').value) || 0);
-  if(estadoSel === 'observado' && !detalle){ $('mErr').textContent = 'Escribe qué está mal.'; return; }
+  const sel = seleccion();
+  const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
+  if(estadoSel === 'observado' && !items.length){ $('mErr').textContent = 'Marca al menos una observación.'; return; }
   $('mGuardar').disabled = true; $('mCancel').disabled = true;
   try{
-    const j = await llamar('calidadGuardar', {clave: clave(actual), estado: estadoSel, detalle, cantidad: estadoSel === 'observado' ? Math.max(1, cantidad) : 0, nonce: nuevoNonce(), ts: Date.now()});
+    const j = await llamar('calidadGuardar', {clave: clave(actual), estado: estadoSel, items: estadoSel === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()});
     if(j && j.ok){
       const k = clave(actual);
       revisiones = j.revisiones || revisiones;
@@ -366,12 +425,57 @@ async function guardarRevision(){
       cerrarModal();
       pintar();
     }else{
-      const msgs = {espera: 'Espera unos segundos antes de volver a modificar este departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.'};
+      const msgs = {espera: 'Espera unos segundos antes de volver a modificar este departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.', datos_incompletos: 'Revisa las observaciones marcadas.'};
       $('mErr').textContent = (j && msgs[j.error]) || 'No se pudo guardar. Intenta de nuevo.';
     }
   }catch(e){
     $('mErr').textContent = 'Sin conexión. Intenta de nuevo.';
   }finally{ $('mGuardar').disabled = false; $('mCancel').disabled = false; }
+}
+
+function pintarOpciones(){
+  $('opLista').innerHTML = opcionesEdit.length ? opcionesEdit.map((o, i) => `<div class="opfila"><span>${esc(o)}</span><button class="btn small" type="button" data-q="${i}">Quitar</button></div>`).join('') : '<div class="vacio-op">No queda ninguna opción.</div>';
+}
+function abrirOpciones(){
+  opcionesEdit = opciones.slice();
+  pintarOpciones();
+  $('opNueva').value = '';
+  $('opErr').textContent = '';
+  $('velOp').classList.add('on');
+}
+function cerrarOpciones(){
+  const v = $('velOp');
+  if(!v.classList.contains('on') || v.classList.contains('out')) return;
+  v.classList.add('out');
+  setTimeout(() => v.classList.remove('on', 'out'), 140);
+}
+function agregarOpcion(){
+  const t = $('opNueva').value.trim();
+  if(!t) return;
+  if(t.length > 40 || /[,|×;]/.test(t)){ $('opErr').textContent = 'Sin comas, barras ni punto y coma (máx. 40 letras).'; return; }
+  if(opcionesEdit.includes(t)){ $('opErr').textContent = 'Esa opción ya existe.'; return; }
+  if(opcionesEdit.length >= 30){ $('opErr').textContent = 'Máximo 30 opciones.'; return; }
+  opcionesEdit.push(t);
+  $('opNueva').value = '';
+  $('opErr').textContent = '';
+  pintarOpciones();
+  $('opLista').scrollTop = $('opLista').scrollHeight;
+}
+async function guardarOpciones(){
+  $('opListo').disabled = true; $('opCancelar').disabled = true;
+  try{
+    const j = await llamar('calidadOpciones', {opciones: opcionesEdit, nonce: nuevoNonce(), ts: Date.now()});
+    if(j && j.ok){
+      const sel = seleccion();
+      opciones = j.opciones;
+      pintarLista(sel);
+      cerrarOpciones();
+    }else{
+      $('opErr').textContent = 'No se pudo guardar. Intenta de nuevo.';
+    }
+  }catch(e){
+    $('opErr').textContent = 'Sin conexión. Intenta de nuevo.';
+  }finally{ $('opListo').disabled = false; $('opCancelar').disabled = false; }
 }
 
 async function abrirRegistro(){
@@ -396,13 +500,14 @@ function cerrarRegistro(){
 }
 
 async function cargar(){
-  if(cargando || $('vel').classList.contains('on') || $('velReg').classList.contains('on')) return;
+  if(cargando || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on')) return;
   cargando = true; $('refrescar').disabled = true;
   try{
     const j = await llamar('loadCalidad');
     if(j && j.ok && j.celdas && typeof j.celdas === 'object'){
       celdas = j.celdas;
       revisiones = j.revisiones || {};
+      if(Array.isArray(j.opciones)) opciones = j.opciones;
       cargado = true;
       pintar();
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
@@ -443,12 +548,29 @@ $('pestanas').addEventListener('click', e => {
 $('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargar(); });
 $('filtroVista').addEventListener('change', pintar);
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
-document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e, true)));
+document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e)));
 $('verRegistro').addEventListener('click', abrirRegistro);
 $('regCerrar').addEventListener('click', cerrarRegistro);
+$('mEditar').addEventListener('click', abrirOpciones);
+$('opLista').addEventListener('click', e => { const b = e.target.closest('button[data-q]'); if(b){ opcionesEdit.splice(Number(b.dataset.q), 1); pintarOpciones(); } });
+$('opAgregar').addEventListener('click', agregarOpcion);
+$('opCancelar').addEventListener('click', cerrarOpciones);
+$('opListo').addEventListener('click', guardarOpciones);
+$('mLista').addEventListener('change', e => {
+  const chk = e.target.closest('input[type=checkbox]');
+  if(!chk) return;
+  const cant = chk.closest('.obsfila').querySelector('.cant');
+  cant.disabled = !chk.checked;
+  if(chk.checked && !cant.value) cant.value = 1;
+  if(!chk.checked) cant.value = '';
+});
 $('mCancel').addEventListener('click', cerrarModal);
 $('mGuardar').addEventListener('click', guardarRevision);
-document.addEventListener('keydown', e => { if(e.key === 'Enter' && $('vel').classList.contains('on') && e.target.tagName === 'INPUT') guardarRevision(); });
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+  if(e.target.id === 'opNueva'){ e.preventDefault(); agregarOpcion(); }
+  else if(e.target.classList.contains('cant')){ e.preventDefault(); guardarRevision(); }
+});
 document.addEventListener('visibilitychange', () => { if(!document.hidden) cargar(); });
 setInterval(() => { if(!document.hidden) cargar(); }, 60000);
 
