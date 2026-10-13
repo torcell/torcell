@@ -32,32 +32,40 @@ main{max-width:860px;margin:0 auto;padding:16px;}
 .msg{font-size:12.5px;color:var(--sub);margin:0 0 12px;}
 .barra{display:flex;gap:10px;align-items:stretch;margin-bottom:12px;flex-wrap:wrap;}
 .barra select{flex:1 1 150px;min-height:40px;padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
-.resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
 .res{background:var(--panel);border:1px solid var(--border);border-top:4px solid var(--strong);padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
 .res b{font-size:20px;line-height:1.1;}
 .res span{font-size:11.5px;color:var(--sub);}
-.res.p{border-top-color:var(--warn);}.res.r{border-top-color:var(--ok);}.res.o{border-top-color:var(--bad);}
+.res.n{border-top-color:var(--strong);}.res.p{border-top-color:var(--warn);}.res.r{border-top-color:var(--ok);}.res.o{border-top-color:var(--bad);}
 .piso{margin-bottom:20px;}
 .piso h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .lista{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
-.tile{background:var(--panel);color:var(--text);border:1px solid var(--border);border-top:4px solid var(--warn);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:74px;text-align:center;transition:transform .1s ease,box-shadow .12s ease,border-color .12s ease;}
+.tile{font-family:inherit;transition:transform .1s ease,box-shadow .12s ease,border-color .15s ease,background .15s ease;background:var(--panel);color:var(--text);border:1px solid var(--border);border-top:4px solid var(--warn);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:74px;text-align:center;transition:transform .1s ease,box-shadow .12s ease,border-color .12s ease;}
 .tile:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.2);border-color:var(--accent);}
 .tile:active{transform:scale(.95);}
-.tile.r{border-top-color:var(--ok);}.tile.o{border-top-color:var(--bad);}
+.tile.n{background:var(--soft);border-top-color:var(--strong);cursor:default;color:var(--sub);}.tile.n:hover{transform:none;box-shadow:none;border-color:var(--border);}.tile.n small{color:var(--sub);font-weight:500;}.tile.anim{animation:tileIn .28s ease both;}@keyframes tileIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}.tile.r{border-top-color:var(--ok);}.tile.o{border-top-color:var(--bad);}
 .tile b{font-size:17px;line-height:1.1;overflow-wrap:anywhere;}
 .tile.pas b{font-size:13px;letter-spacing:.04em;text-transform:uppercase;}
 .tile small{font-size:11px;font-weight:600;color:var(--warn);}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
-#vel{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;display:none;align-items:center;justify-content:center;padding:16px;}
-#vel.on{display:flex;}
-.modal{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;}
+#vel{position:fixed;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+#vel.on{display:flex;animation:overlayIn .16s ease;}
+#vel.out{animation:overlayOut .14s ease forwards;}
+@keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
+@keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
+@keyframes modalPop{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
+@keyframes modalPopOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.96);}}
+.modal{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--strong);padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;animation:modalPop .16s ease;}
+#vel.out .modal{animation:modalPopOut .14s ease forwards;}
+body.bloq{overflow:hidden;}
 .modal h2{margin:0;font-size:17px;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
-.seg button{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:10px 4px;font-size:12.5px;font-weight:600;min-height:44px;margin-left:-1px;}
+.seg button{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:10px 4px;font-size:12.5px;font-weight:600;min-height:44px;margin-left:-1px;}
 .seg button:first-child{margin-left:0;}
 .seg button:hover{border-color:var(--accent);position:relative;}
+.seg button:active{transform:scale(.96);}
 .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .seg button.on[data-e="revisado"]{background:var(--ok);border-color:var(--ok);}
 .seg button.on[data-e="observado"]{background:var(--bad);border-color:var(--bad);}
@@ -66,7 +74,10 @@ main{max-width:860px;margin:0 auto;padding:16px;}
 .campo label{font-size:12px;font-weight:600;color:var(--sub);}
 .campo input{min-height:42px;padding:8px 10px;font-size:15px;border:1px solid var(--strong);background:var(--soft);color:var(--text);width:100%;}
 .campo input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
-.fila2{display:grid;grid-template-columns:1fr 110px;gap:10px;}
+.fila2{display:grid;grid-template-columns:1fr 110px;gap:10px;overflow:hidden;max-height:90px;opacity:1;transition:max-height .22s ease,opacity .2s ease,margin .22s ease;}
+.fila2.oculto{max-height:0;opacity:0;margin-top:-12px;pointer-events:none;}
+.campo input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+.campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
 </style>
@@ -81,13 +92,15 @@ main{max-width:860px;margin:0 auto;padding:16px;}
   <div class="resumen">
     <div class="res p"><b id="nPend">0</b><span>Por revisar</span></div>
     <div class="res r"><b id="nRev">0</b><span>Revisados</span></div>
-    <div class="res o"><b id="nObs">0</b><span>Con observaciones</span></div>
+    <div class="res o"><b id="nObs">0</b><span>Observados</span></div>
+    <div class="res n"><b id="nNo">0</b><span>Sin terminar</span></div>
   </div>
   <div class="barra">
     <select id="filtro" aria-label="Filtrar por piso"></select>
     <select id="filtroEstado" aria-label="Filtrar por estado">
       <option value="">Todos los estados</option>
       <option value="pendiente">Por revisar</option>
+      <option value="nolisto">Sin terminar</option>
       <option value="revisado">Revisados</option>
       <option value="observado">Con observaciones</option>
     </select>
@@ -103,7 +116,7 @@ main{max-width:860px;margin:0 auto;padding:16px;}
       <button type="button" data-e="revisado">Revisado</button>
       <button type="button" data-e="observado">Observaciones</button>
     </div>
-    <div class="fila2" id="mObs" hidden>
+    <div class="fila2 oculto" id="mObs">
       <div class="campo"><label for="mDet">¿Qué está mal?</label><input id="mDet" type="text" maxlength="300" placeholder="Ej: cerámica con palmetas sopladas" autocomplete="off"></div>
       <div class="campo"><label for="mCant">Cantidad</label><input id="mCant" type="number" min="1" max="999" step="1" inputmode="numeric" placeholder="1"></div>
     </div>
@@ -137,19 +150,24 @@ async function llamar(action, extra){
 function estado(d){
   const evaluar = lista => {
     const req = lista.filter(([id, , m]) => { const c = celdas[id]; return m || (c && (c.t || c.m)); });
-    if(!req.length) return {ok:false, ts:0};
+    if(!req.length) return {ok:false, ts:0, hay:false};
     let ts = 0;
     const ok = req.every(([id]) => { const c = celdas[id]; if(c && c.t){ ts = Math.max(ts, c.ts || 0); return true; } return false; });
-    return {ok, ts};
+    return {ok, ts, hay:true};
   };
   const a = evaluar(d.cer), b = evaluar(d.fra);
-  return {ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts)};
+  return {ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts), cer: a.ok, fra: b.ok};
 }
 
 function revision(d){
   const r = revisiones[clave(d)];
   if(r) return r;
   return d.n <= PISO_REVISADO_HASTA ? {e:'revisado', d:'', c:0, base:true} : {e:'pendiente', d:'', c:0};
+}
+
+function falta(e){
+  if(!e.cer && !e.fra) return 'Falta cerámica y frague';
+  return e.cer ? 'Falta frague' : 'Falta cerámica';
 }
 
 function etiqueta(r){
@@ -159,26 +177,33 @@ function etiqueta(r){
 }
 const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : '';
 
+let primerPintado = true;
 function pintar(){
-  const listos = LAYOUT.map(d => ({d, e: estado(d), r: revision(d)})).filter(x => x.e.ok);
-  $('nPend').textContent = listos.filter(x => x.r.e === 'pendiente').length;
-  $('nRev').textContent = listos.filter(x => x.r.e === 'revisado').length;
-  $('nObs').textContent = listos.filter(x => x.r.e === 'observado').length;
+  const todos = LAYOUT.map(d => { const e = estado(d); return {d, e, r: e.ok ? revision(d) : {e:'nolisto', d:'', c:0}}; });
+  const cuenta = k => todos.filter(x => x.r.e === k).length;
+  $('nPend').textContent = cuenta('pendiente');
+  $('nRev').textContent = cuenta('revisado');
+  $('nObs').textContent = cuenta('observado');
+  $('nNo').textContent = cuenta('nolisto');
   const sel = $('filtro');
   const previo = sel.value;
-  const pisos = [...new Set(listos.map(x => x.d.p))];
+  const pisos = [...new Map(LAYOUT.map(d => [d.p, d.n])).entries()].sort((a, b) => b[1] - a[1]).map(x => x[0]);
   sel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${esc(p)}"${p === previo ? ' selected' : ''}>${esc(p)}</option>`).join('');
   const fe = $('filtroEstado').value;
-  const vis = listos.filter(x => (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
+  const vis = todos.filter(x => (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
   if(!vis.length){
     $('lista').innerHTML = '<div class="vacio">No hay departamentos para mostrar con este filtro.</div>';
     return;
   }
   const grupos = {};
   vis.forEach(x => { (grupos[x.d.p] = grupos[x.d.p] || {n: x.d.n, items: []}).items.push(x); });
-  $('lista').innerHTML = Object.keys(grupos).sort((a, b) => grupos[a].n - grupos[b].n).map(p =>
-    `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.length}</h2><div class="lista">` +
-    grupos[p].items.map(x => `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small></button>`).join('') +
+  const anim = primerPintado ? ' anim' : '';
+  primerPintado = false;
+  $('lista').innerHTML = Object.keys(grupos).sort((a, b) => grupos[b].n - grupos[a].n).map(p =>
+    `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
+    grupos[p].items.map(x => x.r.e === 'nolisto'
+      ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b>${esc(x.d.d)}</b><small>${falta(x.e)}</small></div>`
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small></button>`).join('') +
     '</div></section>').join('');
 }
 
@@ -186,12 +211,13 @@ function fechaTxt(ts){
   return ts ? 'Terminado el ' + new Date(ts).toLocaleDateString('es-CL', {day:'2-digit', month:'short'}) : '';
 }
 
-function elegir(e){
+function elegir(e, foco){
   estadoSel = e;
   document.querySelectorAll('#mSeg button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
-  $('mObs').hidden = e !== 'observado';
+  $('mObs').classList.toggle('oculto', e !== 'observado');
+  $('mDet').tabIndex = $('mCant').tabIndex = e === 'observado' ? 0 : -1;
   $('mErr').textContent = '';
-  if(e === 'observado') $('mDet').focus();
+  if(e === 'observado' && foco) setTimeout(() => $('mDet').focus(), 230);
 }
 
 function abrir(k){
@@ -204,10 +230,16 @@ function abrir(k){
   $('mDet').value = r.e === 'observado' ? r.d : '';
   $('mCant').value = r.e === 'observado' && r.c ? r.c : '';
   elegir(r.e);
+  document.body.classList.add('bloq');
   $('vel').classList.add('on');
 }
 
-function cerrarModal(){ $('vel').classList.remove('on'); actual = null; }
+function cerrarModal(){
+  const v = $('vel');
+  if(!v.classList.contains('on') || v.classList.contains('out')) return;
+  v.classList.add('out');
+  setTimeout(() => { v.classList.remove('on', 'out'); document.body.classList.remove('bloq'); actual = null; }, 140);
+}
 
 async function guardarRevision(){
   if(!actual) return;
@@ -251,11 +283,10 @@ $('refrescar').addEventListener('click', cargar);
 $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
-document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e)));
+document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e, true)));
 $('mCancel').addEventListener('click', cerrarModal);
 $('mGuardar').addEventListener('click', guardarRevision);
-$('vel').addEventListener('click', e => { if(e.target === $('vel')) cerrarModal(); });
-document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); if(e.key === 'Enter' && $('vel').classList.contains('on') && e.target.tagName === 'INPUT') guardarRevision(); });
+document.addEventListener('keydown', e => { if(e.key === 'Enter' && $('vel').classList.contains('on') && e.target.tagName === 'INPUT') guardarRevision(); });
 document.addEventListener('visibilitychange', () => { if(!document.hidden) cargar(); });
 setInterval(() => { if(!document.hidden) cargar(); }, 60000);
 
