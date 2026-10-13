@@ -106,6 +106,8 @@ body.bloq{overflow:hidden;}
 .area b{flex:1 0 100%;font-size:12.5px;}
 .pill{font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--border);color:var(--sub);}
 .pill.ok{background:rgba(67,160,71,.16);border-color:transparent;color:var(--ok);}
+#aviso{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,16px);max-width:min(92vw,420px);background:#3a2323;color:#fff;border:1px solid #c0392b;padding:10px 14px;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
+#aviso.on{opacity:1;transform:translate(-50%,0);}
 .modal.reg{max-width:560px;}
 .reglista{display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:60vh;}
 .regit{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--soft);padding:9px 10px;display:flex;flex-direction:column;gap:3px;font-size:13px;}
@@ -166,6 +168,7 @@ body.bloq{overflow:hidden;}
     </div>
   </div>
 </div>
+<div id="aviso" role="status"></div>
 <div id="velOp">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="oTit">
     <h2 id="oTit">Editar opciones de observación</h2>
@@ -230,8 +233,8 @@ const NOMBRE_AREA = {'Piso':'Piso', 'Pasillos':'Pasillo', 'Muro Baños':'Muro ba
 const claveBase = d => d.p + '|' + d.d;
 const clave = (d, sc) => claveBase(d) + '|' + (sc || scope);
 
-async function llamar(action, extra){
-  const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, ...extra})});
+async function llamar(action, extra, rapido){
+  const res = await fetch(DB_URL, {method:'POST', keepalive: !!rapido, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, ...extra})});
   if(!res.ok) throw new Error('red');
   return JSON.parse(await res.text());
 }
@@ -410,27 +413,44 @@ function cerrarModal(){
   setTimeout(() => { v.classList.remove('on', 'out'); document.body.classList.remove('bloq'); actual = null; }, 140);
 }
 
-async function guardarRevision(){
+let enVuelo = 0;
+let avisoTimer = null;
+function aviso(texto){
+  const a = $('aviso');
+  a.textContent = texto;
+  a.classList.add('on');
+  clearTimeout(avisoTimer);
+  avisoTimer = setTimeout(() => a.classList.remove('on'), 5000);
+}
+
+function guardarRevision(){
   if(!actual) return;
   const sel = seleccion();
   const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
   if(estadoSel === 'observado' && !items.length){ $('mErr').textContent = 'Marca al menos una observación.'; return; }
-  $('mGuardar').disabled = true; $('mCancel').disabled = true;
-  try{
-    const j = await llamar('calidadGuardar', {clave: clave(actual), estado: estadoSel, items: estadoSel === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()});
-    if(j && j.ok){
-      const k = clave(actual);
-      revisiones = j.revisiones || revisiones;
-      marcarEspera(k);
-      cerrarModal();
-      pintar();
-    }else{
-      const msgs = {espera: 'Espera unos segundos antes de volver a modificar este departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.', datos_incompletos: 'Revisa las observaciones marcadas.'};
-      $('mErr').textContent = (j && msgs[j.error]) || 'No se pudo guardar. Intenta de nuevo.';
-    }
-  }catch(e){
-    $('mErr').textContent = 'Sin conexión. Intenta de nuevo.';
-  }finally{ $('mGuardar').disabled = false; $('mCancel').disabled = false; }
+  const k = clave(actual);
+  const previo = revisiones[k];
+  const envio = {clave: k, estado: estadoSel, items: estadoSel === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()};
+  revisiones[k] = {e: estadoSel, d: items.map(x => x.t + ' ×' + x.c).join(', '), c: items.reduce((t, x) => t + x.c, 0), ts: Date.now()};
+  if(estadoSel !== 'observado'){ revisiones[k].d = ''; revisiones[k].c = 0; }
+  marcarEspera(k);
+  cerrarModal();
+  pintar();
+  enVuelo++;
+  llamar('calidadGuardar', envio, true).then(j => {
+    if(j && j.ok) return;
+    const msgs = {espera: 'Espera unos segundos antes de volver a modificar ese departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.', datos_incompletos: 'Revisa las observaciones marcadas.'};
+    deshacer(k, previo, (j && msgs[j.error]) || 'No se pudo guardar el cambio. Intenta de nuevo.');
+  }).catch(() => {
+    deshacer(k, previo, 'Sin conexión: el cambio no se guardó. Intenta de nuevo.');
+  }).finally(() => { enVuelo--; });
+}
+
+function deshacer(k, previo, texto){
+  if(previo) revisiones[k] = previo; else delete revisiones[k];
+  delete espera[k];
+  pintar();
+  aviso(texto);
 }
 
 function pintarOpciones(){
@@ -500,7 +520,7 @@ function cerrarRegistro(){
 }
 
 async function cargar(){
-  if(cargando || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on')) return;
+  if(cargando || enVuelo > 0 || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on')) return;
   cargando = true; $('refrescar').disabled = true;
   try{
     const j = await llamar('loadCalidad');
