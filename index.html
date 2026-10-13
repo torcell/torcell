@@ -103,6 +103,16 @@
   .btn:active, .tab:active, .chk-pill:active, .assign-btn:active, .m2-edit-btn:active, .nota-btn-single:active{transform:scale(.94);}
   .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
   .btn.primary:hover{filter:brightness(1.08);}
+  .btn:not(:disabled):not(.bloq):hover, .tab:hover, .chk-pill:hover, .sbtn:hover, .banner-actualizar button:hover, .lg-teclas button:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.22);border-color:var(--accent);}
+  .btn.primary:not(:disabled):hover{box-shadow:0 4px 12px rgba(0,0,0,.35);}
+  .btn:not(:disabled):not(.bloq):active, .tab:active, .chk-pill:active, .sbtn:active{transform:scale(.94);box-shadow:none;}
+  #floatingSaveBtn, #scrollTopBtn{transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;}
+  #floatingSaveBtn::after, #scrollTopBtn::after{content:"";position:absolute;top:-10px;right:-10px;bottom:-10px;left:-10px;border-radius:50%;}
+  #floatingSaveBtn:not(:disabled):hover{transform:scale(1.12);filter:brightness(1.12);box-shadow:0 5px 16px rgba(0,0,0,.45) !important;}
+  #scrollTopBtn:hover{transform:scale(1.12);border-color:var(--accent) !important;color:var(--accent) !important;}
+  #floatingSaveBtn:active, #scrollTopBtn:active{transform:scale(.92);}
+  #floatingSaveBtn:disabled, #saveNowBtn:disabled{opacity:.5;cursor:wait;transform:none;filter:none;}
+  .btn.primary:disabled{filter:none;}
   .btn.small{padding:6px 10px;font-size:12px;}
   .btn.icon{padding:9px 11px;font-size:15px;line-height:1;}
 
@@ -1077,7 +1087,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.25.1';
+const APP_VERSION = '0.25.2';
 const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1766,8 +1776,15 @@ async function saveDocsIfChanged(){
   return ok;
 }
 
+let guardandoAhora = false;
+function bloquearGuardado(v){
+  guardandoAhora = v;
+  ['saveNowBtn', 'floatingSaveBtn'].forEach(id => { const b = document.getElementById(id); if(b) b.disabled = v; });
+  document.querySelectorAll('[data-pet-aceptar],[data-pet-rechazar]').forEach(b => { b.disabled = v; });
+}
 async function doSaveCycle(){
   mostrarCargando('Guardando…');
+  bloquearGuardado(true);
   try{
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
@@ -1798,7 +1815,7 @@ async function doSaveCycle(){
   else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error');
   else if(!localOk) avisoToast('No se pudo guardar en este navegador. Descarga un respaldo para no perder los cambios.', 'error');
   return {localOk, dbOk};
-  } finally { ocultarCargando(); }
+  } finally { ocultarCargando(); if(!pendientesEnCola) bloquearGuardado(false); }
 }
 
 function mostrarGuardadoToast(){
@@ -1807,8 +1824,11 @@ function mostrarGuardadoToast(){
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.display = 'none'; }, 5000);
 }
+let pendientesEnCola = 0;
 function enqueueSave(){
-  const p = saveChain.then(doSaveCycle);
+  pendientesEnCola++;
+  bloquearGuardado(true);
+  const p = saveChain.then(doSaveCycle).finally(() => { pendientesEnCola--; if(!pendientesEnCola) bloquearGuardado(false); });
   saveChain = p.catch(e => { console.error('Error al guardar', e); });
   return p.catch(() => ({localOk:false, dbOk:false}));
 }
@@ -1828,7 +1848,7 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 async function saveNow(){
-  if(!isAdmin) return;
+  if(!isAdmin || guardandoAhora) return;
   clearTimeout(saveTimer);
   const {localOk, dbOk} = await enqueueSave();
   const msgEl = document.getElementById('ioMsg');
@@ -3175,7 +3195,7 @@ function renderPeticiones(){
   el.querySelectorAll('[data-pet-rechazar]').forEach(b => b.addEventListener('click', () => resolverPeticionUI(b.getAttribute('data-pet-rechazar'), false)));
 }
 async function resolverPeticionUI(id, aceptar){
-  const p = peticionesPendientes.find(x => x.id === id); if(!p) return;
+  const p = peticionesPendientes.find(x => x.id === id); if(!p || guardandoAhora) return;
   mostrarCargando('Guardando…');
   try{
     if(aceptar){
