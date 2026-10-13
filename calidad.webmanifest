@@ -1,0 +1,14 @@
+{
+  "name": "Calidad · Obra Bellavista",
+  "short_name": "Calidad",
+  "start_url": "./calidad.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f2f3b",
+  "theme_color": "#0f2f3b",
+  "icons": [
+    {"src": "calidad-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "calidad-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
+}

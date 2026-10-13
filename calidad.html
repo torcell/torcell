@@ -6,6 +6,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Calidad">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="calidad.webmanifest">
 <meta name="theme-color" content="#0f2f3b">
 <title>Calidad · Obra Bellavista</title>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFSElEQVR42u2WbYydVRHHf3POc+7ufdvSwnZLaykFl9o0UpBISkUQmm7Z0tK0pq3UEGONRjHxCwmJxpcYo9EQg/E1vsREJEi6lhKBAqvbDQRoFyoNVA1uEVdTkG53t3tfl97nOWf8cO9e7qW19lu/7EmeD09mzsx/5sz8ZyS76nrlAh7DBT5zAOYAXHAA0bmEItL+Dyigqm0y1fPr5FZrei4A1lo0BGpxQtDQdkuMkHKO07Va3YpAyrnzSLUSi8EDFrAN0NHZIi5OF7Apx6LuS8ikO+teVEGEWhwzPjHFsiWXYsTgQ+DtkxPndG5RymJZ6GtkfaBiDEUbIa0ARATvPXEt5tM7t/Gpj29hVe+VpNOdCEISPM5GfPOHP+OJ4WcZeeShxlPAHZ/9EsMvHCKXy+FDaHPuVJmOHLeVJvnF+BssCJ592Yu4a9EKujSpAxARgvdYER78yffZtmHd/4xmYP8gn9+1nUy6k1ock3KOO+/YyNAzz51RM7PON5Qm2XPiGBkN2ABdLTXTBDAzM8Nvf/A9tm1Y1zRcq8VMFQqoKtZaXnzlKG+fnGDXltubhaeqbLr1JroX9VCqVIisRVXrzm3d+cCJY+QJxALGQNLaBdYYyuUKt3xkDZ/ccjtxnJByjl8+vJf7fv5ripVqozAN4+Mn2dy3jiU9C/EhkHIOHwI9l1zM+hvX8NAjj9F10TxMkjQjHxgfJa/K69Zxyjg+fLqKtiTKiBFCHLN9Yx+qSuQiHj/wDJ+75yuMvfkWxXKZQqlEoVQmiRPu3Nxfj16VoedHCCGgCp/Y1A8imNm0FyfZ859R8kGZEMu2RR/gSDoLAVqrxISgSMqx8sorEBEEeGDfY4hz5LJZrLU450i857JlS+n76A2ICKcKRe7+xrcZn5hCBG654Xp6ly+jWEvor0wxcGKULlWOG0f/4pUczS9gnvp2MmhlwjYy0XY9I8LpSoWNN9/IvHwegOGRlxg9/DJ/euEQALlMmr71t9I9Pcme8dfJG+WUMXxhwVLGrKOnPE3kw5m2jRG0FvPaG2OoKgrctXUzIY4pVyok3pN4j3Updm66rclgD//hSXCOPU883WS2Xf3rmc7mOGki8HD4dGDr8TF++vcj3HfsFa4rFyACaYnVaFCMcwzsH0RESOKEzetu5lf3f5fLlyxmflceVWXlVe9n7XXXIMDYm28xdHCE9MJunh05zOg//4UAa65exdJrVvMjyTKcRPxFHF6EKWsp2Iga8m4GGmkwPgSyuSwHnjvIg48+jnMRtTjmMzu2cvTpfby6fy/Lly5hw01rm5T76OABCpNTZDo7KRcK7H3qj3Uys5bd6z/G/dmL2bniWr7T+0G+fNVqvt57NfeuuJaX8/NQhUTeHQZm9v0zmTR3f/Vb7BscajrqSKUoVav849/H2b19azNtv98/iEml8N5jOzrY+9RQnRWBHf195ObPp4ShEjmqjW8mcogRRNv5vwnAWEsSAju+eA+77/0awwdfZGq6wI9/8zt6L7+M5e9bTHXmHZ7/8xEOH/0rmUyGOElIp9O8+rfXGD70EtWZd7i0p5u1H1pNrVrBiWBVMaqIKiUMBTEUMM1ClNateJZKy8USxjkWL+ymWCnTkUrRlcvVZZUqxXK5PjEbUfsQyOey5LNZACrVKsVSGTGmbfzmvCetgRkxlK1F3gugbRxroFZLsNagqiTe12XGEkW2rW1FhMR7fFPHYK09Y454EUIj7Wcdx03FhiHnouby0dFi8L0LiKoSWUs0q9No5zO2n5Z7ej4bUauj/7f1nM9WpHNL6RyAOQBnOf8FaPJecIMlU5YAAAAASUVORK5CYII=">
@@ -16,11 +18,12 @@
 @media (prefers-color-scheme:dark){:root{--bg:#14181a;--panel:#1d2326;--soft:#232a2d;--border:#333c40;--strong:#46525a;--text:#e6eaea;--sub:#9aa5a8;--ok:#4fb85b;--warn:#f0b400;--bad:#e5604f;}}
 *{box-sizing:border-box;}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-body{min-height:100vh;padding-bottom:env(safe-area-inset-bottom);}
+body{min-height:100vh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;padding-bottom:env(safe-area-inset-bottom);}
 button,input,select{font-family:inherit;border-radius:0;}
 button{cursor:pointer;}
-header{background:var(--head);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5;}
-header h1{font-size:16px;margin:0;flex:1;line-height:1.25;}
+header{background:var(--head);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;z-index:5;}
+header h1{font-size:16px;margin:0;line-height:1.25;}
+.hbtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
 header small{display:block;font-weight:400;font-size:12px;opacity:.75;}
 .btn{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:9px 14px;font-size:13px;min-height:40px;transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease;}
 .btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.22);border-color:var(--accent);}
@@ -94,7 +97,7 @@ body.bloq{overflow:hidden;}
 .opnuevo input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
 .vacio-op{font-size:12px;color:var(--sub);padding:8px 0;}
 .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.pestanas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px;}
+.pestanas{margin-top:2px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px;}
 .pestanas button{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:11px 4px;font-size:14px;font-weight:700;min-height:44px;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;}
 .pestanas button+button{margin-left:-1px;}
 .pestanas button:hover{border-color:var(--accent);position:relative;}
@@ -108,6 +111,18 @@ body.bloq{overflow:hidden;}
 .pill.ok{background:rgba(67,160,71,.16);border-color:transparent;color:var(--ok);}
 #aviso{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,16px);max-width:min(92vw,420px);background:#3a2323;color:#fff;border:1px solid #c0392b;padding:10px 14px;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
 #aviso.on{opacity:1;transform:translate(-50%,0);}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;}
+#gate.off{display:none;}
+.caja{width:100%;max-width:340px;background:var(--panel);border:1px solid var(--border);padding:22px 20px;display:flex;flex-direction:column;gap:12px;}
+.caja h2{margin:0;font-size:17px;}
+.caja p{margin:0;font-size:13px;color:var(--sub);}
+.caja input{min-height:46px;padding:8px 12px;font-size:20px;letter-spacing:.3em;text-align:center;border:1px solid var(--strong);background:var(--soft);color:var(--text);width:100%;}
+.caja input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+body.sin-sesion header,body.sin-sesion main{visibility:hidden;}
+.estado{padding:34px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;}
+.estado.err2{border-style:solid;border-color:var(--bad);color:var(--text);}
+.giro{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:giro .8s linear infinite;}
+@keyframes giro{to{transform:rotate(360deg);}}
 .modal.reg{max-width:560px;}
 .reglista{display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:60vh;}
 .regit{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--soft);padding:9px 10px;display:flex;flex-direction:column;gap:3px;font-size:13px;}
@@ -125,18 +140,25 @@ body.bloq{overflow:hidden;}
 </style>
 </head>
 <body>
+<div id="gate">
+  <form class="caja" id="form" autocomplete="off">
+    <h2>Calidad · Obra Bellavista</h2>
+    <p id="gateTxt">Ingresa tu PIN para ver los departamentos listos para revisar.</p>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="12" aria-label="PIN">
+    <div class="err" id="err"></div>
+    <button class="btn primary" id="entrar" type="submit">Ingresar</button>
+  </form>
+</div>
 <header>
-  <h1>Listos para revisar<small>Conectado como <span style="white-space:nowrap;">Silvia Gonzales — Calidad</span></small><small id="sub">Obra Bellavista, La Florida</small></h1>
-  <button class="btn" id="verRegistro">Registro</button>
-  <button class="btn" id="refrescar">Actualizar</button>
+  <h1>Listos para revisar<small>Conectado como <span style="white-space:nowrap;" id="quien">—</span></small><small id="sub">Obra Bellavista, La Florida</small></h1>
+  <div class="hbtns">
+    <button class="btn" id="verRegistro">Registro</button>
+    <button class="btn" id="refrescar">Actualizar</button>
+    <button class="btn" id="salir">Salir</button>
+  </div>
 </header>
 <main>
   <p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
-  <div class="pestanas" id="pestanas">
-    <button type="button" class="on" data-sc="piso">Piso</button>
-    <button type="button" data-sc="muros">Muro baño</button>
-    <button type="button" data-sc="cocina">Muro cocina</button>
-  </div>
   <div class="resumen">
     <div class="res p"><b id="nPend">0</b><span>Por revisar</span></div>
     <div class="res r"><b id="nRev">0</b><span>Revisados</span></div>
@@ -147,7 +169,7 @@ body.bloq{overflow:hidden;}
     <select id="filtro" aria-label="Filtrar por piso"></select>
     <select id="filtroVista" aria-label="Pisos a mostrar">
       <option value="mov">Pisos con avance</option>
-      <option value="todos">Todos los pisos</option>
+      <option value="todos">Incluir pisos sin avance</option>
     </select>
     <button type="button" class="btn primary" id="ordenPisos" aria-pressed="true">↓ Mayor a menor</button>
     <select id="filtroEstado" aria-label="Filtrar por estado">
@@ -157,6 +179,11 @@ body.bloq{overflow:hidden;}
       <option value="revisado">Revisados</option>
       <option value="observado">Con observaciones</option>
     </select>
+  </div>
+  <div class="pestanas" id="pestanas">
+    <button type="button" class="on" data-sc="piso">Piso</button>
+    <button type="button" data-sc="muros">Muro baño</button>
+    <button type="button" data-sc="cocina">Muro cocina</button>
   </div>
   <div id="lista"></div>
 </main>
@@ -229,16 +256,51 @@ let scope = 'piso';
 let ordenDesc = true;
 try{ ordenDesc = localStorage.getItem('calidadOrdenPisos') !== 'asc'; }catch(e){}
 let cargado = false;
+let errorCarga = 'No se pudo cargar la información de la base de datos.';
 const AREAS_DE = {piso: a => a === 'Piso' || a === 'Pasillos', muros: a => a === 'Muro Baños' || a === 'Muro', cocina: a => a === 'Muro Cocina'};
 const NOMBRE_SCOPE = {piso:'piso', muros:'muro baño', cocina:'muro cocina'};
 const NOMBRE_AREA = {'Piso':'Piso', 'Pasillos':'Pasillo', 'Muro Baños':'Muro baño', 'Muro Cocina':'Muro cocina', 'Muro':'Muro'};
 const claveBase = d => d.p + '|' + d.d;
 const clave = (d, sc) => claveBase(d) + '|' + (sc || scope);
 
+const guardarLocal = (k, v) => { try{ v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); }catch(e){} };
+const leerLocal = k => { try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } };
+let token = leerLocal('calidadToken');
+let nombre = leerLocal('calidadNombre');
+const TIEMPO_MAX = 20000;
+
 async function llamar(action, extra, rapido){
-  const res = await fetch(DB_URL, {method:'POST', keepalive: !!rapido, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, ...extra})});
-  if(!res.ok) throw new Error('red');
-  return JSON.parse(await res.text());
+  const ctl = new AbortController();
+  const tope = setTimeout(() => ctl.abort(), TIEMPO_MAX);
+  try{
+    const res = await fetch(DB_URL, {method:'POST', keepalive: !!rapido, signal: ctl.signal, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, token, ...extra})});
+    if(!res.ok) throw new Error('red');
+    const j = JSON.parse(await res.text());
+    if(j && j.error === 'sin_sesion' && token) cerrarSesion('Tu sesión venció. Ingresa tu PIN de nuevo.');
+    return j;
+  }catch(e){
+    if(e && e.name === 'AbortError') throw new Error('tiempo');
+    throw e;
+  }finally{ clearTimeout(tope); }
+}
+
+function cerrarSesion(msg){
+  token = ''; nombre = '';
+  guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null);
+  celdas = {}; revisiones = {}; cargado = false;
+  document.body.classList.add('sin-sesion');
+  $('gate').classList.remove('off');
+  $('pin').value = '';
+  $('err').textContent = msg || '';
+  ['vel', 'velReg', 'velOp'].forEach(id => $(id).classList.remove('on', 'out'));
+  document.body.classList.remove('bloq');
+  setTimeout(() => $('pin').focus(), 50);
+}
+
+function entrarVista(){
+  $('quien').textContent = nombre + ' — Calidad';
+  document.body.classList.remove('sin-sesion');
+  $('gate').classList.add('off');
 }
 
 function estado(d, sc){
@@ -247,13 +309,13 @@ function estado(d, sc){
     const celdasDe = lista.filter(c => f(c[1]));
     const req = celdasDe.filter(([id, , m]) => { const c = celdas[id]; return m || (c && (c.t || c.m)); });
     if(!celdasDe.length) return {aplica:false, ok:false, ts:0};
-    if(!req.length) return {aplica:true, ok:false, ts:0};
+    if(!req.length) return {aplica:true, ok:false, ts:0, sin:true};
     let ts = 0;
     const ok = req.every(([id]) => { const c = celdas[id]; if(c && c.t){ ts = Math.max(ts, c.ts || 0); return true; } return false; });
     return {aplica:true, ok, ts};
   };
   const a = evaluar(d.cer), b = evaluar(d.fra);
-  return {aplica: a.aplica || b.aplica, ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts), cer: a.ok, fra: b.ok};
+  return {aplica: a.aplica || b.aplica, ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts), cer: a.ok, fra: b.ok, cerSin: !!a.sin, fraSin: !!b.sin};
 }
 
 function revision(d){
@@ -285,7 +347,8 @@ function quitarEspera(k){
 
 function falta(e){
   if(!e.cer && !e.fra) return 'Falta cerámica y frague';
-  return e.cer ? 'Falta frague' : 'Falta cerámica';
+  if(e.cer) return e.fraSin ? 'Frague sin m²' : 'Falta frague';
+  return e.cerSin ? 'Cerámica sin m²' : 'Falta cerámica';
 }
 
 function etiqueta(r){
@@ -299,7 +362,9 @@ let primerPintado = true;
 function pintar(){
   if(!cargado){
     ['nPend', 'nRev', 'nObs', 'nNo'].forEach(id => { $(id).textContent = '–'; });
-    $('lista').innerHTML = '<div class="vacio">No se pudo cargar la información de la base de datos.<br><button class="btn" id="reintentar" type="button">Reintentar</button></div>';
+    $('lista').innerHTML = cargando
+      ? '<div class="estado" role="status"><div class="giro"></div><span>Cargando información de la base de datos…</span></div>'
+      : '<div class="estado err2" role="alert"><span>No se ha podido cargar la información.<br>' + esc(errorCarga) + '</span><button class="btn" id="reintentar" type="button">Reintentar</button></div>';
     return;
   }
   const f = AREAS_DE[scope];
@@ -315,7 +380,7 @@ function pintar(){
   const sentido = ordenDesc ? -1 : 1;
   const soloAvance = $('filtroVista').value === 'mov';
   const pisos = [...new Map(todos.filter(x => !soloAvance || pisosConAvance.has(x.d.p)).map(x => [x.d.p, x.d.n])).entries()].sort((a, b) => sentido * (a[1] - b[1])).map(x => x[0]);
-  sel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${esc(p)}"${p === previo ? ' selected' : ''}>${esc(p)}</option>`).join('');
+  sel.innerHTML = '<option value="">Filtrar por piso</option>' + pisos.map(p => `<option value="${esc(p)}"${p === previo ? ' selected' : ''}>${esc(p)}</option>`).join('');
   const fe = $('filtroEstado').value;
   const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
   if(!vis.length){
@@ -443,8 +508,8 @@ function guardarRevision(){
     if(j && j.ok) return;
     const msgs = {espera: 'Espera unos segundos antes de volver a modificar ese departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.', datos_incompletos: 'Revisa las observaciones marcadas.'};
     deshacer(k, previo, (j && msgs[j.error]) || 'No se pudo guardar el cambio. Intenta de nuevo.');
-  }).catch(() => {
-    deshacer(k, previo, 'Sin conexión: el cambio no se guardó. Intenta de nuevo.');
+  }).catch(e => {
+    deshacer(k, previo, e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. El cambio no se guardó.' : 'Sin conexión: el cambio no se guardó. Intenta de nuevo.');
   }).finally(() => { enVuelo--; });
 }
 
@@ -522,27 +587,78 @@ function cerrarRegistro(){
 }
 
 async function cargar(){
-  if(cargando || enVuelo > 0 || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on')) return;
+  if(!token || cargando || enVuelo > 0 || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on')) return;
   cargando = true; $('refrescar').disabled = true;
+  $('sub').textContent = cargado ? 'Actualizando…' : 'Cargando…';
+  if(!cargado) pintar();
   try{
     const j = await llamar('loadCalidad');
+    if(!token) return;
     if(j && j.ok && j.celdas && typeof j.celdas === 'object'){
       celdas = j.celdas;
       revisiones = j.revisiones || {};
       if(Array.isArray(j.opciones)) opciones = j.opciones;
       cargado = true;
+      cargando = false;
       pintar();
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+    }else if(j && j.error === 'sin_sesion'){
+      return;
     }else{
-      $('sub').textContent = 'No se pudo cargar. Reintenta.';
-      if(!cargado) pintar();
+      errorCarga = j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no reconoce esta versión. Falta publicar la versión nueva del script.' : 'La base de datos respondió con un formato inesperado.';
+      falloCarga('No se pudo cargar. Reintenta.');
     }
   }catch(e){
-    $('sub').textContent = 'Sin conexión. Reintenta.';
-    if(!cargado) pintar();
+    errorCarga = e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet.';
+    falloCarga(e && e.message === 'tiempo' ? 'La base tarda demasiado en responder.' : 'Sin conexión con la base de datos.');
   }finally{ cargando = false; $('refrescar').disabled = false; }
 }
 
+function falloCarga(sub){
+  cargando = false;
+  $('sub').textContent = sub;
+  if(!cargado) pintar();
+  else aviso(errorCarga);
+}
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pin = $('pin').value.trim();
+  if(pin.length < 4){ $('err').textContent = 'Ingresa tu PIN.'; return; }
+  $('entrar').disabled = true;
+  $('err').textContent = '';
+  $('gateTxt').textContent = 'Comprobando tu sesión…';
+  const ctl = new AbortController();
+  const tope = setTimeout(() => ctl.abort(), TIEMPO_MAX);
+  try{
+    const res = await fetch(DB_URL, {method:'POST', signal: ctl.signal, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'login', pin, dispositivo: leerLocal('progresoObraDisp')})});
+    const j = JSON.parse(await res.text());
+    if(j && j.ok && j.token && j.nombre){
+      if(j.dispositivo) guardarLocal('progresoObraDisp', j.dispositivo);
+      token = j.token; nombre = String(j.nombre);
+      guardarLocal('calidadToken', token); guardarLocal('calidadNombre', nombre);
+      $('pin').value = '';
+      entrarVista();
+      cargar();
+    }else{
+      $('err').textContent = j && j.error === 'demasiados_intentos' ? 'Demasiados intentos. Espera unos minutos.' : 'PIN incorrecto.';
+      $('pin').value = '';
+    }
+  }catch(err){
+    $('err').textContent = err && err.name === 'AbortError' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet.';
+  }finally{
+    clearTimeout(tope);
+    $('entrar').disabled = false;
+    $('gateTxt').textContent = 'Ingresa tu PIN para ver los departamentos listos para revisar.';
+  }
+});
+
+$('salir').addEventListener('click', () => {
+  const t = token;
+  cerrarSesion('');
+  fetch(DB_URL, {method:'POST', keepalive: true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: t})}).catch(() => {});
+});
+$('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargar(); });
 $('refrescar').addEventListener('click', cargar);
 $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
@@ -567,7 +683,6 @@ $('pestanas').addEventListener('click', e => {
   primerPintado = true;
   pintar();
 });
-$('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargar(); });
 $('filtroVista').addEventListener('change', pintar);
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
 document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e)));
@@ -593,20 +708,13 @@ document.addEventListener('keydown', e => {
   if(e.target.id === 'opNueva'){ e.preventDefault(); agregarOpcion(); }
   else if(e.target.classList.contains('cant')){ e.preventDefault(); guardarRevision(); }
 });
-document.addEventListener('visibilitychange', () => { if(!document.hidden) cargar(); });
-setInterval(() => { if(!document.hidden) cargar(); }, 60000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden && token) cargar(); });
+setInterval(() => { if(!document.hidden && token) cargar(); }, 60000);
 
-(function(){
-  const m = {name:'Calidad · Obra Bellavista', short_name:'Calidad', start_url: location.href.split('#')[0], display:'standalone', background_color:'#0f2f3b', theme_color:'#0f2f3b'};
-  try{
-    const l = document.createElement('link');
-    l.rel = 'manifest';
-    l.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type:'application/manifest+json'}));
-    document.head.appendChild(l);
-  }catch(e){}
-})();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('calidad-sw.js').catch(() => {});
 
-cargar();
+if(token && nombre){ entrarVista(); cargar(); }
+else{ cerrarSesion(''); }
 </script>
 </body>
 </html>
