@@ -147,6 +147,11 @@
   .mat-tabla .mat-falta{display:block;color:#c0546f;font-size:11px;}
   .mat-tabla.mat-ajustes input{width:64px;text-align:center;padding:4px;}
   .mat-tabla input[type=checkbox]{width:20px;height:20px;cursor:pointer;}
+  .mat-tabla label.mat-ok{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;}
+  .mat-tabla td.mat-datos{height:1px;}
+  .mat-tabla .mat-cont{height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:6px;}
+  .mat-tabla .mat-cont label.mat-ok{margin-top:0;}
+  .mat-tabla td.mat-celda-ok{background:rgba(67,160,71,.14);}
   .mat-resumen{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
   .mat-resumen > div{flex:1 1 220px;border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;font-size:12.5px;}
   .mat-resumen > div > b{display:block;font-size:12px;color:var(--sub);margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px;}
@@ -1072,7 +1077,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.24.0';
+const APP_VERSION = '0.24.1';
 const BACKEND_REQUERIDO = 26;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2662,7 +2667,13 @@ function matUnidadPorClave(){
 function matTerminada(u){
   return u.celdas.length > 0 && u.celdas.every(c => { const st = getState(c.id); return st.terminado || st.pagado; });
 }
-function matPendiente(u){ return !MATERIALES.ok[u.key] && !matTerminada(u); }
+const matClaveArea = (u, c) => u.key + '|' + c.area;
+const matAreaListo = (u, c) => !!(MATERIALES.ok[u.key] || MATERIALES.ok[matClaveArea(u, c)]);
+function matListo(u){
+  const req = u.celdas.filter(c => matCalculo(c));
+  return req.length ? req.every(c => matAreaListo(u, c)) : !!MATERIALES.ok[u.key];
+}
+function matPendiente(u){ return !matListo(u) && !matTerminada(u); }
 let matNivelesCache = null;
 function matNiveles(){
   if(matNivelesCache) return matNivelesCache;
@@ -2701,10 +2712,11 @@ function matCalculo(celda){
   return {m2, piezas, cajas, sacos, tipo: MAT_DE_AREA[celda.area]};
 }
 const matNum = (n, d) => Number(n).toLocaleString('es-CL', {minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 1 : d});
-function matTotales(unidades){
+function matTotales(unidades, soloPend){
   const t = {};
   MAT_TIPOS.forEach(([k]) => { t[k] = {piezas: 0, sacos: 0, m2: 0}; });
   unidades.forEach(u => u.celdas.forEach(c => {
+    if(soloPend && matAreaListo(u, c)) return;
     const r = matCalculo(c);
     if(r){ t[r.tipo].piezas += r.piezas; t[r.tipo].sacos += r.sacos; t[r.tipo].m2 += r.m2; }
   }));
@@ -2717,15 +2729,18 @@ function matTextoTotales(t){
     return `<div style="margin-bottom:3px;"><b style="display:inline;margin-right:4px;text-transform:none;font-size:12.5px;color:var(--text);">${n}:</b>${matNum(t[k].piezas, 0)} piezas${cajas} · ${matNum(Math.ceil(t[k].sacos), 0)} sacos</div>`;
   }).join('') || '<span style="color:var(--sub);">Sin metros registrados.</span>';
 }
-function matCeldaHtml(celda){
+function matCeldaHtml(celda, u){
   if(!celda) return '<td>—</td>';
   const r = matCalculo(celda);
   if(!r) return '<td><span style="color:var(--sub);">sin m²</span></td>';
+  const clave = matClaveArea(u, celda);
+  const listo = matAreaListo(u, celda);
+  const chk = `<label class="mat-ok"><input type="checkbox" data-matok="${esc(clave)}" ${listo ? 'checked' : ''} aria-label="Materiales listos"> Listo</label>`;
   const partes = [];
   if(r.cajas !== null) partes.push(`${matNum(r.cajas, 0)} cajas`);
   if(Number(MATERIALES.params[r.tipo].kgSaco) > 0) partes.push(`${matNum(Math.round(r.sacos * 10) / 10)} sacos`);
   const falta = r.cajas === null ? '<span class="mat-falta">cajas: falta dato</span>' : '';
-  return `<td><span class="mat-m2">${matNum(r.m2, 2)} m²</span><b>${matNum(r.piezas, 0)} piezas</b><br>${partes.join(' · ')}${falta}</td>`;
+  return `<td class="mat-datos${listo ? ' mat-celda-ok' : ''}"><div class="mat-cont"><div><span class="mat-m2">${matNum(r.m2, 2)} m²</span><b>${matNum(r.piezas, 0)} piezas</b><br>${partes.join(' · ')}${falta}</div>${chk}</div></td>`;
 }
 let matFoco = null;
 function renderMateriales(){
@@ -2737,15 +2752,15 @@ function renderMateriales(){
   sel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(x => `<option value="${esc(x)}"${x === pisoSel ? ' selected' : ''}>${esc(x)}</option>`).join('');
   const todas = matUnidadesTodas();
   const pend = todas.filter(matPendiente);
-  document.getElementById('matResumen').innerHTML = `<div><b>Sin confirmar (${pend.length} de ${todas.length})</b>${matTextoTotales(matTotales(pend))}</div><div><b>Total de la obra</b>${matTextoTotales(matTotales(todas))}</div>`;
+  document.getElementById('matResumen').innerHTML = `<div><b>Sin confirmar (${pend.length} de ${todas.length})</b>${matTextoTotales(matTotales(pend, true))}</div><div><b>Total de la obra</b>${matTextoTotales(matTotales(todas))}</div>`;
   const soloPend = document.getElementById('matSoloPend').checked;
   const filas = todas.filter(u => (!sel.value || u.piso === sel.value) && (!soloPend || matPendiente(u)));
   const porArea = (u, a) => u.celdas.find(c => c.area === a);
-  document.getElementById('matLista').innerHTML = `<tr><th>Piso / Dpto</th><th>Piso o Pasillo</th><th>Muro Baño</th><th>Muro Cocina</th><th>Materiales listos</th></tr>` +
+  document.getElementById('matLista').innerHTML = `<tr><th>Piso / Dpto</th><th>Piso o Pasillo</th><th>Muro Baño</th><th>Muro Cocina</th></tr>` +
     (filas.map(u => `<tr data-matfila="${esc(u.key)}" title="${matTitulo(matNivel(u))}" class="${matNivel(u) === 'rojo' ? 'mat-pend' : matNivel(u) === 'amarillo' ? 'mat-prep' : ''}${matFoco === u.key ? ' mat-resalta' : ''}">
       <td class="mat-nombre">${esc(u.piso)} · ${esc(u.nombre)}</td>
-      ${matCeldaHtml(porArea(u, 'Piso') || porArea(u, 'Pasillos'))}${matCeldaHtml(porArea(u, 'Muro Baños'))}${matCeldaHtml(porArea(u, 'Muro Cocina'))}
-      <td><input type="checkbox" data-matok="${esc(u.key)}" ${MATERIALES.ok[u.key] ? 'checked' : ''} aria-label="Materiales listos"></td></tr>`).join('') || '<tr><td colspan="5" style="color:var(--sub);">No hay departamentos para mostrar.</td></tr>');
+      ${matCeldaHtml(porArea(u, 'Piso') || porArea(u, 'Pasillos'), u)}${matCeldaHtml(porArea(u, 'Muro Baños'), u)}${matCeldaHtml(porArea(u, 'Muro Cocina'), u)}
+      </tr>`).join('') || '<tr><td colspan="4" style="color:var(--sub);">No hay departamentos para mostrar.</td></tr>');
 }
 let matGuardarTimer = null;
 function matCambio(){
@@ -2776,7 +2791,13 @@ document.getElementById('matAjustes').addEventListener('change', (e) => {
 });
 document.getElementById('matLista').addEventListener('change', (e) => {
   const cb = e.target.closest('input[data-matok]'); if(!cb) return;
-  if(cb.checked) MATERIALES.ok[cb.dataset.matok] = true; else delete MATERIALES.ok[cb.dataset.matok];
+  const clave = cb.dataset.matok;
+  const u = matUnidadPorClave()[clave.slice(0, clave.lastIndexOf('|'))];
+  if(u && MATERIALES.ok[u.key]){
+    delete MATERIALES.ok[u.key];
+    u.celdas.forEach(c => { MATERIALES.ok[matClaveArea(u, c)] = true; });
+  }
+  if(cb.checked) MATERIALES.ok[clave] = true; else delete MATERIALES.ok[clave];
   matCambio(); renderMateriales();
 });
 
