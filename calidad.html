@@ -31,6 +31,7 @@ header .btn{padding:9px 12px;background:transparent;color:#fff;border-color:rgba
 main{max-width:860px;margin:0 auto;padding:16px;}
 .msg{font-size:12.5px;color:var(--sub);margin:0 0 12px;}
 .barra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.barra .btn{min-height:40px;}
 .barra select{min-width:0;min-height:40px;padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
 .resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
 .res{background:var(--panel);border:1px solid var(--border);border-top:4px solid var(--strong);padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
@@ -79,6 +80,18 @@ body.bloq{overflow:hidden;}
 .campo input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pestanas{display:grid;grid-template-columns:1fr 1fr;margin-bottom:12px;}
+.pestanas button{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:11px 4px;font-size:14px;font-weight:700;min-height:44px;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;}
+.pestanas button+button{margin-left:-1px;}
+.pestanas button:hover{border-color:var(--accent);position:relative;}
+.pestanas button:active{transform:scale(.97);}
+.pestanas button.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.areas{display:flex;flex-direction:column;gap:6px;}
+.area{border:1px solid var(--border);border-left:4px solid var(--strong);background:var(--soft);padding:7px 9px;display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center;opacity:.65;transition:opacity .2s ease;}
+.area.act{border-left-color:var(--accent);opacity:1;}
+.area b{flex:1 0 100%;font-size:12.5px;}
+.pill{font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--border);color:var(--sub);}
+.pill.ok{background:rgba(67,160,71,.16);border-color:transparent;color:var(--ok);}
 .modal.reg{max-width:560px;}
 .reglista{display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:60vh;}
 .regit{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--soft);padding:9px 10px;display:flex;flex-direction:column;gap:3px;font-size:13px;}
@@ -103,6 +116,10 @@ body.bloq{overflow:hidden;}
 </header>
 <main>
   <p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
+  <div class="pestanas" id="pestanas">
+    <button type="button" class="on" data-sc="piso">Piso</button>
+    <button type="button" data-sc="muros">Muros</button>
+  </div>
   <div class="resumen">
     <div class="res p"><b id="nPend">0</b><span>Por revisar</span></div>
     <div class="res r"><b id="nRev">0</b><span>Revisados</span></div>
@@ -115,10 +132,7 @@ body.bloq{overflow:hidden;}
       <option value="mov">Pisos con avance</option>
       <option value="todos">Todos los pisos</option>
     </select>
-    <select id="filtroOrden" aria-label="Orden de los pisos">
-      <option value="desc">De arriba hacia abajo</option>
-      <option value="asc">De abajo hacia arriba</option>
-    </select>
+    <button type="button" class="btn primary" id="ordenPisos" aria-pressed="true">↓ Mayor a menor</button>
     <select id="filtroEstado" aria-label="Filtrar por estado">
       <option value="">Todos los estados</option>
       <option value="pendiente">Por revisar</option>
@@ -142,6 +156,7 @@ body.bloq{overflow:hidden;}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTit">
     <h2 id="mTit"></h2>
     <div class="sub" id="mSub"></div>
+    <div class="areas" id="mAreas"></div>
     <div class="seg" id="mSeg">
       <button type="button" data-e="pendiente">Por revisar</button>
       <button type="button" data-e="revisado">Revisado</button>
@@ -172,7 +187,14 @@ const espera = {};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const clave = d => d.p + '|' + d.d;
+let scope = 'piso';
+let ordenDesc = true;
+try{ ordenDesc = localStorage.getItem('calidadOrdenPisos') !== 'asc'; }catch(e){}
+let cargado = false;
+const AREAS_DE = {piso: a => a === 'Piso' || a === 'Pasillos', muros: a => a.indexOf('Muro') === 0};
+const NOMBRE_AREA = {'Piso':'Piso', 'Pasillos':'Pasillo', 'Muro Baños':'Muro baño', 'Muro Cocina':'Muro cocina', 'Muro':'Muro'};
+const claveBase = d => d.p + '|' + d.d;
+const clave = (d, sc) => claveBase(d) + '|' + (sc || scope);
 
 async function llamar(action, extra){
   const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, ...extra})});
@@ -180,16 +202,19 @@ async function llamar(action, extra){
   return JSON.parse(await res.text());
 }
 
-function estado(d){
+function estado(d, sc){
+  const f = AREAS_DE[sc || scope];
   const evaluar = lista => {
-    const req = lista.filter(([id, , m]) => { const c = celdas[id]; return m || (c && (c.t || c.m)); });
-    if(!req.length) return {ok:false, ts:0, hay:false};
+    const celdasDe = lista.filter(c => f(c[1]));
+    const req = celdasDe.filter(([id, , m]) => { const c = celdas[id]; return m || (c && (c.t || c.m)); });
+    if(!celdasDe.length) return {aplica:false, ok:false, ts:0};
+    if(!req.length) return {aplica:true, ok:false, ts:0};
     let ts = 0;
     const ok = req.every(([id]) => { const c = celdas[id]; if(c && c.t){ ts = Math.max(ts, c.ts || 0); return true; } return false; });
-    return {ok, ts, hay:true};
+    return {aplica:true, ok, ts};
   };
   const a = evaluar(d.cer), b = evaluar(d.fra);
-  return {ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts), cer: a.ok, fra: b.ok};
+  return {aplica: a.aplica || b.aplica, ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts), cer: a.ok, fra: b.ok};
 }
 
 function revision(d){
@@ -233,7 +258,13 @@ const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : '';
 
 let primerPintado = true;
 function pintar(){
-  const todos = LAYOUT.map(d => { const e = estado(d); return {d, e, mov: [...d.cer, ...d.fra].some(c => celdas[c[0]] && celdas[c[0]].t), r: e.ok ? revision(d) : {e:'nolisto', d:'', c:0}}; });
+  if(!cargado){
+    ['nPend', 'nRev', 'nObs', 'nNo'].forEach(id => { $(id).textContent = '–'; });
+    $('lista').innerHTML = '<div class="vacio">No se pudo cargar la información de la base de datos.<br><button class="btn" id="reintentar" type="button">Reintentar</button></div>';
+    return;
+  }
+  const f = AREAS_DE[scope];
+  const todos = LAYOUT.map(d => { const e = estado(d); return {d, e, mov: [...d.cer, ...d.fra].some(c => f(c[1]) && celdas[c[0]] && celdas[c[0]].t), r: e.ok ? revision(d) : {e:'nolisto', d:'', c:0}}; }).filter(x => x.e.aplica);
   const pisosConAvance = new Set(todos.filter(x => x.mov).map(x => x.d.p));
   const cuenta = k => todos.filter(x => x.r.e === k).length;
   $('nPend').textContent = cuenta('pendiente');
@@ -242,9 +273,9 @@ function pintar(){
   $('nNo').textContent = cuenta('nolisto');
   const sel = $('filtro');
   const previo = sel.value;
-  const sentido = $('filtroOrden').value === 'asc' ? 1 : -1;
+  const sentido = ordenDesc ? -1 : 1;
   const soloAvance = $('filtroVista').value === 'mov';
-  const pisos = [...new Map(LAYOUT.filter(d => !soloAvance || pisosConAvance.has(d.p)).map(d => [d.p, d.n])).entries()].sort((a, b) => sentido * (a[1] - b[1])).map(x => x[0]);
+  const pisos = [...new Map(todos.filter(x => !soloAvance || pisosConAvance.has(x.d.p)).map(x => [x.d.p, x.d.n])).entries()].sort((a, b) => sentido * (a[1] - b[1])).map(x => x[0]);
   sel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${esc(p)}"${p === previo ? ' selected' : ''}>${esc(p)}</option>`).join('');
   const fe = $('filtroEstado').value;
   const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
@@ -280,6 +311,21 @@ function elegir(e, foco){
   if(e === 'observado' && foco) setTimeout(() => $('mDet').focus(), 230);
 }
 
+function areasHtml(d){
+  const f = AREAS_DE[scope];
+  const mapa = {};
+  d.cer.forEach(c => { (mapa[c[1]] = mapa[c[1]] || {})[ 'cer' ] = c; });
+  d.fra.forEach(c => { (mapa[c[1]] = mapa[c[1]] || {})[ 'fra' ] = c; });
+  const pill = (nombre, c) => {
+    if(!c) return '';
+    const dato = celdas[c[0]];
+    if(dato && dato.t) return `<span class="pill ok">${nombre} ✓${dato.ts ? ' ' + new Date(dato.ts).toLocaleDateString('es-CL', {day:'2-digit', month:'short'}) : ''}</span>`;
+    return `<span class="pill">${nombre} ${c[2] || (dato && dato.m) ? 'pendiente' : 'sin m²'}</span>`;
+  };
+  return Object.keys(mapa).sort((a, b) => (a === 'Piso' ? 0 : a === 'Pasillos' ? 0 : 1) - (b === 'Piso' ? 0 : b === 'Pasillos' ? 0 : 1) || a.localeCompare(b)).map(a =>
+    `<div class="area${f(a) ? ' act' : ''}"><b>${esc(NOMBRE_AREA[a] || a)}</b>${pill('Cerámica', mapa[a].cer)}${pill('Frague', mapa[a].fra)}</div>`).join('');
+}
+
 function abrir(k){
   if(espera[k] > Date.now()) return;
   const d = LAYOUT.find(x => clave(x) === k);
@@ -287,9 +333,10 @@ function abrir(k){
   actual = d;
   const r = revision(d);
   $('mTit').textContent = d.p + ' · ' + (d.d === 'Pasillo' ? 'Pasillo' : 'Dpto ' + d.d);
-  const partes = [fechaTxt(estado(d).ts)];
+  const partes = ['Revisión de ' + (scope === 'piso' ? 'piso' : 'muros'), fechaTxt(estado(d).ts)];
   if(r.ts) partes.push('Última modificación: ' + fechaHora(r.ts));
   $('mSub').textContent = partes.filter(Boolean).join(' · ');
+  $('mAreas').innerHTML = areasHtml(d);
   $('mDet').value = r.e === 'observado' ? r.d : '';
   $('mCant').value = r.e === 'observado' && r.c ? r.c : '';
   elegir(r.e);
@@ -353,23 +400,47 @@ async function cargar(){
   cargando = true; $('refrescar').disabled = true;
   try{
     const j = await llamar('loadCalidad');
-    if(j && j.ok){
-      celdas = j.celdas || {};
+    if(j && j.ok && j.celdas && typeof j.celdas === 'object'){
+      celdas = j.celdas;
       revisiones = j.revisiones || {};
+      cargado = true;
       pintar();
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
     }else{
       $('sub').textContent = 'No se pudo cargar. Reintenta.';
+      if(!cargado) pintar();
     }
   }catch(e){
     $('sub').textContent = 'Sin conexión. Reintenta.';
+    if(!cargado) pintar();
   }finally{ cargando = false; $('refrescar').disabled = false; }
 }
 
 $('refrescar').addEventListener('click', cargar);
 $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
-$('filtroOrden').addEventListener('change', pintar);
+function pintarBotonOrden(){
+  const b = $('ordenPisos');
+  b.textContent = ordenDesc ? '↓ Mayor a menor' : '↑ Menor a mayor';
+  b.classList.toggle('primary', ordenDesc);
+  b.setAttribute('aria-pressed', ordenDesc ? 'true' : 'false');
+}
+$('ordenPisos').addEventListener('click', () => {
+  ordenDesc = !ordenDesc;
+  try{ localStorage.setItem('calidadOrdenPisos', ordenDesc ? 'desc' : 'asc'); }catch(e){}
+  pintarBotonOrden();
+  pintar();
+});
+pintarBotonOrden();
+$('pestanas').addEventListener('click', e => {
+  const b = e.target.closest('button[data-sc]');
+  if(!b || b.dataset.sc === scope) return;
+  scope = b.dataset.sc;
+  document.querySelectorAll('#pestanas button').forEach(x => x.classList.toggle('on', x === b));
+  primerPintado = true;
+  pintar();
+});
+$('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargar(); });
 $('filtroVista').addEventListener('change', pintar);
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
 document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e, true)));
