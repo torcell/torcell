@@ -30,8 +30,8 @@ header small{display:block;font-weight:400;font-size:12px;opacity:.75;}
 header .btn{padding:9px 12px;background:transparent;color:#fff;border-color:rgba(255,255,255,.45);}
 main{max-width:860px;margin:0 auto;padding:16px;}
 .msg{font-size:12.5px;color:var(--sub);margin:0 0 12px;}
-.barra{display:flex;gap:10px;align-items:stretch;margin-bottom:12px;flex-wrap:wrap;}
-.barra select{flex:1 1 150px;min-height:40px;padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
+.barra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.barra select{min-width:0;min-height:40px;padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
 .resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
 .res{background:var(--panel);border:1px solid var(--border);border-top:4px solid var(--strong);padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
 .res b{font-size:20px;line-height:1.1;}
@@ -111,6 +111,14 @@ body.bloq{overflow:hidden;}
   </div>
   <div class="barra">
     <select id="filtro" aria-label="Filtrar por piso"></select>
+    <select id="filtroVista" aria-label="Pisos a mostrar">
+      <option value="mov">Pisos con avance</option>
+      <option value="todos">Todos los pisos</option>
+    </select>
+    <select id="filtroOrden" aria-label="Orden de los pisos">
+      <option value="desc">De arriba hacia abajo</option>
+      <option value="asc">De abajo hacia arriba</option>
+    </select>
     <select id="filtroEstado" aria-label="Filtrar por estado">
       <option value="">Todos los estados</option>
       <option value="pendiente">Por revisar</option>
@@ -225,7 +233,8 @@ const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : '';
 
 let primerPintado = true;
 function pintar(){
-  const todos = LAYOUT.map(d => { const e = estado(d); return {d, e, r: e.ok ? revision(d) : {e:'nolisto', d:'', c:0}}; });
+  const todos = LAYOUT.map(d => { const e = estado(d); return {d, e, mov: [...d.cer, ...d.fra].some(c => celdas[c[0]] && celdas[c[0]].t), r: e.ok ? revision(d) : {e:'nolisto', d:'', c:0}}; });
+  const pisosConAvance = new Set(todos.filter(x => x.mov).map(x => x.d.p));
   const cuenta = k => todos.filter(x => x.r.e === k).length;
   $('nPend').textContent = cuenta('pendiente');
   $('nRev').textContent = cuenta('revisado');
@@ -233,10 +242,12 @@ function pintar(){
   $('nNo').textContent = cuenta('nolisto');
   const sel = $('filtro');
   const previo = sel.value;
-  const pisos = [...new Map(LAYOUT.map(d => [d.p, d.n])).entries()].sort((a, b) => b[1] - a[1]).map(x => x[0]);
+  const sentido = $('filtroOrden').value === 'asc' ? 1 : -1;
+  const soloAvance = $('filtroVista').value === 'mov';
+  const pisos = [...new Map(LAYOUT.filter(d => !soloAvance || pisosConAvance.has(d.p)).map(d => [d.p, d.n])).entries()].sort((a, b) => sentido * (a[1] - b[1])).map(x => x[0]);
   sel.innerHTML = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${esc(p)}"${p === previo ? ' selected' : ''}>${esc(p)}</option>`).join('');
   const fe = $('filtroEstado').value;
-  const vis = todos.filter(x => (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
+  const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
   if(!vis.length){
     $('lista').innerHTML = '<div class="vacio">No hay departamentos para mostrar con este filtro.</div>';
     return;
@@ -245,7 +256,7 @@ function pintar(){
   vis.forEach(x => { (grupos[x.d.p] = grupos[x.d.p] || {n: x.d.n, items: []}).items.push(x); });
   const anim = primerPintado ? ' anim' : '';
   primerPintado = false;
-  $('lista').innerHTML = Object.keys(grupos).sort((a, b) => grupos[b].n - grupos[a].n).map(p =>
+  $('lista').innerHTML = Object.keys(grupos).sort((a, b) => sentido * (grupos[a].n - grupos[b].n)).map(p =>
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
       ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b>${esc(x.d.d)}</b><small>${falta(x.e)}</small></div>`
@@ -358,6 +369,8 @@ async function cargar(){
 $('refrescar').addEventListener('click', cargar);
 $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
+$('filtroOrden').addEventListener('change', pintar);
+$('filtroVista').addEventListener('change', pintar);
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
 document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e, true)));
 $('verRegistro').addEventListener('click', abrirRegistro);
