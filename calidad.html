@@ -94,7 +94,7 @@ body.bloq{overflow:hidden;}
 .opnuevo input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
 .vacio-op{font-size:12px;color:var(--sub);padding:8px 0;}
 .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.pestanas{display:grid;grid-template-columns:1fr 1fr;margin-bottom:12px;}
+.pestanas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px;}
 .pestanas button{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:11px 4px;font-size:14px;font-weight:700;min-height:44px;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;}
 .pestanas button+button{margin-left:-1px;}
 .pestanas button:hover{border-color:var(--accent);position:relative;}
@@ -134,7 +134,8 @@ body.bloq{overflow:hidden;}
   <p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
   <div class="pestanas" id="pestanas">
     <button type="button" class="on" data-sc="piso">Piso</button>
-    <button type="button" data-sc="muros">Muros</button>
+    <button type="button" data-sc="muros">Muro baño</button>
+    <button type="button" data-sc="cocina">Muro cocina</button>
   </div>
   <div class="resumen">
     <div class="res p"><b id="nPend">0</b><span>Por revisar</span></div>
@@ -228,7 +229,8 @@ let scope = 'piso';
 let ordenDesc = true;
 try{ ordenDesc = localStorage.getItem('calidadOrdenPisos') !== 'asc'; }catch(e){}
 let cargado = false;
-const AREAS_DE = {piso: a => a === 'Piso' || a === 'Pasillos', muros: a => a.indexOf('Muro') === 0};
+const AREAS_DE = {piso: a => a === 'Piso' || a === 'Pasillos', muros: a => a === 'Muro Baños' || a === 'Muro', cocina: a => a === 'Muro Cocina'};
+const NOMBRE_SCOPE = {piso:'piso', muros:'muro baño', cocina:'muro cocina'};
 const NOMBRE_AREA = {'Piso':'Piso', 'Pasillos':'Pasillo', 'Muro Baños':'Muro baño', 'Muro Cocina':'Muro cocina', 'Muro':'Muro'};
 const claveBase = d => d.p + '|' + d.d;
 const clave = (d, sc) => claveBase(d) + '|' + (sc || scope);
@@ -395,7 +397,7 @@ function abrir(k){
   actual = d;
   const r = revision(d);
   $('mTit').textContent = d.p + ' · ' + (d.d === 'Pasillo' ? 'Pasillo' : 'Dpto ' + d.d);
-  const partes = ['Revisión de ' + (scope === 'piso' ? 'piso' : 'muros'), fechaTxt(estado(d).ts)];
+  const partes = ['Revisión de ' + NOMBRE_SCOPE[scope], fechaTxt(estado(d).ts)];
   if(r.ts) partes.push('Última modificación: ' + fechaHora(r.ts));
   $('mSub').textContent = partes.filter(Boolean).join(' · ');
   $('mAreas').innerHTML = areasHtml(d);
