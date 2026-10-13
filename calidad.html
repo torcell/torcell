@@ -27,7 +27,7 @@ header small{display:block;font-weight:400;font-size:12px;opacity:.75;}
 .btn:not(:disabled):active{transform:scale(.95);box-shadow:none;}
 .btn:disabled{opacity:.5;cursor:wait;}
 .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
-header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.45);}
+header .btn{padding:9px 12px;background:transparent;color:#fff;border-color:rgba(255,255,255,.45);}
 main{max-width:860px;margin:0 auto;padding:16px;}
 .msg{font-size:12.5px;color:var(--sub);margin:0 0 12px;}
 .barra{display:flex;gap:10px;align-items:stretch;margin-bottom:12px;flex-wrap:wrap;}
@@ -49,15 +49,15 @@ main{max-width:860px;margin:0 auto;padding:16px;}
 .tile small{font-size:11px;font-weight:600;color:var(--warn);}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
-#vel{position:fixed;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
-#vel.on{display:flex;animation:overlayIn .16s ease;}
-#vel.out{animation:overlayOut .14s ease forwards;}
+#vel,#velReg{position:fixed;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+#vel.on,#velReg.on{display:flex;animation:overlayIn .16s ease;}
+#vel.out,#velReg.out{animation:overlayOut .14s ease forwards;}
 @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
 @keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
 @keyframes modalPop{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
 @keyframes modalPopOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.96);}}
 .modal{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--strong);padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;animation:modalPop .16s ease;}
-#vel.out .modal{animation:modalPopOut .14s ease forwards;}
+#vel.out .modal,#velReg.out .modal{animation:modalPopOut .14s ease forwards;}
 body.bloq{overflow:hidden;}
 .modal h2{margin:0;font-size:17px;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
@@ -79,12 +79,26 @@ body.bloq{overflow:hidden;}
 .campo input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .campo input::-webkit-outer-spin-button,.campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal.reg{max-width:560px;}
+.reglista{display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:60vh;}
+.regit{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--soft);padding:9px 10px;display:flex;flex-direction:column;gap:3px;font-size:13px;}
+.regit b{font-size:13.5px;}
+.regit .meta{font-size:11.5px;color:var(--sub);}
+.regit .cambio{font-size:12.5px;overflow-wrap:anywhere;}
+.regvacio{padding:24px 10px;text-align:center;color:var(--sub);font-size:13px;}
+.acciones.uno{grid-template-columns:1fr;}
+.tile{position:relative;overflow:hidden;}
+.tile.esperando{cursor:wait;opacity:.8;}
+.tile.esperando:hover{transform:none;box-shadow:none;border-color:var(--border);}
+.tile .espera{position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transform-origin:left;animation:esperaBarra 3s linear forwards;}
+@keyframes esperaBarra{from{transform:scaleX(0);}to{transform:scaleX(1);}}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
 </style>
 </head>
 <body>
 <header>
-  <h1>Listos para revisar<small id="sub">Obra Bellavista, La Florida</small></h1>
+  <h1>Listos para revisar<small>Conectado como <span style="white-space:nowrap;">Silvia Gonzales — Calidad</span></small><small id="sub">Obra Bellavista, La Florida</small></h1>
+  <button class="btn" id="verRegistro">Registro</button>
   <button class="btn" id="refrescar">Actualizar</button>
 </header>
 <main>
@@ -107,7 +121,16 @@ body.bloq{overflow:hidden;}
   </div>
   <div id="lista"></div>
 </main>
-<div id="vel">
+<div id="velReg" class="vel">
+  <div class="modal reg" role="dialog" aria-modal="true" aria-labelledby="rTit">
+    <h2 id="rTit">Registro de modificaciones</h2>
+    <div class="reglista" id="regLista"></div>
+    <div class="acciones uno">
+      <button class="btn" id="regCerrar" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+<div id="vel" class="vel">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTit">
     <h2 id="mTit"></h2>
     <div class="sub" id="mSub"></div>
@@ -136,6 +159,8 @@ let revisiones = {};
 let cargando = false;
 let actual = null;
 let estadoSel = '';
+const ESPERA_MS = 3000;
+const espera = {};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -163,6 +188,27 @@ function revision(d){
   const r = revisiones[clave(d)];
   if(r) return r;
   return d.n <= PISO_REVISADO_HASTA ? {e:'revisado', d:'', c:0, base:true} : {e:'pendiente', d:'', c:0};
+}
+
+function nuevoNonce(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const b = new Uint8Array(16);
+  (window.crypto || {getRandomValues: a => a.forEach((_, i) => { a[i] = Math.floor(Math.random() * 256); })}).getRandomValues(b);
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
+function marcarEspera(k){
+  espera[k] = Date.now() + ESPERA_MS;
+  setTimeout(() => { delete espera[k]; quitarEspera(k); }, ESPERA_MS + 30);
+}
+
+function quitarEspera(k){
+  const t = [...document.querySelectorAll('.tile[data-k]')].find(x => x.dataset.k === k);
+  if(!t) return;
+  t.classList.remove('esperando');
+  const b = t.querySelector('.espera');
+  if(b) b.remove();
 }
 
 function falta(e){
@@ -203,12 +249,15 @@ function pintar(){
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
       ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b>${esc(x.d.d)}</b><small>${falta(x.e)}</small></div>`
-      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small></button>`).join('') +
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small>${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
     '</div></section>').join('');
 }
 
 function fechaTxt(ts){
   return ts ? 'Terminado el ' + new Date(ts).toLocaleDateString('es-CL', {day:'2-digit', month:'short'}) : '';
+}
+function fechaHora(ts){
+  return new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
 }
 
 function elegir(e, foco){
@@ -221,12 +270,15 @@ function elegir(e, foco){
 }
 
 function abrir(k){
+  if(espera[k] > Date.now()) return;
   const d = LAYOUT.find(x => clave(x) === k);
   if(!d) return;
   actual = d;
   const r = revision(d);
   $('mTit').textContent = d.p + ' · ' + (d.d === 'Pasillo' ? 'Pasillo' : 'Dpto ' + d.d);
-  $('mSub').textContent = fechaTxt(estado(d).ts);
+  const partes = [fechaTxt(estado(d).ts)];
+  if(r.ts) partes.push('Última modificación: ' + fechaHora(r.ts));
+  $('mSub').textContent = partes.filter(Boolean).join(' · ');
   $('mDet').value = r.e === 'observado' ? r.d : '';
   $('mCant').value = r.e === 'observado' && r.c ? r.c : '';
   elegir(r.e);
@@ -248,21 +300,45 @@ async function guardarRevision(){
   if(estadoSel === 'observado' && !detalle){ $('mErr').textContent = 'Escribe qué está mal.'; return; }
   $('mGuardar').disabled = true; $('mCancel').disabled = true;
   try{
-    const j = await llamar('calidadGuardar', {clave: clave(actual), estado: estadoSel, detalle, cantidad: estadoSel === 'observado' ? Math.max(1, cantidad) : 0});
+    const j = await llamar('calidadGuardar', {clave: clave(actual), estado: estadoSel, detalle, cantidad: estadoSel === 'observado' ? Math.max(1, cantidad) : 0, nonce: nuevoNonce(), ts: Date.now()});
     if(j && j.ok){
+      const k = clave(actual);
       revisiones = j.revisiones || revisiones;
+      marcarEspera(k);
       cerrarModal();
       pintar();
     }else{
-      $('mErr').textContent = 'No se pudo guardar. Intenta de nuevo.';
+      const msgs = {espera: 'Espera unos segundos antes de volver a modificar este departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.'};
+      $('mErr').textContent = (j && msgs[j.error]) || 'No se pudo guardar. Intenta de nuevo.';
     }
   }catch(e){
     $('mErr').textContent = 'Sin conexión. Intenta de nuevo.';
   }finally{ $('mGuardar').disabled = false; $('mCancel').disabled = false; }
 }
 
+async function abrirRegistro(){
+  const v = $('velReg');
+  const lista = $('regLista');
+  lista.innerHTML = '<div class="regvacio">Cargando…</div>';
+  document.body.classList.add('bloq');
+  v.classList.add('on');
+  try{
+    const j = await llamar('calidadRegistro');
+    const reg = (j && j.ok && j.registro) || [];
+    lista.innerHTML = reg.length ? reg.map(x => `<div class="regit"><b>${esc(x.celda)}</b><span class="cambio">${esc(x.antes)} → ${esc(x.despues)}</span><span class="meta">${esc(fechaHora(x.ts))} · ${esc(x.quien)} — Calidad</span></div>`).join('') : '<div class="regvacio">Aún no hay modificaciones registradas.</div>';
+  }catch(e){
+    lista.innerHTML = '<div class="regvacio">No se pudo cargar el registro.</div>';
+  }
+}
+function cerrarRegistro(){
+  const v = $('velReg');
+  if(!v.classList.contains('on') || v.classList.contains('out')) return;
+  v.classList.add('out');
+  setTimeout(() => { v.classList.remove('on', 'out'); document.body.classList.remove('bloq'); }, 140);
+}
+
 async function cargar(){
-  if(cargando || $('vel').classList.contains('on')) return;
+  if(cargando || $('vel').classList.contains('on') || $('velReg').classList.contains('on')) return;
   cargando = true; $('refrescar').disabled = true;
   try{
     const j = await llamar('loadCalidad');
@@ -284,6 +360,8 @@ $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
 document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e, true)));
+$('verRegistro').addEventListener('click', abrirRegistro);
+$('regCerrar').addEventListener('click', cerrarRegistro);
 $('mCancel').addEventListener('click', cerrarModal);
 $('mGuardar').addEventListener('click', guardarRevision);
 document.addEventListener('keydown', e => { if(e.key === 'Enter' && $('vel').classList.contains('on') && e.target.tagName === 'INPUT') guardarRevision(); });
