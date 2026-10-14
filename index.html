@@ -197,6 +197,17 @@
   .pt > details > summary::after{content:'▾';color:var(--sub);flex:none;}
   .pt > details[open] > summary::after{content:'▴';}
   .pt-cab,.pt-fila > summary,.pt-tot{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:8px 15px;align-items:start;}
+  .pt-cinco .pt-cab,.pt-cinco .pt-fila > summary,.pt-cinco .pt-tot{grid-template-columns:minmax(0,1.2fr) repeat(4,minmax(0,1fr));}
+  .pt-cinco .pt-col{text-align:right;}
+  .pt-cinco .pt-cab > div:not(:first-child){text-align:right;}
+  .pt-cinco .pt-col.suma b{color:var(--entregado);}
+  @media (max-width:700px){
+    .pt-cinco .pt-cab,.pt-cinco .pt-fila > summary,.pt-cinco .pt-tot{gap:4px;padding:8px 10px;}
+    .pt-cinco .pt-cab{font-size:9px;letter-spacing:0;}
+    .pt-cinco .pt-col b{font-size:12px;}
+    .pt-cinco .pt-col span{font-size:10px;}
+    .pt-cinco .pt-nom{font-size:12.5px;}
+  }
   .pt-cab{font-size:10.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--panel-soft);}
   .pt-fila{border-bottom:1px solid var(--border);}
   .pt-fila > summary{cursor:pointer;list-style:none;}
@@ -1167,7 +1178,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.26.1';
+const APP_VERSION = '0.26.2';
 const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2262,12 +2273,15 @@ function ptDatos(){
     if(!isAdmin && w !== workerSession) return;
     const estado = resolveEstado(st);
     if(estado !== 'entregado' && estado !== 'pagado' && estado !== 'proceso') return;
-    const o = por[w] || (por[w] = {nombre: w, ent: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []});
+    const o = por[w] || (por[w] = {nombre: w, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []});
     if(estado === 'proceso'){ o.partida++; return; }
     const b = estado === 'entregado' ? o.ent : o.pag;
     const m2 = Number(st.m2) || 0;
-    b.n++; b.m2 += m2; b.monto += m2 * rate1For(c.categoria, w);
-    o.celdas.push({c, estado, m2});
+    const monto = m2 * rate1For(c.categoria, w);
+    b.n++; b.m2 += m2; b.monto += monto;
+    const nuevo = estado === 'entregado' && !!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena;
+    if(estado === 'entregado'){ const t = nuevo ? o.nuevo : o.dentro; t.n++; t.m2 += m2; t.monto += monto; }
+    o.celdas.push({c, estado, m2, nuevo});
   });
   return Object.values(por);
 }
@@ -2281,7 +2295,7 @@ function ptDetalle(o, verPlata){
     const c = f.c, w = o.nombre;
     const lugar = `${esc(c.categoria)} · ${esc(c.piso)} · ${c.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + esc(c.dpto)} · ${esc(AREA_LABEL[c.area] || c.area)}`;
     const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1For(c.categoria, w)) : '';
-    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? 'e-ent' : 'e-pag'}">${f.estado === 'entregado' ? 'Terminado' : 'Pagado'}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span></td></tr>`;
+    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? 'e-ent' : 'e-pag'}">${f.estado === 'entregado' ? (f.nuevo ? 'Terminado · tras cierre' : 'Terminado') : 'Pagado'}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span></td></tr>`;
   }).join('')}</table></div>`;
 }
 function renderPorTrabajador(){
@@ -2291,18 +2305,23 @@ function renderPorTrabajador(){
   const ws = workerSession ? (workerStatus[workerSession] || {}) : {};
   const verPlata = isAdmin || (!!workerSession && !!ws.vePrecioReal);
   let datos = ptDatos();
-  if(workerSession && !isAdmin && !datos.length) datos = [{nombre: workerSession, ent: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []}];
+  if(workerSession && !isAdmin && !datos.length) datos = [{nombre: workerSession, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []}];
   datos.sort((a, b) => (b.ent.monto - a.ent.monto) || (b.ent.m2 - a.ent.m2) || a.nombre.localeCompare(b.nombre, 'es'));
   if(!datos.length){ el.style.display = 'none'; el.innerHTML = ''; return; }
-  const tot = {ent: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}};
-  datos.forEach(o => ['ent', 'pag'].forEach(k => { tot[k].n += o[k].n; tot[k].m2 += o[k].m2; tot[k].monto += o[k].monto; }));
+  const tot = {ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}};
+  datos.forEach(o => ['ent', 'dentro', 'nuevo', 'pag'].forEach(k => { tot[k].n += o[k].n; tot[k].m2 += o[k].m2; tot[k].monto += o[k].monto; }));
+  const conCierre = !!cierreQuincena;
+  const colsTerminado = (o) => conCierre
+    ? ptCol(o.dentro, verPlata) + ptCol(o.nuevo, verPlata) + ptCol(o.ent, verPlata).replace('class="pt-col"', 'class="pt-col suma"')
+    : ptCol(o.ent, verPlata);
   const filas = datos.map(o => `<details class="pt-fila" data-w="${esc(o.nombre)}"${ptAbiertos.has(o.nombre) ? ' open' : ''}>
-    <summary><div class="pt-nom">${esc(o.nombre)}${o.partida ? `<small>${o.partida} en partida</small>` : ''}</div>${ptCol(o.ent, verPlata)}${ptCol(o.pag, verPlata)}</summary>
+    <summary><div class="pt-nom">${esc(o.nombre)}${o.partida ? `<small>${o.partida} en partida</small>` : ''}</div>${colsTerminado(o)}${ptCol(o.pag, verPlata)}</summary>
     ${ptAbiertos.has(o.nombre) ? ptDetalle(o, verPlata) : ''}</details>`).join('');
-  const totalFila = isAdmin && datos.length > 1 ? `<div class="pt-tot"><div class="pt-nom">Total</div>${ptCol(tot.ent, verPlata)}${ptCol(tot.pag, verPlata)}</div>` : '';
+  const totalFila = isAdmin && datos.length > 1 ? `<div class="pt-tot"><div class="pt-nom">Total</div>${colsTerminado(tot)}${ptCol(tot.pag, verPlata)}</div>` : '';
   el.style.display = '';
+  el.classList.toggle('pt-cinco', conCierre);
   el.innerHTML = `<details${ptSeccionAbierta ? ' open' : ''} id="ptDetalles"><summary>${isAdmin ? '👷 Avance por trabajador' : '👷 Mi avance'} <span class="pt-sub">todas las categorías</span></summary>
-    <div class="pt-cab"><div>Trabajador</div><div>Terminado (por pagar)</div><div>Pagado</div></div>${filas}${totalFila}</details>`;
+    <div class="pt-cab"><div>Trabajador</div>${conCierre ? '<div>Hasta el cierre</div><div>Después del cierre</div><div>Suma terminado</div>' : '<div>Terminado (por pagar)</div>'}<div>Pagado</div></div>${filas}${totalFila}</details>`;
 }
 document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
   const d = e.target;
