@@ -384,13 +384,57 @@
     transition: background-color .6s ease, color .5s ease, border-color .5s ease !important;
   }
 
-  body.tema1{
+  body.tema1, body.tema3{
     --pagado:#0d9488; --pagado-bg:rgba(13,148,136,.14); --pagado-border:rgba(13,148,136,.45);
     --pagado-pill-bg:rgba(13,148,136,.55); --pagado-pill-text:#eafaf7;
   }
   body.tema2{
     --pagado:#7c3aed; --pagado-bg:rgba(124,58,237,.14); --pagado-border:rgba(124,58,237,.45);
     --pagado-pill-bg:rgba(124,58,237,.55); --pagado-pill-text:#f3ecff;
+  }
+
+
+  .cell-ventana{cursor:pointer;display:flex;flex-direction:column;gap:6px;position:relative;transition:box-shadow .12s ease,transform .12s ease;outline:none;}
+  .cell-ventana:hover{box-shadow:inset 0 0 0 2px var(--accent);}
+  .cell-ventana:focus-visible{box-shadow:inset 0 0 0 2px var(--accent2);}
+  .cell-ventana:active{transform:scale(.985);}
+  .cell-ventana .checks-row{display:flex;justify-content:flex-end;}
+  .cell-ventana .nota-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cv-abrir{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);text-align:right;opacity:.85;}
+  .cell-ventana:hover .cv-abrir{opacity:1;}
+  #ventanaOverlay .modal{max-width:520px;padding:0;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100dvh - 24px);}
+  .vt-head{padding:16px 20px 14px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  #ventanaOverlay .vt-head h3{margin:0;font-size:18px;font-weight:800;color:#fff;letter-spacing:.2px;}
+  .vt-sub{margin-top:3px;font-size:12px;opacity:.92;}
+  .vt-head .ribbon-flag.estado-badge{margin:0;flex:0 0 auto;align-self:flex-start;width:auto;box-shadow:0 0 0 2px rgba(255,255,255,.55);}
+  .vt-body{padding:14px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;min-height:0;}
+  .vt-sec{border:1px solid var(--border);background:var(--panel);}
+  .vt-sec-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:800;color:var(--sub);padding:8px 12px;border-bottom:1px solid var(--border);background:var(--panel-soft);}
+  .vt-sec-body{padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+  .vt-valor{font-size:14px;font-weight:700;color:var(--text);min-width:0;overflow-wrap:anywhere;}
+  .vt-valor.vacio{color:var(--sub);font-weight:500;font-style:italic;}
+  .vt-valor small{display:block;font-size:11.5px;font-weight:500;color:var(--sub);margin-top:2px;}
+  .vt-acciones{display:flex;gap:6px;flex-wrap:wrap;}
+  .vt-pasos{display:flex;flex-direction:column;gap:6px;padding:10px 12px;}
+  .vt-paso{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);font-family:inherit;text-align:left;cursor:pointer;border-radius:0;}
+  .vt-paso:hover:not(:disabled){border-color:var(--accent);}
+  .vt-paso:disabled{opacity:.4;cursor:not-allowed;}
+  .vt-caja{width:22px;height:22px;flex:0 0 22px;border:2px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;line-height:1;}
+  .vt-nombre{flex:1;font-size:14px;font-weight:700;}
+  .vt-fecha{font-size:11.5px;color:var(--sub);white-space:nowrap;}
+  .vt-paso.on.partida{background:var(--proceso);border-color:var(--proceso);color:#4a3900;}
+  .vt-paso.on.terminado{background:var(--entregado);border-color:var(--entregado);color:#fff;}
+  .vt-paso.on.pagado{background:var(--pagado-pill-bg);border-color:var(--pagado);color:var(--pagado-pill-text);}
+  .vt-paso.on .vt-caja{border-color:currentColor;}
+  .vt-paso.on .vt-fecha{color:inherit;opacity:.9;}
+  .vt-paso.cambio{outline:2px dashed var(--accent);outline-offset:1px;}
+  .vt-confirma{display:flex;gap:8px;justify-content:flex-end;padding:0 12px 10px;}
+  .vt-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);background:var(--panel-soft);}
+  @media (max-width:700px){
+    .vt-head{padding:14px 14px 12px;}
+    .vt-body{padding:12px 14px;}
+    .vt-foot{padding:10px 14px;}
+    .vt-fecha{white-space:normal;text-align:right;}
   }
 
   .floor-block{content-visibility:auto;contain-intrinsic-size:auto 1250px;}
@@ -695,6 +739,7 @@
       <select id="temaSelector" title="Tema de colores">
         <option value="">Tema original</option>
         <option value="tema1">Tema 2</option>
+        <option value="tema3">Tema 3</option>
       </select>
     </div>
   </header>
@@ -923,6 +968,10 @@
   <button class="btn small" id="avisoDatosViejosCerrar" style="flex-shrink:0;">✕</button>
 </div>
 
+<div class="overlay" id="ventanaOverlay">
+  <div class="modal" id="ventanaModal"></div>
+</div>
+
 <div class="overlay" id="asignarOverlay">
   <div class="modal" style="max-width:480px;">
     <h3 id="asignarTitulo">Asignar trabajador</h3>
@@ -1118,7 +1167,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.25.5';
+const APP_VERSION = '0.26.1';
 const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2293,9 +2342,9 @@ function matchesActiveFilters(){
   return !!(piso || trab || estado || q);
 }
 
-function priceLinesHtml(cell, st){
+function priceLinesHtml(cell, st, sinBoton){
   const m2 = st.m2;
-  const editBtn = isAdmin ? `<button class="m2-edit-btn" data-id="${cell.id}" data-action="editm2">✎ m²</button>` : '';
+  const editBtn = (isAdmin && !sinBoton) ? `<button class="m2-edit-btn" data-id="${cell.id}" data-action="editm2">✎ m²</button>` : '';
   if(!m2){
     return `<div class="price-block">${editBtn}<div class="meta-line">Sin m² registrados</div></div>`;
   }
@@ -2452,6 +2501,121 @@ function abrirAsignar(id){
   grid.innerHTML = html; grid.dataset.id = id;
   document.getElementById('asignarOverlay').classList.add('show');
 }
+
+const vistaVentana = () => document.body.classList.contains('tema3') && !workerSession && (isAdmin || puede('estados') || puede('asignar') || puede('notas'));
+const escVt = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+function etiquetaEstado(cell, estado){
+  const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
+  return estado === 'pagado' ? 'Pagado' : estado === 'entregado' ? terminadoLabel : estado === 'proceso' ? 'Partida' : 'Pendiente';
+}
+function cellVentanaHtml(cell, st){
+  const hasWorker = !!st.trabajador, estado = resolveEstado(st);
+  const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${escVt(st.nota)}">${escVt(st.nota)}</div></div>` : '';
+  return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">
+    <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div></div>
+    <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
+    ${priceLinesHtml(cell, st, true)}
+    ${nota}
+    <div class="cv-abrir">Abrir ›</div>
+  </div>`;
+}
+let ventanaId = null, ventanaDestino = null;
+const ventanaAbierta = () => !!ventanaId && document.getElementById('ventanaOverlay').classList.contains('show');
+function abrirVentana(id){
+  if(!cellById[id]) return;
+  ventanaId = id; ventanaDestino = null;
+  pintarVentana();
+  document.getElementById('ventanaOverlay').classList.add('show');
+}
+function cerrarVentana(){
+  closeOverlayAnimated(document.getElementById('ventanaOverlay'));
+  ventanaId = null; ventanaDestino = null;
+}
+function pasosVentanaHtml(cell, st, destino){
+  const actual = estadoNumero(st);
+  const nombres = ['Partida', TERMINADO_LABEL[cell.area] || 'Terminado', 'Pagado'];
+  const clases = ['partida', 'terminado', 'pagado'];
+  const fechas = [st.partidaTs, st.terminadoTs, st.pagadoTs];
+  const bloqueado = !puede('estados') || (st.pagado && !isAdmin);
+  return [1, 2, 3].map(n => {
+    const activo = destino >= n, cambio = activo !== (actual >= n);
+    const habilitado = !bloqueado && (isAdmin || n < 3) && (destino >= n || turboMode || destino === n - 1);
+    let fecha = '—';
+    if(activo){ const ts = cambio ? Date.now() : fechas[n - 1]; fecha = ts ? fechaCorta(ts) : 'sin fecha'; }
+    return `<button type="button" class="vt-paso ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-vtn="${n}" ${habilitado ? '' : 'disabled'}><span class="vt-caja">${activo ? '✓' : ''}</span><span class="vt-nombre">${nombres[n - 1]}</span><span class="vt-fecha">${fecha}</span></button>`;
+  }).join('');
+}
+function pintarVentana(){
+  const id = ventanaId, cell = cellById[id];
+  if(!cell) return;
+  const st = getState(id), actual = estadoNumero(st);
+  if(ventanaDestino === actual) ventanaDestino = null;
+  const destino = ventanaDestino === null ? actual : ventanaDestino;
+  const estado = resolveEstado(st), hasWorker = !!st.trabajador;
+  const titulo = cell.dpto === 'Pasillo' ? 'Pasillo · ' + cell.piso : 'Departamento ' + cell.dpto;
+  const pisoCell = puede('asignar') ? celdaPisoDe(cell) : null;
+  const pw = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
+  const botonesTrab = puede('asignar') || puede('estados') ? `
+      <div class="vt-acciones">
+        ${(!st.pagado && pisoCell && pw && pw !== st.trabajador) ? `<button type="button" class="btn small" data-vt="igual">Igual al Piso</button>` : ''}
+        ${st.pagado ? '' : `<button type="button" class="btn small" data-vt="asignar">${hasWorker ? 'Reasignar' : 'Asignar'}</button>`}
+      </div>` : '';
+  const m2 = st.m2;
+  const precio = m2 ? `${m2} m²<small><span class="price-money">${money(m2 * rate1ForDisplay(cell.categoria, st.trabajador))}</span></small>` : 'Sin m² registrados';
+  const hayCambio = destino !== actual;
+  document.getElementById('ventanaModal').innerHTML = `
+    <div class="vt-head">
+      <div><h3>${escVt(titulo)}</h3><div class="vt-sub">${escVt(cell.categoria)} · ${escVt(AREA_LABEL[cell.area] || cell.area)} · ${escVt(cell.piso)}</div></div>
+      <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
+    </div>
+    <div class="vt-body">
+      <div class="vt-sec"><div class="vt-sec-title">Trabajador</div>
+        <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${botonesTrab}</div></div>
+      <div class="vt-sec"><div class="vt-sec-title">Estado</div>
+        <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
+        ${hayCambio ? `<div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar">Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar">Confirmar cambio</button></div>` : ''}</div>
+      <div class="vt-sec"><div class="vt-sec-title">Metraje</div>
+        <div class="vt-sec-body"><div class="vt-valor${m2 ? '' : ' vacio'}">${precio}</div>${isAdmin ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="m2">✎ Editar m²</button></div>` : ''}</div></div>
+      <div class="vt-sec"><div class="vt-sec-title">Observación</div>
+        <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '✎ Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
+    </div>
+    <div class="vt-foot"><button type="button" class="btn primary" data-vt="cerrar">Cerrar</button></div>`;
+}
+document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'ventanaOverlay') return;
+  const id = ventanaId; if(!id) return;
+  const paso = e.target.closest('[data-vtn]');
+  if(paso){
+    if(paso.disabled) return;
+    const n = Number(paso.getAttribute('data-vtn'));
+    const actual = ventanaDestino === null ? estadoNumero(getState(id)) : ventanaDestino;
+    ventanaDestino = actual >= n ? n - 1 : n;
+    pintarVentana();
+    return;
+  }
+  const b = e.target.closest('[data-vt]'); if(!b) return;
+  const accion = b.getAttribute('data-vt');
+  if(accion === 'cerrar'){ cerrarVentana(); return; }
+  if(accion === 'cancelar'){ ventanaDestino = null; pintarVentana(); return; }
+  if(accion === 'confirmar'){
+    const destino = ventanaDestino;
+    ventanaDestino = null;
+    if(destino !== null) confirmarEstadoAdmin(id, destino);
+    pintarVentana();
+    return;
+  }
+  if(accion === 'asignar'){ abrirAsignar(id); return; }
+  if(accion === 'igual'){
+    const pisoCell = celdaPisoDe(cellById[id]);
+    const w = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
+    if(!w) return;
+    asignarTrabajador(id, w);
+    avisoToast(`${w} asignado: es el mismo del Piso.`);
+    return;
+  }
+  if(accion === 'm2'){ abrirEditarM2(id); return; }
+  if(accion === 'nota'){ abrirObservacionModal(id); return; }
+});
 function cellHtml(cell){
   const st = getState(cell.id);
   const hasWorker = !!st.trabajador;
@@ -2465,6 +2629,7 @@ function cellHtml(cell){
       ${peticionBtnHtml(cell, st)}
     </div>`;
   }
+  if(vistaVentana()) return cellVentanaHtml(cell, st);
   const pisoCell = puede('asignar') ? celdaPisoDe(cell) : null;
   const pisoWorker = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
   const mismoOk = !st.pagado && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador;
@@ -3731,12 +3896,26 @@ function render(){
   renderStats();
   updateRetencionesIndicator();
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
+  if(ventanaAbierta()) pintarVentana();
 }
 
 const contenidoRaiz = document.getElementById('content');
+function abrirEditarM2(id){
+  const cell = cellById[id];
+  const current = getState(id).m2;
+  const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
+    <input type="number" id="m2Input" step="0.01" style="width:100%;" value="${current !== undefined && current !== null ? current : ''}">`;
+  openInputModal('Editar metraje (m²)', bodyHtml, () => {
+    const v = parseFloat(document.getElementById('m2Input').value);
+    state[id].m2 = isNaN(v) ? null : v;
+    markCellDirty(id);
+    scheduleSave(); refrescarCelda(id);
+  });
+}
 function alClickContenido(e){
   const t = e.target;
   let el;
+  if((el = t.closest('[data-abrir]'))){ abrirVentana(el.getAttribute('data-abrir')); return; }
   if((el = t.closest('td.dpto-col[data-matkey]'))){ abrirMateriales(el.getAttribute('data-matkey')); return; }
   if((el = t.closest('.assign-btn[data-id]'))){ if(puede('estados') || puede('asignar')) abrirAsignar(el.getAttribute('data-id')); return; }
   if((el = t.closest('.mismo-piso-btn'))){
@@ -3750,17 +3929,7 @@ function alClickContenido(e){
   }
   if((el = t.closest('.m2-edit-btn'))){
     if(!(puede('estados') || puede('asignar'))) return;
-    const id = el.getAttribute('data-id');
-    const cell = cellById[id];
-    const current = getState(id).m2;
-    const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
-      <input type="number" id="m2Input" step="0.01" style="width:100%;" value="${current !== undefined && current !== null ? current : ''}">`;
-    openInputModal('Editar metraje (m²)', bodyHtml, () => {
-      const v = parseFloat(document.getElementById('m2Input').value);
-      state[id].m2 = isNaN(v) ? null : v;
-      markCellDirty(id);
-      scheduleSave(); refrescarCelda(id);
-    });
+    abrirEditarM2(el.getAttribute('data-id'));
     return;
   }
   if((el = t.closest('.nota-btn-single'))){ if(puede('notas')) abrirObservacionModal(el.getAttribute('data-id')); return; }
@@ -3777,6 +3946,13 @@ function alClickContenido(e){
   }
 }
 contenidoRaiz.addEventListener('click', alClickContenido);
+contenidoRaiz.addEventListener('keydown', (e) => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest && e.target.closest('[data-abrir]');
+  if(!el || e.target !== el) return;
+  e.preventDefault();
+  abrirVentana(el.getAttribute('data-abrir'));
+});
 function alCambioContenido(e){
   const cb = e.target;
   if(!cb.matches || !cb.matches('.checks-row input[type=checkbox]')) return;
@@ -3847,6 +4023,7 @@ function refrescarCelda(id){
   updateRetencionesIndicator();
   actualizarAvisos();
   if(typeof updateFloatingSaveBtn === 'function') updateFloatingSaveBtn();
+  if(ventanaAbierta()) pintarVentana();
 }
 
 [document.getElementById('filterPiso'), document.getElementById('filterTrabajador'), document.getElementById('filterEstado')]
@@ -3994,15 +4171,17 @@ document.getElementById('toggleDark').addEventListener('click', (e) => {
 
 document.getElementById('temaSelector').addEventListener('change', (e) => {
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
-  document.body.classList.remove('tema1', 'tema2');
+  document.body.classList.remove('tema1', 'tema2', 'tema3');
   if(e.target.value) document.body.classList.add(e.target.value);
+  if(ventanaId) cerrarVentana();
   render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
-  try{ localStorage.setItem('progresoObraTema', e.target.value); }catch(err){}
+  try{ localStorage.setItem('progresoObraTemaV2', e.target.value); }catch(err){}
 });
 try{
-  const temaGuardado = localStorage.getItem('progresoObraTema');
-  if(temaGuardado === 'tema1'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
+  const guardadoV2 = localStorage.getItem('progresoObraTemaV2');
+  const temaGuardado = guardadoV2 === null ? 'tema3' : guardadoV2;
+  if(temaGuardado === 'tema1' || temaGuardado === 'tema3'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
 }catch(err){}
 document.getElementById('saveNowBtn').addEventListener('click', saveNow);
 
