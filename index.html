@@ -564,7 +564,6 @@
     .cell-block{padding:3px;}
   }
 
-  /* ===== Pantalla de inicio de sesión ===== */
   .lg{--lg-azul:#0b2b36;--lg-mortero:#d9cdb8;--lg-frague:#8d8a84;position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--text);}
   body.dark .lg{--lg-mortero:#4a4338;--lg-frague:#2a2927;}
   .lg.off{display:none;}
@@ -573,6 +572,25 @@
   .lg-app{position:relative;width:100%;max-width:440px;height:100dvh;max-height:860px;background:var(--panel);overflow:hidden;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
   @media (min-width:600px){.lg-app{border:1px solid var(--border-strong);box-shadow:0 10px 40px rgba(0,0,0,.18);}}
   @media (max-width:500px){.lg-app{max-width:none;max-height:none;}}
+  @media (min-width:900px) and (min-height:600px){
+    .lg{background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
+    .lg::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+    .lg-app{max-width:980px;width:92vw;height:min(620px,92dvh);max-height:none;border:0;box-shadow:0 24px 70px rgba(0,0,0,.45);}
+    .lg .lg-modo{position:fixed;top:18px;right:18px;width:44px;height:44px;border-color:rgba(255,255,255,.55);background:rgba(0,0,0,.25);}
+    .lg-p.lg-form.on{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);padding:0;}
+    .lg-form .lg-cab{flex-direction:column;justify-content:center;text-align:center;gap:20px;padding:40px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 48px),repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 48px),linear-gradient(170deg,#0b2b36 0%,#0b2b36 52%,#2f6f8f 135%);}
+    .lg-form .lg-cab img{width:128px;height:128px;}
+    .lg-form .lg-cab b{font-size:30px;line-height:1.15;}
+    .lg-form .lg-cab span{font-size:16px;opacity:.85;display:block;margin-top:8px;}
+    .lg-form .lg-cuerpo{padding:36px 52px 28px;justify-content:center;gap:16px;overflow:auto;}
+    .lg-form .lg-titulo{font-size:25px;}
+    .lg-form .lg-visor{min-height:62px;}
+    .lg-form .lg-visor i{width:16px;height:16px;}
+    .lg-form .lg-teclas{flex:0 0 auto;grid-template-rows:repeat(4,56px);max-height:none;}
+    .lg-form .lg-teclas button{font-size:24px;}
+    .lg-form .lg-recordar{padding:9px 12px;}
+    .lg-form .lg-cuerpo{gap:12px;}
+  }
   .lg-p{position:absolute;inset:0;display:none;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
   .lg-p.on{display:flex;}
   .lg button{font-family:inherit;border-radius:0;cursor:pointer;}
@@ -635,7 +653,7 @@
       <div class="lg-carga"><div class="lg-barra" id="lgBarra" role="progressbar" aria-label="Cargando"></div></div>
       <p id="lgSplashMsg">Preparando el piso…</p>
     </section>
-    <section class="lg-p" id="lgPin">
+    <section class="lg-p lg-form" id="lgPin">
       <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Progreso</b><span>Obra Bellavista, La Florida</span></div></div>
       <div class="lg-cuerpo">
         <h2 class="lg-titulo">Ingresa tu PIN</h2>
@@ -646,7 +664,7 @@
         <p class="lg-pie">¿Olvidaste tu PIN? Pídeselo al administrador.</p>
       </div>
     </section>
-    <section class="lg-p" id="lgUrl">
+    <section class="lg-p lg-form" id="lgUrl">
       <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Progreso</b><span>Obra Bellavista, La Florida</span></div></div>
       <div class="lg-cuerpo">
         <h2 class="lg-titulo">Conectar con el servidor</h2>
@@ -1087,7 +1105,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.25.2';
+const APP_VERSION = '0.25.3';
 const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2169,7 +2187,6 @@ function renderStats(){
   renderPorTrabajador();
 }
 
-/* ===== Avance por trabajador (admin: todos · trabajador: solo lo suyo) ===== */
 const ptAbiertos = new Set();
 let ptSeccionAbierta = true;
 try{ ptSeccionAbierta = localStorage.getItem('progresoObraPorTrab') !== '0'; }catch(err){}
@@ -4837,7 +4854,6 @@ document.getElementById('content').addEventListener('click', (e) => {
   }
 });
 
-/* ===== Inicio de sesión (pantalla de entrada) ===== */
 const lg = id => document.getElementById(id);
 function limpiarSesionGuardada(){
   ['progresoObraToken','progresoObraName','progresoObraRol'].forEach(k => {
@@ -4971,7 +4987,7 @@ function gateIniciar(){
   });
 }
 function gatePintar(){
-  lg('lgVisor').innerHTML = gate.pin ? gate.pin.split('').map(() => '<i></i>').join('') : '<em>Toca los números</em>';
+  lg('lgVisor').innerHTML = gate.pin ? gate.pin.split('').map(() => '<i></i>').join('') : '<em>' + (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches ? 'Escribe tu PIN o usa los números' : 'Toca los números') + '</em>';
   const b = lg('lgEntrar'); b.disabled = gate.pin.length < 4 || gate.bloqueado || gate.ocupado;
   b.textContent = gate.ocupado ? '…' : 'Entrar';
 }
