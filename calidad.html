@@ -33,8 +33,6 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .cluster{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .cluster .btn{min-height:38px;padding:8px 14px;}
 .conectado{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;padding:9px 14px;min-height:38px;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.conectado select{background:transparent;color:#fff;border:0;border-bottom:1px solid rgba(255,255,255,.6);font-size:13px;font-weight:700;padding:0 2px;max-width:160px;}
-.conectado select option{color:#2c302c;background:#fff;}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);padding:14px;margin-bottom:14px;}
 .toolbar .grp{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 150px;}
 .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
@@ -60,20 +58,17 @@ main{max-width:860px;margin:0 auto;padding:16px;}
 .tile small{font-size:11px;font-weight:600;color:var(--warn);}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
-#vel,#velReg,#velOp,#velQuien{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
-#vel::before,#velReg::before,#velOp::before,#velQuien::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+#vel,#velReg,#velOp{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+#vel::before,#velReg::before,#velOp::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
 #velOp{z-index:60;}
-#velQuien{z-index:65;}
-.quienes{display:flex;flex-direction:column;gap:8px;}
-.quienes .btn{min-height:46px;font-size:14px;font-weight:600;}
-#vel.on,#velReg.on,#velOp.on,#velQuien.on{display:flex;animation:overlayIn .16s ease;}
-#vel.out,#velReg.out,#velOp.out,#velQuien.out{animation:overlayOut .14s ease forwards;}
+#vel.on,#velReg.on,#velOp.on{display:flex;animation:overlayIn .16s ease;}
+#vel.out,#velReg.out,#velOp.out{animation:overlayOut .14s ease forwards;}
 @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
 @keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
 @keyframes modalPop{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
 @keyframes modalPopOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.96);}}
 .modal{position:relative;width:100%;max-width:400px;background:var(--panel);border:1px solid var(--strong);padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;animation:modalPop .16s ease;}
-#vel.out .modal,#velReg.out .modal,#velOp.out .modal,#velQuien.out .modal{animation:modalPopOut .14s ease forwards;}
+#vel.out .modal,#velReg.out .modal,#velOp.out .modal{animation:modalPopOut .14s ease forwards;}
 body.bloq{overflow:hidden;}
 .modal h2{margin:0;font-size:17px;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
@@ -162,6 +157,26 @@ body.sin-sesion header,body.sin-sesion main{visibility:hidden;}
   .caja-cuerpo{flex:6;justify-content:center;padding:36px 56px;gap:14px;}
   .caja h2{font-size:25px;}
 }
+#carga{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:24px;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);--mortero:#d9cdb8;--frague:#8d8a84;}
+#carga::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+#carga>*{position:relative;}
+#carga.on{display:flex;}
+#carga.sale{animation:overlayOut .35s ease forwards;}
+#carga img{width:112px;height:112px;display:block;animation:cEntra .5s ease-out both;}
+#carga h1{margin:0;font-size:20px;font-weight:700;line-height:1.25;animation:cEntra .5s .12s ease-out both;}
+#carga p{margin:0;font-size:15.5px;font-weight:600;letter-spacing:.2px;min-height:24px;color:#fff;transition:opacity .16s ease,transform .16s ease;}
+#carga p.out{opacity:0;transform:translateY(-8px);}
+#carga p.in{animation:cMsg .34s cubic-bezier(.2,.9,.3,1.2) both;}
+#carga p.fin{color:#9fe3a8;}
+.cbarra-w{width:min(280px,76%);animation:cEntra .5s .24s ease-out both;}
+@keyframes cEntra{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes cMsg{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.cbarra{position:relative;width:100%;height:36px;background:var(--frague);overflow:hidden;border:1px solid var(--frague);}
+.cbarra .mortero{position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--mortero) 0 3px,color-mix(in srgb,var(--mortero) 82%,#000) 3px 5px);}
+.cbarra .pl{position:absolute;opacity:0;transform:translateY(-9px) scale(1.07);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.18),0 1px 1px rgba(0,0,0,.25);}
+.cbarra .pl.on{opacity:1;transform:none;transition:opacity .16s ease-out,transform .26s cubic-bezier(.2,.9,.3,1.25);}
+.cbarra .pl::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 38%,rgba(0,0,0,.08) 100%);}
+@media (prefers-color-scheme:dark){#carga{--mortero:#4a4338;--frague:#2a2927;}}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
 </style>
 </head>
@@ -233,12 +248,11 @@ body.sin-sesion header,body.sin-sesion main{visibility:hidden;}
     </div>
   </div>
 </div>
-<div id="velQuien">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qTit">
-    <h2 id="qTit">¿Quién revisa?</h2>
-    <div class="sub">Este nombre quedará en el registro de modificaciones.</div>
-    <div class="quienes" id="quienes"></div>
-  </div>
+<div id="carga" role="status" aria-live="polite">
+  <img alt="CA4" id="cargaLogo" width="112" height="112">
+  <h1>Calidad<br>Obra Bellavista, La Florida</h1>
+  <div class="cbarra-w"><div class="cbarra" id="cargaBarra" role="progressbar" aria-label="Cargando"></div></div>
+  <p id="cargaMsg">Comprobando tu sesión…</p>
 </div>
 <div id="aviso" role="status"></div>
 <div id="velOp">
@@ -311,16 +325,15 @@ const guardarLocal = (k, v) => { try{ v === null ? localStorage.removeItem(k) : 
 const leerLocal = k => { try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } };
 let token = leerLocal('calidadToken');
 let nombre = leerLocal('calidadNombre');
-let revisores = [];
-try{ const r = JSON.parse(leerLocal('calidadRevisores') || '[]'); if(Array.isArray(r)) revisores = r.filter(x => typeof x === 'string').slice(0, 6); }catch(e){}
-let revisor = leerLocal('calidadRevisor');
-const TIEMPO_MAX = 20000;
+let cargo = leerLocal('calidadCargo');
+const TIEMPO_MAX = 30000;
+const TIEMPO_INICIAL = 45000;
 
-async function llamar(action, extra, rapido){
+async function llamar(action, extra, rapido, limite){
   const ctl = new AbortController();
-  const tope = setTimeout(() => ctl.abort(), TIEMPO_MAX);
+  const tope = setTimeout(() => ctl.abort(), limite || TIEMPO_MAX);
   try{
-    const res = await fetch(DB_URL, {method:'POST', keepalive: !!rapido, signal: ctl.signal, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, token, revisor, ...extra})});
+    const res = await fetch(DB_URL, {method:'POST', keepalive: !!rapido, signal: ctl.signal, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, token, ...extra})});
     if(!res.ok) throw new Error('red');
     const j = JSON.parse(await res.text());
     if(j && j.error === 'sin_sesion' && token) cerrarSesion('Tu sesión venció. Ingresa tu PIN de nuevo.');
@@ -331,50 +344,109 @@ async function llamar(action, extra, rapido){
   }finally{ clearTimeout(tope); }
 }
 
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+function crearBarraCeramica(cont, alto, filas){
+  const TONOS = [[176,140,98],[164,128,88],[188,152,110],[170,136,96],[154,120,84],[182,146,104],[160,124,86]];
+  const azar = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  const h = alto, w = h * 4, g = 2;
+  let tablas = [], actual = 0;
+  cont.style.height = (filas * (h + g) + g + 2) + 'px';
+  const mortero = document.createElement('div'); mortero.className = 'mortero';
+  function construir(){
+    cont.innerHTML = ''; cont.appendChild(mortero); tablas = [];
+    const W = cont.clientWidth - 2;
+    for(let r = 0; r < filas; r++){
+      let x = g - (r % 2 ? w / 2 + g / 2 : 0), k = 0;
+      while(x < W){
+        const ini = Math.max(x, 0), fin = Math.min(x + w, W - g);
+        if(fin - ini > 3){
+          const d = document.createElement('div'); d.className = 'pl';
+          const t = TONOS[Math.floor(azar(r * 50 + k + 1) * TONOS.length)], v = (azar(r * 91 + k * 7) - 0.5) * 14;
+          d.style.cssText = `left:${ini}px;top:${g + r * (h + g)}px;width:${fin - ini}px;height:${h}px;background:rgb(${t[0] + v | 0},${t[1] + v | 0},${t[2] + v | 0})`;
+          cont.appendChild(d); tablas.push({el: d, cx: (ini + fin) / 2});
+        }
+        x += w + g; k++;
+      }
+    }
+    tablas.sort((a, b) => a.cx - b.cx); poner(actual);
+  }
+  function poner(pct){
+    actual = Math.max(0, Math.min(100, pct));
+    const lim = actual / 100 * (cont.clientWidth - 2);
+    tablas.forEach(t => t.el.classList.toggle('on', actual >= 100 || t.cx <= lim));
+    cont.setAttribute('aria-valuenow', Math.round(actual));
+  }
+  if(window.ResizeObserver) new ResizeObserver(construir).observe(cont);
+  construir();
+  return {poner};
+}
+const carga = {el: $('carga'), barra: null, meta: 88, prog: 0, raf: 0, t0: 0, msgs: [], actual: '', timer: 0};
+const CARGA_MSGS = ['Haciendo mezcla…', 'Colocando cerámica…', 'Revisando el frague…', 'Comprobando tu sesión…'];
+function cargaMsg(texto, fin){
+  const el = $('cargaMsg');
+  if(carga.actual === texto) return;
+  carga.actual = texto;
+  clearTimeout(carga.timer);
+  el.classList.remove('in'); el.classList.add('out');
+  carga.timer = setTimeout(() => {
+    el.textContent = texto; el.classList.toggle('fin', !!fin);
+    el.classList.remove('out'); void el.offsetWidth; el.classList.add('in');
+  }, 150);
+}
+function cargaBucle(){
+  const t = performance.now() - carga.t0;
+  const objetivo = carga.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 1100));
+  carga.prog += (objetivo - carga.prog) * (carga.meta >= 100 ? 0.25 : 0.12);
+  if(carga.meta >= 100 && carga.prog > 99.5) carga.prog = 100;
+  if(carga.barra) carga.barra.poner(carga.prog);
+  if(carga.meta < 100){
+    if(t > 9000) cargaMsg('Despertando la base de datos, puede tardar un poco…');
+    else cargaMsg(carga.msgs[Math.min(carga.msgs.length - 1, Math.floor(t / 600))]);
+  }
+  if(carga.el.classList.contains('on')) carga.raf = requestAnimationFrame(cargaBucle);
+}
+function cargaMostrar(msgs){
+  if(carga.el.classList.contains('on') && !carga.el.classList.contains('sale')) return;
+  if(!carga.barra){ $('cargaLogo').src = document.querySelector('.caja-marca img').src; carga.barra = crearBarraCeramica($('cargaBarra'), 17, 2); }
+  carga.el.classList.remove('sale'); carga.el.classList.add('on');
+  carga.msgs = msgs || CARGA_MSGS; carga.prog = 0; carga.meta = 88; carga.t0 = performance.now(); carga.actual = '';
+  $('cargaMsg').textContent = ''; $('cargaMsg').classList.remove('fin', 'out');
+  cancelAnimationFrame(carga.raf); cargaBucle();
+}
+function cargaCortar(){
+  cancelAnimationFrame(carga.raf);
+  carga.el.classList.remove('on', 'sale');
+}
+async function cargaOcultar(){
+  carga.meta = 100; cargaMsg('Listo', true);
+  await dormir(650);
+  carga.el.classList.add('sale');
+  await dormir(350);
+  cargaCortar();
+}
+
 function cerrarSesion(msg){
-  token = ''; nombre = ''; revisores = []; revisor = '';
-  guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadRevisores', null); guardarLocal('calidadRevisor', null);
+  cargaCortar();
+  token = ''; nombre = ''; cargo = '';
+  guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadCargo', null);
   celdas = {}; revisiones = {}; cargado = false;
   document.body.classList.add('sin-sesion');
   $('gate').classList.remove('off');
   $('pin').value = '';
   $('err').textContent = msg || '';
-  ['vel', 'velReg', 'velOp', 'velQuien'].forEach(id => $(id).classList.remove('on', 'out'));
+  ['vel', 'velReg', 'velOp'].forEach(id => $(id).classList.remove('on', 'out'));
   document.body.classList.remove('bloq');
   setTimeout(() => $('pin').focus(), 50);
 }
 
 function pintarQuien(){
-  const q = $('quien');
-  if(revisores.length > 1 && revisor){
-    q.innerHTML = 'Calidad - <select id="quienSel" aria-label="Quién revisa">' + revisores.map(n => `<option value="${esc(n)}"${n === revisor ? ' selected' : ''}>${esc(n)}</option>`).join('') + '</select>';
-  }else{
-    q.textContent = 'Calidad - ' + (revisor || nombre);
-  }
-}
-
-function abrirQuien(){
-  const v = $('velQuien');
-  if(v.classList.contains('on')) return;
-  $('quienes').innerHTML = revisores.map(n => `<button class="btn" type="button" data-n="${esc(n)}">${esc(n)}</button>`).join('');
-  v.classList.add('on');
-}
-
-function fijarRevisores(lista){
-  revisores = lista.filter(x => typeof x === 'string' && x).slice(0, 6);
-  guardarLocal('calidadRevisores', JSON.stringify(revisores));
-  if(revisor && !revisores.includes(revisor)) revisor = '';
-  if(!revisor && revisores.length === 1) revisor = revisores[0];
-  guardarLocal('calidadRevisor', revisor || null);
-  pintarQuien();
-  if(revisores.length > 1 && !revisor) abrirQuien();
+  $('quien').textContent = (cargo || 'Calidad') + ' - ' + nombre;
 }
 
 function entrarVista(){
   pintarQuien();
   document.body.classList.remove('sin-sesion');
   $('gate').classList.add('off');
-  if(revisores.length > 1 && !revisor) abrirQuien();
 }
 
 function estado(d, sc){
@@ -660,33 +732,64 @@ function cerrarRegistro(){
   setTimeout(() => { v.classList.remove('on', 'out'); document.body.classList.remove('bloq'); }, 140);
 }
 
-async function cargar(){
-  if(!token || cargando || enVuelo > 0 || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on') || $('velQuien').classList.contains('on')) return;
+async function cargar(inicial){
+  if(!token || cargando || enVuelo > 0 || $('vel').classList.contains('on') || $('velReg').classList.contains('on') || $('velOp').classList.contains('on')) return;
   cargando = true; $('refrescar').disabled = true;
   $('sub').textContent = cargado ? 'Actualizando…' : 'Cargando…';
   if(!cargado) pintar();
   try{
-    const j = await llamar('loadCalidad');
+    let j;
+    if(inicial) j = await llamar('loadCalidad', undefined, false, TIEMPO_INICIAL);
+    else{
+      try{ j = await llamar('loadCalidad'); }
+      catch(e){
+        if(!token) return;
+        $('sub').textContent = 'Reintentando…';
+        j = await llamar('loadCalidad');
+      }
+    }
     if(!token) return;
     if(j && j.ok && j.celdas && typeof j.celdas === 'object'){
       celdas = j.celdas;
       revisiones = j.revisiones || {};
       if(Array.isArray(j.opciones)) opciones = j.opciones;
-      if(Array.isArray(j.revisores) && j.revisores.length) fijarRevisores(j.revisores);
       cargado = true;
       cargando = false;
       pintar();
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+      return 'ok';
     }else if(j && j.error === 'sin_sesion'){
-      return;
+      return 'sesion';
     }else{
       errorCarga = j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no reconoce esta versión. Falta publicar la versión nueva del script.' : 'La base de datos respondió con un formato inesperado.';
-      falloCarga('No se pudo cargar. Reintenta.');
+      if(!inicial) falloCarga('No se pudo cargar. Reintenta.');
+      return 'fallo';
     }
   }catch(e){
     errorCarga = e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet.';
-    falloCarga(e && e.message === 'tiempo' ? 'La base tarda demasiado en responder.' : 'Sin conexión con la base de datos.');
+    if(!inicial) falloCarga(e && e.message === 'tiempo' ? 'La base tarda demasiado en responder.' : 'Sin conexión con la base de datos.');
+    return 'fallo';
   }finally{ cargando = false; $('refrescar').disabled = false; }
+}
+
+async function cargarInicial(){
+  const t0 = Date.now();
+  cargaMostrar();
+  let r = '';
+  for(let i = 0; i < 4 && token; i++){
+    r = await cargar(true);
+    if(r === 'ok' || r === 'sesion') break;
+    if(i < 3) await dormir(2500);
+  }
+  if(!token) return;
+  if(r === 'ok'){
+    const falta = 2200 - (Date.now() - t0);
+    if(falta > 0) await dormir(falta);
+    await cargaOcultar();
+  }else{
+    cargaCortar();
+    if(r === 'fallo') falloCarga(errorCarga.indexOf('tarda') !== -1 ? 'La base tarda demasiado en responder.' : 'Sin conexión con la base de datos.');
+  }
 }
 
 function falloCarga(sub){
@@ -703,20 +806,26 @@ $('form').addEventListener('submit', async e => {
   $('entrar').disabled = true;
   $('err').textContent = '';
   $('gateTxt').textContent = 'Comprobando tu sesión…';
+  cargaMostrar(['Comprobando tu sesión…']);
   const ctl = new AbortController();
-  const tope = setTimeout(() => ctl.abort(), TIEMPO_MAX);
+  const tope = setTimeout(() => ctl.abort(), 60000);
   try{
     const res = await fetch(DB_URL, {method:'POST', signal: ctl.signal, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'login', pin, dispositivo: leerLocal('progresoObraDisp')})});
     const j = JSON.parse(await res.text());
     if(j && j.ok && j.token && j.nombre){
       if(j.dispositivo) guardarLocal('progresoObraDisp', j.dispositivo);
-      token = j.token; nombre = String(j.nombre);
-      guardarLocal('calidadToken', token); guardarLocal('calidadNombre', nombre);
+      const cargos = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
+      if(!cargos[Number(j.rol)]){
+        $('err').textContent = 'Esta cuenta no tiene acceso a Calidad.';
+        $('pin').value = '';
+        fetch(DB_URL, {method:'POST', keepalive: true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: j.token})}).catch(() => {});
+        return;
+      }
+      token = j.token; nombre = String(j.nombre); cargo = cargos[Number(j.rol)];
+      guardarLocal('calidadToken', token); guardarLocal('calidadNombre', nombre); guardarLocal('calidadCargo', cargo);
       $('pin').value = '';
-      revisores = []; revisor = '';
       entrarVista();
-      fijarRevisores(Array.isArray(j.nombres) ? j.nombres : []);
-      cargar();
+      cargarInicial();
     }else{
       $('err').textContent = j && j.error === 'demasiados_intentos' ? 'Demasiados intentos. Espera unos minutos.' : 'PIN incorrecto.';
       $('pin').value = '';
@@ -725,6 +834,7 @@ $('form').addEventListener('submit', async e => {
     $('err').textContent = err && err.name === 'AbortError' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet.';
   }finally{
     clearTimeout(tope);
+    if(!token) cargaCortar();
     $('entrar').disabled = false;
     $('gateTxt').textContent = 'Ingresa tu PIN para ver los departamentos listos para revisar.';
   }
@@ -735,23 +845,7 @@ $('salir').addEventListener('click', () => {
   cerrarSesion('');
   fetch(DB_URL, {method:'POST', keepalive: true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: t})}).catch(() => {});
 });
-$('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargar(); });
-$('quien').addEventListener('change', e => {
-  if(e.target.id !== 'quienSel' || !revisores.includes(e.target.value)) return;
-  revisor = e.target.value;
-  guardarLocal('calidadRevisor', revisor);
-  pintarQuien();
-});
-$('quienes').addEventListener('click', e => {
-  const b = e.target.closest('button[data-n]');
-  if(!b || !revisores.includes(b.dataset.n)) return;
-  revisor = b.dataset.n;
-  guardarLocal('calidadRevisor', revisor);
-  pintarQuien();
-  const v = $('velQuien');
-  v.classList.add('out');
-  setTimeout(() => { v.classList.remove('on', 'out'); cargar(); }, 140);
-});
+$('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargarInicial(); });
 $('refrescar').addEventListener('click', cargar);
 $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
@@ -804,7 +898,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('visibilitychange', () => { if(!document.hidden && token) cargar(); });
 setInterval(() => { if(!document.hidden && token) cargar(); }, 60000);
 
-if(token && nombre){ entrarVista(); cargar(); }
+if(token && nombre){ entrarVista(); cargarInicial(); }
 else{ cerrarSesion(''); }
 </script>
 </body>
