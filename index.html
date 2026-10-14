@@ -258,10 +258,11 @@
   .floor-title .line{flex:1;height:1px;background:var(--border);}
   .floor-title .badge{font-size:11px;color:var(--sub);}
 
-  table.dept-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--panel);border:1px solid var(--border-strong);table-layout:fixed;}
+  table.dept-table{width:100%;border-collapse:separate;border-spacing:0;background:transparent;border:none;table-layout:fixed;}
+  body.esp-dptos table.dept-table{border-spacing:0 10px;}
   table.dept-table th, table.dept-table td{border:1px solid var(--border-strong);padding:0;vertical-align:top;text-align:left;}
   table.dept-table thead tr{background:var(--panel-soft);}
-  table.dept-table th{background:var(--panel-soft);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);font-weight:700;padding:8px;position:sticky;top:0;z-index:5;box-shadow:0 1px 0 var(--border-strong);}
+  table.dept-table th{background:var(--panel-soft);font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);font-weight:700;padding:8px;position:sticky;top:0;z-index:5;}
   table.dept-table td.dpto-col{width:70px;background:var(--panel-soft);padding:8px;color:var(--text);text-align:center;vertical-align:middle;}
   table.dept-table td.dpto-col .dpto-inner{font-weight:700;font-size:14px;word-break:break-word;display:inline-block;}
   table.dept-table td.dpto-col.dpto-corto .dpto-inner{font-size:20px;}
@@ -406,7 +407,10 @@
 
 
   .cell-ventana{cursor:pointer;display:flex;flex-direction:column;gap:6px;position:relative;transition:box-shadow .12s ease,transform .12s ease;outline:none;}
-  .cell-ventana:hover{box-shadow:inset 0 0 0 2px var(--accent);}
+  .cell-ventana{--luz:color-mix(in srgb,var(--accent) 30%,transparent);}
+  .cell-ventana::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .28s ease;background:linear-gradient(to bottom,var(--luz) 0%,transparent 48%),linear-gradient(to top,var(--luz) 0%,transparent 48%);}
+  @media (hover:hover){.cell-ventana:hover::after{opacity:1;}}
+  .cell-ventana.luz::after{opacity:1;}
   .cell-ventana:focus-visible{box-shadow:inset 0 0 0 2px var(--accent2);}
   .cell-ventana:active{transform:scale(.985);}
   .cell-ventana .checks-row{display:flex;justify-content:flex-end;}
@@ -439,6 +443,22 @@
   .vt-paso.on .vt-caja{border-color:currentColor;}
   .vt-paso.on .vt-fecha{color:inherit;opacity:.9;}
   .vt-paso.cambio{outline:2px dashed var(--accent);outline-offset:1px;}
+  .rb-der{margin-left:auto;display:flex;gap:8px;align-items:center;position:relative;flex-wrap:wrap;justify-content:flex-end;}
+  .mc-pop{display:none;position:absolute;top:100%;right:0;margin-top:6px;z-index:60;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);box-shadow:0 6px 20px rgba(0,0,0,.25);padding:14px;width:260px;max-width:calc(100vw - 20px);font-size:13px;}
+  .mc-pop.show{display:block;}
+  .mc-tit{font-weight:800;margin-bottom:2px;}
+  .mc-sub{font-size:11.5px;color:var(--sub);margin-bottom:10px;}
+  .mc-fila{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .mc-fila input[type=color]{width:48px;height:32px;padding:0;border:1px solid var(--border-strong);background:none;border-radius:0;cursor:pointer;}
+  .mc-vista{flex:1;height:32px;}
+  .mc-acc{display:flex;gap:8px;justify-content:flex-end;}
+  @media (max-width:700px){
+    .floor-block{margin-left:-6px;margin-right:-6px;}
+    .floor-title{margin-left:6px;margin-right:6px;}
+    table.dept-table th:first-child{font-size:8px;padding:4px 1px;text-align:center;letter-spacing:0;overflow:hidden;}
+    table.dept-table td.dpto-col{width:34px;}
+    col.col-dpto{width:34px;}
+  }
   .vt-confirma{display:flex;gap:8px;justify-content:flex-end;padding:0 12px 10px;}
   .vt-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);background:var(--panel-soft);}
   @media (max-width:700px){
@@ -760,6 +780,10 @@
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
+    <div class="rb-der" id="rbDer" style="display:none;">
+      <button type="button" class="btn small" id="miColorBtn">🎨 Mi color</button>
+      <div class="mc-pop" id="miColorPop"></div>
+    </div>
   </div>
   <div id="recordatoriosBar" class="rec-bar" style="display:none;"></div>
 
@@ -772,6 +796,7 @@
         <button class="btn" id="dbBtn">Conectar base de datos</button>
         <button class="btn admin-only" id="exportBtn">Exportar datos</button>
         <button class="btn admin-only" id="importBtn">Importar datos</button>
+        <button class="btn solo-admin" id="espaciadoBtn" style="grid-column:1 / -1;"></button>
         <input type="file" id="importFile" accept="application/json" style="display:none;">
       </div>
     </div>
@@ -1178,7 +1203,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.26.2';
+const APP_VERSION = '0.27.0';
 const BACKEND_REQUERIDO = 28;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1303,6 +1328,7 @@ function guardarM2DelPeriodo(desde, hasta){
 }
 const AFP_COTIZACION_OBLIGATORIA = 10;
 let allowGuestPrices = false;
+let espaciadoDptos = true;
 let isAdmin = false;
 let isSupervisor = false;
 let isJefe = false;
@@ -1372,6 +1398,7 @@ function applyRoleUI(){
   badge.style.display = label ? '' : 'none';
   badge.className = 'role-badge ' + cls;
   badge.classList.remove('role-flash'); void badge.offsetWidth; badge.classList.add('role-flash');
+  aplicarColorUsuario(loggedIn);
   document.getElementById('loginBtn').style.display = 'none';
   document.getElementById('logoutBtn').style.display = loggedIn ? 'inline-flex' : 'none';
   actualizarBotonesCargo();
@@ -1528,6 +1555,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.customWorkers && remote.customWorkers.length) customWorkers = remote.customWorkers;
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
+    if(typeof remote.espaciadoDptos === 'boolean') espaciadoDptos = remote.espaciadoDptos;
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
     if(remote.cierreAnterior !== undefined) cierreAnterior = remote.cierreAnterior;
     if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
@@ -1700,7 +1728,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -1722,7 +1750,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, paymentHistory, afpRates: AFP_RATES, obsPresets: OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -1761,6 +1789,7 @@ function applyLoadedPayload(parsed){
   customWorkers = parsed.customWorkers || [];
   if(parsed.rates) RATES = {...RATES, ...parsed.rates};
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
+  if(typeof parsed.espaciadoDptos === 'boolean') espaciadoDptos = parsed.espaciadoDptos;
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
@@ -1883,7 +1912,7 @@ async function doSaveCycle(){
 
   const guardadoCompleto = forzarGuardadoCompleto || (dirtySnap.size === 0 && !settingsDirty);
   if(guardadoCompleto) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, paymentHistory, afpRates:AFP_RATES, obsPresets:OBS_PRESETS, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -2592,7 +2621,7 @@ function pintarVentana(){
         <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${botonesTrab}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Estado</div>
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
-        ${hayCambio ? `<div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar">Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar">Confirmar cambio</button></div>` : ''}</div>
+        <div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar"${hayCambio ? '' : ' disabled'}>Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar"${hayCambio ? '' : ' disabled'}>Confirmar cambio</button></div></div>
       <div class="vt-sec"><div class="vt-sec-title">Metraje</div>
         <div class="vt-sec-body"><div class="vt-valor${m2 ? '' : ' vacio'}">${precio}</div>${isAdmin ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="m2">✎ Editar m²</button></div>` : ''}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Observación</div>
@@ -2635,6 +2664,71 @@ document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   if(accion === 'm2'){ abrirEditarM2(id); return; }
   if(accion === 'nota'){ abrirObservacionModal(id); return; }
 });
+
+const COLORES_CARGO_BASE = {admin:['#2f6f8f','#7a3fa0'], supervisor:['#1d7f8c','#2f9e6b'], jefe:['#b3362f','#e0702b'], trabajador:['#b8860b','#d9a21a']};
+const NOMBRES_CARGO = {admin:'Admin', supervisor:'Supervisor', jefe:'Jefe de Terreno', trabajador:'Trabajador'};
+const cargoClave = () => isAdmin ? 'admin' : isSupervisor ? 'supervisor' : isJefe ? 'jefe' : workerSession ? 'trabajador' : 'admin';
+const claveColorUsuario = () => 'progresoObraColor|' + cargoClave() + '|' + (sessionName || '');
+function colorUsuario(){
+  try{
+    const g = JSON.parse(localStorage.getItem(claveColorUsuario()) || 'null');
+    if(Array.isArray(g) && g.length === 2 && g.every(c => /^#[0-9a-f]{6}$/i.test(c))) return g;
+  }catch(err){}
+  return COLORES_CARGO_BASE[cargoClave()].slice();
+}
+function aplicarColorUsuario(conectado){
+  const raiz = document.documentElement, badge = document.getElementById('roleBadge');
+  const der = document.getElementById('rbDer');
+  if(der) der.style.display = conectado ? '' : 'none';
+  if(!conectado) return;
+  const c = colorUsuario();
+  raiz.style.setProperty('--accent', c[0]);
+  raiz.style.setProperty('--accent2', c[1]);
+  if(badge) badge.style.background = `linear-gradient(90deg,${c[0]},${c[1]})`;
+}
+function pintarMiColor(){
+  const c = colorUsuario(), pop = document.getElementById('miColorPop');
+  pop.innerHTML = `<div class="mc-tit">Mi color</div><div class="mc-sub">${NOMBRES_CARGO[cargoClave()]}: elige dos colores. Se ve al instante.</div>
+    <div class="mc-fila"><input type="color" data-i="0" value="${c[0]}"><input type="color" data-i="1" value="${c[1]}"><span class="mc-vista" id="mcVista" style="background:linear-gradient(90deg,${c[0]},${c[1]});"></span></div>
+    <div class="mc-acc"><button type="button" class="btn small" data-mc="reset">Restablecer</button><button type="button" class="btn small primary" data-mc="listo">Listo</button></div>`;
+}
+document.getElementById('miColorBtn').addEventListener('click', () => {
+  const pop = document.getElementById('miColorPop');
+  if(!pop.classList.contains('show')) pintarMiColor();
+  pop.classList.toggle('show');
+});
+document.getElementById('miColorPop').addEventListener('input', (e) => {
+  const t = e.target; if(!t.matches('input[type=color]')) return;
+  const c = colorUsuario(); c[Number(t.dataset.i)] = t.value;
+  try{ localStorage.setItem(claveColorUsuario(), JSON.stringify(c)); }catch(err){}
+  document.getElementById('mcVista').style.background = `linear-gradient(90deg,${c[0]},${c[1]})`;
+  aplicarColorUsuario(true);
+});
+document.getElementById('miColorPop').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-mc]'); if(!b) return;
+  if(b.dataset.mc === 'listo'){ document.getElementById('miColorPop').classList.remove('show'); return; }
+  try{ localStorage.removeItem(claveColorUsuario()); }catch(err){}
+  pintarMiColor(); aplicarColorUsuario(true);
+});
+function actualizarEspaciado(){
+  document.body.classList.toggle('esp-dptos', espaciadoDptos);
+  const b = document.getElementById('espaciadoBtn');
+  if(b){ b.textContent = '↕ Espaciado entre dptos: ' + (espaciadoDptos ? 'Sí' : 'No'); b.classList.toggle('primary', espaciadoDptos); }
+}
+document.getElementById('espaciadoBtn').addEventListener('click', () => {
+  if(!isAdmin) return;
+  espaciadoDptos = !espaciadoDptos;
+  markSettingsDirty('espaciadoDptos');
+  scheduleSave();
+  actualizarEspaciado();
+});
+document.addEventListener('pointerdown', (e) => {
+  if(e.pointerType === 'mouse') return;
+  const c = e.target.closest && e.target.closest('.cell-ventana');
+  if(!c) return;
+  c.classList.add('luz');
+  setTimeout(() => c.classList.remove('luz'), 700);
+}, {passive: true});
 function cellHtml(cell){
   const st = getState(cell.id);
   const hasWorker = !!st.trabajador;
@@ -3890,6 +3984,7 @@ function abrirEditorPresets(volverAId){
 
 function render(){
   matNivelesCache = null;
+  actualizarEspaciado();
   const contentEl = document.getElementById('content');
   let html;
   if(activeCategoria === 'Pasillos'){
@@ -4195,10 +4290,10 @@ document.getElementById('temaSelector').addEventListener('change', (e) => {
   if(ventanaId) cerrarVentana();
   render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
-  try{ localStorage.setItem('progresoObraTemaV2', e.target.value); }catch(err){}
+  try{ localStorage.setItem('progresoObraTemaV3', e.target.value); }catch(err){}
 });
 try{
-  const guardadoV2 = localStorage.getItem('progresoObraTemaV2');
+  const guardadoV2 = localStorage.getItem('progresoObraTemaV3');
   const temaGuardado = guardadoV2 === null ? 'tema3' : guardadoV2;
   if(temaGuardado === 'tema1' || temaGuardado === 'tema3'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
 }catch(err){}
