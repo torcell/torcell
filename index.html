@@ -229,12 +229,38 @@
   .stat-card.st-proceso{border-top-color:var(--proceso);}
   .stat-card.st-entregado{border-top-color:var(--entregado);}
   .stat-card.st-pagado{border-top-color:var(--pagado);}
+  .stat-card.stat-combo{grid-column:span 2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0;border-top:0;}
+  .stat-combo .combo-col{padding:13px 15px;border-top:3px solid var(--border-strong);min-width:0;}
+  .stat-combo .combo-col + .combo-col{border-left:1px solid var(--border);}
+  .stat-combo .combo-col.st-proceso{border-top-color:var(--proceso);}
+  .stat-combo .combo-col.st-entregado{border-top-color:var(--entregado);}
+  .stat-combo .combo-col.st-pagado{border-top-color:var(--pagado);}
   .stat-card .n{font-size:22px;font-weight:700;}
   .stat-card .l{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
   .stat-card .bar{height:5px;background:var(--panel-soft);margin-top:9px;border:1px solid var(--border);}
   .stat-card .bar > div{height:100%;}
   .stat-card .sub2{font-size:11px;color:var(--sub);margin-top:3px;}
   .stat-card .ganancia{font-weight:700;color:var(--entregado);}
+  .frag-chip{display:block;background:none;border:0;padding:0;margin:2px 0 4px;font:inherit;font-size:12px;font-weight:600;color:var(--sub);text-align:left;cursor:pointer;border-radius:0;}
+  .frag-chip u{display:block;width:max-content;font-size:10.5px;font-weight:400;text-decoration:none;border-bottom:1px dotted var(--sub);margin-top:1px;}
+  .frag-chip:hover{color:var(--accent);}
+  .frag-chip:hover u{border-bottom-color:var(--accent);}
+  .frag-chip:active{transform:scale(.97);}
+  .frag-tabla{width:100%;border-collapse:collapse;font-size:13px;margin:0 0 14px;}
+  .frag-tabla th{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);font-weight:600;text-align:right;padding:6px 8px;border-bottom:1px solid var(--border-strong);}
+  .frag-tabla th:first-child,.frag-tabla td:first-child{text-align:left;}
+  .frag-tabla td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;}
+  .frag-tabla tr.tot td{font-weight:700;}
+  .frag-tabla tr.sub td{color:var(--sub);}
+  .frag-tabla td small{display:block;font-size:10.5px;color:var(--sub);font-weight:400;}
+  .frag-h{margin:14px 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
+  .pt-grupo{padding:7px 15px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);background:var(--panel-soft);border-top:1px solid var(--border);}
+  .pt-grupo.frag{border-left:3px solid var(--border-strong);}
+  .pt-tot.frag{font-weight:600;color:var(--sub);}
+  .pt-grupo.frag ~ .pt-fila .pt-col.suma b,.pt-grupo.frag ~ .pt-tot .pt-col.suma b{color:var(--sub);}
+  .pt-resumen{padding:9px 15px;font-size:12.5px;border-top:1px solid var(--border);line-height:1.6;}
+  .pt-resumen b{font-variant-numeric:tabular-nums;}
+  .pt-resumen .frag{color:var(--sub);}
   .c-pendiente{color:var(--pendiente)} .c-proceso{color:#a97e00} .c-entregado{color:var(--entregado)} .c-pagado{color:var(--pagado)}
   .money-card .n{font-size:16.5px;}
   .recordatorio-cierre{margin:0 0 12px;padding:8px 10px;background:var(--panel-soft);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.6;}
@@ -593,6 +619,11 @@
   }
 
   #liqPrintArea{position:fixed;left:-10000px;top:0;width:800px;background:#fff;}
+  .liq-fuera-cierre{margin:14px 0 0;border:1px solid var(--border-strong);background:var(--panel-soft);font-size:12px;}
+  .liq-fuera-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;color:var(--sub);border-bottom:1px solid var(--border);}
+  .liq-fuera-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border-bottom:1px solid var(--border);}
+  .liq-fuera-fila:last-child{border-bottom:0;}
+  .liq-fuera-fila small{display:block;color:var(--sub);font-size:11px;margin-top:1px;}
 
   @page{ margin:0; }
   .liq-spacer{ display:none; }
@@ -1231,10 +1262,18 @@
     <div class="actions"><button class="btn primary" id="statsCloseBtn">Cerrar</button></div>
   </div>
 </div>
+<div class="overlay" id="fragOverlay">
+  <div class="modal" style="max-width:640px;display:flex;flex-direction:column;max-height:88vh;">
+    <h3 style="margin-bottom:2px;">Detalle del frague</h3>
+    <p style="margin:0 0 10px;font-size:12px;color:var(--sub);">El frague lo pagamos nosotros: no se cobra y no suma al total de cerámica. Incluye pisos, muros y pasillos.</p>
+    <div id="fragBody" style="overflow-y:auto;flex:1;min-height:0;"></div>
+    <div class="actions"><button class="btn primary" id="fragCloseBtn" type="button">Cerrar</button></div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.30.3';
+const APP_VERSION = '0.31.3';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2311,12 +2350,26 @@ function renderStats(){
   const counts = {pendiente:0, proceso:0, entregado:0, pagado:0};
   let totalMonto1 = 0, pagadoMonto1 = 0, terminadoMonto1 = 0, terminadoMonto2 = 0;
   let tDentro1 = 0, tDentro2 = 0, nDentro = 0, tNuevo1 = 0, tNuevo2 = 0, nNuevo = 0;
+  const enPasillos = activeCategoria === 'Pasillos';
+  const enFrague = activeCategoria === 'Frague';
+  let fTerm = 0, fDentro = 0, fNuevo = 0, fPag = 0;
+  const sumarFrague = (c, st) => {
+    if(!st.m2) return;
+    const p = st.m2 * rate1For('Frague', st.trabajador);
+    const e = resolveEstado(st);
+    if(e === 'pagado') fPag += p;
+    if(e === 'entregado'){
+      fTerm += p;
+      if(cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena) fNuevo += p; else fDentro += p;
+    }
+  };
   cells.forEach(c => {
     const st = getState(c.id);
     const estado = resolveEstado(st);
     counts[estado] = (counts[estado]||0)+1;
     const nuevoTrasCierre = estado === 'entregado' && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena;
     if(estado === 'entregado'){ if(nuevoTrasCierre) nNuevo++; else nDentro++; }
+    if(enPasillos && c.categoria === 'Frague'){ sumarFrague(c, st); return; }
     if(st.m2){
       const p1 = st.m2 * rate1For(c.categoria, st.trabajador);
       const p2 = st.m2 * RATES.cerAlt;
@@ -2329,6 +2382,9 @@ function renderStats(){
       }
     }
   });
+  if(activeCategoria === 'Cerámica'){
+    ALL_CELLS.forEach(c => { if(c.categoria === 'Frague' && c.area !== 'Pasillos') sumarFrague(c, getState(c.id)); });
+  }
   const total = cells.length;
   const statsEl = document.getElementById('stats');
   const defs = [
@@ -2337,30 +2393,81 @@ function renderStats(){
     {key:'entregado', label:'Terminado', cls:'entregado', color:'var(--entregado)'},
     {key:'pagado', label:'Pagado', cls:'pagado', color:'var(--pagado)'},
   ];
-  const cards = defs.map(s => {
-    const n = counts[s.key]||0;
-    const pct = total ? Math.round(n/total*100) : 0;
-
-    const barHtml = (s.key === 'pendiente' || s.key === 'pagado')
-      ? `<div class="bar"><div style="width:${pct}%; background:${s.color};"></div></div>` : '';
-    return `<div class="stat-card st-${s.cls}"><div class="n c-${s.cls}">${n}</div><div class="l">${s.label}</div>
-      ${barHtml}</div>`;
-  }).join('');
+  const barraDe = s => {
+    const pct = total ? Math.round((counts[s.key]||0)/total*100) : 0;
+    return (s.key === 'pendiente' || s.key === 'pagado') ? `<div class="bar"><div style="width:${pct}%; background:${s.color};"></div></div>` : '';
+  };
+  const pendDef = defs[0];
+  const tarjetaPend = `<div class="stat-card st-pendiente"><div class="n c-pendiente">${counts.pendiente||0}</div><div class="l">${pendDef.label}</div>${barraDe(pendDef)}</div>`;
+  const tarjetaAvance = `<div class="stat-card stat-combo">${defs.slice(1).map(s =>
+    `<div class="combo-col st-${s.cls}"><div class="n c-${s.cls}">${counts[s.key]||0}</div><div class="l">${s.label}</div>${barraDe(s)}</div>`).join('')}</div>`;
+  const cards = tarjetaPend + tarjetaAvance;
   const gananciaLinea = (r, b) => `<div class="sub2 ganancia">Margen: ${money(r - b)}</div>`;
-  const terminadoSub = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>${gananciaLinea(terminadoMonto2, terminadoMonto1)}` : '';
-  const terminadoMoneyCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(terminadoMonto1)}</div><div class="l">Terminado</div>${terminadoSub}</div>`;
-  const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>
+  const fragLinea = (v) => v > 0 ? `<button type="button" class="frag-chip" data-frag-det title="Ver detalle del frague">+ ${money(v)} frague <u>ver detalle</u></button>` : '';
+
+  const terminadoSub = activeCategoria === 'Cerámica'
+    ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>${gananciaLinea(terminadoMonto2, terminadoMonto1)}`
+    : '';
+  const fragTermCard = enFrague ? '' : fragLinea(fTerm);
+  const terminadoMoneyCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(terminadoMonto1)}</div>${fragTermCard}<div class="l">Terminado</div>${terminadoSub}</div>`;
+  const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>${enFrague ? '' : fragLinea(fPag)}
     <div class="l">Pagado de ${money(totalMonto1)}</div>
     <div class="bar"><div style="width:${totalMonto1?Math.round(pagadoMonto1/totalMonto1*100):0}%; background:var(--pagado);"></div></div></div>`;
   const fechaHoraCierre = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
   const refDentro = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tDentro2)} con tarifa referencia</div>${gananciaLinea(tDentro2, tDentro1)}` : '';
   const refNuevo = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tNuevo2)} con tarifa referencia</div>${gananciaLinea(tNuevo2, tNuevo1)}` : '';
-  const terminadoDentroCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(tDentro1)}</div><div class="l">Terminado dentro del cierre</div><div class="sub2">${nDentro} partida(s) · entran en la próxima liquidación</div>${refDentro}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div></div>`;
-  const terminadoNuevoCard = `<div class="stat-card money-card st-entregado cierre-nuevo"><div class="n c-entregado">${money(tNuevo1)}</div><div class="l">Terminado nuevo, después del cierre</div><div class="sub2">${nNuevo} partida(s) · no entran hasta el próximo cierre</div>${refNuevo}</div>`;
+  const terminadoDentroCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(tDentro1)}</div>${enFrague ? '' : fragLinea(fDentro)}<div class="l">Terminado dentro del cierre</div><div class="sub2">${nDentro} partida(s) · entran en la próxima liquidación</div>${refDentro}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div></div>`;
+  const terminadoNuevoCard = `<div class="stat-card money-card st-entregado cierre-nuevo"><div class="n c-entregado">${money(tNuevo1)}</div>${enFrague ? '' : fragLinea(fNuevo)}<div class="l">Terminado nuevo, después del cierre</div><div class="sub2">${nNuevo} partida(s) · no entran hasta el próximo cierre</div>${refNuevo}</div>`;
   const terminadoCards = cierreQuincena ? terminadoDentroCard + terminadoNuevoCard : terminadoMoneyCard;
   statsEl.innerHTML = cards + (isAdmin ? terminadoCards + pagadoMoneyCard : '');
   renderPorTrabajador();
 }
+
+function calcFrague(){
+  const nuevoB = () => ({dentro: 0, nuevo: 0, ter: 0, pag: 0, total: 0, m2: 0, ref: 0});
+  const r = {cer: nuevoB(), fra: nuevoB()};
+  ALL_CELLS.forEach(c => {
+    const st = getState(c.id);
+    const m2 = Number(st.m2) || 0;
+    if(!m2) return;
+    const esF = c.categoria === 'Frague';
+    const b = esF ? r.fra : r.cer;
+    const p = m2 * rate1For(c.categoria, st.trabajador);
+    const e = resolveEstado(st);
+    b.total += p; b.m2 += m2;
+    if(e === 'pagado') b.pag += p;
+    if(e === 'entregado'){
+      b.ter += p;
+      if(!!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena) b.nuevo += p; else b.dentro += p;
+      if(!esF) b.ref += m2 * RATES.cerAlt;
+    }
+  });
+  return r;
+}
+function abrirFragueDetalle(){
+  const r = calcFrague();
+  const fila = (txt, a, b, cls) => `<tr class="${cls || ''}"><td>${txt}</td><td>${money(a)}</td><td>${money(b)}</td></tr>`;
+  const conCierre = !!cierreQuincena;
+  const tabla1 = `<table class="frag-tabla"><tr><th></th><th>Cerámica</th><th>Frague</th></tr>
+    ${conCierre ? fila('Terminado hasta el cierre', r.cer.dentro, r.fra.dentro) + fila('Terminado después del cierre', r.cer.nuevo, r.fra.nuevo) : ''}
+    ${fila('Terminado (por pagar)', r.cer.ter, r.fra.ter, 'tot')}
+    ${fila('Pagado', r.cer.pag, r.fra.pag)}
+    <tr class="sub"><td>Total del proyecto<small>con m² cargados</small></td><td>${money(r.cer.total)}<small>${ptFm2(r.cer.m2)} m²</small></td><td>${money(r.fra.total)}<small>${ptFm2(r.fra.m2)} m²</small></td></tr></table>`;
+  const mCer = r.cer.ref - r.cer.ter;
+  const tabla2 = `<div class="frag-h">Margen real sobre lo terminado</div><table class="frag-tabla">
+    <tr><td>Tarifa de referencia de cerámica</td><td>${money(r.cer.ref)}</td></tr>
+    <tr class="sub"><td>− Costo de cerámica</td><td>${money(r.cer.ter)}</td></tr>
+    <tr><td>Margen de cerámica</td><td>${money(mCer)}</td></tr>
+    <tr class="sub"><td>− Frague terminado</td><td>${money(r.fra.ter)}</td></tr>
+    <tr class="tot"><td>Margen real</td><td>${money(mCer - r.fra.ter)}</td></tr></table>`;
+  const fraguadores = ptDatos().filter(o => o.frague).sort((a, b) => b.ent.monto - a.ent.monto);
+  const tabla3 = fraguadores.length ? `<div class="frag-h">Por fraguador</div><table class="frag-tabla"><tr><th></th><th>Terminado</th><th>Pagado</th></tr>
+    ${fraguadores.map(o => `<tr><td>${esc(o.nombre)}</td><td>${money(o.ent.monto)}<small>${ptFm2(o.ent.m2)} m²</small></td><td>${money(o.pag.monto)}<small>${ptFm2(o.pag.m2)} m²</small></td></tr>`).join('')}</table>` : '';
+  document.getElementById('fragBody').innerHTML = tabla1 + tabla2 + tabla3;
+  document.getElementById('fragOverlay').classList.add('show');
+}
+document.getElementById('stats').addEventListener('click', (e) => { if(e.target.closest('[data-frag-det]')) abrirFragueDetalle(); });
+document.getElementById('fragCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('fragOverlay')));
 
 const ptAbiertos = new Set();
 let ptSeccionAbierta = true;
@@ -2374,7 +2481,9 @@ function ptDatos(){
     if(!isAdmin && w !== workerSession) return;
     const estado = resolveEstado(st);
     if(estado !== 'entregado' && estado !== 'pagado' && estado !== 'proceso') return;
-    const o = por[w] || (por[w] = {nombre: w, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []});
+    const esF = c.categoria === 'Frague';
+    const k = w + (esF ? '|F' : '|C');
+    const o = por[k] || (por[k] = {key: k, nombre: w, frague: esF, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []});
     if(estado === 'proceso'){ o.partida++; return; }
     const b = estado === 'entregado' ? o.ent : o.pag;
     const m2 = Number(st.m2) || 0;
@@ -2406,23 +2515,32 @@ function renderPorTrabajador(){
   const ws = workerSession ? (workerStatus[workerSession] || {}) : {};
   const verPlata = isAdmin || (!!workerSession && !!ws.vePrecioReal);
   let datos = ptDatos();
-  if(workerSession && !isAdmin && !datos.length) datos = [{nombre: workerSession, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []}];
+  if(workerSession && !isAdmin && !datos.length) datos = [{key: workerSession + '|C', nombre: workerSession, frague: false, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []}];
   datos.sort((a, b) => (b.ent.monto - a.ent.monto) || (b.ent.m2 - a.ent.m2) || a.nombre.localeCompare(b.nombre, 'es'));
   if(!datos.length){ el.style.display = 'none'; el.innerHTML = ''; return; }
-  const tot = {ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}};
-  datos.forEach(o => ['ent', 'dentro', 'nuevo', 'pag'].forEach(k => { tot[k].n += o[k].n; tot[k].m2 += o[k].m2; tot[k].monto += o[k].monto; }));
+  const vacioTot = () => ({ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}});
+  const sumar = (lista) => { const t = vacioTot(); lista.forEach(o => ['ent', 'dentro', 'nuevo', 'pag'].forEach(k => { t[k].n += o[k].n; t[k].m2 += o[k].m2; t[k].monto += o[k].monto; })); return t; };
+  const listaCer = datos.filter(o => !o.frague), listaFra = datos.filter(o => o.frague);
+  const tot = sumar(listaCer), totFra = sumar(listaFra);
   const conCierre = !!cierreQuincena;
   const colsTerminado = (o) => conCierre
     ? ptCol(o.dentro, verPlata) + ptCol(o.nuevo, verPlata) + ptCol(o.ent, verPlata).replace('class="pt-col"', 'class="pt-col suma"')
     : ptCol(o.ent, verPlata);
-  const filas = datos.map(o => `<details class="pt-fila" data-w="${esc(o.nombre)}"${ptAbiertos.has(o.nombre) ? ' open' : ''}>
+  const filaHtml = o => `<details class="pt-fila" data-w="${esc(o.key)}"${ptAbiertos.has(o.key) ? ' open' : ''}>
     <summary><div class="pt-nom">${esc(o.nombre)}${o.partida ? `<small>${o.partida} en partida</small>` : ''}</div>${colsTerminado(o)}${ptCol(o.pag, verPlata)}</summary>
-    ${ptAbiertos.has(o.nombre) ? ptDetalle(o, verPlata) : ''}</details>`).join('');
-  const totalFila = isAdmin && datos.length > 1 ? `<div class="pt-tot"><div class="pt-nom">Total</div>${colsTerminado(tot)}${ptCol(tot.pag, verPlata)}</div>` : '';
+    ${ptAbiertos.has(o.key) ? ptDetalle(o, verPlata) : ''}</details>`;
+  const separar = isAdmin && listaFra.length > 0;
+  const filas = (separar && listaCer.length ? '<div class="pt-grupo">Cerámica</div>' : '') + listaCer.map(filaHtml).join('')
+    + (isAdmin && listaCer.length > 1 ? `<div class="pt-tot"><div class="pt-nom">Total cerámica</div>${colsTerminado(tot)}${ptCol(tot.pag, verPlata)}</div>` : '')
+    + (separar ? '<div class="pt-grupo frag">Frague</div>' : '') + listaFra.map(filaHtml).join('')
+    + (separar && listaFra.length > 1 ? `<div class="pt-tot frag"><div class="pt-nom">Total frague</div>${colsTerminado(totFra)}${ptCol(totFra.pag, verPlata)}</div>` : '');
+  const resumenAparte = separar && verPlata
+    ? `<div class="pt-resumen"><div>Total terminado <b>${money(tot.ent.monto)}</b> <span class="frag">+ ${money(totFra.ent.monto)} frague</span></div><div>Total pagado <b>${money(tot.pag.monto)}</b> <span class="frag">+ ${money(totFra.pag.monto)} frague</span></div></div>` : '';
+  const totalFila = '';
   el.style.display = '';
   el.classList.toggle('pt-cinco', conCierre);
-  el.innerHTML = `<details${ptSeccionAbierta ? ' open' : ''} id="ptDetalles"><summary>${isAdmin ? '👷 Avance por trabajador' : '👷 Mi avance'} <span class="pt-sub">todas las categorías</span></summary>
-    <div class="pt-cab"><div>Trabajador</div>${conCierre ? '<div>Hasta el cierre</div><div>Después del cierre</div><div>Suma terminado</div>' : '<div>Terminado (por pagar)</div>'}<div>Pagado</div></div>${filas}${totalFila}</details>`;
+  el.innerHTML = `<details${ptSeccionAbierta ? ' open' : ''} id="ptDetalles"><summary>${isAdmin ? '👷 Avance por trabajador' : '👷 Mi avance'} <span class="pt-sub">${isAdmin ? 'cerámica y frague por separado' : 'todas las categorías'}</span></summary>
+    <div class="pt-cab"><div>Trabajador</div>${conCierre ? '<div>Hasta el cierre</div><div>Después del cierre</div><div>Suma terminado</div>' : '<div>Terminado (por pagar)</div>'}<div>Pagado</div></div>${filas}${totalFila}${resumenAparte}</details>`;
 }
 document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
   const d = e.target;
@@ -2432,7 +2550,7 @@ document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
   if(d.open){
     ptAbiertos.add(w);
     if(!d.querySelector('.pt-det')){
-      const o = ptDatos().find(x => x.nombre === w);
+      const o = ptDatos().find(x => x.key === w);
       const ws = workerSession ? (workerStatus[workerSession] || {}) : {};
       if(o) d.insertAdjacentHTML('beforeend', ptDetalle(o, isAdmin || (!!workerSession && !!ws.vePrecioReal)));
     }
@@ -4651,6 +4769,7 @@ function abrirConfigLiquidacion(){
   document.getElementById('liqConfigError').textContent = '';
   document.getElementById('liqHistoryBox').style.display = 'none';
   liqIgnorarCierre = false;
+  liqExtraIds = new Set();
 
   const sinAsignar = ALL_CELLS.filter(c => {
     const st = getState(c.id);
@@ -4715,6 +4834,7 @@ document.getElementById('liqWorkerSelect').addEventListener('change', (e) => {
 
 let liqExtraDetails = [];
 let liqIgnorarCierre = false;
+let liqExtraIds = new Set();
 
 document.getElementById('liqConfigGenerar').addEventListener('click', generarLiquidacionInterna);
 function generarLiquidacionInterna(){
@@ -4736,14 +4856,18 @@ function generarLiquidacionInterna(){
 
   const rows = [];
   let excluidosPorCierre = 0;
+  const excluidosLista = [];
   ALL_CELLS.forEach(cell => {
     const st = getState(cell.id);
     if((st.trabajador || '') !== worker) return;
     if(st.retenido && !incRetenido) return;
     const estado = resolveEstado(st);
 
-    if(estado === 'entregado' && !liqIgnorarCierre && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena){
-      excluidosPorCierre++;
+    if(estado === 'entregado' && !liqIgnorarCierre && !liqExtraIds.has(cell.id) && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena){
+      if(st.m2){
+        excluidosPorCierre++;
+        excluidosLista.push({id: cell.id, categoria: cell.categoria, piso: cell.piso, pisoNum: cell.pisoNum, label: liqLabelForCell(cell), area: AREA_LABEL[cell.area] || cell.area, m2: st.m2, precio: st.m2 * rate1For(cell.categoria, st.trabajador)});
+      }
       return;
     }
     const included = !st.retenido && (
@@ -4784,7 +4908,7 @@ function generarLiquidacionInterna(){
   pendingLiqFinalize = function(incluirObs){
     liqExtraDetails = [];
     liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
-      subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas, excluidosPorCierre,
+      subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas, excluidosPorCierre, excluidosLista,
       observaciones: incluirObs ? rowsConNota.map(r => ({label:r.label, area:r.area, piso:r.piso, nota:r.nota})) : [] };
     liqRebuildDoc();
     closeOverlayAnimated(liqConfigOverlay);
@@ -4868,10 +4992,17 @@ function liqRebuildDoc(){
         <h4 style="margin:14px 0 6px;font-size:12.5px;">Observaciones</h4>
         ${m.observaciones.map(o => `<div style="font-size:11.5px;margin-bottom:4px;"><b>${o.label} — ${o.area}</b> (${o.piso}): <i>${o.nota}</i></div>`).join('')}
       </div>` : '';
+  const fueraLista = (m.excluidosLista || []).slice().sort((a, b) => a.pisoNum - b.pisoNum || String(a.label).localeCompare(String(b.label), 'es', {numeric: true}));
   const cierreHtml = (m.excluidosPorCierre > 0) ? `
-      <div style="margin:12px 0 0;font-size:11px;color:var(--sub);font-style:italic;">
-        ${m.excluidosPorCierre} partida(s) Terminada(s) después del cierre de quincena/mes no se incluyeron en esta liquidación.
-        <button class="btn small" id="liqAgregarFueraCierreBtn" type="button" style="font-style:normal;margin-left:6px;">Agregar de todas formas</button>
+      <div class="liq-fuera-cierre">
+        <div class="liq-fuera-cab">
+          <span>${m.excluidosPorCierre} partida(s) terminada(s) después del cierre no se incluyeron en esta liquidación.</span>
+          <button class="btn small" id="liqAgregarFueraCierreBtn" type="button">Agregar todas</button>
+        </div>
+        ${fueraLista.map(r => `<div class="liq-fuera-fila">
+          <div><b>${r.label} — ${r.area}</b><small>${r.piso} · ${r.categoria} · ${r.m2} m² · ${moneyReal(r.precio)}</small></div>
+          <button class="btn small liq-add-uno" type="button" data-id="${r.id}">Agregar</button>
+        </div>`).join('')}
       </div>` : '';
   const metaHtml = `
       <div class="liq-meta">
@@ -4936,7 +5067,6 @@ function liqRebuildDoc(){
         <tfoot class="liq-spacer"><tr><td colspan="6"></td></tr></tfoot>
       </table>
       ${obsHtml}
-      ${cierreHtml}
     </div>`;
 
   const prevChecked = new Set([...document.querySelectorAll('.liq-retain-chk:checked')].map(c => c.getAttribute('data-id')));
@@ -4952,9 +5082,17 @@ function liqRebuildDoc(){
   const liqScrollBox = document.getElementById('liqModalBody');
   liqScrollBox.scrollTop = liqScrollBox.scrollHeight;
 
+  document.querySelectorAll('#liqModalBody .liq-add-uno').forEach(b => b.addEventListener('click', () => {
+    const r = (m.excluidosLista || []).find(x => x.id === b.getAttribute('data-id'));
+    if(!r) return;
+    askConfirm(`¿Agregar ${r.label} — ${r.area} (${r.piso})? Quedó terminada después del cierre; la vas a pagar en esta liquidación igual.`, () => {
+      liqExtraIds.add(r.id);
+      generarLiquidacionInterna();
+    });
+  }));
   const btnFueraCierre = document.getElementById('liqAgregarFueraCierreBtn');
   if(btnFueraCierre) btnFueraCierre.addEventListener('click', () => {
-    askConfirm(`¿Agregar las ${m.excluidosPorCierre} partida(s) Terminada(s) después del cierre? Vas a estar pagando algo que quedó fuera del corte de esta quincena/mes a propósito.`, () => {
+    askConfirm(`¿Agregar las ${m.excluidosPorCierre} partida(s) terminada(s) después del cierre? Vas a estar pagando algo que quedó fuera del corte de esta quincena/mes a propósito.`, () => {
       liqIgnorarCierre = true;
       generarLiquidacionInterna();
     });
