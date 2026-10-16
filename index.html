@@ -103,13 +103,13 @@
   .btn:active, .tab:active, .chk-pill:active, .assign-btn:active, .m2-edit-btn:active, .nota-btn-single:active{transform:scale(.94);}
   .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
   .btn.primary:hover{filter:brightness(1.08);}
-  .btn:not(:disabled):not(.bloq):hover, .tab:hover, .chk-pill:hover, .sbtn:hover, .banner-actualizar button:hover, .lg-teclas button:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.22);border-color:var(--accent);}
-  .btn.primary:not(:disabled):hover{box-shadow:0 4px 12px rgba(0,0,0,.35);}
+  .btn:not(:disabled):not(.bloq):hover, .tab:hover, .chk-pill:hover, .sbtn:hover, .banner-actualizar button:hover, .lg-teclas button:hover{box-shadow:inset 0 0 0 1px var(--accent), inset 0 0 16px color-mix(in srgb,var(--accent) 24%,transparent);border-color:var(--accent);}
+  .btn.primary:not(:disabled):hover, .tab.active:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,.75), inset 0 0 18px rgba(255,255,255,.24);border-color:transparent;}
   .btn:not(:disabled):not(.bloq):active, .tab:active, .chk-pill:active, .sbtn:active{transform:scale(.94);box-shadow:none;}
   #floatingSaveBtn, #scrollTopBtn{transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;}
   #floatingSaveBtn::after, #scrollTopBtn::after{content:"";position:absolute;top:-10px;right:-10px;bottom:-10px;left:-10px;border-radius:50%;}
-  #floatingSaveBtn:not(:disabled):hover{transform:scale(1.12);filter:brightness(1.12);box-shadow:0 5px 16px rgba(0,0,0,.45) !important;}
-  #scrollTopBtn:hover{transform:scale(1.12);border-color:var(--accent) !important;color:var(--accent) !important;}
+  #floatingSaveBtn:not(:disabled):hover{filter:brightness(1.1);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent), 0 2px 10px rgba(0,0,0,.35) !important;}
+  #scrollTopBtn:hover{border-color:var(--accent) !important;color:var(--accent) !important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent) !important;}
   #floatingSaveBtn:active, #scrollTopBtn:active{transform:scale(.92);}
   #floatingSaveBtn:disabled, #saveNowBtn:disabled{opacity:.5;cursor:wait;transform:none;filter:none;}
   .btn.primary:disabled{filter:none;}
@@ -1234,7 +1234,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.30.1';
+const APP_VERSION = '0.30.2';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
