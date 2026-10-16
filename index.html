@@ -223,6 +223,7 @@
   .pt-det td{padding:4px 6px 4px 0;border-bottom:1px dashed var(--border);vertical-align:top;}
   .pt-det td:last-child{text-align:right;white-space:nowrap;}
   .pt-det .e-ent{color:var(--entregado);font-weight:600;}
+  .pt-det .e-fuera{color:#e8710a;font-weight:600;}
   .pt-det .e-pag{color:var(--pagado);font-weight:600;}
   .pt-det .pt-add-cierre{margin-top:4px;padding:3px 8px;font-size:11px;}
   .stat-card{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--border-strong);border-radius:var(--radius);padding:13px 15px;box-shadow:0 2px 6px rgba(30,40,35,.06);}
@@ -246,6 +247,7 @@
   .cat-m{padding:9px 0;}
   .cat-m + .cat-m{border-top:1px dashed var(--border);}
   .cat-m .n{font-size:20px;}
+  .cat-m .sub2.fuera,.cat-m .sub2.fuera b{color:#e8710a;}
   .cat-card:not(:has(.cat-money)) .cat-body{grid-template-columns:1fr;}
   @media (max-width:520px){.cat-body{grid-template-columns:1fr;}.cat-money{border-left:0;border-top:1px solid var(--border);}}
   .stat-card .n{font-size:22px;font-weight:700;}
@@ -1286,7 +1288,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.31.7';
+const APP_VERSION = '0.31.9';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2383,10 +2385,11 @@ function renderStats(){
     const esC = cat === 'Cerámica';
     const ref = (t, rf) => esC ? `<div class="sub2">${money(rf)} con tarifa referencia</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
     const item = (cls, valor, rotulo, subs) => `<div class="cat-m ${cls}"><div class="n c-entregado">${money(valor)}</div><div class="l">${rotulo}</div>${subs}</div>`;
-    const terminados = cierreQuincena
-      ? item('', r.dentro, 'Terminado dentro del cierre', `<div class="sub2">${r.nDentro} partida(s) · entran en la próxima liquidación</div>${ref(r.dentro, r.refDentro)}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div>`)
-        + item('cierre-nuevo', r.nuevo, 'Terminado nuevo, después del cierre', `<div class="sub2">${r.nNuevo} partida(s) · no entran hasta el próximo cierre</div>${ref(r.nuevo, r.refNuevo)}`)
-      : item('', r.ter, 'Terminado', ref(r.ter, r.refTer));
+    const nT = r.nDentro + r.nNuevo;
+    const reparto = cierreQuincena
+      ? `<div class="sub2">Dentro del cierre <b>${money(r.dentro)}</b> (${r.nDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.nuevo)}</b> (${r.nNuevo})</div>`
+      : `<div class="sub2">${nT} partida(s)</div>`;
+    const terminados = item('', r.ter, 'Terminado', reparto + ref(r.ter, r.refTer) + (cierreQuincena ? `<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div>` : ''));
     const pct = r.total ? Math.round(r.pag / r.total * 100) : 0;
     const pagado = `<div class="cat-m"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div><div class="bar"><div style="width:${pct}%; background:var(--pagado);"></div></div></div>`;
     return terminados + pagado;
@@ -2495,7 +2498,7 @@ function ptDetalle(o, verPlata){
     const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1For(c.categoria, w)) : '';
     const estTxt = f.estado === 'entregado' ? (cierreQuincena ? (f.nuevo ? 'Terminado · fuera del cierre' : 'Terminado · dentro del cierre') : 'Terminado') : 'Pagado';
     const btn = (isAdmin && f.estado === 'entregado' && f.nuevo) ? `<br><button type="button" class="btn small pt-add-cierre" data-id="${esc(f.id)}">Agregar al cierre</button>` : '';
-    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? 'e-ent' : 'e-pag'}">${estTxt}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span>${btn}</td></tr>`;
+    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? (cierreQuincena && f.nuevo ? 'e-fuera' : 'e-ent') : 'e-pag'}">${estTxt}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span>${btn}</td></tr>`;
   }).join('')}</table></div>`;
 }
 function renderPorTrabajador(){
