@@ -1288,7 +1288,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.31.9';
+const APP_VERSION = '0.31.11';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2357,17 +2357,19 @@ function money(n){ return (preciosOcultos() && n !== null && n !== undefined) ? 
 
 function statsDeCategoria(cat){
   const cells = ALL_CELLS.filter(c => c.categoria === cat);
-  const r = {counts:{pendiente:0, proceso:0, entregado:0, pagado:0}, total:0, pag:0, ter:0, dentro:0, nuevo:0, nDentro:0, nNuevo:0, refDentro:0, refNuevo:0, refTer:0};
+  const r = {counts:{pendiente:0, proceso:0, entregado:0, pagado:0}, total:0, pag:0, ter:0, dentro:0, nuevo:0, nDentro:0, nNuevo:0, pagDentro:0, pagFuera:0, nPagDentro:0, nPagFuera:0, refDentro:0, refNuevo:0, refTer:0};
   cells.forEach(c => {
     const st = getState(c.id);
     const e = resolveEstado(st);
     r.counts[e] = (r.counts[e]||0) + 1;
     const nuevo = e === 'entregado' && !!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena;
     if(e === 'entregado'){ if(nuevo) r.nNuevo++; else r.nDentro++; }
+    const pagFuera = e === 'pagado' && !!cierreQuincena && (st.pagadoTs || st.terminadoTs || 0) > cierreQuincena;
+    if(e === 'pagado'){ if(pagFuera) r.nPagFuera++; else r.nPagDentro++; }
     if(!st.m2) return;
     const p = st.m2 * rate1For(cat, st.trabajador), ref = st.m2 * RATES.cerAlt;
     r.total += p;
-    if(e === 'pagado') r.pag += p;
+    if(e === 'pagado'){ r.pag += p; if(pagFuera) r.pagFuera += p; else r.pagDentro += p; }
     if(e === 'entregado'){
       r.ter += p; r.refTer += ref;
       if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; }
@@ -2391,7 +2393,7 @@ function renderStats(){
       : `<div class="sub2">${nT} partida(s)</div>`;
     const terminados = item('', r.ter, 'Terminado', reparto + ref(r.ter, r.refTer) + (cierreQuincena ? `<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div>` : ''));
     const pct = r.total ? Math.round(r.pag / r.total * 100) : 0;
-    const pagado = `<div class="cat-m"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div><div class="bar"><div style="width:${pct}%; background:var(--pagado);"></div></div></div>`;
+    const pagado = `<div class="cat-m"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${pct}%; background:var(--pagado);"></div></div></div>`;
     return terminados + pagado;
   };
   const tarjeta = (cat, cls) => {
@@ -2453,10 +2455,17 @@ document.getElementById('porTrabajador').addEventListener('click', (e) => {
   const b = e.target.closest('.pt-add-cierre');
   if(!b || !isAdmin) return;
   e.preventDefault();
-  const id = b.getAttribute('data-id'), cell = cellById[id], st = state[id];
+  const id = b.getAttribute('data-id'), dir = b.getAttribute('data-dir'), est = b.getAttribute('data-estado');
+  const cell = cellById[id], st = state[id];
   if(!cell || !st || !cierreQuincena) return;
-  askConfirm(`¿Agregar ${cell.piso} · ${cell.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + cell.dpto} · ${AREA_LABEL[cell.area] || cell.area} al cierre? Terminó después del cierre; pasará a contar como terminado dentro del cierre y se pagará en esta liquidación. Su fecha de terminado quedará en el momento del cierre.`, () => {
-    st.terminadoTs = cierreQuincena;
+  const campo = est === 'pagado' ? 'pagadoTs' : 'terminadoTs';
+  const que = est === 'pagado' ? 'pagada' : 'terminada';
+  const lugar = `${cell.piso} · ${cell.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + cell.dpto} · ${AREA_LABEL[cell.area] || cell.area}`;
+  const txt = dir === 'dentro'
+    ? `¿Agregar ${lugar} al cierre? Quedó ${que} después del cierre; pasará a contar como ${que} dentro del cierre. Su fecha quedará en el momento del cierre.`
+    : `¿Sacar ${lugar} del cierre? Pasará a contar como ${que} fuera del cierre (después del cierre). Su fecha quedará justo después del cierre.`;
+  askConfirm(txt, () => {
+    st[campo] = dir === 'dentro' ? cierreQuincena : cierreQuincena + 1000;
     markCellDirty(id); scheduleSave(); render();
   });
 });
@@ -2482,7 +2491,8 @@ function ptDatos(){
     b.n++; b.m2 += m2; b.monto += monto;
     const nuevo = estado === 'entregado' && !!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena;
     if(estado === 'entregado'){ const t = nuevo ? o.nuevo : o.dentro; t.n++; t.m2 += m2; t.monto += monto; }
-    o.celdas.push({c, estado, m2, nuevo, id: c.id});
+    const pagFuera = estado === 'pagado' && !!cierreQuincena && (st.pagadoTs || st.terminadoTs || 0) > cierreQuincena;
+    o.celdas.push({c, estado, m2, nuevo, pagFuera, id: c.id});
   });
   return Object.values(por);
 }
@@ -2496,9 +2506,10 @@ function ptDetalle(o, verPlata){
     const c = f.c, w = o.nombre;
     const lugar = `${esc(c.categoria)} · ${esc(c.piso)} · ${c.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + esc(c.dpto)} · ${esc(AREA_LABEL[c.area] || c.area)}`;
     const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1For(c.categoria, w)) : '';
-    const estTxt = f.estado === 'entregado' ? (cierreQuincena ? (f.nuevo ? 'Terminado · fuera del cierre' : 'Terminado · dentro del cierre') : 'Terminado') : 'Pagado';
-    const btn = (isAdmin && f.estado === 'entregado' && f.nuevo) ? `<br><button type="button" class="btn small pt-add-cierre" data-id="${esc(f.id)}">Agregar al cierre</button>` : '';
-    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? (cierreQuincena && f.nuevo ? 'e-fuera' : 'e-ent') : 'e-pag'}">${estTxt}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span>${btn}</td></tr>`;
+    const estTxt = f.estado === 'entregado' ? (cierreQuincena ? (f.nuevo ? 'Terminado · fuera del cierre' : 'Terminado · dentro del cierre') : 'Terminado') : (cierreQuincena ? (f.pagFuera ? 'Pagado · fuera del cierre' : 'Pagado · dentro del cierre') : 'Pagado');
+    const fuera = f.estado === 'entregado' ? f.nuevo : f.pagFuera;
+    const btn = (isAdmin && cierreQuincena) ? `<br><button type="button" class="btn small pt-add-cierre" data-id="${esc(f.id)}" data-estado="${f.estado}" data-dir="${fuera ? 'dentro' : 'fuera'}">${fuera ? 'Agregar al cierre' : 'Sacar del cierre'}</button>` : '';
+    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? (cierreQuincena && f.nuevo ? 'e-fuera' : 'e-ent') : (f.pagFuera ? 'e-fuera' : 'e-pag')}">${estTxt}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span>${btn}</td></tr>`;
   }).join('')}</table></div>`;
 }
 function renderPorTrabajador(){
