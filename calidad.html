@@ -14,7 +14,7 @@
 @media (prefers-color-scheme:dark){:root{--bg:#14181a;--panel:#1d2326;--soft:#232a2d;--border:#333c40;--strong:#46525a;--text:#e6eaea;--sub:#9aa5a8;--ok:#4fb85b;--warn:#f0b400;--bad:#e5604f;}}
 *{box-sizing:border-box;}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-body{min-height:100vh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;padding-bottom:env(safe-area-inset-bottom);}
+body{background-color:#0b2b36;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);background-attachment:fixed;min-height:100vh;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;padding-bottom:env(safe-area-inset-bottom);}
 button,input,select{font-family:inherit;border-radius:0;}
 button{cursor:pointer;}
 .btn{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:9px 14px;font-size:13px;min-height:40px;transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease;}
@@ -28,8 +28,9 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .brand-logo.dk{display:none;}
 @media (prefers-color-scheme:dark){.brand-logo.lt{display:none;}.brand-logo.dk{display:block;}}
 .titles{min-width:0;}
-.titles h1{font-size:20px;margin:0 0 3px;font-weight:700;letter-spacing:.2px;line-height:1.2;}
-.titles p{margin:0;color:var(--sub);font-size:12.5px;}
+.brand-logo.lt{display:none !important;}.brand-logo.dk{display:block !important;border-right-color:rgba(255,255,255,.35);}
+.titles h1{color:#fff;font-size:20px;margin:0 0 3px;font-weight:700;letter-spacing:.2px;line-height:1.2;}
+.titles p{margin:0;color:rgba(255,255,255,.78);font-size:12.5px;}
 .cluster{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .cluster .btn{min-height:38px;padding:8px 14px;}
 .conectado{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;padding:9px 14px;min-height:38px;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}
@@ -40,7 +41,7 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .toolbar select{padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
 @media (max-width:520px){.toolbar .grp{flex:1 1 calc(50% - 10px);}.cluster{width:100%;}.cluster .btn{flex:0 0 auto;}}
 main{max-width:860px;margin:0 auto;padding:16px;}
-.msg{font-size:12.5px;color:var(--sub);margin:0 0 12px;}
+.msg{font-size:12.5px;color:rgba(255,255,255,.82);margin:0 0 12px;}
 .resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
 .res{background:var(--panel);border:1px solid var(--border);border-top:4px solid var(--strong);padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
 .res b{font-size:20px;line-height:1.1;}
@@ -115,7 +116,15 @@ body.bloq{overflow:hidden;}
 .pill{font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--border);color:var(--sub);}
 .pill.ok{background:rgba(67,160,71,.16);border-color:transparent;color:var(--ok);}
 #aviso{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,16px);max-width:min(92vw,420px);background:#3a2323;color:#fff;border:1px solid #c0392b;padding:10px 14px;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
-#aviso.on{opacity:1;transform:translate(-50%,0);}
+#aviso.on{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+#aviso{display:flex;align-items:flex-start;gap:12px;}
+#aviso button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;width:26px;height:26px;padding:0;font-size:14px;line-height:1;flex:0 0 auto;}
+.infobar{width:calc(100% - 32px);max-width:828px;margin:12px auto 0;padding:9px 12px;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.5;color:var(--text);}
+.infobar.warn{border-left-color:var(--warn);background:linear-gradient(rgba(217,154,0,.14),rgba(217,154,0,.14)),var(--panel);}
+.infobar.bad{border-left-color:var(--bad);background:linear-gradient(rgba(192,57,43,.12),rgba(192,57,43,.12)),var(--panel);}
+.infobar b{font-weight:700;}
+.infobar .btn{margin-top:8px;}
+.infobar[hidden]{display:none;}
 #gate.off{display:none;}
 body.sin-sesion header,body.sin-sesion main{visibility:hidden;}
 .estado{padding:34px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);display:flex;flex-direction:column;align-items:center;gap:12px;font-size:14px;}
@@ -209,6 +218,7 @@ body.sin-sesion header,body.sin-sesion main{visibility:hidden;}
     <button class="btn" id="salir" type="button">Cerrar sesión</button>
   </div>
 </header>
+<div class="infobar" id="infoBar" role="status" hidden></div>
 <main>
   <p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
   <div class="resumen">
@@ -254,7 +264,7 @@ body.sin-sesion header,body.sin-sesion main{visibility:hidden;}
   <div class="cbarra-w"><div class="cbarra" id="cargaBarra" role="progressbar" aria-label="Cargando"></div></div>
   <p id="cargaMsg">Comprobando tu sesión…</p>
 </div>
-<div id="aviso" role="status"></div>
+<div id="aviso" role="alert"><span id="avisoTxt"></span><button type="button" id="avisoX" aria-label="Cerrar aviso">✕</button></div>
 <div id="velOp">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="oTit">
     <h2 id="oTit">Editar opciones de observación</h2>
@@ -299,8 +309,10 @@ const LAYOUT = [{"n":-1,"p":"Piso -1","d":"Sala de basura","cer":[["cer-sub-basu
 const PISO_REVISADO_HASTA = 9;
 let celdas = {};
 let revisiones = {};
-const OPCIONES_BASE = ['Palmeta/s Sopladas', 'Palmeta/s Picadas', 'Palmeta/s Cabeceadas'];
-let opciones = OPCIONES_BASE.slice();
+const PALM_BASE = ['Palmeta/s Sopladas', 'Palmeta/s Picadas', 'Palmeta/s Cabeceadas'];
+const OPCIONES_BASE = {piso: [...PALM_BASE, 'Falta Terraza', 'Pavimento en mal estado'], muros: [...PALM_BASE, 'Tabiquería en mal estado'], cocina: [...PALM_BASE, 'Tabiquería en mal estado']};
+let opciones = JSON.parse(JSON.stringify(OPCIONES_BASE));
+const opcionesDe = () => opciones[scope] || [];
 let opcionesEdit = [];
 let cargando = false;
 let actual = null;
@@ -427,6 +439,8 @@ async function cargaOcultar(){
 
 function cerrarSesion(msg){
   cargaCortar();
+  pintarInfo('', '');
+  $('aviso').classList.remove('on');
   token = ''; nombre = ''; cargo = '';
   guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadCargo', null);
   celdas = {}; revisiones = {}; cargado = false;
@@ -440,7 +454,7 @@ function cerrarSesion(msg){
 }
 
 function pintarQuien(){
-  $('quien').textContent = (cargo || 'Calidad') + ' - ' + nombre;
+  $('quien').textContent = (cargo ? cargo + ' - ' : '') + nombre;
 }
 
 function entrarVista(){
@@ -505,6 +519,37 @@ function etiqueta(r){
 const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : '';
 
 let primerPintado = true;
+function pintarInfo(tipo, html){
+  const b = $('infoBar');
+  b.className = 'infobar' + (tipo ? ' ' + tipo : '');
+  b.innerHTML = html;
+  b.hidden = !html;
+}
+function fechaCorta(ts){
+  return new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+}
+function infoDeCarga(j){
+  const hora = new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const base = '…' + DB_URL.replace(/\/exec$/, '').slice(-8);
+  const r = j.resumen;
+  if(!r || typeof r.filas !== 'number'){
+    pintarInfo('warn', '<b>El servidor no entrega el resumen de datos.</b> Falta publicar la versión nueva del script en la base de datos. Leído a las ' + hora + '.');
+    return;
+  }
+  const listos = Object.keys(celdas).length ? LAYOUT.filter(d => estado(d, 'piso').ok || estado(d, 'muros').ok || estado(d, 'cocina').ok).length : 0;
+  let txt = '<b>Datos de la base de datos leídos a las ' + hora + '.</b> ' + r.filas + ' partidas, ' + r.term + ' terminadas (cerámica ' + r.cer + ', frague ' + r.fra + ')';
+  if(r.ult) txt += '. Último avance registrado: ' + fechaCorta(r.ult);
+  txt += '. Servidor v' + esc(String(j.backendVersion || '?')) + ' · base ' + esc(base) + '.';
+  let tipo = '';
+  if(r.filas === 0){ tipo = 'warn'; txt += '<br>La base de datos no tiene ninguna partida. Revisa que el panel esté guardando en esta misma base.'; }
+  else if(r.term === 0){ tipo = 'warn'; txt += '<br>No hay ninguna partida terminada en la base de datos. Si en el panel ves avance, el panel no está guardando aquí: compara el código de la base con el que usa el panel.'; }
+  else if(!listos){ txt += '<br>Ningún departamento tiene cerámica y frague terminados al mismo tiempo, por eso no hay nada por revisar todavía.'; }
+  pintarInfo(tipo, txt);
+}
+function infoDeError(texto){
+  pintarInfo('bad', '<b>No se pudo leer la base de datos.</b> ' + esc(texto) + '<br><button class="btn small" id="infoReintentar" type="button">Reintentar</button>');
+}
+
 function pintar(){
   if(!cargado){
     ['nPend', 'nRev', 'nObs', 'nNo'].forEach(id => { $(id).textContent = '–'; });
@@ -572,7 +617,7 @@ function parseItems(r){
 }
 
 function pintarLista(sel){
-  const nombres = [...opciones, ...Object.keys(sel).filter(n => !opciones.includes(n))];
+  const nombres = [...opcionesDe(), ...Object.keys(sel).filter(n => !opcionesDe().includes(n))];
   $('mLista').innerHTML = nombres.length ? nombres.map(n => `<div class="obsfila"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label><input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}></div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
   $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = estadoSel === 'observado' ? 0 : -1; });
 }
@@ -627,13 +672,10 @@ function cerrarModal(){
 }
 
 let enVuelo = 0;
-let avisoTimer = null;
 function aviso(texto){
   const a = $('aviso');
-  a.textContent = texto;
+  $('avisoTxt').textContent = texto;
   a.classList.add('on');
-  clearTimeout(avisoTimer);
-  avisoTimer = setTimeout(() => a.classList.remove('on'), 5000);
 }
 
 function guardarRevision(){
@@ -670,7 +712,8 @@ function pintarOpciones(){
   $('opLista').innerHTML = opcionesEdit.length ? opcionesEdit.map((o, i) => `<div class="opfila"><span>${esc(o)}</span><button class="btn small" type="button" data-q="${i}">Quitar</button></div>`).join('') : '<div class="vacio-op">No queda ninguna opción.</div>';
 }
 function abrirOpciones(){
-  opcionesEdit = opciones.slice();
+  opcionesEdit = opcionesDe().slice();
+  $('oTit').textContent = 'Opciones de observación · ' + NOMBRE_SCOPE[scope];
   pintarOpciones();
   $('opNueva').value = '';
   $('opErr').textContent = '';
@@ -697,10 +740,10 @@ function agregarOpcion(){
 async function guardarOpciones(){
   $('opListo').disabled = true; $('opCancelar').disabled = true;
   try{
-    const j = await llamar('calidadOpciones', {opciones: opcionesEdit, nonce: nuevoNonce(), ts: Date.now()});
+    const j = await llamar('calidadOpciones', {zona: scope, opciones: opcionesEdit, nonce: nuevoNonce(), ts: Date.now()});
     if(j && j.ok){
       const sel = seleccion();
-      opciones = j.opciones;
+      if(j.opciones && typeof j.opciones === 'object' && !Array.isArray(j.opciones)) opciones = Object.assign({}, opciones, j.opciones);
       pintarLista(sel);
       cerrarOpciones();
     }else{
@@ -752,10 +795,13 @@ async function cargar(inicial){
     if(j && j.ok && j.celdas && typeof j.celdas === 'object'){
       celdas = j.celdas;
       revisiones = j.revisiones || {};
-      if(Array.isArray(j.opciones)) opciones = j.opciones;
+      const cargoSrv = {admin:'Admin', jefe:'Jefe de Terreno', calidad:'Calidad'}[j.cargo];
+      if(cargoSrv && cargoSrv !== cargo){ cargo = cargoSrv; guardarLocal('calidadCargo', cargo); pintarQuien(); }
+      if(j.opciones && typeof j.opciones === 'object' && !Array.isArray(j.opciones)) opciones = Object.assign({}, opciones, j.opciones);
       cargado = true;
       cargando = false;
       pintar();
+      infoDeCarga(j);
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
       return 'ok';
     }else if(j && j.error === 'sin_sesion'){
@@ -763,11 +809,13 @@ async function cargar(inicial){
     }else{
       errorCarga = j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no reconoce esta versión. Falta publicar la versión nueva del script.' : 'La base de datos respondió con un formato inesperado.';
       if(!inicial) falloCarga('No se pudo cargar. Reintenta.');
+      infoDeError(errorCarga);
       return 'fallo';
     }
   }catch(e){
     errorCarga = e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet.';
     if(!inicial) falloCarga(e && e.message === 'tiempo' ? 'La base tarda demasiado en responder.' : 'Sin conexión con la base de datos.');
+    infoDeError(errorCarga);
     return 'fallo';
   }finally{ cargando = false; $('refrescar').disabled = false; }
 }
@@ -846,7 +894,9 @@ $('salir').addEventListener('click', () => {
   fetch(DB_URL, {method:'POST', keepalive: true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: t})}).catch(() => {});
 });
 $('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargarInicial(); });
-$('refrescar').addEventListener('click', cargar);
+$('refrescar').addEventListener('click', () => cargar());
+$('avisoX').addEventListener('click', () => $('aviso').classList.remove('on'));
+$('infoBar').addEventListener('click', e => { if(e.target.closest('#infoReintentar')) cargarInicial(); });
 $('filtro').addEventListener('change', pintar);
 $('filtroEstado').addEventListener('change', pintar);
 function pintarBotonOrden(){
