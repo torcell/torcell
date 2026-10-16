@@ -224,26 +224,27 @@
   .pt-det td:last-child{text-align:right;white-space:nowrap;}
   .pt-det .e-ent{color:var(--entregado);font-weight:600;}
   .pt-det .e-pag{color:var(--pagado);font-weight:600;}
+  .pt-det .pt-add-cierre{margin-top:4px;padding:3px 8px;font-size:11px;}
   .stat-card{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--border-strong);border-radius:var(--radius);padding:13px 15px;box-shadow:0 2px 6px rgba(30,40,35,.06);}
   .stat-card.st-pendiente{border-top-color:var(--pendiente);}
   .stat-card.st-proceso{border-top-color:var(--proceso);}
   .stat-card.st-entregado{border-top-color:var(--entregado);}
   .stat-card.st-pagado{border-top-color:var(--pagado);}
-  .stat-card.stat-combo{grid-column:span 2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:0;border-top:0;}
-  .stat-combo .combo-col{padding:13px 15px;border-top:3px solid var(--border-strong);min-width:0;}
-  .stat-combo .combo-col + .combo-col{border-left:1px solid var(--border);}
-  .stat-combo .combo-col.st-proceso{border-top-color:var(--proceso);}
-  .stat-combo .combo-col.st-entregado{border-top-color:var(--entregado);}
-  .stat-combo .combo-col.st-pagado{border-top-color:var(--pagado);}
+  .stat-card.stat-combo{padding:9px 15px;display:flex;flex-direction:column;justify-content:center;gap:3px;}
+  .stat-combo .combo-fila{display:flex;align-items:baseline;gap:10px;min-width:0;}
+  .stat-combo .combo-fila + .combo-fila{border-top:1px solid var(--border);padding-top:3px;}
+  .stat-combo .combo-fila .n{font-size:19px;min-width:30px;line-height:1.2;}
+  .stat-combo .combo-fila .l{margin-top:0;min-width:0;white-space:nowrap;}
+  @media (max-width:520px){.stat-card.stat-combo{padding:9px 11px;}.stat-combo .combo-fila{gap:7px;}.stat-combo .combo-fila .n{min-width:22px;}.stat-combo .combo-fila .l{font-size:9.5px;letter-spacing:.2px;}}
   .stat-card .n{font-size:22px;font-weight:700;}
   .stat-card .l{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
   .stat-card .bar{height:5px;background:var(--panel-soft);margin-top:9px;border:1px solid var(--border);}
   .stat-card .bar > div{height:100%;}
   .stat-card .sub2{font-size:11px;color:var(--sub);margin-top:3px;}
   .stat-card .ganancia{font-weight:700;color:var(--entregado);}
-  .frag-chip{display:block;background:none;border:0;padding:0;margin:2px 0 4px;font:inherit;font-size:12px;font-weight:600;color:var(--sub);text-align:left;cursor:pointer;border-radius:0;}
+  .frag-chip{display:block;background:none;border:0;padding:0;margin:2px 0 4px;font:inherit;font-size:12px;font-weight:600;color:var(--entregado);text-align:left;cursor:pointer;border-radius:0;}
   .frag-chip u{display:block;width:max-content;font-size:10.5px;font-weight:400;text-decoration:none;border-bottom:1px dotted var(--sub);margin-top:1px;}
-  .frag-chip:hover{color:var(--accent);}
+  .frag-chip:hover{filter:brightness(.85);}
   .frag-chip:hover u{border-bottom-color:var(--accent);}
   .frag-chip:active{transform:scale(.97);}
   .frag-tabla{width:100%;border-collapse:collapse;font-size:13px;margin:0 0 14px;}
@@ -260,7 +261,7 @@
   .pt-grupo.frag ~ .pt-fila .pt-col.suma b,.pt-grupo.frag ~ .pt-tot .pt-col.suma b{color:var(--sub);}
   .pt-resumen{padding:9px 15px;font-size:12.5px;border-top:1px solid var(--border);line-height:1.6;}
   .pt-resumen b{font-variant-numeric:tabular-nums;}
-  .pt-resumen .frag{color:var(--sub);}
+  .pt-resumen .frag{color:var(--entregado);font-weight:600;margin-left:6px;}
   .c-pendiente{color:var(--pendiente)} .c-proceso{color:#a97e00} .c-entregado{color:var(--entregado)} .c-pagado{color:var(--pagado)}
   .money-card .n{font-size:16.5px;}
   .recordatorio-cierre{margin:0 0 12px;padding:8px 10px;background:var(--panel-soft);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.6;}
@@ -1273,7 +1274,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.31.3';
+const APP_VERSION = '0.31.6';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2400,10 +2401,10 @@ function renderStats(){
   const pendDef = defs[0];
   const tarjetaPend = `<div class="stat-card st-pendiente"><div class="n c-pendiente">${counts.pendiente||0}</div><div class="l">${pendDef.label}</div>${barraDe(pendDef)}</div>`;
   const tarjetaAvance = `<div class="stat-card stat-combo">${defs.slice(1).map(s =>
-    `<div class="combo-col st-${s.cls}"><div class="n c-${s.cls}">${counts[s.key]||0}</div><div class="l">${s.label}</div>${barraDe(s)}</div>`).join('')}</div>`;
+    `<div class="combo-fila"><div class="n c-${s.cls}">${counts[s.key]||0}</div><div class="l">${s.label}</div></div>`).join('')}</div>`;
   const cards = tarjetaPend + tarjetaAvance;
   const gananciaLinea = (r, b) => `<div class="sub2 ganancia">Margen: ${money(r - b)}</div>`;
-  const fragLinea = (v) => v > 0 ? `<button type="button" class="frag-chip" data-frag-det title="Ver detalle del frague">+ ${money(v)} frague <u>ver detalle</u></button>` : '';
+  const fragLinea = (v) => v > 0 ? `<button type="button" class="frag-chip" data-frag-det title="Ver detalle del frague">Frague ${money(v)} <u>ver detalle</u></button>` : '';
 
   const terminadoSub = activeCategoria === 'Cerámica'
     ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>${gananciaLinea(terminadoMonto2, terminadoMonto1)}`
@@ -2469,6 +2470,17 @@ function abrirFragueDetalle(){
 document.getElementById('stats').addEventListener('click', (e) => { if(e.target.closest('[data-frag-det]')) abrirFragueDetalle(); });
 document.getElementById('fragCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('fragOverlay')));
 
+document.getElementById('porTrabajador').addEventListener('click', (e) => {
+  const b = e.target.closest('.pt-add-cierre');
+  if(!b || !isAdmin) return;
+  e.preventDefault();
+  const id = b.getAttribute('data-id'), cell = cellById[id], st = state[id];
+  if(!cell || !st || !cierreQuincena) return;
+  askConfirm(`¿Agregar ${cell.piso} · ${cell.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + cell.dpto} · ${AREA_LABEL[cell.area] || cell.area} al cierre? Terminó después del cierre; pasará a contar como terminado dentro del cierre y se pagará en esta liquidación. Su fecha de terminado quedará en el momento del cierre.`, () => {
+    st.terminadoTs = cierreQuincena;
+    markCellDirty(id); scheduleSave(); render();
+  });
+});
 const ptAbiertos = new Set();
 let ptSeccionAbierta = true;
 try{ ptSeccionAbierta = localStorage.getItem('progresoObraPorTrab') !== '0'; }catch(err){}
@@ -2491,7 +2503,7 @@ function ptDatos(){
     b.n++; b.m2 += m2; b.monto += monto;
     const nuevo = estado === 'entregado' && !!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena;
     if(estado === 'entregado'){ const t = nuevo ? o.nuevo : o.dentro; t.n++; t.m2 += m2; t.monto += monto; }
-    o.celdas.push({c, estado, m2, nuevo});
+    o.celdas.push({c, estado, m2, nuevo, id: c.id});
   });
   return Object.values(por);
 }
@@ -2505,7 +2517,9 @@ function ptDetalle(o, verPlata){
     const c = f.c, w = o.nombre;
     const lugar = `${esc(c.categoria)} · ${esc(c.piso)} · ${c.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + esc(c.dpto)} · ${esc(AREA_LABEL[c.area] || c.area)}`;
     const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1For(c.categoria, w)) : '';
-    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? 'e-ent' : 'e-pag'}">${f.estado === 'entregado' ? (f.nuevo ? 'Terminado · tras cierre' : 'Terminado') : 'Pagado'}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span></td></tr>`;
+    const estTxt = f.estado === 'entregado' ? (cierreQuincena ? (f.nuevo ? 'Terminado · fuera del cierre' : 'Terminado · dentro del cierre') : 'Terminado') : 'Pagado';
+    const btn = (isAdmin && f.estado === 'entregado' && f.nuevo) ? `<br><button type="button" class="btn small pt-add-cierre" data-id="${esc(f.id)}">Agregar al cierre</button>` : '';
+    return `<tr><td>${lugar}</td><td class="${f.estado === 'entregado' ? 'e-ent' : 'e-pag'}">${estTxt}<br><span style="font-weight:400;color:var(--sub);">${f.m2 ? ptFm2(f.m2) + ' m²' : 'sin m²'}${monto}</span>${btn}</td></tr>`;
   }).join('')}</table></div>`;
 }
 function renderPorTrabajador(){
@@ -2535,7 +2549,7 @@ function renderPorTrabajador(){
     + (separar ? '<div class="pt-grupo frag">Frague</div>' : '') + listaFra.map(filaHtml).join('')
     + (separar && listaFra.length > 1 ? `<div class="pt-tot frag"><div class="pt-nom">Total frague</div>${colsTerminado(totFra)}${ptCol(totFra.pag, verPlata)}</div>` : '');
   const resumenAparte = separar && verPlata
-    ? `<div class="pt-resumen"><div>Total terminado <b>${money(tot.ent.monto)}</b> <span class="frag">+ ${money(totFra.ent.monto)} frague</span></div><div>Total pagado <b>${money(tot.pag.monto)}</b> <span class="frag">+ ${money(totFra.pag.monto)} frague</span></div></div>` : '';
+    ? `<div class="pt-resumen"><div>Total terminado <b>${money(tot.ent.monto)}</b> <span class="frag">Frague ${money(totFra.ent.monto)}</span></div><div>Total pagado <b>${money(tot.pag.monto)}</b> <span class="frag">Frague ${money(totFra.pag.monto)}</span></div></div>` : '';
   const totalFila = '';
   el.style.display = '';
   el.classList.toggle('pt-cinco', conCierre);
@@ -4769,7 +4783,6 @@ function abrirConfigLiquidacion(){
   document.getElementById('liqConfigError').textContent = '';
   document.getElementById('liqHistoryBox').style.display = 'none';
   liqIgnorarCierre = false;
-  liqExtraIds = new Set();
 
   const sinAsignar = ALL_CELLS.filter(c => {
     const st = getState(c.id);
@@ -4834,7 +4847,6 @@ document.getElementById('liqWorkerSelect').addEventListener('change', (e) => {
 
 let liqExtraDetails = [];
 let liqIgnorarCierre = false;
-let liqExtraIds = new Set();
 
 document.getElementById('liqConfigGenerar').addEventListener('click', generarLiquidacionInterna);
 function generarLiquidacionInterna(){
@@ -4863,7 +4875,7 @@ function generarLiquidacionInterna(){
     if(st.retenido && !incRetenido) return;
     const estado = resolveEstado(st);
 
-    if(estado === 'entregado' && !liqIgnorarCierre && !liqExtraIds.has(cell.id) && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena){
+    if(estado === 'entregado' && !liqIgnorarCierre && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena){
       if(st.m2){
         excluidosPorCierre++;
         excluidosLista.push({id: cell.id, categoria: cell.categoria, piso: cell.piso, pisoNum: cell.pisoNum, label: liqLabelForCell(cell), area: AREA_LABEL[cell.area] || cell.area, m2: st.m2, precio: st.m2 * rate1For(cell.categoria, st.trabajador)});
@@ -4992,17 +5004,9 @@ function liqRebuildDoc(){
         <h4 style="margin:14px 0 6px;font-size:12.5px;">Observaciones</h4>
         ${m.observaciones.map(o => `<div style="font-size:11.5px;margin-bottom:4px;"><b>${o.label} — ${o.area}</b> (${o.piso}): <i>${o.nota}</i></div>`).join('')}
       </div>` : '';
-  const fueraLista = (m.excluidosLista || []).slice().sort((a, b) => a.pisoNum - b.pisoNum || String(a.label).localeCompare(String(b.label), 'es', {numeric: true}));
   const cierreHtml = (m.excluidosPorCierre > 0) ? `
       <div class="liq-fuera-cierre">
-        <div class="liq-fuera-cab">
-          <span>${m.excluidosPorCierre} partida(s) terminada(s) después del cierre no se incluyeron en esta liquidación.</span>
-          <button class="btn small" id="liqAgregarFueraCierreBtn" type="button">Agregar todas</button>
-        </div>
-        ${fueraLista.map(r => `<div class="liq-fuera-fila">
-          <div><b>${r.label} — ${r.area}</b><small>${r.piso} · ${r.categoria} · ${r.m2} m² · ${moneyReal(r.precio)}</small></div>
-          <button class="btn small liq-add-uno" type="button" data-id="${r.id}">Agregar</button>
-        </div>`).join('')}
+        <div class="liq-fuera-cab"><span>${m.excluidosPorCierre} partida(s) terminada(s) después del cierre no se incluyeron en esta liquidación. Se agregan desde "Avance por trabajador".</span></div>
       </div>` : '';
   const metaHtml = `
       <div class="liq-meta">
@@ -5081,22 +5085,6 @@ function liqRebuildDoc(){
   document.getElementById('liqPrintArea').innerHTML = docHtmlPrint;
   const liqScrollBox = document.getElementById('liqModalBody');
   liqScrollBox.scrollTop = liqScrollBox.scrollHeight;
-
-  document.querySelectorAll('#liqModalBody .liq-add-uno').forEach(b => b.addEventListener('click', () => {
-    const r = (m.excluidosLista || []).find(x => x.id === b.getAttribute('data-id'));
-    if(!r) return;
-    askConfirm(`¿Agregar ${r.label} — ${r.area} (${r.piso})? Quedó terminada después del cierre; la vas a pagar en esta liquidación igual.`, () => {
-      liqExtraIds.add(r.id);
-      generarLiquidacionInterna();
-    });
-  }));
-  const btnFueraCierre = document.getElementById('liqAgregarFueraCierreBtn');
-  if(btnFueraCierre) btnFueraCierre.addEventListener('click', () => {
-    askConfirm(`¿Agregar las ${m.excluidosPorCierre} partida(s) terminada(s) después del cierre? Vas a estar pagando algo que quedó fuera del corte de esta quincena/mes a propósito.`, () => {
-      liqIgnorarCierre = true;
-      generarLiquidacionInterna();
-    });
-  });
 
   document.getElementById('liqAddDetailBtn').addEventListener('click', () => {
     const bodyHtml = `
