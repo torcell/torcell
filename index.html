@@ -231,11 +231,23 @@
   .stat-card.st-entregado{border-top-color:var(--entregado);}
   .stat-card.st-pagado{border-top-color:var(--pagado);}
   .stat-card.stat-combo{padding:9px 15px;display:flex;flex-direction:column;justify-content:center;gap:3px;}
-  .stat-combo .combo-fila{display:flex;align-items:baseline;gap:10px;min-width:0;}
-  .stat-combo .combo-fila + .combo-fila{border-top:1px solid var(--border);padding-top:3px;}
-  .stat-combo .combo-fila .n{font-size:19px;min-width:30px;line-height:1.2;}
-  .stat-combo .combo-fila .l{margin-top:0;min-width:0;white-space:nowrap;}
-  @media (max-width:520px){.stat-card.stat-combo{padding:9px 11px;}.stat-combo .combo-fila{gap:7px;}.stat-combo .combo-fila .n{min-width:22px;}.stat-combo .combo-fila .l{font-size:9.5px;letter-spacing:.2px;}}
+  .combo-fila{display:flex;align-items:baseline;gap:10px;min-width:0;}
+  .combo-fila + .combo-fila{border-top:1px solid var(--border);padding-top:3px;}
+  .combo-fila .n{font-size:19px;min-width:30px;line-height:1.2;}
+  .combo-fila .l{margin-top:0;min-width:0;white-space:nowrap;}
+    #stats.stats{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));}
+  @media (max-width:760px){#stats.stats{grid-template-columns:1fr;}}
+  .cat-card{padding:0;}
+  .cat-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 15px 8px;border-bottom:1px solid var(--border);font-size:13px;text-transform:uppercase;letter-spacing:.6px;}
+  .cat-cab .frag-chip{margin:0;font-size:11px;text-transform:none;letter-spacing:0;color:var(--sub);border-bottom:1px dotted var(--sub);}
+  .cat-body{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);}
+  .cat-counts{padding:10px 15px;display:flex;flex-direction:column;gap:3px;justify-content:center;}
+  .cat-money{border-left:1px solid var(--border);padding:4px 15px;}
+  .cat-m{padding:9px 0;}
+  .cat-m + .cat-m{border-top:1px dashed var(--border);}
+  .cat-m .n{font-size:20px;}
+  .cat-card:not(:has(.cat-money)) .cat-body{grid-template-columns:1fr;}
+  @media (max-width:520px){.cat-body{grid-template-columns:1fr;}.cat-money{border-left:0;border-top:1px solid var(--border);}}
   .stat-card .n{font-size:22px;font-weight:700;}
   .stat-card .l{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
   .stat-card .bar{height:5px;background:var(--panel-soft);margin-top:9px;border:1px solid var(--border);}
@@ -1274,7 +1286,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.31.6';
+const APP_VERSION = '0.31.7';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2341,86 +2353,50 @@ const preciosOcultos = () => document.body.classList.contains('hide-prices');
 function moneyReal(n){ if(n===null||n===undefined) return '—'; const r = Math.round(n); return (r < 0 ? '-' : '') + '$' + Math.abs(r).toLocaleString('es-CL'); }
 function money(n){ return (preciosOcultos() && n !== null && n !== undefined) ? '$ ••••' : moneyReal(n); }
 
-function renderStats(){
-  let cells;
-  if(activeCategoria === 'Pasillos'){
-    cells = ALL_CELLS.filter(c => c.area === 'Pasillos');
-  } else {
-    cells = ALL_CELLS.filter(c => c.categoria === activeCategoria && c.area !== 'Pasillos');
-  }
-  const counts = {pendiente:0, proceso:0, entregado:0, pagado:0};
-  let totalMonto1 = 0, pagadoMonto1 = 0, terminadoMonto1 = 0, terminadoMonto2 = 0;
-  let tDentro1 = 0, tDentro2 = 0, nDentro = 0, tNuevo1 = 0, tNuevo2 = 0, nNuevo = 0;
-  const enPasillos = activeCategoria === 'Pasillos';
-  const enFrague = activeCategoria === 'Frague';
-  let fTerm = 0, fDentro = 0, fNuevo = 0, fPag = 0;
-  const sumarFrague = (c, st) => {
-    if(!st.m2) return;
-    const p = st.m2 * rate1For('Frague', st.trabajador);
-    const e = resolveEstado(st);
-    if(e === 'pagado') fPag += p;
-    if(e === 'entregado'){
-      fTerm += p;
-      if(cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena) fNuevo += p; else fDentro += p;
-    }
-  };
+function statsDeCategoria(cat){
+  const cells = ALL_CELLS.filter(c => c.categoria === cat);
+  const r = {counts:{pendiente:0, proceso:0, entregado:0, pagado:0}, total:0, pag:0, ter:0, dentro:0, nuevo:0, nDentro:0, nNuevo:0, refDentro:0, refNuevo:0, refTer:0};
   cells.forEach(c => {
     const st = getState(c.id);
-    const estado = resolveEstado(st);
-    counts[estado] = (counts[estado]||0)+1;
-    const nuevoTrasCierre = estado === 'entregado' && cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena;
-    if(estado === 'entregado'){ if(nuevoTrasCierre) nNuevo++; else nDentro++; }
-    if(enPasillos && c.categoria === 'Frague'){ sumarFrague(c, st); return; }
-    if(st.m2){
-      const p1 = st.m2 * rate1For(c.categoria, st.trabajador);
-      const p2 = st.m2 * RATES.cerAlt;
-      totalMonto1 += p1;
-      if(estado==='pagado') pagadoMonto1 += p1;
-      if(estado==='entregado'){
-        terminadoMonto1 += p1; if(c.categoria==='Cerámica') terminadoMonto2 += p2;
-        if(nuevoTrasCierre){ tNuevo1 += p1; if(c.categoria==='Cerámica') tNuevo2 += p2; }
-        else { tDentro1 += p1; if(c.categoria==='Cerámica') tDentro2 += p2; }
-      }
+    const e = resolveEstado(st);
+    r.counts[e] = (r.counts[e]||0) + 1;
+    const nuevo = e === 'entregado' && !!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena;
+    if(e === 'entregado'){ if(nuevo) r.nNuevo++; else r.nDentro++; }
+    if(!st.m2) return;
+    const p = st.m2 * rate1For(cat, st.trabajador), ref = st.m2 * RATES.cerAlt;
+    r.total += p;
+    if(e === 'pagado') r.pag += p;
+    if(e === 'entregado'){
+      r.ter += p; r.refTer += ref;
+      if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; }
     }
   });
-  if(activeCategoria === 'Cerámica'){
-    ALL_CELLS.forEach(c => { if(c.categoria === 'Frague' && c.area !== 'Pasillos') sumarFrague(c, getState(c.id)); });
-  }
-  const total = cells.length;
+  return r;
+}
+function renderStats(){
   const statsEl = document.getElementById('stats');
-  const defs = [
-    {key:'pendiente', label:'Pendiente', cls:'pendiente', color:'var(--pendiente)'},
-    {key:'proceso', label:'Partida (en proceso)', cls:'proceso', color:'var(--proceso)'},
-    {key:'entregado', label:'Terminado', cls:'entregado', color:'var(--entregado)'},
-    {key:'pagado', label:'Pagado', cls:'pagado', color:'var(--pagado)'},
-  ];
-  const barraDe = s => {
-    const pct = total ? Math.round((counts[s.key]||0)/total*100) : 0;
-    return (s.key === 'pendiente' || s.key === 'pagado') ? `<div class="bar"><div style="width:${pct}%; background:${s.color};"></div></div>` : '';
-  };
-  const pendDef = defs[0];
-  const tarjetaPend = `<div class="stat-card st-pendiente"><div class="n c-pendiente">${counts.pendiente||0}</div><div class="l">${pendDef.label}</div>${barraDe(pendDef)}</div>`;
-  const tarjetaAvance = `<div class="stat-card stat-combo">${defs.slice(1).map(s =>
-    `<div class="combo-fila"><div class="n c-${s.cls}">${counts[s.key]||0}</div><div class="l">${s.label}</div></div>`).join('')}</div>`;
-  const cards = tarjetaPend + tarjetaAvance;
-  const gananciaLinea = (r, b) => `<div class="sub2 ganancia">Margen: ${money(r - b)}</div>`;
-  const fragLinea = (v) => v > 0 ? `<button type="button" class="frag-chip" data-frag-det title="Ver detalle del frague">Frague ${money(v)} <u>ver detalle</u></button>` : '';
-
-  const terminadoSub = activeCategoria === 'Cerámica'
-    ? `<div class="sub2">${money(terminadoMonto2)} con tarifa referencia</div>${gananciaLinea(terminadoMonto2, terminadoMonto1)}`
-    : '';
-  const fragTermCard = enFrague ? '' : fragLinea(fTerm);
-  const terminadoMoneyCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(terminadoMonto1)}</div>${fragTermCard}<div class="l">Terminado</div>${terminadoSub}</div>`;
-  const pagadoMoneyCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(pagadoMonto1)}</div>${enFrague ? '' : fragLinea(fPag)}
-    <div class="l">Pagado de ${money(totalMonto1)}</div>
-    <div class="bar"><div style="width:${totalMonto1?Math.round(pagadoMonto1/totalMonto1*100):0}%; background:var(--pagado);"></div></div></div>`;
   const fechaHoraCierre = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  const refDentro = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tDentro2)} con tarifa referencia</div>${gananciaLinea(tDentro2, tDentro1)}` : '';
-  const refNuevo = activeCategoria === 'Cerámica' ? `<div class="sub2">${money(tNuevo2)} con tarifa referencia</div>${gananciaLinea(tNuevo2, tNuevo1)}` : '';
-  const terminadoDentroCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(tDentro1)}</div>${enFrague ? '' : fragLinea(fDentro)}<div class="l">Terminado dentro del cierre</div><div class="sub2">${nDentro} partida(s) · entran en la próxima liquidación</div>${refDentro}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div></div>`;
-  const terminadoNuevoCard = `<div class="stat-card money-card st-entregado cierre-nuevo"><div class="n c-entregado">${money(tNuevo1)}</div>${enFrague ? '' : fragLinea(fNuevo)}<div class="l">Terminado nuevo, después del cierre</div><div class="sub2">${nNuevo} partida(s) · no entran hasta el próximo cierre</div>${refNuevo}</div>`;
-  const terminadoCards = cierreQuincena ? terminadoDentroCard + terminadoNuevoCard : terminadoMoneyCard;
-  statsEl.innerHTML = cards + (isAdmin ? terminadoCards + pagadoMoneyCard : '');
+  const filasConteo = r => [
+    ['pendiente','Pendiente'], ['proceso','Partida (en proceso)'], ['entregado','Terminado'], ['pagado','Pagado']
+  ].map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('');
+  const bloqueMoney = (cat, r) => {
+    const esC = cat === 'Cerámica';
+    const ref = (t, rf) => esC ? `<div class="sub2">${money(rf)} con tarifa referencia</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
+    const item = (cls, valor, rotulo, subs) => `<div class="cat-m ${cls}"><div class="n c-entregado">${money(valor)}</div><div class="l">${rotulo}</div>${subs}</div>`;
+    const terminados = cierreQuincena
+      ? item('', r.dentro, 'Terminado dentro del cierre', `<div class="sub2">${r.nDentro} partida(s) · entran en la próxima liquidación</div>${ref(r.dentro, r.refDentro)}<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div>`)
+        + item('cierre-nuevo', r.nuevo, 'Terminado nuevo, después del cierre', `<div class="sub2">${r.nNuevo} partida(s) · no entran hasta el próximo cierre</div>${ref(r.nuevo, r.refNuevo)}`)
+      : item('', r.ter, 'Terminado', ref(r.ter, r.refTer));
+    const pct = r.total ? Math.round(r.pag / r.total * 100) : 0;
+    const pagado = `<div class="cat-m"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div><div class="bar"><div style="width:${pct}%; background:var(--pagado);"></div></div></div>`;
+    return terminados + pagado;
+  };
+  const tarjeta = (cat, cls) => {
+    const r = statsDeCategoria(cat);
+    return `<div class="stat-card cat-card ${cls}"><div class="cat-cab"><b>${cat}</b>${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>
+      <div class="cat-body"><div class="cat-counts">${filasConteo(r)}</div>${isAdmin ? `<div class="cat-money">${bloqueMoney(cat, r)}</div>` : ''}</div></div>`;
+  };
+  statsEl.innerHTML = tarjeta('Cerámica', 'cat-ceramica') + tarjeta('Frague', 'cat-frague');
   renderPorTrabajador();
 }
 
