@@ -707,6 +707,7 @@
   .lh-grupo span{font-weight:600;text-transform:none;letter-spacing:0;color:var(--sub);}
   .lh-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--border);border-bottom:0;font-size:13px;}
   .lh-fila:last-child{border-bottom:1px solid var(--border);}
+  .lh-btns{display:flex;gap:6px;flex-shrink:0;}
   .lh-fila small{display:block;color:var(--sub);font-size:11px;margin-top:2px;}
   .lh-fila .tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:2px;margin-right:4px;color:#fff;}
   .lh-fila .tag.pago{background:var(--pagado);}
@@ -1336,7 +1337,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.32.0';
+const APP_VERSION = '0.32.1';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5226,7 +5227,7 @@ function pintarLiqHist(){
       const nPart = g.entradas.reduce((s, e) => s + (e.itemIds || []).length, 0);
       const tags = g.entradas.map(e => `<span class="tag ${e.type === 'pago' ? 'pago' : 'retencion'}">${e.type === 'pago' ? 'PAGADO' : (e.liberado ? 'RETENIDO (liberado)' : 'RETENIDO')}</span>`).join('');
       const monto = g.entradas.map(e => `${money(e.totalFinal)}${e.type === 'retencion' ? ' retenido' : ''}`).join(' · ');
-      return `<div class="lh-fila"><div><b>${esc(g.worker)}</b> · ${liqFmtDate(g.fechaPago)}<small>${tags} ${monto} · ${nPart} partida(s)</small></div><button type="button" class="btn small" data-lh-ver="${g.ts}|${esc(g.worker)}">Ver</button></div>`;
+      return `<div class="lh-fila"><div><b>${esc(g.worker)}</b> · ${liqFmtDate(g.fechaPago)}<small>${tags} ${monto} · ${nPart} partida(s)</small></div><div class="lh-btns"><button type="button" class="btn small" data-lh-ver="${g.ts}|${esc(g.worker)}">Ver</button><button type="button" class="btn small" data-lh-del="${g.ts}|${esc(g.worker)}">Eliminar</button></div></div>`;
     }).join('');
   }).join('');
 }
@@ -5295,6 +5296,22 @@ document.getElementById('lhCerrar').addEventListener('click', () => closeOverlay
 document.getElementById('lhWorker').addEventListener('change', pintarLiqHist);
 document.getElementById('lhPeriodo').addEventListener('change', pintarLiqHist);
 document.getElementById('lhLista').addEventListener('click', (e) => {
+  const d = e.target.closest('[data-lh-del]');
+  if(d){
+    const [ts, worker] = d.getAttribute('data-lh-del').split('|');
+    const g = lhGrupos().find(x => String(x.ts) === ts && x.worker === worker);
+    if(!g) return;
+    if(g.entradas.some(en => en.type === 'retencion' && !en.liberado)){
+      openInputModal('No se puede eliminar todavía', '<p style="font-size:13px;">Esta liquidación tiene una retención sin liberar. Libérala primero desde "Retenciones pendientes" y después la puedes eliminar.</p>', () => {}, 'Entendido');
+      return;
+    }
+    askConfirm(`¿Eliminar la liquidación de ${g.worker} del ${liqFmtDate(g.fechaPago)} (${money(lhTotalGrupo(g))})? Solo se borra del historial; las partidas siguen marcadas como pagadas.`, () => {
+      g.entradas.forEach(en => { const i = paymentHistory.indexOf(en); if(i >= 0) paymentHistory.splice(i, 1); });
+      markSettingsDirty(); enqueueSave();
+      renderLiqHist();
+    });
+    return;
+  }
   const b = e.target.closest('[data-lh-ver]');
   if(!b) return;
   const [ts, worker] = b.getAttribute('data-lh-ver').split('|');
