@@ -306,6 +306,13 @@
   .tab{padding:8px 14px;background:var(--panel);color:var(--sub);font-size:13px;cursor:pointer;border-right:1px solid var(--border-strong);}
   .tab:last-child{border-right:none;}
   .tab.active{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:600;}
+  @keyframes pestanaBrillo{0%,100%{box-shadow:0 0 5px 0 rgba(160,110,255,.45), inset 0 0 8px rgba(255,255,255,.12);}50%{box-shadow:0 0 14px 2px rgba(160,110,255,.85), inset 0 0 14px rgba(255,255,255,.28);}}
+  @keyframes pestanaBarrido{0%{background-position:-120% 0;}60%,100%{background-position:220% 0;}}
+  .tab.active,.stats-tab.activa{position:relative;z-index:1;animation:pestanaBrillo 2.8s ease-in-out infinite;}
+  .tab.active::after,.stats-tab.activa::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);background-size:60% 100%;background-repeat:no-repeat;animation:pestanaBarrido 4.5s ease-in-out infinite;}
+  .stats-tab.activa{font-size:13px;}
+  .stats-rotulo{align-self:center;font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-right:10px;}
+  @media (prefers-reduced-motion:reduce){.tab.active,.stats-tab.activa{animation:none;box-shadow:0 0 8px 1px rgba(160,110,255,.6);}.tab.active::after,.stats-tab.activa::after{display:none;}}
   .counter-pill{font-size:12px;color:var(--sub);padding:7px 12px;border:1px dashed var(--border-strong);border-radius:var(--radius);}
 
   .floor-block{margin-bottom:26px;}
@@ -692,6 +699,18 @@
   .liq-hist-entry .tag.pago{background:var(--pagado);color:#fff;}
   .liq-hist-entry .tag.retencion{background:#a97e00;color:#fff;}
 
+  #liqHistOverlay .modal{display:flex;flex-direction:column;max-height:88vh;}
+  #lhLista{overflow-y:auto;flex:1 1 auto;min-height:0;margin:10px 0;overscroll-behavior:contain;}
+  .lh-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .lh-filtros select{flex:1 1 180px;}
+  .lh-grupo{padding:7px 10px;background:var(--panel-soft);border:1px solid var(--border);border-bottom:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;gap:10px;margin-top:10px;}
+  .lh-grupo span{font-weight:600;text-transform:none;letter-spacing:0;color:var(--sub);}
+  .lh-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--border);border-bottom:0;font-size:13px;}
+  .lh-fila:last-child{border-bottom:1px solid var(--border);}
+  .lh-fila small{display:block;color:var(--sub);font-size:11px;margin-top:2px;}
+  .lh-fila .tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:2px;margin-right:4px;color:#fff;}
+  .lh-fila .tag.pago{background:var(--pagado);}
+  .lh-fila .tag.retencion{background:#a97e00;}
   #liqViewOverlay .modal{display:flex;flex-direction:column;max-height:88vh;}
   #liqModalBody{overflow-y:auto;flex:1 1 auto;min-height:0;overscroll-behavior:contain;}
   .liq-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -898,6 +917,7 @@
         <button class="btn admin-only" id="toggleWorkerPanel">Gestionar trabajadores</button>
         <button class="btn admin-only" id="ratesBtn">Precios y metrajes</button>
         <button class="btn admin-only" id="liqOpenBtn">📄 Generar liquidación</button>
+        <button class="btn admin-only" id="liqHistBtn">🗂️ Historial de liquidaciones</button>
         <button class="btn admin-only" id="cierreQuincenaBtn">🔒 Cerrar quincena/mes</button>
         <button class="btn admin-only" id="retencionesBtn" style="position:relative;display:none;">
           🔒 Retenciones pendientes
@@ -1064,6 +1084,18 @@
       <button class="btn" id="liqConfigCancel">Cancelar</button>
       <button class="btn primary" id="liqConfigGenerar">Generar</button>
     </div>
+  </div>
+</div>
+
+<div class="overlay" id="liqHistOverlay">
+  <div class="modal" style="max-width:720px;">
+    <h3>Historial de liquidaciones</h3>
+    <div class="lh-filtros">
+      <select id="lhWorker"></select>
+      <select id="lhPeriodo"></select>
+    </div>
+    <div id="lhLista"></div>
+    <div class="actions"><button class="btn" id="lhCerrar">Cerrar</button></div>
   </div>
 </div>
 
@@ -1304,7 +1336,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.31.14';
+const APP_VERSION = '0.32.0';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2407,7 +2439,7 @@ function renderStats(){
   const seccion = (cls, rotulo, v, n, rf) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}</div>`;
   const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo)}</div>` : '';
   const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div></div>`;
-  const tabs = `<div class="stats-tabs">${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>`;
+  const tabs = `<div class="stats-tabs"><span class="stats-rotulo">Resumen de</span>${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>`;
   statsEl.innerHTML = tabs + `<div class="stats-grid">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard : ''}</div>`;
   renderPorTrabajador();
 }
@@ -3655,7 +3687,7 @@ const PERMISOS_BOTONES = [
   ['b_turbo', '⚡ Turbo', 'Marcar varios estados de una vez'],
   ['b_diagnostico', '🩺 Diagnóstico', 'Ver datos técnicos de la conexión']
 ];
-const PERMISOS_SOLO_ADMIN = ['Gestionar trabajadores', 'Precios y metrajes', 'Generar liquidación', 'Cerrar quincena/mes', 'Retenciones', 'Materiales', 'Permisos por cargo', 'Peticiones', 'Cambios por cuenta', 'Avisos', 'Reporte semanal'];
+const PERMISOS_SOLO_ADMIN = ['Gestionar trabajadores', 'Precios y metrajes', 'Generar liquidación', 'Historial de liquidaciones', 'Cerrar quincena/mes', 'Retenciones', 'Materiales', 'Permisos por cargo', 'Peticiones', 'Cambios por cuenta', 'Avisos', 'Reporte semanal'];
 const PERMISOS_COLUMNAS = [['supervisor', 'Supervisor'], ['jefe', 'Jefe de Terreno']];
 function permisosPorDefecto(){
   const o = {};
@@ -4925,6 +4957,7 @@ function generarLiquidacionInterna(){
       observaciones: incluirObs ? rowsConNota.map(r => ({label:r.label, area:r.area, piso:r.piso, nota:r.nota})) : [] };
     liqRebuildDoc();
     closeOverlayAnimated(liqConfigOverlay);
+    liqHistModo = false; document.getElementById('liqMarkPaidBtn').style.display = '';
     liqViewOverlay.classList.add('show');
 
     const scrollBox = document.getElementById('liqModalBody');
@@ -5122,7 +5155,7 @@ function liqRebuildDoc(){
   });
 }
 
-document.getElementById('liqCloseBtn').addEventListener('click', () => closeOverlayAnimated(liqViewOverlay));
+document.getElementById('liqCloseBtn').addEventListener('click', () => { closeOverlayAnimated(liqViewOverlay); setTimeout(() => { if(liqHistModo){ liqHistModo = false; liqHistNombre = ''; document.getElementById('liqMarkPaidBtn').style.display = ''; } }, 300); });
 document.getElementById('liqPrintBtn').addEventListener('click', () => window.print());
 
 document.getElementById('liqImageBtn').addEventListener('click', () => {
@@ -5138,11 +5171,135 @@ document.getElementById('liqImageBtn').addEventListener('click', () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `liquidacion-${(liqCurrentMeta?liqCurrentMeta.worker:'trabajador').replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,10)}.png`;
+      a.download = `liquidacion-${(liqHistModo ? liqHistNombre : (liqCurrentMeta?liqCurrentMeta.worker:'trabajador')).replace(/\s+/g,'_')}-${new Date().toISOString().slice(0,10)}.png`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
   });
+});
+
+
+// ===== Historial de liquidaciones =====
+let liqHistModo = false, liqHistNombre = '';
+function lhGrupos(){
+  const ord = paymentHistory.slice().sort((a, b) => a.ts - b.ts);
+  const grupos = [];
+  ord.forEach(h => {
+    const g = grupos.find(x => x.worker === h.worker && x.fechaPago === h.fechaPago && x.tipoPago === h.tipoPago && Math.abs(h.ts - x.ts) < 120000);
+    if(g) g.entradas.push(h);
+    else grupos.push({worker: h.worker, fechaPago: h.fechaPago, tipoPago: h.tipoPago, ts: h.ts, entradas: [h]});
+  });
+  return grupos.sort((a, b) => b.fechaPago - a.fechaPago || b.ts - a.ts);
+}
+function lhPeriodoClave(g){
+  const d = new Date(g.fechaPago);
+  return (g.tipoPago === 'finmes' ? 'finmes' : 'quincena') + '|' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function lhPeriodoEtiqueta(clave){
+  const [t, ym] = clave.split('|'), [y, m] = ym.split('-');
+  const mes = new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('es-CL', {month: 'long', year: 'numeric'});
+  return (t === 'finmes' ? 'Fin de mes' : 'Quincena') + ' · ' + mes;
+}
+function lhTotalGrupo(g){ return g.entradas.filter(e => e.type === 'pago').reduce((s, e) => s + (e.totalFinal || 0), 0); }
+function renderLiqHist(){
+  const grupos = lhGrupos();
+  const wSel = document.getElementById('lhWorker'), pSel = document.getElementById('lhPeriodo');
+  const wPrev = wSel.value || '', pPrev = pSel.value || '';
+  const workers = [...new Set(grupos.map(g => g.worker))].sort((a, b) => a.localeCompare(b, 'es'));
+  const periodos = [...new Set(grupos.map(lhPeriodoClave))];
+  wSel.innerHTML = '<option value="">Todos los trabajadores</option>' + workers.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
+  pSel.innerHTML = '<option value="">Todas las quincenas/meses</option>' + periodos.map(c => `<option value="${c}">${lhPeriodoEtiqueta(c)}</option>`).join('');
+  wSel.value = workers.includes(wPrev) ? wPrev : ''; pSel.value = periodos.includes(pPrev) ? pPrev : '';
+  pintarLiqHist();
+}
+function pintarLiqHist(){
+  const w = document.getElementById('lhWorker').value, per = document.getElementById('lhPeriodo').value;
+  const grupos = lhGrupos().filter(g => (!w || g.worker === w) && (!per || lhPeriodoClave(g) === per));
+  const box = document.getElementById('lhLista');
+  if(!grupos.length){ box.innerHTML = '<p style="color:var(--sub);font-size:13px;">Todavía no hay liquidaciones confirmadas.</p>'; return; }
+  const porPeriodo = {};
+  grupos.forEach(g => { (porPeriodo[lhPeriodoClave(g)] = porPeriodo[lhPeriodoClave(g)] || []).push(g); });
+  box.innerHTML = Object.keys(porPeriodo).map(c => {
+    const lista = porPeriodo[c];
+    const tot = lista.reduce((s, g) => s + lhTotalGrupo(g), 0);
+    return `<div class="lh-grupo">${lhPeriodoEtiqueta(c)}<span>${lista.length} liquidación(es) · pagado ${money(tot)}</span></div>` + lista.map(g => {
+      const nPart = g.entradas.reduce((s, e) => s + (e.itemIds || []).length, 0);
+      const tags = g.entradas.map(e => `<span class="tag ${e.type === 'pago' ? 'pago' : 'retencion'}">${e.type === 'pago' ? 'PAGADO' : (e.liberado ? 'RETENIDO (liberado)' : 'RETENIDO')}</span>`).join('');
+      const monto = g.entradas.map(e => `${money(e.totalFinal)}${e.type === 'retencion' ? ' retenido' : ''}`).join(' · ');
+      return `<div class="lh-fila"><div><b>${esc(g.worker)}</b> · ${liqFmtDate(g.fechaPago)}<small>${tags} ${monto} · ${nPart} partida(s)</small></div><button type="button" class="btn small" data-lh-ver="${g.ts}|${esc(g.worker)}">Ver</button></div>`;
+    }).join('');
+  }).join('');
+}
+function lhArmarMeta(g){
+  const rows = [];
+  let pago = null, ret = null;
+  g.entradas.forEach(e => {
+    const esRet = e.type === 'retencion';
+    const cats = {};
+    (e.itemIds || []).forEach(id => { const c = cellById[id]; if(c) cats[liqLabelForCell(c) + '|' + (AREA_LABEL[c.area] || c.area) + '|' + c.piso] = c.categoria; });
+    let snap = e.itemsSnapshot;
+    if(!snap || !snap.length){
+      snap = (e.itemIds || []).map(id => { const c = cellById[id], st = state[id]; if(!c || !st) return null; return {label: liqLabelForCell(c), area: AREA_LABEL[c.area] || c.area, piso: c.piso, m2: st.m2 || 0, monto: (st.m2 || 0) * rate1For(c.categoria, st.trabajador)}; }).filter(Boolean);
+    }
+    snap.forEach(r => rows.push({piso: r.piso, label: r.label, area: r.area, categoria: cats[r.label + '|' + r.area + '|' + r.piso] || '—', m2: r.m2, precio: r.monto, estadoLabel: esRet ? (e.liberado ? 'Retención liberada' : 'Retención para Finiquito') : 'Pagado', pisoNum: parseInt((String(r.piso).match(/-?\d+/) || ['0'])[0], 10)}));
+    if(esRet) ret = e; else pago = e;
+  });
+  const ref = g.entradas[0];
+  return {worker: g.worker, fechaFmt: liqFmtDate(g.fechaPago), tipoPago: g.tipoPago, tipoPagoLabel: g.tipoPago === 'finmes' ? 'Fin de mes' : 'Quincena', dias: ref.dias || 0, rows, pago, ret};
+}
+function lhDocHtml(m, modo){
+  const f = n => moneyReal(n);
+  const totales = (span) => {
+    let h = '';
+    if(m.pago){
+      const p = m.pago;
+      h += `<tr class="liq-total"><td colspan="${span}">PRECIO TOTAL</td><td class="num">${f(p.subtotal)}</td></tr>`;
+      if(m.tipoPago === 'finmes'){
+        h += `<tr class="liq-afp"><td colspan="${span}">Descuento AFP (${m.dias} día(s))</td><td class="num">- ${f(p.afpDescuento || 0)}</td></tr>`;
+        h += `<tr class="liq-total"><td colspan="${span}">TOTAL NETO</td><td class="num">${f(p.subtotal - (p.afpDescuento || 0))}</td></tr>`;
+      }
+      (p.detalles || []).forEach(d => { h += `<tr class="liq-afp"><td colspan="${span}">${esc(d.desc)}</td><td class="num">${d.tipo === 'suma' ? '+' : '-'} ${f(d.monto)}</td></tr>`; });
+      if((p.detalles || []).length) h += `<tr class="liq-total"><td colspan="${span}">TOTAL A PAGAR</td><td class="num">${f(p.totalFinal)}</td></tr>`;
+    }
+    if(m.ret){
+      h += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retención para Finiquito</b> — este monto no se paga ahora, queda guardado</td><td class="num">${f(m.ret.subtotal)}</td></tr>`;
+      (m.ret.detalles || []).forEach(d => { h += `<tr class="liq-afp"><td colspan="${span}">${esc(d.desc)}</td><td class="num">${d.tipo === 'suma' ? '+' : '-'} ${f(d.monto)}</td></tr>`; });
+    }
+    return h;
+  };
+  const meta = `<div class="liq-meta"><div>Trabajador: <b>${esc(m.worker)}</b></div><div>Fecha de pago: <b>${m.fechaFmt}</b></div><div>Tipo de pago: <b>${m.tipoPagoLabel}</b></div>${m.tipoPago === 'finmes' ? `<div>Días trabajados: <b>${m.dias}</b></div>` : ''}</div>`;
+  const filaD = r => `<tr><td>${esc(r.piso)}</td><td>${esc(r.label)} — ${esc(r.area)}</td><td>${esc(r.categoria)}</td><td>${r.m2}</td><td>${r.estadoLabel}</td><td class="num">${f(r.precio)}</td></tr>`;
+  const filaM = r => `<tr><td><b>${esc(r.label)} — ${esc(r.area)}</b><div class="liq-sub2">${esc(r.piso)} · ${esc(r.categoria)}</div></td><td>${r.m2}</td><td>${r.estadoLabel}</td><td class="num">${f(r.precio)}</td></tr>`;
+  if(modo === 'print'){
+    const fechaEmision = new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', timeZone:'America/Santiago'});
+    return `<div class="liq-doc"><div class="liq-print-date">Fecha: ${fechaEmision}</div><h2>Liquidación de pago — Obra Bellavista, La Florida</h2>${meta}
+      <table><thead class="liq-spacer"><tr><td colspan="6"></td></tr></thead><tbody>
+      <tr class="liq-labels"><th>Piso</th><th>Depto / Área</th><th>Categoría</th><th>m²</th><th>Estado</th><th class="num">Precio</th></tr>
+      ${m.rows.map(filaD).join('')}${totales(5)}</tbody><tfoot class="liq-spacer"><tr><td colspan="6"></td></tr></tfoot></table></div>`;
+  }
+  return `<div class="liq-doc"><h2>Liquidación de pago — Obra Bellavista, La Florida</h2>${meta}
+    <div class="liq-only-desktop"><div class="liq-table-scroll"><table><thead><tr><th>Piso</th><th>Depto / Área</th><th>Categoría</th><th>m²</th><th>Estado</th><th class="num">Precio</th></tr></thead><tbody>${m.rows.map(filaD).join('')}${totales(5)}</tbody></table></div></div>
+    <div class="liq-only-mobile"><div class="liq-table-scroll"><table><thead><tr><th>Partida</th><th>m²</th><th>Estado</th><th class="num">Precio</th></tr></thead><tbody>${m.rows.map(filaM).join('')}${totales(3)}</tbody></table></div></div></div>`;
+}
+function abrirLiqHistDoc(g){
+  const m = lhArmarMeta(g);
+  liqHistModo = true; liqHistNombre = m.worker;
+  document.getElementById('liqMarkPaidBtn').style.display = 'none';
+  document.getElementById('liqModalBody').innerHTML = lhDocHtml(m, 'screen');
+  document.getElementById('liqPrintArea').innerHTML = lhDocHtml(m, 'print');
+  liqViewOverlay.classList.add('show');
+  document.getElementById('liqModalBody').scrollTop = 0;
+}
+document.getElementById('liqHistBtn').addEventListener('click', () => { renderLiqHist(); document.getElementById('liqHistOverlay').classList.add('show'); });
+document.getElementById('lhCerrar').addEventListener('click', () => closeOverlayAnimated(document.getElementById('liqHistOverlay')));
+document.getElementById('lhWorker').addEventListener('change', pintarLiqHist);
+document.getElementById('lhPeriodo').addEventListener('change', pintarLiqHist);
+document.getElementById('lhLista').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-lh-ver]');
+  if(!b) return;
+  const [ts, worker] = b.getAttribute('data-lh-ver').split('|');
+  const g = lhGrupos().find(x => String(x.ts) === ts && x.worker === worker);
+  if(g) abrirLiqHistDoc(g);
 });
 
 function detallesHtml(dets){
