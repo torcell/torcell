@@ -724,6 +724,33 @@ function aviso(texto){
   a.classList.add('on');
 }
 
+const locales = {};
+function coincideRev(srv, rev){ return !!srv && srv.e === rev.e && String(srv.d || '') === String(rev.d || ''); }
+function aplicarLocales(srv){
+  const out = Object.assign({}, srv || {});
+  Object.keys(locales).forEach(k => {
+    const l = locales[k];
+    if(coincideRev(out[k], l.rev)){ delete locales[k]; return; }
+    if(l.estado === 'enviando' || (l.estado === 'ok' && Date.now() - l.okTs < 60000)){ out[k] = l.rev; return; }
+    delete locales[k];
+    if(l.previo) out[k] = l.previo; else delete out[k];
+    aviso('Un cambio de revisión no quedó guardado en la base de datos. Vuelve a hacerlo.');
+  });
+  return out;
+}
+function verificarDudosos(intento){
+  if(!Object.values(locales).some(l => l.estado === 'dudoso')) return;
+  if(intento > 6){
+    Object.keys(locales).forEach(k => { if(locales[k].estado === 'dudoso'){ const l = locales[k]; delete locales[k]; deshacer(k, l.previo, 'No se pudo confirmar el guardado (sin conexión con la base de datos). Revisa tu internet y vuelve a hacerlo.'); } });
+    return;
+  }
+  setTimeout(async () => {
+    if(!token) return;
+    await cargar();
+    verificarDudosos(intento + 1);
+  }, intento === 0 ? 3500 : 7000);
+}
+
 function guardarRevision(){
   if(!actual) return;
   const sel = seleccion();
@@ -734,16 +761,20 @@ function guardarRevision(){
   const envio = {clave: k, estado: estadoSel, items: estadoSel === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()};
   revisiones[k] = {e: estadoSel, d: items.map(x => x.t + ' ×' + x.c).join(', '), c: items.reduce((t, x) => t + x.c, 0), ts: Date.now(), u: (cargo ? cargo + ' - ' : '') + nombre};
   if(estadoSel !== 'observado'){ revisiones[k].d = ''; revisiones[k].c = 0; }
+  locales[k] = {rev: Object.assign({}, revisiones[k]), previo, estado: 'enviando', okTs: 0};
   marcarEspera(k);
   cerrarModal();
   pintar();
   enVuelo++;
   llamar('calidadGuardar', envio, true).then(j => {
-    if(j && j.ok) return;
+    if(j && j.ok){ if(locales[k]){ locales[k].estado = 'ok'; locales[k].okTs = Date.now(); } return; }
+    delete locales[k];
     const msgs = {espera: 'Espera unos segundos antes de volver a modificar ese departamento.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', repetida: 'La solicitud ya fue enviada.', datos_incompletos: 'Revisa las observaciones marcadas.'};
     deshacer(k, previo, (j && msgs[j.error]) || 'No se pudo guardar el cambio. Intenta de nuevo.');
   }).catch(e => {
-    deshacer(k, previo, e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. El cambio no se guardó.' : 'Sin conexión: el cambio no se guardó. Intenta de nuevo.');
+    if(locales[k]) locales[k].estado = 'dudoso';
+    aviso('Tardó en responder. Estoy verificando si se guardó…');
+    verificarDudosos(0);
   }).finally(() => { enVuelo--; });
 }
 
@@ -840,7 +871,7 @@ async function cargar(inicial){
     if(!token) return;
     if(j && j.ok && j.celdas && typeof j.celdas === 'object'){
       celdas = j.celdas;
-      revisiones = j.revisiones || {};
+      revisiones = aplicarLocales(j.revisiones || {});
       const cargoSrv = ({admin:'Admin', jefe:'Jefe de Terreno', calidad:'Calidad'})[String(j.cargo)];
       if(typeof cargoSrv === 'string' && cargoSrv !== cargo){ cargo = cargoSrv; guardarLocal('calidadCargo', cargo); pintarQuien(); }
       if(j.opciones && typeof j.opciones === 'object' && !Array.isArray(j.opciones)) opciones = Object.assign({}, opciones, j.opciones);
