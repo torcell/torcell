@@ -1076,7 +1076,7 @@
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;"><input type="checkbox" id="liqIncTerminado" checked> Terminado</label>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;"><input type="checkbox" id="liqIncProceso"> En proceso / Partida</label>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;"><input type="checkbox" id="liqIncPagado"> Ya pagado (para reimprimir)</label>
-    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px;"><input type="checkbox" id="liqIncRetenido"> Retenidos (para finiquito)</label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px;"><input type="checkbox" id="liqIncRetenido"> Retenidos</label>
 
     <button class="btn small" id="liqHistoryToggleBtn" style="margin-bottom:12px;">Ver historial de pagos de este trabajador</button>
     <div id="liqHistoryBox" style="display:none;max-height:180px;overflow-y:auto;border:1px solid var(--border);padding:8px;margin-bottom:12px;background:var(--panel-soft);"></div>
@@ -1337,7 +1337,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.32.1';
+const APP_VERSION = '0.32.2';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4734,6 +4734,17 @@ document.getElementById('liqObsAgregar').addEventListener('click', () => {
 });
 let liqCurrentIds = [];
 let liqCurrentMeta = null;
+let liqRetSel = new Set();
+function liqAplicarRetenciones(){
+  const m = liqCurrentMeta; if(!m) return;
+  m.rows = m.rowsBase.map(r => Object.assign({}, r, {estadoLabel: liqRetSel.has(r.id) ? 'Retenido' : r.estadoOrig}));
+  m.rowsPagables = m.rows.filter(r => r.estadoLabel === 'Terminado' || r.estadoLabel === 'En proceso');
+  m.rowsRetenidas = m.rows.filter(r => r.estadoLabel === 'Retenido');
+  m.subtotal = m.rowsPagables.reduce((s,r) => s + r.precio, 0);
+  m.totalRetenido = m.rowsRetenidas.reduce((s,r) => s + r.precio, 0);
+  m.afpDescuento = m.tipoPago !== 'finmes' ? 0 : (m.afpPct > 0 ? m.subtotal * m.afpPct / 100 : m.dias * m.afpTarifa);
+  m.totalFinal = m.subtotal - m.afpDescuento;
+}
 let paymentHistory = [];
 
 function liqLabelForCell(cell){
@@ -4953,8 +4964,9 @@ function generarLiquidacionInterna(){
 
   pendingLiqFinalize = function(incluirObs){
     liqExtraDetails = [];
+    liqRetSel = new Set();
     liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
-      subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsPagables, rowsPagadas, rowsRetenidas, excluidosPorCierre, excluidosLista,
+      subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsBase: rows.map(r => Object.assign({}, r, {estadoOrig: r.estadoLabel})), rowsPagables, rowsPagadas, rowsRetenidas, excluidosPorCierre, excluidosLista,
       observaciones: incluirObs ? rowsConNota.map(r => ({label:r.label, area:r.area, piso:r.piso, nota:r.nota})) : [] };
     liqRebuildDoc();
     closeOverlayAnimated(liqConfigOverlay);
@@ -4978,6 +4990,7 @@ function generarLiquidacionInterna(){
 function liqRebuildDoc(){
   const m = liqCurrentMeta;
   if(!m) return;
+  liqAplicarRetenciones();
 
   const baseTotal = m.tipoPago === 'finmes' ? m.totalFinal : m.subtotal;
   const sumaExtra = liqExtraDetails.filter(d => d.tipo === 'suma').reduce((s,d) => s + d.monto, 0);
@@ -5014,12 +5027,12 @@ function liqRebuildDoc(){
       html += `<tr class="liq-total liq-subtle"><td colspan="${span}">Total ya pagado (informativo)</td><td class="num">${moneyReal(m.totalYaPagado)}</td>${pad}</tr>`;
     }
     if(m.rowsRetenidas.length){
-      html += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retención para Finiquito</b> — este monto no se paga ahora, queda guardado</td><td class="num">${moneyReal(m.totalRetenido)}</td>${pad}</tr>`;
+      html += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retenido</b> — este monto no se paga ahora, queda guardado</td><td class="num">${moneyReal(m.totalRetenido)}</td>${pad}</tr>`;
     }
     return html;
   }
   function estadoCellText(r){
-    return r.estadoLabel === 'Retenido' ? 'Retención para Finiquito' : r.estadoLabel;
+    return r.estadoLabel === 'Retenido' ? 'Retenido' : r.estadoLabel;
   }
 
   const detallesUiHtml = `
@@ -5032,8 +5045,8 @@ function liqRebuildDoc(){
       <button class="btn small" id="liqAddDetailBtn" style="margin-top:8px;">+ Agregar detalle</button>
     </div>`;
 
-  const retainCellHtml = (r) => (r.estadoLabel==='Terminado'||r.estadoLabel==='En proceso')
-    ? `<input type="checkbox" class="liq-retain-chk" data-id="${r.id}">` : '—';
+  const retainCellHtml = (r) => (r.estadoOrig==='Terminado'||r.estadoOrig==='En proceso')
+    ? `<input type="checkbox" class="liq-retain-chk" data-id="${r.id}"${liqRetSel.has(r.id) ? ' checked' : ''}>` : '—';
   const obsHtml = (m.observaciones && m.observaciones.length) ? `
       <div class="liq-obs-block">
         <h4 style="margin:14px 0 6px;font-size:12.5px;">Observaciones</h4>
@@ -5108,13 +5121,14 @@ function liqRebuildDoc(){
       ${obsHtml}
     </div>`;
 
-  const prevChecked = new Set([...document.querySelectorAll('.liq-retain-chk:checked')].map(c => c.getAttribute('data-id')));
   document.getElementById('liqModalBody').innerHTML = docHtmlScreen + detallesUiHtml;
   document.querySelectorAll('.liq-retain-chk').forEach(chk => {
-    if(prevChecked.has(chk.getAttribute('data-id'))) chk.checked = true;
-
     chk.addEventListener('change', e => {
-      document.querySelectorAll(`.liq-retain-chk[data-id="${e.target.getAttribute('data-id')}"]`).forEach(o => { o.checked = e.target.checked; });
+      const id = e.target.getAttribute('data-id');
+      if(e.target.checked) liqRetSel.add(id); else liqRetSel.delete(id);
+      const caja = document.getElementById('liqModalBody'), pos = caja.scrollTop;
+      liqRebuildDoc();
+      caja.scrollTop = pos;
     });
   });
   document.getElementById('liqPrintArea').innerHTML = docHtmlPrint;
@@ -5134,7 +5148,7 @@ function liqRebuildDoc(){
       <div class="rate-row"><label>Se aplica a</label>
         <select id="detDestino" style="width:220px;">
           <option value="pago">Al pago</option>
-          <option value="retencion">A lo retenido (finiquito)</option>
+          <option value="retencion">A lo retenido</option>
         </select>
       </div>`;
     openInputModal('Agregar detalle', bodyHtml, () => {
@@ -5242,7 +5256,7 @@ function lhArmarMeta(g){
     if(!snap || !snap.length){
       snap = (e.itemIds || []).map(id => { const c = cellById[id], st = state[id]; if(!c || !st) return null; return {label: liqLabelForCell(c), area: AREA_LABEL[c.area] || c.area, piso: c.piso, m2: st.m2 || 0, monto: (st.m2 || 0) * rate1For(c.categoria, st.trabajador)}; }).filter(Boolean);
     }
-    snap.forEach(r => rows.push({piso: r.piso, label: r.label, area: r.area, categoria: cats[r.label + '|' + r.area + '|' + r.piso] || '—', m2: r.m2, precio: r.monto, estadoLabel: esRet ? (e.liberado ? 'Retención liberada' : 'Retención para Finiquito') : 'Pagado', pisoNum: parseInt((String(r.piso).match(/-?\d+/) || ['0'])[0], 10)}));
+    snap.forEach(r => rows.push({piso: r.piso, label: r.label, area: r.area, categoria: cats[r.label + '|' + r.area + '|' + r.piso] || '—', m2: r.m2, precio: r.monto, estadoLabel: esRet ? (e.liberado ? 'Retención liberada' : 'Retenido') : 'Pagado', pisoNum: parseInt((String(r.piso).match(/-?\d+/) || ['0'])[0], 10)}));
     if(esRet) ret = e; else pago = e;
   });
   const ref = g.entradas[0];
@@ -5263,7 +5277,7 @@ function lhDocHtml(m, modo){
       if((p.detalles || []).length) h += `<tr class="liq-total"><td colspan="${span}">TOTAL A PAGAR</td><td class="num">${f(p.totalFinal)}</td></tr>`;
     }
     if(m.ret){
-      h += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retención para Finiquito</b> — este monto no se paga ahora, queda guardado</td><td class="num">${f(m.ret.subtotal)}</td></tr>`;
+      h += `<tr class="liq-total liq-subtle"><td colspan="${span}"><b>Retenido</b> — este monto no se paga ahora, queda guardado</td><td class="num">${f(m.ret.subtotal)}</td></tr>`;
       (m.ret.detalles || []).forEach(d => { h += `<tr class="liq-afp"><td colspan="${span}">${esc(d.desc)}</td><td class="num">${d.tipo === 'suma' ? '+' : '-'} ${f(d.monto)}</td></tr>`; });
     }
     return h;
@@ -5351,7 +5365,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
     document.getElementById('ioMsg').textContent = 'No hay nada nuevo que pagar aquí (solo mostraste partidas ya pagadas o retenidas).';
     return;
   }
-  const retainIds = [...new Set([...document.querySelectorAll('.liq-retain-chk:checked')].map(el => el.getAttribute('data-id')))];
+  const retainIds = liqCurrentIds.filter(id => liqRetSel.has(id));
   const payIds = liqCurrentIds.filter(id => !retainIds.includes(id));
   const hasPay = payIds.length > 0, hasRet = retainIds.length > 0;
 
@@ -5368,7 +5382,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
   if(detRet.length) extra += ` Detalles aplicados a lo retenido: ${descr(detRet)}.`;
 
   const msg = (hasRet
-    ? `¿Confirmar esta liquidación? Se pagarán ${payIds.length} partida(s) y se retendrán ${retainIds.length} para el finiquito.`
+    ? `¿Confirmar esta liquidación? Se pagarán ${payIds.length} partida(s) y se retendrán ${retainIds.length}.`
     : `¿Marcar estas ${payIds.length} partida(s) como Pagadas?`) + extra;
   askConfirm(msg, () => {
     let payTotal = 0, retainTotal = 0;
