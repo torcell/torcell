@@ -236,8 +236,23 @@
   .combo-fila + .combo-fila{border-top:1px solid var(--border);padding-top:3px;}
   .combo-fila .n{font-size:19px;min-width:30px;line-height:1.2;}
   .combo-fila .l{margin-top:0;min-width:0;white-space:nowrap;}
-    #stats.stats{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));}
-  @media (max-width:760px){#stats.stats{grid-template-columns:1fr;}}
+    #stats.stats{display:block;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+  .stats-tabs{display:flex;align-items:stretch;gap:0;margin-bottom:10px;}
+  .stats-tab{border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);padding:7px 18px;font-size:12.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;border-radius:0;font-family:inherit;}
+  .stats-tab + .stats-tab{border-left:0;}
+  .stats-tab.activa{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+  .stats-tabs .frag-chip{margin:0 0 0 auto;align-self:center;font-size:12px;color:var(--sub);}
+  .stat-card .sub2 b{font-weight:700;}
+  .stat-card .sub2.fuera,.stat-card .sub2.fuera b{color:#e8710a;}
+  .cierre-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;padding:0;}
+  .cierre-box .cat-m{padding:13px 15px;}
+  .cierre-box .cat-m + .cat-m{border-top:0;border-left:1px dashed var(--border);}
+  .cierre-box .cat-m .l{margin:0 0 3px;}
+  .cierre-box .cat-m .cnt{text-transform:none;letter-spacing:0;}
+  .cierre-box .cat-m.fuera .l,.cierre-box .cat-m.fuera .l .cnt,.cierre-box .cat-m.fuera .sub2{color:#e8710a;}
+  .cierre-box .cat-m.fuera .n{color:#e8710a;}
+  .cierre-box .cat-m .n{font-size:20px;}
   .cat-card{padding:0;}
   .cat-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 15px 8px;border-bottom:1px solid var(--border);font-size:13px;text-transform:uppercase;letter-spacing:.6px;}
   .cat-cab .frag-chip{margin:0;font-size:11px;text-transform:none;letter-spacing:0;color:var(--sub);border-bottom:1px dotted var(--sub);}
@@ -602,7 +617,8 @@
     .toolbar select, .toolbar input[type=text]{width:100%;min-width:0;}
     .tabs{margin-left:0;width:100%;}
     .tab{flex:1;text-align:center;padding:9px 6px;}
-    .stats{grid-template-columns:repeat(2,1fr);}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .stats-grid .cierre-box{grid-column:span 2;}
     .cell-block{min-width:0;padding:4px;}
     .ribbon-flag.estado-badge{padding:4px 7px;font-size:9px;letter-spacing:0;}
     :root{--ancho-estado:78px;}
@@ -1288,7 +1304,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.31.11';
+const APP_VERSION = '0.31.14';
 const BACKEND_REQUERIDO = 46;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2377,31 +2393,22 @@ function statsDeCategoria(cat){
   });
   return r;
 }
+let statsCat = 'Cerámica';
+try{ const sc = localStorage.getItem('progresoObraStatsCat'); if(sc === 'Frague' || sc === 'Cerámica') statsCat = sc; }catch(err){}
 function renderStats(){
   const statsEl = document.getElementById('stats');
+  const cat = statsCat, esC = cat === 'Cerámica';
+  const r = statsDeCategoria(cat);
   const fechaHoraCierre = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  const filasConteo = r => [
-    ['pendiente','Pendiente'], ['proceso','Partida (en proceso)'], ['entregado','Terminado'], ['pagado','Pagado']
-  ].map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('');
-  const bloqueMoney = (cat, r) => {
-    const esC = cat === 'Cerámica';
-    const ref = (t, rf) => esC ? `<div class="sub2">${money(rf)} con tarifa referencia</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
-    const item = (cls, valor, rotulo, subs) => `<div class="cat-m ${cls}"><div class="n c-entregado">${money(valor)}</div><div class="l">${rotulo}</div>${subs}</div>`;
-    const nT = r.nDentro + r.nNuevo;
-    const reparto = cierreQuincena
-      ? `<div class="sub2">Dentro del cierre <b>${money(r.dentro)}</b> (${r.nDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.nuevo)}</b> (${r.nNuevo})</div>`
-      : `<div class="sub2">${nT} partida(s)</div>`;
-    const terminados = item('', r.ter, 'Terminado', reparto + ref(r.ter, r.refTer) + (cierreQuincena ? `<div class="sub2">Cierre: ${fechaHoraCierre(cierreQuincena)}</div>` : ''));
-    const pct = r.total ? Math.round(r.pag / r.total * 100) : 0;
-    const pagado = `<div class="cat-m"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${pct}%; background:var(--pagado);"></div></div></div>`;
-    return terminados + pagado;
-  };
-  const tarjeta = (cat, cls) => {
-    const r = statsDeCategoria(cat);
-    return `<div class="stat-card cat-card ${cls}"><div class="cat-cab"><b>${cat}</b>${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>
-      <div class="cat-body"><div class="cat-counts">${filasConteo(r)}</div>${isAdmin ? `<div class="cat-money">${bloqueMoney(cat, r)}</div>` : ''}</div></div>`;
-  };
-  statsEl.innerHTML = tarjeta('Cerámica', 'cat-ceramica') + tarjeta('Frague', 'cat-frague');
+  const cards = `<div class="stat-card stat-combo">${[['pendiente','Pendiente'],['proceso','Partida (en proceso)'],['entregado','Terminado'],['pagado','Pagado']].map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('')}</div>`;
+  const refLinea = rf => esC ? `<div class="sub2">REF ${money(rf)}</div>` : '';
+  const refMargen = (t, rf) => esC ? `<div class="sub2">REF ${money(rf)}</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
+  const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refLinea(r.refTer)}</div>`;
+  const seccion = (cls, rotulo, v, n, rf) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}</div>`;
+  const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo)}</div>` : '';
+  const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div></div>`;
+  const tabs = `<div class="stats-tabs">${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>`;
+  statsEl.innerHTML = tabs + `<div class="stats-grid">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard : ''}</div>`;
   renderPorTrabajador();
 }
 
@@ -2448,7 +2455,11 @@ function abrirFragueDetalle(){
   document.getElementById('fragBody').innerHTML = tabla1 + tabla2 + tabla3;
   document.getElementById('fragOverlay').classList.add('show');
 }
-document.getElementById('stats').addEventListener('click', (e) => { if(e.target.closest('[data-frag-det]')) abrirFragueDetalle(); });
+document.getElementById('stats').addEventListener('click', (e) => {
+  if(e.target.closest('[data-frag-det]')){ abrirFragueDetalle(); return; }
+  const t = e.target.closest('[data-stats-cat]');
+  if(t){ statsCat = t.getAttribute('data-stats-cat'); try{ localStorage.setItem('progresoObraStatsCat', statsCat); }catch(err){} renderStats(); }
+});
 document.getElementById('fragCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('fragOverlay')));
 
 document.getElementById('porTrabajador').addEventListener('click', (e) => {
