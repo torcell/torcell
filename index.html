@@ -132,6 +132,13 @@
   .cambios-barra{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap;}
   .cambios-barra select{flex:1 1 220px;min-width:0;}
   #cambiosLista,#accesosLista{overflow-y:auto;min-height:0;flex:1 1 auto;}
+  .disp-item{border:1px solid #c0546f;border-left:5px solid #c0546f;background:color-mix(in srgb,#c0546f 8%,var(--panel));padding:9px 12px;margin-bottom:10px;}
+  .disp-cab{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:4px;}
+  .disp-cab span{color:var(--sub);font-size:12px;}
+  .disp-fila{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--border);}
+  .disp-fila small{color:var(--sub);font-size:11px;}
+  .disp-item .btn{margin-top:8px;}
+  .disp-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#c0392b;color:#fff;font-size:11px;font-weight:800;}
   .cambio-item{border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;margin-bottom:6px;font-size:12.5px;}
   .cambio-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--sub);font-size:11.5px;margin-bottom:3px;}
   .cambio-cuenta{font-weight:700;color:var(--text);}
@@ -194,8 +201,11 @@
   .pt > details > summary{cursor:pointer;padding:11px 15px;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .pt > details > summary::-webkit-details-marker{display:none;}
   .pt > details > summary .pt-sub{font-weight:400;font-size:11.5px;color:var(--sub);margin-left:6px;}
-  .pt > details > summary::after{content:'▾';color:var(--sub);flex:none;}
-  .pt > details[open] > summary::after{content:'▴';}
+  .pt > details > summary::after{content:'▾ Ver';color:var(--sub);flex:none;font-size:12px;font-weight:600;}
+  .pt > details[open] > summary{background:color-mix(in srgb,var(--accent) 13%,var(--panel));border-left:5px solid var(--accent);padding-left:10px;box-shadow:inset 0 -1px 0 var(--border);}
+  .pt > details[open] > summary::after{content:'▴ Abierto · tocar para cerrar';color:var(--accent);font-weight:800;}
+  .pt:has(> details[open]){border-color:var(--accent);border-top-color:var(--accent);}
+  @media (max-width:700px){.pt > details[open] > summary::after{content:'▴ Abierto';}.pt > details[open] > summary .pt-sub{display:none;}.pt > details > summary{flex-wrap:nowrap;}.pt > details > summary::after{white-space:nowrap;}}
   .pt-cab,.pt-fila > summary,.pt-tot{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:8px;padding:8px 15px;align-items:start;}
   .pt-cinco .pt-cab,.pt-cinco .pt-fila > summary,.pt-cinco .pt-tot{grid-template-columns:minmax(0,1.2fr) repeat(4,minmax(0,1fr));}
   .pt-cinco .pt-col{text-align:right;}
@@ -238,6 +248,12 @@
   .combo-fila .l{margin-top:0;min-width:0;white-space:nowrap;}
     #stats.stats{display:block;}
   .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+  .stat-card.st-retenido{border-top-color:#a97e00;display:flex;flex-direction:column;gap:2px;}
+  .stat-card .c-retenido{color:#a97e00;}
+  body.dark .stat-card .c-retenido{color:#d9a826;}
+  .stat-card.st-retenido .cnt{text-transform:none;letter-spacing:0;}
+  .stat-card.st-retenido .ret-det{margin-top:6px;align-self:flex-start;}
+  @media (min-width:1000px){.stats-grid.con-ret{grid-template-columns:minmax(190px,1.1fr) minmax(120px,.75fr) minmax(250px,1.5fr) minmax(130px,.85fr) minmax(130px,.8fr);}}
   .stats-tabs{display:flex;align-items:stretch;gap:0;margin-bottom:10px;}
   .stats-tab{border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);padding:7px 18px;font-size:12.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;border-radius:0;font-family:inherit;}
   .stats-tab + .stats-tab{border-left:0;}
@@ -1262,6 +1278,7 @@
     <h3>Inicios de sesión</h3>
     <div class="cambios-barra"><select id="accesosCuenta"><option value="">Todas las cuentas</option></select><button type="button" class="btn small" id="accesosRefrescarBtn">Actualizar</button></div>
     <p id="accesosMsg" style="margin:0 0 8px;font-size:12px;color:var(--sub);"></p>
+    <div id="dispAlerta" style="display:none;"></div>
     <div id="accesosLista"></div>
     <div class="actions"><button class="btn primary" id="accesosCerrarBtn">Cerrar</button></div>
   </div>
@@ -1337,8 +1354,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.32.2';
-const BACKEND_REQUERIDO = 46;
+const APP_VERSION = '0.33.0';
+const BACKEND_REQUERIDO = 48;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -1817,13 +1834,58 @@ document.getElementById('avisoDatosViejosCerrar').addEventListener('click', () =
   avisoDatosViejosDescartado = true;
   document.getElementById('avisoDatosViejos').style.display = 'none';
 });
+function etiquetaDispositivo(){
+  const u = navigator.userAgent || '';
+  const so = /iPhone|iPad|iPod/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
+  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
+  return so + ' · ' + nav;
+}
+let dispMultiples = [];
+let dispAvisados = '';
+function actualizarAlertaDispositivos(lista, avisar){
+  dispMultiples = Array.isArray(lista) ? lista : [];
+  const b = document.getElementById('accesosBtn');
+  if(b){
+    let dot = b.querySelector('.disp-dot');
+    if(isAdmin && dispMultiples.length){
+      if(!dot){ dot = document.createElement('span'); dot.className = 'disp-dot'; b.appendChild(dot); }
+      dot.textContent = String(dispMultiples.length);
+    } else if(dot) dot.remove();
+  }
+  if(avisar && isAdmin && dispMultiples.length){
+    const clave = dispMultiples.map(d => d.cuenta + ':' + d.dispositivos.length).join('|');
+    if(clave !== dispAvisados){
+      dispAvisados = clave;
+      const d0 = dispMultiples[0];
+      avisoToast('⚠️ ' + d0.cuenta + ' entró desde ' + d0.dispositivos.length + ' aparatos distintos' + (dispMultiples.length > 1 ? ' (y ' + (dispMultiples.length - 1) + ' cuenta(s) más)' : '') + '. Míralo en "Inicios de sesión".', 'error');
+    }
+  }
+}
+function pintarDispositivosMultiples(){
+  const box = document.getElementById('dispAlerta');
+  if(!box) return;
+  if(!isAdmin || !dispMultiples.length){ box.innerHTML = ''; box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.innerHTML = dispMultiples.map(d => `<div class="disp-item"><div class="disp-cab"><b>⚠️ ${esc(d.cuenta)}</b><span>${d.dispositivos.length} aparatos en los últimos 7 días</span></div>
+    ${d.dispositivos.map(x => `<div class="disp-fila"><span>${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)} · último uso ${fechaHoraCambio(x.t)}</small></div>`).join('')}
+    <button type="button" class="btn small" data-disp-visto="${esc(d.cuenta)}">Entendido</button></div>`).join('');
+}
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-disp-visto]'); if(!b) return;
+  const cuenta = b.getAttribute('data-disp-visto');
+  b.disabled = true;
+  let j = null;
+  try{ j = await llamarDb('dispositivosVisto', {cuenta}); }catch(err){ j = null; }
+  if(j && j.ok){ actualizarAlertaDispositivos(dispMultiples.filter(d => d.cuenta !== cuenta), false); pintarDispositivosMultiples(); }
+  else { b.disabled = false; avisoToast('No se pudo guardar. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.', 'error'); }
+});
 async function dbLoad(){
   if(!DB_URL) return null;
   dbErrorReason = '';
   try{
     let data = null;
     if(sessionToken){
-      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', token: sessionToken})});
+      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', token: sessionToken, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo()})});
       if(!resP.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${resP.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
       const jp = await resP.json();
       if(jp && jp.ok === true){ data = jp; }
@@ -1839,6 +1901,7 @@ async function dbLoad(){
     if(data && data.items) ultimoConteoHoja = Object.keys(data.items).length;
     dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = ''; updateDbBadge();
     if(data && data.backendVersion){ backendVersion = data.backendVersion; updateRateFootnote(); }
+    if(data && isAdmin) actualizarAlertaDispositivos(data.dispositivosMultiples, true);
     return data;
   }catch(err){
     console.error('Base de datos: no se pudo cargar', err);
@@ -2406,7 +2469,7 @@ function money(n){ return (preciosOcultos() && n !== null && n !== undefined) ? 
 
 function statsDeCategoria(cat){
   const cells = ALL_CELLS.filter(c => c.categoria === cat);
-  const r = {counts:{pendiente:0, proceso:0, entregado:0, pagado:0}, total:0, pag:0, ter:0, dentro:0, nuevo:0, nDentro:0, nNuevo:0, pagDentro:0, pagFuera:0, nPagDentro:0, nPagFuera:0, refDentro:0, refNuevo:0, refTer:0};
+  const r = {counts:{pendiente:0, proceso:0, entregado:0, pagado:0}, total:0, pag:0, ter:0, dentro:0, nuevo:0, nDentro:0, nNuevo:0, pagDentro:0, pagFuera:0, nPagDentro:0, nPagFuera:0, refDentro:0, refNuevo:0, refTer:0, nRet:0, ret:0, refRet:0};
   cells.forEach(c => {
     const st = getState(c.id);
     const e = resolveEstado(st);
@@ -2418,6 +2481,7 @@ function statsDeCategoria(cat){
     if(!st.m2) return;
     const p = st.m2 * rate1For(cat, st.trabajador), ref = st.m2 * RATES.cerAlt;
     r.total += p;
+    if(st.retenido && !st.pagado){ r.nRet++; r.ret += p; r.refRet += ref; }
     if(e === 'pagado'){ r.pag += p; if(pagFuera) r.pagFuera += p; else r.pagDentro += p; }
     if(e === 'entregado'){
       r.ter += p; r.refTer += ref;
@@ -2425,6 +2489,35 @@ function statsDeCategoria(cat){
     }
   });
   return r;
+}
+function abrirRetenidoDetalle(cat){
+  const origen = id => paymentHistory.find(h => h.type === 'retencion' && !h.liberado && (h.itemIds || []).indexOf(id) !== -1) || null;
+  const grupos = {};
+  ALL_CELLS.forEach(c => {
+    if(c.categoria !== cat) return;
+    const st = getState(c.id);
+    if(!(st.retenido && !st.pagado) || !st.m2) return;
+    const h = origen(c.id);
+    const w = st.trabajador || '(sin asignar)';
+    const k = w + '|' + (h ? h.ts : 'sin');
+    if(!grupos[k]) grupos[k] = {w, h, filas: [], sub: 0};
+    const p = st.m2 * rate1For(cat, st.trabajador);
+    grupos[k].filas.push({txt: `${liqLabelForCell(c)} — ${AREA_LABEL[c.area] || c.area}`, piso: c.piso, m2: st.m2, p});
+    grupos[k].sub += p;
+  });
+  const lista = Object.values(grupos).sort((a, b) => a.w.localeCompare(b.w) || ((a.h ? a.h.ts : 0) - (b.h ? b.h.ts : 0)));
+  let total = 0, ajustes = 0;
+  const html = lista.map(g => {
+    total += g.sub;
+    if(g.h) (g.h.detalles || []).forEach(d => { ajustes += (d.tipo === 'resta' ? -1 : 1) * (Number(d.monto) || 0); });
+    const cab = g.h ? `Liquidación del ${liqFmtDate(g.h.fechaPago || g.h.ts)} · ${g.h.tipoPago === 'finmes' ? 'Fin de mes' : 'Quincena'}` : 'Sin liquidación registrada en el historial';
+    return `<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;"><b>${esc(g.w)}</b><b>${money(g.sub)}</b></div>
+      <div style="font-size:11.5px;color:var(--sub);margin-bottom:4px;">${cab}</div>
+      ${g.filas.map(f => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--border);"><span>${esc(f.txt)} <small style="color:var(--sub);">${esc(f.piso)} · ${f.m2} m²</small></span><span>${money(f.p)}</span></div>`).join('')}
+      ${g.h ? detallesHtml(g.h.detalles) : ''}</div>`;
+  }).join('');
+  openInputModal('🔒 Retenido · ' + cat, (html || '<p style="font-size:13px;">No hay partidas retenidas.</p>') + `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding-top:8px;border-top:2px solid var(--border-strong);"><span>Total retenido</span><span>${money(total)}</span></div>${ajustes ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding-top:4px;"><span>Ajustes (adelantos / adicionales)</span><span>${ajustes < 0 ? '- ' : '+ '}${money(Math.abs(ajustes))}</span></div><div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:800;padding-top:4px;"><span>Total al liberar</span><span>${money(total + ajustes)}</span></div>` : ''}<p style="font-size:11.5px;color:var(--sub);margin:8px 0 0;">Las partidas retenidas siguen contando dentro de Terminado hasta que se paguen. Se pagan desde "🔒 Retenciones pendientes".</p>`, () => {}, 'Cerrar');
+  inputModalCancel.style.display = 'none';
 }
 let statsCat = 'Cerámica';
 try{ const sc = localStorage.getItem('progresoObraStatsCat'); if(sc === 'Frague' || sc === 'Cerámica') statsCat = sc; }catch(err){}
@@ -2440,8 +2533,9 @@ function renderStats(){
   const seccion = (cls, rotulo, v, n, rf) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}</div>`;
   const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo)}</div>` : '';
   const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div></div>`;
+  const retCard = (isAdmin && r.nRet > 0) ? `<div class="stat-card money-card st-retenido"><div class="n c-retenido">${money(r.ret)}</div><div class="l">Retenido <span class="cnt">(${r.nRet})</span></div>${refLinea(r.refRet)}<button type="button" class="btn small ret-det" data-ret-det>Detalles</button></div>` : '';
   const tabs = `<div class="stats-tabs"><span class="stats-rotulo">Resumen de</span>${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>`;
-  statsEl.innerHTML = tabs + `<div class="stats-grid">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard : ''}</div>`;
+  statsEl.innerHTML = tabs + `<div class="stats-grid${retCard ? ' con-ret' : ''}">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard + retCard : ''}</div>`;
   renderPorTrabajador();
 }
 
@@ -2490,6 +2584,7 @@ function abrirFragueDetalle(){
 }
 document.getElementById('stats').addEventListener('click', (e) => {
   if(e.target.closest('[data-frag-det]')){ abrirFragueDetalle(); return; }
+  if(e.target.closest('[data-ret-det]')){ abrirRetenidoDetalle(statsCat); return; }
   const t = e.target.closest('[data-stats-cat]');
   if(t){ statsCat = t.getAttribute('data-stats-cat'); try{ localStorage.setItem('progresoObraStatsCat', statsCat); }catch(err){} renderStats(); }
 });
@@ -2514,8 +2609,7 @@ document.getElementById('porTrabajador').addEventListener('click', (e) => {
   });
 });
 const ptAbiertos = new Set();
-let ptSeccionAbierta = true;
-try{ ptSeccionAbierta = localStorage.getItem('progresoObraPorTrab') !== '0'; }catch(err){}
+let ptSeccionAbierta = false;
 function ptDatos(){
   const por = {};
   ALL_CELLS.forEach(c => {
@@ -2592,7 +2686,7 @@ function renderPorTrabajador(){
 }
 document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
   const d = e.target;
-  if(d.id === 'ptDetalles'){ ptSeccionAbierta = d.open; try{ localStorage.setItem('progresoObraPorTrab', d.open ? '1' : '0'); }catch(err){} return; }
+  if(d.id === 'ptDetalles'){ ptSeccionAbierta = d.open; return; }
   if(!d.classList || !d.classList.contains('pt-fila')) return;
   const w = d.getAttribute('data-w');
   if(d.open){
@@ -3135,7 +3229,7 @@ function openInputModal(title, bodyHtml, onConfirm, confirmLabel){
   inputModalConfirm.textContent = confirmLabel || 'Guardar';
   inputOverlay.classList.add('show');
 }
-function closeInputModal(){ closeOverlayAnimated(inputOverlay); inputConfirmHandler = null; }
+function closeInputModal(){ closeOverlayAnimated(inputOverlay); inputConfirmHandler = null; inputModalCancel.style.display = ''; }
 inputModalCancel.addEventListener('click', closeInputModal);
 inputModalConfirm.addEventListener('click', () => { if(inputConfirmHandler && inputConfirmHandler() === 'mantener') return; closeInputModal(); });
 
@@ -3189,7 +3283,7 @@ async function checkLoginRemote(pin){
   try{
     const res = await fetch(DB_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({action:'login', pin, dispositivo: dispositivoId()})
+      body: JSON.stringify({action:'login', pin, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo()})
     });
     if(!res.ok) return null;
     const json = await res.json();
@@ -3661,6 +3755,8 @@ async function cargarAccesos(){
     msg.textContent = (j && j.error === 'sin_sesion') ? 'Tu sesión venció. Vuelve a iniciar sesión.' : 'No se pudo cargar. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.';
     lista.innerHTML = ''; return;
   }
+  if(Array.isArray(j.dispositivos)){ actualizarAlertaDispositivos(j.dispositivos, false); }
+  pintarDispositivosMultiples();
   sel.innerHTML = '<option value="">Todas las cuentas</option>' + (j.cuentas || []).map(c => `<option value="${esc(c)}"${c === cuenta ? ' selected' : ''}>${esc(c)}</option>`).join('');
   msg.textContent = j.accesos.length ? `Últimos ${j.accesos.length} inicios de sesión${cuenta ? ' de ' + cuenta : ''}.` : '';
   lista.innerHTML = j.accesos.length ? j.accesos.map(a => `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${esc(a.cuenta)}</span><span>${fechaHoraCambio(a.ts)}</span></div></div>`).join('')
@@ -4205,6 +4301,8 @@ document.getElementById('diagnosticoBtn').addEventListener('click', () => {
   if(retenidasViejas.length) avisos.push({tipo:'info', texto: `Hay ${retenidasViejas.length} partida(s) retenida(s) para finiquito en este momento. Revisa "🔒 Retenciones pendientes" si alguna ya debería liberarse.`});
 
   if(DB_URL && ultimoConteoHoja !== null && ultimoConteoHoja < ALL_CELLS.length) avisos.push({tipo:'alerta', texto: `La hoja de datos tiene ${ultimoConteoHoja} de ${ALL_CELLS.length} departamentos. El reporte semanal y las peticiones de los trabajadores necesitan la hoja completa. Entra a 📧 Reporte semanal y pulsa "Completar hoja de datos".`});
+
+  if(isAdmin && dispMultiples.length) dispMultiples.forEach(d => avisos.push({tipo:'alerta', texto: `${esc(d.cuenta)} entró desde ${d.dispositivos.length} aparatos distintos en los últimos 7 días (${d.dispositivos.map(x => esc(x.e || 'Aparato')).join(', ')}). Puede que comparta su acceso. Detalle en "Inicios de sesión".`}));
 
   const colorPorTipo = {alerta:'#c0546f', aviso:'#a97e00', info:'var(--sub)'};
   const iconoPorTipo = {alerta:'⚠️', aviso:'📌', info:'ℹ️'};
@@ -5837,7 +5935,7 @@ function gateBloquear(seg, texto){
 }
 async function gateLoginFetch(pin){
   try{
-    const res = await fetch(DB_URL, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: 'login', pin, dispositivo: dispositivoId()})});
+    const res = await fetch(DB_URL, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: 'login', pin, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo()})});
     if(!res.ok) return null;
     const json = await res.json();
     return (json && typeof json.ok === 'boolean') ? json : null;
