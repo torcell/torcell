@@ -497,6 +497,9 @@
   .cell-ventana:active{transform:scale(.985);}
   .cell-ventana .checks-row{display:flex;justify-content:flex-end;}
   .cell-ventana .nota-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cv-pie{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;margin-top:auto;}
+  .cv-pie .price-block{flex:1 1 auto;min-width:0;justify-content:flex-end;}
+  .cv-pie .cv-abrir{flex:0 0 auto;white-space:nowrap;line-height:1.2;}
   .cv-abrir{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);text-align:right;opacity:.85;}
   .cell-ventana:hover .cv-abrir{opacity:1;}
   #ventanaOverlay .modal{max-width:520px;padding:0;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100dvh - 24px);}
@@ -665,6 +668,7 @@
     table.dept-table td.dpto-col .dpto-inner{writing-mode:vertical-rl;text-orientation:upright;letter-spacing:1px;line-height:1.15;font-size:13px;display:inline-block;margin:0 auto;}
     table.dept-table td.dpto-col.dpto-corto .dpto-inner{font-size:19px;}
     table.dept-table td.dpto-col.dpto-largo .dpto-inner{font-size:10.5px;letter-spacing:0;}
+    table.dept-table td.dpto-col.mat-pend, table.dept-table td.dpto-col.mat-prep{padding-top:28px;}
     col.col-dpto{width:26px;}
     .grp-piso{margin-left:0;}
     .worker-name{font-size:14px;padding:4px 6px;}
@@ -1356,7 +1360,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.34.0';
+const APP_VERSION = '0.34.1';
 const BACKEND_REQUERIDO = 50;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2924,9 +2928,8 @@ function cellVentanaHtml(cell, st){
   return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">
     <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div></div>
     <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
-    ${priceLinesHtml(cell, st, true)}
     ${nota}
-    <div class="cv-abrir">Abrir ›</div>
+    <div class="cv-pie">${priceLinesHtml(cell, st, true)}<div class="cv-abrir">Abrir ›</div></div>
   </div>`;
 }
 let ventanaId = null, ventanaDestino = null;
@@ -4381,6 +4384,14 @@ function equalizeRowNameHeights(filas){
   grupos.forEach(els => els.forEach(el => { el.style.minHeight = ''; }));
   const alturas = grupos.map(els => { let m = 0; els.forEach(el => { m = Math.max(m, el.offsetHeight); }); return m; });
   grupos.forEach((els, i) => els.forEach(el => { el.style.minHeight = alturas[i] + 'px'; }));
+  // celdas tipo ventana: todas del mismo alto en la fila, para que "Abrir" quede siempre abajo a la derecha
+  trs.forEach(tr => {
+    const cs = tr.querySelectorAll('.cell-ventana');
+    cs.forEach(c => { c.style.minHeight = ''; });
+    if(cs.length < 2) return;
+    let m = 0; cs.forEach(c => { m = Math.max(m, c.offsetHeight); });
+    cs.forEach(c => { c.style.minHeight = m + 'px'; });
+  });
 }
 
 function abrirObservacionModal(id){
