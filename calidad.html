@@ -59,11 +59,11 @@ main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;b
 .piso{margin-bottom:20px;}
 .piso h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .lista{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
-.tile{font-family:inherit;transition:transform .1s ease,box-shadow .12s ease,border-color .15s ease,background .15s ease;background:var(--panel);color:var(--text);border:1px solid var(--border);border-top:4px solid var(--warn);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:74px;text-align:center;transition:transform .1s ease,box-shadow .12s ease,border-color .12s ease;}
+.tile{font-family:inherit;transition:transform .1s ease,box-shadow .12s ease,border-color .15s ease,background .15s ease;background:var(--panel);color:var(--text);border:1px solid var(--border);border-top:4px solid var(--warn);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-height:78px;text-align:center;transition:transform .1s ease,box-shadow .12s ease,border-color .12s ease;}
 .tile:hover{box-shadow:inset 0 0 0 1px var(--accent), inset 0 0 16px color-mix(in srgb,var(--accent) 24%,transparent);border-color:var(--accent);}
 .tile:active{transform:scale(.95);}
 .tile.n{background:var(--soft);border-top-color:var(--strong);cursor:default;color:var(--sub);}.tile.n:hover{transform:none;box-shadow:none;border-color:var(--border);}.tile.n small{color:var(--sub);font-weight:500;}.tile.anim{animation:tileIn .28s ease both;}@keyframes tileIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}.tile.r{border-top-color:var(--ok);}.tile.o{border-top-color:var(--bad);}
-.tile b{font-size:17px;line-height:1.1;overflow-wrap:anywhere;}
+.tile b{font-size:17px;line-height:1.1;overflow-wrap:anywhere;min-height:22px;display:flex;align-items:center;justify-content:center;width:100%;}
 .tile.pas b{font-size:13px;letter-spacing:.04em;text-transform:uppercase;}
 .tile small{font-size:11px;font-weight:600;color:var(--warn);}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
