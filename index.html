@@ -1328,8 +1328,7 @@
 
 <div class="overlay" id="retencionesOverlay">
   <div class="modal" style="max-width:420px;">
-    <h3>🔒 Retenciones pendientes</h3>
-    <p style="margin:0 0 14px;font-size:12.5px;color:var(--sub);">Dinero que se dejó guardado para el finiquito de estos trabajadores. Márcalo como Pagado cuando ya se les entregue.</p>
+    <h3 style="margin-bottom:12px;">🔒 Retenciones pendientes</h3>
     <div id="retencionesList"></div>
     <div class="actions"><button class="btn primary" id="retencionesCloseBtn">Cerrar</button></div>
   </div>
@@ -2475,7 +2474,8 @@ function statsDeCategoria(cat){
     const e = resolveEstado(st);
     r.counts[e] = (r.counts[e]||0) + 1;
     const nuevo = e === 'entregado' && !!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena;
-    if(e === 'entregado'){ if(nuevo) r.nNuevo++; else r.nDentro++; }
+    const retenida = !!st.retenido && !st.pagado;
+    if(e === 'entregado' && !retenida){ if(nuevo) r.nNuevo++; else r.nDentro++; }
     const pagFuera = e === 'pagado' && !!cierreQuincena && (st.pagadoTs || st.terminadoTs || 0) > cierreQuincena;
     if(e === 'pagado'){ if(pagFuera) r.nPagFuera++; else r.nPagDentro++; }
     if(!st.m2) return;
@@ -2485,7 +2485,7 @@ function statsDeCategoria(cat){
     if(e === 'pagado'){ r.pag += p; if(pagFuera) r.pagFuera += p; else r.pagDentro += p; }
     if(e === 'entregado'){
       r.ter += p; r.refTer += ref;
-      if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; }
+      if(!retenida){ if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; } }
     }
   });
   return r;
