@@ -431,9 +431,14 @@ let cargo = leerLocal('calidadCargo');
 const TIEMPO_MAX = 30000;
 const TIEMPO_INICIAL = 45000;
 
+const NOMBRE_TIPO_DISP = {cel: 'celular', pc: 'computador'};
+function msgDispositivoOcupado(tipo){
+  return 'Esta cuenta ya está abierta en otro ' + (NOMBRE_TIPO_DISP[tipo] || 'aparato') + '. Solo se permite 1 celular y 1 computador por cuenta. Pídele al administrador que libere el cupo.';
+}
 function etiquetaDispositivo(){
   const u = navigator.userAgent || '';
-  const so = /iPhone|iPad|iPod/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
+  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
+  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
   const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
   return so + ' · ' + nav;
 }
@@ -445,6 +450,7 @@ async function llamar(action, extra, rapido, limite){
     if(!res.ok) throw new Error('red');
     const j = JSON.parse(await res.text());
     if(j && j.error === 'sin_sesion' && token) cerrarSesion('Tu sesión venció. Ingresa tu PIN de nuevo.');
+    else if(j && j.error === 'dispositivo_ocupado' && token) cerrarSesion(msgDispositivoOcupado(j.tipo));
     return j;
   }catch(e){
     if(e && e.name === 'AbortError') throw new Error('tiempo');
@@ -1313,7 +1319,7 @@ $('form').addEventListener('submit', async e => {
       entrarVista();
       cargarInicial();
     }else{
-      $('err').textContent = j && j.error === 'demasiados_intentos' ? 'Demasiados intentos. Espera unos minutos.' : 'PIN incorrecto.';
+      $('err').textContent = j && j.error === 'demasiados_intentos' ? 'Demasiados intentos. Espera unos minutos.' : j && j.error === 'dispositivo_ocupado' ? msgDispositivoOcupado(j.tipo) : 'PIN incorrecto.';
       $('pin').value = '';
     }
   }catch(err){

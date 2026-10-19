@@ -135,8 +135,11 @@
   .disp-item{border:1px solid #c0546f;border-left:5px solid #c0546f;background:color-mix(in srgb,#c0546f 8%,var(--panel));padding:9px 12px;margin-bottom:10px;}
   .disp-cab{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:4px;}
   .disp-cab span{color:var(--sub);font-size:12px;}
-  .disp-fila{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--border);}
+  .disp-fila{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:nowrap;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--border);}
   .disp-fila small{color:var(--sub);font-size:11px;}
+  .disp-item.info{border-color:#b8860b;border-left-color:#b8860b;background:color-mix(in srgb,#b8860b 8%,var(--panel));}
+  .disp-fila .btn{margin:0;flex:0 0 auto;}
+  .disp-info{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1 1 0;}
   .disp-item .btn{margin-top:8px;}
   .disp-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#c0392b;color:#fff;font-size:11px;font-weight:800;}
   .cambio-item{border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;margin-bottom:6px;font-size:12.5px;}
@@ -1353,8 +1356,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.33.0';
-const BACKEND_REQUERIDO = 48;
+const APP_VERSION = '0.34.0';
+const BACKEND_REQUERIDO = 50;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -1835,12 +1838,17 @@ document.getElementById('avisoDatosViejosCerrar').addEventListener('click', () =
 });
 function etiquetaDispositivo(){
   const u = navigator.userAgent || '';
-  const so = /iPhone|iPad|iPod/.test(u) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
+  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
+  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
   const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
   return so + ' · ' + nav;
 }
 let dispMultiples = [];
 let dispAvisados = '';
+const NOMBRE_TIPO_DISP = {cel: 'celular', pc: 'computador'};
+function msgDispositivoOcupado(tipo){
+  return 'Esta cuenta ya está abierta en otro ' + (NOMBRE_TIPO_DISP[tipo] || 'aparato') + '. Solo se permite 1 celular y 1 computador por cuenta. Pídele al administrador que libere el cupo.';
+}
 function actualizarAlertaDispositivos(lista, avisar){
   dispMultiples = Array.isArray(lista) ? lista : [];
   const b = document.getElementById('accesosBtn');
@@ -1852,11 +1860,13 @@ function actualizarAlertaDispositivos(lista, avisar){
     } else if(dot) dot.remove();
   }
   if(avisar && isAdmin && dispMultiples.length){
-    const clave = dispMultiples.map(d => d.cuenta + ':' + d.dispositivos.length).join('|');
+    const clave = dispMultiples.map(d => d.cuenta + ':' + d.dispositivos.length + ':' + (d.bloqueo ? d.bloqueo.t : 0)).join('|');
     if(clave !== dispAvisados){
       dispAvisados = clave;
-      const d0 = dispMultiples[0];
-      avisoToast('⚠️ ' + d0.cuenta + ' entró desde ' + d0.dispositivos.length + ' aparatos distintos' + (dispMultiples.length > 1 ? ' (y ' + (dispMultiples.length - 1) + ' cuenta(s) más)' : '') + '. Míralo en "Inicios de sesión".', 'error');
+      const d0 = dispMultiples[0], mas = dispMultiples.length > 1 ? ' (y ' + (dispMultiples.length - 1) + ' cuenta(s) más)' : '';
+      avisoToast(d0.bloqueo
+        ? '⛔ ' + d0.cuenta + ' intentó entrar desde un 2.º ' + (NOMBRE_TIPO_DISP[d0.bloqueo.k] || 'aparato') + ' y se bloqueó' + mas + '. Míralo en "Inicios de sesión".'
+        : 'ℹ️ ' + d0.cuenta + ' ya usa ' + d0.dispositivos.length + ' aparatos' + mas + '. Míralo en "Inicios de sesión".', d0.bloqueo ? 'error' : 'ok');
     }
   }
 }
@@ -1865,10 +1875,26 @@ function pintarDispositivosMultiples(){
   if(!box) return;
   if(!isAdmin || !dispMultiples.length){ box.innerHTML = ''; box.style.display = 'none'; return; }
   box.style.display = '';
-  box.innerHTML = dispMultiples.map(d => `<div class="disp-item"><div class="disp-cab"><b>⚠️ ${esc(d.cuenta)}</b><span>${d.dispositivos.length} aparatos en los últimos 7 días</span></div>
-    ${d.dispositivos.map(x => `<div class="disp-fila"><span>${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)} · último uso ${fechaHoraCambio(x.t)}</small></div>`).join('')}
-    <button type="button" class="btn small" data-disp-visto="${esc(d.cuenta)}">Entendido</button></div>`).join('');
+  box.innerHTML = dispMultiples.map(d => {
+    const bl = d.bloqueo;
+    const cab = bl
+      ? `<b>⛔ ${esc(d.cuenta)}</b><span>Intento bloqueado: 2.º ${esc(NOMBRE_TIPO_DISP[bl.k] || 'aparato')} (${esc(bl.e || '?')}) · ${fechaHoraCambio(bl.t)}${bl.n > 1 ? ' · ' + bl.n + ' intentos' : ''}</span>`
+      : `<b>ℹ️ ${esc(d.cuenta)}</b><span>Ya usa ${d.dispositivos.length} aparatos (el máximo permitido)</span>`;
+    const filas = d.dispositivos.map(x => `<div class="disp-fila"><div class="disp-info"><span>${esc(NOMBRE_TIPO_DISP[x.k] ? NOMBRE_TIPO_DISP[x.k][0].toUpperCase() + NOMBRE_TIPO_DISP[x.k].slice(1) : 'Aparato')} · ${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)}<br>último uso ${fechaHoraCambio(x.t)}</small></div><button type="button" class="btn small" data-disp-lib="${esc(x.id)}" data-cuenta="${esc(d.cuenta)}" data-nombre="${esc((NOMBRE_TIPO_DISP[x.k] || 'aparato') + ' ' + (x.e || ''))}">Liberar</button></div>`).join('');
+    return `<div class="disp-item${bl ? '' : ' info'}"><div class="disp-cab">${cab}</div>${filas}
+    <button type="button" class="btn small" data-disp-visto="${esc(d.cuenta)}">Entendido</button></div>`;
+  }).join('');
 }
+document.addEventListener('click', (e) => {
+  const lb = e.target.closest('[data-disp-lib]'); if(!lb) return;
+  const cuenta = lb.getAttribute('data-cuenta'), id = lb.getAttribute('data-disp-lib'), nom = lb.getAttribute('data-nombre');
+  askConfirm('¿Liberar el ' + nom.trim() + ' de ' + cuenta + '? Ese aparato tendrá que volver a ingresar con el PIN, y el cupo queda libre para otro.', async () => {
+    let j = null;
+    try{ j = await llamarDb('dispositivoLiberar', {cuenta, id}); }catch(err){ j = null; }
+    if(j && j.ok){ actualizarAlertaDispositivos(dispMultiples.filter(d => d.cuenta !== cuenta), false); pintarDispositivosMultiples(); avisoToast('Cupo liberado. Ya puede ingresar otro aparato en esa cuenta.', 'ok'); }
+    else avisoToast('No se pudo liberar. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.', 'error');
+  });
+});
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-disp-visto]'); if(!b) return;
   const cuenta = b.getAttribute('data-disp-visto');
@@ -1888,6 +1914,10 @@ async function dbLoad(){
       if(!resP.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${resP.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
       const jp = await resP.json();
       if(jp && jp.ok === true){ data = jp; }
+      else if(jp && jp.error === 'dispositivo_ocupado'){
+        if(appListo){ sesionVencida(msgDispositivoOcupado(jp.tipo)); } else { sesionInvalida = true; limpiarSesionGuardada(); }
+        return null;
+      }
       else if(jp && jp.error === 'sin_sesion'){
         if(appListo){ sesionVencida(); } else { sesionInvalida = true; limpiarSesionGuardada(); }
         return null;
@@ -3307,6 +3337,7 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
   if(!res.ok){
     pinError.textContent = res.error === 'demasiados_intentos'
       ? 'Demasiados PIN incorrectos seguidos. Espera unos minutos y vuelve a intentar.'
+      : res.error === 'dispositivo_ocupado' ? msgDispositivoOcupado(res.tipo)
       : 'PIN incorrecto.';
     return;
   }
@@ -4302,7 +4333,7 @@ document.getElementById('diagnosticoBtn').addEventListener('click', () => {
 
   if(DB_URL && ultimoConteoHoja !== null && ultimoConteoHoja < ALL_CELLS.length) avisos.push({tipo:'alerta', texto: `La hoja de datos tiene ${ultimoConteoHoja} de ${ALL_CELLS.length} departamentos. El reporte semanal y las peticiones de los trabajadores necesitan la hoja completa. Entra a 📧 Reporte semanal y pulsa "Completar hoja de datos".`});
 
-  if(isAdmin && dispMultiples.length) dispMultiples.forEach(d => avisos.push({tipo:'alerta', texto: `${esc(d.cuenta)} entró desde ${d.dispositivos.length} aparatos distintos en los últimos 7 días (${d.dispositivos.map(x => esc(x.e || 'Aparato')).join(', ')}). Puede que comparta su acceso. Detalle en "Inicios de sesión".`}));
+  if(isAdmin && dispMultiples.length) dispMultiples.forEach(d => avisos.push({tipo: d.bloqueo ? 'alerta' : 'info', texto: d.bloqueo ? `${esc(d.cuenta)} intentó entrar desde un 2.º ${esc(NOMBRE_TIPO_DISP[d.bloqueo.k] || 'aparato')} (${esc(d.bloqueo.e || '?')}) y se bloqueó. Puede que comparta su acceso. Puedes liberar un cupo en "Inicios de sesión".` : `${esc(d.cuenta)} ya usa ${d.dispositivos.length} aparatos (${d.dispositivos.map(x => esc(x.e || 'Aparato')).join(', ')}), el máximo permitido.`}));
 
   const colorPorTipo = {alerta:'#c0546f', aviso:'#a97e00', info:'var(--sub)'};
   const iconoPorTipo = {alerta:'⚠️', aviso:'📌', info:'ℹ️'};
@@ -5952,6 +5983,7 @@ async function gateIntentar(){
   if(res === null){ gatePintar(); gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
   if(!res.ok){
     if(res.error === 'demasiados_intentos'){ fallo(''); gateBloquear(30, 'Demasiados PIN incorrectos seguidos.'); return; }
+    if(res.error === 'dispositivo_ocupado'){ fallo(msgDispositivoOcupado(res.tipo)); return; }
     gate.fallos++;
     if(gate.fallos >= 5){ fallo(''); gateBloquear(15, 'Demasiados intentos en este aparato.'); }
     else fallo(`PIN incorrecto. Te quedan ${5 - gate.fallos} intentos`);
@@ -5985,13 +6017,13 @@ function gatePedirUrl(){
     inp.onkeydown = (e) => { if(e.key === 'Enter') ir(); };
   });
 }
-async function sesionVencida(){
+async function sesionVencida(msg){
   if(reautenticando) return;
   reautenticando = true;
   const rolPrev = rolActual(), nomPrev = sessionName || '';
   sessionToken = null; limpiarSesionGuardada();
   try{
-    const res = await gatePedirPin('Tu sesión venció. Ingresa tu PIN para seguir.');
+    const res = await gatePedirPin(msg || 'Tu sesión venció. Ingresa tu PIN para seguir.');
     if(res.rol === rolPrev && (rolPrev !== 3 || res.nombre === nomPrev)){
       sessionToken = res.token || null;
       await gateOcultar();
