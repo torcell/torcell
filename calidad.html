@@ -106,6 +106,7 @@ body.bloq{overflow:hidden;}
 .obsfila input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex:0 0 auto;margin:0;}
 .obsfila .cant{min-height:36px;padding:5px 8px;font-size:14px;border:1px solid var(--strong);background:var(--panel);color:var(--text);width:100%;text-align:center;-moz-appearance:textfield;appearance:textfield;transition:opacity .15s ease;}
 .obsfila .cant:disabled{opacity:.35;}
+.obsfila .cant-no{display:block;min-height:36px;}
 .obsfila .cant::-webkit-outer-spin-button,.obsfila .cant::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .obsfila .cant:focus{outline:2px solid var(--accent);outline-offset:-1px;}
 .oplista{display:flex;flex-direction:column;max-height:220px;overflow:auto;}
@@ -390,7 +391,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.6.1';
+const CAL_VERSION = '1.6.2';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -745,9 +746,10 @@ function parseItems(r){
   return out;
 }
 
+const SIN_CANTIDAD = ['Falta Terraza'];
 function pintarLista(sel){
   const nombres = [...opcionesDe(), ...Object.keys(sel).filter(n => !opcionesDe().includes(n))];
-  $('mLista').innerHTML = nombres.length ? nombres.map(n => `<div class="obsfila"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label><input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}></div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
+  $('mLista').innerHTML = nombres.length ? nombres.map(n => `<div class="obsfila"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label>${SIN_CANTIDAD.includes(n) ? '<span class="cant-no" aria-hidden="true"></span>' : `<input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}>`}</div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
   $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = estadoSel === 'observado' ? 0 : -1; });
 }
 
@@ -755,7 +757,7 @@ function seleccion(){
   const sel = {};
   $('mLista').querySelectorAll('.obsfila').forEach(f => {
     const chk = f.querySelector('input[type=checkbox]');
-    if(chk.checked) sel[chk.value] = Math.max(1, Math.min(999, Math.floor(Number(f.querySelector('.cant').value) || 1)));
+    if(chk.checked) sel[chk.value] = Math.max(1, Math.min(999, Math.floor(Number((f.querySelector('.cant') || {}).value) || 1)));
   });
   return sel;
 }
@@ -1437,6 +1439,7 @@ $('mLista').addEventListener('change', e => {
   const chk = e.target.closest('input[type=checkbox]');
   if(!chk) return;
   const cant = chk.closest('.obsfila').querySelector('.cant');
+  if(!cant) return;
   cant.disabled = !chk.checked;
   if(chk.checked && !cant.value) cant.value = 1;
   if(!chk.checked) cant.value = '';
