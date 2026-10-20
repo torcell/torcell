@@ -1,4 +1,5 @@
 <title>Avance de Obra</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -68,10 +69,17 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .pill.late{background:transparent;color:var(--ink);border:1.5px solid var(--late)}
 .pill.ontime{background:transparent;color:var(--ink);border:1.5px solid var(--st-ok)}
 
-nav.tabs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
+nav.tabs{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
 nav.tabs button{border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px var(--f-body);padding:10px 6px;cursor:pointer;border-radius:0;min-width:0}
 nav.tabs button:last-child{border-right:0}
 nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+nav.tabs button.lock{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 6px,var(--grid) 6px 7px);cursor:not-allowed}
+.temblor{animation:temblor .28s ease}
+@keyframes temblor{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.aviso-ses{font-size:13.5px;color:var(--ink);border-left:3px solid var(--late);padding:2px 0 2px 10px;max-width:68ch;order:9}
+.pill.real{background:var(--st-ok);color:var(--st-ok-ink);text-transform:uppercase;letter-spacing:.06em}
+.zona-vacia{grid-column:2 / span 8;height:30px;border:1px dashed var(--hatch);color:var(--muted);font-size:11.5px;display:flex;align-items:center;justify-content:center}
+#cargando{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:30;font-size:15px;color:var(--muted)}
 button{transition:transform .08s ease}
 button:active{transform:scale(.97)}
 button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -119,7 +127,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 /* dibujo del edificio por pisos */
 .elev-layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start}
 .elev{display:flex;flex-direction:column;gap:3px}
-.row{display:grid;grid-template-columns:44px repeat(8,46px);gap:3px}
+.row{display:grid;grid-template-columns:44px repeat(8,46px) 6px repeat(2,40px);gap:3px}
 .lvl{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
 .cell{height:30px;border:1.5px solid transparent;border-radius:0;font:500 12px var(--f-mono);color:var(--ink);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;background:var(--st-wait)}
 .cell:hover,.zone:hover{outline:2px solid var(--ink);outline-offset:-1px}
@@ -159,7 +167,33 @@ dl.facts dt{color:var(--muted)} dl.facts dd{margin:0;font-variant-numeric:tabula
 .scale .ramp{display:flex}
 .scale .ramp span{width:22px;height:12px}
 
+/* bodega */
+.pill.b-ya{background:var(--st-block);color:var(--st-block-ink)}
+.pill.b-hoy{background:var(--late);color:#1F1300}
+.pill.b-pronto{background:transparent;color:var(--ink);border:1.5px solid var(--late)}
+.pill.b-ok{background:transparent;color:var(--ink);border:1.5px solid var(--st-ok)}
+.pill.b-cub{background:var(--st-ok);color:var(--st-ok-ink)}
+.bkpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
+.bkpis>div{padding:12px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;min-width:0}
+.bkpis>div:last-child{border-right:0}
+.bkpis b{font-family:var(--f-display);font-size:30px;font-weight:600;line-height:1}
+.avisos{display:flex;flex-direction:column}
+.aviso{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--grid);cursor:pointer}
+.aviso:last-child{border-bottom:0}
+.aviso:hover .an{text-decoration:underline}
+.aviso .an{font-weight:600}
+.aviso .ad{font-size:13px;color:var(--muted)}
+.aviso .af{font-family:var(--f-mono);font-size:13px;text-align:right;white-space:nowrap}
+.mat-head{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline}
+.mat-head dl{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0;font-size:13.5px}
+.mat-head dt{color:var(--muted)} .mat-head dd{margin:0 0 0 4px;font-family:var(--f-mono)}
+.mat-head dl div{display:flex}
+
 /* tablas */
+td.nw{white-space:nowrap}
+#tblBodega th,#tblBodega td{padding:8px 9px;font-size:13.5px}
+#listaBodega{display:none}
+@media (max-width:640px){ #tblBodega{display:none} #wrapBodega{border:0} #listaBodega{display:flex} }
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line)}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -221,15 +255,21 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   .kpi:nth-child(2n),.scen>div:nth-child(2n){border-right:0}
   .kpi:nth-child(-n+2),.scen>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .scen>div:nth-child(3){grid-column:1 / -1}
-  nav.tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
-  nav.tabs button:nth-child(4n){border-right:0}
-  nav.tabs button:nth-child(-n+4){border-bottom:1px solid var(--line)}
+  nav.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  nav.tabs button:nth-child(3n){border-right:0}
+  nav.tabs button:nth-child(-n+6){border-bottom:1px solid var(--line)}
   .glos{grid-template-columns:1fr}
+  .bkpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bkpis>div:nth-child(2n){border-right:0}
+  .bkpis>div:nth-child(-n+4){border-bottom:1px solid var(--line)}
+  .bkpis>div:last-child{grid-column:1 / -1}
+  .aviso{grid-template-columns:minmax(0,1fr) auto}
+  .aviso>span:first-child{grid-column:1 / -1}
 }
 @media (max-width:460px){
-  .row{grid-template-columns:30px repeat(8,minmax(0,1fr));gap:2px}
+  .row{grid-template-columns:28px repeat(8,minmax(0,1fr)) 2px repeat(2,minmax(0,1fr));gap:2px}
   .elev{gap:2px}
-  .cell{font-size:10.5px;height:28px}
+  .cell{font-size:9.5px;height:28px}
   .gap,.zone{height:28px}
   .zone{font-size:10.5px}
   .ground{margin-left:32px}
@@ -243,18 +283,19 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   .selector button:nth-child(2n){border-right:0}
   .selector button:nth-last-child(3){border-bottom:1px solid var(--line)}
 }
-@media (prefers-reduced-motion:reduce){button{transition:none}button:active{transform:none}#tip{transition:none}}
+@media (prefers-reduced-motion:reduce){.temblor{animation:none}button{transition:none}button:active{transform:none}#tip{transition:none}}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="idrow">
-      <div class="eyebrow"><span class="pill demo">Demostración</span><span>Avance y proyecciones</span></div>
-      <h1>Edificio Demo 24 pisos</h1>
-      <div class="muted">Torre única · 2 <span class="term" data-term="subterraneo">subterráneos</span> · 159 departamentos desde el piso 2</div>
+      <div class="eyebrow" id="hdrEyebrow"><span class="pill demo">Demostración</span><span>Avance y proyecciones</span></div>
+      <h1 id="hdrTitulo">Edificio Demo 24 pisos</h1>
+      <div class="aviso-ses" id="avisoSes" hidden></div>
+      <div class="muted" id="hdrSub">Torre única · 2 <span class="term" data-term="subterraneo">subterráneos</span> · 159 departamentos desde el piso 2</div>
     </div>
     <div class="hdr-der">
-      <div class="sesion"><span class="ini" aria-hidden="true">AS</span><span>Conectado como: <b>A. Sandoval</b> · Jefe de Terreno</span></div>
+      <div class="sesion" id="sesion"><span class="ini" aria-hidden="true">AS</span><span>Conectado como: <b>A. Sandoval</b> · Jefe de Terreno</span></div>
       <div class="corte"><span class="term" data-term="corte">Fecha de corte</span><b id="corteTxt"></b></div>
     </div>
   </header>
@@ -264,6 +305,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
     <button role="tab" aria-selected="false" data-tab="edificio" id="tab-edificio">Edificio</button>
     <button role="tab" aria-selected="false" data-tab="tren" id="tab-tren">Por piso</button>
     <button role="tab" aria-selected="false" data-tab="proy" id="tab-proy">Proyección</button>
+    <button role="tab" aria-selected="false" data-tab="bodega" id="tab-bodega">Bodega</button>
     <button role="tab" aria-selected="false" data-tab="partidas" id="tab-partidas">Partidas</button>
     <button role="tab" aria-selected="false" data-tab="listado" id="tab-listado">Listado</button>
     <button role="tab" aria-selected="false" data-tab="supuestos" id="tab-supuestos">Supuestos</button>
@@ -279,17 +321,21 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
         <div class="panel-head">
           <h2><span class="term" data-term="curvas">Curva S</span> de avance</h2>
           <div class="legend-row">
-            <span class="lg"><i class="plan"></i><span class="term" data-term="programado">Programado</span></span>
+            <span class="lg" id="lgPlan"><i class="plan"></i><span class="term" data-term="programado">Programado</span></span>
             <span class="lg"><i></i><span class="term" data-term="real">Real</span></span>
             <span class="lg"><i class="proj"></i><span class="term" data-term="proyeccion">Proyección base</span></span>
           </div>
         </div>
         <div class="chart" id="chS"></div>
-        <p class="note">Avance <span class="term" data-term="ponderado">ponderado</span> de toda la obra, semana a semana. Pasa el cursor por el gráfico para ver los valores.</p>
+        <p class="note" id="notaCurva">Avance <span class="term" data-term="ponderado">ponderado</span> de toda la obra, semana a semana. Pasa el cursor por el gráfico para ver los valores.</p>
       </div>
-      <div class="panel">
+      <div class="panel" id="panelRestr">
         <div class="panel-head"><h2><span class="term" data-term="restriccion">Restricciones</span> abiertas</h2></div>
         <div class="restr" id="restr"></div>
+      </div>
+      <div class="panel" id="panelAvisos">
+        <div class="panel-head"><h2>Avisos de <span class="term" data-term="bodega">bodega</span></h2><span class="note">Materiales que hay que pedir pronto.</span></div>
+        <div class="avisos" id="avisosRes"></div>
       </div>
       </div>
       <div class="panel">
@@ -298,12 +344,13 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
         </div>
         <div class="legend-row">
           <span class="lg"><i class="box" style="background:var(--real)"></i>Real</span>
-          <span class="lg"><i class="box" style="background:var(--ink);width:3px"></i>Programado al corte</span>
+          <span class="lg" id="lgTick"><i class="box" style="background:var(--ink);width:3px"></i>Programado al corte</span>
         </div>
         <div>
           <div class="bars-head"><span>Partida</span><span></span><span>Real</span><span><span class="term" data-term="desviacion">Desv.</span></span></div>
           <div class="bars" id="bars"></div>
         </div>
+        <div id="detalleReal" hidden></div>
       </div>
     </div>
   </section>
@@ -321,7 +368,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
           <div class="selector" id="selPartida" role="group" aria-label="Partida"></div>
           <h3 id="selTitulo"></h3>
           <div class="statlist" id="statlist"></div>
-          <p class="note">El piso 2 no tiene los departamentos 202 ni 206: van rayados para que las columnas queden alineadas. La última columna es el pasillo común de cada piso.</p>
+          <p class="note">El piso 2 no tiene los departamentos 202 ni 206: van rayados para que las columnas queden alineadas. PAS es el pasillo común de cada piso; A1 y A2 son las paradas de los 2 ascensores, que van aparte.</p>
         </div>
       </div>
     </div>
@@ -370,6 +417,32 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
       </div>
       <div class="chart" id="chR" style="min-height:200px"></div>
       <p class="note" id="rendNota"></p>
+    </div>
+  </section>
+
+  <!-- BODEGA -->
+  <section id="v-bodega" class="view" hidden>
+    <div class="bkpis" id="bkpis"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Materiales en <span class="term" data-term="bodega">bodega</span></h2>
+        <span class="note">El consumo sale del ritmo real de cada partida. Toca un material para ver cómo baja su stock y cuándo hay que pedir.</span>
+      </div>
+      <div class="tbl-wrap" id="wrapBodega"><table id="tblBodega"></table></div>
+      <div class="avisos" id="listaBodega"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="matTitulo"></h2>
+        <div class="legend-row">
+          <span class="lg"><i></i>Stock proyectado</span>
+          <span class="lg"><i class="box" style="background:var(--late);opacity:.25;width:16px"></i>Llega si pides hoy (mín.–máx.)</span>
+          <span class="lg"><i class="plan"></i>Punto de pedido</span>
+        </div>
+      </div>
+      <div class="mat-head" id="matHead"></div>
+      <div class="chart" id="chB" style="min-height:230px"></div>
+      <p class="note" id="matNota"></p>
     </div>
   </section>
 
@@ -430,7 +503,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
     </div>
   </section>
 
-  <footer><span>Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.4.0</span></footer>
+  <footer><span id="pie">Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.7.0</span></footer>
 </div>
 
 <div class="overlay" id="overlay" hidden>
@@ -443,6 +516,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   </div>
 </div>
 <div id="tip" role="tooltip"></div>
+<div id="cargando">Cargando datos de la obra…</div>
 
 <script>
 const CONFIG = {
@@ -493,10 +567,31 @@ const CONFIG = {
     { cod: "MUE", nom: "Muebles de cocina y closets",        esp: "Terminaciones", unidad: "recinto", aplica: ["dep"],            pre: ["PIN"],             off: 88,  dur: 6,  peso: 6,   ritmo: 1.0 },
     { cod: "PIS", nom: "Piso flotante o vinílico",           esp: "Terminaciones", unidad: "recinto", aplica: ["dep"],            pre: ["PIN"],             off: 90,  dur: 6,  peso: 5,   ritmo: 1.0 },
     { cod: "ART", nom: "Artefactos sanitarios y eléctricos", esp: "Instalaciones", unidad: "recinto", aplica: ["p1","dep"],       pre: ["MUE","CER"],       off: 96,  dur: 5,  peso: 3,   ritmo: 1.0 },
-    { cod: "ASC", nom: "Ascensor (montaje y puertas de piso)", esp: "Instalaciones", unidad: "nivel", aplica: ["sub","p1","dep"], pre: ["OG"],          off: 60,  dur: 8,  peso: 2,   ritmo: 1.0 },
+    { cod: "ASC", nom: "Ascensores (montaje y puertas de piso)", esp: "Instalaciones", unidad: "recinto", aplica: ["asc"],        pre: ["OG"],              off: 60,  dur: 4,  peso: 2,   ritmo: 1.0 },
     { cod: "ASE", nom: "Aseo final",                         esp: "Entrega",       unidad: "recinto", aplica: ["sub","p1","dep","pas"], pre: ["ART","PIS","PUE"], off: 103, dur: 3,  peso: 1.5, ritmo: 1.0 },
     { cod: "CAL", nom: "Recepción de Calidad",               esp: "Entrega",       unidad: "recinto", aplica: ["sub","p1","dep","pas"], pre: ["ASE"],             off: 107, dur: 3,  peso: 1.5, ritmo: 1.0 }
   ],
+  // materiales de bodega: consumo por recinto (A, B, C, D = tipologías; pas = pasillo), merma en %, plazo de entrega en días hábiles
+  materiales: [
+    { cod: "CER-01", nom: "Cerámica 45x45 (piso y muro)", partida: "CER", unidad: "m²",  pres: 1.44, presNom: "caja de 1,44 m²", merma: 8,  porTipo: { A: 22, B: 16, C: 16, D: 11 }, pas: 30, stock: 70,  plazo: [8, 15],
+      transito: [] },
+    { cod: "ADH-01", nom: "Adhesivo cerámico",            partida: "CER", unidad: "kg",  pres: 25,   presNom: "saco de 25 kg",   merma: 5,  porTipo: { A: 110, B: 80, C: 80, D: 55 }, pas: 150, stock: 350, plazo: [3, 8],
+      transito: [] },
+    { cod: "FRA-01", nom: "Frague",                       partida: "FRA", unidad: "kg",  pres: 5,    presNom: "bolsa de 5 kg",   merma: 10, porTipo: { A: 11, B: 8, C: 8, D: 6 },       pas: 15,  stock: 60,   plazo: [3, 6],
+      transito: [{ cant: 300, pedido: "2026-10-15", llegaMin: "2026-10-21", llegaMax: "2026-10-26" }] },
+    { cod: "IMP-01", nom: "Impermeabilizante (baño y terraza)", partida: "IMP", unidad: "kg", pres: 18, presNom: "tineta de 18 kg", merma: 5, porCant: { banos: 6, terrazas: 4 }, stock: 105, plazo: [5, 12],
+      transito: [] },
+    { cod: "PLA-01", nom: "Plancha yeso-cartón 1,2x2,4", partida: "TAB", unidad: "un",  pres: 1,    presNom: "plancha",         merma: 4,  porTipo: { A: 40, B: 28, C: 28, D: 18 }, stock: 900,  plazo: [5, 10],
+      transito: [{ cant: 100, pedido: "2026-10-16", llegaMin: "2026-10-23", llegaMax: "2026-10-30" }] },
+    { cod: "PIN-01", nom: "Pintura látex interior",       partida: "PIN", unidad: "gal", pres: 4,    presNom: "tineta de 4 gal", merma: 5,  porTipo: { A: 6, B: 4.5, C: 4.5, D: 3 },  pas: 3,   stock: 150,  plazo: [4, 9],
+      transito: [] },
+    { cod: "PUE-01", nom: "Puerta interior con marco",    partida: "PUE", unidad: "un",  pres: 1,    presNom: "puerta",          merma: 0,  porCant: { puertas: 1 },                   stock: 120,  plazo: [15, 30],
+      transito: [{ cant: 60, pedido: "2026-10-01", llegaMin: "2026-11-05", llegaMax: "2026-11-20" }] },
+    { cod: "PIS-01", nom: "Piso flotante 8 mm",           partida: "PIS", unidad: "m²",  pres: 2.2,  presNom: "caja de 2,2 m²",  merma: 7,  porTipo: { A: 45, B: 32, C: 32, D: 22 }, stock: 1700, plazo: [10, 20],
+      transito: [] }
+  ],
+  diasAviso: 5,
+  semanasPedido: 4,
   restricciones: [
     { partida: "VEN", pisos: [19, 20], desde: "2026-09-21", categoria: "Materiales", titulo: "Ventanas de los pisos 19 y 20 sin despacho del proveedor", responsable: "Abastecimiento", liberacionDias: 15 }
   ],
@@ -525,7 +620,7 @@ const GLOSARIO = {
     salaelectrica: ["Sala eléctrica y grupo", "Tableros eléctricos generales y el grupo electrógeno (generador de respaldo cuando se corta la luz)."],
     rampa: ["Rampa de acceso", "Rampa por donde bajan los autos a los subterráneos."],
     pasillo: ["Pasillo de piso", "Pasillo común de cada piso, por donde se llega a los departamentos y al ascensor. Lleva electricidad, yeso, cerámica o porcelanato, pintura, aseo y recepción."],
-    ascensor: ["Ascensor", "Se instala en su caja (el hueco vertical) después de la obra gruesa. En cada piso se ponen las puertas de piso. Se controla por nivel."],
+    ascensor: ["Ascensores", "El edificio tiene 2 ascensores (A1 y A2), independientes del pasillo. Cada uno tiene una parada en cada nivel, del -2 al 24, y cada parada se controla por separado."],
     hall: ["Hall de acceso", "Entrada principal del edificio en el piso 1."],
     conserjeria: ["Conserjería", "Recinto del conserje, con el control de acceso."],
     multiuso: ["Sala multiuso", "Espacio común para reuniones o eventos de los residentes."],
@@ -549,7 +644,7 @@ const GLOSARIO = {
     MUE: ["Muebles de cocina y closets", "Muebles fijos: cocina (bases y muebles altos) y closets de dormitorios."],
     PIS: ["Piso flotante o vinílico", "Piso de terminación de living y dormitorios, instalado sobre la losa."],
     ART: ["Artefactos", "WC, lavamanos, lavaplatos, griferías, enchufes, interruptores y lámparas."],
-    ASC: ["Ascensor", "Montaje del ascensor en su caja y puertas de piso en cada nivel. Lo hace normalmente un subcontrato especialista."],
+    ASC: ["Ascensores", "Montaje de los 2 ascensores en sus cajas (el hueco vertical) y de la puerta de piso en cada parada. Lo hace normalmente un subcontrato especialista."],
     ASE: ["Aseo final", "Limpieza fina del recinto antes de mostrarlo a Calidad."],
     CAL: ["Recepción de Calidad", "Revisión del recinto terminado por el área de Calidad. Si hay observaciones, se corrigen antes de entregar."],
     especialidad: ["Especialidad", "Rama técnica a la que pertenece la partida: obra gruesa, eléctrica, sanitaria, terminaciones, etc."]
@@ -575,6 +670,19 @@ const GLOSARIO = {
     atrasado: ["Atrasado", "El programa dice que en ese piso ya debería haber más terminado que lo que hay en realidad."],
     restriccion: ["Restricción", "Cualquier cosa que impide avanzar: falta de material, planos, personal, equipos o permisos."]
   },
+  "Bodega": {
+    bodega: ["Bodega", "Lugar de la obra donde se guardan los materiales. Aquí se lleva cuánto queda de cada uno y cuándo hay que pedir más."],
+    stock: ["Stock", "Cantidad de material que hay hoy en bodega."],
+    consumo: ["Consumo semanal", "Cuánto material se gasta por semana. Sale del ritmo real de la partida (recintos por semana) por lo que lleva cada recinto, más la merma."],
+    cobertura: ["Cobertura", "Para cuántos días hábiles alcanza el stock (incluido lo que viene en camino) si se sigue trabajando al ritmo actual."],
+    plazo: ["Plazo de entrega", "Días hábiles desde que se hace el pedido hasta que llega a la obra. Se guarda el mínimo y el máximo porque a veces se atrasa."],
+    puntopedido: ["Punto de pedido", "Stock con el que hay que pedir para que el material llegue antes de acabarse aunque se demore el plazo máximo."],
+    transito: ["En tránsito", "Material ya pedido que todavía no llega. Se suma recién en la fecha máxima de llegada, para no confiarse."],
+    quiebre: ["Quiebre de stock", "Momento en que el material se acaba en bodega y la cuadrilla se queda sin poder trabajar."],
+    merma: ["Merma", "Material que se pierde por cortes, roturas o sobrantes. Se agrega como porcentaje sobre lo que lleva cada recinto."],
+    presentacion: ["Presentación", "Cómo viene el material (caja, saco, tineta). Los pedidos sugeridos se redondean a presentaciones completas."],
+    saldomat: ["Falta por consumir", "Material que todavía se necesita para terminar la partida en toda la obra, con merma."]
+  },
   "Indicadores": {
     ponderado: ["Avance ponderado", "Avance total calculado dando a cada partida un peso según su importancia (costo). No es un promedio simple: la obra gruesa pesa mucho más que el aseo."],
     peso: ["Peso", "Parte del avance total que representa cada partida. Todos los pesos suman 100%."],
@@ -593,15 +701,92 @@ const GLOSARIO = {
 const TERMS = {};
 Object.values(GLOSARIO).forEach(g => Object.entries(g).forEach(([k, v]) => { TERMS[k] = v; }));
 
+// celdas del panel de cerámica y frague: [id, C/F, piso, depto, área, m2]; área 0 piso, 1 muro baño, 2 muro cocina, 3 muro, 4 pasillo
+const CELDAS = [["cer-201-piso","C",2,"201",0,47.96],["cer-201-murobanos","C",2,"201",1,null],["cer-201-murococina","C",2,"201",2,1.29],["cer-203-piso","C",2,"203",0,51.5],["cer-203-murobanos","C",2,"203",1,null],["cer-203-murococina","C",2,"203",2,1.8],["cer-204-piso","C",2,"204",0,39.82],["cer-204-murobanos","C",2,"204",1,null],["cer-204-murococina","C",2,"204",2,1.86],["cer-205-piso","C",2,"205",0,51.5],["cer-205-murobanos","C",2,"205",1,null],["cer-205-murococina","C",2,"205",2,1.8],["cer-207-piso","C",2,"207",0,47.96],["cer-207-murobanos","C",2,"207",1,null],["cer-207-murococina","C",2,"207",2,1.29],["cer-pasillo-2","C",2,"Pasillo",4,21.21],["cer-301-piso","C",3,"301",0,35.8],["cer-301-murobanos","C",3,"301",1,17.02],["cer-301-murococina","C",3,"301",2,1.29],["cer-302-piso","C",3,"302",0,25.18],["cer-302-murobanos","C",3,"302",1,20.68],["cer-302-murococina","C",3,"302",2,1.29],["cer-303-piso","C",3,"303",0,27.12],["cer-303-murobanos","C",3,"303",1,17.02],["cer-303-murococina","C",3,"303",2,1.8],["cer-304-piso","C",3,"304",0,24.26],["cer-304-murobanos","C",3,"304",1,14.26],["cer-304-murococina","C",3,"304",2,1.86],["cer-305-piso","C",3,"305",0,27.12],["cer-305-murobanos","C",3,"305",1,17.02],["cer-305-murococina","C",3,"305",2,1.8],["cer-306-piso","C",3,"306",0,25.18],["cer-306-murobanos","C",3,"306",1,20.68],["cer-306-murococina","C",3,"306",2,1.29],["cer-307-piso","C",3,"307",0,35.8],["cer-307-murobanos","C",3,"307",1,17.02],["cer-307-murococina","C",3,"307",2,1.29],["cer-pasillo-3","C",3,"Pasillo",4,21.21],["cer-401-piso","C",4,"401",0,35.8],["cer-401-murobanos","C",4,"401",1,17.02],["cer-401-murococina","C",4,"401",2,1.29],["cer-402-piso","C",4,"402",0,27.34],["cer-402-murobanos","C",4,"402",1,20.68],["cer-402-murococina","C",4,"402",2,1.29],["cer-403-piso","C",4,"403",0,27.12],["cer-403-murobanos","C",4,"403",1,17.02],["cer-403-murococina","C",4,"403",2,1.8],["cer-404-piso","C",4,"404",0,24.26],["cer-404-murobanos","C",4,"404",1,14.26],["cer-404-murococina","C",4,"404",2,1.86],["cer-405-piso","C",4,"405",0,27.12],["cer-405-murobanos","C",4,"405",1,17.02],["cer-405-murococina","C",4,"405",2,1.8],["cer-406-piso","C",4,"406",0,27.34],["cer-406-murobanos","C",4,"406",1,20.68],["cer-406-murococina","C",4,"406",2,1.29],["cer-407-piso","C",4,"407",0,35.8],["cer-407-murobanos","C",4,"407",1,17.02],["cer-407-murococina","C",4,"407",2,1.29],["cer-pasillo-4","C",4,"Pasillo",4,21.21],["cer-501-piso","C",5,"501",0,35.8],["cer-501-murobanos","C",5,"501",1,17.02],["cer-501-murococina","C",5,"501",2,1.29],["cer-502-piso","C",5,"502",0,27.34],["cer-502-murobanos","C",5,"502",1,20.68],["cer-502-murococina","C",5,"502",2,1.29],["cer-503-piso","C",5,"503",0,27.12],["cer-503-murobanos","C",5,"503",1,17.02],["cer-503-murococina","C",5,"503",2,1.8],["cer-504-piso","C",5,"504",0,24.26],["cer-504-murobanos","C",5,"504",1,14.26],["cer-504-murococina","C",5,"504",2,1.86],["cer-505-piso","C",5,"505",0,27.12],["cer-505-murobanos","C",5,"505",1,17.02],["cer-505-murococina","C",5,"505",2,1.8],["cer-506-piso","C",5,"506",0,27.34],["cer-506-murobanos","C",5,"506",1,20.68],["cer-506-murococina","C",5,"506",2,1.29],["cer-507-piso","C",5,"507",0,35.8],["cer-507-murobanos","C",5,"507",1,17.02],["cer-507-murococina","C",5,"507",2,1.29],["cer-pasillo-5","C",5,"Pasillo",4,25.0],["cer-601-piso","C",6,"601",0,35.8],["cer-601-murobanos","C",6,"601",1,17.02],["cer-601-murococina","C",6,"601",2,1.29],["cer-602-piso","C",6,"602",0,27.34],["cer-602-murobanos","C",6,"602",1,20.68],["cer-602-murococina","C",6,"602",2,1.29],["cer-603-piso","C",6,"603",0,27.12],["cer-603-murobanos","C",6,"603",1,17.02],["cer-603-murococina","C",6,"603",2,1.8],["cer-604-piso","C",6,"604",0,24.26],["cer-604-murobanos","C",6,"604",1,14.26],["cer-604-murococina","C",6,"604",2,1.86],["cer-605-piso","C",6,"605",0,27.12],["cer-605-murobanos","C",6,"605",1,17.02],["cer-605-murococina","C",6,"605",2,1.8],["cer-606-piso","C",6,"606",0,27.34],["cer-606-murobanos","C",6,"606",1,20.68],["cer-606-murococina","C",6,"606",2,1.29],["cer-607-piso","C",6,"607",0,35.8],["cer-607-murobanos","C",6,"607",1,17.02],["cer-607-murococina","C",6,"607",2,1.29],["cer-pasillo-6","C",6,"Pasillo",4,21.21],["cer-701-piso","C",7,"701",0,35.8],["cer-701-murobanos","C",7,"701",1,17.02],["cer-701-murococina","C",7,"701",2,1.29],["cer-702-piso","C",7,"702",0,27.34],["cer-702-murobanos","C",7,"702",1,20.68],["cer-702-murococina","C",7,"702",2,1.29],["cer-703-piso","C",7,"703",0,27.12],["cer-703-murobanos","C",7,"703",1,17.02],["cer-703-murococina","C",7,"703",2,1.8],["cer-704-piso","C",7,"704",0,24.26],["cer-704-murobanos","C",7,"704",1,14.26],["cer-704-murococina","C",7,"704",2,1.86],["cer-705-piso","C",7,"705",0,27.12],["cer-705-murobanos","C",7,"705",1,17.02],["cer-705-murococina","C",7,"705",2,1.8],["cer-706-piso","C",7,"706",0,27.34],["cer-706-murobanos","C",7,"706",1,20.68],["cer-706-murococina","C",7,"706",2,1.29],["cer-707-piso","C",7,"707",0,35.8],["cer-707-murobanos","C",7,"707",1,17.02],["cer-707-murococina","C",7,"707",2,1.29],["cer-pasillo-7","C",7,"Pasillo",4,21.21],["cer-801-piso","C",8,"801",0,35.8],["cer-801-murobanos","C",8,"801",1,17.02],["cer-801-murococina","C",8,"801",2,1.29],["cer-802-piso","C",8,"802",0,27.34],["cer-802-murobanos","C",8,"802",1,20.68],["cer-802-murococina","C",8,"802",2,1.29],["cer-803-piso","C",8,"803",0,27.12],["cer-803-murobanos","C",8,"803",1,17.02],["cer-803-murococina","C",8,"803",2,1.8],["cer-804-piso","C",8,"804",0,24.26],["cer-804-murobanos","C",8,"804",1,14.26],["cer-804-murococina","C",8,"804",2,1.86],["cer-805-piso","C",8,"805",0,27.12],["cer-805-murobanos","C",8,"805",1,17.02],["cer-805-murococina","C",8,"805",2,1.8],["cer-806-piso","C",8,"806",0,27.34],["cer-806-murobanos","C",8,"806",1,20.68],["cer-806-murococina","C",8,"806",2,1.29],["cer-807-piso","C",8,"807",0,35.8],["cer-807-murobanos","C",8,"807",1,17.02],["cer-807-murococina","C",8,"807",2,1.29],["cer-pasillo-8","C",8,"Pasillo",4,25.0],["cer-901-piso","C",9,"901",0,35.8],["cer-901-murobanos","C",9,"901",1,17.02],["cer-901-murococina","C",9,"901",2,1.29],["cer-902-piso","C",9,"902",0,27.34],["cer-902-murobanos","C",9,"902",1,20.68],["cer-902-murococina","C",9,"902",2,1.29],["cer-903-piso","C",9,"903",0,27.12],["cer-903-murobanos","C",9,"903",1,17.02],["cer-903-murococina","C",9,"903",2,1.8],["cer-904-piso","C",9,"904",0,24.26],["cer-904-murobanos","C",9,"904",1,14.26],["cer-904-murococina","C",9,"904",2,1.86],["cer-905-piso","C",9,"905",0,27.12],["cer-905-murobanos","C",9,"905",1,17.02],["cer-905-murococina","C",9,"905",2,1.8],["cer-906-piso","C",9,"906",0,27.34],["cer-906-murobanos","C",9,"906",1,20.68],["cer-906-murococina","C",9,"906",2,1.29],["cer-907-piso","C",9,"907",0,35.8],["cer-907-murobanos","C",9,"907",1,17.02],["cer-907-murococina","C",9,"907",2,1.29],["cer-pasillo-9","C",9,"Pasillo",4,25.0],["cer-1001-piso","C",10,"1001",0,35.8],["cer-1001-murobanos","C",10,"1001",1,17.02],["cer-1001-murococina","C",10,"1001",2,1.29],["cer-1002-piso","C",10,"1002",0,27.34],["cer-1002-murobanos","C",10,"1002",1,20.68],["cer-1002-murococina","C",10,"1002",2,1.29],["cer-1003-piso","C",10,"1003",0,27.12],["cer-1003-murobanos","C",10,"1003",1,17.02],["cer-1003-murococina","C",10,"1003",2,1.8],["cer-1004-piso","C",10,"1004",0,24.26],["cer-1004-murobanos","C",10,"1004",1,14.26],["cer-1004-murococina","C",10,"1004",2,1.86],["cer-1005-piso","C",10,"1005",0,27.12],["cer-1005-murobanos","C",10,"1005",1,17.02],["cer-1005-murococina","C",10,"1005",2,1.8],["cer-1006-piso","C",10,"1006",0,27.34],["cer-1006-murobanos","C",10,"1006",1,20.68],["cer-1006-murococina","C",10,"1006",2,1.29],["cer-1007-piso","C",10,"1007",0,35.8],["cer-1007-murobanos","C",10,"1007",1,17.02],["cer-1007-murococina","C",10,"1007",2,1.29],["cer-pasillo-10","C",10,"Pasillo",4,25.0],["cer-1101-piso","C",11,"1101",0,35.8],["cer-1101-murobanos","C",11,"1101",1,17.02],["cer-1101-murococina","C",11,"1101",2,1.29],["cer-1102-piso","C",11,"1102",0,27.34],["cer-1102-murobanos","C",11,"1102",1,20.68],["cer-1102-murococina","C",11,"1102",2,1.29],["cer-1103-piso","C",11,"1103",0,27.12],["cer-1103-murobanos","C",11,"1103",1,17.02],["cer-1103-murococina","C",11,"1103",2,1.8],["cer-1104-piso","C",11,"1104",0,24.26],["cer-1104-murobanos","C",11,"1104",1,14.26],["cer-1104-murococina","C",11,"1104",2,1.86],["cer-1105-piso","C",11,"1105",0,27.12],["cer-1105-murobanos","C",11,"1105",1,17.02],["cer-1105-murococina","C",11,"1105",2,1.8],["cer-1106-piso","C",11,"1106",0,27.34],["cer-1106-murobanos","C",11,"1106",1,20.68],["cer-1106-murococina","C",11,"1106",2,1.29],["cer-1107-piso","C",11,"1107",0,35.8],["cer-1107-murobanos","C",11,"1107",1,17.02],["cer-1107-murococina","C",11,"1107",2,1.29],["cer-pasillo-11","C",11,"Pasillo",4,25.0],["cer-1201-piso","C",12,"1201",0,35.8],["cer-1201-murobanos","C",12,"1201",1,17.02],["cer-1201-murococina","C",12,"1201",2,1.29],["cer-1202-piso","C",12,"1202",0,27.34],["cer-1202-murobanos","C",12,"1202",1,20.68],["cer-1202-murococina","C",12,"1202",2,1.29],["cer-1203-piso","C",12,"1203",0,27.12],["cer-1203-murobanos","C",12,"1203",1,17.02],["cer-1203-murococina","C",12,"1203",2,1.8],["cer-1204-piso","C",12,"1204",0,24.26],["cer-1204-murobanos","C",12,"1204",1,14.26],["cer-1204-murococina","C",12,"1204",2,1.86],["cer-1205-piso","C",12,"1205",0,27.12],["cer-1205-murobanos","C",12,"1205",1,17.02],["cer-1205-murococina","C",12,"1205",2,1.8],["cer-1206-piso","C",12,"1206",0,27.34],["cer-1206-murobanos","C",12,"1206",1,20.68],["cer-1206-murococina","C",12,"1206",2,1.29],["cer-1207-piso","C",12,"1207",0,35.8],["cer-1207-murobanos","C",12,"1207",1,17.02],["cer-1207-murococina","C",12,"1207",2,1.29],["cer-pasillo-12","C",12,"Pasillo",4,25.0],["cer-1301-piso","C",13,"1301",0,35.8],["cer-1301-murobanos","C",13,"1301",1,17.02],["cer-1301-murococina","C",13,"1301",2,1.29],["cer-1302-piso","C",13,"1302",0,27.34],["cer-1302-murobanos","C",13,"1302",1,20.68],["cer-1302-murococina","C",13,"1302",2,1.29],["cer-1303-piso","C",13,"1303",0,27.12],["cer-1303-murobanos","C",13,"1303",1,17.02],["cer-1303-murococina","C",13,"1303",2,1.8],["cer-1304-piso","C",13,"1304",0,24.26],["cer-1304-murobanos","C",13,"1304",1,14.26],["cer-1304-murococina","C",13,"1304",2,1.86],["cer-1305-piso","C",13,"1305",0,27.12],["cer-1305-murobanos","C",13,"1305",1,17.02],["cer-1305-murococina","C",13,"1305",2,1.8],["cer-1306-piso","C",13,"1306",0,27.34],["cer-1306-murobanos","C",13,"1306",1,20.68],["cer-1306-murococina","C",13,"1306",2,1.29],["cer-1307-piso","C",13,"1307",0,35.8],["cer-1307-murobanos","C",13,"1307",1,17.02],["cer-1307-murococina","C",13,"1307",2,1.29],["cer-pasillo-13","C",13,"Pasillo",4,25.0],["cer-1401-piso","C",14,"1401",0,35.8],["cer-1401-murobanos","C",14,"1401",1,17.02],["cer-1401-murococina","C",14,"1401",2,1.29],["cer-1402-piso","C",14,"1402",0,27.34],["cer-1402-murobanos","C",14,"1402",1,20.68],["cer-1402-murococina","C",14,"1402",2,1.29],["cer-1403-piso","C",14,"1403",0,27.12],["cer-1403-murobanos","C",14,"1403",1,17.02],["cer-1403-murococina","C",14,"1403",2,1.8],["cer-1404-piso","C",14,"1404",0,24.26],["cer-1404-murobanos","C",14,"1404",1,14.26],["cer-1404-murococina","C",14,"1404",2,1.86],["cer-1405-piso","C",14,"1405",0,27.12],["cer-1405-murobanos","C",14,"1405",1,17.02],["cer-1405-murococina","C",14,"1405",2,1.8],["cer-1406-piso","C",14,"1406",0,27.34],["cer-1406-murobanos","C",14,"1406",1,20.68],["cer-1406-murococina","C",14,"1406",2,1.29],["cer-1407-piso","C",14,"1407",0,35.8],["cer-1407-murobanos","C",14,"1407",1,17.02],["cer-1407-murococina","C",14,"1407",2,1.29],["cer-pasillo-14","C",14,"Pasillo",4,21.21],["cer-1501-piso","C",15,"1501",0,35.8],["cer-1501-murobanos","C",15,"1501",1,17.02],["cer-1501-murococina","C",15,"1501",2,1.29],["cer-1502-piso","C",15,"1502",0,27.34],["cer-1502-murobanos","C",15,"1502",1,20.68],["cer-1502-murococina","C",15,"1502",2,1.29],["cer-1503-piso","C",15,"1503",0,27.12],["cer-1503-murobanos","C",15,"1503",1,17.02],["cer-1503-murococina","C",15,"1503",2,1.8],["cer-1504-piso","C",15,"1504",0,24.26],["cer-1504-murobanos","C",15,"1504",1,14.26],["cer-1504-murococina","C",15,"1504",2,1.86],["cer-1505-piso","C",15,"1505",0,27.12],["cer-1505-murobanos","C",15,"1505",1,17.02],["cer-1505-murococina","C",15,"1505",2,1.8],["cer-1506-piso","C",15,"1506",0,27.34],["cer-1506-murobanos","C",15,"1506",1,20.68],["cer-1506-murococina","C",15,"1506",2,1.29],["cer-1507-piso","C",15,"1507",0,35.8],["cer-1507-murobanos","C",15,"1507",1,17.02],["cer-1507-murococina","C",15,"1507",2,1.29],["cer-pasillo-15","C",15,"Pasillo",4,21.21],["cer-1601-piso","C",16,"1601",0,35.8],["cer-1601-murobanos","C",16,"1601",1,17.02],["cer-1601-murococina","C",16,"1601",2,1.29],["cer-1602-piso","C",16,"1602",0,27.34],["cer-1602-murobanos","C",16,"1602",1,20.68],["cer-1602-murococina","C",16,"1602",2,1.29],["cer-1603-piso","C",16,"1603",0,27.12],["cer-1603-murobanos","C",16,"1603",1,17.02],["cer-1603-murococina","C",16,"1603",2,1.8],["cer-1604-piso","C",16,"1604",0,24.26],["cer-1604-murobanos","C",16,"1604",1,14.26],["cer-1604-murococina","C",16,"1604",2,1.86],["cer-1605-piso","C",16,"1605",0,27.12],["cer-1605-murobanos","C",16,"1605",1,17.02],["cer-1605-murococina","C",16,"1605",2,1.8],["cer-1606-piso","C",16,"1606",0,27.34],["cer-1606-murobanos","C",16,"1606",1,20.68],["cer-1606-murococina","C",16,"1606",2,1.29],["cer-1607-piso","C",16,"1607",0,35.8],["cer-1607-murobanos","C",16,"1607",1,17.02],["cer-1607-murococina","C",16,"1607",2,1.29],["cer-pasillo-16","C",16,"Pasillo",4,21.21],["cer-1701-piso","C",17,"1701",0,35.8],["cer-1701-murobanos","C",17,"1701",1,17.02],["cer-1701-murococina","C",17,"1701",2,1.29],["cer-1702-piso","C",17,"1702",0,27.34],["cer-1702-murobanos","C",17,"1702",1,20.68],["cer-1702-murococina","C",17,"1702",2,1.29],["cer-1703-piso","C",17,"1703",0,27.12],["cer-1703-murobanos","C",17,"1703",1,17.02],["cer-1703-murococina","C",17,"1703",2,1.8],["cer-1704-piso","C",17,"1704",0,24.26],["cer-1704-murobanos","C",17,"1704",1,14.26],["cer-1704-murococina","C",17,"1704",2,1.86],["cer-1705-piso","C",17,"1705",0,27.12],["cer-1705-murobanos","C",17,"1705",1,17.02],["cer-1705-murococina","C",17,"1705",2,1.8],["cer-1706-piso","C",17,"1706",0,27.34],["cer-1706-murobanos","C",17,"1706",1,20.68],["cer-1706-murococina","C",17,"1706",2,1.29],["cer-1707-piso","C",17,"1707",0,35.8],["cer-1707-murobanos","C",17,"1707",1,17.02],["cer-1707-murococina","C",17,"1707",2,1.29],["cer-pasillo-17","C",17,"Pasillo",4,21.21],["cer-1801-piso","C",18,"1801",0,35.8],["cer-1801-murobanos","C",18,"1801",1,17.02],["cer-1801-murococina","C",18,"1801",2,1.29],["cer-1802-piso","C",18,"1802",0,27.34],["cer-1802-murobanos","C",18,"1802",1,20.68],["cer-1802-murococina","C",18,"1802",2,1.29],["cer-1803-piso","C",18,"1803",0,27.12],["cer-1803-murobanos","C",18,"1803",1,17.02],["cer-1803-murococina","C",18,"1803",2,1.8],["cer-1804-piso","C",18,"1804",0,24.26],["cer-1804-murobanos","C",18,"1804",1,14.26],["cer-1804-murococina","C",18,"1804",2,1.86],["cer-1805-piso","C",18,"1805",0,27.12],["cer-1805-murobanos","C",18,"1805",1,17.02],["cer-1805-murococina","C",18,"1805",2,1.8],["cer-1806-piso","C",18,"1806",0,27.34],["cer-1806-murobanos","C",18,"1806",1,20.68],["cer-1806-murococina","C",18,"1806",2,1.29],["cer-1807-piso","C",18,"1807",0,35.8],["cer-1807-murobanos","C",18,"1807",1,17.02],["cer-1807-murococina","C",18,"1807",2,1.29],["cer-pasillo-18","C",18,"Pasillo",4,21.21],["cer-1901-piso","C",19,"1901",0,35.8],["cer-1901-murobanos","C",19,"1901",1,17.02],["cer-1901-murococina","C",19,"1901",2,1.29],["cer-1902-piso","C",19,"1902",0,27.34],["cer-1902-murobanos","C",19,"1902",1,20.68],["cer-1902-murococina","C",19,"1902",2,1.29],["cer-1903-piso","C",19,"1903",0,27.12],["cer-1903-murobanos","C",19,"1903",1,17.02],["cer-1903-murococina","C",19,"1903",2,1.8],["cer-1904-piso","C",19,"1904",0,24.26],["cer-1904-murobanos","C",19,"1904",1,14.26],["cer-1904-murococina","C",19,"1904",2,1.86],["cer-1905-piso","C",19,"1905",0,27.12],["cer-1905-murobanos","C",19,"1905",1,17.02],["cer-1905-murococina","C",19,"1905",2,1.8],["cer-1906-piso","C",19,"1906",0,27.34],["cer-1906-murobanos","C",19,"1906",1,20.68],["cer-1906-murococina","C",19,"1906",2,1.29],["cer-1907-piso","C",19,"1907",0,35.8],["cer-1907-murobanos","C",19,"1907",1,17.02],["cer-1907-murococina","C",19,"1907",2,1.29],["cer-pasillo-19","C",19,"Pasillo",4,21.21],["cer-2001-piso","C",20,"2001",0,35.8],["cer-2001-murobanos","C",20,"2001",1,17.02],["cer-2001-murococina","C",20,"2001",2,1.29],["cer-2002-piso","C",20,"2002",0,27.34],["cer-2002-murobanos","C",20,"2002",1,20.68],["cer-2002-murococina","C",20,"2002",2,1.29],["cer-2003-piso","C",20,"2003",0,27.12],["cer-2003-murobanos","C",20,"2003",1,17.02],["cer-2003-murococina","C",20,"2003",2,1.8],["cer-2004-piso","C",20,"2004",0,24.26],["cer-2004-murobanos","C",20,"2004",1,14.26],["cer-2004-murococina","C",20,"2004",2,1.86],["cer-2005-piso","C",20,"2005",0,27.12],["cer-2005-murobanos","C",20,"2005",1,17.02],["cer-2005-murococina","C",20,"2005",2,1.8],["cer-2006-piso","C",20,"2006",0,27.34],["cer-2006-murobanos","C",20,"2006",1,20.68],["cer-2006-murococina","C",20,"2006",2,1.29],["cer-2007-piso","C",20,"2007",0,35.8],["cer-2007-murobanos","C",20,"2007",1,17.02],["cer-2007-murococina","C",20,"2007",2,1.29],["cer-pasillo-20","C",20,"Pasillo",4,21.21],["cer-2101-piso","C",21,"2101",0,35.8],["cer-2101-murobanos","C",21,"2101",1,17.02],["cer-2101-murococina","C",21,"2101",2,1.29],["cer-2102-piso","C",21,"2102",0,27.34],["cer-2102-murobanos","C",21,"2102",1,20.68],["cer-2102-murococina","C",21,"2102",2,1.29],["cer-2103-piso","C",21,"2103",0,27.12],["cer-2103-murobanos","C",21,"2103",1,17.02],["cer-2103-murococina","C",21,"2103",2,1.8],["cer-2104-piso","C",21,"2104",0,24.26],["cer-2104-murobanos","C",21,"2104",1,14.26],["cer-2104-murococina","C",21,"2104",2,1.86],["cer-2105-piso","C",21,"2105",0,27.12],["cer-2105-murobanos","C",21,"2105",1,17.02],["cer-2105-murococina","C",21,"2105",2,1.8],["cer-2106-piso","C",21,"2106",0,27.34],["cer-2106-murobanos","C",21,"2106",1,20.68],["cer-2106-murococina","C",21,"2106",2,1.29],["cer-2107-piso","C",21,"2107",0,35.8],["cer-2107-murobanos","C",21,"2107",1,17.02],["cer-2107-murococina","C",21,"2107",2,1.29],["cer-pasillo-21","C",21,"Pasillo",4,21.21],["cer-2201-piso","C",22,"2201",0,35.8],["cer-2201-murobanos","C",22,"2201",1,17.02],["cer-2201-murococina","C",22,"2201",2,1.29],["cer-2202-piso","C",22,"2202",0,27.34],["cer-2202-murobanos","C",22,"2202",1,20.68],["cer-2202-murococina","C",22,"2202",2,1.29],["cer-2203-piso","C",22,"2203",0,27.12],["cer-2203-murobanos","C",22,"2203",1,17.02],["cer-2203-murococina","C",22,"2203",2,1.8],["cer-2204-piso","C",22,"2204",0,24.26],["cer-2204-murobanos","C",22,"2204",1,14.26],["cer-2204-murococina","C",22,"2204",2,1.86],["cer-2205-piso","C",22,"2205",0,27.12],["cer-2205-murobanos","C",22,"2205",1,17.02],["cer-2205-murococina","C",22,"2205",2,1.8],["cer-2206-piso","C",22,"2206",0,27.34],["cer-2206-murobanos","C",22,"2206",1,20.68],["cer-2206-murococina","C",22,"2206",2,1.29],["cer-2207-piso","C",22,"2207",0,35.8],["cer-2207-murobanos","C",22,"2207",1,17.02],["cer-2207-murococina","C",22,"2207",2,1.29],["cer-pasillo-22","C",22,"Pasillo",4,21.21],["cer-2301-piso","C",23,"2301",0,35.8],["cer-2301-murobanos","C",23,"2301",1,17.02],["cer-2301-murococina","C",23,"2301",2,1.29],["cer-2302-piso","C",23,"2302",0,27.34],["cer-2302-murobanos","C",23,"2302",1,20.68],["cer-2302-murococina","C",23,"2302",2,1.29],["cer-2303-piso","C",23,"2303",0,27.12],["cer-2303-murobanos","C",23,"2303",1,17.02],["cer-2303-murococina","C",23,"2303",2,1.8],["cer-2304-piso","C",23,"2304",0,24.26],["cer-2304-murobanos","C",23,"2304",1,14.26],["cer-2304-murococina","C",23,"2304",2,1.86],["cer-2305-piso","C",23,"2305",0,27.12],["cer-2305-murobanos","C",23,"2305",1,17.02],["cer-2305-murococina","C",23,"2305",2,1.8],["cer-2306-piso","C",23,"2306",0,27.34],["cer-2306-murobanos","C",23,"2306",1,20.68],["cer-2306-murococina","C",23,"2306",2,1.29],["cer-2307-piso","C",23,"2307",0,35.8],["cer-2307-murobanos","C",23,"2307",1,17.02],["cer-2307-murococina","C",23,"2307",2,1.29],["cer-pasillo-23","C",23,"Pasillo",4,21.21],["cer-2401-piso","C",24,"2401",0,35.8],["cer-2401-murobanos","C",24,"2401",1,17.02],["cer-2401-murococina","C",24,"2401",2,1.29],["cer-2402-piso","C",24,"2402",0,27.34],["cer-2402-murobanos","C",24,"2402",1,20.68],["cer-2402-murococina","C",24,"2402",2,1.29],["cer-2403-piso","C",24,"2403",0,27.12],["cer-2403-murobanos","C",24,"2403",1,17.02],["cer-2403-murococina","C",24,"2403",2,1.8],["cer-2404-piso","C",24,"2404",0,24.26],["cer-2404-murobanos","C",24,"2404",1,14.26],["cer-2404-murococina","C",24,"2404",2,1.86],["cer-2405-piso","C",24,"2405",0,27.12],["cer-2405-murobanos","C",24,"2405",1,17.02],["cer-2405-murococina","C",24,"2405",2,1.8],["cer-2406-piso","C",24,"2406",0,27.34],["cer-2406-murobanos","C",24,"2406",1,20.68],["cer-2406-murococina","C",24,"2406",2,1.29],["cer-2407-piso","C",24,"2407",0,35.8],["cer-2407-murobanos","C",24,"2407",1,17.02],["cer-2407-murococina","C",24,"2407",2,1.29],["cer-pasillo-24","C",24,"Pasillo",4,21.21],["fra-201-piso","F",2,"201",0,47.96],["fra-201-murobanos","F",2,"201",1,3.6],["fra-201-murococina","F",2,"201",2,1.29],["fra-203-piso","F",2,"203",0,51.5],["fra-203-murobanos","F",2,"203",1,3.0],["fra-203-murococina","F",2,"203",2,1.8],["fra-204-piso","F",2,"204",0,39.82],["fra-204-murobanos","F",2,"204",1,2.69],["fra-204-murococina","F",2,"204",2,1.86],["fra-205-piso","F",2,"205",0,51.5],["fra-205-murococina","F",2,"205",2,1.8],["fra-205-murobanos","F",2,"205",1,17.02],["fra-207-piso","F",2,"207",0,47.96],["fra-207-murococina","F",2,"207",2,1.29],["fra-207-murobanos","F",2,"207",1,17.02],["fra-pasillo-2","F",2,"Pasillo",4,21.21],["fra-301-piso","F",3,"301",0,35.8],["fra-301-murobanos","F",3,"301",1,17.02],["fra-301-murococina","F",3,"301",2,1.29],["fra-302-piso","F",3,"302",0,25.18],["fra-302-murobanos","F",3,"302",1,20.68],["fra-302-murococina","F",3,"302",2,1.29],["fra-303-piso","F",3,"303",0,27.12],["fra-303-murobanos","F",3,"303",1,17.02],["fra-303-murococina","F",3,"303",2,1.8],["fra-304-piso","F",3,"304",0,24.26],["fra-304-murobanos","F",3,"304",1,14.26],["fra-304-murococina","F",3,"304",2,1.86],["fra-305-piso","F",3,"305",0,27.12],["fra-305-murobanos","F",3,"305",1,17.02],["fra-305-murococina","F",3,"305",2,1.8],["fra-306-piso","F",3,"306",0,25.18],["fra-306-murobanos","F",3,"306",1,20.68],["fra-306-murococina","F",3,"306",2,1.29],["fra-307-piso","F",3,"307",0,35.8],["fra-307-murobanos","F",3,"307",1,17.02],["fra-307-murococina","F",3,"307",2,1.29],["fra-pasillo-3","F",3,"Pasillo",4,21.21],["fra-401-piso","F",4,"401",0,35.8],["fra-401-murobanos","F",4,"401",1,17.02],["fra-401-murococina","F",4,"401",2,1.29],["fra-402-piso","F",4,"402",0,27.34],["fra-402-murobanos","F",4,"402",1,20.68],["fra-402-murococina","F",4,"402",2,1.29],["fra-403-piso","F",4,"403",0,27.12],["fra-403-murobanos","F",4,"403",1,17.02],["fra-403-murococina","F",4,"403",2,1.8],["fra-404-piso","F",4,"404",0,24.26],["fra-404-murobanos","F",4,"404",1,14.26],["fra-404-murococina","F",4,"404",2,1.86],["fra-405-piso","F",4,"405",0,27.12],["fra-405-murobanos","F",4,"405",1,17.02],["fra-405-murococina","F",4,"405",2,1.8],["fra-406-piso","F",4,"406",0,27.34],["fra-406-murobanos","F",4,"406",1,20.68],["fra-406-murococina","F",4,"406",2,1.29],["fra-407-piso","F",4,"407",0,35.8],["fra-407-murobanos","F",4,"407",1,17.02],["fra-407-murococina","F",4,"407",2,1.29],["fra-pasillo-4","F",4,"Pasillo",4,21.21],["fra-501-piso","F",5,"501",0,35.8],["fra-501-murobanos","F",5,"501",1,17.02],["fra-501-murococina","F",5,"501",2,1.29],["fra-502-piso","F",5,"502",0,27.34],["fra-502-murobanos","F",5,"502",1,20.68],["fra-502-murococina","F",5,"502",2,1.29],["fra-503-piso","F",5,"503",0,27.12],["fra-503-murobanos","F",5,"503",1,17.02],["fra-503-murococina","F",5,"503",2,1.8],["fra-504-piso","F",5,"504",0,24.26],["fra-504-murobanos","F",5,"504",1,14.26],["fra-504-murococina","F",5,"504",2,1.86],["fra-505-piso","F",5,"505",0,27.12],["fra-505-murobanos","F",5,"505",1,17.02],["fra-505-murococina","F",5,"505",2,1.8],["fra-506-piso","F",5,"506",0,27.34],["fra-506-murobanos","F",5,"506",1,20.68],["fra-506-murococina","F",5,"506",2,1.29],["fra-507-piso","F",5,"507",0,35.8],["fra-507-murobanos","F",5,"507",1,17.02],["fra-507-murococina","F",5,"507",2,1.29],["fra-pasillo-5","F",5,"Pasillo",4,21.21],["fra-601-piso","F",6,"601",0,35.8],["fra-601-murobanos","F",6,"601",1,17.02],["fra-601-murococina","F",6,"601",2,1.29],["fra-602-piso","F",6,"602",0,27.34],["fra-602-murobanos","F",6,"602",1,20.68],["fra-602-murococina","F",6,"602",2,1.29],["fra-603-piso","F",6,"603",0,27.12],["fra-603-murobanos","F",6,"603",1,17.02],["fra-603-murococina","F",6,"603",2,1.8],["fra-604-piso","F",6,"604",0,24.26],["fra-604-murobanos","F",6,"604",1,14.26],["fra-604-murococina","F",6,"604",2,1.86],["fra-605-piso","F",6,"605",0,27.12],["fra-605-murobanos","F",6,"605",1,17.02],["fra-605-murococina","F",6,"605",2,1.8],["fra-606-piso","F",6,"606",0,27.34],["fra-606-murobanos","F",6,"606",1,20.68],["fra-606-murococina","F",6,"606",2,1.29],["fra-607-piso","F",6,"607",0,35.8],["fra-607-murobanos","F",6,"607",1,17.02],["fra-607-murococina","F",6,"607",2,1.29],["fra-pasillo-6","F",6,"Pasillo",4,21.21],["fra-701-piso","F",7,"701",0,35.8],["fra-701-murobanos","F",7,"701",1,17.02],["fra-701-murococina","F",7,"701",2,1.29],["fra-702-piso","F",7,"702",0,27.34],["fra-702-murobanos","F",7,"702",1,20.68],["fra-702-murococina","F",7,"702",2,1.29],["fra-703-piso","F",7,"703",0,27.12],["fra-703-murobanos","F",7,"703",1,17.02],["fra-703-murococina","F",7,"703",2,1.8],["fra-704-piso","F",7,"704",0,24.26],["fra-704-murobanos","F",7,"704",1,14.26],["fra-704-murococina","F",7,"704",2,1.86],["fra-705-piso","F",7,"705",0,27.12],["fra-705-murobanos","F",7,"705",1,17.02],["fra-705-murococina","F",7,"705",2,1.8],["fra-706-piso","F",7,"706",0,27.34],["fra-706-murobanos","F",7,"706",1,20.68],["fra-706-murococina","F",7,"706",2,1.29],["fra-707-piso","F",7,"707",0,35.8],["fra-707-murobanos","F",7,"707",1,17.02],["fra-707-murococina","F",7,"707",2,1.29],["fra-pasillo-7","F",7,"Pasillo",4,21.21],["fra-801-piso","F",8,"801",0,35.8],["fra-801-murobanos","F",8,"801",1,17.02],["fra-801-murococina","F",8,"801",2,1.29],["fra-802-piso","F",8,"802",0,27.34],["fra-802-murobanos","F",8,"802",1,20.68],["fra-802-murococina","F",8,"802",2,1.29],["fra-803-piso","F",8,"803",0,27.12],["fra-803-murobanos","F",8,"803",1,17.02],["fra-803-murococina","F",8,"803",2,1.8],["fra-804-piso","F",8,"804",0,24.26],["fra-804-murobanos","F",8,"804",1,14.26],["fra-804-murococina","F",8,"804",2,1.86],["fra-805-piso","F",8,"805",0,27.12],["fra-805-murobanos","F",8,"805",1,17.02],["fra-805-murococina","F",8,"805",2,1.8],["fra-806-piso","F",8,"806",0,27.34],["fra-806-murobanos","F",8,"806",1,20.68],["fra-806-murococina","F",8,"806",2,1.29],["fra-807-piso","F",8,"807",0,35.8],["fra-807-murobanos","F",8,"807",1,17.02],["fra-807-murococina","F",8,"807",2,1.29],["fra-pasillo-8","F",8,"Pasillo",4,21.21],["fra-901-piso","F",9,"901",0,35.8],["fra-901-murobanos","F",9,"901",1,17.02],["fra-901-murococina","F",9,"901",2,1.29],["fra-902-piso","F",9,"902",0,27.34],["fra-902-murobanos","F",9,"902",1,20.68],["fra-902-murococina","F",9,"902",2,1.29],["fra-903-piso","F",9,"903",0,27.12],["fra-903-murobanos","F",9,"903",1,17.02],["fra-903-murococina","F",9,"903",2,1.8],["fra-904-piso","F",9,"904",0,24.26],["fra-904-murobanos","F",9,"904",1,14.26],["fra-904-murococina","F",9,"904",2,1.86],["fra-905-piso","F",9,"905",0,27.12],["fra-905-murobanos","F",9,"905",1,17.02],["fra-905-murococina","F",9,"905",2,1.8],["fra-906-piso","F",9,"906",0,27.34],["fra-906-murobanos","F",9,"906",1,20.68],["fra-906-murococina","F",9,"906",2,1.29],["fra-907-piso","F",9,"907",0,35.8],["fra-907-murobanos","F",9,"907",1,17.02],["fra-907-murococina","F",9,"907",2,1.29],["fra-pasillo-9","F",9,"Pasillo",4,21.21],["fra-1001-piso","F",10,"1001",0,35.8],["fra-1001-murobanos","F",10,"1001",1,17.02],["fra-1001-murococina","F",10,"1001",2,1.29],["fra-1002-piso","F",10,"1002",0,27.34],["fra-1002-murobanos","F",10,"1002",1,20.68],["fra-1002-murococina","F",10,"1002",2,1.29],["fra-1003-piso","F",10,"1003",0,27.12],["fra-1003-murobanos","F",10,"1003",1,17.02],["fra-1003-murococina","F",10,"1003",2,1.8],["fra-1004-piso","F",10,"1004",0,24.26],["fra-1004-murobanos","F",10,"1004",1,14.26],["fra-1004-murococina","F",10,"1004",2,1.86],["fra-1005-piso","F",10,"1005",0,27.12],["fra-1005-murobanos","F",10,"1005",1,17.02],["fra-1005-murococina","F",10,"1005",2,1.8],["fra-1006-piso","F",10,"1006",0,27.34],["fra-1006-murobanos","F",10,"1006",1,20.68],["fra-1006-murococina","F",10,"1006",2,1.29],["fra-1007-piso","F",10,"1007",0,35.8],["fra-1007-murobanos","F",10,"1007",1,17.02],["fra-1007-murococina","F",10,"1007",2,1.29],["fra-pasillo-10","F",10,"Pasillo",4,21.21],["fra-1101-piso","F",11,"1101",0,35.8],["fra-1101-murobanos","F",11,"1101",1,17.02],["fra-1101-murococina","F",11,"1101",2,1.29],["fra-1102-piso","F",11,"1102",0,27.34],["fra-1102-murobanos","F",11,"1102",1,20.68],["fra-1102-murococina","F",11,"1102",2,1.29],["fra-1103-piso","F",11,"1103",0,27.12],["fra-1103-murobanos","F",11,"1103",1,17.02],["fra-1103-murococina","F",11,"1103",2,1.8],["fra-1104-piso","F",11,"1104",0,24.26],["fra-1104-murobanos","F",11,"1104",1,14.26],["fra-1104-murococina","F",11,"1104",2,1.86],["fra-1105-piso","F",11,"1105",0,27.12],["fra-1105-murobanos","F",11,"1105",1,17.02],["fra-1105-murococina","F",11,"1105",2,1.8],["fra-1106-piso","F",11,"1106",0,27.34],["fra-1106-murobanos","F",11,"1106",1,20.68],["fra-1106-murococina","F",11,"1106",2,1.29],["fra-1107-piso","F",11,"1107",0,35.8],["fra-1107-murobanos","F",11,"1107",1,17.02],["fra-1107-murococina","F",11,"1107",2,1.29],["fra-pasillo-11","F",11,"Pasillo",4,21.21],["fra-1201-piso","F",12,"1201",0,35.8],["fra-1201-murobanos","F",12,"1201",1,17.02],["fra-1201-murococina","F",12,"1201",2,1.29],["fra-1202-piso","F",12,"1202",0,27.34],["fra-1202-murobanos","F",12,"1202",1,20.68],["fra-1202-murococina","F",12,"1202",2,1.29],["fra-1203-piso","F",12,"1203",0,27.12],["fra-1203-murobanos","F",12,"1203",1,17.02],["fra-1203-murococina","F",12,"1203",2,1.8],["fra-1204-piso","F",12,"1204",0,24.26],["fra-1204-murobanos","F",12,"1204",1,14.26],["fra-1204-murococina","F",12,"1204",2,1.86],["fra-1205-piso","F",12,"1205",0,27.12],["fra-1205-murobanos","F",12,"1205",1,17.02],["fra-1205-murococina","F",12,"1205",2,1.8],["fra-1206-piso","F",12,"1206",0,27.34],["fra-1206-murobanos","F",12,"1206",1,20.68],["fra-1206-murococina","F",12,"1206",2,1.29],["fra-1207-piso","F",12,"1207",0,35.8],["fra-1207-murobanos","F",12,"1207",1,17.02],["fra-1207-murococina","F",12,"1207",2,1.29],["fra-pasillo-12","F",12,"Pasillo",4,21.21],["fra-1301-piso","F",13,"1301",0,35.8],["fra-1301-murobanos","F",13,"1301",1,17.02],["fra-1301-murococina","F",13,"1301",2,1.29],["fra-1302-piso","F",13,"1302",0,27.34],["fra-1302-murobanos","F",13,"1302",1,20.68],["fra-1302-murococina","F",13,"1302",2,1.29],["fra-1303-piso","F",13,"1303",0,27.12],["fra-1303-murobanos","F",13,"1303",1,17.02],["fra-1303-murococina","F",13,"1303",2,1.8],["fra-1304-piso","F",13,"1304",0,24.26],["fra-1304-murobanos","F",13,"1304",1,14.26],["fra-1304-murococina","F",13,"1304",2,1.86],["fra-1305-piso","F",13,"1305",0,27.12],["fra-1305-murobanos","F",13,"1305",1,17.02],["fra-1305-murococina","F",13,"1305",2,1.8],["fra-1306-piso","F",13,"1306",0,27.34],["fra-1306-murobanos","F",13,"1306",1,20.68],["fra-1306-murococina","F",13,"1306",2,1.29],["fra-1307-piso","F",13,"1307",0,35.8],["fra-1307-murobanos","F",13,"1307",1,17.02],["fra-1307-murococina","F",13,"1307",2,1.29],["fra-pasillo-13","F",13,"Pasillo",4,21.21],["fra-1401-piso","F",14,"1401",0,35.8],["fra-1401-murobanos","F",14,"1401",1,17.02],["fra-1401-murococina","F",14,"1401",2,1.29],["fra-1402-piso","F",14,"1402",0,27.34],["fra-1402-murobanos","F",14,"1402",1,20.68],["fra-1402-murococina","F",14,"1402",2,1.29],["fra-1403-piso","F",14,"1403",0,27.12],["fra-1403-murobanos","F",14,"1403",1,17.02],["fra-1403-murococina","F",14,"1403",2,1.8],["fra-1404-piso","F",14,"1404",0,24.26],["fra-1404-murobanos","F",14,"1404",1,14.26],["fra-1404-murococina","F",14,"1404",2,1.86],["fra-1405-piso","F",14,"1405",0,27.12],["fra-1405-murobanos","F",14,"1405",1,17.02],["fra-1405-murococina","F",14,"1405",2,1.8],["fra-1406-piso","F",14,"1406",0,27.34],["fra-1406-murobanos","F",14,"1406",1,20.68],["fra-1406-murococina","F",14,"1406",2,1.29],["fra-1407-piso","F",14,"1407",0,35.8],["fra-1407-murobanos","F",14,"1407",1,17.02],["fra-1407-murococina","F",14,"1407",2,1.29],["fra-pasillo-14","F",14,"Pasillo",4,21.21],["fra-1501-piso","F",15,"1501",0,35.8],["fra-1501-murobanos","F",15,"1501",1,17.02],["fra-1501-murococina","F",15,"1501",2,1.29],["fra-1502-piso","F",15,"1502",0,27.34],["fra-1502-murobanos","F",15,"1502",1,20.68],["fra-1502-murococina","F",15,"1502",2,1.29],["fra-1503-piso","F",15,"1503",0,27.12],["fra-1503-murobanos","F",15,"1503",1,17.02],["fra-1503-murococina","F",15,"1503",2,1.8],["fra-1504-piso","F",15,"1504",0,24.26],["fra-1504-murobanos","F",15,"1504",1,14.26],["fra-1504-murococina","F",15,"1504",2,1.86],["fra-1505-piso","F",15,"1505",0,27.12],["fra-1505-murobanos","F",15,"1505",1,17.02],["fra-1505-murococina","F",15,"1505",2,1.8],["fra-1506-piso","F",15,"1506",0,27.34],["fra-1506-murobanos","F",15,"1506",1,20.68],["fra-1506-murococina","F",15,"1506",2,1.29],["fra-1507-piso","F",15,"1507",0,35.8],["fra-1507-murobanos","F",15,"1507",1,17.02],["fra-1507-murococina","F",15,"1507",2,1.29],["fra-pasillo-15","F",15,"Pasillo",4,21.21],["fra-1601-piso","F",16,"1601",0,35.8],["fra-1601-murobanos","F",16,"1601",1,17.02],["fra-1601-murococina","F",16,"1601",2,1.29],["fra-1602-piso","F",16,"1602",0,27.34],["fra-1602-murobanos","F",16,"1602",1,20.68],["fra-1602-murococina","F",16,"1602",2,1.29],["fra-1603-piso","F",16,"1603",0,27.12],["fra-1603-murobanos","F",16,"1603",1,17.02],["fra-1603-murococina","F",16,"1603",2,1.8],["fra-1604-piso","F",16,"1604",0,24.26],["fra-1604-murobanos","F",16,"1604",1,14.26],["fra-1604-murococina","F",16,"1604",2,1.86],["fra-1605-piso","F",16,"1605",0,27.12],["fra-1605-murobanos","F",16,"1605",1,17.02],["fra-1605-murococina","F",16,"1605",2,1.8],["fra-1606-piso","F",16,"1606",0,27.34],["fra-1606-murobanos","F",16,"1606",1,20.68],["fra-1606-murococina","F",16,"1606",2,1.29],["fra-1607-piso","F",16,"1607",0,35.8],["fra-1607-murobanos","F",16,"1607",1,17.02],["fra-1607-murococina","F",16,"1607",2,1.29],["fra-pasillo-16","F",16,"Pasillo",4,21.21],["fra-1701-piso","F",17,"1701",0,35.8],["fra-1701-murobanos","F",17,"1701",1,17.02],["fra-1701-murococina","F",17,"1701",2,1.29],["fra-1702-piso","F",17,"1702",0,27.34],["fra-1702-murobanos","F",17,"1702",1,20.68],["fra-1702-murococina","F",17,"1702",2,1.29],["fra-1703-piso","F",17,"1703",0,27.12],["fra-1703-murobanos","F",17,"1703",1,17.02],["fra-1703-murococina","F",17,"1703",2,1.8],["fra-1704-piso","F",17,"1704",0,24.26],["fra-1704-murobanos","F",17,"1704",1,14.26],["fra-1704-murococina","F",17,"1704",2,1.86],["fra-1705-piso","F",17,"1705",0,27.12],["fra-1705-murobanos","F",17,"1705",1,17.02],["fra-1705-murococina","F",17,"1705",2,1.8],["fra-1706-piso","F",17,"1706",0,27.34],["fra-1706-murobanos","F",17,"1706",1,20.68],["fra-1706-murococina","F",17,"1706",2,1.29],["fra-1707-piso","F",17,"1707",0,35.8],["fra-1707-murobanos","F",17,"1707",1,17.02],["fra-1707-murococina","F",17,"1707",2,1.29],["fra-pasillo-17","F",17,"Pasillo",4,21.21],["fra-1801-piso","F",18,"1801",0,35.8],["fra-1801-murobanos","F",18,"1801",1,17.02],["fra-1801-murococina","F",18,"1801",2,1.29],["fra-1802-piso","F",18,"1802",0,27.34],["fra-1802-murobanos","F",18,"1802",1,20.68],["fra-1802-murococina","F",18,"1802",2,1.29],["fra-1803-piso","F",18,"1803",0,27.12],["fra-1803-murobanos","F",18,"1803",1,17.02],["fra-1803-murococina","F",18,"1803",2,1.8],["fra-1804-piso","F",18,"1804",0,24.26],["fra-1804-murobanos","F",18,"1804",1,14.26],["fra-1804-murococina","F",18,"1804",2,1.86],["fra-1805-piso","F",18,"1805",0,27.12],["fra-1805-murobanos","F",18,"1805",1,17.02],["fra-1805-murococina","F",18,"1805",2,1.8],["fra-1806-piso","F",18,"1806",0,27.34],["fra-1806-murobanos","F",18,"1806",1,20.68],["fra-1806-murococina","F",18,"1806",2,1.29],["fra-1807-piso","F",18,"1807",0,35.8],["fra-1807-murobanos","F",18,"1807",1,17.02],["fra-1807-murococina","F",18,"1807",2,1.29],["fra-pasillo-18","F",18,"Pasillo",4,21.21],["fra-1901-piso","F",19,"1901",0,35.8],["fra-1901-murobanos","F",19,"1901",1,17.02],["fra-1901-murococina","F",19,"1901",2,1.29],["fra-1902-piso","F",19,"1902",0,27.34],["fra-1902-murobanos","F",19,"1902",1,20.68],["fra-1902-murococina","F",19,"1902",2,1.29],["fra-1903-piso","F",19,"1903",0,27.12],["fra-1903-murobanos","F",19,"1903",1,17.02],["fra-1903-murococina","F",19,"1903",2,1.8],["fra-1904-piso","F",19,"1904",0,24.26],["fra-1904-murobanos","F",19,"1904",1,14.26],["fra-1904-murococina","F",19,"1904",2,1.86],["fra-1905-piso","F",19,"1905",0,27.12],["fra-1905-murobanos","F",19,"1905",1,17.02],["fra-1905-murococina","F",19,"1905",2,1.8],["fra-1906-piso","F",19,"1906",0,27.34],["fra-1906-murobanos","F",19,"1906",1,20.68],["fra-1906-murococina","F",19,"1906",2,1.29],["fra-1907-piso","F",19,"1907",0,35.8],["fra-1907-murobanos","F",19,"1907",1,17.02],["fra-1907-murococina","F",19,"1907",2,1.29],["fra-pasillo-19","F",19,"Pasillo",4,21.21],["fra-2001-piso","F",20,"2001",0,35.8],["fra-2001-murobanos","F",20,"2001",1,17.02],["fra-2001-murococina","F",20,"2001",2,1.29],["fra-2002-piso","F",20,"2002",0,27.34],["fra-2002-murobanos","F",20,"2002",1,20.68],["fra-2002-murococina","F",20,"2002",2,1.29],["fra-2003-piso","F",20,"2003",0,27.12],["fra-2003-murobanos","F",20,"2003",1,17.02],["fra-2003-murococina","F",20,"2003",2,1.8],["fra-2004-piso","F",20,"2004",0,24.26],["fra-2004-murobanos","F",20,"2004",1,14.26],["fra-2004-murococina","F",20,"2004",2,1.86],["fra-2005-piso","F",20,"2005",0,27.12],["fra-2005-murobanos","F",20,"2005",1,17.02],["fra-2005-murococina","F",20,"2005",2,1.8],["fra-2006-piso","F",20,"2006",0,27.34],["fra-2006-murobanos","F",20,"2006",1,20.68],["fra-2006-murococina","F",20,"2006",2,1.29],["fra-2007-piso","F",20,"2007",0,35.8],["fra-2007-murobanos","F",20,"2007",1,17.02],["fra-2007-murococina","F",20,"2007",2,1.29],["fra-pasillo-20","F",20,"Pasillo",4,21.21],["fra-2101-piso","F",21,"2101",0,35.8],["fra-2101-murobanos","F",21,"2101",1,17.02],["fra-2101-murococina","F",21,"2101",2,1.29],["fra-2102-piso","F",21,"2102",0,27.34],["fra-2102-murobanos","F",21,"2102",1,20.68],["fra-2102-murococina","F",21,"2102",2,1.29],["fra-2103-piso","F",21,"2103",0,27.12],["fra-2103-murobanos","F",21,"2103",1,17.02],["fra-2103-murococina","F",21,"2103",2,1.8],["fra-2104-piso","F",21,"2104",0,24.26],["fra-2104-murobanos","F",21,"2104",1,14.26],["fra-2104-murococina","F",21,"2104",2,1.86],["fra-2105-piso","F",21,"2105",0,27.12],["fra-2105-murobanos","F",21,"2105",1,17.02],["fra-2105-murococina","F",21,"2105",2,1.8],["fra-2106-piso","F",21,"2106",0,27.34],["fra-2106-murobanos","F",21,"2106",1,20.68],["fra-2106-murococina","F",21,"2106",2,1.29],["fra-2107-piso","F",21,"2107",0,35.8],["fra-2107-murobanos","F",21,"2107",1,17.02],["fra-2107-murococina","F",21,"2107",2,1.29],["fra-pasillo-21","F",21,"Pasillo",4,21.21],["fra-2201-piso","F",22,"2201",0,35.8],["fra-2201-murobanos","F",22,"2201",1,17.02],["fra-2201-murococina","F",22,"2201",2,1.29],["fra-2202-piso","F",22,"2202",0,27.34],["fra-2202-murobanos","F",22,"2202",1,20.68],["fra-2202-murococina","F",22,"2202",2,1.29],["fra-2203-piso","F",22,"2203",0,27.12],["fra-2203-murobanos","F",22,"2203",1,17.02],["fra-2203-murococina","F",22,"2203",2,1.8],["fra-2204-piso","F",22,"2204",0,24.26],["fra-2204-murobanos","F",22,"2204",1,14.26],["fra-2204-murococina","F",22,"2204",2,1.86],["fra-2205-piso","F",22,"2205",0,27.12],["fra-2205-murobanos","F",22,"2205",1,17.02],["fra-2205-murococina","F",22,"2205",2,1.8],["fra-2206-piso","F",22,"2206",0,27.34],["fra-2206-murobanos","F",22,"2206",1,20.68],["fra-2206-murococina","F",22,"2206",2,1.29],["fra-2207-piso","F",22,"2207",0,35.8],["fra-2207-murobanos","F",22,"2207",1,17.02],["fra-2207-murococina","F",22,"2207",2,1.29],["fra-pasillo-22","F",22,"Pasillo",4,21.21],["fra-2301-piso","F",23,"2301",0,35.8],["fra-2301-murobanos","F",23,"2301",1,17.02],["fra-2301-murococina","F",23,"2301",2,1.29],["fra-2302-piso","F",23,"2302",0,27.34],["fra-2302-murobanos","F",23,"2302",1,20.68],["fra-2302-murococina","F",23,"2302",2,1.29],["fra-2303-piso","F",23,"2303",0,27.12],["fra-2303-murobanos","F",23,"2303",1,17.02],["fra-2303-murococina","F",23,"2303",2,1.8],["fra-2304-piso","F",23,"2304",0,24.26],["fra-2304-murobanos","F",23,"2304",1,14.26],["fra-2304-murococina","F",23,"2304",2,1.86],["fra-2305-piso","F",23,"2305",0,27.12],["fra-2305-murobanos","F",23,"2305",1,17.02],["fra-2305-murococina","F",23,"2305",2,1.8],["fra-2306-piso","F",23,"2306",0,27.34],["fra-2306-murobanos","F",23,"2306",1,20.68],["fra-2306-murococina","F",23,"2306",2,1.29],["fra-2307-piso","F",23,"2307",0,35.8],["fra-2307-murobanos","F",23,"2307",1,17.02],["fra-2307-murococina","F",23,"2307",2,1.29],["fra-pasillo-23","F",23,"Pasillo",4,21.21],["fra-2401-piso","F",24,"2401",0,35.8],["fra-2401-murobanos","F",24,"2401",1,17.02],["fra-2401-murococina","F",24,"2401",2,1.29],["fra-2402-piso","F",24,"2402",0,27.34],["fra-2402-murobanos","F",24,"2402",1,20.68],["fra-2402-murococina","F",24,"2402",2,1.29],["fra-2403-piso","F",24,"2403",0,27.12],["fra-2403-murobanos","F",24,"2403",1,17.02],["fra-2403-murococina","F",24,"2403",2,1.8],["fra-2404-piso","F",24,"2404",0,24.26],["fra-2404-murobanos","F",24,"2404",1,14.26],["fra-2404-murococina","F",24,"2404",2,1.86],["fra-2405-piso","F",24,"2405",0,27.12],["fra-2405-murobanos","F",24,"2405",1,17.02],["fra-2405-murococina","F",24,"2405",2,1.8],["fra-2406-piso","F",24,"2406",0,27.34],["fra-2406-murobanos","F",24,"2406",1,20.68],["fra-2406-murococina","F",24,"2406",2,1.29],["fra-2407-piso","F",24,"2407",0,35.8],["fra-2407-murobanos","F",24,"2407",1,17.02],["fra-2407-murococina","F",24,"2407",2,1.29],["fra-pasillo-24","F",24,"Pasillo",4,21.21],["cer-sub-basura-piso","C",-1,"Sala de basura",0,12.6],["cer-sub-basura-muro","C",-1,"Sala de basura",3,27],["cer-sub-conserje-piso","C",-1,"Sala conserje",0,30],["cer-sub-conserje-muro","C",-1,"Sala conserje",3,null],["fra-sub-basura-piso","F",-1,"Sala de basura",0,12.6],["fra-sub-basura-muro","F",-1,"Sala de basura",3,27],["fra-sub-conserje-piso","F",-1,"Sala conserje",0,30],["fra-sub-conserje-muro","F",-1,"Sala conserje",3,null]];
+const AREAS = ["Piso", "Muro baño", "Muro cocina", "Muro", "Pasillo"];
+
+// leo la misma sesión del panel (mismo sitio); si no hay sesión quedan los datos de prueba
+const URL_BASE_DEFECTO = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
+function leerSes(k){ try { return sessionStorage.getItem(k) || localStorage.getItem(k) || null; } catch (e) { return null; } }
+function etiquetaDispositivo(){
+  const u = navigator.userAgent || "";
+  const so = /iPhone|iPad|iPod/.test(u) ? "iPhone/iPad" : /Android/.test(u) ? "Android" : /Windows/.test(u) ? "Windows" : /Mac OS X|Macintosh/.test(u) ? "Mac" : /Linux/.test(u) ? "Linux" : "Otro";
+  const nav = /Edg\//.test(u) ? "Edge" : /OPR\/|Opera/.test(u) ? "Opera" : /SamsungBrowser/.test(u) ? "Samsung" : /Firefox|FxiOS/.test(u) ? "Firefox" : /Chrome|CriOS/.test(u) ? "Chrome" : /Safari/.test(u) ? "Safari" : "Navegador";
+  return so + " · " + nav;
+}
+let AVISO_SIN_SESION = "";
+async function cargarReales(){
+  const token = leerSes("progresoObraToken");
+  if (!token) { AVISO_SIN_SESION = "Sin sesión del panel: se muestran datos de prueba. Entra al panel con tu PIN y vuelve a abrir esta página."; return null; }
+  let url = URL_BASE_DEFECTO; try { url = localStorage.getItem("progresoObraDbUrl") || URL_BASE_DEFECTO; } catch (e) {}
+  const ctl = new AbortController(); const tope = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const r = await fetch(url, { method: "POST", signal: ctl.signal, headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "loadPrivado", token, dispositivo: leerSes("progresoObraDisp") || "", dispositivoEtiqueta: etiquetaDispositivo() }) });
+    if (!r.ok) throw new Error("red");
+    const j = JSON.parse(await r.text());
+    if (!j || j.ok !== true || !j.items) { AVISO_SIN_SESION = j && j.error === "sin_sesion" ? "La sesión del panel venció: se muestran datos de prueba. Vuelve a entrar con tu PIN." : "La base de datos no entregó los datos: se muestran datos de prueba."; return null; }
+    return { items: j.items, nombre: leerSes("progresoObraName") || "", rol: leerSes("progresoObraRol") || "" };
+  } catch (e) {
+    AVISO_SIN_SESION = "No se pudo conectar con la base de datos: se muestran datos de prueba.";
+    return null;
+  } finally { clearTimeout(tope); }
+}
+
+// paso los datos reales de cerámica y frague al formato de esta página
+const hoyIso = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
+const tsIso = ts => new Date(ts).toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
+function codRecinto(piso, dpto){
+  if (dpto === "Pasillo") return "P" + String(piso).padStart(2, "0") + "-PAS";
+  if (dpto === "Sala de basura") return "S1-BAS";
+  if (dpto === "Sala conserje") return "S1-CON";
+  return "D-" + dpto;
+}
+function aplicarReales(cfg, reales){
+  const porRec = {};
+  let min = null;
+  CELDAS.forEach(([id, c, piso, dpto, area, m2]) => {
+    const st = reales.items[id] || {};
+    const k = codRecinto(piso, dpto) + "|" + (c === "C" ? "CER" : "FRA");
+    const terminado = !!(st.terminado || st.pagado);
+    const empezado = terminado || !!st.partida;
+    const m = (st.m2 === undefined || st.m2 === null) ? m2 : st.m2;
+    (porRec[k] = porRec[k] || []).push({ area, m2: Number(m) || 0, terminado, empezado, ini: st.partidaTs || null, fin: st.terminadoTs || null, trabajador: st.trabajador || "" });
+    [st.partidaTs, st.terminadoTs].forEach(t => { if (t && (min == null || t < min)) min = t; });
+  });
+  cfg.modoReal = true;
+  cfg.reales = porRec;
+  cfg.corte = hoyIso();
+  cfg.inicio = min ? tsIso(min) : cfg.corte;
+  cfg.obra = { codigo: "BELLAVISTA", nombre: "Obra Bellavista, La Florida" };
+  cfg.partidas = [
+    { cod: "CER", nom: "Cerámica", esp: "Terminaciones", unidad: "recinto", aplica: ["sub","dep","pas"], pre: [],      off: 0, dur: 10, peso: 50, ritmo: 1 },
+    { cod: "FRA", nom: "Frague",   esp: "Terminaciones", unidad: "recinto", aplica: ["sub","dep","pas"], pre: ["CER"], off: 0, dur: 4,  peso: 50, ritmo: 1 }
+  ];
+  cfg.zonas = { "-2": [], "-1": [["BAS", "Sala de basura", "basura"], ["CON", "Sala conserje", "conserjeria"]], "1": [] };
+  cfg.restricciones = [];
+  cfg.materiales = [];
+  cfg.sesion = { nombre: reales.nombre, rol: reales.rol };
+}
+
+async function iniciar(){
+  const reales = await cargarReales();
+  if (reales) aplicarReales(CONFIG, reales);
+  arrancar();
+  document.getElementById("cargando").remove();
+}
+
+function arrancar(){
 // calendario: todo se cuenta en días hábiles (lunes a viernes sin feriados)
 const iso = d => d.toISOString().slice(0, 10);
 const parse = s => new Date(s + "T12:00:00Z");
 const FER = new Set(CONFIG.feriados);
 const WD = [];
-(function(){ let d = parse("2025-09-01"); const end = parse("2028-12-31");
+(function(){ let d = parse(CONFIG.inicio < "2025-09-01" ? CONFIG.inicio.slice(0, 8) + "01" : "2025-09-01"); const end = parse("2028-12-31");
   while (d <= end) { const w = d.getUTCDay(); if (w !== 0 && w !== 6 && !FER.has(iso(d))) WD.push(iso(d)); d = new Date(d.getTime() + 864e5); } })();
 function wdIndex(s){ let lo = 0, hi = WD.length; while (lo < hi) { const m = (lo + hi) >> 1; if (WD[m] < s) lo = m + 1; else hi = m; } return lo; }
 const W0 = wdIndex(CONFIG.inicio);
+const dWdTs = ts => wdIndex(tsIso(ts)) - W0;
 const CORTE = wdIndex(CONFIG.corte) - W0;
 const wdDate = i => WD[Math.max(0, Math.min(WD.length - 1, Math.round(i) + W0))];
 const fmt = s => { const d = parse(s); return d.toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).replace(/\./g, ""); };
@@ -621,12 +806,15 @@ NIVELES.forEach(n => {
   else (n === 2 ? CONFIG.piso2 : [1,2,3,4,5,6,7]).forEach(c => { const num = n * 100 + c;
     RECINTOS.push({ codigo: "D-" + num, nivel: n, tipo: "Departamento", nombre: "Depto " + num, tipologia: CONFIG.tipologiaPorColumna[c], col: c, ambito: "dep" }); });
   if (n >= 2) RECINTOS.push({ codigo: nivelLabel(n) + "-PAS", nivel: n, tipo: "Pasillo", nombre: "Pasillo piso " + n, term: "pasillo", tipologia: "", col: 8, ambito: "pas" });
+  // los 2 ascensores van aparte del pasillo: una parada por nivel cada uno
+  [1, 2].forEach(a => RECINTOS.push({ codigo: nivelLabel(n) + "-A" + a, nivel: n, tipo: "Ascensor", nombre: "Ascensor " + a + " · " + nivelNombre(n).toLowerCase(), term: "ascensor", tipologia: "", col: 8 + a, ambito: "asc", asc: a }));
 });
 const P = CONFIG.partidas;
 const PBY = Object.fromEntries(P.map(p => [p.cod, p]));
 const deptos = RECINTOS.filter(r => r.tipo === "Departamento");
 const zonas = RECINTOS.filter(r => r.tipo === "Zona");
 const pasillos = RECINTOS.filter(r => r.tipo === "Pasillo");
+const ascensores = RECINTOS.filter(r => r.tipo === "Ascensor");
 function cantRec(r){
   if (!r.tipologia) return null;
   const ex = CONFIG.excepciones[r.codigo];
@@ -661,6 +849,20 @@ const RESTR = CONFIG.restricciones.map(x => ({ ...x, desdeWd: wdIndex(x.desde) -
 const REG = [];
 const regBy = {};
 const key = (p, u) => p + "|" + u;
+if (CONFIG.modoReal) {
+  // en modo real: un recinto está terminado cuando todas sus áreas lo están; en curso si alguna empezó
+  P.forEach(p => RECINTOS.filter(r => p.aplica.includes(r.ambito)).forEach(r => {
+    const areas = CONFIG.reales[r.codigo + "|" + p.cod]; if (!areas) return;
+    const ini = areas.map(a => a.ini).filter(Boolean), fin = areas.map(a => a.fin).filter(Boolean);
+    const todas = areas.every(a => a.terminado), alguna = areas.some(a => a.empezado);
+    let rs = Infinity, rf = Infinity;
+    if (alguna) rs = ini.length ? dWdTs(Math.min(...ini)) : (fin.length ? dWdTs(Math.min(...fin)) : 0);
+    if (todas) rf = fin.length ? dWdTs(Math.max(...fin)) : Math.max(0, rs);
+    if (rf < rs) rs = rf;
+    const reg = { p: p.cod, u: r.codigo, nivel: r.nivel, amb: r.ambito, k: KIDX[r.nivel], ps: Infinity, pf: Infinity, rs, rf, bloq: null, preds: predsEfectivas(p, r.ambito), areas };
+    REG.push(reg); regBy[key(p.cod, r.codigo)] = reg;
+  }));
+} else
 P.forEach(p => {
   const units = p.unidad === "nivel"
     ? NIVELES.filter(n => p.aplica.includes(ambito(n))).map(n => ({ u: nivelLabel(n), nivel: n, amb: ambito(n) }))
@@ -695,13 +897,21 @@ function estado(reg, t = CORTE){
   return reg.bloq ? "block" : "free";
 }
 const EST = { ok: ["Terminado", "terminado"], run: ["En curso", "encurso"], free: ["Liberado", "liberado"], wait: ["Pendiente", "pendiente"], block: ["Bloqueado", "bloqueado"] };
-REG.forEach(r => { r.est = estado(r); });
+REG.forEach(r => { r.est = estado(r); if (CONFIG.modoReal && r.est === "free" && !r.preds.length) r.est = "wait"; });
+if (CONFIG.modoReal) { EST.wait = ["Sin empezar", "pendiente"]; EST.free = ["Listo para empezar", "liberado"]; }
 const regsDe = c => REG.filter(r => r.p === c);
 const regDeRecinto = (c, rec) => regBy[key(c, PBY[c].unidad === "nivel" ? nivelLabel(rec.nivel) : rec.codigo)];
+const MR = !!CONFIG.modoReal;
+const m2De = (c, rec) => { const g = regDeRecinto(c, rec); return g && g.areas ? g.areas.reduce((s, a) => s + a.m2, 0) : 0; };
+const m2Ok = (c, rec) => { const g = regDeRecinto(c, rec); return g && g.areas ? g.areas.filter(a => a.terminado).reduce((s, a) => s + a.m2, 0) : 0; };
 
 // avance: terminado cuenta 1, en curso 0,5
 const PESO_TOTAL = P.reduce((s, p) => s + p.peso, 0);
+// en modo real el avance va por m² terminados de cada área (piso, muro baño, muro cocina)
+const AREAS_FIN = {};
+if (MR) P.forEach(p => { const l = []; regsDe(p.cod).forEach(r => r.areas.forEach(a => l.push([a.terminado ? (a.fin ? dWdTs(a.fin) : 0) : Infinity, a.m2]))); AREAS_FIN[p.cod] = { l, tot: l.reduce((s, x) => s + x[1], 0) || 1 }; });
 function avPart(c, t, cual){
+  if (MR) { if (cual === "plan") return 0; const a = AREAS_FIN[c]; return a.l.reduce((s, x) => s + (x[0] <= t ? x[1] : 0), 0) / a.tot; }
   const rs = regsDe(c); let s = 0;
   rs.forEach(r => { const a = cual === "plan" ? r.ps : r.rs, b = cual === "plan" ? r.pf : r.rf; if (b <= t) s += 1; else if (a <= t) s += 0.5; });
   return s / rs.length;
@@ -749,7 +959,7 @@ function proyectar(esc){
   return { fin, rate, sinHist, obra: Math.max(...Object.values(fin)) };
 }
 const PROY = { base: proyectar("base"), opt: proyectar("opt"), cons: proyectar("cons") };
-const PLAN_FIN = Math.max(...REG.map(r => r.pf));
+const PLAN_FIN = MR ? CORTE : Math.max(...REG.map(r => r.pf));
 
 function avProy(t){
   return P.reduce((s, p) => {
@@ -758,6 +968,70 @@ function avProy(t){
     return s + p.peso * (a0 + (1 - a0) * x);
   }, 0) / PESO_TOTAL;
 }
+
+// bodega: consumo según el ritmo de cada partida, cobertura y cuándo pedir
+function consumoRec(m, rec){
+  let q = 0;
+  if (m.porCant) { const c = cantRec(rec); if (c) q = Object.entries(m.porCant).reduce((s, [k, v]) => s + (c[k] || 0) * v, 0); }
+  else if (rec.tipologia) q = m.porTipo[rec.tipologia] || 0;
+  else if (rec.tipo === "Pasillo") q = m.pas || 0;
+  return q * (1 + m.merma / 100);
+}
+const D_HOY = CORTE;
+const dWd = s => wdIndex(s) - W0;
+function calcMaterial(m){
+  const p = PBY[m.partida];
+  const recs = RECINTOS.filter(r => p.aplica.includes(r.ambito)).map(r => ({ r, q: consumoRec(m, r), g: regDeRecinto(m.partida, r) })).filter(x => x.q > 0);
+  const total = recs.reduce((s, x) => s + x.q, 0);
+  const falta = recs.reduce((s, x) => s + x.q * (x.g.est === "ok" ? 0 : x.g.est === "run" ? 0.5 : 1), 0);
+  const pend = recs.filter(x => x.g.est !== "ok");
+  const prom = pend.length ? pend.reduce((s, x) => s + x.q, 0) / pend.length : 0;
+  const ritmo = PROY.base.rate[m.partida];
+  const porDia = Math.min(falta, ritmo * prom) / 5;
+  const tr = m.transito.map(t => ({ ...t, dMin: dWd(t.llegaMin), dMax: dWd(t.llegaMax) }));
+  const enCamino = tr.reduce((s, t) => s + t.cant, 0);
+  const necesita = Math.max(0, falta - m.stock);
+  // simulo día a día: el material en tránsito lo sumo recién en la fecha máxima
+  let st = m.stock, quiebre = null;
+  const serie = [];
+  const H = 70;
+  for (let d = 0; d <= H; d++) {
+    tr.forEach(t => { if (t.dMax === D_HOY + d) st += t.cant; });
+    serie.push([D_HOY + d, st]);
+    if (quiebre == null && st <= 0 && porDia > 0) quiebre = D_HOY + d;
+    st = Math.max(0, st - porDia);
+  }
+  const consumidoHasta = d => porDia * (d - D_HOY);
+  const cubierto = m.stock + enCamino >= falta - 0.01;
+  if (quiebre == null && porDia > 0 && !cubierto) {
+    const disp = m.stock + enCamino;
+    quiebre = D_HOY + Math.ceil(disp / porDia);
+  }
+  const cobertura = quiebre == null ? Infinity : quiebre - D_HOY;
+  const [pMin, pMax] = m.plazo;
+  const limite = quiebre == null ? null : quiebre - pMax;
+  let est;
+  if (porDia <= 0 && falta <= 0.01) est = "cub";
+  else if (cubierto) est = "cub";
+  else if (cobertura < pMin) est = "ya";
+  else if (cobertura < pMax) est = "hoy";
+  else if (cobertura < pMax + CONFIG.diasAviso) est = "pronto";
+  else est = "ok";
+  const objetivo = porDia * (pMax + CONFIG.semanasPedido * 5);
+  let sugerido = Math.min(Math.max(0, falta - m.stock - enCamino), Math.max(objetivo - Math.max(0, m.stock + enCamino - porDia * pMax), 0));
+  if (est === "cub" || est === "ok") sugerido = 0;
+  const presentaciones = Math.ceil(sugerido / m.pres - 1e-9);
+  return { m, p, total, falta, porDia, porSemana: porDia * 5, enCamino, tr, serie, quiebre, cobertura, limite, est, sugerido: presentaciones * m.pres, presentaciones, faltanDias: est === "ya" ? pMin - cobertura : 0, necesita };
+}
+const BOD = CONFIG.materiales.map(calcMaterial);
+const BEST = {
+  ya: ["Pedir ya", "b-ya", "Aunque se pida hoy no alcanza a llegar antes de que se acabe."],
+  hoy: ["Pedir hoy", "b-hoy", "Si se demora el plazo máximo, se acaba antes de que llegue."],
+  pronto: ["Pedir pronto", "b-pronto", "Queda poco margen: hay que pedir en los próximos días."],
+  ok: ["Con stock", "b-ok", "Alcanza para más que el plazo máximo de entrega."],
+  cub: ["Cubierto", "b-cub", "Con lo que hay y lo que viene en camino alcanza hasta terminar la partida."]
+};
+const ORD_B = { ya: 0, hoy: 1, pronto: 2, ok: 3, cub: 4 };
 
 // funciones chicas que uso en todas las vistas
 const $ = id => document.getElementById(id);
@@ -815,6 +1089,7 @@ document.addEventListener("click", e => {
 window.addEventListener("scroll", () => { if (tipFijo) hideTip(); }, { passive: true });
 
 const TIPFN = {
+  lock(){ return "<b>Bloqueada por ahora</b><br>Esta pestaña se habilita más adelante."; },
   rec(el){
     const rec = RECINTOS.find(r => r.codigo === el.dataset.cod); if (!rec) return "";
     if (SEL === "_res") {
@@ -827,7 +1102,7 @@ const TIPFN = {
     const r = regDeRecinto(SEL, rec);
     const ex = CONFIG.excepciones[rec.codigo], q = cantDe(SEL, rec);
     return `<b>${esc(rec.nombre)} · ${esc(p.nom)}</b><div class="tl"><span>Estado</span><span>${EST[r.est][0]}</span>` +
-      `<span>Término prog.</span><span>${fmtWd(r.pf)}</span>` +
+      (MR ? `<span>m²</span><span>${num(m2Ok(SEL, rec), 1)} de ${num(m2De(SEL, rec), 1)}</span>` : `<span>Término prog.</span><span>${fmtWd(r.pf)}</span>`) +
       (r.est === "ok" ? `<span>Terminó</span><span>${fmtWd(r.rf)}</span>` : r.est === "run" ? `<span>Empezó</span><span>${fmtWd(r.rs)}</span>` : "") +
       (r.bloq ? `<span>Motivo</span><span>${esc(r.bloq.categoria)}</span>` : "") +
       (CONFIG.cantidadPorPartida[SEL] ? `<span>Cantidad</span><span>${q} ${CONFIG.cantidadPorPartida[SEL].unidad}</span>` : "") + `</div>` +
@@ -840,11 +1115,12 @@ const TIPFN = {
     const plan = rs.reduce((s, r) => s + (r.pf <= CORTE ? 1 : r.ps <= CORTE ? .5 : 0), 0) / rs.length;
     return `<b>${nivelNombre(n)} · ${esc(p.nom)}</b><div class="tl"><span>Terminados</span><span>${c("ok")} de ${rs.length}</span><span>En curso</span><span>${c("run")}</span>` +
       (c("block") ? `<span>Bloqueados</span><span>${c("block")}</span>` : "") +
-      `<span>Programado</span><span>${pct(plan, 0)}</span></div>`;
+      (MR ? "" : `<span>Programado</span><span>${pct(plan, 0)}</span>`) + `</div>`;
   },
   mxh(el){ const p = PBY[el.dataset.p]; const t = TERMS[p.cod]; return `<b>${esc(p.cod)} · ${esc(p.nom)}</b><br>${esc(t ? t[1] : "")}`; },
   bar(el){
     const p = PBY[el.dataset.p], h = HIST[p.cod];
+    if (MR) return `<b>${esc(p.nom)}</b><div class="tl"><span>Recintos terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Avance m²</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span></div>`;
     return `<b>${esc(p.nom)}</b><div class="tl"><span>Terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Real</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span><span>Programado</span><span>${pct(avPart(p.cod, CORTE, "plan"))}</span><span>Peso</span><span>${num(p.peso / PESO_TOTAL * 100)}%</span>` +
       (cantPartida(p.cod) ? `<span>Cantidad</span><span>${cantPartida(p.cod).ok} de ${cantPartida(p.cod).tot} ${cantPartida(p.cod).unidad}</span>` : "") + `</div>`;
   }
@@ -852,8 +1128,33 @@ const TIPFN = {
 
 // vistas
 $("corteTxt").textContent = fmt(CONFIG.corte);
+const CARGOS = { "1": "Admin", "2": "Supervisor", "3": "Contratista", "4": "Jefe de Terreno" };
+if (MR) {
+  const hora = new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago" });
+  $("hdrEyebrow").innerHTML = `<span class="pill real">Datos reales</span><span>Cerámica y frague · leído a las ${hora}</span>`;
+  $("hdrTitulo").textContent = CONFIG.obra.nombre;
+  $("hdrSub").innerHTML = `${deptos.length} departamentos y ${pasillos.length} pasillos · sin programa cargado, se muestra solo lo real`;
+  $("pie").textContent = "Datos reales de cerámica y frague, leídos de la base de datos. Esta página no modifica nada.";
+  $("notaCurva").textContent = "Cerámica y frague juntos, por m² terminados semana a semana. Pasa el cursor por el gráfico para ver los valores.";
+  $("lgPlan").hidden = true; $("panelRestr").hidden = true; $("panelAvisos").hidden = true;
+  const nom = CONFIG.sesion.nombre || "Usuario", ini = nom.split(/[\s.]+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("");
+  $("sesion").innerHTML = `<span class="ini" aria-hidden="true">${esc(ini)}</span><span>Conectado como: <b>${esc(nom)}</b> · ${esc(CARGOS[CONFIG.sesion.rol] || "Usuario")}</span>`;
+} else if (AVISO_SIN_SESION) {
+  $("avisoSes").textContent = AVISO_SIN_SESION; $("avisoSes").hidden = false;
+}
 
 function renderKpis(){
+  if (MR) {
+    const tot = c => RECINTOS.reduce((s, r) => s + m2De(c, r), 0), ok = c => RECINTOS.reduce((s, r) => s + m2Ok(c, r), 0);
+    const dCer = deptos.filter(x => regDeRecinto("CER", x).est === "ok").length, dFra = deptos.filter(x => regDeRecinto("FRA", x).est === "ok").length;
+    const fin = PROY.base.fin.FRA;
+    $("kpis").innerHTML = `
+      <div class="kpi"><span class="lab">${T("CER", "Cerámica")}</span><b class="mono">${pct(ok("CER") / tot("CER"))}</b><span class="sub">${num(ok("CER"), 0)} de ${num(tot("CER"), 0)} m² terminados</span></div>
+      <div class="kpi"><span class="lab">${T("FRA", "Frague")}</span><b class="mono">${pct(ok("FRA") / tot("FRA"))}</b><span class="sub">${num(ok("FRA"), 0)} de ${num(tot("FRA"), 0)} m² terminados</span></div>
+      <div class="kpi"><span class="lab">${T("proyeccion", "Término proyectado")}</span><b class="mono">${HIST.FRA.saldo <= 0 ? "Listo" : fmtC(wdDate(fin))}</b><span class="sub">frague completo, al ritmo actual</span></div>
+      <div class="kpi"><span class="lab">Deptos terminados</span><b class="mono">${dFra}<span style="font-size:20px;color:var(--muted)"> / ${deptos.length}</span></b><span class="sub">con frague · ${dCer} con cerámica</span></div>`;
+    return;
+  }
   const r = avGlobal(CORTE, "real"), pl = avGlobal(CORTE, "plan");
   const d = PROY.base.obra - PLAN_FIN;
   const deptosEnt = deptos.filter(x => regDeRecinto("CAL", x).est === "ok").length;
@@ -867,20 +1168,21 @@ function renderKpis(){
 function renderCurvaS(){
   const box = $("chS"); const W = Math.max(300, box.clientWidth), H = 260;
   const m = { l: 40, r: 64, t: 12, b: 28 };
-  const endT = Math.max(PLAN_FIN, PROY.base.obra) + 10;
-  const pts = []; for (let t = 0; t <= endT; t += 5) pts.push(t);
-  const sx = t => m.l + (t / endT) * (W - m.l - m.r), sy = v => m.t + (1 - v) * (H - m.t - m.b);
+  const endT = Math.max(PLAN_FIN, PROY.base.obra, CORTE) + 10;
+  const tIni = MR ? Math.max(0, Math.min(CORTE, ...REG.map(r => r.rs).filter(Number.isFinite)) - 5) : 0;
+  const pts = []; for (let t = tIni; t <= endT; t += 5) pts.push(t);
+  const sx = t => m.l + ((t - tIni) / (endT - tIni)) * (W - m.l - m.r), sy = v => m.t + (1 - v) * (H - m.t - m.b);
   const plan = pts.map(t => [t, avGlobal(Math.min(t, PLAN_FIN + 5), "plan")]);
   const real = pts.filter(t => t <= CORTE).map(t => [t, avGlobal(t, "real")]); real.push([CORTE, avGlobal(CORTE, "real")]);
   const proy = [[CORTE, avGlobal(CORTE, "real")], ...pts.filter(t => t > CORTE).map(t => [t, avProy(t)])];
   const path = arr => arr.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1)).join("");
   let g = "";
   [0, .25, .5, .75, 1].forEach(v => { g += `<line x1="${m.l}" x2="${W - m.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${sy(v) + 4}" text-anchor="end">${v * 100}%</text>`; });
-  const meses = []; for (let t = 1; t <= endT; t++) { const s = wdDate(t); if (s.slice(0, 7) !== wdDate(t - 1).slice(0, 7)) meses.push([t, s.slice(0, 7)]); }
+  const meses = []; for (let t = tIni + 1; t <= endT; t++) { const s = wdDate(t); if (s.slice(0, 7) !== wdDate(t - 1).slice(0, 7)) meses.push([t, s.slice(0, 7)]); }
   const step = W < 420 ? 6 : W < 620 ? 4 : 2;
   meses.forEach(([t, s], i) => { if (i % step) return; const d = parse(s + "-01"); g += `<text x="${sx(t)}" y="${H - 8}" text-anchor="middle">${d.toLocaleDateString("es-CL", { month: "short", timeZone: "UTC" }).replace(".", "")} ${String(d.getUTCFullYear()).slice(2)}</text>`; });
   g += `<line x1="${sx(CORTE)}" x2="${sx(CORTE)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="2 3"/><text x="${sx(CORTE) + 4}" y="${H - m.b - 6}" text-anchor="start" style="fill:var(--ink)">Corte</text>`;
-  g += `<path d="${path(plan)}" fill="none" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  if (!MR) g += `<path d="${path(plan)}" fill="none" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>`;
   g += `<path d="${path(proy)}" fill="none" stroke="var(--real)" stroke-width="2" stroke-dasharray="3 4"/>`;
   g += `<path d="${path(real)}" fill="none" stroke="var(--real)" stroke-width="2.5"/>`;
   const lr = real[real.length - 1];
@@ -894,14 +1196,14 @@ function renderCurvaS(){
   const move = ev => {
     const rect = box.querySelector("svg").getBoundingClientRect();
     const px = (ev.clientX - rect.left) * (W / rect.width);
-    let t = Math.round(((px - m.l) / (W - m.l - m.r)) * endT / 5) * 5; t = Math.max(0, Math.min(endT, t));
+    let t = tIni + Math.round(((px - m.l) / (W - m.l - m.r)) * (endT - tIni) / 5) * 5; t = Math.max(tIni, Math.min(endT, t));
     const vp = avGlobal(Math.min(t, PLAN_FIN + 5), "plan"), vr = t <= CORTE ? avGlobal(t, "real") : avProy(t);
     hov.style.display = ""; $("sHl").setAttribute("x1", sx(t)); $("sHl").setAttribute("x2", sx(t));
-    $("sHp").setAttribute("cx", sx(t)); $("sHp").setAttribute("cy", sy(vp));
+    $("sHp").setAttribute("cx", sx(t)); $("sHp").setAttribute("cy", sy(vp)); $("sHp").style.display = MR ? "none" : "";
     $("sHr").setAttribute("cx", sx(t)); $("sHr").setAttribute("cy", sy(vr));
     $("sHr").setAttribute("fill", t <= CORTE ? "var(--real)" : "var(--surface)"); $("sHr").setAttribute("stroke", t <= CORTE ? "var(--surface)" : "var(--real)");
     const cx = rect.left + sx(t) * rect.width / W, cy = rect.top + sy(Math.max(vp, vr)) * rect.height / H;
-    showTip(`<b>Semana del ${fmt(wdDate(t))}</b><div class="tl"><span>Programado</span><span>${pct(vp)}</span><span>${t <= CORTE ? "Real" : "Proyección"}</span><span>${pct(vr)}</span></div>`, { left: cx, right: cx, top: cy, bottom: cy, width: 0, height: 0 });
+    showTip(`<b>Semana del ${fmt(wdDate(t))}</b><div class="tl">${MR ? "" : `<span>Programado</span><span>${pct(vp)}</span>`}<span>${t <= CORTE ? "Real" : "Proyección"}</span><span>${pct(vr)}</span></div>`, { left: cx, right: cx, top: cy, bottom: cy, width: 0, height: 0 });
   };
   hit.addEventListener("pointermove", move);
   hit.addEventListener("pointerdown", move);
@@ -909,6 +1211,25 @@ function renderCurvaS(){
 }
 
 function renderBars(){
+  if (MR) {
+    $("bars").innerHTML = P.map(p => { const r = avPart(p.cod, CORTE, "real");
+      return `<div class="bar-row" data-tipfn="bar" data-p="${p.cod}"><span class="bar-name">${T(p.cod, esc(p.nom))}</span>
+        <div class="track"><div class="fill" style="width:${(r * 100).toFixed(1)}%"></div></div><span class="bar-val">${pct(r, 0)}</span><span class="bar-dev"></span></div>`; }).join("");
+    const filas = P.map(p => { const h = HIST[p.cod], ok = RECINTOS.reduce((s, r) => s + m2Ok(p.cod, r), 0), tot = RECINTOS.reduce((s, r) => s + m2De(p.cod, r), 0);
+      return [[T(p.cod, esc(p.nom)), ""],
+        ["m² terminados", `${num(ok, 0)} de ${num(tot, 0)}`],
+        ["Recintos terminados", `${h.ok} de ${h.total}`],
+        ["En curso", `${h.run}`],
+        [T("frente"), h.frente != null ? nivelNombre(h.frente) : "Sin iniciar"],
+        [T("rendimiento", "Ritmo (6 sem.)"), `${num(h.base)} rec./sem`],
+        [T("proyeccion", "Término proyectado"), h.saldo <= 0 ? "Terminada" : fmt(wdDate(PROY.base.fin[p.cod])) + (PROY.base.sinHist[p.cod] ? " (sin historial)" : "")]]; });
+    $("detalleReal").hidden = false;
+    $("detalleReal").innerHTML = `<div class="tbl-wrap" style="margin-top:6px"><table><thead><tr><th></th>${filas.map(f => `<th>${f[0][0]}</th>`).join("")}</tr></thead><tbody>` +
+      filas[0].slice(1).map((_, i) => `<tr><td class="muted">${filas[0][i + 1][0]}</td>${filas.map(f => `<td class="mono nw">${f[i + 1][1]}</td>`).join("")}</tr>`).join("") + `</tbody></table></div>`;
+    $("bars").previousElementSibling.querySelector("span:last-child").textContent = "";
+    $("lgTick").hidden = true;
+    return;
+  }
   $("bars").innerHTML = P.map(p => {
     const r = avPart(p.cod, CORTE, "real"), pl = avPart(p.cod, CORTE, "plan");
     return `<div class="bar-row" data-tipfn="bar" data-p="${p.cod}">
@@ -928,8 +1249,10 @@ function renderRestr(){
 
 // vista edificio
 let SEL = "CER";
+if (MR && !PBY[SEL]) SEL = P[0].cod;
 function renderSelector(){
   const opts = [["_res", "Resumen"], ...P.map(p => [p.cod, p.nom.split(" (")[0]])];
+  $("selPartida").style.gridTemplateColumns = opts.length <= 3 ? `repeat(${opts.length},minmax(0,1fr))` : "";
   $("selPartida").innerHTML = opts.map(([c, n]) => `<button aria-pressed="${c === SEL}" data-sel="${c}" ${c === "_res" ? "" : `data-term="${c}"`}>${esc(n)}</button>`).join("");
 }
 function claseRec(rec){
@@ -943,12 +1266,13 @@ function claseRec(rec){
   return { cls: "st-" + regDeRecinto(SEL, rec).est, style: "" };
 }
 function renderElev(){
-  let h = `<div class="row" aria-hidden="true"><span></span>${[1,2,3,4,5,6,7].map(i => `<span class="colhead">0${i}</span>`).join("")}<span class="colhead term" data-term="pasillo">PAS</span></div>`;
+  let h = `<div class="row" aria-hidden="true"><span></span>${[1,2,3,4,5,6,7].map(i => `<span class="colhead">0${i}</span>`).join("")}<span class="colhead term" data-term="pasillo">PAS</span><span></span><span class="colhead term" data-term="ascensor">A1</span><span class="colhead term" data-term="ascensor">A2</span></div>`;
   [...NIVELES].reverse().forEach(n => {
     h += `<div class="row"><span class="lvl">${nivelLabel(n)}</span>`;
     if (n <= 1) {
       const zs = zonas.filter(z => z.nivel === n);
-      h += `<div class="zones" style="grid-template-columns:repeat(${zs.length},minmax(0,1fr))">` + zs.map(z => { const c = claseRec(z);
+      if (!zs.length) { h += `<span class="zona-vacia">Sin recintos con datos</span>`; }
+      else h += `<div class="zones" style="grid-template-columns:repeat(${zs.length},minmax(0,1fr))">` + zs.map(z => { const c = claseRec(z);
         return `<button class="zone ${c.cls}" style="${c.style}" data-cod="${z.codigo}" data-tipfn="rec">${esc(z.nombre)}</button>`; }).join("") + `</div>`;
     } else {
       for (let c = 1; c <= 7; c++) {
@@ -960,6 +1284,8 @@ function renderElev(){
       const pa = pasillos.find(x => x.nivel === n), kp = claseRec(pa);
       h += `<button class="cell pas ${kp.cls}" style="${kp.style}" data-cod="${pa.codigo}" data-tipfn="rec" aria-label="${pa.nombre}">PAS</button>`;
     }
+    h += `<span></span>` + ascensores.filter(x => x.nivel === n).map(a => { const k = claseRec(a);
+      return `<button class="cell ${k.cls}" style="${k.style}" data-cod="${a.codigo}" data-tipfn="rec" aria-label="${a.nombre}">A${a.asc}</button>`; }).join("");
     h += `</div>`;
     if (n === 1) h += `<div class="ground" aria-hidden="true"></div>`;
   });
@@ -973,9 +1299,9 @@ function renderElev(){
     const p = PBY[SEL], rs = regsDe(SEL), h2 = HIST[SEL];
     $("selTitulo").innerHTML = T(SEL, esc(p.nom));
     const cnt = s => rs.filter(r => r.est === s).length;
-    $("statlist").innerHTML = ["ok", "run", "free", "block", "wait"].map(s =>
+    $("statlist").innerHTML = (MR ? ["ok", "run", "free", "wait"] : ["ok", "run", "free", "block", "wait"]).map(s =>
       `<div><span class="sw st-${s}"></span><span>${T(EST[s][1], EST[s][0])}</span><span class="mono">${cnt(s)}</span></div>`).join("") +
-      `<dl class="facts" style="margin-top:6px"><dt>${T("frente")}</dt><dd>${h2.frente != null ? nivelNombre(h2.frente) : "Sin iniciar"}</dd><dt>Avance real</dt><dd>${pct(avPart(SEL, CORTE, "real"))}</dd><dt>Programado</dt><dd>${pct(avPart(SEL, CORTE, "plan"))}</dd>` +
+      `<dl class="facts" style="margin-top:6px"><dt>${T("frente")}</dt><dd>${h2.frente != null ? nivelNombre(h2.frente) : "Sin iniciar"}</dd><dt>Avance real</dt><dd>${pct(avPart(SEL, CORTE, "real"))}</dd>${MR ? `<dt>m² terminados</dt><dd>${num(RECINTOS.reduce((s, r) => s + m2Ok(SEL, r), 0), 0)} de ${num(RECINTOS.reduce((s, r) => s + m2De(SEL, r), 0), 0)}</dd>` : `<dt>Programado</dt><dd>${pct(avPart(SEL, CORTE, "plan"))}</dd>`}` +
       (p.unidad === "nivel" ? `<dt>Se controla por</dt><dd>Piso completo</dd>` : "") +
       (cantPartida(SEL) ? `<dt>${T("cantidad")}</dt><dd>${cantPartida(SEL).ok} de ${cantPartida(SEL).tot} ${cantPartida(SEL).unidad}</dd>` : "") + `</dl>`;
   }
@@ -990,8 +1316,8 @@ function renderMatrix(){
   [...NIVELES].reverse().forEach(n => {
     h += `<span class="mx-l">${nivelLabel(n)}</span>`;
     P.forEach(p => {
-      if (!p.aplica.includes(ambito(n))) { h += `<span class="mx-c na"></span>`; return; }
       const rs = REG.filter(r => r.p === p.cod && r.nivel === n);
+      if (!rs.length) { h += `<span class="mx-c na"></span>`; return; }
       const v = rs.reduce((s, r) => s + (r.est === "ok" ? 1 : r.est === "run" ? .5 : 0), 0) / rs.length;
       const plan = rs.reduce((s, r) => s + (r.pf <= CORTE ? 1 : r.ps <= CORTE ? .5 : 0), 0) / rs.length;
       const blk = rs.some(r => r.est === "block");
@@ -1060,9 +1386,86 @@ function renderRend(){
       (h.medidoAntesDe != null ? ` El ritmo se mide en las semanas anteriores al bloqueo del ${fmt(wdDate(h.medidoAntesDe))}, para que la restricción no lo distorsione; la línea punteada muestra ese ritmo.` : "");
 }
 
+// vista bodega
+let SELM = null;
+const bPill = e => `<span class="pill ${BEST[e][1]}">${BEST[e][0]}</span>`;
+const nUni = (x, m) => `${num(x, x < 20 && x % 1 ? 1 : 0)} ${m.unidad}`;
+function cobTxt(b){ return b.cobertura === Infinity ? "—" : `${fmtC(wdDate(b.quiebre))} (${b.cobertura} d)`; }
+function renderBodega(){
+  const orden = [...BOD].sort((a, b) => ORD_B[a.est] - ORD_B[b.est] || a.cobertura - b.cobertura);
+  if (!SELM) SELM = orden[0].m.cod;
+  $("bkpis").innerHTML = ["ya", "hoy", "pronto", "ok", "cub"].map(e => `<div><span>${bPill(e)}</span><b class="mono">${BOD.filter(b => b.est === e).length}</b></div>`).join("");
+  $("tblBodega").innerHTML = `<thead><tr><th>Material</th><th class="num">${T("stock")}</th><th class="num">${T("transito", "En camino")}</th><th class="num">${T("consumo", "Consumo/sem")}</th><th>${T("cobertura", "Alcanza hasta")}</th><th>Estado</th><th>Pedir antes del</th><th class="num">Pedido sugerido</th></tr></thead><tbody>` +
+    orden.map(b => { const m = b.m;
+      return `<tr class="clk${m.cod === SELM ? " sel" : ""}" data-m="${m.cod}">
+        <td><b>${esc(m.nom)}</b><div class="muted" style="font-size:12.5px">${T(m.partida, PBY[m.partida].nom.split(" (")[0])} · ${T("plazo", "plazo " + m.plazo[0] + "–" + m.plazo[1] + " d")}</div></td>
+        <td class="num mono nw">${nUni(m.stock, m)}</td><td class="num mono nw">${b.enCamino ? nUni(b.enCamino, m) : "—"}</td>
+        <td class="num mono nw">${b.porSemana > 0 ? nUni(b.porSemana, m) : "—"}</td>
+        <td class="mono nw">${b.est === "cub" ? "Fin de partida" : cobTxt(b)}</td>
+        <td>${bPill(b.est)}</td>
+        <td class="mono nw">${b.est === "cub" ? "—" : b.limite < D_HOY ? "<b>Atrasado</b>" : fmtC(wdDate(b.limite))}</td>
+        <td class="num mono nw">${b.presentaciones ? `${b.presentaciones} × ${esc(m.presNom.split(" de ")[0])}<div class="muted" style="font-size:12px">${nUni(b.sugerido, m)}</div>` : "—"}</td></tr>`; }).join("") + `</tbody>`;
+  // en el celular la tabla no cabe: muestro una lista simple
+  $("listaBodega").innerHTML = orden.map(b => { const m = b.m;
+    const det = b.est === "cub" ? "Alcanza hasta terminar la partida" : `Alcanza hasta ${cobTxt(b)} · pedir antes del ${b.limite < D_HOY ? "<b>hoy (atrasado)</b>" : fmtC(wdDate(b.limite))}`;
+    return `<div class="aviso" data-m="${m.cod}"><span>${bPill(b.est)}</span><span><span class="an">${esc(m.nom)}</span><div class="ad">Stock ${nUni(m.stock, m)}${b.enCamino ? " + " + nUni(b.enCamino, m) + " en camino" : ""} · ${det}</div></span><span class="af">${b.presentaciones ? b.presentaciones + " × " + esc(m.presNom.split(" de ")[0]) : ""}</span></div>`; }).join("");
+  renderMaterial();
+}
+$("listaBodega").addEventListener("click", e => { const a = e.target.closest("[data-m]"); if (!a) return; SELM = a.dataset.m; renderBodega(); $("matTitulo").scrollIntoView({ block: "start" }); });
+$("tblBodega").addEventListener("click", e => { if (e.target.closest(".term")) return; const tr = e.target.closest("tr[data-m]"); if (!tr) return; SELM = tr.dataset.m; renderBodega(); });
+
+function renderMaterial(){
+  const b = BOD.find(x => x.m.cod === SELM), m = b.m;
+  $("matTitulo").innerHTML = `${esc(m.nom)} ${bPill(b.est)}`;
+  $("matHead").innerHTML = `<dl>
+    <div><dt>${T("stock")}</dt><dd>${nUni(m.stock, m)}</dd></div>
+    <div><dt>${T("presentacion")}</dt><dd>${esc(m.presNom)}</dd></div>
+    <div><dt>${T("merma")}</dt><dd>${m.merma}%</dd></div>
+    <div><dt>${T("saldomat")}</dt><dd>${nUni(b.falta, m)}</dd></div>
+    <div><dt>${T("plazo")}</dt><dd>${m.plazo[0]} a ${m.plazo[1]} días hábiles</dd></div></dl>`;
+  const box = $("chB"); const W = Math.max(300, box.clientWidth), Hh = 230, mg = { l: 52, r: 14, t: 14, b: 28 };
+  const t0 = D_HOY;
+  const horiz = Math.min(60, Math.max(30, m.plazo[1] + 10, b.quiebre != null ? b.quiebre - D_HOY + 10 : 0, ...b.tr.map(t => t.dMax - D_HOY + 10)));
+  const t1 = D_HOY + horiz;
+  const pts = b.serie.filter(([t]) => t <= t1);
+  const vmax = Math.max(1, ...pts.map(x => x[1]), b.porDia * m.plazo[1]) * 1.12;
+  const sx = t => mg.l + (t - t0) / (t1 - t0) * (W - mg.l - mg.r), sy = v => mg.t + (1 - v / vmax) * (Hh - mg.t - mg.b);
+  let g = "";
+  const paso = vmax > 2000 ? 1000 : vmax > 800 ? 200 : vmax > 300 ? 100 : vmax > 100 ? 50 : vmax > 40 ? 10 : 5;
+  for (let v = 0; v <= vmax; v += paso) g += `<line x1="${mg.l}" x2="${W - mg.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${mg.l - 6}" y="${sy(v) + 4}" text-anchor="end">${num(v, 0)}</text>`;
+  const a0 = Math.min(t1, D_HOY + m.plazo[0]), a1 = Math.min(t1, D_HOY + m.plazo[1]);
+  g += `<rect x="${sx(a0)}" y="${mg.t}" width="${Math.max(0, sx(a1) - sx(a0))}" height="${Hh - mg.t - mg.b}" fill="var(--late)" opacity=".18"/>`;
+  if (W >= 520) g += `<text x="${(sx(a0) + sx(a1)) / 2}" y="${mg.t + 12}" text-anchor="middle" style="fill:var(--ink)">llega si pides hoy</text>`;
+  const pp = b.porDia * m.plazo[1];
+  if (pp > 0) g += `<line x1="${mg.l}" x2="${W - mg.r}" y1="${sy(pp)}" y2="${sy(pp)}" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>${W >= 520 ? `<text x="${W - mg.r}" y="${sy(pp) - 5}" text-anchor="end">punto de pedido ${nUni(pp, m)}</text>` : ""}`;
+  const pasoX = horiz <= 30 ? 5 : 10;
+  for (let t = t0; t <= t1; t += pasoX) { if (W < 520 && (t - t0) % (pasoX * 2)) continue; g += `<text x="${sx(t)}" y="${Hh - 8}" text-anchor="middle">${fmtC(wdDate(t))}</text>`; }
+  g += `<path d="${pts.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1)).join("")}" fill="none" stroke="var(--real)" stroke-width="2.5"/>`;
+  b.tr.forEach(t => { if (t.dMax <= t1) g += `<circle cx="${sx(t.dMax)}" cy="${sy(b.serie.find(x => x[0] === t.dMax)[1])}" r="4.5" fill="var(--real)" stroke="var(--surface)" stroke-width="2"/><text class="lbl" x="${sx(t.dMax) + 6}" y="${sy(b.serie.find(x => x[0] === t.dMax)[1]) - 6}">+${nUni(t.cant, m)}</text>`; });
+  if (b.quiebre != null && b.quiebre <= t1) g += `<line x1="${sx(b.quiebre)}" x2="${sx(b.quiebre)}" y1="${mg.t}" y2="${Hh - mg.b}" stroke="var(--st-block)" stroke-width="2"/><text class="lbl" x="${sx(b.quiebre) + 6}" y="${Hh - mg.b - 8}" text-anchor="start" style="fill:var(--st-block)">se acaba ${fmtC(wdDate(b.quiebre))}</text>`;
+  g += `<line x1="${sx(D_HOY)}" x2="${sx(D_HOY)}" y1="${mg.t}" y2="${Hh - mg.b}" stroke="var(--ink)" stroke-dasharray="2 3"/>`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${Hh}" height="${Hh}" role="img" aria-label="Stock proyectado de ${esc(m.nom)}">${g}</svg>`;
+  const u = m.unidad;
+  let nota = `Se consumen ${nUni(b.porSemana, m)} por semana. `;
+  if (b.est === "ya") nota += `Con el stock actual alcanza ${b.cobertura} días hábiles y lo más rápido que llega un pedido son ${m.plazo[0]}: faltarán unos ${b.faltanDias} días de material. Conviene pedir hoy y ver si se puede adelantar el despacho o mover la cuadrilla a otro frente.`;
+  else if (b.est === "hoy") nota += `Alcanza ${b.cobertura} días hábiles. Si el pedido se demora el máximo (${m.plazo[1]} días) se acaba antes de que llegue: hay que pedir hoy.`;
+  else if (b.est === "pronto") nota += `Alcanza ${b.cobertura} días hábiles. Hay que pedir a más tardar el ${fmt(wdDate(b.limite))} para cubrir el plazo máximo.`;
+  else if (b.est === "ok") nota += `Alcanza ${b.cobertura} días hábiles. El próximo pedido conviene hacerlo antes del ${fmt(wdDate(b.limite))}.`;
+  else nota = `Con lo que hay${b.enCamino ? " y lo que viene en camino" : ""} alcanza para terminar la partida (faltan ${nUni(b.falta, m)}). No hay que pedir más.`;
+  if (b.presentaciones) nota += ` Pedido sugerido: ${b.presentaciones} × ${esc(m.presNom)} (${nUni(b.sugerido, m)}), que cubre el plazo máximo más ${CONFIG.semanasPedido} semanas de trabajo sin pasarse de lo que falta.`;
+  $("matNota").innerHTML = nota;
+}
+
+function renderAvisos(){
+  const lista = [...BOD].filter(b => ["ya", "hoy", "pronto"].includes(b.est)).sort((a, b) => ORD_B[a.est] - ORD_B[b.est] || a.cobertura - b.cobertura);
+  $("avisosRes").innerHTML = lista.length ? lista.map(b => `<div class="aviso" data-m="${b.m.cod}"><span>${bPill(b.est)}</span><span><span class="an">${esc(b.m.nom)}</span><div class="ad">Alcanza ${b.cobertura} días hábiles · plazo ${b.m.plazo[0]}–${b.m.plazo[1]} d</div></span><span class="af">${b.presentaciones ? b.presentaciones + " × " + esc(b.m.presNom.split(" de ")[0]) : ""}</span></div>`).join("")
+    : `<p class="note">No hay materiales por pedir.</p>`;
+}
+$("avisosRes").addEventListener("click", e => { const a = e.target.closest("[data-m]"); if (!a) return; SELM = a.dataset.m; irA("bodega"); });
+
 // vista partidas y tipologías
 function renderPartidas(){
-  const amb = { sub: "Subterráneos", p1: "Piso 1", dep: "Departamentos", pas: "Pasillos" };
+  const amb = { sub: "Subterráneos", p1: "Piso 1", dep: "Departamentos", pas: "Pasillos", asc: "Ascensores" };
   $("tblPartidas").innerHTML = `<thead><tr><th class="num">#</th><th>Código</th><th>${T("partida")}</th><th>${T("especialidad")}</th><th>Se controla por</th><th>Aplica en</th><th>${T("predecesora", "Predecesoras")}</th><th class="num">${T("peso")}</th><th class="num">${T("unidad", "Unidades")}</th><th class="num">${T("cantidad")}</th></tr></thead><tbody>` +
     P.map((p, i) => `<tr><td class="num"><span class="ord">${i + 1}</span></td><td class="mono">${p.cod}</td><td>${T(p.cod, esc(p.nom))}</td><td>${p.esp}</td>
       <td>${p.unidad === "nivel" ? "Piso completo" : T("recinto", "Recinto")}</td>
@@ -1119,6 +1522,8 @@ function renderSupuestos(){
     ["Tipologías", "Puertas, ventanas, ventanales, baño y terraza según la obra actual. Por confirmar: tipos B y C con 1 dormitorio y tina, tipo D estudio con ducha (según la cantidad de puertas). El 303 sin terraza y el 302 por confirmar."],
     ["Impermeabilización", "Nueva partida antes de la cerámica, en el baño y la terraza de cada departamento. Pesa 2% del avance (se le quitó a la obra gruesa)."],
     ["Zonas", "Zonas de subterráneos y piso 1 iguales que en el paso 1."],
+    ["Bodega", "Stock, consumo por tipología, merma y plazos de entrega son de ejemplo. El consumo semanal es el ritmo base de la partida por lo que lleva cada recinto pendiente. Lo que viene en camino se cuenta recién en su fecha máxima de llegada."],
+    ["Pasillo y ascensores", "Un pasillo común por piso (del 2 al 24). Los 2 ascensores se controlan aparte, con una parada por nivel del -2 al 24 (52 paradas en total)."],
     ["Formato para el Excel real", "Lo ideal es una fila por recinto y partida con: código del recinto (o piso), partida, fecha de inicio real y fecha de término real. Si el Excel viene distinto, se adapta la lectura."]
   ];
   $("supuestos").innerHTML = items.map(([t, d]) => `<li><div><b>${t}</b><div class="muted">${d}</div></div><span class="pill soft">Por confirmar</span></li>`).join("");
@@ -1133,7 +1538,18 @@ function renderGlosario(){
 // ficha de cada recinto
 function abrirFicha(cod){
   const r = RECINTOS.find(x => x.codigo === cod); if (!r) return;
-  const ps = P.filter(p => p.aplica.includes(r.ambito));
+  const ps = P.filter(p => p.aplica.includes(r.ambito) && regDeRecinto(p.cod, r));
+  if (MR) {
+    $("mEyebrow").innerHTML = `<span class="mono">${r.codigo}</span><span>·</span><span>${nivelNombre(r.nivel)}</span>`;
+    $("mTitulo").textContent = r.nombre;
+    const fecha = ts => ts ? fmtC(tsIso(ts)) : "—";
+    const estA = a => a.terminado ? "ok" : a.empezado ? "run" : "wait";
+    const filas = ps.flatMap(p => regDeRecinto(p.cod, r).areas.map(a => `<tr><td>${T(p.cod, esc(p.nom))}</td><td>${AREAS[a.area]}</td><td class="num mono">${a.m2 ? num(a.m2, 2) : "—"}</td><td>${pill(estA(a))}</td><td class="mono">${a.terminado ? fecha(a.fin) : a.empezado ? "desde " + fecha(a.ini) : "—"}</td><td>${esc(a.trabajador)}</td></tr>`));
+    $("mBody").innerHTML = (ps.length ? "" : `<p class="note">Este recinto no tiene cerámica ni frague en la base de datos.</p>`) +
+      `<div class="tbl-wrap"><table><thead><tr><th>Partida</th><th>Área</th><th class="num">m²</th><th>Estado</th><th>Fecha</th><th>Contratista</th></tr></thead><tbody>${filas.join("")}</tbody></table></div>`;
+    $("overlay").hidden = false; $("mCerrar").focus();
+    return;
+  }
   $("mEyebrow").innerHTML = `<span class="mono">${r.codigo}</span><span>·</span><span>${nivelNombre(r.nivel)}</span>`;
   $("mTitulo").textContent = r.nombre;
   const tip = r.tipologia ? CONFIG.tipologias[r.tipologia] : null;
@@ -1150,20 +1566,34 @@ $("mCerrar").addEventListener("click", () => { $("overlay").hidden = true; hideT
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("overlay").hidden) { $("overlay").hidden = true; hideTip(); } });
 
 // pestañas (recuerda la última abierta)
-const VISTAS = ["resumen", "edificio", "tren", "proy", "partidas", "listado", "supuestos", "glosario"];
+const VISTAS = ["resumen", "edificio", "tren", "proy", "bodega", "partidas", "listado", "supuestos", "glosario"];
+// por ahora solo dejo abiertas estas dos pestañas; las demás se ven pero no se pueden abrir
+const ABIERTAS = ["resumen", "edificio"];
+document.querySelectorAll("nav.tabs button").forEach(b => {
+  if (ABIERTAS.includes(b.dataset.tab)) return;
+  b.classList.add("lock"); b.setAttribute("aria-disabled", "true"); b.dataset.tipfn = "lock";
+});
 function irA(v){
+  if (!ABIERTAS.includes(v)) {
+    const b = document.querySelector(`nav.tabs button[data-tab="${v}"]`);
+    if (b) { b.classList.remove("temblor"); void b.offsetWidth; b.classList.add("temblor"); }
+    return;
+  }
   document.querySelectorAll("nav.tabs button").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === v ? "true" : "false"));
   VISTAS.forEach(t => { $("v-" + t).hidden = t !== v; });
   hideTip();
   if (v === "resumen") renderCurvaS();
   if (v === "proy") renderRend();
+  if (v === "bodega") renderBodega();
   try { localStorage.setItem("vista_panel", v); } catch (e) {}
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => irA(b.dataset.tab)));
 
-let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (!$("v-resumen").hidden) renderCurvaS(); if (!$("v-proy").hidden) renderRend(); }, 120); });
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (!$("v-resumen").hidden) renderCurvaS(); if (!$("v-proy").hidden) renderRend(); if (!$("v-bodega").hidden) renderMaterial(); }, 120); });
 
-renderKpis(); renderBars(); renderRestr(); renderSelector(); renderElev(); renderMatrix(); renderProy(); renderPartidas(); renderTipos(); renderListado(); renderSupuestos(); renderGlosario();
-let inicial = "resumen"; try { const v = localStorage.getItem("vista_panel"); if (VISTAS.includes(v)) inicial = v; } catch (e) {}
+renderKpis(); renderBars(); renderRestr(); renderAvisos(); renderSelector(); renderElev(); renderMatrix(); renderProy(); renderPartidas(); renderTipos(); renderListado(); renderSupuestos(); renderGlosario();
+let inicial = "resumen"; try { const v = localStorage.getItem("vista_panel"); if (ABIERTAS.includes(v)) inicial = v; } catch (e) {}
 irA(inicial);
+}
+iniciar();
 </script>
