@@ -922,6 +922,7 @@
     <span class="role-badge guest" id="roleBadge" style="display:none;"></span>
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
+    <button class="btn small solo-admin" id="irCalidadBtn">✔ Ir a Calidad</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
     <div class="rb-der" id="rbDer" style="display:none;">
       <button type="button" class="btn small" id="miColorBtn">🎨 Mi color</button>
@@ -1370,7 +1371,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.35.0';
+const APP_VERSION = '0.36.0';
 const BACKEND_REQUERIDO = 51;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3824,6 +3825,15 @@ async function cargarAccesos(){
   lista.innerHTML = j.accesos.length ? j.accesos.map(a => `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${esc(a.cuenta)}</span><span>${fechaHoraCambio(a.ts)}</span></div></div>`).join('')
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay inicios de sesión registrados.</p>';
 }
+document.getElementById('irCalidadBtn').addEventListener('click', () => {
+  // Pasa la sesión de admin a Calidad para no pedir el PIN de nuevo.
+  try{
+    if(isAdmin && sessionToken){
+      localStorage.setItem('calidadToken', sessionToken); localStorage.setItem('calidadNombre', sessionName || ''); localStorage.setItem('calidadCargo', 'Admin');
+    }
+  }catch(err){}
+  window.location.href = 'calidad.html';
+});
 document.getElementById('accesosBtn').addEventListener('click', () => { document.getElementById('accesosCuenta').value = ''; document.getElementById('accesosOverlay').classList.add('show'); cargarAccesos(); });
 document.getElementById('accesosCuenta').addEventListener('change', cargarAccesos);
 document.getElementById('accesosRefrescarBtn').addEventListener('click', cargarAccesos);

@@ -262,6 +262,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <span class="conectado">Conectado como: <span id="quien">—</span></span>
     <span id="verCal" title="Versión de esta página" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);align-self:center;padding:0 4px;"></span>
     <button class="btn" id="verFotos" type="button" hidden>Fotos</button>
+    <button class="btn" id="irPanel" type="button" hidden>Ir al Panel</button>
     <button class="btn" id="verRegistro" type="button">Registro</button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
     <button class="btn" id="tema" type="button" aria-label="Cambiar tema">Tema: Auto</button>
@@ -385,7 +386,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.3.0';
+const CAL_VERSION = '1.4.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -804,7 +805,16 @@ function aviso(texto){
 const FOTO_LADO = 1280, MINI_LADO = 220, FOTOS_MAX = 12, FOTO_MAX_CHARS = 700000;
 const miEtiqueta = () => (cargo ? cargo + ' - ' : '') + nombre;
 const esAdminCal = () => cargo === 'Admin';
-function ajustarFotosUI(){ $('verFotos').hidden = !(fotosOk && esAdminCal()); }
+function ajustarFotosUI(){ $('verFotos').hidden = !(fotosOk && esAdminCal()); $('irPanel').hidden = !esAdminCal(); }
+$('irPanel').addEventListener('click', () => {
+  // Pasa la sesión de admin al Panel para no pedir el PIN de nuevo.
+  try{
+    if(esAdminCal() && token){
+      ['sessionStorage','localStorage'].forEach(a => { try{ window[a].setItem('progresoObraToken', token); window[a].setItem('progresoObraName', nombre); window[a].setItem('progresoObraRol', '1'); }catch(e){} });
+    }
+  }catch(e){}
+  window.location.href = 'index.html';
+});
 function dptoTxt(base){ const q = base.split('|'); return q[0] + ' · ' + (q[1] === 'Pasillo' ? 'Pasillo' : 'Dpto ' + q[1]); }
 function fechaFoto(ts){ return ts ? new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : ''; }
 async function bitmapDe(file){
