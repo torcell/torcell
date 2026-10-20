@@ -1,0 +1,1169 @@
+<title>Avance de Obra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* colores y letras van aquí arriba; si cambio un color, cambiarlo también en los dos bloques del modo oscuro */
+:root{
+  --bg:#EEF0EE; --surface:#FFFFFF; --surface-2:#F6F7F5; --ink:#1B2321; --muted:#5B6662; --line:#D2D7D4; --grid:#E3E7E4;
+  --accent:#1D5BA6; --accent-ink:#FFFFFF; --demo:#F1C232; --demo-ink:#2A2200;
+  --tA:#D7E3F3; --tB:#DCEBD5; --tC:#F2E2CB; --tD:#E6DCEF; --zone:#E4E7E5; --hatch:#C9CFCB;
+  --real:#2a78d6; --plan:#5B6662;
+  --st-ok:#0E8A2E; --st-ok-ink:#FFFFFF; --st-run:#2a78d6; --st-run-ink:#FFFFFF;
+  --st-free:#FFFFFF; --st-free-line:#2a78d6; --st-wait:#E1E5E2; --st-block:#C93434; --st-block-ink:#FFFFFF;
+  --late:#D9822B;
+  --s0:#EEF2F7; --s1:#cde2fb; --s2:#9ec5f4; --s3:#6da7ec; --s4:#3987e5; --s5:#256abf; --s6:#184f95;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141917; --surface:#1C2220; --surface-2:#222927; --ink:#E7ECE9; --muted:#9AA5A0; --line:#323B38; --grid:#2A322F;
+  --accent:#6FA6E8; --accent-ink:#0E1A2A; --demo:#E3B52A; --demo-ink:#221B00;
+  --tA:#25364D; --tB:#29402A; --tC:#4A3A24; --tD:#3B2E4A; --zone:#2A322F; --hatch:#3A4440;
+  --real:#3987e5; --plan:#9AA5A0;
+  --st-ok:#1E9A3E; --st-ok-ink:#FFFFFF; --st-run:#3987e5; --st-run-ink:#0B1626;
+  --st-free:#1C2220; --st-free-line:#6FA6E8; --st-wait:#2E3633; --st-block:#D94B4B; --st-block-ink:#FFFFFF;
+  --late:#E39A4A;
+  --s0:#222927; --s1:#104281; --s2:#184f95; --s3:#1c5cab; --s4:#256abf; --s5:#3987e5; --s6:#6da7ec; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141917; --surface:#1C2220; --surface-2:#222927; --ink:#E7ECE9; --muted:#9AA5A0; --line:#323B38; --grid:#2A322F;
+  --accent:#6FA6E8; --accent-ink:#0E1A2A; --demo:#E3B52A; --demo-ink:#221B00;
+  --tA:#25364D; --tB:#29402A; --tC:#4A3A24; --tD:#3B2E4A; --zone:#2A322F; --hatch:#3A4440;
+  --real:#3987e5; --plan:#9AA5A0;
+  --st-ok:#1E9A3E; --st-ok-ink:#FFFFFF; --st-run:#3987e5; --st-run-ink:#0B1626;
+  --st-free:#1C2220; --st-free-line:#6FA6E8; --st-wait:#2E3633; --st-block:#D94B4B; --st-block-ink:#FFFFFF;
+  --late:#E39A4A;
+  --s0:#222927; --s1:#104281; --s2:#184f95; --s3:#1c5cab; --s4:#256abf; --s5:#3987e5; --s6:#6da7ec; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:.01em;margin:0;text-wrap:balance}
+h1{font-size:30px;line-height:1.1}
+h2{font-size:21px}
+h3{font-size:17px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.term{text-decoration:underline dotted;text-decoration-color:var(--muted);text-underline-offset:3px;cursor:help}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.idrow{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hdr-der{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.sesion{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);border:1px solid var(--line);background:var(--surface);padding:5px 10px 5px 5px}
+.sesion b{color:var(--ink);font-weight:600}
+.sesion .ini{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);font:600 12px var(--f-body)}
+.corte{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:var(--muted)}
+.corte b{font-family:var(--f-mono);font-size:15px;color:var(--ink);font-weight:500}
+.pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.pill.demo{background:var(--demo);color:var(--demo-ink);text-transform:uppercase;letter-spacing:.06em}
+.pill.soft{background:var(--surface-2);color:var(--muted);border:1px solid var(--line);font-weight:500}
+.pill.ok{background:var(--st-ok);color:var(--st-ok-ink)}
+.pill.run{background:var(--st-run);color:var(--st-run-ink)}
+.pill.free{background:var(--st-free);color:var(--ink);border:1.5px solid var(--st-free-line)}
+.pill.wait{background:var(--st-wait);color:var(--ink)}
+.pill.block{background:var(--st-block);color:var(--st-block-ink)}
+.pill.late{background:transparent;color:var(--ink);border:1.5px solid var(--late)}
+.pill.ontime{background:transparent;color:var(--ink);border:1.5px solid var(--st-ok)}
+
+nav.tabs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
+nav.tabs button{border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px var(--f-body);padding:10px 6px;cursor:pointer;border-radius:0;min-width:0}
+nav.tabs button:last-child{border-right:0}
+nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+button{transition:transform .08s ease}
+button:active{transform:scale(.97)}
+button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.view{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+.note{font-size:13.5px;color:var(--muted);max-width:68ch;margin:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+
+/* cuadros con los números grandes de arriba */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--line);min-width:0}
+.kpi:last-child{border-right:0}
+.kpi .lab{font-size:12.5px;color:var(--muted)}
+.kpi b{font-family:var(--f-display);font-size:34px;font-weight:600;line-height:1}
+.kpi .sub{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+/* gráficos */
+.legend-row{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);align-items:center}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:18px;height:0;border-top:2px solid var(--real)}
+.lg i.plan{border-top-color:var(--plan);border-top-style:dashed}
+.lg i.proj{border-top:2px dashed var(--real)}
+.lg i.box{width:12px;height:12px;border:0}
+.chart{width:100%;min-height:240px;position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+.chart .lbl{font-family:var(--f-body);font-size:12px;font-weight:600;fill:var(--ink)}
+
+/* barras de avance por partida (la rayita negra es lo programado) */
+.bars{display:flex;flex-direction:column}
+.bar-row{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 46px 74px;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid var(--grid)}
+.bar-row:last-child{border-bottom:0}
+.bar-name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{position:relative;height:14px;background:var(--surface-2);border:1px solid var(--grid)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;background:var(--real);border-radius:0 4px 4px 0}
+.track .tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.bar-val{font-family:var(--f-mono);font-size:13px;text-align:right}
+.bar-dev{display:flex;justify-content:flex-end}
+.bars-head{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 46px 74px;gap:12px;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.bars-head span:nth-child(n+3){text-align:right}
+
+/* dibujo del edificio por pisos */
+.elev-layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start}
+.elev{display:flex;flex-direction:column;gap:3px}
+.row{display:grid;grid-template-columns:44px repeat(8,46px);gap:3px}
+.lvl{font-family:var(--f-mono);font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.cell{height:30px;border:1.5px solid transparent;border-radius:0;font:500 12px var(--f-mono);color:var(--ink);cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;background:var(--st-wait)}
+.cell:hover,.zone:hover{outline:2px solid var(--ink);outline-offset:-1px}
+.gap{height:30px;background:repeating-linear-gradient(135deg,transparent 0 4px,var(--hatch) 4px 5px);border:1px dashed var(--hatch)}
+.zones{grid-column:2 / span 8;display:grid;gap:3px}
+.zone{height:30px;border:1.5px solid transparent;border-radius:0;font:500 11.5px var(--f-body);color:var(--ink);cursor:pointer;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--st-wait)}
+.ground{height:0;border-top:2px solid var(--ink);margin:4px 0 4px 47px}
+.colhead{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-align:center}
+.st-ok{background:var(--st-ok)!important;color:var(--st-ok-ink)!important}
+.st-run{background:var(--st-run)!important;color:var(--st-run-ink)!important}
+.st-free{background:var(--st-free)!important;border-color:var(--st-free-line)!important}
+.st-wait{background:var(--st-wait)!important}
+.st-block{background:var(--st-block)!important;color:var(--st-block-ink)!important}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.selector{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line)}
+.selector button{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 13px var(--f-body);padding:8px 4px;cursor:pointer;border-radius:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selector button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.selector button:nth-child(3n){border-right:0}
+.selector button:nth-last-child(-n+3){border-bottom:0}
+.statlist{display:flex;flex-direction:column;gap:8px}
+.statlist div{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;font-size:14px}
+.sw{width:18px;height:18px;border:1.5px solid transparent}
+dl.facts{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0;font-size:14px}
+dl.facts dt{color:var(--muted)} dl.facts dd{margin:0;font-variant-numeric:tabular-nums}
+
+/* cuadrícula pisos x partidas */
+.matrix-wrap{overflow-x:auto}
+.matrix{display:grid;gap:2px;width:max-content}
+.mx-h{font:500 11px var(--f-mono);color:var(--muted);text-align:center;height:24px;display:flex;align-items:flex-end;justify-content:center;cursor:help}
+.mx-l{font:500 12px var(--f-mono);color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.mx-c{width:40px;height:22px;position:relative;cursor:default}
+.mx-c.na{background:repeating-linear-gradient(135deg,transparent 0 4px,var(--grid) 4px 5px)}
+.mx-c .dot{position:absolute;right:2px;top:2px;width:6px;height:6px;border-radius:50%;background:var(--late);box-shadow:0 0 0 1.5px var(--surface)}
+.mx-c.blk{background:var(--st-block)!important}
+.mx-c.blk::after{content:"!";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--st-block-ink);font:700 12px var(--f-body)}
+.scale{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.scale .ramp{display:flex}
+.scale .ramp span{width:22px;height:12px}
+
+/* tablas */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font:600 12px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface-2);position:sticky;top:0;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+tbody tr.sel{background:var(--surface-2)}
+tbody tr.clk{cursor:pointer}
+tbody tr.clk:hover{background:var(--surface-2)}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font-size:12px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.ord{font-family:var(--f-display);font-size:20px;font-weight:600;color:var(--accent)}
+
+/* los 3 escenarios de término */
+.scen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line)}
+.scen>div{padding:14px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.scen>div:last-child{border-right:0}
+.scen .lab{font-size:12.5px;color:var(--muted)}
+.scen b{font-family:var(--f-display);font-size:26px;font-weight:600;line-height:1.05}
+.scen .sub{font-size:13px;color:var(--muted)}
+.scen>div.base{background:var(--surface-2)}
+
+.restr{display:flex;flex-direction:column;gap:10px}
+.restr-item{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:12px;border:1px solid var(--line);border-left:4px solid var(--st-block)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,input[type="search"]{height:36px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:14px var(--f-body);padding:0 10px;border-radius:0}
+.btn{height:36px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);font:600 14px var(--f-body);padding:0 14px;cursor:pointer;border-radius:0}
+.toast{font-size:13px;color:var(--muted);min-height:1em}
+
+ul.plain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+ul.plain li{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
+ul.plain li:last-child{border-bottom:0}
+.glos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px}
+.glos div{padding:10px 0;border-bottom:1px solid var(--line)}
+.glos dt{font-weight:600}
+.glos dd{margin:2px 0 0;color:var(--muted);font-size:14px}
+.glos-group{font-family:var(--f-display);font-size:16px;font-weight:600;color:var(--accent);padding-top:14px;grid-column:1 / -1;border-bottom:1px solid var(--line);padding-bottom:6px}
+
+/* ficha del depto: no se cierra tocando afuera, solo con la X (así no se cierra por error en el celular) */
+.overlay{position:fixed;inset:0;background:rgba(10,14,12,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal{background:var(--surface);border:1px solid var(--line);width:min(620px,100%);max-height:calc(100% - 32px);overflow:auto;display:flex;flex-direction:column}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.modal-body{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.x{width:36px;height:36px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:18px;cursor:pointer;border-radius:0;flex:none}
+
+#tip{position:fixed;z-index:40;max-width:300px;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.4;padding:8px 10px;pointer-events:none;opacity:0;transition:opacity .1s}
+#tip.on{opacity:1}
+#tip b{font-weight:600}
+#tip .tl{display:grid;grid-template-columns:auto auto;gap:2px 12px;margin-top:4px;font-family:var(--f-mono);font-size:12px}
+
+footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+@media (max-width:900px){
+  .grid2{grid-template-columns:1fr}
+  .elev-layout{grid-template-columns:1fr}
+  .kpis,.scen{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .elev-layout .side{order:-1}
+  .kpi:nth-child(2n),.scen>div:nth-child(2n){border-right:0}
+  .kpi:nth-child(-n+2),.scen>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .scen>div:nth-child(3){grid-column:1 / -1}
+  nav.tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+  nav.tabs button:nth-child(4n){border-right:0}
+  nav.tabs button:nth-child(-n+4){border-bottom:1px solid var(--line)}
+  .glos{grid-template-columns:1fr}
+}
+@media (max-width:460px){
+  .row{grid-template-columns:30px repeat(8,minmax(0,1fr));gap:2px}
+  .elev{gap:2px}
+  .cell{font-size:10.5px;height:28px}
+  .gap,.zone{height:28px}
+  .zone{font-size:10.5px}
+  .ground{margin-left:32px}
+  .panel{padding:14px}
+  nav.tabs button{font-size:13px;padding:10px 2px}
+  h1{font-size:26px}
+  .kpi b{font-size:28px}
+  .bar-row,.bars-head{grid-template-columns:minmax(0,104px) minmax(0,1fr) 40px 64px;gap:8px}
+  .selector{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .selector button:nth-child(3n){border-right:1px solid var(--line)}
+  .selector button:nth-child(2n){border-right:0}
+  .selector button:nth-last-child(3){border-bottom:1px solid var(--line)}
+}
+@media (prefers-reduced-motion:reduce){button{transition:none}button:active{transform:none}#tip{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="idrow">
+      <div class="eyebrow"><span class="pill demo">Demostración</span><span>Avance y proyecciones</span></div>
+      <h1>Edificio Demo 24 pisos</h1>
+      <div class="muted">Torre única · 2 <span class="term" data-term="subterraneo">subterráneos</span> · 159 departamentos desde el piso 2</div>
+    </div>
+    <div class="hdr-der">
+      <div class="sesion"><span class="ini" aria-hidden="true">AS</span><span>Conectado como: <b>A. Sandoval</b> · Jefe de Terreno</span></div>
+      <div class="corte"><span class="term" data-term="corte">Fecha de corte</span><b id="corteTxt"></b></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Vistas">
+    <button role="tab" aria-selected="true" data-tab="resumen" id="tab-resumen">Resumen</button>
+    <button role="tab" aria-selected="false" data-tab="edificio" id="tab-edificio">Edificio</button>
+    <button role="tab" aria-selected="false" data-tab="tren" id="tab-tren">Por piso</button>
+    <button role="tab" aria-selected="false" data-tab="proy" id="tab-proy">Proyección</button>
+    <button role="tab" aria-selected="false" data-tab="partidas" id="tab-partidas">Partidas</button>
+    <button role="tab" aria-selected="false" data-tab="listado" id="tab-listado">Listado</button>
+    <button role="tab" aria-selected="false" data-tab="supuestos" id="tab-supuestos">Supuestos</button>
+    <button role="tab" aria-selected="false" data-tab="glosario" id="tab-glosario">Glosario</button>
+  </nav>
+
+  <!-- RESUMEN -->
+  <section id="v-resumen" class="view">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="col">
+      <div class="panel">
+        <div class="panel-head">
+          <h2><span class="term" data-term="curvas">Curva S</span> de avance</h2>
+          <div class="legend-row">
+            <span class="lg"><i class="plan"></i><span class="term" data-term="programado">Programado</span></span>
+            <span class="lg"><i></i><span class="term" data-term="real">Real</span></span>
+            <span class="lg"><i class="proj"></i><span class="term" data-term="proyeccion">Proyección base</span></span>
+          </div>
+        </div>
+        <div class="chart" id="chS"></div>
+        <p class="note">Avance <span class="term" data-term="ponderado">ponderado</span> de toda la obra, semana a semana. Pasa el cursor por el gráfico para ver los valores.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2><span class="term" data-term="restriccion">Restricciones</span> abiertas</h2></div>
+        <div class="restr" id="restr"></div>
+      </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Avance por partida</h2>
+        </div>
+        <div class="legend-row">
+          <span class="lg"><i class="box" style="background:var(--real)"></i>Real</span>
+          <span class="lg"><i class="box" style="background:var(--ink);width:3px"></i>Programado al corte</span>
+        </div>
+        <div>
+          <div class="bars-head"><span>Partida</span><span></span><span>Real</span><span><span class="term" data-term="desviacion">Desv.</span></span></div>
+          <div class="bars" id="bars"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDIFICIO -->
+  <section id="v-edificio" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Estado del edificio</h2>
+        <span class="note">Elige una partida. Pasa el cursor sobre un departamento para ver su estado; tócalo para abrir su ficha.</span>
+      </div>
+      <div class="elev-layout">
+        <div class="elev" id="elev"></div>
+        <div class="side">
+          <div class="selector" id="selPartida" role="group" aria-label="Partida"></div>
+          <h3 id="selTitulo"></h3>
+          <div class="statlist" id="statlist"></div>
+          <p class="note">El piso 2 no tiene los departamentos 202 ni 206: van rayados para que las columnas queden alineadas. La última columna es el pasillo común de cada piso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TREN POR PISO -->
+  <section id="v-tren" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Avance por piso y partida</h2>
+        <span class="note">Cada casilla es un piso en una partida. Más oscuro = más terminado. Así se ve el <span class="term" data-term="tren">tren</span> subiendo por el edificio.</span>
+      </div>
+      <div class="scale">
+        <span>0%</span><span class="ramp" id="ramp"></span><span>100% terminado</span>
+        <span class="lg" style="margin-left:12px"><i class="box" style="background:var(--late);border-radius:50%;width:8px;height:8px"></i><span class="term" data-term="atrasado">Atrasado vs programa</span></span>
+        <span class="lg"><i class="box" style="background:var(--st-block)"></i><span class="term" data-term="bloqueado">Bloqueado</span></span>
+        <span class="lg"><i class="box" style="background:repeating-linear-gradient(135deg,transparent 0 3px,var(--line) 3px 4px)"></i>No aplica</span>
+      </div>
+      <div class="matrix-wrap"><div class="matrix" id="matrix"></div></div>
+    </div>
+  </section>
+
+  <!-- PROYECCION -->
+  <section id="v-proy" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Término proyectado de la obra</h2>
+        <span class="note">Calculado con el <span class="term" data-term="rendimiento">rendimiento</span> real de cada partida, respetando las <span class="term" data-term="predecesora">predecesoras</span>. No es una fecha contractual.</span>
+      </div>
+      <div class="scen" id="scen"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Proyección por partida</h2>
+        <span class="note">Toca una fila para ver su rendimiento semanal.</span>
+      </div>
+      <div class="tbl-wrap"><table id="tblProy"></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="rendTitulo"></h2>
+        <div class="legend-row">
+          <span class="lg"><i class="box" style="background:var(--real)"></i>Terminados en la semana</span>
+          <span class="lg"><i class="plan"></i>Ritmo base (promedio de 6 semanas)</span>
+        </div>
+      </div>
+      <div class="chart" id="chR" style="min-height:200px"></div>
+      <p class="note" id="rendNota"></p>
+    </div>
+  </section>
+
+  <!-- PARTIDAS -->
+  <section id="v-partidas" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="term" data-term="tren">Tren de partidas</span></h2>
+        <span class="note">Orden en que avanzan las partidas en cada piso. Pasa el cursor sobre cada nombre para ver de qué se trata.</span>
+      </div>
+      <div class="tbl-wrap"><table id="tblPartidas"></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="term" data-term="tipologia">Tipologías</span> de departamento</h2>
+        <span class="note">Cantidades por departamento según la obra actual. Lo marcado "por confirmar" es supuesto.</span>
+      </div>
+      <div class="tbl-wrap"><table id="tblTipos"></table></div>
+    </div>
+  </section>
+
+  <!-- LISTADO -->
+  <section id="v-listado" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Listado de <span class="term" data-term="recinto">recintos</span></h2>
+        <span class="note" id="cuentaListado"></span>
+      </div>
+      <div class="toolbar">
+        <select id="fNivel" aria-label="Filtrar por nivel"></select>
+        <input type="search" id="fBuscar" placeholder="Buscar código o nombre" aria-label="Buscar">
+        <button class="btn" id="btnCsv">Copiar CSV</button>
+        <span class="toast" id="toast" role="status"></span>
+      </div>
+      <div class="tbl-wrap" style="max-height:520px"><table id="tblRecintos"></table></div>
+    </div>
+  </section>
+
+  <!-- SUPUESTOS -->
+  <section id="v-supuestos" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Supuestos y fórmulas</h2>
+        <span class="note">Valores de prueba y cómo se calcula cada número. Cuando llegue el Excel real, estos valores se reemplazan.</span>
+      </div>
+      <ul class="plain" id="supuestos"></ul>
+    </div>
+  </section>
+
+  <!-- GLOSARIO -->
+  <section id="v-glosario" class="view" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Glosario de obra</h2>
+        <span class="note">Los mismos textos aparecen al pasar el cursor sobre las palabras subrayadas con puntos.</span>
+      </div>
+      <dl class="glos" id="glos"></dl>
+    </div>
+  </section>
+
+  <footer><span>Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.4.0</span></footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitulo">
+    <div class="modal-head">
+      <div><div class="eyebrow" id="mEyebrow"></div><h2 id="mTitulo"></h2></div>
+      <button class="x" id="mCerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const CONFIG = {
+  obra: { codigo: "DEMO-24", nombre: "Edificio Demo 24 pisos" },
+  inicio: "2025-10-01",
+  corte: "2026-10-20",
+  pisoHasta: 24, columnas: 7,
+  piso2: [1, 3, 4, 5, 7],
+  cicloPlan: 10,
+  tipologiaPorColumna: { 1: "A", 2: "B", 3: "C", 4: "D", 5: "C", 6: "B", 7: "A" },
+  tipologias: {
+    A: { nombre: "Tipo A", cols: "01 y 07", desc: "2 dormitorios · baño con tina · terraza", dorm: "2", banoTipo: "Tina",
+         cant: { puertas: 5, ventanas: 1, ventanales: 2, banos: 1, terrazas: 1 }, detalle: "1 ventana, 1 ventanal con corredera a la terraza y 1 ventanal en dormitorio", conf: [] },
+    B: { nombre: "Tipo B", cols: "02 y 06", desc: "1 dormitorio · baño con tina · terraza", dorm: "1", banoTipo: "Tina",
+         cant: { puertas: 3, ventanas: 0, ventanales: 2, banos: 1, terrazas: 1 }, detalle: "2 ventanales, 1 con corredera a la terraza", conf: ["dorm", "banoTipo"] },
+    C: { nombre: "Tipo C", cols: "03 y 05", desc: "1 dormitorio · baño con tina · terraza", dorm: "1", banoTipo: "Tina",
+         cant: { puertas: 3, ventanas: 0, ventanales: 2, banos: 1, terrazas: 1 }, detalle: "2 ventanales, 1 con corredera a la terraza", conf: ["dorm", "banoTipo"] },
+    D: { nombre: "Tipo D", cols: "04", desc: "Más pequeño · baño con ducha · terraza", dorm: "Estudio", banoTipo: "Ducha",
+         cant: { puertas: 2, ventanas: 1, ventanales: 1, banos: 1, terrazas: 1 }, detalle: "1 ventanal más grande con corredera a la terraza y 1 ventana en el baño, al lado de la ducha", conf: ["dorm", "banoTipo"] }
+  },
+  excepciones: {
+    "D-303": { cant: { terrazas: 0 }, nota: "Sin terraza (por confirmar)" },
+    "D-302": { cant: {}, nota: "Terraza por confirmar: podría no tener" }
+  },
+  cantidadPorPartida: {
+    PUE: { claves: ["puertas"], unidad: "puertas" },
+    VEN: { claves: ["ventanas", "ventanales"], unidad: "ventanas y ventanales" },
+    IMP: { claves: ["banos", "terrazas"], unidad: "baños y terrazas" }
+  },
+  zonas: {
+    "-2": [["EST", "Estacionamientos", "estacionamientos"], ["BOD", "Bodegas", "bodegas"], ["SBO", "Sala de bombas", "salabombas"], ["EAG", "Estanques de agua", "estanques"]],
+    "-1": [["EST", "Estacionamientos", "estacionamientos"], ["BOD", "Bodegas", "bodegas"], ["SEL", "Sala eléctrica y grupo", "salaelectrica"], ["RAM", "Rampa de acceso", "rampa"]],
+    "1":  [["HAL", "Hall de acceso", "hall"], ["CON", "Conserjería", "conserjeria"], ["MUL", "Sala multiuso", "multiuso"], ["BAS", "Sala de basura", "basura"], ["BIC", "Bicicletero", "bicicletero"]]
+  },
+  // off: días hábiles después de que parte la obra gruesa del piso | dur: días que demora en cada recinto | peso: cuánto vale en el avance total | ritmo: 1 = va igual que el programa, mayor que 1 = va más lento
+  partidas: [
+    { cod: "OG",  nom: "Obra gruesa (muros y losa)",        esp: "Obra gruesa",   unidad: "nivel",   aplica: ["sub","p1","dep"], pre: [],                  off: 0,   dur: 10, peso: 26,  ritmo: 1.15 },
+    { cod: "INS", nom: "Instalaciones sanitarias y gas",     esp: "Sanitario",     unidad: "recinto", aplica: ["sub","p1","dep"], pre: ["OG"],              off: 15,  dur: 8,  peso: 6,   ritmo: 1.0 },
+    { cod: "IEL", nom: "Instalaciones eléctricas y débiles", esp: "Eléctrico",     unidad: "recinto", aplica: ["sub","p1","dep","pas"], pre: ["OG"],              off: 15,  dur: 8,  peso: 6,   ritmo: 1.05 },
+    { cod: "TAB", nom: "Tabiquería",                         esp: "Arquitectura",  unidad: "recinto", aplica: ["p1","dep"],       pre: ["OG"],              off: 25,  dur: 10, peso: 8,   ritmo: 0.95 },
+    { cod: "VEN", nom: "Ventanas y marcos",                  esp: "Arquitectura",  unidad: "recinto", aplica: ["p1","dep"],       pre: ["OG"],              off: 30,  dur: 6,  peso: 6,   ritmo: 1.0 },
+    { cod: "YES", nom: "Yeso y enlucido",                    esp: "Terminaciones", unidad: "recinto", aplica: ["p1","dep","pas"],       pre: ["TAB","INS","IEL"], off: 40,  dur: 10, peso: 6,   ritmo: 1.1 },
+    { cod: "IMP", nom: "Impermeabilización (baño y terraza)", esp: "Terminaciones", unidad: "recinto", aplica: ["dep"],          pre: ["YES"],             off: 50,  dur: 4,  peso: 2,   ritmo: 1.0 },
+    { cod: "CER", nom: "Cerámica (baños, cocina, logia)",    esp: "Terminaciones", unidad: "recinto", aplica: ["p1","dep","pas"],       pre: ["IMP"],             off: 55,  dur: 10, peso: 8,   ritmo: 1.25 },
+    { cod: "FRA", nom: "Frague",                             esp: "Terminaciones", unidad: "recinto", aplica: ["p1","dep","pas"],       pre: ["CER"],             off: 63,  dur: 4,  peso: 2,   ritmo: 1.0 },
+    { cod: "PIN", nom: "Pintura",                            esp: "Terminaciones", unidad: "recinto", aplica: ["sub","p1","dep","pas"], pre: ["FRA","VEN"],       off: 70,  dur: 10, peso: 7,   ritmo: 1.0 },
+    { cod: "PUE", nom: "Puertas y quincallería",             esp: "Terminaciones", unidad: "recinto", aplica: ["p1","dep"],       pre: ["PIN"],             off: 85,  dur: 5,  peso: 4,   ritmo: 1.0 },
+    { cod: "MUE", nom: "Muebles de cocina y closets",        esp: "Terminaciones", unidad: "recinto", aplica: ["dep"],            pre: ["PIN"],             off: 88,  dur: 6,  peso: 6,   ritmo: 1.0 },
+    { cod: "PIS", nom: "Piso flotante o vinílico",           esp: "Terminaciones", unidad: "recinto", aplica: ["dep"],            pre: ["PIN"],             off: 90,  dur: 6,  peso: 5,   ritmo: 1.0 },
+    { cod: "ART", nom: "Artefactos sanitarios y eléctricos", esp: "Instalaciones", unidad: "recinto", aplica: ["p1","dep"],       pre: ["MUE","CER"],       off: 96,  dur: 5,  peso: 3,   ritmo: 1.0 },
+    { cod: "ASC", nom: "Ascensor (montaje y puertas de piso)", esp: "Instalaciones", unidad: "nivel", aplica: ["sub","p1","dep"], pre: ["OG"],          off: 60,  dur: 8,  peso: 2,   ritmo: 1.0 },
+    { cod: "ASE", nom: "Aseo final",                         esp: "Entrega",       unidad: "recinto", aplica: ["sub","p1","dep","pas"], pre: ["ART","PIS","PUE"], off: 103, dur: 3,  peso: 1.5, ritmo: 1.0 },
+    { cod: "CAL", nom: "Recepción de Calidad",               esp: "Entrega",       unidad: "recinto", aplica: ["sub","p1","dep","pas"], pre: ["ASE"],             off: 107, dur: 3,  peso: 1.5, ritmo: 1.0 }
+  ],
+  restricciones: [
+    { partida: "VEN", pisos: [19, 20], desde: "2026-09-21", categoria: "Materiales", titulo: "Ventanas de los pisos 19 y 20 sin despacho del proveedor", responsable: "Abastecimiento", liberacionDias: 15 }
+  ],
+  feriados: ["2025-10-12","2025-10-31","2025-11-01","2025-11-16","2025-12-08","2025-12-14","2025-12-25",
+    "2026-01-01","2026-04-03","2026-04-04","2026-05-01","2026-05-21","2026-06-21","2026-06-29","2026-07-16","2026-08-15","2026-09-18","2026-09-19","2026-10-12","2026-10-31","2026-11-01","2026-12-08","2026-12-25",
+    "2027-01-01","2027-03-26","2027-03-27","2027-05-01","2027-05-21","2027-06-21","2027-06-28","2027-07-16","2027-08-15","2027-09-17","2027-09-18","2027-09-19","2027-10-11","2027-10-31","2027-11-01","2027-12-08","2027-12-25",
+    "2028-01-01","2028-04-14","2028-05-01","2028-05-21","2028-06-29","2028-07-16","2028-08-15","2028-09-18","2028-09-19","2028-10-12","2028-11-01","2028-12-08","2028-12-25"]
+};
+
+const GLOSARIO = {
+  "Edificio": {
+    nivel: ["Nivel", "Cada piso del edificio, incluidos los subterráneos. Se nombran S2, S1 (subterráneos) y P01 a P24."],
+    subterraneo: ["Subterráneo", "Pisos bajo el nivel de la calle. Aquí son el -1 y el -2, con estacionamientos, bodegas y salas técnicas."],
+    recinto: ["Recinto", "Lugar físico donde se controla el avance: un departamento o una zona común (hall, bodegas, etc.)."],
+    tipologia: ["Tipología", "Modelo de departamento. Todos los de un mismo tipo tienen la misma planta y las mismas cantidades de trabajo."],
+    ventanal: ["Ventanal", "Ventana grande, casi del alto del muro. Se cuenta aparte de las ventanas normales porque cuesta y demora más."],
+    corredera: ["Corredera", "Hoja de ventana o ventanal que se abre deslizándose por un riel. Aquí es la que da paso a la terraza."],
+    terraza: ["Terraza", "Balcón del departamento. Lleva impermeabilización y cerámica."],
+    tina: ["Tina o ducha", "Tipo de baño: con tina de baño o con receptáculo de ducha (base plana). Cambia el artefacto que se instala y la cerámica."],
+    cantidad: ["Cantidad", "Número de elementos que tiene la partida (puertas, ventanales, baños). Permite medir el avance en unidades reales, no solo en departamentos."],
+    logia: ["Logia", "Espacio pequeño de servicio junto a la cocina, para la lavadora y el secado de ropa."],
+    estacionamientos: ["Estacionamientos", "Zona de autos en el subterráneo. Normalmente lleva pintura de piso y demarcación."],
+    bodegas: ["Bodegas", "Pequeños recintos con llave que se venden junto a los departamentos para guardar cosas."],
+    salabombas: ["Sala de bombas", "Recinto con las bombas que impulsan el agua potable hacia los pisos altos."],
+    estanques: ["Estanques de agua", "Depósitos de agua potable de reserva del edificio."],
+    salaelectrica: ["Sala eléctrica y grupo", "Tableros eléctricos generales y el grupo electrógeno (generador de respaldo cuando se corta la luz)."],
+    rampa: ["Rampa de acceso", "Rampa por donde bajan los autos a los subterráneos."],
+    pasillo: ["Pasillo de piso", "Pasillo común de cada piso, por donde se llega a los departamentos y al ascensor. Lleva electricidad, yeso, cerámica o porcelanato, pintura, aseo y recepción."],
+    ascensor: ["Ascensor", "Se instala en su caja (el hueco vertical) después de la obra gruesa. En cada piso se ponen las puertas de piso. Se controla por nivel."],
+    hall: ["Hall de acceso", "Entrada principal del edificio en el piso 1."],
+    conserjeria: ["Conserjería", "Recinto del conserje, con el control de acceso."],
+    multiuso: ["Sala multiuso", "Espacio común para reuniones o eventos de los residentes."],
+    basura: ["Sala de basura", "Recinto donde se juntan los contenedores de basura del edificio."],
+    bicicletero: ["Bicicletero", "Espacio para guardar bicicletas."]
+  },
+  "Partidas": {
+    partida: ["Partida", "Cada trabajo del presupuesto que se controla por separado, por ejemplo cerámica o pintura."],
+    OG: ["Obra gruesa", "La estructura de hormigón armado: muros, pilares, vigas y losas. Es el esqueleto del edificio. Se controla por piso completo."],
+    losa: ["Losa", "Placa de hormigón que forma el piso de un nivel y el cielo del nivel de abajo."],
+    INS: ["Instalaciones sanitarias y gas", "Cañerías de agua potable, alcantarillado y gas dentro del recinto, antes de cerrar muros."],
+    IEL: ["Instalaciones eléctricas y débiles", "Tubos y cables de electricidad. 'Corrientes débiles' son internet, TV, citófono y alarmas."],
+    TAB: ["Tabiquería", "Muros interiores livianos que dividen ambientes. No sostienen el edificio; suelen ser perfiles metálicos con planchas de yeso-cartón."],
+    VEN: ["Ventanas y marcos", "Instalación de ventanas y ventanales de aluminio o PVC, y de los marcos donde después van las puertas."],
+    YES: ["Yeso y enlucido", "Capa que alisa muros y cielos para dejarlos parejos y listos para pintar."],
+    IMP: ["Impermeabilización", "Capa que impide que el agua traspase la losa. Va en todos los baños y terrazas, antes de la cerámica; si falla aparecen filtraciones en el piso de abajo."],
+    CER: ["Cerámica", "Revestimiento de piso y muros en zonas húmedas: baños, cocina y logia."],
+    FRA: ["Frague", "Pasta que rellena las juntas entre cerámicas. Sella y da la terminación final."],
+    PIN: ["Pintura", "Pintado de muros y cielos. Va después del frague para no ensuciar la pintura."],
+    PUE: ["Puertas y quincallería", "Puertas interiores y sus herrajes: bisagras, manillas y cerraduras."],
+    MUE: ["Muebles de cocina y closets", "Muebles fijos: cocina (bases y muebles altos) y closets de dormitorios."],
+    PIS: ["Piso flotante o vinílico", "Piso de terminación de living y dormitorios, instalado sobre la losa."],
+    ART: ["Artefactos", "WC, lavamanos, lavaplatos, griferías, enchufes, interruptores y lámparas."],
+    ASC: ["Ascensor", "Montaje del ascensor en su caja y puertas de piso en cada nivel. Lo hace normalmente un subcontrato especialista."],
+    ASE: ["Aseo final", "Limpieza fina del recinto antes de mostrarlo a Calidad."],
+    CAL: ["Recepción de Calidad", "Revisión del recinto terminado por el área de Calidad. Si hay observaciones, se corrigen antes de entregar."],
+    especialidad: ["Especialidad", "Rama técnica a la que pertenece la partida: obra gruesa, eléctrica, sanitaria, terminaciones, etc."]
+  },
+  "Planificación": {
+    tren: ["Tren de partidas", "Forma de construir edificios en que cada partida avanza piso por piso, una detrás de otra, como vagones de un tren."],
+    predecesora: ["Predecesora", "Partida que tiene que terminar en un recinto antes de que otra pueda empezar ahí. Ejemplo: no se fragua sin cerámica."],
+    unidad: ["Unidad de control", "Una partida en un recinto (por ejemplo, la cerámica del 704). Es lo que se marca como terminado."],
+    programado: ["Programado", "Lo que debería estar hecho a una fecha según la planificación aprobada (el programa de obra)."],
+    real: ["Real", "Lo que efectivamente está terminado en terreno."],
+    ciclo: ["Ciclo", "Días hábiles que pasan entre que una partida empieza un piso y empieza el siguiente."],
+    diashabiles: ["Días hábiles", "Lunes a viernes, sin feriados. Es la unidad con que se miden los plazos de obra."],
+    corte: ["Fecha de corte", "Fecha hasta la que se consideran los datos. Todo lo que pase después no está en los números."],
+    contractual: ["Término programado", "Fecha en que el programa aprobado termina la obra. Es la referencia para medir atrasos."],
+    mandante: ["Mandante", "El cliente dueño del proyecto, normalmente una inmobiliaria."]
+  },
+  "Estados": {
+    terminado: ["Terminado", "La partida está completa en ese recinto."],
+    encurso: ["En curso", "La partida empezó en ese recinto pero aún no termina. Cuenta como 50% para el avance."],
+    liberado: ["Liberado", "Las predecesoras ya terminaron: la partida puede empezar cuando quiera. Son los frentes de trabajo disponibles."],
+    pendiente: ["Pendiente", "Todavía no puede empezar porque falta terminar una partida anterior."],
+    bloqueado: ["Bloqueado", "Podría empezar, pero hay una restricción activa que lo impide (por ejemplo, falta material)."],
+    atrasado: ["Atrasado", "El programa dice que en ese piso ya debería haber más terminado que lo que hay en realidad."],
+    restriccion: ["Restricción", "Cualquier cosa que impide avanzar: falta de material, planos, personal, equipos o permisos."]
+  },
+  "Indicadores": {
+    ponderado: ["Avance ponderado", "Avance total calculado dando a cada partida un peso según su importancia (costo). No es un promedio simple: la obra gruesa pesa mucho más que el aseo."],
+    peso: ["Peso", "Parte del avance total que representa cada partida. Todos los pesos suman 100%."],
+    desviacion: ["Desviación", "Diferencia entre lo real y lo programado. Negativo = atraso; positivo = adelanto."],
+    pp: ["Puntos porcentuales (pp)", "Diferencia entre dos porcentajes. Si el real es 40% y el programado 45%, la desviación es −5 pp."],
+    curvas: ["Curva S", "Gráfico del avance acumulado en el tiempo. Tiene forma de S porque la obra parte lenta, acelera en el medio y se frena al final."],
+    rendimiento: ["Rendimiento", "Cuántos recintos se terminan por semana en una partida. Se calcula con lo terminado en las últimas semanas."],
+    saldo: ["Saldo", "Lo que falta por terminar en una partida."],
+    frente: ["Frente", "Piso más alto donde la partida ya está trabajando o terminó."],
+    proyeccion: ["Proyección", "Estimación de cuándo terminará algo si sigue el ritmo actual. Es una estimación, no un compromiso."],
+    base: ["Escenario base", "Proyección con el promedio de las últimas 6 semanas."],
+    optimista: ["Escenario optimista", "Proyección con el mejor ritmo de 4 semanas seguidas de las últimas 12, como máximo 40% sobre el base."],
+    conservador: ["Escenario conservador", "Proyección con el peor ritmo de 4 semanas seguidas de las últimas 12, como mínimo 70% del base."]
+  }
+};
+const TERMS = {};
+Object.values(GLOSARIO).forEach(g => Object.entries(g).forEach(([k, v]) => { TERMS[k] = v; }));
+
+// calendario: todo se cuenta en días hábiles (lunes a viernes sin feriados)
+const iso = d => d.toISOString().slice(0, 10);
+const parse = s => new Date(s + "T12:00:00Z");
+const FER = new Set(CONFIG.feriados);
+const WD = [];
+(function(){ let d = parse("2025-09-01"); const end = parse("2028-12-31");
+  while (d <= end) { const w = d.getUTCDay(); if (w !== 0 && w !== 6 && !FER.has(iso(d))) WD.push(iso(d)); d = new Date(d.getTime() + 864e5); } })();
+function wdIndex(s){ let lo = 0, hi = WD.length; while (lo < hi) { const m = (lo + hi) >> 1; if (WD[m] < s) lo = m + 1; else hi = m; } return lo; }
+const W0 = wdIndex(CONFIG.inicio);
+const CORTE = wdIndex(CONFIG.corte) - W0;
+const wdDate = i => WD[Math.max(0, Math.min(WD.length - 1, Math.round(i) + W0))];
+const fmt = s => { const d = parse(s); return d.toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).replace(/\./g, ""); };
+const fmtC = s => { const d = parse(s); return d.toLocaleDateString("es-CL", { day: "2-digit", month: "short", timeZone: "UTC" }).replace(/\./g, ""); };
+const fmtWd = i => fmt(wdDate(i));
+
+// estructura del edificio: niveles, deptos, pasillos y zonas
+function nivelLabel(n){ return n < 0 ? "S" + Math.abs(n) : "P" + String(n).padStart(2, "0"); }
+function nivelNombre(n){ return n < 0 ? "Subterráneo " + n : "Piso " + n; }
+function ambito(n){ return n < 0 ? "sub" : (n === 1 ? "p1" : "dep"); }
+
+const NIVELES = [-2, -1, 1]; for (let p = 2; p <= CONFIG.pisoHasta; p++) NIVELES.push(p);
+const KIDX = Object.fromEntries(NIVELES.map((n, i) => [n, i]));
+const RECINTOS = [];
+NIVELES.forEach(n => {
+  if (n <= 1) CONFIG.zonas[String(n)].forEach(([c, nom, term]) => RECINTOS.push({ codigo: nivelLabel(n) + "-" + c, nivel: n, tipo: "Zona", nombre: nom, term, tipologia: "", col: null, ambito: ambito(n) }));
+  else (n === 2 ? CONFIG.piso2 : [1,2,3,4,5,6,7]).forEach(c => { const num = n * 100 + c;
+    RECINTOS.push({ codigo: "D-" + num, nivel: n, tipo: "Departamento", nombre: "Depto " + num, tipologia: CONFIG.tipologiaPorColumna[c], col: c, ambito: "dep" }); });
+  if (n >= 2) RECINTOS.push({ codigo: nivelLabel(n) + "-PAS", nivel: n, tipo: "Pasillo", nombre: "Pasillo piso " + n, term: "pasillo", tipologia: "", col: 8, ambito: "pas" });
+});
+const P = CONFIG.partidas;
+const PBY = Object.fromEntries(P.map(p => [p.cod, p]));
+const deptos = RECINTOS.filter(r => r.tipo === "Departamento");
+const zonas = RECINTOS.filter(r => r.tipo === "Zona");
+const pasillos = RECINTOS.filter(r => r.tipo === "Pasillo");
+function cantRec(r){
+  if (!r.tipologia) return null;
+  const ex = CONFIG.excepciones[r.codigo];
+  return { ...CONFIG.tipologias[r.tipologia].cant, ...(ex ? ex.cant : {}) };
+}
+function cantDe(c, rec){
+  const m = CONFIG.cantidadPorPartida[c]; if (!m) return 0;
+  const q = cantRec(rec); return q ? m.claves.reduce((s, k) => s + (q[k] || 0), 0) : 0;
+}
+function cantPartida(c){
+  const m = CONFIG.cantidadPorPartida[c]; if (!m) return null;
+  let tot = 0, ok = 0;
+  deptos.forEach(d => { const q = cantDe(c, d); tot += q; if (regDeRecinto(c, d).est === "ok") ok += q; });
+  return { tot, ok, unidad: m.unidad };
+}
+
+function predsEfectivas(p, amb){
+  if (!p.pre.length) return [];
+  const vale = c => PBY[c].unidad === "nivel" || PBY[c].aplica.includes(amb);
+  const ok = p.pre.filter(vale);
+  if (ok.length) return ok;
+  const i = P.indexOf(p);
+  for (let j = i - 1; j >= 0; j--) if (vale(P[j].cod) && P[j].cod !== "ASC") return [P[j].cod];
+  return [];
+}
+
+// datos de prueba con semilla fija para que salgan siempre iguales; sacar esto cuando cargue el Excel real
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(240);
+const RESTR = CONFIG.restricciones.map(x => ({ ...x, desdeWd: wdIndex(x.desde) - W0 }));
+
+const REG = [];
+const regBy = {};
+const key = (p, u) => p + "|" + u;
+P.forEach(p => {
+  const units = p.unidad === "nivel"
+    ? NIVELES.filter(n => p.aplica.includes(ambito(n))).map(n => ({ u: nivelLabel(n), nivel: n, amb: ambito(n) }))
+    : RECINTOS.filter(r => p.aplica.includes(r.ambito)).map(r => ({ u: r.codigo, nivel: r.nivel, amb: r.ambito }));
+  units.forEach(x => {
+    const k = KIDX[x.nivel];
+    const ps = k * CONFIG.cicloPlan + p.off;
+    const pf = ps + p.dur;
+    let rs = (p.off ? p.off + 3 : 0) + k * CONFIG.cicloPlan * p.ritmo + Math.floor(R() * 3);
+    const preds = predsEfectivas(p, x.amb);
+    preds.forEach(c => {
+      const q = PBY[c];
+      const pr = regBy[key(c, q.unidad === "nivel" ? nivelLabel(x.nivel) : x.u)];
+      if (pr) rs = Math.max(rs, pr.rf + 1 + Math.floor(R() * 2));
+    });
+    rs = Math.round(rs);
+    let rf = rs + Math.max(1, Math.round(p.dur * (p.unidad === "nivel" ? p.ritmo : (0.85 + R() * 0.4))));
+    let bloq = null;
+    RESTR.forEach(re => { if (re.partida === p.cod && re.pisos.includes(x.nivel) && rs >= re.desdeWd) bloq = re; });
+    if (bloq) { rs = Infinity; rf = Infinity; }
+    const reg = { p: p.cod, u: x.u, nivel: x.nivel, amb: x.amb, k, ps, pf, rs, rf, bloq, preds };
+    REG.push(reg); regBy[key(p.cod, x.u)] = reg;
+  });
+});
+
+// estado de cada partida en un recinto a una fecha dada
+function estado(reg, t = CORTE){
+  if (reg.rf <= t) return "ok";
+  if (reg.rs <= t) return "run";
+  const predsOk = reg.preds.every(c => { const q = PBY[c]; const pr = regBy[key(c, q.unidad === "nivel" ? nivelLabel(reg.nivel) : reg.u)]; return pr && pr.rf <= t; });
+  if (!predsOk) return "wait";
+  return reg.bloq ? "block" : "free";
+}
+const EST = { ok: ["Terminado", "terminado"], run: ["En curso", "encurso"], free: ["Liberado", "liberado"], wait: ["Pendiente", "pendiente"], block: ["Bloqueado", "bloqueado"] };
+REG.forEach(r => { r.est = estado(r); });
+const regsDe = c => REG.filter(r => r.p === c);
+const regDeRecinto = (c, rec) => regBy[key(c, PBY[c].unidad === "nivel" ? nivelLabel(rec.nivel) : rec.codigo)];
+
+// avance: terminado cuenta 1, en curso 0,5
+const PESO_TOTAL = P.reduce((s, p) => s + p.peso, 0);
+function avPart(c, t, cual){
+  const rs = regsDe(c); let s = 0;
+  rs.forEach(r => { const a = cual === "plan" ? r.ps : r.rs, b = cual === "plan" ? r.pf : r.rf; if (b <= t) s += 1; else if (a <= t) s += 0.5; });
+  return s / rs.length;
+}
+const avGlobal = (t, cual) => P.reduce((s, p) => s + p.peso * avPart(p.cod, t, cual), 0) / PESO_TOTAL;
+
+// rendimientos de las últimas semanas y proyección de término
+const SEM = 12;
+const HIST = {};
+P.forEach(p => {
+  const rs = regsDe(p.cod);
+  const semanas = [];
+  for (let w = SEM; w >= 1; w--) { const a = CORTE - w * 5, b = a + 5; semanas.push({ ini: a, n: rs.filter(r => r.rf > a && r.rf <= b).length }); }
+  const avg = arr => arr.reduce((s, x) => s + x.n, 0) / arr.length;
+  const re = RESTR.find(x => x.partida === p.cod && x.desdeWd < CORTE);
+  const finVentana = re ? re.desdeWd : CORTE;
+  const ref = []; for (let w = SEM; w >= 1; w--) { const a = finVentana - w * 5; ref.push({ ini: a, n: rs.filter(r => r.rf > a && r.rf <= a + 5).length }); }
+  const base = avg(ref.slice(-6));
+  const win = []; for (let i = 0; i + 4 <= ref.length; i++) win.push(avg(ref.slice(i, i + 4)));
+  const porPiso = p.unidad === "nivel" ? 1 : rs.filter(r => r.nivel === 10).length || 1;
+  const planRate = porPiso * 5 / CONFIG.cicloPlan;
+  const ok = rs.filter(r => r.est === "ok").length, run = rs.filter(r => r.est === "run").length;
+  const frenteArr = rs.filter(r => r.est === "ok" || r.est === "run").map(r => r.nivel);
+  HIST[p.cod] = { semanas, base, medidoAntesDe: re ? re.desdeWd : null, opt: Math.min(Math.max(...win), base * 1.4), cons: Math.max(Math.min(...win), base * 0.7), planRate, total: rs.length, ok, run,
+    saldo: rs.length - ok - 0.5 * run, frente: frenteArr.length ? Math.max(...frenteArr) : null,
+    planFin: Math.max(...rs.map(r => r.pf)), lastFin: Math.max(0, ...rs.filter(r => r.est === "ok").map(r => r.rf)) };
+});
+
+function proyectar(esc){
+  const fin = {}, rate = {}, sinHist = {};
+  P.forEach(p => {
+    const h = HIST[p.cod];
+    let r = h[esc];
+    sinHist[p.cod] = false;
+    if (!(r > 0)) { r = h.planRate * (esc === "opt" ? 1.1 : esc === "cons" ? 0.85 : 1); sinHist[p.cod] = true; }
+    rate[p.cod] = r;
+    let f = h.saldo <= 0 ? h.lastFin : CORTE + Math.ceil(h.saldo / r * 5);
+    RESTR.filter(x => x.partida === p.cod).forEach(x => {
+      const lib = x.liberacionDias * (esc === "opt" ? 0.6 : esc === "cons" ? 1.6 : 1);
+      f = Math.max(f, CORTE + Math.ceil(lib) + p.dur * x.pisos.length);
+    });
+    p.pre.forEach(c => { f = Math.max(f, fin[c] + p.dur); });
+    fin[p.cod] = f;
+  });
+  return { fin, rate, sinHist, obra: Math.max(...Object.values(fin)) };
+}
+const PROY = { base: proyectar("base"), opt: proyectar("opt"), cons: proyectar("cons") };
+const PLAN_FIN = Math.max(...REG.map(r => r.pf));
+
+function avProy(t){
+  return P.reduce((s, p) => {
+    const a0 = avPart(p.cod, CORTE, "real"), f = PROY.base.fin[p.cod];
+    const x = f <= CORTE ? 1 : Math.min(1, Math.max(0, (t - CORTE) / (f - CORTE)));
+    return s + p.peso * (a0 + (1 - a0) * x);
+  }, 0) / PESO_TOTAL;
+}
+
+// funciones chicas que uso en todas las vistas
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const T = (k, txt) => `<span class="term" data-term="${k}">${txt ?? TERMS[k][0]}</span>`;
+const pct = (x, d = 1) => (x * 100).toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
+const num = (x, d = 1) => x.toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pill = st => `<span class="pill ${st}">${EST[st][0]}</span>`;
+function devPill(pp){
+  const v = Math.round(pp * 1000) / 10;
+  if (v >= -2) return `<span class="pill ontime">${v > 0 ? "+" : ""}${num(v)} pp</span>`;
+  return `<span class="pill late">${num(v)} pp</span>`;
+}
+function diasPill(d){
+  if (d <= 0) return `<span class="pill ontime">${d < 0 ? d + " d" : "En plazo"}</span>`;
+  return `<span class="pill late">+${d} d</span>`;
+}
+
+// cuadrito de ayuda al pasar el cursor (en celular sale al tocar)
+const tip = $("tip");
+let tipFijo = null;
+function showTip(html, rect){
+  tip.innerHTML = html; tip.classList.add("on");
+  const tw = tip.offsetWidth, th = tip.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+  let x = rect.left + rect.width / 2 - tw / 2, y = rect.top - th - 8;
+  if (y < 8) y = rect.bottom + 8;
+  if (y + th > vh - 8) y = vh - th - 8;
+  x = Math.max(8, Math.min(vw - tw - 8, x));
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip(){ tip.classList.remove("on"); tipFijo = null; }
+function tipHtml(el){
+  if (el.dataset.term && TERMS[el.dataset.term]) { const [t, d] = TERMS[el.dataset.term]; return `<b>${esc(t)}</b><br>${esc(d)}`; }
+  if (el.dataset.tipfn && TIPFN[el.dataset.tipfn]) return TIPFN[el.dataset.tipfn](el);
+  return null;
+}
+document.addEventListener("pointerover", e => {
+  if (e.pointerType === "touch") return;
+  const el = e.target.closest("[data-term],[data-tipfn]"); if (!el) return;
+  const h = tipHtml(el); if (h) showTip(h, el.getBoundingClientRect());
+});
+document.addEventListener("pointerout", e => {
+  if (e.pointerType === "touch") return;
+  const el = e.target.closest("[data-term],[data-tipfn]"); if (el && !el.contains(e.relatedTarget)) hideTip();
+});
+document.addEventListener("click", e => {
+  const el = e.target.closest(".term,.mx-c,.mx-h");
+  if (el && (e.pointerType === "touch" || matchMedia("(hover: none)").matches)) {
+    if (tipFijo === el) { hideTip(); return; }
+    const h = tipHtml(el); if (h) { showTip(h, el.getBoundingClientRect()); tipFijo = el; }
+    return;
+  }
+  if (!el && tipFijo) hideTip();
+});
+window.addEventListener("scroll", () => { if (tipFijo) hideTip(); }, { passive: true });
+
+const TIPFN = {
+  rec(el){
+    const rec = RECINTOS.find(r => r.codigo === el.dataset.cod); if (!rec) return "";
+    if (SEL === "_res") {
+      const ps = P.filter(p => p.aplica.includes(rec.ambito));
+      const ok = ps.filter(p => regDeRecinto(p.cod, rec).est === "ok");
+      const ult = ok.length ? ok[ok.length - 1].nom : "ninguna";
+      return `<b>${esc(rec.nombre)}</b><div class="tl"><span>Terminadas</span><span>${ok.length} de ${ps.length}</span><span>Última</span><span>${esc(ult)}</span></div>`;
+    }
+    const p = PBY[SEL]; if (!p.aplica.includes(rec.ambito)) return `<b>${esc(rec.nombre)}</b><br>${esc(p.nom)} no aplica aquí.`;
+    const r = regDeRecinto(SEL, rec);
+    const ex = CONFIG.excepciones[rec.codigo], q = cantDe(SEL, rec);
+    return `<b>${esc(rec.nombre)} · ${esc(p.nom)}</b><div class="tl"><span>Estado</span><span>${EST[r.est][0]}</span>` +
+      `<span>Término prog.</span><span>${fmtWd(r.pf)}</span>` +
+      (r.est === "ok" ? `<span>Terminó</span><span>${fmtWd(r.rf)}</span>` : r.est === "run" ? `<span>Empezó</span><span>${fmtWd(r.rs)}</span>` : "") +
+      (r.bloq ? `<span>Motivo</span><span>${esc(r.bloq.categoria)}</span>` : "") +
+      (CONFIG.cantidadPorPartida[SEL] ? `<span>Cantidad</span><span>${q} ${CONFIG.cantidadPorPartida[SEL].unidad}</span>` : "") + `</div>` +
+      (ex ? `<div style="margin-top:4px">${esc(ex.nota)}</div>` : "");
+  },
+  mx(el){
+    const p = PBY[el.dataset.p], n = +el.dataset.n;
+    const rs = REG.filter(r => r.p === p.cod && r.nivel === n);
+    const c = s => rs.filter(r => r.est === s).length;
+    const plan = rs.reduce((s, r) => s + (r.pf <= CORTE ? 1 : r.ps <= CORTE ? .5 : 0), 0) / rs.length;
+    return `<b>${nivelNombre(n)} · ${esc(p.nom)}</b><div class="tl"><span>Terminados</span><span>${c("ok")} de ${rs.length}</span><span>En curso</span><span>${c("run")}</span>` +
+      (c("block") ? `<span>Bloqueados</span><span>${c("block")}</span>` : "") +
+      `<span>Programado</span><span>${pct(plan, 0)}</span></div>`;
+  },
+  mxh(el){ const p = PBY[el.dataset.p]; const t = TERMS[p.cod]; return `<b>${esc(p.cod)} · ${esc(p.nom)}</b><br>${esc(t ? t[1] : "")}`; },
+  bar(el){
+    const p = PBY[el.dataset.p], h = HIST[p.cod];
+    return `<b>${esc(p.nom)}</b><div class="tl"><span>Terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Real</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span><span>Programado</span><span>${pct(avPart(p.cod, CORTE, "plan"))}</span><span>Peso</span><span>${num(p.peso / PESO_TOTAL * 100)}%</span>` +
+      (cantPartida(p.cod) ? `<span>Cantidad</span><span>${cantPartida(p.cod).ok} de ${cantPartida(p.cod).tot} ${cantPartida(p.cod).unidad}</span>` : "") + `</div>`;
+  }
+};
+
+// vistas
+$("corteTxt").textContent = fmt(CONFIG.corte);
+
+function renderKpis(){
+  const r = avGlobal(CORTE, "real"), pl = avGlobal(CORTE, "plan");
+  const d = PROY.base.obra - PLAN_FIN;
+  const deptosEnt = deptos.filter(x => regDeRecinto("CAL", x).est === "ok").length;
+  $("kpis").innerHTML = `
+    <div class="kpi"><span class="lab">${T("ponderado", "Avance real")}</span><b class="mono">${pct(r)}</b><span class="sub">de toda la obra</span></div>
+    <div class="kpi"><span class="lab">${T("programado", "Programado al corte")}</span><b class="mono">${pct(pl)}</b><span class="sub">${devPill(r - pl)} ${T("pp", "vs programa")}</span></div>
+    <div class="kpi"><span class="lab">${T("proyeccion", "Término proyectado")}</span><b class="mono">${fmtC(wdDate(PROY.base.obra))}</b><span class="sub">${diasPill(d)} ${T("diashabiles", "días hábiles")} · prog. ${fmtC(wdDate(PLAN_FIN))}</span></div>
+    <div class="kpi"><span class="lab">${T("CAL", "Deptos recibidos")}</span><b class="mono">${deptosEnt}<span style="font-size:20px;color:var(--muted)"> / ${deptos.length}</span></b><span class="sub">con recepción de Calidad</span></div>`;
+}
+
+function renderCurvaS(){
+  const box = $("chS"); const W = Math.max(300, box.clientWidth), H = 260;
+  const m = { l: 40, r: 64, t: 12, b: 28 };
+  const endT = Math.max(PLAN_FIN, PROY.base.obra) + 10;
+  const pts = []; for (let t = 0; t <= endT; t += 5) pts.push(t);
+  const sx = t => m.l + (t / endT) * (W - m.l - m.r), sy = v => m.t + (1 - v) * (H - m.t - m.b);
+  const plan = pts.map(t => [t, avGlobal(Math.min(t, PLAN_FIN + 5), "plan")]);
+  const real = pts.filter(t => t <= CORTE).map(t => [t, avGlobal(t, "real")]); real.push([CORTE, avGlobal(CORTE, "real")]);
+  const proy = [[CORTE, avGlobal(CORTE, "real")], ...pts.filter(t => t > CORTE).map(t => [t, avProy(t)])];
+  const path = arr => arr.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1)).join("");
+  let g = "";
+  [0, .25, .5, .75, 1].forEach(v => { g += `<line x1="${m.l}" x2="${W - m.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${sy(v) + 4}" text-anchor="end">${v * 100}%</text>`; });
+  const meses = []; for (let t = 1; t <= endT; t++) { const s = wdDate(t); if (s.slice(0, 7) !== wdDate(t - 1).slice(0, 7)) meses.push([t, s.slice(0, 7)]); }
+  const step = W < 420 ? 6 : W < 620 ? 4 : 2;
+  meses.forEach(([t, s], i) => { if (i % step) return; const d = parse(s + "-01"); g += `<text x="${sx(t)}" y="${H - 8}" text-anchor="middle">${d.toLocaleDateString("es-CL", { month: "short", timeZone: "UTC" }).replace(".", "")} ${String(d.getUTCFullYear()).slice(2)}</text>`; });
+  g += `<line x1="${sx(CORTE)}" x2="${sx(CORTE)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="2 3"/><text x="${sx(CORTE) + 4}" y="${H - m.b - 6}" text-anchor="start" style="fill:var(--ink)">Corte</text>`;
+  g += `<path d="${path(plan)}" fill="none" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  g += `<path d="${path(proy)}" fill="none" stroke="var(--real)" stroke-width="2" stroke-dasharray="3 4"/>`;
+  g += `<path d="${path(real)}" fill="none" stroke="var(--real)" stroke-width="2.5"/>`;
+  const lr = real[real.length - 1];
+  g += `<circle cx="${sx(lr[0])}" cy="${sy(lr[1])}" r="4.5" fill="var(--real)" stroke="var(--surface)" stroke-width="2"/>`;
+  g += `<text class="lbl" x="${sx(lr[0]) - 8}" y="${sy(lr[1]) - 10}" text-anchor="end">Real ${pct(lr[1], 0)}</text>`;
+
+  g += `<g id="sHover" style="display:none"><line id="sHl" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)"/><circle id="sHp" r="4" fill="var(--plan)" stroke="var(--surface)" stroke-width="2"/><circle id="sHr" r="4" fill="var(--real)" stroke="var(--surface)" stroke-width="2"/></g>`;
+  g += `<rect id="sHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Curva S: real ${pct(lr[1], 0)}, programado ${pct(avGlobal(CORTE, "plan"), 0)} al corte">${g}</svg>`;
+  const hit = $("sHit"), hov = $("sHover");
+  const move = ev => {
+    const rect = box.querySelector("svg").getBoundingClientRect();
+    const px = (ev.clientX - rect.left) * (W / rect.width);
+    let t = Math.round(((px - m.l) / (W - m.l - m.r)) * endT / 5) * 5; t = Math.max(0, Math.min(endT, t));
+    const vp = avGlobal(Math.min(t, PLAN_FIN + 5), "plan"), vr = t <= CORTE ? avGlobal(t, "real") : avProy(t);
+    hov.style.display = ""; $("sHl").setAttribute("x1", sx(t)); $("sHl").setAttribute("x2", sx(t));
+    $("sHp").setAttribute("cx", sx(t)); $("sHp").setAttribute("cy", sy(vp));
+    $("sHr").setAttribute("cx", sx(t)); $("sHr").setAttribute("cy", sy(vr));
+    $("sHr").setAttribute("fill", t <= CORTE ? "var(--real)" : "var(--surface)"); $("sHr").setAttribute("stroke", t <= CORTE ? "var(--surface)" : "var(--real)");
+    const cx = rect.left + sx(t) * rect.width / W, cy = rect.top + sy(Math.max(vp, vr)) * rect.height / H;
+    showTip(`<b>Semana del ${fmt(wdDate(t))}</b><div class="tl"><span>Programado</span><span>${pct(vp)}</span><span>${t <= CORTE ? "Real" : "Proyección"}</span><span>${pct(vr)}</span></div>`, { left: cx, right: cx, top: cy, bottom: cy, width: 0, height: 0 });
+  };
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => { hov.style.display = "none"; hideTip(); });
+}
+
+function renderBars(){
+  $("bars").innerHTML = P.map(p => {
+    const r = avPart(p.cod, CORTE, "real"), pl = avPart(p.cod, CORTE, "plan");
+    return `<div class="bar-row" data-tipfn="bar" data-p="${p.cod}">
+      <span class="bar-name">${T(p.cod, esc(p.nom))}</span>
+      <div class="track"><div class="fill" style="width:${(r * 100).toFixed(1)}%"></div><div class="tick" style="left:calc(${(pl * 100).toFixed(1)}% - 1px)"></div></div>
+      <span class="bar-val">${pct(r, 0)}</span><span class="bar-dev">${devPill(r - pl)}</span></div>`;
+  }).join("");
+}
+
+function renderRestr(){
+  $("restr").innerHTML = RESTR.map(x => {
+    const n = REG.filter(r => r.bloq === x && r.est === "block").length;
+    return `<div class="restr-item"><span class="pill block">Bloqueado</span><div><b>${esc(x.titulo)}</b>
+      <div class="muted" style="font-size:14px">${esc(x.categoria)} · desde ${fmt(x.desde)} · responsable ${esc(x.responsable)} · ${n} ${T("recinto", "recintos")} detenidos en ${T(x.partida, PBY[x.partida].nom.toLowerCase())}. La pintura de esos pisos no puede empezar hasta que se resuelva.</div></div></div>`;
+  }).join("");
+}
+
+// vista edificio
+let SEL = "CER";
+function renderSelector(){
+  const opts = [["_res", "Resumen"], ...P.map(p => [p.cod, p.nom.split(" (")[0]])];
+  $("selPartida").innerHTML = opts.map(([c, n]) => `<button aria-pressed="${c === SEL}" data-sel="${c}" ${c === "_res" ? "" : `data-term="${c}"`}>${esc(n)}</button>`).join("");
+}
+function claseRec(rec){
+  if (SEL === "_res") {
+    const ps = P.filter(p => p.aplica.includes(rec.ambito));
+    const ok = ps.filter(p => regDeRecinto(p.cod, rec).est === "ok").length;
+    const lvl = Math.round(ok / ps.length * 6);
+    return { cls: "", style: `background:var(--s${lvl});${lvl >= 4 ? "color:#fff;" : ""}` };
+  }
+  const p = PBY[SEL]; if (!p.aplica.includes(rec.ambito)) return { cls: "", style: "background:transparent;border:1px dashed var(--hatch);color:var(--muted)" };
+  return { cls: "st-" + regDeRecinto(SEL, rec).est, style: "" };
+}
+function renderElev(){
+  let h = `<div class="row" aria-hidden="true"><span></span>${[1,2,3,4,5,6,7].map(i => `<span class="colhead">0${i}</span>`).join("")}<span class="colhead term" data-term="pasillo">PAS</span></div>`;
+  [...NIVELES].reverse().forEach(n => {
+    h += `<div class="row"><span class="lvl">${nivelLabel(n)}</span>`;
+    if (n <= 1) {
+      const zs = zonas.filter(z => z.nivel === n);
+      h += `<div class="zones" style="grid-template-columns:repeat(${zs.length},minmax(0,1fr))">` + zs.map(z => { const c = claseRec(z);
+        return `<button class="zone ${c.cls}" style="${c.style}" data-cod="${z.codigo}" data-tipfn="rec">${esc(z.nombre)}</button>`; }).join("") + `</div>`;
+    } else {
+      for (let c = 1; c <= 7; c++) {
+        const d = deptos.find(x => x.nivel === n && x.col === c);
+        if (!d) { h += `<span class="gap" title="No existe ${n * 100 + c}"></span>`; continue; }
+        const k = claseRec(d);
+        h += `<button class="cell ${k.cls}" style="${k.style}" data-cod="${d.codigo}" data-tipfn="rec" aria-label="${d.nombre}">${n * 100 + c}</button>`;
+      }
+      const pa = pasillos.find(x => x.nivel === n), kp = claseRec(pa);
+      h += `<button class="cell pas ${kp.cls}" style="${kp.style}" data-cod="${pa.codigo}" data-tipfn="rec" aria-label="${pa.nombre}">PAS</button>`;
+    }
+    h += `</div>`;
+    if (n === 1) h += `<div class="ground" aria-hidden="true"></div>`;
+  });
+  $("elev").innerHTML = h;
+
+  if (SEL === "_res") {
+    $("selTitulo").textContent = "Partidas terminadas por recinto";
+    $("statlist").innerHTML = [0, 2, 4, 6].map(l => `<div><span class="sw" style="background:var(--s${l})"></span><span>${["Ninguna", "Hasta un tercio", "Hasta dos tercios", "Todas"][l / 2]}</span><span></span></div>`).join("") +
+      `<p class="note">Más oscuro = más partidas terminadas en ese recinto.</p>`;
+  } else {
+    const p = PBY[SEL], rs = regsDe(SEL), h2 = HIST[SEL];
+    $("selTitulo").innerHTML = T(SEL, esc(p.nom));
+    const cnt = s => rs.filter(r => r.est === s).length;
+    $("statlist").innerHTML = ["ok", "run", "free", "block", "wait"].map(s =>
+      `<div><span class="sw st-${s}"></span><span>${T(EST[s][1], EST[s][0])}</span><span class="mono">${cnt(s)}</span></div>`).join("") +
+      `<dl class="facts" style="margin-top:6px"><dt>${T("frente")}</dt><dd>${h2.frente != null ? nivelNombre(h2.frente) : "Sin iniciar"}</dd><dt>Avance real</dt><dd>${pct(avPart(SEL, CORTE, "real"))}</dd><dt>Programado</dt><dd>${pct(avPart(SEL, CORTE, "plan"))}</dd>` +
+      (p.unidad === "nivel" ? `<dt>Se controla por</dt><dd>Piso completo</dd>` : "") +
+      (cantPartida(SEL) ? `<dt>${T("cantidad")}</dt><dd>${cantPartida(SEL).ok} de ${cantPartida(SEL).tot} ${cantPartida(SEL).unidad}</dd>` : "") + `</dl>`;
+  }
+}
+$("selPartida").addEventListener("click", e => { const b = e.target.closest("[data-sel]"); if (!b) return; SEL = b.dataset.sel; hideTip(); renderSelector(); renderElev(); });
+$("elev").addEventListener("click", e => { const b = e.target.closest("[data-cod]"); if (b) { hideTip(); abrirFicha(b.dataset.cod); } });
+
+// vista por piso
+function renderMatrix(){
+  $("ramp").innerHTML = [0,1,2,3,4,5,6].map(i => `<span style="background:var(--s${i})"></span>`).join("");
+  let h = `<span></span>` + P.map(p => `<span class="mx-h" data-tipfn="mxh" data-p="${p.cod}" tabindex="0">${p.cod}</span>`).join("");
+  [...NIVELES].reverse().forEach(n => {
+    h += `<span class="mx-l">${nivelLabel(n)}</span>`;
+    P.forEach(p => {
+      if (!p.aplica.includes(ambito(n))) { h += `<span class="mx-c na"></span>`; return; }
+      const rs = REG.filter(r => r.p === p.cod && r.nivel === n);
+      const v = rs.reduce((s, r) => s + (r.est === "ok" ? 1 : r.est === "run" ? .5 : 0), 0) / rs.length;
+      const plan = rs.reduce((s, r) => s + (r.pf <= CORTE ? 1 : r.ps <= CORTE ? .5 : 0), 0) / rs.length;
+      const blk = rs.some(r => r.est === "block");
+      const lvl = Math.round(v * 6);
+      h += `<span class="mx-c${blk ? " blk" : ""}" style="background:var(--s${lvl})" data-tipfn="mx" data-p="${p.cod}" data-n="${n}" tabindex="0">${plan - v > 0.25 && !blk ? '<i class="dot"></i>' : ""}</span>`;
+    });
+  });
+  const m = $("matrix"); m.style.gridTemplateColumns = `40px repeat(${P.length},40px)`; m.innerHTML = h;
+}
+
+// vista proyección
+let SELP = "CER";
+function renderProy(){
+  const sc = [["opt", "optimista", "Optimista"], ["base", "base", "Base"], ["cons", "conservador", "Conservador"]];
+  $("scen").innerHTML = sc.map(([k, t, n]) => {
+    const f = PROY[k].obra, d = f - PLAN_FIN;
+    return `<div class="${k === "base" ? "base" : ""}"><span class="lab">${T(t, "Escenario " + n.toLowerCase())}</span><b class="mono">${fmt(wdDate(f))}</b><span class="sub">${diasPill(d)} vs término programado ${fmt(wdDate(PLAN_FIN))}</span></div>`;
+  }).join("");
+
+  $("tblProy").innerHTML = `<thead><tr><th>Partida</th><th class="num">Avance</th><th>${T("frente")}</th><th class="num">${T("rendimiento", "Rend. base")}</th><th class="num">${T("saldo")}</th><th>Término prog.</th><th>Término proy.</th><th>Rango</th><th class="num">${T("desviacion", "Desv.")}</th></tr></thead><tbody>` +
+    P.map(p => {
+      const h = HIST[p.cod], fb = PROY.base.fin[p.cod], u = p.unidad === "nivel" ? "pisos" : "rec.";
+      const sh = PROY.base.sinHist[p.cod];
+      return `<tr class="clk${p.cod === SELP ? " sel" : ""}" data-p="${p.cod}">
+        <td>${T(p.cod, esc(p.nom))}</td>
+        <td class="num mono">${pct(avPart(p.cod, CORTE, "real"), 0)}</td>
+        <td class="mono">${h.frente != null ? nivelLabel(h.frente) : "—"}</td>
+        <td class="num mono">${num(PROY.base.rate[p.cod])} ${u}/sem${sh ? ' <span class="pill soft" title="Sin historial: usa el ritmo programado">prog.</span>' : ""}</td>
+        <td class="num mono">${num(h.saldo, h.saldo % 1 ? 1 : 0)}</td>
+        <td class="mono">${fmtC(wdDate(h.planFin))}</td>
+        <td class="mono"><b>${h.saldo <= 0 ? "Terminada" : fmtC(wdDate(fb))}</b></td>
+        <td class="mono muted">${h.saldo <= 0 ? "—" : fmtC(wdDate(PROY.opt.fin[p.cod])) + " – " + fmtC(wdDate(PROY.cons.fin[p.cod]))}</td>
+        <td class="num">${diasPill(fb - h.planFin)}</td></tr>`;
+    }).join("") + `</tbody>`;
+  renderRend();
+}
+$("tblProy").addEventListener("click", e => { if (e.target.closest(".term")) return; const tr = e.target.closest("tr[data-p]"); if (!tr) return; SELP = tr.dataset.p; renderProy(); });
+
+function renderRend(){
+  const p = PBY[SELP], h = HIST[SELP];
+  $("rendTitulo").innerHTML = `Rendimiento semanal · ${T(p.cod, esc(p.nom))}`;
+  const box = $("chR"); const W = Math.max(300, box.clientWidth), H = 200, m = { l: 36, r: 12, t: 12, b: 28 };
+  const max = Math.max(1, ...h.semanas.map(s => s.n), h.base) * 1.15;
+  const n = h.semanas.length, bw = (W - m.l - m.r) / n;
+  const sy = v => m.t + (1 - v / max) * (H - m.t - m.b);
+  let g = "";
+  const tk = max > 20 ? 10 : max > 8 ? 4 : 2;
+  for (let v = 0; v <= max; v += tk) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${sy(v) + 4}" text-anchor="end">${v}</text>`;
+  h.semanas.forEach((s, i) => {
+    const x = m.l + i * bw + 3, w = Math.max(2, bw - 6), y = sy(s.n);
+    const rh = Math.max(0, H - m.b - y);
+    if (rh > 0) g += `<path d="M${x} ${H - m.b}V${y + Math.min(4, rh)}q0 -4 4 -4h${w - 8}q4 0 4 4V${H - m.b}Z" fill="var(--real)"/>`;
+    if (i % (W < 520 ? 3 : 2) === 0 || i === n - 1) g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${fmtC(wdDate(s.ini))}</text>`;
+    g += `<rect x="${m.l + i * bw}" y="${m.t}" width="${bw}" height="${H - m.t - m.b}" fill="transparent" data-i="${i}" class="rhit"/>`;
+  });
+  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${sy(h.base)}" y2="${sy(h.base)}" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Rendimiento semanal de ${esc(p.nom)}">${g}</svg>`;
+  box.querySelectorAll(".rhit").forEach(r => {
+    const f = ev => { const s = h.semanas[+r.dataset.i]; showTip(`<b>Semana del ${fmt(wdDate(s.ini))}</b><div class="tl"><span>Terminados</span><span>${s.n} ${p.unidad === "nivel" ? "pisos" : "recintos"}</span></div>`, r.getBoundingClientRect()); };
+    r.addEventListener("pointerenter", f); r.addEventListener("pointerdown", f); r.addEventListener("pointerleave", hideTip);
+  });
+  const u = p.unidad === "nivel" ? "pisos" : "recintos";
+  $("rendNota").innerHTML = PROY.base.sinHist[SELP]
+    ? `Sin terminaciones en las últimas 6 semanas: la proyección usa el ritmo programado (${num(h.planRate)} ${u}/semana).`
+    : `Base ${num(h.base)} ${u}/semana · optimista ${num(h.opt)} · conservador ${num(h.cons)}. Saldo ${num(h.saldo, h.saldo % 1 ? 1 : 0)} ${u}.` +
+      (h.medidoAntesDe != null ? ` El ritmo se mide en las semanas anteriores al bloqueo del ${fmt(wdDate(h.medidoAntesDe))}, para que la restricción no lo distorsione; la línea punteada muestra ese ritmo.` : "");
+}
+
+// vista partidas y tipologías
+function renderPartidas(){
+  const amb = { sub: "Subterráneos", p1: "Piso 1", dep: "Departamentos", pas: "Pasillos" };
+  $("tblPartidas").innerHTML = `<thead><tr><th class="num">#</th><th>Código</th><th>${T("partida")}</th><th>${T("especialidad")}</th><th>Se controla por</th><th>Aplica en</th><th>${T("predecesora", "Predecesoras")}</th><th class="num">${T("peso")}</th><th class="num">${T("unidad", "Unidades")}</th><th class="num">${T("cantidad")}</th></tr></thead><tbody>` +
+    P.map((p, i) => `<tr><td class="num"><span class="ord">${i + 1}</span></td><td class="mono">${p.cod}</td><td>${T(p.cod, esc(p.nom))}</td><td>${p.esp}</td>
+      <td>${p.unidad === "nivel" ? "Piso completo" : T("recinto", "Recinto")}</td>
+      <td><div class="tags">${p.aplica.map(a => `<span class="tag">${amb[a]}</span>`).join("")}</div></td>
+      <td>${p.pre.length ? `<div class="tags">${p.pre.map(c => `<span class="tag mono" data-term="${c}">${c}</span>`).join("")}</div>` : `<span class="muted">Inicio</span>`}</td>
+      <td class="num mono">${num(p.peso / PESO_TOTAL * 100)}%</td><td class="num mono">${regsDe(p.cod).length}</td><td class="num mono">${cantPartida(p.cod) ? cantPartida(p.cod).tot + `<div class="muted" style="font-family:var(--f-body);font-size:12px;white-space:nowrap">${cantPartida(p.cod).unidad}</div>` : "—"}</td></tr>`).join("") +
+    `<tr><td></td><td></td><td><b>Total</b></td><td></td><td></td><td></td><td></td><td class="num mono"><b>100%</b></td><td class="num mono"><b>${REG.length}</b></td><td></td></tr></tbody>`;
+}
+
+function renderTipos(){
+  const pc = (t, k, v) => t.conf.includes(k) ? `${v} <span class="pill soft">por confirmar</span>` : v;
+  const rows = Object.entries(CONFIG.tipologias).map(([k, t]) => {
+    const ds = deptos.filter(d => d.tipologia === k);
+    return `<tr><td style="white-space:nowrap"><b>${t.nombre}</b></td><td class="mono" style="white-space:nowrap">${t.cols}</td><td>${pc(t, "dorm", t.dorm)}</td><td class="num mono">${t.cant.puertas}</td><td class="num mono">${t.cant.ventanas}</td><td class="num mono">${t.cant.ventanales}</td><td>${pc(t, "banoTipo", t.cant.banos + " · " + t.banoTipo.toLowerCase())}</td><td>Sí</td><td class="num mono">${ds.length}</td><td class="muted">${esc(t.detalle)}</td></tr>`;
+  }).join("");
+  const tot = k => deptos.reduce((s, d) => s + cantRec(d)[k], 0);
+  $("tblTipos").innerHTML = `<thead><tr><th>Tipo</th><th>Deptos</th><th>Dormitorios</th><th class="num">Puertas</th><th class="num">Ventanas</th><th class="num">${T("ventanal", "Ventanales")}</th><th>${T("tina", "Baño")}</th><th>${T("terraza")}</th><th class="num">Cantidad</th><th>Detalle</th></tr></thead><tbody>${rows}
+    <tr><td style="white-space:nowrap"><b>Total obra</b></td><td></td><td></td><td class="num mono"><b>${tot("puertas")}</b></td><td class="num mono"><b>${tot("ventanas")}</b></td><td class="num mono"><b>${tot("ventanales")}</b></td><td class="mono"><b>${tot("banos")}</b></td><td class="mono"><b>${tot("terrazas")}</b></td><td class="num mono"><b>${deptos.length}</b></td><td class="muted">${Object.entries(CONFIG.excepciones).map(([c, e]) => c.replace("D-", "") + ": " + e.nota.toLowerCase()).join(" · ")}</td></tr></tbody>`;
+}
+
+// vista listado
+function filas(){ const fn = $("fNivel").value, q = $("fBuscar").value.trim().toLowerCase();
+  return RECINTOS.filter(r => (fn === "" || String(r.nivel) === fn) && (q === "" || r.codigo.toLowerCase().includes(q) || r.nombre.toLowerCase().includes(q))); }
+function renderListado(){
+  const rows = filas();
+  $("cuentaListado").textContent = rows.length + " de " + RECINTOS.length + " recintos";
+  $("tblRecintos").innerHTML = `<thead><tr><th>Código</th><th>${T("nivel")}</th><th>Tipo</th><th>Nombre</th><th>${T("tipologia")}</th><th class="num">Terminadas</th></tr></thead><tbody>` +
+    rows.map(r => { const ps = P.filter(p => p.aplica.includes(r.ambito)); const ok = ps.filter(p => regDeRecinto(p.cod, r).est === "ok").length;
+      return `<tr class="clk" data-cod="${r.codigo}"><td class="mono">${r.codigo}</td><td class="mono">${nivelLabel(r.nivel)}</td><td>${r.tipo}</td><td>${r.term ? T(r.term, esc(r.nombre)) : esc(r.nombre)}</td><td>${r.tipologia ? CONFIG.tipologias[r.tipologia].nombre : "—"}</td><td class="num mono">${ok} / ${ps.length}</td></tr>`; }).join("") + `</tbody>`;
+}
+$("fNivel").innerHTML = `<option value="">Todos los niveles</option>` + NIVELES.map(n => `<option value="${n}">${nivelNombre(n)}</option>`).join("");
+$("fNivel").addEventListener("change", renderListado);
+$("fBuscar").addEventListener("input", renderListado);
+$("tblRecintos").addEventListener("click", e => { if (e.target.closest(".term")) return; const tr = e.target.closest("tr[data-cod]"); if (tr) abrirFicha(tr.dataset.cod); });
+$("btnCsv").addEventListener("click", async () => {
+  const cab = ["codigo", "nivel", "tipo", "nombre", "tipologia", ...P.map(p => p.cod)];
+  const lin = filas().map(r => [r.codigo, r.nivel, r.tipo, r.nombre, r.tipologia, ...P.map(p => p.aplica.includes(r.ambito) ? EST[regDeRecinto(p.cod, r).est][0] : "")]
+    .map(v => `"${String(v).replace(/"/g, '""')}"`).join(";"));
+  try { await navigator.clipboard.writeText([cab.join(";"), ...lin].join("\n")); $("toast").textContent = "CSV copiado (" + lin.length + " filas)"; }
+  catch (e) { $("toast").textContent = "Este navegador no permite copiar"; }
+  setTimeout(() => { $("toast").textContent = ""; }, 3000);
+});
+
+// vista supuestos
+function renderSupuestos(){
+  const items = [
+    ["Datos de avance", `Datos de prueba, siempre salen iguales. Obra gruesa parte el ${fmt(CONFIG.inicio)}; el programa avanza un piso cada ${CONFIG.cicloPlan} ${T("diashabiles", "días hábiles")}.`],
+    ["Atrasos incluidos a propósito", "Obra gruesa va 15% más lenta que el programa y cerámica 25% más lenta. Eso arrastra a las partidas que vienen detrás."],
+    ["Restricción de ejemplo", "Ventanas de los pisos 19 y 20 sin despacho desde el 21-sep. La proyección supone que se libera en 15 días hábiles (9 en el optimista, 24 en el conservador)."],
+    ["Pesos de cada partida", "Obra gruesa 30%, tabiquería y cerámica 8% cada una, pintura 7%, y el resto entre 1,5% y 6%. Deben reemplazarse por los pesos del presupuesto real."],
+    ["Cómo se cuenta el avance", "Terminado = 100%, en curso = 50%, el resto = 0%. Avance de partida = suma ÷ total de unidades. Avance de obra = suma de (avance de partida × peso)."],
+    ["Cómo se proyecta", "Saldo ÷ rendimiento semanal = semanas que faltan, convertidas a días hábiles con feriados. Una partida no puede terminar antes que sus predecesoras más su propia duración por recinto."],
+    ["Feriados", "Calendario chileno 2025–2028 referencial. Debe revisarse con el calendario oficial."],
+    ["Tipologías", "Puertas, ventanas, ventanales, baño y terraza según la obra actual. Por confirmar: tipos B y C con 1 dormitorio y tina, tipo D estudio con ducha (según la cantidad de puertas). El 303 sin terraza y el 302 por confirmar."],
+    ["Impermeabilización", "Nueva partida antes de la cerámica, en el baño y la terraza de cada departamento. Pesa 2% del avance (se le quitó a la obra gruesa)."],
+    ["Zonas", "Zonas de subterráneos y piso 1 iguales que en el paso 1."],
+    ["Formato para el Excel real", "Lo ideal es una fila por recinto y partida con: código del recinto (o piso), partida, fecha de inicio real y fecha de término real. Si el Excel viene distinto, se adapta la lectura."]
+  ];
+  $("supuestos").innerHTML = items.map(([t, d]) => `<li><div><b>${t}</b><div class="muted">${d}</div></div><span class="pill soft">Por confirmar</span></li>`).join("");
+}
+
+// vista glosario
+function renderGlosario(){
+  $("glos").innerHTML = Object.entries(GLOSARIO).map(([g, items]) => `<div class="glos-group">${g}</div>` +
+    Object.values(items).map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join("")).join("");
+}
+
+// ficha de cada recinto
+function abrirFicha(cod){
+  const r = RECINTOS.find(x => x.codigo === cod); if (!r) return;
+  const ps = P.filter(p => p.aplica.includes(r.ambito));
+  $("mEyebrow").innerHTML = `<span class="mono">${r.codigo}</span><span>·</span><span>${nivelNombre(r.nivel)}</span>`;
+  $("mTitulo").textContent = r.nombre;
+  const tip = r.tipologia ? CONFIG.tipologias[r.tipologia] : null;
+  const ok = ps.filter(p => regDeRecinto(p.cod, r).est === "ok").length;
+  const q = cantRec(r), ex = CONFIG.excepciones[r.codigo];
+  const cantHtml = q ? `<dt>Puertas</dt><dd>${q.puertas}</dd><dt>${T("ventanal", "Ventanas")}</dt><dd>${q.ventanas} ventana${q.ventanas === 1 ? "" : "s"} + ${q.ventanales} ventanal${q.ventanales === 1 ? "" : "es"}</dd><dt>${T("tina", "Baño")}</dt><dd>${q.banos} · con ${tip.banoTipo.toLowerCase()}</dd><dt>${T("terraza")}</dt><dd>${q.terrazas ? "Sí" : "No"}</dd>` : "";
+  $("mBody").innerHTML = `${ex ? `<span class="pill late" style="align-self:flex-start">${esc(ex.nota)}</span>` : ""}<dl class="facts"><dt>Tipo</dt><dd>${r.tipo}</dd>${tip ? `<dt>${T("tipologia")}</dt><dd>${tip.nombre} · ${tip.desc}</dd>` : ""}${cantHtml}<dt>Terminadas</dt><dd>${ok} de ${ps.length} partidas</dd></dl>
+    <div class="tbl-wrap"><table><thead><tr><th>Partida</th><th>Estado</th><th>Término prog.</th><th>Término real</th></tr></thead><tbody>` +
+    ps.map(p => { const g = regDeRecinto(p.cod, r);
+      return `<tr><td>${T(p.cod, esc(p.nom))}</td><td>${pill(g.est)}</td><td class="mono">${fmtC(wdDate(g.pf))}</td><td class="mono">${g.est === "ok" ? fmtC(wdDate(g.rf)) : "—"}</td></tr>`; }).join("") + `</tbody></table></div>`;
+  $("overlay").hidden = false; $("mCerrar").focus();
+}
+$("mCerrar").addEventListener("click", () => { $("overlay").hidden = true; hideTip(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("overlay").hidden) { $("overlay").hidden = true; hideTip(); } });
+
+// pestañas (recuerda la última abierta)
+const VISTAS = ["resumen", "edificio", "tren", "proy", "partidas", "listado", "supuestos", "glosario"];
+function irA(v){
+  document.querySelectorAll("nav.tabs button").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === v ? "true" : "false"));
+  VISTAS.forEach(t => { $("v-" + t).hidden = t !== v; });
+  hideTip();
+  if (v === "resumen") renderCurvaS();
+  if (v === "proy") renderRend();
+  try { localStorage.setItem("vista_panel", v); } catch (e) {}
+}
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => irA(b.dataset.tab)));
+
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (!$("v-resumen").hidden) renderCurvaS(); if (!$("v-proy").hidden) renderRend(); }, 120); });
+
+renderKpis(); renderBars(); renderRestr(); renderSelector(); renderElev(); renderMatrix(); renderProy(); renderPartidas(); renderTipos(); renderListado(); renderSupuestos(); renderGlosario();
+let inicial = "resumen"; try { const v = localStorage.getItem("vista_panel"); if (VISTAS.includes(v)) inicial = v; } catch (e) {}
+irA(inicial);
+</script>
