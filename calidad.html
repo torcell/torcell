@@ -171,6 +171,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .btn.danger{background:var(--bad);color:#fff;border-color:transparent;}
 .fotos{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
 .fotos[hidden],.ebarra[hidden]{display:none;}
+#mFotos+.fotos{margin-top:4px;}
 .fotos-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;}
 .fotos-h span{font-size:12px;font-weight:600;color:var(--sub);}
 .fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
@@ -373,7 +374,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
-      <div class="fotos-h"><b>Fotos del departamento</b><span id="mFotosN"></span></div>
+      <div class="fotos-h"><b id="mFotosT">Fotos del departamento</b><span id="mFotosN"></span></div>
       <div class="fgrid" id="mFotosGrid"></div>
       <div class="fbtns">
         <button type="button" class="btn small" id="fTomar">📷 Tomar foto</button>
@@ -381,6 +382,16 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       </div>
       <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
       <input type="file" id="fGal" accept="image/*" multiple hidden>
+    </div>
+    <div class="fotos" id="mFotosC" hidden>
+      <div class="fotos-h"><b>Fotos de muro cocina</b><span id="mFotosNC"></span></div>
+      <div class="fgrid" id="mFotosGridC"></div>
+      <div class="fbtns">
+        <button type="button" class="btn small" id="fTomarC">📷 Tomar foto</button>
+        <button type="button" class="btn small" id="fGaleriaC">🖼 Galería</button>
+      </div>
+      <input type="file" id="fCamC" accept="image/*" capture="environment" hidden>
+      <input type="file" id="fGalC" accept="image/*" multiple hidden>
     </div>
     <div class="err" id="mErr"></div>
     <div class="acciones">
@@ -390,7 +401,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.5.0';
+const CAL_VERSION = '1.6.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -407,6 +418,7 @@ const opcionesDe = () => opciones[scope] || [];
 let opcionesEdit = [];
 let fotosOk = false;
 let fotosCount = {};
+let fotosCocinaN = {};
 const fotosDe = {};
 const fotosEstado = {};
 let cadenaFotos = Promise.resolve();
@@ -425,7 +437,7 @@ try{ ordenDesc = localStorage.getItem('calidadOrdenPisos') !== 'asc'; }catch(e){
 let cargado = false;
 let errorCarga = 'No se pudo cargar la información de la base de datos.';
 const AREAS_DE = {piso: a => a === 'Piso' || a === 'Pasillos', muros: a => a === 'Muro Baños' || a === 'Muro', cocina: a => a === 'Muro Cocina'};
-const NOMBRE_SCOPE = {piso:'piso', muros:'muro baño', cocina:'muro cocina'};
+const NOMBRE_SCOPE = {piso:'piso', muros:'muro baño', cocina:'muro cocina', dpto:'departamento'};
 const NOMBRE_AREA = {'Piso':'Piso', 'Pasillos':'Pasillo', 'Muro Baños':'Muro baño', 'Muro Cocina':'Muro cocina', 'Muro':'Muro'};
 const claveBase = d => d.p + '|' + d.d;
 const clave = (d, sc) => claveBase(d) + '|' + (sc || scope);
@@ -553,7 +565,7 @@ function cerrarSesion(msg){
   token = ''; nombre = ''; cargo = '';
   guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadCargo', null);
   celdas = {}; revisiones = {}; cargado = false;
-  fotosOk = false; fotosCount = {}; Object.keys(fotosDe).forEach(k => delete fotosDe[k]);
+  fotosOk = false; fotosCount = {}; fotosCocinaN = {}; Object.keys(fotosDe).forEach(k => delete fotosDe[k]);
   ajustarFotosUI();
   document.body.classList.add('sin-sesion');
   $('gate').classList.remove('off');
@@ -672,6 +684,7 @@ function infoDeError(texto){
   pintarInfo('bad', '<b>No se pudo leer la base de datos.</b> ' + esc(texto) + '<br><button class="btn small" id="infoReintentar" type="button">Reintentar</button>');
 }
 
+const fotosEnTile = d => { const b = claveBase(d), t = fotosCount[b] || 0, c = fotosCocinaN[b] || 0; return scope === 'cocina' ? t : Math.max(0, t - c); };
 function pintar(){
   if(!cargado){
     ['nPend', 'nRev', 'nObs', 'nNo'].forEach(id => { $(id).textContent = '–'; });
@@ -715,7 +728,7 @@ function pintar(){
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
       ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b>${esc(x.d.d)}</b><small>${falta(x.e)}</small></div>`
-      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small>${fotosCount[claveBase(x.d)] ? `<i class="fcnt" title="Fotos">📷 ${fotosCount[claveBase(x.d)]}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small>${fotosEnTile(x.d) ? `<i class="fcnt" title="Fotos">📷 ${fotosEnTile(x.d)}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
     '</div></section>').join('');
 }
 
@@ -851,16 +864,27 @@ async function prepararFoto(file){
   if(src.close) src.close();
   return {foto, mini};
 }
+const fotoCocina = f => f.z === 'cocina';
 function pintarFotos(){
-  const box = $('mFotos');
-  if(!fotosOk || !actual){ box.hidden = true; return; }
+  const box = $('mFotos'), boxC = $('mFotosC');
+  if(!fotosOk || !actual){ box.hidden = true; boxC.hidden = true; return; }
   box.hidden = false;
+  const esCoc = scope === 'cocina';
+  boxC.hidden = !esCoc;
   const base = claveBase(actual);
-  const arr = fotosDe[base] || [];
+  const todas = fotosDe[base] || [];
   const est = fotosEstado[base];
-  $('mFotosN').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length ? arr.length + ' de ' + FOTOS_MAX : 'sin fotos';
-  $('mFotosGrid').innerHTML = arr.map((f, i) => `<button type="button" class="fth${f.estado === 'sub' ? ' sub' : ''}" data-i="${i}" aria-label="Foto ${i + 1}">${f.m ? `<img alt="" src="data:image/jpeg;base64,${f.m}">` : ''}</button>`).join('');
-  $('fTomar').disabled = $('fGaleria').disabled = arr.length >= FOTOS_MAX;
+  const miniatura = (f, i) => `<button type="button" class="fth${f.estado === 'sub' ? ' sub' : ''}" data-i="${i}" aria-label="Foto ${i + 1}">${f.m ? `<img alt="" src="data:image/jpeg;base64,${f.m}">` : ''}</button>`;
+  const cuenta = n => est === 'pidiendo' && !todas.length ? 'cargando…' : est === 'error' && !todas.length ? 'no se pudieron cargar' : n ? n + (n === 1 ? ' foto' : ' fotos') : 'sin fotos';
+  const gen = [], coc = [];
+  todas.forEach((f, i) => (fotoCocina(f) ? coc : gen).push(miniatura(f, i)));
+  $('mFotosT').textContent = 'Fotos del departamento' + (esCoc ? '' : ' (valen para piso y muro baño)');
+  $('mFotosN').textContent = cuenta(gen.length);
+  $('mFotosGrid').innerHTML = gen.join('');
+  $('mFotosNC').textContent = cuenta(coc.length);
+  $('mFotosGridC').innerHTML = coc.join('');
+  const lleno = todas.length >= FOTOS_MAX;
+  $('fTomar').disabled = $('fGaleria').disabled = $('fTomarC').disabled = $('fGaleriaC').disabled = lleno;
 }
 async function abrirFotos(d){
   pintarFotos();
@@ -875,6 +899,7 @@ async function abrirFotos(d){
       const pend = (fotosDe[base] || []).filter(f => f.estado === 'sub');
       fotosDe[base] = j.fotos.map(f => Object.assign({estado: 'ok'}, f)).concat(pend);
       fotosCount[base] = j.fotos.length;
+      fotosCocinaN[base] = j.fotos.filter(fotoCocina).length;
       fotosEstado[base] = '';
     }else{ fotosEstado[base] = 'error'; }
   }catch(e){ fotosEstado[base] = 'error'; }
@@ -882,9 +907,10 @@ async function abrirFotos(d){
   pintar();
 }
 const MSG_FOTO = {limite: 'Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.', demasiadas: 'Demasiados envíos seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', foto_invalida: 'Esa foto no se pudo guardar. Prueba con otra.', clave_invalida: 'Ese departamento no se reconoce.'};
-function anadirFotos(files){
+function anadirFotos(files, zona){
   if(!actual || !fotosOk) return;
-  const base = claveBase(actual), zona = scope;
+  const base = claveBase(actual);
+  zona = zona === 'cocina' ? 'cocina' : 'dpto';
   const lista = Array.from(files || []).filter(f => !f.type || /^image\//.test(f.type));
   if(!lista.length) return;
   const arr = fotosDe[base] = fotosDe[base] || [];
@@ -911,8 +937,10 @@ async function subirUna(base, zona, file, ent){
     if(j && j.ok){
       ent.id = j.id; ent.ts = j.ts || ent.ts; ent.estado = 'ok';
       fotosCount[base] = (fotosCount[base] || 0) + 1;
+      if(zona === 'cocina') fotosCocinaN[base] = (fotosCocinaN[base] || 0) + 1;
       if(actual && claveBase(actual) === base) pintarFotos();
       pintar();
+      marcarObservadoPorFoto(base, zona);
       return;
     }
     quitar((j && MSG_FOTO[j.error]) || 'No se pudo subir la foto. Revisa que el script de Google esté en la versión nueva.');
@@ -968,6 +996,7 @@ async function borrarFotoVista(){
       const arr = fotosDe[base] || [], i = arr.indexOf(f);
       if(i >= 0) arr.splice(i, 1);
       fotosCount[base] = Math.max(0, (fotosCount[base] || 1) - 1);
+      if(fotoCocina(f)) fotosCocinaN[base] = Math.max(0, (fotosCocinaN[base] || 1) - 1);
       cerrarFoto(); pintarFotos(); pintar();
       return;
     }
@@ -1103,7 +1132,7 @@ async function borrarExportadas(){
     }
     exp.estado = 'borrado'; $('eCerrar').disabled = false;
     Object.keys(fotosDe).forEach(k => delete fotosDe[k]);
-    fotosCount = {};
+    fotosCount = {}; fotosCocinaN = {};
     pintarExp('Listo: se borraron ' + borradas + ' foto' + (borradas === 1 ? '' : 's') + ' de la base de datos.', '', false, true);
   }catch(e){
     exp.estado = 'descargado'; exp.confirmar = false; $('eCerrar').disabled = false;
@@ -1143,14 +1172,16 @@ function guardarRevision(){
   const sel = seleccion();
   const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
   if(estadoSel === 'observado' && !items.length){ $('mErr').textContent = 'Marca al menos una observación.'; return; }
-  const k = clave(actual);
+  enviarRevision(clave(actual), estadoSel, items, true);
+}
+function enviarRevision(k, estadoNuevo, items, cerrar){
   const previo = revisiones[k];
-  const envio = {clave: k, estado: estadoSel, items: estadoSel === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()};
-  revisiones[k] = {e: estadoSel, d: items.map(x => x.t + ' ×' + x.c).join(', '), c: items.reduce((t, x) => t + x.c, 0), ts: Date.now(), u: (cargo ? cargo + ' - ' : '') + nombre};
-  if(estadoSel !== 'observado'){ revisiones[k].d = ''; revisiones[k].c = 0; }
+  const envio = {clave: k, estado: estadoNuevo, items: estadoNuevo === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()};
+  revisiones[k] = {e: estadoNuevo, d: items.map(x => x.t + ' ×' + x.c).join(', '), c: items.reduce((t, x) => t + x.c, 0), ts: Date.now(), u: (cargo ? cargo + ' - ' : '') + nombre};
+  if(estadoNuevo !== 'observado'){ revisiones[k].d = ''; revisiones[k].c = 0; }
   locales[k] = {rev: Object.assign({}, revisiones[k]), previo, estado: 'enviando', okTs: 0};
   marcarEspera(k);
-  cerrarModal();
+  if(cerrar) cerrarModal();
   pintar();
   enVuelo++;
   llamar('calidadGuardar', envio, true).then(j => {
@@ -1163,6 +1194,26 @@ function guardarRevision(){
     aviso('Tardó en responder. Estoy verificando si se guardó…');
     verificarDudosos(0);
   }).finally(() => { enVuelo--; });
+}
+
+
+// Si se sube una foto, esa partida queda en Observaciones (la foto del departamento marca piso y muro baño; la de cocina, solo muro cocina).
+function marcarObservadoPorFoto(base, zona){
+  const d = LAYOUT.find(x => claveBase(x) === base);
+  if(!d) return;
+  (zona === 'cocina' ? ['cocina'] : ['piso', 'muros']).forEach(sc => {
+    const e = estado(d, sc);
+    if(!e.aplica || !e.ok) return;
+    const k = clave(d, sc), r = revision(d, sc);
+    if(r.e === 'observado') return;
+    enviarRevision(k, 'observado', [{t: 'Con fotos', c: 1}], false);
+    if(actual && claveBase(actual) === base && sc === scope){
+      estadoSel = 'observado';
+      pintarLista({'Con fotos': 1});
+      elegir('observado');
+      $('mQuien').textContent = nombreCorto(revisiones[k].u);
+    }
+  });
 }
 
 function deshacer(k, previo, texto){
@@ -1263,6 +1314,7 @@ async function cargar(inicial){
       if(typeof cargoSrv === 'string' && cargoSrv !== cargo){ cargo = cargoSrv; guardarLocal('calidadCargo', cargo); pintarQuien(); }
       fotosOk = !!(j.fotos && typeof j.fotos === 'object' && !Array.isArray(j.fotos));
       if(fotosOk) fotosCount = j.fotos;
+      fotosCocinaN = (j.fotosCocina && typeof j.fotosCocina === 'object' && !Array.isArray(j.fotosCocina)) ? j.fotosCocina : {};
       ajustarFotosUI();
       if(j.opciones && typeof j.opciones === 'object' && !Array.isArray(j.opciones)) opciones = Object.assign({}, opciones, j.opciones);
       cargado = true;
@@ -1423,7 +1475,11 @@ $('mLista').addEventListener('change', e => {
 $('mCancel').addEventListener('click', cerrarModal);
 $('fTomar').addEventListener('click', () => $('fCam').click());
 $('fGaleria').addEventListener('click', () => $('fGal').click());
-['fCam', 'fGal'].forEach(id => $(id).addEventListener('change', e => { anadirFotos(e.target.files); e.target.value = ''; }));
+['fCam', 'fGal'].forEach(id => $(id).addEventListener('change', e => { anadirFotos(e.target.files, 'dpto'); e.target.value = ''; }));
+$('fTomarC').addEventListener('click', () => $('fCamC').click());
+$('fGaleriaC').addEventListener('click', () => $('fGalC').click());
+['fCamC', 'fGalC'].forEach(id => $(id).addEventListener('change', e => { anadirFotos(e.target.files, 'cocina'); e.target.value = ''; }));
+$('mFotosGridC').addEventListener('click', e => { const b = e.target.closest('.fth'); if(b && !b.classList.contains('sub')) verFoto(Number(b.dataset.i)); });
 $('mFotosGrid').addEventListener('click', e => { const b = e.target.closest('.fth'); if(b && !b.classList.contains('sub')) verFoto(Number(b.dataset.i)); });
 $('fvCerrar').addEventListener('click', cerrarFoto);
 $('fvBorrar').addEventListener('click', borrarFotoVista);
