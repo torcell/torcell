@@ -392,6 +392,7 @@
   :root{--ancho-estado:112px;}
   .ribbon-flag.estado-badge{width:var(--ancho-estado);}
   .cell-flip-front.front-admin{min-height:152px;}
+  .est-aviso{margin:0 0 4px;font-size:11px;line-height:1.25;color:#c0546f;font-weight:600;text-align:center;}
   .est-lista{flex:1;display:flex;flex-direction:column;gap:3px;justify-content:center;min-height:0;}
   .est-fila{display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;padding:3px 6px;font-size:11.5px;line-height:1.3;border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);cursor:pointer;border-radius:0;text-align:left;font-family:inherit;}
   .est-fila:disabled{opacity:.4;cursor:not-allowed;}
@@ -1371,7 +1372,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.36.0';
+const APP_VERSION = '0.37.0';
 const BACKEND_REQUERIDO = 51;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1639,6 +1640,19 @@ FLOOR_BLOCKS.forEach(fb => {
   }
 });
 const cellById = Object.fromEntries(ALL_CELLS.map(c => [c.id, c]));
+// El frague solo puede pasar a Partida cuando la cerámica de ese mismo departamento (o pasillo) y misma zona ya está Terminada.
+const CERAMICA_DE = {};
+ALL_CELLS.forEach(c => { if(c.categoria === 'Cerámica') CERAMICA_DE[c.pisoNum + '|' + c.dpto + '|' + c.area] = c.id; });
+function ceramicaPendienteDe(cell){
+  if(!cell || cell.categoria !== 'Frague') return null;
+  const idCer = CERAMICA_DE[cell.pisoNum + '|' + cell.dpto + '|' + cell.area];
+  if(!idCer) return null;
+  return getState(idCer).terminado ? null : cellById[idCer];
+}
+function msgFragueBloqueado(cell){
+  const nom = cell.dpto === 'Pasillo' ? 'l pasillo del piso ' + cell.pisoNum : 'l dpto ' + cell.dpto;
+  return 'No se puede dar Partida al frague de' + nom + ' (' + (AREA_LABEL[cell.area] || cell.area) + '): primero su cerámica debe estar en Terminado.';
+}
 const ALL_FLOOR_NUMS = Array.from(new Set(FLOOR_BLOCKS.map(f => f.pisoNum))).sort((a,b)=>a-b);
 let ordenPisosDesc = true;
 try{ const o = localStorage.getItem('progresoObraOrdenPisosV2'); if(o) ordenPisosDesc = o === 'desc'; }catch(err){}
@@ -2817,7 +2831,8 @@ function checksHtml(cell, st){
 
   const terminadoDisabled = !puede('estados') || (!turboMode && !st.partida);
   const pagadoDisabled = !isAdmin || (!turboMode && !st.terminado);
-  const partidaDisabled = !puede('estados') || (!turboMode && st.terminado);
+  const fragueBloq = !st.partida && !!ceramicaPendienteDe(cell);
+  const partidaDisabled = !puede('estados') || (!turboMode && st.terminado) || fragueBloq;
   return `<div class="checks-row" data-checksof="${cell.id}">
     <label title="${st.pagadoTs ? fechaCortaHora(st.pagadoTs) : 'Sin fecha registrada'}" class="chk-pill pagado ${st.pagado?'on':''} ${pagadoDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="pagado" ${st.pagado?'checked':''} ${pagadoDisabled?'disabled':''}> Pagado
@@ -2825,7 +2840,7 @@ function checksHtml(cell, st){
     <label title="${st.terminadoTs ? fechaCortaHora(st.terminadoTs) : 'Sin fecha registrada'}" class="chk-pill terminado ${st.terminado?'on':''} ${terminadoDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="terminado" ${st.terminado?'checked':''} ${terminadoDisabled?'disabled':''}> ${terminadoLabel}
     </label>
-    <label title="${st.partidaTs ? fechaCortaHora(st.partidaTs) : 'Sin fecha registrada'}" class="chk-pill partida ${st.partida?'on':''} ${partidaDisabled?'disabled':''}">
+    <label title="${fragueBloq ? 'Primero la cerámica debe estar Terminada' : (st.partidaTs ? fechaCortaHora(st.partidaTs) : 'Sin fecha registrada')}" class="chk-pill partida ${st.partida?'on':''} ${partidaDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="partida" ${st.partida?'checked':''} ${partidaDisabled?'disabled':''}> Partida
     </label>
   </div>`;
@@ -2878,9 +2893,10 @@ function filasEstadoAdminHtml(cell, st, destino){
   const clases = ['partida', 'terminado', 'pagado'];
   const fechas = [st.partidaTs, st.terminadoTs, st.pagadoTs];
   const hoy = Date.now();
-  return [1, 2, 3].map(n => {
+  const bloqueoFrague = actual === 0 && !!ceramicaPendienteDe(cell);
+  return (bloqueoFrague ? '<p class="est-aviso">Primero la cerámica de este lugar debe estar en Terminado.</p>' : '') + [1, 2, 3].map(n => {
     const activo = destino >= n, cambio = activo !== (actual >= n);
-    const habilitado = destino >= n || turboMode || destino === n - 1;
+    const habilitado = (destino >= n || turboMode || destino === n - 1) && !bloqueoFrague;
     let largo = '—', corto = '—';
     if(activo){
       const ts = cambio ? hoy : fechas[n - 1];
@@ -2908,6 +2924,7 @@ function pintarReversoAdmin(id){
   flip.querySelector('.est-confirmar').disabled = destino === estadoNumero(st);
 }
 function confirmarEstadoAdmin(id, destino){
+  if(destino > 0 && estadoNumero(getState(id)) === 0 && ceramicaPendienteDe(cellById[id])){ avisoToast(msgFragueBloqueado(cellById[id]), 'error'); return; }
   aplicarEstadoDestino(id, destino);
   markCellDirty(id);
   scheduleSave(); refrescarCelda(id);
@@ -2977,7 +2994,7 @@ function pasosVentanaHtml(cell, st, destino){
   const nombres = ['Partida', TERMINADO_LABEL[cell.area] || 'Terminado', 'Pagado'];
   const clases = ['partida', 'terminado', 'pagado'];
   const fechas = [st.partidaTs, st.terminadoTs, st.pagadoTs];
-  const bloqueado = !puede('estados') || (st.pagado && !isAdmin);
+  const bloqueado = !puede('estados') || (st.pagado && !isAdmin) || (actual === 0 && !!ceramicaPendienteDe(cell));
   return [1, 2, 3].map(n => {
     const activo = destino >= n, cambio = activo !== (actual >= n);
     const habilitado = !bloqueado && (isAdmin || n < 3) && (destino >= n || turboMode || destino === n - 1);
@@ -3013,6 +3030,7 @@ function pintarVentana(){
       <div class="vt-sec"><div class="vt-sec-title">Trabajador</div>
         <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${botonesTrab}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Estado</div>
+        ${estadoNumero(st) === 0 && ceramicaPendienteDe(cell) ? '<p class="est-aviso" style="text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;">Primero la cerámica de este lugar debe estar en Terminado para poder dar Partida al frague.</p>' : ''}
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
         <div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar"${hayCambio ? '' : ' disabled'}>Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar"${hayCambio ? '' : ' disabled'}>Confirmar cambio</button></div></div>
       <div class="vt-sec"><div class="vt-sec-title">Metraje</div>
@@ -3959,6 +3977,7 @@ async function cargarMisPeticiones(){
   }catch(e){}
 }
 async function enviarPeticion(celdaId, tipo){
+  if(!getState(celdaId).partida && ceramicaPendienteDe(cellById[celdaId])){ avisoToast(msgFragueBloqueado(cellById[celdaId]), 'error'); return; }
   if(!DB_URL){ avisoToast('Hace falta la base de datos conectada para enviar peticiones.'); return; }
   mostrarCargando('Enviando petición…');
   try{
@@ -4044,6 +4063,7 @@ async function resolverPeticionUI(id, aceptar){
       if(p.tipo === 1 && st.trabajador && st.trabajador !== p.trabajador){
         avisoToast('Ese departamento ya tiene a otra persona asignada. Rechaza esta petición.'); return;
       }
+      if(!st.partida && ceramicaPendienteDe(cellById[p.celda])){ avisoToast(msgFragueBloqueado(cellById[p.celda]) + ' Rechaza esta petición o espera.', 'error'); return; }
       const ahora = Date.now();
       if(p.tipo === 1){ st.trabajador = p.trabajador; st.partida = true; st.partidaTs = st.partidaTs || ahora; }
       else { st.partida = true; st.partidaTs = st.partidaTs || ahora; st.terminado = true; st.terminadoTs = ahora; }
@@ -4606,6 +4626,7 @@ function alCambioContenido(e){
   const cell = cellById[id];
   const willBeOn = cb.checked;
   cb.checked = !willBeOn;
+  if(willBeOn && !state[id].partida && ceramicaPendienteDe(cell)){ avisoToast(msgFragueBloqueado(cell), 'error'); return; }
   let cascadeNote = '';
   if(flag === 'partida' && !willBeOn && (state[id].terminado || state[id].pagado)) cascadeNote = ' Esto también quitará el estado Terminado y Pagado.';
   if(flag === 'terminado' && !willBeOn && state[id].pagado) cascadeNote = ' Esto también quitará Pagado.';

@@ -120,6 +120,10 @@ body.bloq{overflow:hidden;}
 .pestanas button+button{margin-left:-1px;}
 .pestanas button:hover{border-color:var(--accent);position:relative;}
 .pestanas button:active{transform:scale(.97);}
+.pestanas button{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:nowrap;white-space:nowrap;}
+@media (max-width:480px){.pestanas button{font-size:13px;padding-left:2px;padding-right:2px;gap:4px;}.pestanas .pcnt{font-size:10.5px;min-width:18px;padding:3px 5px;}}
+.pestanas .pcnt{font-style:normal;font-size:11px;font-weight:800;line-height:1;min-width:20px;padding:4px 6px;border-radius:999px;background:var(--warn);color:#fff;text-align:center;}
+.pestanas .pcnt.cero{background:rgba(128,128,128,.35);color:inherit;font-weight:700;}
 
 .pestanas button{position:relative;background:rgba(255,255,255,.12);color:rgba(255,255,255,.78);font-weight:600;border-color:rgba(255,255,255,.28);}
 .pestanas button:hover{background:rgba(255,255,255,.26);color:#fff;border-color:var(--accent);}
@@ -294,9 +298,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="grp"><label for="ordenPisos">Orden de pisos</label><button type="button" class="btn primary" id="ordenPisos" aria-pressed="true">↓ Mayor a menor</button></div>
   </div>
   <div class="pestanas" id="pestanas">
-    <button type="button" class="on" data-sc="piso" aria-pressed="true">Piso</button>
-    <button type="button" data-sc="muros">Muro baño</button>
-    <button type="button" data-sc="cocina">Muro cocina</button>
+    <button type="button" class="on" data-sc="piso" aria-pressed="true"><span class="ptxt">Piso</span><i class="pcnt" hidden></i></button>
+    <button type="button" data-sc="muros" aria-pressed="false"><span class="ptxt">Muro baño</span><i class="pcnt" hidden></i></button>
+    <button type="button" data-sc="cocina" aria-pressed="false"><span class="ptxt">Muro cocina</span><i class="pcnt" hidden></i></button>
   </div>
   <div id="lista"></div>
 </main>
@@ -386,7 +390,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.4.0';
+const CAL_VERSION = '1.5.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -587,8 +591,8 @@ function estado(d, sc){
 }
 
 const nombreCorto = u => { const t = String(u || ''); const i = t.indexOf(' - '); return i === -1 ? t : t.substring(i + 3); };
-function revision(d){
-  const r = revisiones[clave(d)];
+function revision(d, sc){
+  const r = revisiones[clave(d, sc)];
   if(r) return r;
   return d.n <= PISO_REVISADO_HASTA && d.d !== 'Pasillo' ? {e:'revisado', d:'', c:0, base:true} : {e:'pendiente', d:'', c:0};
 }
@@ -681,6 +685,13 @@ function pintar(){
   const pisosConAvance = new Set(todos.filter(x => x.mov).map(x => x.d.p));
   const cuenta = k => todos.filter(x => x.r.e === k).length;
   $('nPend').textContent = cuenta('pendiente');
+  document.querySelectorAll('#pestanas button').forEach(bt => {
+    const sc = bt.dataset.sc, i = bt.querySelector('.pcnt'); if(!i) return;
+    const n = LAYOUT.filter(d => { const e = estado(d, sc); return e.aplica && e.ok && revision(d, sc).e === 'pendiente'; }).length;
+    i.hidden = false; i.textContent = n; i.classList.toggle('cero', n === 0);
+    i.title = n + (n === 1 ? ' departamento listo' : ' departamentos listos') + ' para revisar';
+    bt.setAttribute('aria-label', bt.querySelector('.ptxt').textContent + ': ' + n + ' listos para revisar');
+  });
   $('nRev').textContent = cuenta('revisado');
   $('nObs').textContent = cuenta('observado');
   $('nNo').textContent = cuenta('nolisto');
