@@ -392,6 +392,15 @@
   :root{--ancho-estado:112px;}
   .ribbon-flag.estado-badge{width:var(--ancho-estado);}
   .cell-flip-front.front-admin{min-height:152px;}
+  .cp-intro{margin:0 0 8px;font-size:12.5px;color:var(--sub);}
+  .cp-lista{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto;margin-bottom:10px;}
+  .cp-item{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--soft);padding:7px 10px;}
+  .cp-tit{font-size:13px;font-weight:700;margin-bottom:3px;}
+  .cp-tit small{display:block;font-weight:500;font-size:11px;color:var(--sub);}
+  .cp-campo{display:flex;align-items:baseline;gap:6px;font-size:12px;padding:1px 0;flex-wrap:wrap;}
+  .cp-campo>span:first-child{color:var(--sub);min-width:84px;}
+  .cp-antes{color:var(--sub);text-decoration:line-through;}
+  .cp-flecha{color:var(--sub);}
   .est-aviso{margin:0 0 4px;font-size:11px;line-height:1.25;color:#c0546f;font-weight:600;text-align:center;}
   .est-lista{flex:1;display:flex;flex-direction:column;gap:3px;justify-content:center;min-height:0;}
   .est-fila{display:flex;align-items:center;gap:6px;width:100%;box-sizing:border-box;padding:3px 6px;font-size:11.5px;line-height:1.3;border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);cursor:pointer;border-radius:0;text-align:left;font-family:inherit;}
@@ -924,6 +933,7 @@
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <button class="btn small solo-admin" id="irCalidadBtn">✔ Ir a Calidad</button>
+    <button class="btn small" id="irAvanceBtn" style="display:none;">📊 Dashboard de avance</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
     <div class="rb-der" id="rbDer" style="display:none;">
       <button type="button" class="btn small" id="miColorBtn">🎨 Mi color</button>
@@ -1372,7 +1382,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.37.0';
+const APP_VERSION = '0.39.0';
 const BACKEND_REQUERIDO = 51;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1564,6 +1574,10 @@ function applyRoleUI(){
   document.body.classList.toggle('is-supervisor', isSupervisor || isJefe);
   document.body.classList.toggle('is-worker', !!workerSession);
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
+  const normNom = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const veDashboard = isAdmin || ((isJefe || isSupervisor) && normNom(sessionName).indexOf('sandoval') !== -1);
+  const btnAvance = document.getElementById('irAvanceBtn');
+  if(btnAvance) btnAvance.style.display = veDashboard ? 'inline-flex' : 'none';
   const badge = document.getElementById('roleBadge');
   const loggedIn = isAdmin || isSupervisor || isJefe || workerSession;
   let label = '', cls = 'guest';
@@ -1649,6 +1663,21 @@ function ceramicaPendienteDe(cell){
   if(!idCer) return null;
   return getState(idCer).terminado ? null : cellById[idCer];
 }
+// Bloqueos para dar Partida: tiene que haber un trabajador asignado y, en frague, la cerámica del mismo lugar ya Terminada.
+function motivoBloqueoPartida(cell, ignorarTrabajador){
+  if(!cell) return null;
+  if(!ignorarTrabajador && !getState(cell.id).trabajador) return 'trabajador';
+  if(ceramicaPendienteDe(cell)) return 'ceramica';
+  return null;
+}
+function lugarTxt(cell){ return cell.dpto === 'Pasillo' ? 'el pasillo del piso ' + cell.pisoNum : 'el dpto ' + cell.dpto; }
+function textoBloqueoPartida(motivo, cell){
+  if(motivo === 'trabajador') return 'No se puede dar Partida en ' + lugarTxt(cell) + ' (' + (AREA_LABEL[cell.area] || cell.area) + '): primero asigna un trabajador.';
+  return msgFragueBloqueado(cell);
+}
+function avisoCortoBloqueo(motivo){ return motivo === 'trabajador' ? 'Primero asigna un trabajador para poder dar Partida.' : 'Primero la cerámica de este lugar debe estar en Terminado.'; }
+const asignacionBloqueada = st => !!(st.pagado || (st.terminado && st.trabajador));
+function msgReasignarBloqueado(){ return 'No se puede reasignar: esta partida ya está Terminada. Si fue un error, quita primero la marca de Terminado.'; }
 function msgFragueBloqueado(cell){
   const nom = cell.dpto === 'Pasillo' ? 'l pasillo del piso ' + cell.pisoNum : 'l dpto ' + cell.dpto;
   return 'No se puede dar Partida al frague de' + nom + ' (' + (AREA_LABEL[cell.area] || cell.area) + '): primero su cerámica debe estar en Terminado.';
@@ -2259,6 +2288,35 @@ window.addEventListener('beforeunload', (e) => {
   e.returnValue = '';
 });
 
+// Ventana previa: muestra lo que cambió desde el último guardado y pide confirmar.
+const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área'};
+function resumenCambiosPendientes(){
+  const bool = v => v ? 'Sí' : 'No';
+  const fm2 = v => (v === null || v === undefined || v === '') ? '—' : String(v).replace('.', ',') + ' m²';
+  const filas = [];
+  dirtyCellIds.forEach(id => {
+    const c = cellById[id]; if(!c) return;
+    const campos = camposCambiados(c).filter(f => !/Ts$/.test(f));
+    if(!campos.length) return;
+    const base = baseRec[id] || {}, ahora = recordForCell(c);
+    const nombreCampo = {trabajador:'Trabajador', partida:'Partida', terminado:(TERMINADO_LABEL[c.area] || 'Terminado'), pagado:'Pagado', retenido:'Retenido', nota:'Observación', m2:'Metraje'};
+    const fmt = (f, v) => f === 'm2' ? fm2(v) : (typeof v === 'boolean' ? bool(v) : (v === '' || v == null ? '—' : String(v)));
+    const detalle = campos.map(f => `<div class="cp-campo"><span>${esc(nombreCampo[f] || f)}</span><span class="cp-antes">${esc(fmt(f, base[f]))}</span><span class="cp-flecha">→</span><b>${esc(fmt(f, ahora[f]))}</b></div>`).join('');
+    const lugar = c.dpto === 'Pasillo' ? 'Pasillo' : 'Dpto ' + c.dpto;
+    filas.push({orden: c.pisoNum * 1000, html: `<div class="cp-item"><div class="cp-tit">${esc(lugar)} · ${esc(AREA_LABEL[c.area] || c.area)}<small>${esc(c.categoria)} · ${esc(c.piso)}</small></div>${detalle}</div>`});
+  });
+  filas.sort((a, b) => b.orden - a.orden);
+  const secciones = seccionesTodas ? ['Configuración general (precios, trabajadores, ajustes)'] : Array.from(seccionesSucias).map(k => NOMBRE_SECCION_CAMBIO[k] || k);
+  return {celdas: filas.map(f => f.html), secciones: settingsDirty ? (secciones.length ? secciones : ['Configuración general']) : []};
+}
+function pedirGuardar(){
+  if(!isAdmin || guardandoAhora) return;
+  const r = resumenCambiosPendientes();
+  if(!r.celdas.length && !r.secciones.length){ saveNow(); return; }
+  const cuerpo = (r.celdas.length ? `<p class="cp-intro">${r.celdas.length} partida${r.celdas.length === 1 ? '' : 's'} con cambios desde el último guardado:</p><div class="cp-lista">${r.celdas.join('')}</div>` : '')
+    + (r.secciones.length ? `<p class="cp-intro">También se guardarán cambios en: <b>${r.secciones.map(esc).join(', ')}</b>.</p>` : '');
+  openInputModal('Cambios por guardar', cuerpo, () => { saveNow(); }, 'Guardar');
+}
 async function saveNow(){
   if(!isAdmin || guardandoAhora) return;
   clearTimeout(saveTimer);
@@ -2831,7 +2889,8 @@ function checksHtml(cell, st){
 
   const terminadoDisabled = !puede('estados') || (!turboMode && !st.partida);
   const pagadoDisabled = !isAdmin || (!turboMode && !st.terminado);
-  const fragueBloq = !st.partida && !!ceramicaPendienteDe(cell);
+  const motBloq = !st.partida ? motivoBloqueoPartida(cell) : null;
+  const fragueBloq = !!motBloq;
   const partidaDisabled = !puede('estados') || (!turboMode && st.terminado) || fragueBloq;
   return `<div class="checks-row" data-checksof="${cell.id}">
     <label title="${st.pagadoTs ? fechaCortaHora(st.pagadoTs) : 'Sin fecha registrada'}" class="chk-pill pagado ${st.pagado?'on':''} ${pagadoDisabled?'disabled':''}">
@@ -2840,7 +2899,7 @@ function checksHtml(cell, st){
     <label title="${st.terminadoTs ? fechaCortaHora(st.terminadoTs) : 'Sin fecha registrada'}" class="chk-pill terminado ${st.terminado?'on':''} ${terminadoDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="terminado" ${st.terminado?'checked':''} ${terminadoDisabled?'disabled':''}> ${terminadoLabel}
     </label>
-    <label title="${fragueBloq ? 'Primero la cerámica debe estar Terminada' : (st.partidaTs ? fechaCortaHora(st.partidaTs) : 'Sin fecha registrada')}" class="chk-pill partida ${st.partida?'on':''} ${partidaDisabled?'disabled':''}">
+    <label title="${fragueBloq ? avisoCortoBloqueo(motBloq) : (st.partidaTs ? fechaCortaHora(st.partidaTs) : 'Sin fecha registrada')}" class="chk-pill partida ${st.partida?'on':''} ${partidaDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="partida" ${st.partida?'checked':''} ${partidaDisabled?'disabled':''}> Partida
     </label>
   </div>`;
@@ -2893,8 +2952,9 @@ function filasEstadoAdminHtml(cell, st, destino){
   const clases = ['partida', 'terminado', 'pagado'];
   const fechas = [st.partidaTs, st.terminadoTs, st.pagadoTs];
   const hoy = Date.now();
-  const bloqueoFrague = actual === 0 && !!ceramicaPendienteDe(cell);
-  return (bloqueoFrague ? '<p class="est-aviso">Primero la cerámica de este lugar debe estar en Terminado.</p>' : '') + [1, 2, 3].map(n => {
+  const motivoPart = actual === 0 ? motivoBloqueoPartida(cell) : null;
+  const bloqueoFrague = !!motivoPart;
+  return (bloqueoFrague ? '<p class="est-aviso">' + avisoCortoBloqueo(motivoPart) + '</p>' : '') + [1, 2, 3].map(n => {
     const activo = destino >= n, cambio = activo !== (actual >= n);
     const habilitado = (destino >= n || turboMode || destino === n - 1) && !bloqueoFrague;
     let largo = '—', corto = '—';
@@ -2924,7 +2984,7 @@ function pintarReversoAdmin(id){
   flip.querySelector('.est-confirmar').disabled = destino === estadoNumero(st);
 }
 function confirmarEstadoAdmin(id, destino){
-  if(destino > 0 && estadoNumero(getState(id)) === 0 && ceramicaPendienteDe(cellById[id])){ avisoToast(msgFragueBloqueado(cellById[id]), 'error'); return; }
+  if(destino > 0 && estadoNumero(getState(id)) === 0){ const mot = motivoBloqueoPartida(cellById[id]); if(mot){ avisoToast(textoBloqueoPartida(mot, cellById[id]), 'error'); return; } }
   aplicarEstadoDestino(id, destino);
   markCellDirty(id);
   scheduleSave(); refrescarCelda(id);
@@ -2940,11 +3000,13 @@ function celdaPisoDe(cell){
   return cell.area === 'Piso' ? null : (indicePisos[cell.categoria + '|' + cell.piso + '|' + cell.dpto] || null);
 }
 function asignarTrabajador(id, w){
+  if(asignacionBloqueada(state[id])){ avisoToast(msgReasignarBloqueado(), 'error'); return; }
   state[id].trabajador = w;
   markCellDirty(id);
   scheduleSave(); refrescarCelda(id);
 }
 function abrirAsignar(id){
+  if(asignacionBloqueada(state[id])){ avisoToast(msgReasignarBloqueado(), 'error'); return; }
   const cell = cellById[id], actual = state[id].trabajador || '';
   const especialidad = cell.categoria === 'Frague' ? 'fraguador' : 'ceramista';
   const activos = activeWorkers().filter(w => (workerStatus[w] || {}).especialidad === especialidad);
@@ -2994,7 +3056,7 @@ function pasosVentanaHtml(cell, st, destino){
   const nombres = ['Partida', TERMINADO_LABEL[cell.area] || 'Terminado', 'Pagado'];
   const clases = ['partida', 'terminado', 'pagado'];
   const fechas = [st.partidaTs, st.terminadoTs, st.pagadoTs];
-  const bloqueado = !puede('estados') || (st.pagado && !isAdmin) || (actual === 0 && !!ceramicaPendienteDe(cell));
+  const bloqueado = !puede('estados') || (st.pagado && !isAdmin) || (actual === 0 && !!motivoBloqueoPartida(cell));
   return [1, 2, 3].map(n => {
     const activo = destino >= n, cambio = activo !== (actual >= n);
     const habilitado = !bloqueado && (isAdmin || n < 3) && (destino >= n || turboMode || destino === n - 1);
@@ -3016,7 +3078,7 @@ function pintarVentana(){
   const botonesTrab = puede('asignar') || puede('estados') ? `
       <div class="vt-acciones">
         ${(!st.pagado && pisoCell && pw && pw !== st.trabajador) ? `<button type="button" class="btn small" data-vt="igual">Igual al Piso</button>` : ''}
-        ${st.pagado ? '' : `<button type="button" class="btn small" data-vt="asignar">${hasWorker ? 'Reasignar' : 'Asignar'}</button>`}
+        ${asignacionBloqueada(st) ? '' : `<button type="button" class="btn small" data-vt="asignar">${hasWorker ? 'Reasignar' : 'Asignar'}</button>`}
       </div>` : '';
   const m2 = st.m2;
   const precio = m2 ? `${m2} m²<small><span class="price-money">${money(m2 * rate1ForDisplay(cell.categoria, st.trabajador))}</span></small>` : 'Sin m² registrados';
@@ -3030,7 +3092,7 @@ function pintarVentana(){
       <div class="vt-sec"><div class="vt-sec-title">Trabajador</div>
         <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${botonesTrab}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Estado</div>
-        ${estadoNumero(st) === 0 && ceramicaPendienteDe(cell) ? '<p class="est-aviso" style="text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;">Primero la cerámica de este lugar debe estar en Terminado para poder dar Partida al frague.</p>' : ''}
+        ${estadoNumero(st) === 0 && motivoBloqueoPartida(cell) ? '<p class="est-aviso" style="text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;">' + avisoCortoBloqueo(motivoBloqueoPartida(cell)) + '</p>' : ''}
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
         <div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar"${hayCambio ? '' : ' disabled'}>Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar"${hayCambio ? '' : ' disabled'}>Confirmar cambio</button></div></div>
       <div class="vt-sec"><div class="vt-sec-title">Metraje</div>
@@ -3156,13 +3218,13 @@ function cellHtml(cell){
   if(vistaVentana()) return cellVentanaHtml(cell, st);
   const pisoCell = puede('asignar') ? celdaPisoDe(cell) : null;
   const pisoWorker = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
-  const mismoOk = !st.pagado && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador;
+  const mismoOk = !asignacionBloqueada(st) && pisoCell && pisoCell.id !== cell.id && pisoWorker && pisoWorker !== st.trabajador;
   const mismoBtn = mismoOk
     ? `<button type="button" class="mismo-piso-btn${hasWorker ? '' : ' en-nombre'}" data-id="${cell.id}" title="Poner a ${pisoWorker}, el mismo del Piso"><span class="t-largo">Igual al Piso</span><span class="t-corto">Igual Piso</span></button>` : '';
   const nombreHtml = mismoBtn && !hasWorker ? mismoBtn
     : `<div class="worker-name ${hasWorker?'':'unassigned'}" data-namefor="${cell.id}">${hasWorker ? st.trabajador : 'Sin asignar'}</div>`;
   const assignBtn = !puede('asignar') ? ''
-    : st.pagado ? `<div class="asignar-fila fantasma" aria-hidden="true"><button type="button" class="assign-btn" tabindex="-1" disabled>Reasignar</button></div>`
+    : asignacionBloqueada(st) ? `<div class="asignar-fila fantasma" aria-hidden="true"><button type="button" class="assign-btn" tabindex="-1" disabled>Reasignar</button></div>`
     : `<div class="asignar-fila"><button type="button" class="assign-btn" data-id="${cell.id}">${hasWorker ? 'Reasignar' : 'Asignar'}</button></div>`;
   const mismoFila = mismoBtn && hasWorker ? `<div class="asignar-fila fila-completa">${mismoBtn}</div>` : '';
   const frontInner = `
@@ -3843,6 +3905,7 @@ async function cargarAccesos(){
   lista.innerHTML = j.accesos.length ? j.accesos.map(a => `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${esc(a.cuenta)}</span><span>${fechaHoraCambio(a.ts)}</span></div></div>`).join('')
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay inicios de sesión registrados.</p>';
 }
+document.getElementById('irAvanceBtn').addEventListener('click', () => { window.location.href = 'avance_obra.html'; });
 document.getElementById('irCalidadBtn').addEventListener('click', () => {
   // Pasa la sesión de admin a Calidad para no pedir el PIN de nuevo.
   try{
@@ -3977,7 +4040,7 @@ async function cargarMisPeticiones(){
   }catch(e){}
 }
 async function enviarPeticion(celdaId, tipo){
-  if(!getState(celdaId).partida && ceramicaPendienteDe(cellById[celdaId])){ avisoToast(msgFragueBloqueado(cellById[celdaId]), 'error'); return; }
+  { const mot = !getState(celdaId).partida ? motivoBloqueoPartida(cellById[celdaId], tipo === 1) : null; if(mot){ avisoToast(textoBloqueoPartida(mot, cellById[celdaId]), 'error'); return; } }
   if(!DB_URL){ avisoToast('Hace falta la base de datos conectada para enviar peticiones.'); return; }
   mostrarCargando('Enviando petición…');
   try{
@@ -4063,7 +4126,7 @@ async function resolverPeticionUI(id, aceptar){
       if(p.tipo === 1 && st.trabajador && st.trabajador !== p.trabajador){
         avisoToast('Ese departamento ya tiene a otra persona asignada. Rechaza esta petición.'); return;
       }
-      if(!st.partida && ceramicaPendienteDe(cellById[p.celda])){ avisoToast(msgFragueBloqueado(cellById[p.celda]) + ' Rechaza esta petición o espera.', 'error'); return; }
+      { const mot = !st.partida ? motivoBloqueoPartida(cellById[p.celda], p.tipo === 1) : null; if(mot){ avisoToast(textoBloqueoPartida(mot, cellById[p.celda]) + ' Rechaza esta petición o espera.', 'error'); return; } }
       const ahora = Date.now();
       if(p.tipo === 1){ st.trabajador = p.trabajador; st.partida = true; st.partidaTs = st.partidaTs || ahora; }
       else { st.partida = true; st.partidaTs = st.partidaTs || ahora; st.terminado = true; st.terminadoTs = ahora; }
@@ -4626,7 +4689,7 @@ function alCambioContenido(e){
   const cell = cellById[id];
   const willBeOn = cb.checked;
   cb.checked = !willBeOn;
-  if(willBeOn && !state[id].partida && ceramicaPendienteDe(cell)){ avisoToast(msgFragueBloqueado(cell), 'error'); return; }
+  { const mot = (willBeOn && !state[id].partida) ? motivoBloqueoPartida(cell) : null; if(mot){ avisoToast(textoBloqueoPartida(mot, cell), 'error'); return; } }
   let cascadeNote = '';
   if(flag === 'partida' && !willBeOn && (state[id].terminado || state[id].pagado)) cascadeNote = ' Esto también quitará el estado Terminado y Pagado.';
   if(flag === 'terminado' && !willBeOn && state[id].pagado) cascadeNote = ' Esto también quitará Pagado.';
@@ -4856,7 +4919,7 @@ try{
   const temaGuardado = guardadoV2 === null ? 'tema3' : guardadoV2;
   if(temaGuardado === 'tema1' || temaGuardado === 'tema3'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
 }catch(err){}
-document.getElementById('saveNowBtn').addEventListener('click', saveNow);
+document.getElementById('saveNowBtn').addEventListener('click', pedirGuardar);
 
 document.getElementById('dbBtn').addEventListener('click', () => {
   const bodyHtml = `
@@ -5859,7 +5922,7 @@ function updateLiveClock(){
 }
 updateLiveClock();
 setInterval(updateLiveClock, 30000);
-floatingSaveBtn.addEventListener('click', saveNow);
+floatingSaveBtn.addEventListener('click', pedirGuardar);
 document.getElementById('scrollTopBtn').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
 
 document.getElementById('content').addEventListener('click', (e) => {
