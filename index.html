@@ -873,6 +873,65 @@
   .lg-btn{min-height:54px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:16px;font-weight:700;padding:0 16px;}
   .lg-cuerpo p.lg-expl{margin:0;font-size:13px;color:var(--sub);line-height:1.45;}
   .lg-modo{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-size:16px;padding:0;}
+
+  /* ===== Tema 4 · Marco dorado (solo noche) ===== */
+  html:has(body.tema4){background:#061826;}
+  body.tema4{
+    --marco-oscuro:#463714; --marco-oro:#785a28; --marco-oro-vivo:#c89b3c; --marco-hueco:#010a13;
+    --marco-fondo:#1a1c21; --marco-fondo-arriba:#0c0d0f;
+    --pagina-fondo:#061826; --pagina-fondo2:#0a2a40;
+    --bg:#061826; --panel:#1a1c21; --panel-soft:#14161a; --border:#1e2126; --border-strong:#785a28;
+    --text:#f0e6d2; --sub:#a09b8c; --accent:#c89b3c; --accent2:#785a28; --radius:0px;
+    --pagado:#0d9488; --pagado-bg:rgba(13,148,136,.14); --pagado-border:rgba(13,148,136,.45);
+    --pagado-pill-bg:rgba(13,148,136,.55); --pagado-pill-text:#eafaf7;
+    background:radial-gradient(ellipse at 30% 20%, var(--pagina-fondo2), var(--pagina-fondo) 70%) fixed, var(--pagina-fondo);
+    color-scheme:dark;
+  }
+  /* El marco: todo contenedor con borde, sombra o fondo propio */
+  body.tema4 :is(.tb-group,.toolbar,.pt,.stat-card,.modal,.mc-pop,.obj-item,.worker-panel,.vt-sec,.rec-item,.aviso-grupo,.lg-app){
+    position:relative;
+    border:2px solid transparent;
+    border-image:linear-gradient(to right,var(--marco-oscuro) 0%,var(--marco-oro) 40%) 1;
+    background:linear-gradient(180deg,var(--marco-fondo-arriba) 0%,var(--marco-fondo) 70%);
+    border-radius:0; box-shadow:none;
+  }
+  /* línea doble del lado derecho: hueco oscuro de 2px + línea dorada de 1px */
+  body.tema4 :is(.tb-group,.toolbar,.pt,.stat-card,.mc-pop,.obj-item,.worker-panel,.vt-sec,.rec-item,.aviso-grupo)::before{
+    content:""; position:absolute; left:calc(100% + 2px); top:4px; bottom:4px; width:3px;
+    border-top:1px solid var(--marco-oro); border-bottom:1px solid var(--marco-oro);
+    background:linear-gradient(to right,var(--marco-hueco) 2px,var(--marco-oro) 2px);
+    pointer-events:none;
+  }
+  /* Ventanas con scroll propio: la línea doble se dibuja con sombra para que no la corte el overflow */
+  body.tema4 :is(.modal,.lg-app){box-shadow:2px 0 0 0 var(--marco-hueco),3px 0 0 0 var(--marco-oro);}
+  body.tema4 .overlay{background:rgba(1,10,19,.72);}
+  /* Colores que daban información: se conservan como una franja interior */
+  body.tema4 .stat-card.st-pendiente{box-shadow:inset 0 3px 0 var(--pendiente);}
+  body.tema4 .stat-card.st-proceso{box-shadow:inset 0 3px 0 var(--proceso);}
+  body.tema4 .stat-card.st-entregado{box-shadow:inset 0 3px 0 var(--entregado);}
+  body.tema4 .stat-card.st-pagado{box-shadow:inset 0 3px 0 var(--pagado);}
+  body.tema4 .stat-card.st-retenido{box-shadow:inset 0 3px 0 #a97e00;}
+  body.tema4 .rec-item{box-shadow:inset 6px 0 0 var(--proceso);background:linear-gradient(180deg,#1d1a0e 0%,#1a1810 70%);}
+  body.tema4 .rec-item.atrasado{box-shadow:inset 6px 0 0 #c0392b;background:linear-gradient(180deg,#26100e 0%,#1d1210 70%);}
+  body.tema4 .obj-item{box-shadow:inset 6px 0 0 var(--accent);}
+  body.tema4 .pt{border-top-width:2px;}
+  /* Encabezado de la ventana de departamento y del panel */
+  body.tema4 .vt-head{background:linear-gradient(90deg,var(--marco-oscuro),var(--marco-fondo));color:var(--text);border-bottom:1px solid var(--marco-oro);}
+  body.tema4 #ventanaOverlay .vt-head h3{color:var(--text);}
+  body.tema4 header.top{border-image:linear-gradient(90deg,var(--marco-oscuro),var(--marco-oro-vivo)) 1;}
+  body.tema4 .vt-sec-title{background:var(--marco-fondo-arriba);border-bottom-color:var(--separador,#1e2126);}
+  /* Botones: esquinas rectas; con acento, borde dorado */
+  body.tema4 .btn,body.tema4 select,body.tema4 input,body.tema4 textarea,body.tema4 .tab,body.tema4 .stats-tab{border-radius:0;}
+  body.tema4 .btn{background:var(--marco-fondo);border-color:var(--marco-oro);color:var(--text);}
+  body.tema4 .btn:hover:not(:disabled){border-color:var(--marco-oro-vivo);}
+  body.tema4 .btn.primary{background:linear-gradient(180deg,#2a2210,#1f1a0d);border-color:var(--marco-oro-vivo);color:#f6e7bd;}
+  body.tema4 .tab.active,body.tema4 .stats-tab.activa{background:linear-gradient(180deg,#3a2d12,#2a2210);color:#f6e7bd;border-color:var(--marco-oro-vivo);}
+  body.tema4 select,body.tema4 input[type=text],body.tema4 input[type=number],body.tema4 textarea{background:var(--marco-fondo-arriba);border-color:var(--marco-oro);color:var(--text);}
+  body.tema4 .floor-title h2{position:relative;border:2px solid transparent;border-image:linear-gradient(to right,var(--marco-oscuro) 0%,var(--marco-oro) 40%) 1;background:linear-gradient(180deg,var(--marco-fondo-arriba) 0%,var(--marco-fondo) 70%);border-radius:0;box-shadow:none;padding:5px 12px;}
+  body.tema4 .floor-title .line{background:var(--marco-oro);}
+  /* La línea derecha sobresale 5px: deja ese espacio y evita que content-visibility la corte */
+  body.tema4 .floor-block{padding-right:6px;}
+  body.tema4 .stats-grid,body.tema4 .rec-bar{padding-right:6px;}
 </style>
 </head>
 <body class="lg-on">
@@ -926,6 +985,7 @@
         <option value="">Tema original</option>
         <option value="tema1">Tema 2</option>
         <option value="tema3">Tema 3</option>
+        <option value="tema4">Marco dorado (noche)</option>
       </select>
     </div>
   </header>
@@ -1387,7 +1447,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.43.3';
+const APP_VERSION = '0.44.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4957,6 +5017,7 @@ document.getElementById('turboBtn').addEventListener('click', (e) => {
   render();
 });
 document.getElementById('toggleDark').addEventListener('click', (e) => {
+  if(document.body.classList.contains('tema4')){ avisoToast('El tema Marco dorado es solo nocturno. Cambia de tema para volver al modo día.'); return; }
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
   const dark = document.body.classList.toggle('dark');
   document.documentElement.classList.toggle('dark', dark);
@@ -4965,10 +5026,24 @@ document.getElementById('toggleDark').addEventListener('click', (e) => {
   try{ localStorage.setItem('progresoObraTheme', dark ? 'dark' : 'light'); }catch(err){}
 });
 
+// Marco dorado es un tema solo nocturno: fuerza la noche y, al salir, devuelve el modo que tenías.
+let modoAntesMarco = null;
+function aplicarNocheMarco(on){
+  const b = document.body, h = document.documentElement, btn = document.getElementById('toggleDark');
+  if(on){
+    if(modoAntesMarco === null) modoAntesMarco = b.classList.contains('dark');
+    b.classList.add('dark'); h.classList.add('dark'); btn.textContent = '☀️';
+  }else if(modoAntesMarco !== null){
+    b.classList.toggle('dark', modoAntesMarco); h.classList.toggle('dark', modoAntesMarco); btn.textContent = modoAntesMarco ? '☀️' : '🌙';
+    modoAntesMarco = null;
+  }
+}
 document.getElementById('temaSelector').addEventListener('change', (e) => {
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
-  document.body.classList.remove('tema1', 'tema2', 'tema3');
+  document.body.classList.remove('tema1', 'tema2', 'tema3', 'tema4');
   if(e.target.value) document.body.classList.add(e.target.value);
+  if(e.target.value === 'tema4') document.body.classList.add('tema3');
+  aplicarNocheMarco(e.target.value === 'tema4');
   if(ventanaId) cerrarVentana();
   render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
@@ -4978,6 +5053,7 @@ try{
   const guardadoV2 = localStorage.getItem('progresoObraTemaV3');
   const temaGuardado = guardadoV2 === null ? 'tema3' : guardadoV2;
   if(temaGuardado === 'tema1' || temaGuardado === 'tema3'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
+  else if(temaGuardado === 'tema4'){ document.body.classList.add('tema3', 'tema4'); document.getElementById('temaSelector').value = 'tema4'; aplicarNocheMarco(true); }
 }catch(err){}
 document.getElementById('saveNowBtn').addEventListener('click', pedirGuardar);
 
