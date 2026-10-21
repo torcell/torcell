@@ -1220,6 +1220,7 @@
     <h3>📧 Reporte semanal</h3>
     <p id="reporteInfo" style="margin:0 0 8px;font-size:12px;color:var(--sub);line-height:1.5;"></p>
     <label class="chk-linea"><input type="checkbox" id="reporteTodoChk"> Incluir también lo que ya se envió antes (para ver o probar)</label>
+    <label class="chk-linea"><input type="checkbox" id="reporteUltimoChk"> Último reporte: mostrar y enviar de nuevo lo que se envió la vez pasada (no cambia lo ya informado)</label>
     <div class="rep-campos">
       <label for="reporteAsunto">Asunto del correo</label>
       <input type="text" id="reporteAsunto" maxlength="150" autocomplete="off">
@@ -1229,6 +1230,7 @@
     <div id="reporteContenido" style="max-height:min(52vh,440px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
     <div class="actions" style="flex-wrap:wrap;">
       <button class="btn" id="reporteCompletarBtn" style="display:none;">Completar hoja de datos</button>
+      <button class="btn" id="reporteDeshacerBtn" style="display:none;" title="Vuelve a dejar como pendiente lo que se informó en el último envío">↩ Deshacer último envío</button>
       <button class="btn" id="reporteDestBtn">⚙ Envío y correos</button>
       <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
       <button class="btn primary" id="reporteEnviarBtn">Enviar ahora</button>
@@ -1384,8 +1386,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.40.0';
-const BACKEND_REQUERIDO = 51;
+const APP_VERSION = '0.42.0';
+const BACKEND_REQUERIDO = 54;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -4256,7 +4258,7 @@ async function cargarVistaReporte(){
   reporteVista = null; reporteVistaFallo = '';
   if(!DB_URL || !isAdmin || !sessionToken) return;
   try{
-    const j = await llamarDb('reporteVista', {todo: document.getElementById('reporteTodoChk').checked, esperadas: ALL_CELLS.length});
+    const j = await llamarDb('reporteVista', {todo: document.getElementById('reporteTodoChk').checked, ultimo: document.getElementById('reporteUltimoChk').checked, esperadas: ALL_CELLS.length});
     if(j && j.ok){ reporteVista = j; rellenarCamposCorreo(); }
     else reporteVistaFallo = !j ? 'sin_respuesta' : (j.error || 'version_vieja');
   }catch(e){ reporteVistaFallo = 'sin_respuesta'; }
@@ -4282,12 +4284,13 @@ function pintarReporte(cargando){
   cont.innerHTML = '<div id="reporteMsgPrevia"></div>' + (cargando ? msg('Armando el reporte…') : (v ? v.html : msg(mensajeFalloVista())));
   pintarMensajePrevia();
   info.innerHTML = `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Envío y correos")</i>'}<br>${esc(textoProgramacion(reporteEstado.programacion))}` +
-    (v ? `<br>${!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra los pisos con movimiento desde el reporte del ${v.desde}.`)} (${v.pisos} piso(s) con movimiento, ${v.novedades} partida(s) nueva(s))` : '') +
+    (v ? `<br>${v.ultimo && !v.hayAnterior ? 'Todavía no hay un envío anterior guardado (se guarda desde el próximo envío): por ahora se muestra todo.' : (v.ultimo ? `Mostrando el último reporte enviado (lo que había nuevo desde el ${v.desde || 'inicio'}).` : (!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra los pisos con movimiento desde el reporte del ${v.desde}.`)))} (${v.pisos} piso(s) con movimiento, ${v.novedades} partida(s) nueva(s))` : '') +
     (v && v.incompleta ? `<br><b>⚠ La hoja de datos tiene solo ${v.celdasEnHoja} de ${v.esperadas} departamentos: por eso un piso no puede salir completo y el envío está bloqueado. Pulsa "Completar hoja de datos".</b>` : '') +
     (sinGuardar() ? '<br><b>⚠ Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '') +
     (backendVersion && Number(backendVersion) < BACKEND_REQUERIDO ? `<br><b>⚠ Tu Apps Script publicado es la v${esc(backendVersion)} y este panel necesita la v${BACKEND_REQUERIDO}. Publica una "Nueva versión".</b>` : '');
   const listo = !cargando && !!v;
   btn('reporteCompletarBtn').style.display = (v && v.incompleta) ? '' : 'none';
+  btn('reporteDeshacerBtn').style.display = (v && v.hayAnterior) ? '' : 'none';
   btn('reporteDestBtn').disabled = false;
   btn('reportePruebaBtn').disabled = !listo;
   btn('reporteEnviarBtn').disabled = !listo || !dest.length;
@@ -4312,13 +4315,15 @@ async function refrescarReporte(){
   await Promise.all([cargarEstadoReporte(), cargarVistaReporte()]);
   pintarReporte(false);
 }
-async function enviarReporte(modo){
+async function enviarReporte(modo, correoPrueba){
   mostrarCargando('Enviando…');
   try{
-    const j = await llamarDb('reporteEnviar', {modo, esperadas: ALL_CELLS.length, todo: document.getElementById('reporteTodoChk').checked, asunto: document.getElementById('reporteAsunto').value, mensaje: document.getElementById('reporteMensaje').value});
+    const j = await llamarDb('reporteEnviar', {modo, correoPrueba: correoPrueba || '', esperadas: ALL_CELLS.length, todo: document.getElementById('reporteTodoChk').checked, ultimo: document.getElementById('reporteUltimoChk').checked, asunto: document.getElementById('reporteAsunto').value, mensaje: document.getElementById('reporteMensaje').value});
     if(j && j.ok){
-      avisoToast(modo === 'prueba' ? `Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).` : `Reporte enviado a ${j.enviados} correo(s).`);
+      avisoToast(modo === 'prueba' ? `Prueba enviada a ${j.a}. Revisa tu correo (y la carpeta de spam).` : (j.reenvio ? `Último reporte reenviado a ${j.enviados} correo(s).` : `Reporte enviado a ${j.enviados} correo(s).`));
       if(modo === 'real') await refrescarReporte();
+    } else if(modo === 'prueba' && j && (j.error === 'sin_correo_propio' || (correoPrueba && j.error === 'correo_invalido'))){
+      pedirCorreoPrueba(correoPrueba ? 'Ese correo no parece válido. Revísalo.' : '');
     } else avisoToast((ERRORES_REPORTE[j && j.error] || 'No se pudo enviar el reporte.') + (j && j.detalle ? ` (Google dijo: ${j.detalle})` : ''));
   }catch(e){ avisoToast('No se pudo enviar (revisa la conexión).'); }
   finally{ ocultarCargando(); }
@@ -4327,20 +4332,46 @@ document.getElementById('progDia').innerHTML = DIAS_PROG.map((d, i) => `<option 
 document.getElementById('progHora').innerHTML = Array.from({length: 24}, (_, h) => `<option value="${h}">${String(h).padStart(2, '0')}:00</option>`).join('');
 document.getElementById('reporteBtn').addEventListener('click', () => {
   document.getElementById('reporteTodoChk').checked = false;
+  document.getElementById('reporteUltimoChk').checked = false;
   reporteCamposEditados = false;
   document.getElementById('reporteOverlay').classList.add('show');
   refrescarReporte();
 });
 document.getElementById('reporteTodoChk').addEventListener('change', async () => {
+  if(document.getElementById('reporteTodoChk').checked) document.getElementById('reporteUltimoChk').checked = false;
+  pintarReporte(true); await cargarVistaReporte(); pintarReporte(false);
+});
+document.getElementById('reporteUltimoChk').addEventListener('change', async () => {
+  if(document.getElementById('reporteUltimoChk').checked) document.getElementById('reporteTodoChk').checked = false;
   pintarReporte(true); await cargarVistaReporte(); pintarReporte(false);
 });
 document.getElementById('reporteCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('reporteOverlay')));
+function pedirCorreoPrueba(aviso){
+  openInputModal('Correo para la prueba', `<p style="margin:0 0 8px;font-size:12.5px;color:var(--sub);">Google no me dio tu correo. Escribe aquí el correo al que quieres recibir las pruebas; queda guardado y no se vuelve a pedir.</p>${aviso ? `<p style="margin:0 0 8px;font-size:12.5px;color:#c0546f;">${esc(aviso)}</p>` : ''}<input type="email" id="correoPruebaInput" style="width:100%;" placeholder="tucorreo@gmail.com" autocomplete="email">`, () => {
+    const v = document.getElementById('correoPruebaInput').value.trim();
+    if(!v){ return 'mantener'; }
+    setTimeout(() => enviarReporte('prueba', v), 250);
+  }, 'Guardar y enviar');
+  setTimeout(() => { const i = document.getElementById('correoPruebaInput'); if(i) i.focus(); }, 100);
+}
 document.getElementById('reportePruebaBtn').addEventListener('click', () => enviarReporte('prueba'));
 document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
   const n = reporteEstado.destinatarios.length;
-  askConfirm(`¿Enviar el reporte ahora a ${n} correo(s) con el asunto "${document.getElementById('reporteAsunto').value.trim()}"? ` +
-    (reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, lo marcado como NUEVO deja de serlo y los pisos no se repiten hasta que haya movimiento nuevo.') +
+  const reenvio = document.getElementById('reporteUltimoChk').checked;
+  askConfirm(`¿${reenvio ? 'Reenviar el último reporte' : 'Enviar el reporte ahora'} a ${n} correo(s) con el asunto "${document.getElementById('reporteAsunto').value.trim()}"? ` +
+    (reenvio ? 'Es un reenvío: no cambia lo que ya se informó.' : reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, lo marcado como NUEVO deja de serlo y los pisos no se repiten hasta que haya movimiento nuevo.') +
     (sinGuardar() ? ' Ojo: tienes cambios sin guardar que no van incluidos.' : ''), () => enviarReporte('real'));
+});
+document.getElementById('reporteDeshacerBtn').addEventListener('click', () => {
+  askConfirm('¿Deshacer el último envío? Lo que se informó en ese reporte vuelve a salir como nuevo en el próximo reporte. No se borra nada de los correos ya enviados.', async () => {
+    mostrarCargando('Deshaciendo…');
+    try{
+      const j = await llamarDb('reporteDeshacer', {});
+      if(j && j.ok){ avisoToast('Listo: el último envío se deshizo.'); await refrescarReporte(); }
+      else avisoToast(j && j.error === 'sin_anterior' ? 'No hay un envío anterior guardado para deshacer.' : 'No se pudo deshacer. Revisa que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.');
+    }catch(e){ avisoToast('No se pudo deshacer (revisa la conexión).'); }
+    finally{ ocultarCargando(); }
+  });
 });
 document.getElementById('reporteCompletarBtn').addEventListener('click', async () => {
   forzarGuardadoCompleto = true;
