@@ -510,7 +510,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
     </div>
   </section>
 
-  <footer><span id="pie">Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.7.1</span></footer>
+  <footer><span id="pie">Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.7.2</span></footer>
 </div>
 
 <div class="overlay" id="overlay" hidden>
@@ -697,7 +697,7 @@ const GLOSARIO = {
     desviacion: ["Desviación", "Diferencia entre lo real y lo programado. Negativo = atraso; positivo = adelanto."],
     pp: ["Puntos porcentuales (pp)", "Diferencia entre dos porcentajes. Si el real es 40% y el programado 45%, la desviación es −5 pp."],
     curvas: ["Curva S", "Gráfico del avance acumulado en el tiempo. Tiene forma de S porque la obra parte lenta, acelera en el medio y se frena al final."],
-    rendimiento: ["Rendimiento", "Cuántos recintos se terminan por semana en una partida. Se calcula con lo terminado en las últimas semanas."],
+    rendimiento: ["Rendimiento", "Cuánto se termina por semana en una partida (recintos o m²). Se calcula con lo terminado en las últimas semanas."],
     saldo: ["Saldo", "Lo que falta por terminar en una partida."],
     frente: ["Frente", "Piso más alto donde la partida ya está trabajando o terminó."],
     proyeccion: ["Proyección", "Estimación de cuándo terminará algo si sigue el ritmo actual. Es una estimación, no un compromiso."],
@@ -800,6 +800,7 @@ const WD = [];
 function wdIndex(s){ let lo = 0, hi = WD.length; while (lo < hi) { const m = (lo + hi) >> 1; if (WD[m] < s) lo = m + 1; else hi = m; } return lo; }
 const W0 = wdIndex(CONFIG.inicio);
 const dWdTs = ts => wdIndex(tsIso(ts)) - W0;
+const SIN_FECHA = -10000;
 const CORTE = wdIndex(CONFIG.corte) - W0;
 const wdDate = i => WD[Math.max(0, Math.min(WD.length - 1, Math.round(i) + W0))];
 const fmt = s => { const d = parse(s); return d.toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).replace(/\./g, ""); };
@@ -881,8 +882,9 @@ if (CONFIG.modoReal) {
     const ini = areas.map(a => a.ini).filter(Boolean), fin = areas.map(a => a.fin).filter(Boolean);
     const todas = areas.every(a => a.terminado), alguna = areas.some(a => a.empezado);
     let rs = Infinity, rf = Infinity;
-    if (alguna) rs = ini.length ? dWdTs(Math.min(...ini)) : (fin.length ? dWdTs(Math.min(...fin)) : 0);
-    if (todas) rf = fin.length ? dWdTs(Math.max(...fin)) : Math.max(0, rs);
+    // lo que se terminó antes de que el panel guardara fechas queda "sin fecha": cuenta como hecho pero no entra al ritmo
+    if (alguna) rs = ini.length ? dWdTs(Math.min(...ini)) : (fin.length ? dWdTs(Math.min(...fin)) : SIN_FECHA);
+    if (todas) rf = fin.length ? dWdTs(Math.max(...fin)) : SIN_FECHA;
     if (rf < rs) rs = rf;
     const reg = { p: p.cod, u: r.codigo, nivel: r.nivel, amb: r.ambito, k: KIDX[r.nivel], ps: Infinity, pf: Infinity, rs, rf, bloq: null, preds: predsEfectivas(p, r.ambito), areas };
     REG.push(reg); regBy[key(p.cod, r.codigo)] = reg;
@@ -934,7 +936,7 @@ const m2Ok = (c, rec) => { const g = regDeRecinto(c, rec); return g && g.areas ?
 const PESO_TOTAL = P.reduce((s, p) => s + p.peso, 0);
 // en modo real el avance va por m² terminados de cada área (piso, muro baño, muro cocina)
 const AREAS_FIN = {};
-if (MR) P.filter(p => p.cod === "CER" || p.cod === "FRA").forEach(p => { const l = []; regsDe(p.cod).forEach(r => r.areas.forEach(a => l.push([a.terminado ? (a.fin ? dWdTs(a.fin) : 0) : Infinity, a.m2]))); AREAS_FIN[p.cod] = { l, tot: l.reduce((s, x) => s + x[1], 0) || 1 }; });
+if (MR) P.filter(p => p.cod === "CER" || p.cod === "FRA").forEach(p => { const l = []; regsDe(p.cod).forEach(r => r.areas.forEach(a => l.push([a.terminado ? (a.fin ? dWdTs(a.fin) : SIN_FECHA) : Infinity, a.m2]))); AREAS_FIN[p.cod] = { l, tot: l.reduce((s, x) => s + x[1], 0) || 1 }; });
 function avPart(c, t, cual){
   if (MR) { if (cual === "plan") return 0; const a = AREAS_FIN[c];
     if (!a) { const rs = regsDe(c); return rs.length && !rs[0].sinDatos ? rs.filter(r => r.rf <= t).length / rs.length : 0; } return a.l.reduce((s, x) => s + (x[0] <= t ? x[1] : 0), 0) / a.tot; }
@@ -951,19 +953,24 @@ const HIST = {};
 P.forEach(p => {
   const rs = regsDe(p.cod);
   const semanas = [];
-  for (let w = SEM; w >= 1; w--) { const a = CORTE - w * 5, b = a + 5; semanas.push({ ini: a, n: rs.filter(r => r.rf > a && r.rf <= b).length }); }
+  // en modo real mido en m² terminados por semana (los departamentos se cierran tarde porque el muro cocina va al final)
+  const AF = MR ? AREAS_FIN[p.cod] : null;
+  const cuenta = (a, b) => AF ? AF.l.reduce((s, x) => s + (x[0] > a && x[0] <= b ? x[1] : 0), 0) : rs.filter(r => r.rf > a && r.rf <= b).length;
+  for (let w = SEM; w >= 1; w--) { const a = CORTE - w * 5, b = a + 5; semanas.push({ ini: a, n: cuenta(a, b) }); }
   const avg = arr => arr.reduce((s, x) => s + x.n, 0) / arr.length;
   const re = RESTR.find(x => x.partida === p.cod && x.desdeWd < CORTE);
   const finVentana = re ? re.desdeWd : CORTE;
-  const ref = []; for (let w = SEM; w >= 1; w--) { const a = finVentana - w * 5; ref.push({ ini: a, n: rs.filter(r => r.rf > a && r.rf <= a + 5).length }); }
-  const base = avg(ref.slice(-6));
+  const ref = []; for (let w = SEM; w >= 1; w--) { const a = finVentana - w * 5; ref.push({ ini: a, n: cuenta(a, a + 5) }); }
+  // en modo real solo cuento las semanas desde que hay fechas guardadas (si no, el ritmo sale más bajo de lo real)
+  const semUtiles = MR ? Math.max(1, Math.min(6, Math.ceil((finVentana - 0) / 5))) : 6;
+  const base = avg(ref.slice(-semUtiles));
   const win = []; for (let i = 0; i + 4 <= ref.length; i++) win.push(avg(ref.slice(i, i + 4)));
   const porPiso = p.unidad === "nivel" ? 1 : rs.filter(r => r.nivel === 10).length || 1;
   const planRate = porPiso * 5 / CONFIG.cicloPlan;
   const ok = rs.filter(r => r.est === "ok").length, run = rs.filter(r => r.est === "run").length;
   const frenteArr = rs.filter(r => r.est === "ok" || r.est === "run").map(r => r.nivel);
-  HIST[p.cod] = { semanas, base, medidoAntesDe: re ? re.desdeWd : null, opt: Math.min(Math.max(...win), base * 1.4), cons: Math.max(Math.min(...win), base * 0.7), planRate, total: rs.length, ok, run,
-    saldo: rs.length - ok - 0.5 * run, frente: frenteArr.length ? Math.max(...frenteArr) : null,
+  HIST[p.cod] = { semUtiles, semanas, base, medidoAntesDe: re ? re.desdeWd : null, opt: Math.min(Math.max(...win), base * 1.4), cons: Math.max(Math.min(...win), base * 0.7), planRate, total: rs.length, ok, run,
+    saldo: AF ? AF.l.reduce((s, x) => s + (x[0] === Infinity ? x[1] : 0), 0) : rs.length - ok - 0.5 * run, frente: frenteArr.length ? Math.max(...frenteArr) : null,
     planFin: Math.max(...rs.map(r => r.pf)), lastFin: Math.max(0, ...rs.filter(r => r.est === "ok").map(r => r.rf)) };
 });
 
@@ -1153,7 +1160,7 @@ const TIPFN = {
     const p = PBY[el.dataset.p], h = HIST[p.cod];
     if (MR && p.sinDatos) return `<b>${esc(p.nom)}</b><br>Todavía no se registra en la base de datos.`;
     if (MR && p.cod === "OG") return `<b>${esc(p.nom)}</b><br>Terminada en todos los pisos. El último piso terminó entre el viernes 16 y el lunes 19 de octubre.`;
-    if (MR) return `<b>${esc(p.nom)}</b><div class="tl"><span>Recintos terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Avance m²</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span></div>`;
+    if (MR) return `<b>${esc(p.nom)}</b><div class="tl"><span>Recintos terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Avance m²</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span><span>Ritmo</span><span>${num(h.base, 0)} m²/sem</span></div>`;
     return `<b>${esc(p.nom)}</b><div class="tl"><span>Terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Real</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span><span>Programado</span><span>${pct(avPart(p.cod, CORTE, "plan"))}</span><span>Peso</span><span>${num(p.peso / PESO_TOTAL * 100)}%</span>` +
       (cantPartida(p.cod) ? `<span>Cantidad</span><span>${cantPartida(p.cod).ok} de ${cantPartida(p.cod).tot} ${cantPartida(p.cod).unidad}</span>` : "") + `</div>`;
   }
@@ -1168,7 +1175,7 @@ if (MR) {
   $("hdrTitulo").textContent = CONFIG.obra.nombre;
   $("hdrSub").innerHTML = `${deptos.length} departamentos y ${pasillos.length} pasillos · sin programa cargado, se muestra solo lo real`;
   $("pie").textContent = "Cerámica y frague leídos de la base de datos; obra gruesa terminada según lo informado. Las demás partidas aún no tienen datos. Esta página no modifica nada.";
-  $("notaCurva").textContent = "Cerámica y frague juntos, por m² terminados semana a semana. Pasa el cursor por el gráfico para ver los valores.";
+  $("notaCurva").textContent = `Cerámica y frague juntos, por m² terminados. Lo terminado antes del ${fmt(CONFIG.inicio)} no tiene fecha guardada en la base de datos, por eso la curva parte desde ahí. Pasa el cursor por el gráfico para ver los valores.`;
   $("lgPlan").hidden = true; $("panelRestr").hidden = true; $("panelAvisos").hidden = true;
   const nom = CONFIG.sesion.nombre || "Usuario", ini = nom.split(/[\s.]+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("");
   $("sesion").innerHTML = `<span class="ini" aria-hidden="true">${esc(ini)}</span><span>Conectado como: <b>${esc(nom)}</b> · ${esc(CARGOS[CONFIG.sesion.rol] || "Usuario")}</span>`;
@@ -1254,8 +1261,9 @@ function renderBars(){
         ["m² terminados", `${num(ok, 0)} de ${num(tot, 0)}`],
         ["Recintos terminados", `${h.ok} de ${h.total}`],
         ["En curso", `${h.run}`],
+        ["Falta", `${num(h.saldo, 0)} m²`],
         [T("frente"), h.frente != null ? nivelNombre(h.frente) : "Sin iniciar"],
-        [T("rendimiento", "Ritmo (6 sem.)"), `${num(h.base)} rec./sem`],
+        [T("rendimiento", `Ritmo (${h.semUtiles} sem.)`), `${num(h.base, 0)} m²/sem`],
         [T("proyeccion", "Término proyectado"), h.saldo <= 0 ? "Terminada" : fmt(wdDate(PROY.base.fin[p.cod])) + (PROY.base.sinHist[p.cod] ? " (sin historial)" : "")]]; });
     $("panelDetalle").hidden = false;
     $("detalleReal").innerHTML = `<div class="tbl-wrap"><table><thead><tr><th></th>${filas.map(f => `<th>${f[0][0]}</th>`).join("")}</tr></thead><tbody>` +

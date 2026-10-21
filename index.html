@@ -1387,7 +1387,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.43.1';
+const APP_VERSION = '0.43.3';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2665,16 +2665,20 @@ function renderStats(){
   const cat = statsCat, esC = cat === 'Cerámica';
   const r = statsDeCategoria(cat);
   const fechaHoraCierre = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
-  const cards = `<div class="stat-card stat-combo">${[['pendiente','Pendiente'],['proceso','Partida (en proceso)'],['entregado','Terminado'],['pagado','Pagado']].map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('')}</div>`;
+  const defsEst = [['pendiente','Pendiente'],['proceso','Partida (en proceso)'],['entregado','Terminado'],['pagado','Pagado']];
+  const separadas = preciosOcultos();
+  const cards = separadas
+    ? defsEst.map(([k, l]) => { const n = r.counts[k]||0, pct = r.counts ? Math.round(n / (Object.values(r.counts).reduce((x, y) => x + y, 0) || 1) * 100) : 0; return `<div class="stat-card st-${k}"><div class="n c-${k}">${n}</div><div class="l">${l}</div>${(k === 'pendiente' || k === 'pagado') ? `<div class="bar"><div style="width:${pct}%; background:var(--${k});"></div></div>` : ''}</div>`; }).join('')
+    : `<div class="stat-card stat-combo">${defsEst.map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('')}</div>`;
   const refLinea = rf => esC ? `<div class="sub2">REF ${money(rf)}</div>` : '';
   const refMargen = (t, rf) => esC ? `<div class="sub2">REF ${money(rf)}</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
-  const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refLinea(r.refTer)}</div>`;
+  const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refMargen(r.ter, r.refTer)}</div>`;
   const seccion = (cls, rotulo, v, n, rf) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}</div>`;
   const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo)}</div>` : '';
   const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div></div>`;
   const retCard = (isAdmin && r.nRet > 0) ? `<div class="stat-card money-card st-retenido"><div class="n c-retenido">${money(r.ret)}</div><div class="l">Retenido <span class="cnt">(${r.nRet})</span></div>${refLinea(r.refRet)}<button type="button" class="btn small ret-det" data-ret-det>Detalles</button></div>` : '';
   const tabs = `<div class="stats-tabs"><span class="stats-rotulo">Resumen de</span>${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button>' : ''}</div>`;
-  statsEl.innerHTML = tabs + `<div class="stats-grid${retCard ? ' con-ret' : ''}">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard + retCard : ''}</div>`;
+  statsEl.innerHTML = tabs + `<div class="stats-grid${retCard && !separadas ? ' con-ret' : ''}">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard + retCard : ''}</div>`;
   renderPorTrabajador();
 }
 
