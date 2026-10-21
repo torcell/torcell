@@ -1230,6 +1230,7 @@
     <div id="reporteContenido" style="max-height:min(52vh,440px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
     <div class="actions" style="flex-wrap:wrap;">
       <button class="btn" id="reporteCompletarBtn" style="display:none;">Completar hoja de datos</button>
+      <button class="btn" id="reporteRestaurarBtn" title="Vuelve a marcar como nuevo todo lo hecho después de una fecha, por ejemplo desde el último reporte que sí te sirvió">⏪ Volver a una fecha…</button>
       <button class="btn" id="reporteDeshacerBtn" style="display:none;" title="Vuelve a dejar como pendiente lo que se informó en el último envío">↩ Deshacer último envío</button>
       <button class="btn" id="reporteDestBtn">⚙ Envío y correos</button>
       <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
@@ -1386,8 +1387,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.42.0';
-const BACKEND_REQUERIDO = 54;
+const APP_VERSION = '0.43.0';
+const BACKEND_REQUERIDO = 55;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
@@ -4361,6 +4362,26 @@ document.getElementById('reporteEnviarBtn').addEventListener('click', () => {
   askConfirm(`¿${reenvio ? 'Reenviar el último reporte' : 'Enviar el reporte ahora'} a ${n} correo(s) con el asunto "${document.getElementById('reporteAsunto').value.trim()}"? ` +
     (reenvio ? 'Es un reenvío: no cambia lo que ya se informó.' : reporteVista && !reporteVista.novedades ? 'No hay novedades: saldrá un reporte sin partidas nuevas.' : 'Después de enviarlo, lo marcado como NUEVO deja de serlo y los pisos no se repiten hasta que haya movimiento nuevo.') +
     (sinGuardar() ? ' Ojo: tienes cambios sin guardar que no van incluidos.' : ''), () => enviarReporte('real'));
+});
+document.getElementById('reporteRestaurarBtn').addEventListener('click', () => {
+  const f = new Date(); f.setHours(13, 0, 0, 0);
+  while(f.getDay() !== 5 || f.getTime() > Date.now()) f.setDate(f.getDate() - 1);
+  const dos = n => String(n).padStart(2, '0');
+  const valor = `${f.getFullYear()}-${dos(f.getMonth() + 1)}-${dos(f.getDate())}T13:00`;
+  openInputModal('Volver a una fecha', `<p style="margin:0 0 8px;font-size:12.5px;color:var(--sub);line-height:1.5;">Elige la fecha y hora del último reporte que quieres tomar como "ya informado". Todo lo que se hizo después vuelve a salir como nuevo en el próximo reporte. Se calcula con las fechas de cada partida (por eso es una aproximación: el trabajador que se usa es el actual).</p><input type="datetime-local" id="restFechaInput" style="width:100%;" value="${valor}" >`, () => {
+    const v = document.getElementById('restFechaInput').value;
+    const ts = v ? new Date(v).getTime() : NaN;
+    if(!isFinite(ts) || ts > Date.now()){ avisoToast('Elige una fecha y hora válidas, que no sean futuras.'); return 'mantener'; }
+    setTimeout(() => askConfirm('¿Volver el reporte al ' + new Date(ts).toLocaleString('es-CL', {weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'}) + '? Lo hecho después de esa fecha saldrá como nuevo. Puedes deshacerlo con "Deshacer último envío".', async () => {
+      mostrarCargando('Volviendo atrás…');
+      try{
+        const j = await llamarDb('reporteRestaurar', {ts});
+        if(j && j.ok){ avisoToast(`Listo: el próximo reporte incluirá ${j.novedades} partida(s) nueva(s) en ${j.pisos} piso(s).`); await refrescarReporte(); }
+        else avisoToast(j && j.error === 'fecha_invalida' ? 'La fecha no es válida.' : 'No se pudo volver atrás. Revisa que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.');
+      }catch(e){ avisoToast('No se pudo volver atrás (revisa la conexión).'); }
+      finally{ ocultarCargando(); }
+    }), 250);
+  }, 'Continuar');
 });
 document.getElementById('reporteDeshacerBtn').addEventListener('click', () => {
   askConfirm('¿Deshacer el último envío? Lo que se informó en ese reporte vuelve a salir como nuevo en el próximo reporte. No se borra nada de los correos ya enviados.', async () => {
