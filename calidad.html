@@ -99,6 +99,10 @@ body.bloq{overflow:hidden;}
 .obsin{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;}
 .obshead{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--sub);}
 .btn.small{padding:6px 10px;font-size:12px;min-height:34px;}
+.obsfotos{display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--soft);padding:9px 12px;font-size:14px;font-weight:700;}
+.obsfotos span{white-space:nowrap;}
+.obsfotos small{font-size:12px;font-weight:500;color:var(--sub);flex:1;text-align:right;line-height:1.25;}
+.obslista[hidden],#mEditar[hidden]{display:none;}
 .obslista{border:1px solid var(--border);background:var(--soft);padding:4px 10px;max-height:210px;overflow:auto;}
 .obsfila{display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
 .obsfila:last-child{border-bottom:0;}
@@ -371,7 +375,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="obswrap" id="mObs">
       <div class="obsin">
         <div class="obshead"><span>¿Qué está mal?</span><button class="btn small" id="mEditar" type="button">✎ Editar opciones</button></div>
-        <div class="obslista" id="mLista"></div>
+        <div class="obsfotos" id="mObsFotos"></div>
+        <button class="btn" id="mElegir" type="button">＋ Elegir observaciones</button>
+        <div class="obslista" id="mLista" hidden></div>
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
@@ -392,7 +398,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.6.3';
+const CAL_VERSION = '1.6.4';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -749,10 +755,27 @@ function parseItems(r){
 }
 
 const SIN_CANTIDAD = ['Falta Terraza'];
-function pintarLista(sel){
+let listaAbierta = false;
+function nFotosActual(){
+  if(!actual) return 0;
+  const b = claveBase(actual);
+  return (fotosDe[b] || []).length || fotosCount[b] || 0;
+}
+function pintarResumenObs(){
+  const n = nFotosActual();
+  $('mObsFotos').innerHTML = '<span>📷 Fotos: ' + n + '</span>' + (n ? '' : '<small>Sube fotos abajo o elige las observaciones</small>');
+  const marcadas = $('mLista').querySelectorAll('input[type=checkbox]:checked').length;
+  $('mElegir').textContent = listaAbierta ? '− Ocultar observaciones' : (marcadas ? '＋ Elegir observaciones (' + marcadas + ' marcadas)' : '＋ Elegir observaciones');
+  $('mLista').hidden = !listaAbierta;
+  $('mEditar').hidden = !listaAbierta;
+}
+function pintarLista(sel, mantener){
+  sel = Object.assign({}, sel); delete sel['Con fotos'];
+  if(!mantener) listaAbierta = Object.keys(sel).length > 0;
   const nombres = [...opcionesDe(), ...Object.keys(sel).filter(n => !opcionesDe().includes(n))];
   $('mLista').innerHTML = nombres.length ? nombres.map(n => `<div class="obsfila"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label>${SIN_CANTIDAD.includes(n) ? '<span class="cant-no" aria-hidden="true"></span>' : `<input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}>`}</div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
   $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = estadoSel === 'observado' ? 0 : -1; });
+  pintarResumenObs();
 }
 
 function seleccion(){
@@ -862,6 +885,7 @@ function pintarFotos(){
   const base = claveBase(actual);
   const arr = fotosDe[base] || [];
   const est = fotosEstado[base];
+  pintarResumenObs();
   $('mFotosN').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length ? arr.length + ' de ' + FOTOS_MAX : 'sin fotos';
   $('mFotosGrid').innerHTML = arr.map((f, i) => `<button type="button" class="fth${f.estado === 'sub' ? ' sub' : ''}" data-i="${i}" aria-label="Foto ${i + 1}">${f.m ? `<img alt="" src="data:image/jpeg;base64,${f.m}">` : ''}</button>`).join('');
   $('fTomar').disabled = $('fGaleria').disabled = arr.length >= FOTOS_MAX;
@@ -1147,7 +1171,11 @@ function guardarRevision(){
   if(!actual) return;
   const sel = seleccion();
   const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
-  if(estadoSel === 'observado' && !items.length){ $('mErr').textContent = 'Marca al menos una observación.'; return; }
+  if(estadoSel === 'observado' && !items.length){
+    const nf = nFotosActual();
+    if(!nf){ $('mErr').textContent = 'Sube al menos una foto o elige una observación.'; return; }
+    items.push({t: 'Con fotos', c: nf});
+  }
   enviarRevision(clave(actual), estadoSel, items, true);
 }
 function enviarRevision(k, estadoNuevo, items, cerrar){
@@ -1184,7 +1212,7 @@ function marcarObservadoPorFoto(base, sc){
   enviarRevision(k, 'observado', [{t: 'Con fotos', c: 1}], false);
   if(actual && claveBase(actual) === base && sc === scope){
     estadoSel = 'observado';
-    pintarLista({'Con fotos': 1});
+    pintarLista({});
     elegir('observado');
     $('mQuien').textContent = nombreCorto(revisiones[k].u);
   }
@@ -1233,7 +1261,7 @@ async function guardarOpciones(){
     if(j && j.ok){
       const sel = seleccion();
       if(j.opciones && typeof j.opciones === 'object' && !Array.isArray(j.opciones)) opciones = Object.assign({}, opciones, j.opciones);
-      pintarLista(sel);
+      pintarLista(sel, true);
       cerrarOpciones();
     }else{
       $('opErr').textContent = 'No se pudo guardar. Intenta de nuevo.';
@@ -1441,11 +1469,13 @@ $('mLista').addEventListener('change', e => {
   const chk = e.target.closest('input[type=checkbox]');
   if(!chk) return;
   const cant = chk.closest('.obsfila').querySelector('.cant');
-  if(!cant) return;
+  if(!cant){ pintarResumenObs(); return; }
   cant.disabled = !chk.checked;
   if(chk.checked && !cant.value) cant.value = 1;
   if(!chk.checked) cant.value = '';
+  pintarResumenObs();
 });
+$('mElegir').addEventListener('click', () => { listaAbierta = !listaAbierta; pintarResumenObs(); });
 $('mCancel').addEventListener('click', cerrarModal);
 $('fTomar').addEventListener('click', () => $('fCam').click());
 $('fGaleria').addEventListener('click', () => $('fGal').click());
