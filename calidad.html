@@ -69,7 +69,9 @@ main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;b
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
 #vel,#velReg,#velOp,#velFoto,#velExp{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
-#vel::before,#velReg::before,#velOp::before,#velFoto::before,#velExp::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+#vel::before,#velReg::before,#velOp::before,#velFoto::before,#velExp::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.62);}
+:root.blur-fondo #vel::before,:root.blur-fondo #velReg::before,:root.blur-fondo #velOp::before,:root.blur-fondo #velFoto::before,:root.blur-fondo #velExp::before{-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+#vel.on .modal,#velReg.on .modal,#velOp.on .modal,#velFoto.on .modal,#velExp.on .modal{will-change:transform,opacity;}
 #velOp,#velFoto,#velExp{z-index:60;}
 #vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on{display:flex;animation:overlayIn .16s ease;}
 #vel.out,#velReg.out,#velOp.out,#velFoto.out,#velExp.out{animation:overlayOut .14s ease forwards;}
@@ -398,7 +400,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.6.4';
+const CAL_VERSION = '1.6.5';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -773,9 +775,16 @@ function pintarLista(sel, mantener){
   sel = Object.assign({}, sel); delete sel['Con fotos'];
   if(!mantener) listaAbierta = Object.keys(sel).length > 0;
   const nombres = [...opcionesDe(), ...Object.keys(sel).filter(n => !opcionesDe().includes(n))];
-  $('mLista').innerHTML = nombres.length ? nombres.map(n => `<div class="obsfila"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label>${SIN_CANTIDAD.includes(n) ? '<span class="cant-no" aria-hidden="true"></span>' : `<input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}>`}</div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
+  $('mLista').innerHTML = nombres.length ? nombres.map((n, i) => `<div class="obsfila" data-i="${i}"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label>${SIN_CANTIDAD.includes(n) ? '<span class="cant-no" aria-hidden="true"></span>' : `<input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}>`}</div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
   $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = estadoSel === 'observado' ? 0 : -1; });
+  ordenarMarcadas();
   pintarResumenObs();
+}
+function ordenarMarcadas(){
+  const l = $('mLista');
+  const filas = [...l.querySelectorAll('.obsfila')];
+  const marcada = f => f.querySelector('input[type=checkbox]').checked ? 0 : 1;
+  filas.sort((a, b) => marcada(a) - marcada(b) || Number(a.dataset.i) - Number(b.dataset.i)).forEach(f => l.appendChild(f));
 }
 
 function seleccion(){
@@ -924,6 +933,7 @@ function anadirFotos(files){
     arr.push(ent);
     cadenaFotos = cadenaFotos.then(() => subirUna(base, zona, file, ent)).catch(() => {});
   });
+  if(actual && estadoSel !== 'observado'){ estadoSel = 'observado'; elegir('observado'); }
   pintarFotos();
 }
 async function subirUna(base, zona, file, ent){
@@ -1473,6 +1483,8 @@ $('mLista').addEventListener('change', e => {
   cant.disabled = !chk.checked;
   if(chk.checked && !cant.value) cant.value = 1;
   if(!chk.checked) cant.value = '';
+  ordenarMarcadas();
+  $('mLista').scrollTop = 0;
   pintarResumenObs();
 });
 $('mElegir').addEventListener('click', () => { listaAbierta = !listaAbierta; pintarResumenObs(); });

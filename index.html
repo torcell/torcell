@@ -479,7 +479,7 @@
 
   .footer-note{text-align:center;color:var(--sub);font-size:11.5px;margin-top:30px;}
 
-  .overlay{position:fixed;inset:0;background:rgba(20,22,20,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .overlay{position:fixed;inset:0;background:rgba(20,22,20,.62);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .overlay.show{animation:overlayIn .16s ease;}
   .overlay.overlayClosing{animation:overlayOut .14s ease forwards;}
   @keyframes overlayIn{ from{opacity:0;} to{opacity:1;} }
@@ -932,6 +932,13 @@
   /* La línea derecha sobresale 5px: deja ese espacio y evita que content-visibility la corte */
   body.tema4 .floor-block{padding-right:6px;}
   body.tema4 .stats-grid,body.tema4 .rec-bar{padding-right:6px;}
+
+  /* Rendimiento: el difuminado del fondo y el brillo infinito de las pestañas quedan guardados pero apagados.
+     Para volver a encenderlos: agrega la clase "blur-fondo" o "brillo-pestanas" al <body>. */
+  body.blur-fondo .overlay{-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+  body:not(.brillo-pestanas) .tab.active,body:not(.brillo-pestanas) .stats-tab.activa{animation:none;box-shadow:0 0 8px 1px rgba(160,110,255,.55), inset 0 0 8px rgba(255,255,255,.16);}
+  body:not(.brillo-pestanas) .tab.active::after,body:not(.brillo-pestanas) .stats-tab.activa::after{animation:none;display:none;}
+  .overlay.show .modal{will-change:transform,opacity;}
 </style>
 </head>
 <body class="lg-on">
@@ -1447,7 +1454,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.44.0';
+const APP_VERSION = '0.44.1';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4626,13 +4633,15 @@ function equalizeRowNameHeights(filas){
   const alturas = grupos.map(els => { let m = 0; els.forEach(el => { m = Math.max(m, el.offsetHeight); }); return m; });
   grupos.forEach((els, i) => els.forEach(el => { el.style.minHeight = alturas[i] + 'px'; }));
   // celdas tipo ventana: todas del mismo alto en la fila, para que "Abrir" quede siempre abajo a la derecha
+  // Tres pasadas (limpiar, medir, aplicar) para que el navegador calcule el diseño una sola vez y no una por fila.
+  const filasVentana = [];
   trs.forEach(tr => {
     const cs = tr.querySelectorAll('.cell-ventana');
     cs.forEach(c => { c.style.minHeight = ''; });
-    if(cs.length < 2) return;
-    let m = 0; cs.forEach(c => { m = Math.max(m, c.offsetHeight); });
-    cs.forEach(c => { c.style.minHeight = m + 'px'; });
+    if(cs.length >= 2) filasVentana.push(cs);
   });
+  const altosVentana = filasVentana.map(cs => { let m = 0; cs.forEach(c => { m = Math.max(m, c.offsetHeight); }); return m; });
+  filasVentana.forEach((cs, i) => cs.forEach(c => { c.style.minHeight = altosVentana[i] + 'px'; }));
 }
 
 function abrirObservacionModal(id){
@@ -4884,7 +4893,8 @@ document.getElementById('filterVista').addEventListener('change', (e) => {
   poblarFiltroPiso();
   render();
 });
-document.getElementById('search').addEventListener('input', render);
+let tBuscar = null;
+document.getElementById('search').addEventListener('input', () => { clearTimeout(tBuscar); tBuscar = setTimeout(render, 160); });
 function actualizarBotonOrden(){
   const b = document.getElementById('btnOrdenPisos');
   b.textContent = ordenPisosDesc ? '↓ Mayor a menor' : '↑ Menor a mayor';
