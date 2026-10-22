@@ -501,7 +501,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.17.0';
+const CAL_VERSION = '1.18.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1451,7 +1451,10 @@ async function cargar(inicial){
     }else if(j && j.error === 'sin_sesion'){
       return 'sesion';
     }else{
-      errorCarga = j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no reconoce esta versión. Falta publicar la versión nueva del script.' : 'La base de datos respondió con un formato inesperado.';
+      errorCarga = j && j.error === 'dispositivo_ocupado' ? 'Esta cuenta ya está abierta en otro ' + (j.tipo === 'pc' ? 'computador' : 'celular') + ' y no se permite un segundo dispositivo del mismo tipo. Cierra la sesión en el otro dispositivo o pide al administrador que la libere.'
+        : j && j.error === 'sin_sesion' ? 'Tu sesión venció. Vuelve a entrar.'
+        : j && typeof j === 'object' && j.error ? 'La base de datos respondió con un error (' + String(j.error) + '). Reintenta; si sigue igual, avisa al administrador.'
+        : j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no reconoce esta versión. Falta publicar la versión nueva del script.' : 'La base de datos respondió con un formato inesperado.';
       if(!inicial) falloCarga('No se pudo cargar. Reintenta.');
       infoDeError(errorCarga);
       return 'fallo';
