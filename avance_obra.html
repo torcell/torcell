@@ -69,16 +69,21 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .pill.late{background:transparent;color:var(--ink);border:1.5px solid var(--late)}
 .pill.ontime{background:transparent;color:var(--ink);border:1.5px solid var(--st-ok)}
 
-nav.tabs{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
+nav.tabs{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));border:1px solid var(--line);background:var(--surface)}
 nav.tabs button{border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px var(--f-body);padding:10px 6px;cursor:pointer;border-radius:0;min-width:0}
 nav.tabs button:last-child{border-right:0}
 nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 nav.tabs button.lock{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 6px,var(--grid) 6px 7px);cursor:not-allowed}
 .temblor{animation:temblor .28s ease}
 @keyframes temblor{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+#datosAviso,#tareasAviso{order:0}
 .aviso-ses{font-size:13.5px;color:var(--ink);border-left:3px solid var(--late);padding:2px 0 2px 10px;max-width:68ch;order:9}
 .pill.real{background:var(--st-ok);color:var(--st-ok-ink);text-transform:uppercase;letter-spacing:.06em}
 .zona-vacia{grid-column:2 / span 8;height:30px;border:1px dashed var(--hatch);color:var(--muted);font-size:11.5px;display:flex;align-items:center;justify-content:center}
+#soloPc{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+#soloPc div{max-width:34ch;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.45}
+#soloPc b{font-family:var(--f-display);font-size:24px;font-weight:600}
+#soloPc p{margin:0;color:var(--muted)}
 #cargando{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:30;font-size:15px;color:var(--muted)}
 button{transition:transform .08s ease}
 button:active{transform:scale(.97)}
@@ -104,7 +109,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .lg{display:inline-flex;align-items:center;gap:6px}
 .lg i{display:inline-block;width:18px;height:0;border-top:2px solid var(--real)}
 .lg i.plan{border-top-color:var(--plan);border-top-style:dashed}
-.lg i.proj{border-top:2px dashed var(--real)}
+.lg i.proj{border-top:2px dotted var(--real)}
+.lg i.req{border-top:2px dashed var(--late)}
 .lg i.box{width:12px;height:12px;border:0}
 .chart{width:100%;min-height:240px;position:relative}
 .chart svg{display:block;width:100%;overflow:visible}
@@ -118,6 +124,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-v
 .bar-name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .track{position:relative;height:14px;background:var(--surface-2);border:1px solid var(--grid)}
 .track .fill{position:absolute;left:0;top:0;bottom:0;background:var(--real);border-radius:0 4px 4px 0}
+.bar-row.clk{cursor:pointer}
+i.ej{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;margin-right:6px;font:600 10px var(--f-body);font-style:normal;background:var(--demo);color:var(--demo-ink);vertical-align:1px}
+.bar-row.clk:hover .bar-name{text-decoration:underline}
 .track .tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
 .bar-val{font-family:var(--f-mono);font-size:13px;text-align:right}
 .bar-dev{display:flex;justify-content:flex-end}
@@ -192,10 +201,89 @@ dl.facts dt{color:var(--muted)} dl.facts dd{margin:0;font-variant-numeric:tabula
 .mat-head dt{color:var(--muted)} .mat-head dd{margin:0 0 0 4px;font-family:var(--f-mono)}
 .mat-head dl div{display:flex}
 
+/* curva S: selector total / por partida */
+.curva-sel{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line)}
+.seg button{border:0;border-right:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 14px var(--f-body);padding:9px 16px;cursor:pointer;border-radius:0}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+#selCurva{min-width:240px}
+.seg5{grid-template-columns:repeat(5,minmax(0,1fr));margin-left:auto}
+.seg5 button{padding:9px 12px;font-weight:500}
+.ckpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line)}
+.ckpis>div{padding:10px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px;min-width:0}
+.ckpis>div:last-child{border-right:0}
+.ckpis .lab{font-size:12.5px;color:var(--muted)}
+.ckpis b{font-family:var(--f-display);font-size:26px;font-weight:600;line-height:1.05}
+.ckpis .sub{font-size:12.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* pestaña datos */
+.form-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.campo{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted);min-width:0}
+.campo input,.celda-in{height:36px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:14px var(--f-body);padding:0 10px;border-radius:0;width:100%;min-width:0}
+.celda-in{height:32px;font-family:var(--f-mono);font-size:13px}
+.celda-in.num{text-align:right;max-width:84px}
+.campo input:disabled,.celda-in:disabled{background:var(--surface-2);color:var(--muted)}
+.celda-in.error,.campo input.error{border-color:var(--st-block);outline:1px solid var(--st-block)}
+.btn.small{height:32px;font-size:13px;padding:0 12px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.guardar-bar{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--bg);padding-block:12px;border-top:1px solid var(--line)}
+.av-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.av-add .celda-in{width:auto}
+.x-mini{width:32px;height:32px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);cursor:pointer;border-radius:0}
+.x-mini:disabled{opacity:.4;cursor:not-allowed}
+
+/* objetivos */
+.form-obj{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:end}
+.form-obj .c3{grid-column:span 3}
+.form-obj .c4{grid-column:1 / -1}
+.form-obj .fila-bot{flex-direction:row;align-items:center;gap:10px}
+.seg2{grid-template-columns:repeat(2,max-content);align-self:flex-start;width:max-content}
+#tblTareas td.tarea-t{min-width:300px}
+.tarea-t .quien{margin-top:3px;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+#tblTareas .meta span{white-space:nowrap}
+.seg2 button{padding:9px 18px}
+.campo select{height:36px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:14px var(--f-body);padding:0 10px;border-radius:0}
+.bk6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.pill.t-atr{background:var(--st-block);color:var(--st-block-ink)}
+.pill.t-riesgo{background:var(--late);color:#1F1300}
+.pill.t-hoy{background:var(--late);color:#1F1300}
+.pill.t-prox{background:transparent;color:var(--ink);border:1.5px solid var(--late)}
+.pill.t-ok{background:transparent;color:var(--ink);border:1.5px solid var(--st-ok)}
+.pill.t-fin{background:var(--st-ok);color:var(--st-ok-ink)}
+.acc{display:flex;gap:6px;justify-content:flex-end}
+.acc .btn{min-width:84px}
+.tarea-t b{display:block}
+.tarea-t span{font-size:13px;color:var(--muted);display:block}
+.meta{display:grid;grid-template-columns:110px max-content;gap:8px;align-items:center;font-family:var(--f-mono);font-size:13px}
+.meta .track{height:10px}
+
+/* niveles del edificio (en datos), en panel plegable que se abre suave y queda arriba de la pantalla */
+.plegable{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.plegable.abierto{grid-template-rows:1fr}
+.plegable>div{overflow:hidden;min-height:0}
+#panelNiv{scroll-margin-top:12px}
+#panelNiv:has(.plegable:not(.abierto)){gap:0}
+.niveles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 24px}
+.niv{display:grid;grid-template-columns:44px minmax(0,1fr) 72px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--grid)}
+.niv .cod{font:500 12px var(--f-mono);color:var(--muted)}
+
 /* tablas */
 td.nw{white-space:nowrap}
 #tblBodega th,#tblBodega td{padding:8px 9px;font-size:13.5px}
 #listaBodega{display:none}
+@media (max-width:640px){
+  #tblProg thead{display:none}
+  #tblProg tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 10px;padding:12px;border-bottom:1px solid var(--line)}
+  #tblProg td{border:0;padding:0;display:flex;flex-direction:column;gap:4px;min-width:0;text-align:left}
+  #tblProg td[data-l]::before{content:attr(data-l);font:12px var(--f-body);color:var(--muted)}
+  #tblProg td.pt{grid-column:1 / -1;font-weight:600}
+  #tblProg td.bt{grid-column:1 / -1}
+  #tblProg td.nw{white-space:normal}
+  #tblProg .celda-in.num{max-width:none;text-align:left}
+  #tblProg tbody tr:last-child td{display:block}
+}
 @media (max-width:640px){ #tblBodega{display:none} #wrapBodega{border:0} #listaBodega{display:flex} }
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line)}
 table{border-collapse:collapse;width:100%;font-size:14px}
@@ -236,7 +324,7 @@ ul.plain li:last-child{border-bottom:0}
 .glos dd{margin:2px 0 0;color:var(--muted);font-size:14px}
 .glos-group{font-family:var(--f-display);font-size:16px;font-weight:600;color:var(--accent);padding-top:14px;grid-column:1 / -1;border-bottom:1px solid var(--line);padding-bottom:6px}
 
-/* ficha del depto: no se cierra tocando afuera, solo con la X (así no se cierra por error en el celular) */
+/* ficha del depto: no se cierra tocando afuera, solo con la X (así no se cierra por error) */
 .overlay{position:fixed;inset:0;background:rgba(10,14,12,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
 .modal{background:var(--surface);border:1px solid var(--line);width:min(620px,100%);max-height:calc(100% - 32px);overflow:auto;display:flex;flex-direction:column}
 .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
@@ -258,11 +346,17 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   .kpi:nth-child(2n),.scen>div:nth-child(2n){border-right:0}
   .kpi:nth-child(-n+2),.scen>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .scen>div:nth-child(3){grid-column:1 / -1}
-  nav.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
-  nav.tabs button:nth-child(3n){border-right:0}
-  nav.tabs button:nth-child(-n+6){border-bottom:1px solid var(--line)}
+  nav.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
+  nav.tabs button:nth-child(5n){border-right:0}
+  nav.tabs button:nth-child(-n+5){border-bottom:1px solid var(--line)}
   .glos{grid-template-columns:1fr}
   .bkpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ckpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ckpis>div:nth-child(2n){border-right:0}
+  .ckpis>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .form-row{grid-template-columns:1fr}
+  .seg{width:100%}
+  #selCurva{width:100%}
   .bkpis>div:nth-child(2n){border-right:0}
   .bkpis>div:nth-child(-n+4){border-bottom:1px solid var(--line)}
   .bkpis>div:last-child{grid-column:1 / -1}
@@ -277,7 +371,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   .zone{font-size:10.5px}
   .ground{margin-left:32px}
   .panel{padding:14px}
-  nav.tabs button{font-size:13px;padding:10px 2px}
+  nav.tabs button{font-size:12px;padding:10px 1px}
   h1{font-size:26px}
   .kpi b{font-size:28px}
   .bar-row,.bars-head{grid-template-columns:minmax(0,104px) minmax(0,1fr) 40px 64px;gap:8px}
@@ -286,7 +380,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   .selector button:nth-child(2n){border-right:0}
   .selector button:nth-last-child(3){border-bottom:1px solid var(--line)}
 }
-@media (prefers-reduced-motion:reduce){.temblor{animation:none}button{transition:none}button:active{transform:none}#tip{transition:none}}
+@media (prefers-reduced-motion:reduce){.plegable{transition:none}.temblor{animation:none}button{transition:none}button:active{transform:none}#tip{transition:none}}
 </style>
 
 <div class="wrap">
@@ -306,6 +400,8 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   <nav class="tabs" role="tablist" aria-label="Vistas">
     <button role="tab" aria-selected="true" data-tab="resumen" id="tab-resumen">Resumen</button>
     <button role="tab" aria-selected="false" data-tab="edificio" id="tab-edificio">Edificio</button>
+    <button role="tab" aria-selected="false" data-tab="datos" id="tab-datos">Datos</button>
+    <button role="tab" aria-selected="false" data-tab="tareas" id="tab-tareas">Objetivos</button>
     <button role="tab" aria-selected="false" data-tab="tren" id="tab-tren">Por piso</button>
     <button role="tab" aria-selected="false" data-tab="proy" id="tab-proy">Proyección</button>
     <button role="tab" aria-selected="false" data-tab="bodega" id="tab-bodega">Bodega</button>
@@ -318,19 +414,39 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   <!-- RESUMEN -->
   <section id="v-resumen" class="view">
     <div class="kpis" id="kpis"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2><span class="term" data-term="curvas">Curva S</span> de avance</h2>
+        <div class="legend-row">
+          <span class="lg" id="lgPlan"><i class="plan"></i><span class="term" data-term="programado">Programado</span></span>
+          <span class="lg"><i></i><span class="term" data-term="real">Real</span></span>
+          <span class="lg"><i class="proj"></i><span class="term" data-term="proyeccion">Proyección si sigue así</span></span>
+          <span class="lg" id="lgReq"><i class="req"></i><span class="term" data-term="requerido">Requerido</span></span>
+        </div>
+      </div>
+      <div class="curva-sel">
+        <div class="seg" role="tablist" aria-label="Qué mostrar">
+          <button type="button" id="segTotal" aria-pressed="true">Total obra</button>
+          <button type="button" id="segPartida" aria-pressed="false">Avance por partida</button>
+        </div>
+        <select id="selCurva" aria-label="Partida" hidden></select>
+        <div class="seg seg5" id="segVer" role="group" aria-label="Qué líneas mostrar">
+          <button type="button" data-v="todas" aria-pressed="true">Todas</button>
+          <button type="button" data-v="plan" aria-pressed="false">Programado</button>
+          <button type="button" data-v="real" aria-pressed="false">Real</button>
+          <button type="button" data-v="proy" aria-pressed="false">Proyección</button>
+          <button type="button" data-v="req" aria-pressed="false">Requerido</button>
+        </div>
+      </div>
+      <div class="ckpis" id="ckpis"></div>
+      <div class="chart" id="chS"></div>
+      <p class="note" id="notaCurva"></p>
+    </div>
     <div class="grid2">
       <div class="col">
-      <div class="panel">
-        <div class="panel-head">
-          <h2><span class="term" data-term="curvas">Curva S</span> de avance</h2>
-          <div class="legend-row">
-            <span class="lg" id="lgPlan"><i class="plan"></i><span class="term" data-term="programado">Programado</span></span>
-            <span class="lg"><i></i><span class="term" data-term="real">Real</span></span>
-            <span class="lg"><i class="proj"></i><span class="term" data-term="proyeccion">Proyección base</span></span>
-          </div>
-        </div>
-        <div class="chart" id="chS"></div>
-        <p class="note" id="notaCurva">Avance <span class="term" data-term="ponderado">ponderado</span> de toda la obra, semana a semana. Pasa el cursor por el gráfico para ver los valores.</p>
+      <div class="panel" id="panelTareas">
+        <div class="panel-head"><h2>Objetivos</h2><span class="note">Atrasados, en riesgo y por vencer.</span></div>
+        <div class="avisos" id="tareasRes"></div>
       </div>
       <div class="panel" id="panelDetalle" hidden>
         <div class="panel-head"><h2>Cerámica y frague en detalle</h2><span class="note">Lo que dice la base de datos hoy.</span></div>
@@ -380,6 +496,79 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
       </div>
     </div>
   </section>
+
+  <!-- DATOS -->
+  <section id="v-datos" class="view" hidden>
+    <div class="aviso-ses" id="datosAviso" hidden></div>
+    <div class="panel">
+      <div class="panel-head"><h2>Obra</h2><span class="note">Fechas generales. El término sirve para comparar con la proyección.</span></div>
+      <div class="form-row">
+        <label class="campo"><span>Nombre</span><input type="text" id="fNombre" disabled></label>
+        <label class="campo"><span>Fecha de inicio</span><input type="date" id="fInicio"></label>
+        <label class="campo"><span>Término contractual</span><input type="date" id="fTermino"></label>
+      </div>
+    </div>
+    <div class="panel" id="panelNiv">
+      <div class="panel-head">
+        <h2>Niveles del edificio</h2>
+        <button type="button" class="btn small ghost" id="btnNiv" aria-expanded="false" aria-controls="cuerpoNiv">Mostrar niveles</button>
+      </div>
+      <div class="plegable" id="cuerpoNiv">
+        <div>
+          <p class="note" style="margin-bottom:12px">Nombre que se muestra en el dibujo del edificio y en las fichas. La abreviatura va al lado de cada fila del dibujo (máx. 4 letras).</p>
+          <div class="niveles" id="tblNiv"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Programa por partida</h2><span class="note">Fechas programadas y peso de cada partida. El peso dice cuánto vale en el avance total.</span></div>
+      <div class="tbl-wrap"><table id="tblProg"></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 id="avTitulo">Avances registrados</h2><span class="note" id="avNota"></span></div>
+      <div id="avCuerpo"></div>
+    </div>
+  </section>
+
+  <!-- OBJETIVOS -->
+  <section id="v-tareas" class="view" hidden>
+    <div class="aviso-ses" id="tareasAviso" hidden></div>
+    <div class="bkpis bk6" id="tkpis"></div>
+    <div class="panel">
+      <div class="panel-head"><h2>Objetivos de la obra</h2><span class="note">Metas con fecha límite. Las de avance se miden solas con los datos; las demás se confirman a mano.</span></div>
+      <div class="tbl-wrap"><table id="tblTareas"></table></div>
+    </div>
+    <div class="panel" id="panelForm">
+      <div class="panel-head"><h2 id="formTitulo">Nuevo objetivo</h2><span class="note">Los campos con * son obligatorios.</span></div>
+      <div class="form-obj">
+        <div class="campo c4"><span>Tipo *</span>
+          <div class="seg seg2" id="tTipo" role="group" aria-label="Tipo de objetivo">
+            <button type="button" data-t="avance" aria-pressed="true">Meta de avance de una partida</button>
+            <button type="button" data-t="manual" aria-pressed="false">Tarea a confirmar a mano</button>
+          </div>
+        </div>
+        <label class="campo c3"><span>Objetivo *</span><input type="text" id="tTitulo" maxlength="120" placeholder="Ej.: Cerámica al 70%"></label>
+        <label class="campo"><span>Área</span><select id="tCat"></select></label>
+        <label class="campo c3"><span>Detalle</span><input type="text" id="tDetalle" maxlength="240" placeholder="Opcional"></label>
+        <label class="campo"><span>Responsable</span><input type="text" id="tResp" maxlength="60" placeholder="Ej.: A. Sandoval"></label>
+        <label class="campo solo-av"><span>Partida *</span><select id="tPartida"></select></label>
+        <label class="campo solo-av"><span>Meta de avance (%) *</span><input type="number" id="tMeta" min="1" max="100" step="1" value="70"></label>
+        <label class="campo"><span>Fecha límite *</span><input type="date" id="tFecha"></label>
+        <label class="campo"><span>Avisar con anticipación (días)</span><input type="number" id="tAviso" min="0" max="60" value="5"></label>
+        <div class="campo c4 fila-bot"><button type="button" class="btn" id="tAgregar">Agregar objetivo</button><button type="button" class="btn ghost" id="tCancelar" hidden>Cancelar</button><span class="toast" id="tMsg"></span></div>
+      </div>
+    </div>
+    <div class="panel" id="panelHechas">
+      <div class="panel-head"><h2>Cumplidos</h2><span class="note">Con la fecha en que se cumplieron y si fue a tiempo.</span></div>
+      <div id="listaHechas"></div>
+    </div>
+  </section>
+
+  <div class="guardar-bar" id="barraGuardar" hidden>
+    <button type="button" class="btn" id="btnGuardar" disabled>Guardar</button>
+    <button type="button" class="btn ghost" id="btnDescartar" disabled>Descartar cambios</button>
+    <span class="toast" id="msgGuardar" role="status"></span>
+  </div>
 
   <!-- TREN POR PISO -->
   <section id="v-tren" class="view" hidden>
@@ -510,7 +699,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
     </div>
   </section>
 
-  <footer><span id="pie">Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.7.2</span></footer>
+  <footer><span id="pie">Datos de demostración, no corresponden a una obra real</span><span class="mono">v0.11.0</span></footer>
 </div>
 
 <div class="overlay" id="overlay" hidden>
@@ -524,6 +713,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
 </div>
 <div id="tip" role="tooltip"></div>
 <div id="cargando">Cargando datos de la obra…</div>
+<div id="soloPc" hidden><div><b>Este panel está hecho, por ahora, solo para computador.</b><p>Ábrelo desde un computador de escritorio o un notebook para verlo bien.</p></div></div>
 
 <script>
 const CONFIG = {
@@ -700,7 +890,8 @@ const GLOSARIO = {
     rendimiento: ["Rendimiento", "Cuánto se termina por semana en una partida (recintos o m²). Se calcula con lo terminado en las últimas semanas."],
     saldo: ["Saldo", "Lo que falta por terminar en una partida."],
     frente: ["Frente", "Piso más alto donde la partida ya está trabajando o terminó."],
-    proyeccion: ["Proyección", "Estimación de cuándo terminará algo si sigue el ritmo actual. Es una estimación, no un compromiso."],
+    proyeccion: ["Proyección si sigue así", "Hacia dónde va el avance si se mantiene el ritmo de las últimas semanas. Es una estimación, no un compromiso."],
+    requerido: ["Requerido", "Lo que habría que avanzar desde hoy para terminar justo en la fecha de término programada o contractual. Si es más empinado que la proyección, hay que apurar el ritmo."],
     base: ["Escenario base", "Proyección con el promedio de las últimas 6 semanas."],
     optimista: ["Escenario optimista", "Proyección con el mejor ritmo de 4 semanas seguidas de las últimas 12, como máximo 40% sobre el base."],
     conservador: ["Escenario conservador", "Proyección con el peor ritmo de 4 semanas seguidas de las últimas 12, como mínimo 70% del base."]
@@ -771,8 +962,8 @@ function aplicarReales(cfg, reales){
   cfg.partidas = cfg.partidas.map(p => {
     if (p.cod === "CER") return { ...p, nom: "Cerámica", aplica: ["sub","dep","pas"], pre: [] };
     if (p.cod === "FRA") return { ...p, aplica: ["sub","dep","pas"], pre: ["CER"] };
-    if (p.cod === "OG") return { ...p, pre: [] };
-    return { ...p, pre: [], sinDatos: true };
+    // las que todavía no están en la base de datos van con datos de ejemplo (marcados como tal)
+    return { ...p, pre: [], ejemplo: true };
   });
   // la obra gruesa terminó el último piso entre el viernes 16 y el lunes 19 de octubre de 2026
   cfg.ogFin = { desde: "2026-10-16", hasta: "2026-10-19" };
@@ -782,9 +973,66 @@ function aplicarReales(cfg, reales){
   cfg.sesion = { nombre: reales.nombre, rol: reales.rol };
 }
 
+// ojo: en la copia de prueba PRUEBA va en true y FOTO trae una foto de los datos; no guarda nada. En la normal dejar false y null
+const PRUEBA = false;
+const FOTO = null;
+
+// programa y avances que se ingresan en la pestaña Datos (se guardan en la base de datos)
+let PROG_ESTADO = "sin_sesion", PROG_VERSION = 0, PROG_LEIDO = null;
+async function llamarBase(action, extra){
+  const token = leerSes("progresoObraToken");
+  let url = URL_BASE_DEFECTO; try { url = localStorage.getItem("progresoObraDbUrl") || URL_BASE_DEFECTO; } catch (e) {}
+  const ctl = new AbortController(); const tope = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const r = await fetch(url, { method: "POST", signal: ctl.signal, headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action, token, dispositivo: leerSes("progresoObraDisp") || "", dispositivoEtiqueta: etiquetaDispositivo(), ...extra }) });
+    if (!r.ok) throw new Error("red");
+    return JSON.parse(await r.text());
+  } finally { clearTimeout(tope); }
+}
+async function cargarPrograma(){
+  if (PRUEBA) { PROG_ESTADO = "prueba"; return; }
+  if (!leerSes("progresoObraToken")) { PROG_ESTADO = "sin_sesion"; return; }
+  try {
+    const j = await llamarBase("avanceLeer", {});
+    if (j && j.ok === true) { PROG_ESTADO = "ok"; PROG_LEIDO = j.programa || null; PROG_VERSION = j.version || 0; }
+    else if (j && j.error === "sin_sesion") PROG_ESTADO = "sin_sesion";
+    else PROG_ESTADO = "sin_base";
+  } catch (e) { PROG_ESTADO = "error"; }
+}
+// fechas de programa de ejemplo para que se vea la curva programada; se cambian en la pestaña Datos
+function programaInicial(){
+  const f = { OG: ["2025-07-01", "2026-09-30"], INS: ["2025-09-15", "2026-11-13"], IEL: ["2025-09-15", "2026-11-13"], TAB: ["2025-10-15", "2026-11-30"],
+    VEN: ["2025-11-03", "2026-12-15"], YES: ["2025-11-17", "2026-12-30"], IMP: ["2026-01-05", "2027-01-15"], CER: ["2026-01-15", "2027-01-29"],
+    FRA: ["2026-02-02", "2027-02-12"], PIN: ["2026-02-16", "2027-02-26"], PUE: ["2026-03-16", "2027-03-12"], MUE: ["2026-03-16", "2027-03-19"],
+    PIS: ["2026-03-23", "2027-03-26"], ART: ["2026-04-01", "2027-03-31"], ASC: ["2026-05-04", "2027-01-29"], ASE: ["2026-04-15", "2027-04-15"], CAL: ["2026-04-20", "2027-04-30"] };
+  const partidas = {}; Object.entries(f).forEach(([c, [a, b]]) => { partidas[c] = { inicio: a, termino: b }; });
+  return { obra: { inicio: "2025-07-01", termino: "2027-04-30" }, partidas, ejemploFechas: true };
+}
+
+// por ahora el panel es solo para computador; en celular o tablet muestro un aviso y no cargo nada
+function esCelular(){
+  const u = navigator.userAgent || "";
+  if (/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(u)) return true;
+  if (/Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1) return true;
+  return false;
+}
+// 3 objetivos de ejemplo para el jefe de terreno (se pueden editar o borrar)
+function objetivosIniciales(){
+  return [
+    { id: "o1", tipo: "avance", titulo: "Cerámica al 70%", detalle: "Terminar pisos y muros de baño hasta el piso 18.", resp: "A. Sandoval", area: "Producción", partida: "CER", meta: 70, fecha: "2026-11-20", aviso: 7 },
+    { id: "o2", tipo: "manual", titulo: "Revisión de Calidad pisos 2 al 6", detalle: "Recorrido con Calidad de cerámica y frague; dejar observaciones con responsable.", resp: "A. Sandoval", area: "Calidad", fecha: "2026-10-30", aviso: 3 },
+    { id: "o3", tipo: "manual", titulo: "Confirmar despacho de cerámica pisos 15 al 18", detalle: "Fecha de llegada confirmada por escrito con el proveedor.", resp: "A. Sandoval", area: "Materiales", fecha: "2026-10-16", aviso: 3 }
+  ];
+}
+
 async function iniciar(){
-  const reales = await cargarReales();
+  if (esCelular()) { document.getElementById("soloPc").hidden = false; document.getElementById("cargando").remove(); return; }
+  const [reales] = await Promise.all([PRUEBA ? Promise.resolve({ items: FOTO, nombre: "Prueba", rol: "1" }) : cargarReales(), cargarPrograma()]);
   if (reales) aplicarReales(CONFIG, reales);
+  CONFIG.programa = PROG_LEIDO || programaInicial();
+  if (!CONFIG.programa.objetivos) CONFIG.programa.objetivos = objetivosIniciales();
+  delete CONFIG.programa.tareas;
   arrancar();
   document.getElementById("cargando").remove();
 }
@@ -795,7 +1043,7 @@ const iso = d => d.toISOString().slice(0, 10);
 const parse = s => new Date(s + "T12:00:00Z");
 const FER = new Set(CONFIG.feriados);
 const WD = [];
-(function(){ let d = parse(CONFIG.inicio < "2025-09-01" ? CONFIG.inicio.slice(0, 8) + "01" : "2025-09-01"); const end = parse("2028-12-31");
+(function(){ let d = parse("2023-01-02"); const end = parse("2030-12-31");
   while (d <= end) { const w = d.getUTCDay(); if (w !== 0 && w !== 6 && !FER.has(iso(d))) WD.push(iso(d)); d = new Date(d.getTime() + 864e5); } })();
 function wdIndex(s){ let lo = 0, hi = WD.length; while (lo < hi) { const m = (lo + hi) >> 1; if (WD[m] < s) lo = m + 1; else hi = m; } return lo; }
 const W0 = wdIndex(CONFIG.inicio);
@@ -809,7 +1057,10 @@ const fmtWd = i => fmt(wdDate(i));
 
 // estructura del edificio: niveles, deptos, pasillos y zonas
 function nivelLabel(n){ return n < 0 ? "S" + Math.abs(n) : "P" + String(n).padStart(2, "0"); }
-function nivelNombre(n){ return n < 0 ? "Subterráneo " + n : "Piso " + n; }
+// nombres de los niveles: se pueden cambiar en la pestaña Datos (ej. el último piso como "Terraza")
+let NIVNOM = (CONFIG.programa && CONFIG.programa.niveles) || {};
+function nivelNombre(n){ const x = NIVNOM[nivelLabel(n)]; return x && x.nombre ? x.nombre : (n < 0 ? "Subterráneo " + n : "Piso " + n); }
+function nivelCorto(n){ const x = NIVNOM[nivelLabel(n)]; return x && x.corto ? x.corto : nivelLabel(n); }
 function ambito(n){ return n < 0 ? "sub" : (n === 1 ? "p1" : "dep"); }
 
 const NIVELES = [-2, -1, 1]; for (let p = 2; p <= CONFIG.pisoHasta; p++) NIVELES.push(p);
@@ -855,7 +1106,7 @@ function predsEfectivas(p, amb){
   return [];
 }
 
-// datos de prueba con semilla fija para que salgan siempre iguales; sacar esto cuando cargue el Excel real
+// datos de ejemplo con semilla fija (salen siempre iguales); solo se usan cuando no hay sesión del panel
 function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(240);
 const RESTR = CONFIG.restricciones.map(x => ({ ...x, desdeWd: wdIndex(x.desde) - W0 }));
@@ -865,15 +1116,24 @@ const regBy = {};
 const key = (p, u) => p + "|" + u;
 if (CONFIG.modoReal) {
   // en modo real: un recinto está terminado cuando todas sus áreas lo están; en curso si alguna empezó
+  // datos de ejemplo para las partidas que no están en la base de datos: siguen el tren
+  // (las de antes de la cerámica van más arriba, las de después del frague más abajo)
+  // frente = último piso terminado hoy; ciclo = días hábiles entre un piso y el siguiente
+  const EJ = { OG: [24, 9], INS: [22, 8], IEL: [22, 8], TAB: [21, 8], VEN: [20, 8], YES: [18, 9], IMP: [16, 9], ASC: [18, 6],
+    PIN: [11, 10], PUE: [8, 10], MUE: [8, 10], PIS: [7, 10], ART: [6, 10], ASE: [5, 11], CAL: [4, 11] };
+  const RJ = rng(97);
+  const finOG = wdIndex(CONFIG.ogFin.hasta) - W0;
   P.forEach(p => {
-    if (p.cod !== "OG" && !p.sinDatos) return;
+    if (!p.ejemplo || !EJ[p.cod]) return;
+    const [frente, ciclo] = EJ[p.cod], kf = KIDX[frente], ref = p.cod === "OG" ? finOG : CORTE - 2;
     const units = p.unidad === "nivel" ? NIVELES.filter(n => p.aplica.includes(ambito(n))).map(n => ({ u: nivelLabel(n), nivel: n, amb: ambito(n) }))
       : RECINTOS.filter(r => p.aplica.includes(r.ambito)).map(r => ({ u: r.codigo, nivel: r.nivel, amb: r.ambito }));
-    const finOG = wdIndex(CONFIG.ogFin.hasta) - W0;
     units.forEach(x => {
-      const og = p.cod === "OG", ultimo = og && x.nivel === CONFIG.pisoHasta;
-      const reg = { p: p.cod, u: x.u, nivel: x.nivel, amb: x.amb, k: KIDX[x.nivel], ps: Infinity, pf: Infinity,
-        rs: og ? 0 : Infinity, rf: og ? (ultimo ? finOG : 0) : Infinity, bloq: null, preds: [], sinDatos: !og };
+      const k = KIDX[x.nivel];
+      let rs = Infinity, rf = Infinity;
+      if (k <= kf) { rf = Math.round(ref - (kf - k) * ciclo - (k === kf || p.cod === "OG" ? 0 : Math.floor(RJ() * 3))); rs = rf - Math.max(1, Math.round(p.dur * (0.8 + RJ() * 0.4))); }
+      else if (k === kf + 1) { rs = CORTE - 1 - Math.floor(RJ() * 4); if (RJ() < 0.35) rf = CORTE - Math.floor(RJ() * 2); }
+      const reg = { p: p.cod, u: x.u, nivel: x.nivel, amb: x.amb, k, ps: Infinity, pf: Infinity, rs, rf, bloq: null, preds: [], ejemplo: true };
       REG.push(reg); regBy[key(p.cod, x.u)] = reg;
     });
   });
@@ -939,7 +1199,7 @@ const AREAS_FIN = {};
 if (MR) P.filter(p => p.cod === "CER" || p.cod === "FRA").forEach(p => { const l = []; regsDe(p.cod).forEach(r => r.areas.forEach(a => l.push([a.terminado ? (a.fin ? dWdTs(a.fin) : SIN_FECHA) : Infinity, a.m2]))); AREAS_FIN[p.cod] = { l, tot: l.reduce((s, x) => s + x[1], 0) || 1 }; });
 function avPart(c, t, cual){
   if (MR) { if (cual === "plan") return 0; const a = AREAS_FIN[c];
-    if (!a) { const rs = regsDe(c); return rs.length && !rs[0].sinDatos ? rs.filter(r => r.rf <= t).length / rs.length : 0; } return a.l.reduce((s, x) => s + (x[0] <= t ? x[1] : 0), 0) / a.tot; }
+    if (!a) { const rs = regsDe(c); return rs.length ? rs.reduce((s, r) => s + (r.rf <= t ? 1 : r.rs <= t ? 0.5 : 0), 0) / rs.length : 0; } return a.l.reduce((s, x) => s + (x[0] <= t ? x[1] : 0), 0) / a.tot; }
   const rs = regsDe(c); let s = 0;
   rs.forEach(r => { const a = cual === "plan" ? r.ps : r.rs, b = cual === "plan" ? r.pf : r.rf; if (b <= t) s += 1; else if (a <= t) s += 0.5; });
   return s / rs.length;
@@ -1069,7 +1329,7 @@ const BEST = {
 };
 const ORD_B = { ya: 0, hoy: 1, pronto: 2, ok: 3, cub: 4 };
 
-// funciones chicas que uso en todas las vistas
+// funciones chicas que ocupo en todas las vistas
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const T = (k, txt) => `<span class="term" data-term="${k}">${txt ?? TERMS[k][0]}</span>`;
@@ -1086,7 +1346,7 @@ function diasPill(d){
   return `<span class="pill late">+${d} d</span>`;
 }
 
-// cuadrito de ayuda al pasar el cursor (en celular sale al tocar)
+// cuadrito de ayuda al pasar el cursor
 const tip = $("tip");
 let tipFijo = null;
 function showTip(html, rect){
@@ -1137,7 +1397,6 @@ const TIPFN = {
     const p = PBY[SEL]; if (!p.aplica.includes(rec.ambito)) return `<b>${esc(rec.nombre)}</b><br>${esc(p.nom)} no aplica aquí.`;
     const r = regDeRecinto(SEL, rec);
     if (MR && p.sinDatos) return `<b>${esc(rec.nombre)} · ${esc(p.nom)}</b><br>Sin datos todavía.`;
-    if (MR && p.cod === "OG") return `<b>${esc(rec.nombre)} · ${esc(p.nom)}</b><br>Terminada${rec.nivel === CONFIG.pisoHasta ? " entre el 16 y el 19 de octubre" : ""}.`;
     const ex = CONFIG.excepciones[rec.codigo], q = cantDe(SEL, rec);
     return `<b>${esc(rec.nombre)} · ${esc(p.nom)}</b><div class="tl"><span>Estado</span><span>${EST[r.est][0]}</span>` +
       (MR ? `<span>m²</span><span>${num(m2Ok(SEL, rec), 1)} de ${num(m2De(SEL, rec), 1)}</span>` : `<span>Término prog.</span><span>${fmtWd(r.pf)}</span>`) +
@@ -1158,8 +1417,9 @@ const TIPFN = {
   mxh(el){ const p = PBY[el.dataset.p]; const t = TERMS[p.cod]; return `<b>${esc(p.cod)} · ${esc(p.nom)}</b><br>${esc(t ? t[1] : "")}`; },
   bar(el){
     const p = PBY[el.dataset.p], h = HIST[p.cod];
-    if (MR && p.sinDatos) return `<b>${esc(p.nom)}</b><br>Todavía no se registra en la base de datos.`;
-    if (MR && p.cod === "OG") return `<b>${esc(p.nom)}</b><br>Terminada en todos los pisos. El último piso terminó entre el viernes 16 y el lunes 19 de octubre.`;
+    if (MR && !esBase(p.cod)) { const r = realHoy(p.cod), pl = planDe(p.cod, CORTE), u = puntosReales(p.cod).slice(-1)[0];
+      const fuente = u ? `<span>Último registro</span><span>${fmtC(wdDate(u[0]))}</span>` : p.ejemplo ? `<span>Origen</span><span>datos de ejemplo</span>` : "";
+      return `<b>${esc(p.nom)}</b>${r == null ? "<br>Sin avances ingresados todavía." : `<div class="tl"><span>Real</span><span>${pct(r)}</span>${fuente}${pl != null ? `<span>Programado</span><span>${pct(pl)}</span>` : ""}</div>`}<div style="margin-top:4px">Toca para ver su curva.</div>`; }
     if (MR) return `<b>${esc(p.nom)}</b><div class="tl"><span>Recintos terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Avance m²</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span><span>Ritmo</span><span>${num(h.base, 0)} m²/sem</span></div>`;
     return `<b>${esc(p.nom)}</b><div class="tl"><span>Terminados</span><span>${h.ok} de ${h.total}</span><span>En curso</span><span>${h.run}</span><span>Real</span><span>${pct(avPart(p.cod, CORTE, "real"))}</span><span>Programado</span><span>${pct(avPart(p.cod, CORTE, "plan"))}</span><span>Peso</span><span>${num(p.peso / PESO_TOTAL * 100)}%</span>` +
       (cantPartida(p.cod) ? `<span>Cantidad</span><span>${cantPartida(p.cod).ok} de ${cantPartida(p.cod).tot} ${cantPartida(p.cod).unidad}</span>` : "") + `</div>`;
@@ -1171,10 +1431,10 @@ $("corteTxt").textContent = fmt(CONFIG.corte);
 const CARGOS = { "1": "Admin", "2": "Supervisor", "3": "Contratista", "4": "Jefe de Terreno" };
 if (MR) {
   const hora = new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago" });
-  $("hdrEyebrow").innerHTML = `<span class="pill real">Datos reales</span><span>Obra gruesa, cerámica y frague · leído a las ${hora}</span>`;
+  $("hdrEyebrow").innerHTML = `<span class="pill real">Datos reales</span><span>Cerámica y frague reales · demás partidas con datos de ejemplo · leído a las ${hora}</span>`;
   $("hdrTitulo").textContent = CONFIG.obra.nombre;
   $("hdrSub").innerHTML = `${deptos.length} departamentos y ${pasillos.length} pasillos · sin programa cargado, se muestra solo lo real`;
-  $("pie").textContent = "Cerámica y frague leídos de la base de datos; obra gruesa terminada según lo informado. Las demás partidas aún no tienen datos. Esta página no modifica nada.";
+  $("pie").textContent = "Cerámica y frague se leen de la base de datos del panel. Las demás partidas (marcadas con E) tienen datos de ejemplo hasta que se ingresen los reales en la pestaña Datos.";
   $("notaCurva").textContent = `Cerámica y frague juntos, por m² terminados. Lo terminado antes del ${fmt(CONFIG.inicio)} no tiene fecha guardada en la base de datos, por eso la curva parte desde ahí. Pasa el cursor por el gráfico para ver los valores.`;
   $("lgPlan").hidden = true; $("panelRestr").hidden = true; $("panelAvisos").hidden = true;
   const nom = CONFIG.sesion.nombre || "Usuario", ini = nom.split(/[\s.]+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("");
@@ -1205,57 +1465,208 @@ function renderKpis(){
     <div class="kpi"><span class="lab">${T("CAL", "Deptos recibidos")}</span><b class="mono">${deptosEnt}<span style="font-size:20px;color:var(--muted)"> / ${deptos.length}</span></b><span class="sub">con recepción de Calidad</span></div>`;
 }
 
+// curva S: programado, real y proyección; total de la obra o una partida
+let PROG = JSON.parse(JSON.stringify(CONFIG.programa));
+let PROG_GUARDADO = JSON.stringify(PROG);
+const dW = s => wdIndex(s) - W0;
+const gP = c => (PROG.partidas[c] = PROG.partidas[c] || {});
+const pesoDe = c => { const g = PROG.partidas[c]; return g && g.peso !== undefined && g.peso !== "" && g.peso !== null ? Number(g.peso) || 0 : PBY[c].peso; };
+const esBase = c => MR && (c === "CER" || c === "FRA");
+function planDe(c, t){
+  if (!MR) return avPart(c, t, "plan");
+  const g = PROG.partidas[c]; if (!g || !g.inicio || !g.termino) return null;
+  const a = dW(g.inicio), b = dW(g.termino); if (!(b > a)) return null;
+  return t <= a ? 0 : t >= b ? 1 : (t - a) / (b - a);
+}
+function puntosReales(c){
+  const g = PROG.partidas[c]; if (!g || !g.avances) return [];
+  return g.avances.filter(x => x.fecha && x.pct !== "" && x.pct !== null && !isNaN(Number(x.pct)))
+    .map(x => [dW(x.fecha), Math.max(0, Math.min(100, Number(x.pct))) / 100]).sort((x, y) => x[0] - y[0]);
+}
+function realDe(c, t){
+  if (t > CORTE) return null;
+  if (!MR) return avPart(c, t, "real");
+  // antes de la primera fecha guardada no se sabe cuánto había, así que no dibujo nada
+  if (esBase(c)) {
+    // antes de la primera fecha guardada lo estimo en línea recta desde el inicio programado (si hay programa)
+    const p0 = primerRealDe(c);
+    if (t >= p0) return avPart(c, t, "real");
+    const g = PROG.partidas[c]; if (!g || !g.inicio) return null;
+    const a = dW(g.inicio); if (a >= p0) return null;
+    return t <= a ? 0 : avPart(c, p0, "real") * (t - a) / (p0 - a);
+  }
+  const pts = puntosReales(c);
+  // si se ingresaron avances a mano mandan esos; si no, los de ejemplo por recinto
+  if (!pts.length && PBY[c].ejemplo) return avPart(c, t, "real");
+  if (!pts.length || t < pts[0][0]) return null;
+  for (let i = pts.length - 1; i >= 0; i--) if (pts[i][0] <= t) {
+    const n = pts[i + 1]; if (!n || n[0] === pts[i][0]) return pts[i][1];
+    return pts[i][1] + (n[1] - pts[i][1]) * (t - pts[i][0]) / (n[0] - pts[i][0]);
+  }
+  return null;
+}
+const realHoy = c => realDe(c, CORTE);
+function finProyDe(c){
+  if (!MR) return PROY.base.fin[c];
+  if (esBase(c)) return HIST[c].saldo <= 0 ? HIST[c].lastFin : PROY.base.fin[c];
+  if (!puntosReales(c).length && PBY[c].ejemplo) return HIST[c].saldo <= 0 ? HIST[c].lastFin : PROY.base.fin[c];
+  const pts = puntosReales(c).filter(x => x[0] <= CORTE); if (!pts.length) return null;
+  const u = pts[pts.length - 1]; if (u[1] >= 1) return u[0];
+  if (pts.length < 2) return null;
+  const a = pts[pts.length - 2], m = (u[1] - a[1]) / (u[0] - a[0]);
+  return m > 0 ? Math.ceil(u[0] + (1 - u[1]) / m) : null;
+}
+function proyDe(c, t){
+  if (t < CORTE) return null;
+  const r0 = realHoy(c), f = finProyDe(c); if (r0 == null || f == null) return null;
+  if (f <= CORTE) return r0;
+  return r0 + (1 - r0) * Math.min(1, Math.max(0, (t - CORTE) / (f - CORTE)));
+}
+function finProgDe(c){ if (!MR) return Math.max(...regsDe(c).map(r => r.pf)); const g = PROG.partidas[c]; return g && g.termino ? dW(g.termino) : null; }
+function iniProgDe(c){ if (!MR) return Math.min(...regsDe(c).map(r => r.ps)); const g = PROG.partidas[c]; return g && g.inicio ? dW(g.inicio) : null; }
+function primerRealDe(c){
+  if (esBase(c)) { const l = AREAS_FIN[c].l.map(x => x[0]).filter(x => Number.isFinite(x) && x > SIN_FECHA); return l.length ? Math.min(...l) : CORTE; }
+  if (!MR) { const l = regsDe(c).map(r => r.rs).filter(Number.isFinite); return l.length ? Math.min(...l) : null; }
+  const p = puntosReales(c); if (p.length) return p[0][0];
+  if (PBY[c].ejemplo) { const l = regsDe(c).map(r => r.rs).filter(Number.isFinite); return l.length ? Math.min(...l) : null; }
+  return null;
+}
+
+// total ponderado por peso; lo que no tiene dato cuenta 0
+const conPeso = () => P.filter(p => pesoDe(p.cod) > 0);
+function sumaPond(fn){ const ps = conPeso(); const w = ps.reduce((s, p) => s + pesoDe(p.cod), 0); return w ? ps.reduce((s, p) => s + pesoDe(p.cod) * (fn(p.cod) ?? 0), 0) / w : 0; }
+function serieDe(sel){
+  if (sel !== "_total") {
+    const c = sel;
+    return { plan: t => planDe(c, t), real: t => realDe(c, t), proy: t => proyDe(c, t), finProy: finProyDe(c), finProg: finProgDe(c), iniProg: iniProgDe(c), primerReal: primerRealDe(c),
+      tienePlan: planDe(c, CORTE) != null, tieneReal: realHoy(c) != null };
+  }
+  const ps = conPeso();
+  const conPlan = ps.filter(p => planDe(p.cod, CORTE) != null), sinReal = ps.filter(p => realHoy(p.cod) == null), sinProy = ps.filter(p => finProyDe(p.cod) == null && (realHoy(p.cod) ?? 0) < 1);
+  const finesP = ps.map(p => finProgDe(p.cod)).filter(x => x != null), iniP = ps.map(p => iniProgDe(p.cod)).filter(x => x != null);
+  const ob = PROG.obra || {};
+  // la curva real total parte cuando todas las partidas que tienen datos ya tienen su primer registro
+  const conReal = ps.filter(p => realHoy(p.cod) != null);
+  // desde cuándo se conoce el avance de cada partida (las de ejemplo y las estimadas se conocen desde siempre)
+  const inicioReal = c => { if (MR && PBY[c].ejemplo && !puntosReales(c).length) return -Infinity;
+    const p0 = primerRealDe(c); if (!esBase(c)) return p0; const g = PROG.partidas[c]; return g && g.inicio && dW(g.inicio) < p0 ? -Infinity : p0; };
+  const desdeReal = conReal.length ? Math.max(...conReal.map(p => inicioReal(p.cod)), (ob.inicio ? dW(ob.inicio) : -Infinity)) : CORTE;
+  return {
+    plan: t => conPlan.length ? sumaPond(c => planDe(c, t)) : null,
+    real: t => t > CORTE || t < desdeReal ? null : sumaPond(c => realDe(c, t)),
+    proy: t => t < CORTE ? null : sumaPond(c => proyDe(c, t) ?? realHoy(c)),
+    finProy: sinProy.length ? null : Math.max(CORTE, ...ps.map(p => finProyDe(p.cod) ?? CORTE)),
+    finProg: MR ? (ob.termino ? dW(ob.termino) : (finesP.length ? Math.max(...finesP) : null)) : PLAN_FIN,
+    iniProg: MR ? (ob.inicio ? dW(ob.inicio) : (iniP.length ? Math.min(...iniP) : null)) : 0,
+    primerReal: desdeReal, desdeReal,
+    tienePlan: conPlan.length > 0, tieneReal: true, sinReal, sinProy, sinPlan: ps.filter(p => planDe(p.cod, CORTE) == null), total: true
+  };
+}
+
+let CURVA = "_total", VER = "todas";
+const ver = k => VER === "todas" || VER === k;
 function renderCurvaS(){
-  const box = $("chS"); const W = Math.max(300, box.clientWidth), H = 260;
-  const m = { l: 40, r: 64, t: 12, b: 28 };
-  const endT = Math.max(PLAN_FIN, PROY.base.obra, CORTE) + 10;
-  const tIni = MR ? Math.max(0, Math.min(CORTE, ...REG.map(r => r.rs).filter(Number.isFinite)) - 5) : 0;
-  const pts = []; for (let t = tIni; t <= endT; t += 5) pts.push(t);
-  const sx = t => m.l + ((t - tIni) / (endT - tIni)) * (W - m.l - m.r), sy = v => m.t + (1 - v) * (H - m.t - m.b);
-  const plan = pts.map(t => [t, avGlobal(Math.min(t, PLAN_FIN + 5), "plan")]);
-  const real = pts.filter(t => t <= CORTE).map(t => [t, avGlobal(t, "real")]); real.push([CORTE, avGlobal(CORTE, "real")]);
-  const proy = [[CORTE, avGlobal(CORTE, "real")], ...pts.filter(t => t > CORTE).map(t => [t, avProy(t)])];
-  const path = arr => arr.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + " " + sy(p[1]).toFixed(1)).join("");
+  const S = serieDe(CURVA);
+  $("lgPlan").hidden = !S.tienePlan;
+  $("lgReq").hidden = !(S.finProg != null);
+  if (MR) $("hdrSub").textContent = `${deptos.length} departamentos y ${pasillos.length} pasillos · ${P.some(p => planDe(p.cod, CORTE) != null) ? "programa ingresado en Datos" : "sin programa: ingrésalo en la pestaña Datos"}`;
+  const rH = S.real(CORTE), pH = S.plan(CORTE);
+  const fp = S.finProy, fg = S.finProg;
+  // requerido: desde el avance de hoy hasta el 100% justo en el término programado
+  const req = t => (rH == null || fg == null || fg <= CORTE || t < CORTE) ? null : Math.min(1, rH + (1 - rH) * (t - CORTE) / (fg - CORTE));
+  const porSem = (desde, hasta) => (rH == null || hasta == null || hasta <= CORTE) ? null : (1 - rH) / (hasta - CORTE) * 5;
+  const ritmoAct = porSem(CORTE, fp), ritmoReq = porSem(CORTE, fg);
+  $("ckpis").innerHTML = `
+    <div><span class="lab">${T("real", "Real a hoy")}</span><b class="mono">${rH == null ? "Sin datos" : pct(rH)}</b><span class="sub">${CURVA === "_total" ? "de toda la obra, ponderado" : esc(PBY[CURVA].nom.split(" (")[0])}</span></div>
+    <div><span class="lab">${T("programado", "Programado a hoy")}</span><b class="mono">${pH == null ? "Sin programa" : pct(pH)}</b><span class="sub">${pH != null && rH != null ? devPill(rH - pH) + " " + T("pp", "vs programa") : "ingresa fechas en Datos"}</span></div>
+    <div><span class="lab">${T("proyeccion", "Término proyectado")}</span><b class="mono">${fp == null ? "Faltan datos" : fmtC(wdDate(fp))}</b><span class="sub">${fp != null && fg != null ? diasPill(fp - fg) + " " + T("diashabiles", "días hábiles") : fp != null ? fmt(wdDate(fp)) : "se necesitan 2 avances o más"}</span></div>
+    <div><span class="lab">${T("contractual", CURVA === "_total" ? "Término contractual" : "Término programado")}</span><b class="mono">${fg == null ? "—" : fmtC(wdDate(fg))}</b><span class="sub">${fg == null ? "sin fecha ingresada" : fmt(wdDate(fg))}</span></div>
+    <div><span class="lab">${T("requerido", "Ritmo requerido")}</span><b class="mono">${ritmoReq == null ? "—" : num(ritmoReq * 100, 1) + "%"}<span style="font-size:15px;color:var(--muted)">${ritmoReq == null ? "" : " /sem"}</span></b><span class="sub">${ritmoAct == null ? "ritmo actual sin datos" : `actual ${num(ritmoAct * 100, 1)}%/sem`}${ritmoAct != null && ritmoReq != null ? (ritmoAct >= ritmoReq ? ' <span class="pill ontime">alcanza</span>' : ' <span class="pill late">falta ritmo</span>') : ""}</span></div>`;
+
+  const box = $("chS"); const W = Math.max(300, box.clientWidth), H = W < 520 ? 240 : 300;
+  const m = { l: 40, r: 16, t: 14, b: 28 };
+  const cand0 = [S.iniProg, S.primerReal, CORTE].filter(x => x != null && Number.isFinite(x));
+  const cand1 = [S.finProg, S.finProy, CORTE + 20].filter(x => x != null && Number.isFinite(x));
+  const t0 = Math.min(...cand0) - 5, t1 = Math.max(...cand1) + 10;
+  const paso = Math.max(1, Math.round((t1 - t0) / 160));
+  const ts = []; for (let t = t0; t <= t1; t += paso) ts.push(t); if (ts[ts.length - 1] !== CORTE && !ts.includes(CORTE)) { ts.push(CORTE); ts.sort((a, b) => a - b); }
+  const sx = t => m.l + (t - t0) / (t1 - t0) * (W - m.l - m.r), sy = v => m.t + (1 - v) * (H - m.t - m.b);
+  const linea = f => { let d = "", on = false; ts.forEach(t => { const v = f(t); if (v == null) { on = false; return; } d += (on ? "L" : "M") + sx(t).toFixed(1) + " " + sy(v).toFixed(1); on = true; }); return d; };
   let g = "";
   [0, .25, .5, .75, 1].forEach(v => { g += `<line x1="${m.l}" x2="${W - m.r}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--grid)"/><text x="${m.l - 6}" y="${sy(v) + 4}" text-anchor="end">${v * 100}%</text>`; });
-  const meses = []; for (let t = tIni + 1; t <= endT; t++) { const s = wdDate(t); if (s.slice(0, 7) !== wdDate(t - 1).slice(0, 7)) meses.push([t, s.slice(0, 7)]); }
-  const step = W < 420 ? 6 : W < 620 ? 4 : 2;
-  meses.forEach(([t, s], i) => { if (i % step) return; const d = parse(s + "-01"); g += `<text x="${sx(t)}" y="${H - 8}" text-anchor="middle">${d.toLocaleDateString("es-CL", { month: "short", timeZone: "UTC" }).replace(".", "")} ${String(d.getUTCFullYear()).slice(2)}</text>`; });
-  g += `<line x1="${sx(CORTE)}" x2="${sx(CORTE)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="2 3"/><text x="${sx(CORTE) + 4}" y="${H - m.b - 6}" text-anchor="start" style="fill:var(--ink)">Corte</text>`;
-  if (!MR) g += `<path d="${path(plan)}" fill="none" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>`;
-  g += `<path d="${path(proy)}" fill="none" stroke="var(--real)" stroke-width="2" stroke-dasharray="3 4"/>`;
-  g += `<path d="${path(real)}" fill="none" stroke="var(--real)" stroke-width="2.5"/>`;
-  const lr = real[real.length - 1];
-  g += `<circle cx="${sx(lr[0])}" cy="${sy(lr[1])}" r="4.5" fill="var(--real)" stroke="var(--surface)" stroke-width="2"/>`;
-  g += `<text class="lbl" x="${sx(lr[0]) - 8}" y="${sy(lr[1]) - 10}" text-anchor="end">Real ${pct(lr[1], 0)}</text>`;
-
-  g += `<g id="sHover" style="display:none"><line id="sHl" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)"/><circle id="sHp" r="4" fill="var(--plan)" stroke="var(--surface)" stroke-width="2"/><circle id="sHr" r="4" fill="var(--real)" stroke="var(--surface)" stroke-width="2"/></g>`;
+  const meses = []; for (let t = t0 + 1; t <= t1; t++) { const d = wdDate(t); if (d.slice(0, 7) !== wdDate(t - 1).slice(0, 7)) meses.push([t, d.slice(0, 7)]); }
+  const cabe = Math.max(1, Math.floor((W - m.l - m.r) / 56)), cada = Math.max(1, Math.ceil(meses.length / cabe));
+  meses.forEach(([t, d], i) => { if (i % cada) return; const f = parse(d + "-01"); g += `<text x="${sx(t)}" y="${H - 8}" text-anchor="middle">${f.toLocaleDateString("es-CL", { month: "short", timeZone: "UTC" }).replace(".", "")} ${String(f.getUTCFullYear()).slice(2)}</text>`; });
+  g += `<line x1="${sx(CORTE)}" x2="${sx(CORTE)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="2 3"/><text x="${sx(CORTE) + 4}" y="${H - m.b - 6}" style="fill:var(--ink)">Hoy</text>`;
+  if (fg != null) g += `<line x1="${sx(fg)}" x2="${sx(fg)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--plan)" stroke-dasharray="1 3"/>`;
+  if (S.tienePlan && ver("plan")) g += `<path d="${linea(S.plan)}" fill="none" stroke="var(--plan)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  if (fp != null && ver("proy")) g += `<path d="${linea(S.proy)}" fill="none" stroke="var(--real)" stroke-width="2" stroke-dasharray="2 4"/>`;
+  if (ver("req")) g += `<path d="${linea(req)}" fill="none" stroke="var(--late)" stroke-width="2" stroke-dasharray="7 4"/>`;
+  if (ver("real")) g += `<path d="${linea(S.real)}" fill="none" stroke="var(--real)" stroke-width="2.5"/>`;
+  if (rH != null && (ver("real") || ver("proy") || ver("req"))) g += `<circle cx="${sx(CORTE)}" cy="${sy(rH)}" r="4.5" fill="var(--real)" stroke="var(--surface)" stroke-width="2"/><text class="lbl" x="${sx(CORTE) - 8}" y="${sy(rH) - 10}" text-anchor="end">Real ${pct(rH, 0)}</text>`;
+  if (fp != null && fp > CORTE && ver("proy")) g += `<circle cx="${sx(fp)}" cy="${sy(1)}" r="4" fill="var(--surface)" stroke="var(--real)" stroke-width="2"/><text class="lbl" x="${sx(fp) - 6}" y="${sy(1) + 16}" text-anchor="end">${fmtC(wdDate(fp))}</text>`;
+  g += `<g id="sHover" style="display:none"><line id="sHl" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)"/></g>`;
   g += `<rect id="sHit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Curva S: real ${pct(lr[1], 0)}, programado ${pct(avGlobal(CORTE, "plan"), 0)} al corte">${g}</svg>`;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="Curva S">${g}</svg>`;
   const hit = $("sHit"), hov = $("sHover");
-  const move = ev => {
+  const mover = ev => {
     const rect = box.querySelector("svg").getBoundingClientRect();
     const px = (ev.clientX - rect.left) * (W / rect.width);
-    let t = tIni + Math.round(((px - m.l) / (W - m.l - m.r)) * (endT - tIni) / 5) * 5; t = Math.max(tIni, Math.min(endT, t));
-    const vp = avGlobal(Math.min(t, PLAN_FIN + 5), "plan"), vr = t <= CORTE ? avGlobal(t, "real") : avProy(t);
+    const t = Math.max(t0, Math.min(t1, Math.round(t0 + (px - m.l) / (W - m.l - m.r) * (t1 - t0))));
+    const vp = ver("plan") ? S.plan(t) : null, vr = ver("real") ? S.real(t) : null, vy = fp != null && ver("proy") ? S.proy(t) : null, vq = ver("req") ? req(t) : null;
     hov.style.display = ""; $("sHl").setAttribute("x1", sx(t)); $("sHl").setAttribute("x2", sx(t));
-    $("sHp").setAttribute("cx", sx(t)); $("sHp").setAttribute("cy", sy(vp)); $("sHp").style.display = MR ? "none" : "";
-    $("sHr").setAttribute("cx", sx(t)); $("sHr").setAttribute("cy", sy(vr));
-    $("sHr").setAttribute("fill", t <= CORTE ? "var(--real)" : "var(--surface)"); $("sHr").setAttribute("stroke", t <= CORTE ? "var(--surface)" : "var(--real)");
-    const cx = rect.left + sx(t) * rect.width / W, cy = rect.top + sy(Math.max(vp, vr)) * rect.height / H;
-    showTip(`<b>Semana del ${fmt(wdDate(t))}</b><div class="tl">${MR ? "" : `<span>Programado</span><span>${pct(vp)}</span>`}<span>${t <= CORTE ? "Real" : "Proyección"}</span><span>${pct(vr)}</span></div>`, { left: cx, right: cx, top: cy, bottom: cy, width: 0, height: 0 });
+    const cx = rect.left + sx(t) * rect.width / W, cy = rect.top + sy(Math.max(vp ?? 0, vr ?? 0, vy ?? 0)) * rect.height / H;
+    showTip(`<b>${fmt(wdDate(t))}</b><div class="tl">${vp != null ? `<span>Programado</span><span>${pct(vp)}</span>` : ""}${vr != null ? `<span>Real</span><span>${pct(vr)}</span>` : ""}${vy != null && t > CORTE ? `<span>Proyección</span><span>${pct(vy)}</span>` : ""}${vq != null && t > CORTE ? `<span>Requerido</span><span>${pct(vq)}</span>` : ""}</div>`, { left: cx, right: cx, top: cy, bottom: cy, width: 0, height: 0 });
   };
-  hit.addEventListener("pointermove", move);
-  hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointermove", mover); hit.addEventListener("pointerdown", mover);
   hit.addEventListener("pointerleave", () => { hov.style.display = "none"; hideTip(); });
+
+  const nom = c => esc(PBY[c].nom.split(" (")[0]);
+  let nota = "";
+  if (CURVA === "_total") {
+    nota = "Avance de toda la obra, sumando cada partida según su peso.";
+    const lista = l => l.length <= 3 ? l.map(p => nom(p.cod)).join(", ") : `${l.length} partidas`;
+    if (S.sinPlan.length && MR) nota += ` Sin programa: ${lista(S.sinPlan)}.`;
+    if (S.sinReal.length) nota += ` Sin avance registrado (cuentan 0%): ${lista(S.sinReal)}.`;
+    if (MR) nota += ` Cerámica y frague antes del ${fmt(wdDate(Math.min(primerRealDe("CER"), primerRealDe("FRA"))))} son una estimación (no había fechas guardadas); las partidas con E son datos de ejemplo.`;
+    if (MR && S.desdeReal > S.iniProg && S.desdeReal < CORTE) nota += ` La línea real parte el ${fmt(wdDate(S.desdeReal))}, cuando todas las partidas con datos ya tienen su primer registro.`;
+    else if (MR && S.desdeReal >= CORTE) nota += " La línea real todavía es un solo punto: ingresa avances con fechas anteriores en Datos para ver la historia.";
+    if (S.finProy == null) nota += " El término proyectado aparece cuando todas las partidas con peso tienen al menos 2 avances.";
+    if (MR) nota += " El detalle de cada partida está en la pestaña Datos.";
+  } else {
+    const c = CURVA;
+    nota = esBase(c) ? `Avance real leído de la base de datos del panel (m² terminados). Antes del ${fmt(wdDate(primerRealDe(c)))} no hay fechas guardadas: ese tramo es una estimación en línea recta desde el inicio programado. La proyección usa el ritmo de las últimas semanas.`
+      : MR ? (puntosReales(c).length ? `Avance ingresado en la pestaña Datos (${puntosReales(c).length} registro${puntosReales(c).length === 1 ? "" : "s"}). La proyección sigue el ritmo entre los dos últimos registros.` : "Sin avances todavía: ingrésalos en la pestaña Datos.")
+      : "Datos de demostración.";
+    if (MR && !S.tienePlan) nota += " Sin programa: ingresa las fechas programadas en Datos.";
+  }
+  $("notaCurva").innerHTML = nota + " Pasa el cursor por el gráfico para ver los valores.";
 }
+function opcionesCurva(){
+  $("selCurva").innerHTML = P.map(p => { const vacio = MR && planDe(p.cod, CORTE) == null && realHoy(p.cod) == null;
+    return `<option value="${p.cod}"${p.cod === CURVA ? " selected" : ""}>${esc(p.nom.split(" (")[0])}${vacio ? " · sin datos" : ""}</option>`; }).join("");
+}
+function elegirCurva(sel){
+  CURVA = sel;
+  $("segTotal").setAttribute("aria-pressed", sel === "_total"); $("segPartida").setAttribute("aria-pressed", sel !== "_total");
+  $("selCurva").hidden = sel === "_total";
+  if (sel !== "_total") { opcionesCurva(); $("selCurva").value = sel; }
+  renderCurvaS();
+}
+$("segTotal").addEventListener("click", () => elegirCurva("_total"));
+$("segPartida").addEventListener("click", () => elegirCurva(CURVA !== "_total" ? CURVA : (P.find(p => realHoy(p.cod) != null && p.cod !== "OG") || P[0]).cod));
+$("selCurva").addEventListener("change", e => elegirCurva(e.target.value));
+$("segVer").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; VER = b.dataset.v;
+  document.querySelectorAll("#segVer button").forEach(x => x.setAttribute("aria-pressed", x === b)); renderCurvaS(); });
+$("kpis").hidden = true;
+$("bars").addEventListener("click", e => { if (e.target.closest(".term")) return; const r = e.target.closest("[data-p]"); if (!r || !MR) return; elegirCurva(r.dataset.p); $("chS").scrollIntoView({ block: "center" }); });
 
 function renderBars(){
   if (MR) {
-    $("bars").innerHTML = P.map(p => { const r = avPart(p.cod, CORTE, "real");
-      if (p.sinDatos) return `<div class="bar-row" data-tipfn="bar" data-p="${p.cod}"><span class="bar-name">${T(p.cod, esc(p.nom))}</span><div class="track" style="background:transparent;border-style:dashed"></div><span class="bar-val muted">—</span><span class="bar-dev"><span class="pill nd">Sin datos</span></span></div>`;
-      return `<div class="bar-row" data-tipfn="bar" data-p="${p.cod}"><span class="bar-name">${T(p.cod, esc(p.nom))}</span>
-        <div class="track"><div class="fill" style="width:${(r * 100).toFixed(1)}%"></div></div><span class="bar-val">${pct(r, 0)}</span><span class="bar-dev"></span></div>`; }).join("");
+    $("bars").innerHTML = P.map(p => { const r = realHoy(p.cod), pl = planDe(p.cod, CORTE);
+      if (r == null) return `<div class="bar-row clk" data-tipfn="bar" data-p="${p.cod}"><span class="bar-name">${T(p.cod, esc(p.nom))}</span><div class="track" style="background:transparent;border-style:dashed">${pl != null ? `<div class="tick" style="left:calc(${(pl * 100).toFixed(1)}% - 1px)"></div>` : ""}</div><span class="bar-val muted">—</span><span class="bar-dev"><span class="pill nd">Sin datos</span></span></div>`;
+      return `<div class="bar-row clk" data-tipfn="bar" data-p="${p.cod}"><span class="bar-name">${p.ejemplo && !puntosReales(p.cod).length ? '<i class="ej" title="Datos de ejemplo">E</i>' : ""}${T(p.cod, esc(p.nom))}</span>
+        <div class="track"><div class="fill" style="width:${(r * 100).toFixed(1)}%"></div>${pl != null ? `<div class="tick" style="left:calc(${(pl * 100).toFixed(1)}% - 1px)"></div>` : ""}</div><span class="bar-val">${pct(r, 0)}</span><span class="bar-dev">${pl != null ? devPill(r - pl) : ""}</span></div>`; }).join("");
     const filas = P.filter(p => P_REAL.includes(p.cod)).map(p => { const h = HIST[p.cod], ok = RECINTOS.reduce((s, r) => s + m2Ok(p.cod, r), 0), tot = RECINTOS.reduce((s, r) => s + m2De(p.cod, r), 0);
       return [[T(p.cod, esc(p.nom)), ""],
         ["m² terminados", `${num(ok, 0)} de ${num(tot, 0)}`],
@@ -1268,8 +1679,7 @@ function renderBars(){
     $("panelDetalle").hidden = false;
     $("detalleReal").innerHTML = `<div class="tbl-wrap"><table><thead><tr><th></th>${filas.map(f => `<th>${f[0][0]}</th>`).join("")}</tr></thead><tbody>` +
       filas[0].slice(1).map((_, i) => `<tr><td class="muted">${filas[0][i + 1][0]}</td>${filas.map(f => `<td class="mono nw">${f[i + 1][1]}</td>`).join("")}</tr>`).join("") + `</tbody></table></div>`;
-    $("bars").previousElementSibling.querySelector("span:last-child").textContent = "";
-    $("lgTick").hidden = true;
+    $("lgTick").hidden = !P.some(p => planDe(p.cod, CORTE) != null);
     return;
   }
   $("bars").innerHTML = P.map(p => {
@@ -1287,6 +1697,281 @@ function renderRestr(){
     return `<div class="restr-item"><span class="pill block">Bloqueado</span><div><b>${esc(x.titulo)}</b>
       <div class="muted" style="font-size:14px">${esc(x.categoria)} · desde ${fmt(x.desde)} · responsable ${esc(x.responsable)} · ${n} ${T("recinto", "recintos")} detenidos en ${T(x.partida, PBY[x.partida].nom.toLowerCase())}. La pintura de esos pisos no puede empezar hasta que se resuelva.</div></div></div>`;
   }).join("");
+}
+
+// pestaña datos: fechas de obra, programa por partida y avances que se ingresan a mano
+const ROLES_EDITAN = ["1", "2", "4"];
+const puedeEditar = () => MR && (PRUEBA || (PROG_ESTADO === "ok" && ROLES_EDITAN.includes(String(CONFIG.sesion && CONFIG.sesion.rol))));
+let SELD = "OG", ultimoGuardado = 0;
+const hayCambios = () => JSON.stringify(PROG) !== PROG_GUARDADO;
+function marcarCambio(){
+  $("btnGuardar").disabled = !puedeEditar() || !hayCambios();
+  $("btnDescartar").disabled = !hayCambios();
+  $("msgGuardar").textContent = "";
+  renderCurvaS(); renderBars(); renderTareasResumen();
+}
+function errores(){
+  const e = [];
+  const ob = PROG.obra || {};
+  if (ob.inicio && ob.termino && ob.termino <= ob.inicio) e.push("El término de la obra debe ser después del inicio.");
+  P.forEach(p => { const g = PROG.partidas[p.cod]; if (!g) return;
+    if (g.inicio && g.termino && g.termino <= g.inicio) e.push(`${p.nom.split(" (")[0]}: el término programado debe ser después del inicio.`);
+    if (g.peso !== undefined && g.peso !== "" && (isNaN(Number(g.peso)) || Number(g.peso) < 0)) e.push(`${p.nom.split(" (")[0]}: el peso debe ser un número positivo.`); });
+  return e;
+}
+function textoReal(c){
+  if (esBase(c)) return `Base de datos · ${pct(realHoy(c), 0)}`;
+  const u = puntosReales(c).slice(-1)[0];
+  if (!u && PBY[c].ejemplo) return `Ejemplo · ${pct(realHoy(c), 0)}`;
+  return u ? `${pct(u[1], 0)} al ${fmtC(wdDate(u[0]))}` : `<span class="muted">Sin registros</span>`;
+}
+function renderNiveles(libre){
+  const nn = PROG.niveles = PROG.niveles || {};
+  NIVNOM = nn;
+  $("tblNiv").innerHTML = [...NIVELES].reverse().map(n => { const k = nivelLabel(n), x = nn[k] || {};
+    return `<div class="niv"><span class="cod">${k}</span><input class="celda-in" type="text" maxlength="30" data-niv="${k}" data-f="nombre" value="${esc(x.nombre || "")}" placeholder="${n < 0 ? "Subterráneo " + n : "Piso " + n}" ${libre ? "" : "disabled"} aria-label="Nombre ${k}">
+      <input class="celda-in" type="text" maxlength="4" data-niv="${k}" data-f="corto" value="${esc(x.corto || "")}" placeholder="${k}" ${libre ? "" : "disabled"} aria-label="Abreviatura ${k}"></div>`; }).join("");
+}
+function renderDatos(){
+  const ed = puedeEditar();
+  const avisos = { sin_sesion: "Para ingresar o cambiar datos tienes que entrar al panel con tu PIN y volver a abrir esta página.",
+    sin_base: "La base de datos todavía no tiene dónde guardar estos datos (falta actualizarla). Puedes probar los cambios, pero no se guardarán.",
+    error: "No se pudo leer el programa desde la base de datos. Revisa la conexión y vuelve a abrir la página.",
+    prueba: "Copia de prueba: los cambios se ven en los gráficos pero no se guardan en la base de datos." };
+  let aviso = avisos[PROG_ESTADO] || "";
+  if (!aviso && !ed) aviso = "Tu cuenta puede ver estos datos pero no cambiarlos.";
+  if (!MR) aviso = avisos.sin_sesion;
+  $("datosAviso").textContent = aviso; $("datosAviso").hidden = !aviso;
+  const libre = MR && (ed || PROG_ESTADO === "sin_base");
+  const ob = PROG.obra = PROG.obra || {};
+  $("fNombre").value = CONFIG.obra.nombre;
+  $("fInicio").value = ob.inicio || ""; $("fTermino").value = ob.termino || "";
+  $("fInicio").disabled = $("fTermino").disabled = !libre;
+  renderNiveles(libre);
+  const sumaP = P.reduce((s, p) => s + pesoDe(p.cod), 0);
+  $("tblProg").innerHTML = `<thead><tr><th>Partida</th><th class="num">${T("peso")}</th><th>Inicio programado</th><th>Término programado</th><th>${T("real", "Avance real")}</th><th></th></tr></thead><tbody>` +
+    P.map(p => { const g = PROG.partidas[p.cod] || {};
+      return `<tr${p.cod === SELD ? ' class="sel"' : ""}><td class="pt">${T(p.cod, esc(p.nom.split(" (")[0]))}</td>
+        <td class="num" data-l="Peso %"><input class="celda-in num" type="number" min="0" step="0.5" data-c="${p.cod}" data-k="peso" value="${pesoDe(p.cod)}" ${libre ? "" : "disabled"} aria-label="Peso ${esc(p.nom)}"></td>
+        <td data-l="Inicio programado"><input class="celda-in" type="date" data-c="${p.cod}" data-k="inicio" value="${g.inicio || ""}" ${libre ? "" : "disabled"} aria-label="Inicio ${esc(p.nom)}"></td>
+        <td data-l="Término programado"><input class="celda-in" type="date" data-c="${p.cod}" data-k="termino" value="${g.termino || ""}" ${libre ? "" : "disabled"} aria-label="Término ${esc(p.nom)}"></td>
+        <td class="mono nw" data-l="Avance real">${textoReal(p.cod)}</td>
+        <td class="bt"><button type="button" class="btn small ghost" data-av="${p.cod}">Avances</button></td></tr>`; }).join("") +
+    `<tr><td><b>Suma de pesos</b></td><td class="num mono"><b>${num(sumaP, 1)}%</b></td><td colspan="4" class="muted">${Math.abs(sumaP - 100) > 0.05 ? "No suma 100%: el total se reparte en proporción a los pesos." : ""}</td></tr></tbody>`;
+  marcarErrores();
+  renderAvancesManual();
+  $("btnGuardar").disabled = !ed || !hayCambios();
+  $("btnDescartar").disabled = !hayCambios();
+}
+function marcarErrores(){
+  const ob = PROG.obra || {};
+  $("fTermino").classList.toggle("error", !!(ob.inicio && ob.termino && ob.termino <= ob.inicio));
+  document.querySelectorAll('#tblProg input[data-k="termino"]').forEach(i => { const g = PROG.partidas[i.dataset.c] || {}; i.classList.toggle("error", !!(g.inicio && g.termino && g.termino <= g.inicio)); });
+}
+function renderAvancesManual(){
+  const p = PBY[SELD], libre = MR && (puedeEditar() || PROG_ESTADO === "sin_base");
+  $("avTitulo").innerHTML = `Avances registrados · ${T(p.cod, esc(p.nom.split(" (")[0]))}`;
+  if (esBase(p.cod)) {
+    $("avNota").textContent = "";
+    $("avCuerpo").innerHTML = `<p class="note">El avance de ${esc(p.nom.toLowerCase())} viene de la base de datos del panel (m² terminados por departamento). Se cambia desde el panel, no aquí. Hoy va en ${pct(realHoy(p.cod))}.</p>`;
+    return;
+  }
+  $("avNota").textContent = p.ejemplo && !puntosReales(p.cod).length
+    ? "Ahora muestra datos de ejemplo por departamento. Si anotas avances aquí, reemplazan al ejemplo en los gráficos."
+    : "Anota el % terminado de la partida en una fecha. Con 2 registros o más se calcula la proyección.";
+  const g = PROG.partidas[p.cod] || {}, av = (g.avances || []).map((x, i) => ({ ...x, i })).sort((a, b) => a.fecha < b.fecha ? -1 : 1);
+  $("avCuerpo").innerHTML = (av.length ? `<div class="tbl-wrap"><table><thead><tr><th>Fecha</th><th class="num">Avance</th><th></th></tr></thead><tbody>` +
+    av.map(x => `<tr><td class="mono">${fmt(x.fecha)}</td><td class="num mono">${num(Number(x.pct), Number(x.pct) % 1 ? 1 : 0)}%</td><td style="width:44px"><button type="button" class="x-mini" data-del="${x.i}" aria-label="Borrar registro" ${libre ? "" : "disabled"}>✕</button></td></tr>`).join("") +
+    `</tbody></table></div>` : `<p class="note">Todavía no hay avances para esta partida.</p>`) +
+    `<div class="av-add"><input class="celda-in" type="date" id="avFecha" value="${CONFIG.corte}" max="${CONFIG.corte}" ${libre ? "" : "disabled"} aria-label="Fecha del avance">
+     <input class="celda-in num" type="number" id="avPct" min="0" max="100" step="0.5" placeholder="%" ${libre ? "" : "disabled"} aria-label="Porcentaje">
+     <button type="button" class="btn small" id="avAgregar" ${libre ? "" : "disabled"}>Agregar</button><span class="toast" id="avMsg"></span></div>`;
+}
+function temblar(el){ el.classList.remove("temblor"); void el.offsetWidth; el.classList.add("temblor"); }
+$("v-datos").addEventListener("input", e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.niv) { const nn = PROG.niveles = PROG.niveles || {}; NIVNOM = nn; const o = nn[el.dataset.niv] = nn[el.dataset.niv] || {};
+    o[el.dataset.f] = el.value.trim(); if (!o.nombre && !o.corto) delete nn[el.dataset.niv]; renderElev(); marcarCambio(); return; }
+  if (el.id === "fInicio" || el.id === "fTermino") { (PROG.obra = PROG.obra || {})[el.id === "fInicio" ? "inicio" : "termino"] = el.value; marcarErrores(); marcarCambio(); return; }
+  if (el.dataset && el.dataset.c && el.dataset.k) { gP(el.dataset.c)[el.dataset.k] = el.dataset.k === "peso" ? (el.value === "" ? "" : Number(el.value)) : el.value; marcarErrores(); marcarCambio();
+    if (el.dataset.k === "peso") { const sumaP = P.reduce((s, p) => s + pesoDe(p.cod), 0); const tr = $("tblProg").querySelector("tbody tr:last-child"); tr.children[1].innerHTML = `<b>${num(sumaP, 1)}%</b>`; tr.children[2].textContent = Math.abs(sumaP - 100) > 0.05 ? "No suma 100%: el total se reparte en proporción a los pesos." : ""; } }
+});
+$("btnNiv").addEventListener("click", () => {
+  const c = $("cuerpoNiv"), abrir = !c.classList.contains("abierto");
+  c.classList.toggle("abierto", abrir);
+  $("btnNiv").setAttribute("aria-expanded", abrir); $("btnNiv").textContent = abrir ? "Ocultar niveles" : "Mostrar niveles";
+  if (abrir) $("panelNiv").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+});
+$("v-datos").addEventListener("click", e => {
+  const b = e.target.closest("[data-av]"); if (b) { SELD = b.dataset.av; renderDatos(); $("avTitulo").scrollIntoView({ block: "nearest" }); return; }
+  const d = e.target.closest("[data-del]"); if (d) { const g = gP(SELD); g.avances.splice(Number(d.dataset.del), 1); renderDatos(); marcarCambio(); return; }
+  if (e.target.id === "avAgregar") {
+    const f = $("avFecha").value, v = $("avPct").value;
+    const n = Number(v);
+    let err = "";
+    if (!f) err = "Falta la fecha."; else if (f > CONFIG.corte) err = "La fecha no puede ser futura.";
+    else if (v === "" || isNaN(n) || n < 0 || n > 100) err = "El avance va de 0 a 100%.";
+    if (err) { $("avMsg").textContent = err; temblar(e.target); return; }
+    const g = gP(SELD); g.avances = g.avances || [];
+    const igual = g.avances.findIndex(x => x.fecha === f);
+    if (igual >= 0) g.avances[igual].pct = n; else g.avances.push({ fecha: f, pct: n });
+    renderDatos(); marcarCambio();
+  }
+});
+$("barraGuardar").addEventListener("click", e => {
+  if (e.target.id === "btnDescartar") { PROG = JSON.parse(PROG_GUARDADO); NIVNOM = PROG.niveles || {}; renderDatos(); renderTareas(); renderElev(); marcarCambio(); }
+  if (e.target.id === "btnGuardar") guardarPrograma(e.target);
+});
+async function guardarPrograma(btn){
+  const e = errores();
+  if (e.length) { $("msgGuardar").textContent = e[0]; temblar(btn); return; }
+  // acordarme: 3 segundos mínimo entre guardados para que no se repitan envíos
+  if (Date.now() - ultimoGuardado < 3000) { $("msgGuardar").textContent = "Espera unos segundos antes de volver a guardar."; temblar(btn); return; }
+  ultimoGuardado = Date.now();
+  if (PRUEBA) { PROG_GUARDADO = JSON.stringify(PROG); $("msgGuardar").textContent = "Guardado en esta copia de prueba (no va a la base de datos)."; marcarBotones(); return; }
+  btn.disabled = true; $("msgGuardar").textContent = "Guardando…";
+  try {
+    const j = await llamarBase("avanceGuardar", { programa: PROG, version: PROG_VERSION });
+    if (j && j.ok) { PROG_VERSION = j.version; PROG_GUARDADO = JSON.stringify(PROG); $("msgGuardar").textContent = "Guardado."; }
+    else if (j && j.error === "version") $("msgGuardar").textContent = "Otra persona guardó cambios antes. Recarga la página para ver la última versión (tus cambios se perderán).";
+    else if (j && j.error === "sin_permiso") $("msgGuardar").textContent = "Tu cuenta no tiene permiso para guardar estos datos.";
+    else if (j && j.error === "sin_sesion") $("msgGuardar").textContent = "La sesión venció. Entra al panel con tu PIN y vuelve a intentar.";
+    else $("msgGuardar").textContent = "No se pudo guardar: falta actualizar la base de datos.";
+  } catch (err) { $("msgGuardar").textContent = "No se pudo guardar. Revisa la conexión y vuelve a intentar."; }
+  marcarBotones();
+}
+function marcarBotones(){ $("btnGuardar").disabled = !puedeEditar() || !hayCambios(); $("btnDescartar").disabled = !hayCambios(); }
+window.addEventListener("beforeunload", e => { if (hayCambios()) { e.preventDefault(); e.returnValue = ""; } });
+
+// objetivos del jefe de terreno: meta de avance de una partida (se mide sola) o tarea que se confirma a mano
+const HOY = CONFIG.corte;
+const difDias = (a, b) => Math.round((parse(a) - parse(b)) / 864e5);
+const AREAS_OBJ = ["Producción", "Calidad", "Seguridad", "Materiales", "Coordinación", "Documentación"];
+// cuándo llega la partida a la meta: busco el primer día con datos que la alcanza (y si no, la proyección)
+function llegaMeta(c, meta){
+  const m = meta / 100;
+  for (let t = CORTE - 260; t <= CORTE; t++) { const v = realDe(c, t); if (v != null && v >= m - 1e-9) return { real: true, t }; }
+  const f = finProyDe(c), r0 = realHoy(c);
+  if (f == null || r0 == null) return null;
+  if (f <= CORTE) return { real: false, t: CORTE };
+  return { real: false, t: Math.ceil(CORTE + (m - r0) / (1 - r0) * (f - CORTE)) };
+}
+function estadoObj(o){
+  const limite = o.fecha, dLim = dW(limite);
+  if (o.tipo === "avance") {
+    const r = realHoy(o.partida), lm = llegaMeta(o.partida, Number(o.meta));
+    if (lm && lm.real) { const f = wdDate(lm.t); return { e: "fin", cumplido: f, tarde: f > limite ? difDias(f, limite) : 0, r }; }
+    if (limite < HOY) return { e: "atr", dias: difDias(HOY, limite), r, lm };
+    if (lm && lm.t > dLim) return { e: "riesgo", r, lm, dias: difDias(HOY, limite) };
+  } else if (o.cumplido) return { e: "fin", cumplido: o.cumplido.fecha, tarde: o.cumplido.fecha > limite ? difDias(o.cumplido.fecha, limite) : 0 };
+  if (limite < HOY) return { e: "atr", dias: difDias(HOY, limite) };
+  if (limite === HOY) return { e: "hoy" };
+  const en = difDias(limite, HOY);
+  const extra = o.tipo === "avance" ? { r: realHoy(o.partida), lm: llegaMeta(o.partida, Number(o.meta)) } : {};
+  if (en <= (Number(o.aviso) || 0)) return { e: "prox", en, ...extra };
+  return { e: "ok", en, ...extra };
+}
+const TEST = { atr: ["Atrasado", "t-atr", 0], riesgo: ["En riesgo", "t-riesgo", 1], hoy: ["Vence hoy", "t-hoy", 2], prox: ["Próximo", "t-prox", 3], ok: ["En plazo", "t-ok", 4], fin: ["Cumplido", "t-fin", 5] };
+const tPill = e => `<span class="pill ${TEST[e][1]}">${TEST[e][0]}</span>`;
+const objOrdenados = () => (PROG.objetivos || []).map(o => ({ o, s: estadoObj(o) }))
+  .sort((a, b) => TEST[a.s.e][2] - TEST[b.s.e][2] || String(a.o.fecha).localeCompare(String(b.o.fecha)));
+const tareasLibre = () => MR && (puedeEditar() || PROG_ESTADO === "sin_base");
+let TEDIT = null, TTIPO = "avance", confirmar = null;
+// para los botones que piden un segundo clic (cumplido y borrar)
+function pedirConfirmacion(clave){ confirmar = clave; renderTareas(); setTimeout(() => { if (confirmar === clave) { confirmar = null; renderTareas(); } }, 3000); }
+
+function renderTareas(){
+  const libre = tareasLibre();
+  const avisos = { sin_sesion: "Para ver y cambiar objetivos tienes que entrar al panel con tu PIN y volver a abrir esta página.",
+    sin_base: "La base de datos todavía no tiene dónde guardar los objetivos (falta actualizarla). Puedes probar, pero no se guardarán.",
+    prueba: "Copia de prueba: los objetivos se pueden crear y cambiar, pero no se guardan en la base de datos." };
+  const av = !MR ? avisos.sin_sesion : (avisos[PROG_ESTADO] || (!puedeEditar() ? "Tu cuenta puede ver los objetivos pero no cambiarlos." : ""));
+  $("tareasAviso").textContent = av; $("tareasAviso").hidden = !av;
+  const todos = objOrdenados(), l = todos.filter(x => x.s.e !== "fin");
+  $("tkpis").innerHTML = ["atr", "riesgo", "hoy", "prox", "ok", "fin"].map(e => `<div><span>${tPill(e)}</span><b class="mono">${todos.filter(x => x.s.e === e).length}</b></div>`).join("");
+  $("tblTareas").innerHTML = `<thead><tr><th>Estado</th><th>Objetivo</th><th>Meta</th><th>Fecha límite</th><th class="num">Atraso</th><th></th></tr></thead><tbody>` +
+    (l.length ? l.map(({ o, s }) => {
+      const meta = o.tipo === "avance"
+        ? `<div class="meta"><div class="track"><div class="fill" style="width:${((s.r || 0) * 100).toFixed(1)}%"></div><div class="tick" style="left:calc(${Number(o.meta)}% - 1px)"></div></div><span>${s.r == null ? "sin datos" : pct(s.r, 0)} de ${Number(o.meta)}%</span></div><span class="muted" style="font-size:12px">${esc(PBY[o.partida].nom.split(" (")[0])}${s.lm && !s.lm.real ? ` · llegaría el ${fmtC(wdDate(s.lm.t))}` : ""}</span>`
+        : `<span class="muted">Se confirma a mano</span>`;
+      const sub = s.e === "prox" ? `<div class="muted" style="font-size:12px;margin-top:3px">vence en ${s.en} día${s.en === 1 ? "" : "s"}</div>` : s.e === "riesgo" ? `<div class="muted" style="font-size:12px;margin-top:3px">al ritmo actual no llega</div>` : "";
+      const kC = "c" + o.id, kB = "b" + o.id;
+      const botonCumplido = o.tipo === "manual"
+        ? `<button type="button" class="btn small" data-tc="${o.id}" ${libre ? "" : "disabled"}>${confirmar === kC ? "¿Confirmar?" : "Cumplido"}</button>`
+        : `<button type="button" class="btn small" disabled title="Se marca solo cuando la partida llega a la meta">Automático</button>`;
+      return `<tr${TEDIT === o.id ? ' class="sel"' : ""}><td>${tPill(s.e)}${sub}</td>
+        <td class="tarea-t"><b>${esc(o.titulo)}</b>${o.detalle ? `<span>${esc(o.detalle)}</span>` : ""}<span class="quien">${[o.area, o.resp].filter(Boolean).map(esc).join(" · ") || ""}</span></td>
+        <td>${meta}</td><td class="mono nw">${fmt(o.fecha)}</td>
+        <td class="num mono">${s.e === "atr" ? `<b>${s.dias} día${s.dias === 1 ? "" : "s"}</b>` : "—"}</td>
+        <td><div class="acc">${botonCumplido}
+          <button type="button" class="btn small ghost" data-te="${o.id}" ${libre ? "" : "disabled"}>Editar</button>
+          <button type="button" class="btn small ghost" data-tb="${o.id}" ${libre ? "" : "disabled"}>${confirmar === kB ? "¿Borrar?" : "Borrar"}</button></div></td></tr>`;
+    }).join("") : `<tr><td colspan="6" class="muted">No hay objetivos pendientes. Agrega uno abajo.</td></tr>`) + `</tbody>`;
+  const hechos = todos.filter(x => x.s.e === "fin").sort((a, b) => b.s.cumplido.localeCompare(a.s.cumplido));
+  $("listaHechas").innerHTML = hechos.length ? `<div class="tbl-wrap"><table><thead><tr><th>Objetivo</th><th>Fecha límite</th><th>Cumplido el</th><th>Cómo</th><th></th></tr></thead><tbody>` +
+    hechos.map(({ o, s }) => `<tr><td>${esc(o.titulo)}</td><td class="mono">${fmt(o.fecha)}</td><td class="mono">${fmt(s.cumplido)} ${s.tarde ? `<span class="pill t-prox">${s.tarde} d tarde</span>` : '<span class="pill t-ok">a tiempo</span>'}</td><td>${o.tipo === "avance" ? "Automático (datos)" : "Confirmado por " + esc(o.cumplido.por || "—")}</td>
+      <td><div class="acc">${o.tipo === "manual" ? `<button type="button" class="btn small ghost" data-tu="${o.id}" ${libre ? "" : "disabled"}>Deshacer</button>` : ""}<button type="button" class="btn small ghost" data-tb="${o.id}" ${libre ? "" : "disabled"}>${confirmar === "b" + o.id ? "¿Borrar?" : "Borrar"}</button></div></td></tr>`).join("") + `</tbody></table></div>`
+    : `<p class="note">Todavía no hay objetivos cumplidos.</p>`;
+  $("panelForm").hidden = !libre;
+  formTipo();
+  actualizarPestanaTareas();
+}
+function formTipo(){
+  document.querySelectorAll("#tTipo button").forEach(b => b.setAttribute("aria-pressed", b.dataset.t === TTIPO));
+  document.querySelectorAll(".solo-av").forEach(x => { x.hidden = TTIPO !== "avance"; });
+  if (!$("tCat").options.length) $("tCat").innerHTML = `<option value="">—</option>` + AREAS_OBJ.map(a => `<option>${a}</option>`).join("");
+  if (!$("tPartida").options.length) $("tPartida").innerHTML = P.map(p => `<option value="${p.cod}">${esc(p.nom.split(" (")[0])}</option>`).join("");
+}
+function leerForm(){
+  const v = id => $(id).value;
+  const o = { tipo: TTIPO, titulo: v("tTitulo").trim(), detalle: v("tDetalle").trim(), resp: v("tResp").trim(), area: v("tCat"), fecha: v("tFecha"), aviso: Math.max(0, Math.min(60, Number(v("tAviso")) || 0)) };
+  if (TTIPO === "avance") { o.partida = v("tPartida"); o.meta = Number(v("tMeta")); }
+  if (!o.titulo) return { error: "Falta el nombre del objetivo." };
+  if (!o.fecha) return { error: "Falta la fecha límite." };
+  if (TTIPO === "avance" && !(o.meta >= 1 && o.meta <= 100)) return { error: "La meta de avance va de 1 a 100%." };
+  return { o };
+}
+function limpiarForm(){
+  TEDIT = null;
+  ["tTitulo", "tDetalle", "tResp", "tFecha"].forEach(id => { $(id).value = ""; }); $("tAviso").value = 5; $("tMeta").value = 70; $("tCat").value = "";
+  $("formTitulo").textContent = "Nuevo objetivo"; $("tAgregar").textContent = "Agregar objetivo"; $("tCancelar").hidden = true; $("tMsg").textContent = "";
+}
+$("v-tareas").addEventListener("click", e => {
+  const tipo = e.target.closest("#tTipo button");
+  if (tipo) { TTIPO = tipo.dataset.t; formTipo(); return; }
+  const c = e.target.closest("[data-tc]");
+  if (c) { const k = "c" + c.dataset.tc; if (confirmar !== k) { pedirConfirmacion(k); return; }
+    const o = PROG.objetivos.find(x => x.id === c.dataset.tc); o.cumplido = { fecha: HOY, por: (CONFIG.sesion && CONFIG.sesion.nombre) || "" };
+    confirmar = null; renderTareas(); marcarCambio(); return; }
+  const u = e.target.closest("[data-tu]");
+  if (u) { const o = PROG.objetivos.find(x => x.id === u.dataset.tu); delete o.cumplido; renderTareas(); marcarCambio(); return; }
+  const ed = e.target.closest("[data-te]");
+  if (ed) { const o = PROG.objetivos.find(x => x.id === ed.dataset.te); TEDIT = o.id; TTIPO = o.tipo; formTipo();
+    $("tTitulo").value = o.titulo; $("tDetalle").value = o.detalle || ""; $("tResp").value = o.resp || ""; $("tCat").value = o.area || ""; $("tFecha").value = o.fecha; $("tAviso").value = o.aviso || 0;
+    if (o.tipo === "avance") { $("tPartida").value = o.partida; $("tMeta").value = o.meta; }
+    $("formTitulo").textContent = "Editar objetivo"; $("tAgregar").textContent = "Guardar cambios del objetivo"; $("tCancelar").hidden = false;
+    renderTareas(); $("panelForm").scrollIntoView({ block: "nearest" }); return; }
+  const bo = e.target.closest("[data-tb]");
+  if (bo) { const k = "b" + bo.dataset.tb; if (confirmar !== k) { pedirConfirmacion(k); return; }
+    PROG.objetivos = PROG.objetivos.filter(x => x.id !== bo.dataset.tb); confirmar = null; if (TEDIT === bo.dataset.tb) limpiarForm();
+    renderTareas(); marcarCambio(); return; }
+  if (e.target.id === "tCancelar") { limpiarForm(); renderTareas(); return; }
+  if (e.target.id === "tAgregar") {
+    const r = leerForm(); if (r.error) { $("tMsg").textContent = r.error; temblar(e.target); return; }
+    if (TEDIT) { const o = PROG.objetivos.find(x => x.id === TEDIT); const cump = o.cumplido; Object.keys(o).forEach(k => { if (k !== "id") delete o[k]; }); Object.assign(o, r.o); if (cump && r.o.tipo === "manual") o.cumplido = cump; }
+    else (PROG.objetivos = PROG.objetivos || []).push({ id: "o" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ...r.o });
+    limpiarForm(); renderTareas(); marcarCambio();
+  }
+});
+function actualizarPestanaTareas(){
+  const n = (PROG.objetivos || []).filter(o => ["atr", "riesgo", "hoy"].includes(estadoObj(o).e)).length;
+  $("tab-tareas").textContent = n ? `Objetivos (${n})` : "Objetivos";
+}
+function renderTareasResumen(){
+  const l = objOrdenados().filter(x => ["atr", "riesgo", "hoy", "prox"].includes(x.s.e)).slice(0, 6);
+  $("tareasRes").innerHTML = l.length ? l.map(({ o, s }) => `<div class="aviso" data-irt="1"><span>${tPill(s.e)}</span><span><span class="an">${esc(o.titulo)}</span><div class="ad">${o.area ? esc(o.area) + " · " : ""}límite ${fmt(o.fecha)}${o.tipo === "avance" && s.r != null ? " · va en " + pct(s.r, 0) : ""}</div></span><span class="af">${s.e === "atr" ? s.dias + " d de atraso" : s.e === "riesgo" ? "no llega" : s.e === "hoy" ? "hoy" : "en " + s.en + " d"}</span></div>`).join("")
+    : `<p class="note">No hay objetivos atrasados ni por vencer.</p>`;
+  actualizarPestanaTareas();
 }
 
 // vista edificio
@@ -1313,7 +1998,7 @@ function claseRec(rec){
 function renderElev(){
   let h = `<div class="row" aria-hidden="true"><span></span>${[1,2,3,4,5,6,7].map(i => `<span class="colhead">0${i}</span>`).join("")}<span class="colhead term" data-term="pasillo">PAS</span><span></span><span class="colhead term" data-term="ascensor">A1</span><span class="colhead term" data-term="ascensor">A2</span></div>`;
   [...NIVELES].reverse().forEach(n => {
-    h += `<div class="row"><span class="lvl">${nivelLabel(n)}</span>`;
+    h += `<div class="row"><span class="lvl" title="${esc(nivelNombre(n))}">${esc(nivelCorto(n))}</span>`;
     if (n <= 1) {
       const zs = zonas.filter(z => z.nivel === n);
       if (!zs.length) { h += `<span class="zona-vacia">Sin recintos con datos</span>`; }
@@ -1342,18 +2027,18 @@ function renderElev(){
       `<p class="note">Más oscuro = más partidas terminadas en ese recinto.</p>`;
   } else {
     const p = PBY[SEL], rs = regsDe(SEL), h2 = HIST[SEL];
-    if (MR && (p.sinDatos || p.cod === "OG")) {
+    if (MR && p.sinDatos) {
       $("selTitulo").innerHTML = T(SEL, esc(p.nom));
       $("statlist").innerHTML = p.sinDatos
         ? `<div><span class="sw st-nd"></span><span>${T("sindatos", "Sin datos")}</span><span class="mono">${rs.length}</span></div><p class="note">Esta partida todavía no se registra en la base de datos. Cuando se cargue, se pinta aquí igual que cerámica y frague.</p>`
         : `<div><span class="sw st-ok"></span><span>${T("terminado", "Terminado")}</span><span class="mono">${rs.length} pisos</span></div><p class="note">Obra gruesa terminada en todos los pisos. El último piso terminó entre el viernes 16 y el lunes 19 de octubre de 2026.</p>`;
       return;
     }
-    $("selTitulo").innerHTML = T(SEL, esc(p.nom));
+    $("selTitulo").innerHTML = T(SEL, esc(p.nom)) + (MR && p.ejemplo ? ' <span class="pill demo">Ejemplo</span>' : "");
     const cnt = s => rs.filter(r => r.est === s).length;
     $("statlist").innerHTML = (MR ? ["ok", "run", "free", "wait"] : ["ok", "run", "free", "block", "wait"]).map(s =>
       `<div><span class="sw st-${s}"></span><span>${T(EST[s][1], EST[s][0])}</span><span class="mono">${cnt(s)}</span></div>`).join("") +
-      `<dl class="facts" style="margin-top:6px"><dt>${T("frente")}</dt><dd>${h2.frente != null ? nivelNombre(h2.frente) : "Sin iniciar"}</dd><dt>Avance real</dt><dd>${pct(avPart(SEL, CORTE, "real"))}</dd>${MR ? `<dt>m² terminados</dt><dd>${num(RECINTOS.reduce((s, r) => s + m2Ok(SEL, r), 0), 0)} de ${num(RECINTOS.reduce((s, r) => s + m2De(SEL, r), 0), 0)}</dd>` : `<dt>Programado</dt><dd>${pct(avPart(SEL, CORTE, "plan"))}</dd>`}` +
+      `<dl class="facts" style="margin-top:6px"><dt>${T("frente")}</dt><dd>${h2.frente != null ? nivelNombre(h2.frente) : "Sin iniciar"}</dd><dt>Avance real</dt><dd>${pct(avPart(SEL, CORTE, "real"))}</dd>${MR && esBase(SEL) ? `<dt>m² terminados</dt><dd>${num(RECINTOS.reduce((s, r) => s + m2Ok(SEL, r), 0), 0)} de ${num(RECINTOS.reduce((s, r) => s + m2De(SEL, r), 0), 0)}</dd>` : MR ? (planDe(SEL, CORTE) != null ? `<dt>Programado</dt><dd>${pct(planDe(SEL, CORTE))}</dd>` : "") : `<dt>Programado</dt><dd>${pct(avPart(SEL, CORTE, "plan"))}</dd>`}` +
       (p.unidad === "nivel" ? `<dt>Se controla por</dt><dd>Piso completo</dd>` : "") +
       (cantPartida(SEL) ? `<dt>${T("cantidad")}</dt><dd>${cantPartida(SEL).ok} de ${cantPartida(SEL).tot} ${cantPartida(SEL).unidad}</dd>` : "") + `</dl>`;
   }
@@ -1457,7 +2142,7 @@ function renderBodega(){
         <td>${bPill(b.est)}</td>
         <td class="mono nw">${b.est === "cub" ? "—" : b.limite < D_HOY ? "<b>Atrasado</b>" : fmtC(wdDate(b.limite))}</td>
         <td class="num mono nw">${b.presentaciones ? `${b.presentaciones} × ${esc(m.presNom.split(" de ")[0])}<div class="muted" style="font-size:12px">${nUni(b.sugerido, m)}</div>` : "—"}</td></tr>`; }).join("") + `</tbody>`;
-  // en el celular la tabla no cabe: muestro una lista simple
+  // si la ventana queda muy angosta la tabla no cabe: muestro una lista simple
   $("listaBodega").innerHTML = orden.map(b => { const m = b.m;
     const det = b.est === "cub" ? "Alcanza hasta terminar la partida" : `Alcanza hasta ${cobTxt(b)} · pedir antes del ${b.limite < D_HOY ? "<b>hoy (atrasado)</b>" : fmtC(wdDate(b.limite))}`;
     return `<div class="aviso" data-m="${m.cod}"><span>${bPill(b.est)}</span><span><span class="an">${esc(m.nom)}</span><div class="ad">Stock ${nUni(m.stock, m)}${b.enCamino ? " + " + nUni(b.enCamino, m) + " en camino" : ""} · ${det}</div></span><span class="af">${b.presentaciones ? b.presentaciones + " × " + esc(m.presNom.split(" de ")[0]) : ""}</span></div>`; }).join("");
@@ -1513,6 +2198,7 @@ function renderAvisos(){
   $("avisosRes").innerHTML = lista.length ? lista.map(b => `<div class="aviso" data-m="${b.m.cod}"><span>${bPill(b.est)}</span><span><span class="an">${esc(b.m.nom)}</span><div class="ad">Alcanza ${b.cobertura} días hábiles · plazo ${b.m.plazo[0]}–${b.m.plazo[1]} d</div></span><span class="af">${b.presentaciones ? b.presentaciones + " × " + esc(b.m.presNom.split(" de ")[0]) : ""}</span></div>`).join("")
     : `<p class="note">No hay materiales por pedir.</p>`;
 }
+$("tareasRes").addEventListener("click", e => { if (e.target.closest("[data-irt]")) irA("tareas"); });
 $("avisosRes").addEventListener("click", e => { const a = e.target.closest("[data-m]"); if (!a) return; SELM = a.dataset.m; irA("bodega"); });
 
 // vista partidas y tipologías
@@ -1599,7 +2285,8 @@ function abrirFicha(cod){
     const filas = ps.flatMap(p => regDeRecinto(p.cod, r).areas.map(a => `<tr><td>${T(p.cod, esc(p.nom))}</td><td>${AREAS[a.area]}</td><td class="num mono">${a.m2 ? num(a.m2, 2) : "—"}</td><td>${pill(estA(a))}</td><td class="mono">${a.terminado ? fecha(a.fin) : a.empezado ? "desde " + fecha(a.ini) : "—"}</td><td>${esc(a.trabajador)}</td></tr>`));
     $("mBody").innerHTML = (ps.length ? "" : `<p class="note">Este recinto no tiene cerámica ni frague en la base de datos.</p>`) +
       `<div class="tbl-wrap"><table><thead><tr><th>Partida</th><th>Área</th><th class="num">m²</th><th>Estado</th><th>Fecha</th><th>Contratista</th></tr></thead><tbody>${filas.join("")}</tbody></table></div>` +
-      `<dl class="facts"><dt>${T("OG")}</dt><dd>Terminada</dd><dt>Otras partidas</dt><dd class="muted">${P.filter(p => p.sinDatos && p.aplica.includes(r.ambito)).map(p => p.nom.split(" (")[0]).join(", ")}: sin datos todavía</dd></dl>`;
+      `<div class="tbl-wrap"><table><thead><tr><th>Otras partidas</th><th>Estado</th><th>Origen</th></tr></thead><tbody>` +
+      P.filter(p => p.ejemplo && regDeRecinto(p.cod, r)).map(p => `<tr><td>${T(p.cod, esc(p.nom.split(" (")[0]))}</td><td>${pill(regDeRecinto(p.cod, r).est)}</td><td class="muted">Ejemplo</td></tr>`).join("") + `</tbody></table></div>`;
     $("overlay").hidden = false; $("mCerrar").focus();
     return;
   }
@@ -1619,9 +2306,9 @@ $("mCerrar").addEventListener("click", () => { $("overlay").hidden = true; hideT
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("overlay").hidden) { $("overlay").hidden = true; hideTip(); } });
 
 // pestañas (recuerda la última abierta)
-const VISTAS = ["resumen", "edificio", "tren", "proy", "bodega", "partidas", "listado", "supuestos", "glosario"];
-// por ahora solo dejo abiertas estas dos pestañas; las demás se ven pero no se pueden abrir
-const ABIERTAS = ["resumen", "edificio"];
+const VISTAS = ["resumen", "edificio", "datos", "tareas", "tren", "proy", "bodega", "partidas", "listado", "supuestos", "glosario"];
+// por ahora dejo abiertas solo estas pestañas; el resto queda bloqueado hasta que las termine
+const ABIERTAS = ["resumen", "edificio", "datos", "tareas"];
 document.querySelectorAll("nav.tabs button").forEach(b => {
   if (ABIERTAS.includes(b.dataset.tab)) return;
   b.classList.add("lock"); b.setAttribute("aria-disabled", "true"); b.dataset.tipfn = "lock";
@@ -1638,13 +2325,16 @@ function irA(v){
   if (v === "resumen") renderCurvaS();
   if (v === "proy") renderRend();
   if (v === "bodega") renderBodega();
+  if (v === "datos") renderDatos();
+  if (v === "tareas") renderTareas();
+  $("barraGuardar").hidden = !(MR && (v === "datos" || v === "tareas"));
   try { localStorage.setItem("vista_panel", v); } catch (e) {}
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => irA(b.dataset.tab)));
 
 let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (!$("v-resumen").hidden) renderCurvaS(); if (!$("v-proy").hidden) renderRend(); if (!$("v-bodega").hidden) renderMaterial(); }, 120); });
 
-renderKpis(); renderBars(); renderRestr(); renderAvisos(); renderSelector(); renderElev(); renderMatrix(); renderProy(); renderPartidas(); renderTipos(); renderListado(); renderSupuestos(); renderGlosario();
+renderKpis(); renderBars(); renderRestr(); renderAvisos(); renderTareasResumen(); if (!MR) $("panelTareas").hidden = true; renderSelector(); renderElev(); renderMatrix(); renderProy(); renderPartidas(); renderTipos(); renderListado(); renderSupuestos(); renderGlosario();
 let inicial = "resumen"; try { const v = localStorage.getItem("vista_panel"); if (ABIERTAS.includes(v)) inicial = v; } catch (e) {}
 irA(inicial);
 }

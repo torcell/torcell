@@ -180,7 +180,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .fotos{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
 .fotos[hidden],.ebarra[hidden]{display:none;}
 .fotos-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;}
-.fotos-h span{font-size:12px;font-weight:600;color:var(--sub);}
+.fotos-h span{font-size:12px;font-weight:600;color:var(--sub);margin-left:auto;}
+.fotos-h .btn{flex:none;}
 .fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
 .fgrid:empty{display:none;}
 .fth{position:relative;aspect-ratio:1;padding:0;border:1px solid var(--border);background:var(--soft);overflow:hidden;transition:transform .08s ease,border-color .12s ease;}
@@ -246,6 +247,69 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 :root[data-tema="oscuro"] #carga{--mortero:#4a4338;--frague:#2a2927;}
 @media (prefers-color-scheme:dark){:root:not([data-tema="claro"]) #carga{--mortero:#4a4338;--frague:#2a2927;}}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
+
+/* ===== Halloween (solo noche). Se enciende y apaga con el botón del encabezado. Sin animaciones infinitas ni difuminados. ===== */
+:root.halloween{color-scheme:dark;--bg:#160d20;--panel:#1c1226;--soft:#160e1e;--border:#33204a;--strong:#6b3fa0;--text:#f4ebff;--sub:#bba6d8;--ok:#6fcf3a;--warn:#ffb300;--bad:#ff5a4a;--accent:#ff7a18;--accent2:#8a2be2;--telarana:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23e9dcff' stroke-opacity='.28' stroke-width='1'%3E%3Cg transform='translate(64 0) scale(-1 1)'%3E%3Cpath d='M0 0L64 0M0 0L58 22M0 0L44 44M0 0L22 58M0 0L0 64'/%3E%3Cpath d='M14 0Q12 12 0 14M28 0Q24 24 0 28M42 0Q36 36 0 42M56 0Q48 48 0 56'/%3E%3C/g%3E%3C/svg%3E");}
+:root.halloween,:root.halloween html{background:#0b0610;}
+:root.halloween body::before{background:radial-gradient(circle at 90% 3%,rgba(255,150,40,.30) 0,rgba(255,122,24,.10) 9%,transparent 22%),radial-gradient(ellipse at 15% 0%,rgba(138,43,226,.28),transparent 55%),linear-gradient(to top,rgba(138,43,226,.22),transparent 28%),linear-gradient(180deg,#1a0b2a 0%,#0b0610 70%);}
+:root.halloween :is(main,.toolbar,.res,.infobar,.modal,.area){background:var(--telarana) top right / 40px no-repeat,linear-gradient(180deg,#221432 0%,var(--panel) 75%);}
+:root.halloween main{border-color:var(--strong);border-top:3px solid var(--accent);box-shadow:0 10px 40px rgba(0,0,0,.55);background-size:56px;}
+:root.halloween .toolbar{border-color:var(--strong);border-top:3px solid var(--accent);}
+:root.halloween .res{border-color:var(--border);}
+:root.halloween .modal{border-color:var(--strong);border-top:3px solid var(--accent);box-shadow:0 0 0 1px rgba(255,122,24,.35),0 10px 30px rgba(0,0,0,.6);}
+:root.halloween .infobar{border-left-color:var(--accent);}
+:root.halloween #vel::before,:root.halloween #velReg::before,:root.halloween #velOp::before,:root.halloween #velFoto::before,:root.halloween #velExp::before{background:rgba(8,3,14,.74);}
+:root.halloween .titles h1{color:#fff3e0;text-shadow:0 0 14px rgba(255,122,24,.55),0 2px 0 #3a1068;}
+:root.halloween .titles h1::before{content:"🎃 ";}
+:root.halloween header.top{border-image:linear-gradient(90deg,var(--accent),var(--accent2),transparent) 1;}
+:root.halloween .piso h2{color:#ffb878;border-bottom-color:var(--strong);}
+:root.halloween .piso h2::before{content:"🕸️ ";}
+:root.halloween .btn{background:#1a1024;border-color:var(--strong);}
+:root.halloween .btn:not(:disabled):hover{border-color:var(--accent);box-shadow:0 0 10px rgba(255,122,24,.45);}
+:root.halloween .btn.primary{background:linear-gradient(90deg,#c2410c,#6d28d9);border-color:var(--accent);}
+:root.halloween .conectado{background:linear-gradient(90deg,#ea580c,#7c3aed);}
+:root.halloween .pestanas button.on{background:linear-gradient(90deg,#ea580c,#7c3aed);}
+:root.halloween .area.act{border-color:var(--accent);}
+:root.halloween .seg button.on:not([data-e]){background:var(--accent);}
+#halloween.on{border-color:var(--accent);background:linear-gradient(90deg,#c2410c,#6d28d9);color:#fff;}
+@media (min-width:600px){:root.halloween header.top{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='70' viewBox='0 0 220 70'%3E%3Cg fill='%23ff7a18' fill-opacity='.34'%3E%3Cpath d='M30 30c-6-8-16-10-26-6 6 2 8 8 8 12 4-4 8-4 11-1 2-3 4-4 7-1 3-3 7-3 11 1 0-4 2-10 8-12-10-4-20-2-26 6z' transform='translate(18 10) scale(1.1)'/%3E%3Cpath d='M30 30c-6-8-16-10-26-6 6 2 8 8 8 12 4-4 8-4 11-1 2-3 4-4 7-1 3-3 7-3 11 1 0-4 2-10 8-12-10-4-20-2-26 6z' transform='translate(120 0) scale(.8)'/%3E%3Cpath d='M30 30c-6-8-16-10-26-6 6 2 8 8 8 12 4-4 8-4 11-1 2-3 4-4 7-1 3-3 7-3 11 1 0-4 2-10 8-12-10-4-20-2-26 6z' transform='translate(160 34) scale(.65)'/%3E%3C/g%3E%3C/svg%3E") no-repeat 99% 4px / 150px auto;}}
+
+
+  /* ---- Halloween: telarañas, arañas, murciélagos, esqueletos y brujas ---- */
+  :root.halloween{--tl:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23e9dcff' stroke-opacity='.3' stroke-width='1'%3E%3Cpath d='M0 0L64 0M0 0L58 22M0 0L44 44M0 0L22 58M0 0L0 64'/%3E%3Cpath d='M14 0Q12 12 0 14M28 0Q24 24 0 28M42 0Q36 36 0 42M56 0Q48 48 0 56'/%3E%3C/svg%3E");--tr:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23e9dcff' stroke-opacity='.3' stroke-width='1'%3E%3Cg transform='translate(64 0) scale(-1 1)'%3E%3Cpath d='M0 0L64 0M0 0L58 22M0 0L44 44M0 0L22 58M0 0L0 64'/%3E%3Cpath d='M14 0Q12 12 0 14M28 0Q24 24 0 28M42 0Q36 36 0 42M56 0Q48 48 0 56'/%3E%3C/g%3E%3C/svg%3E");--arana:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='72' viewBox='0 0 36 72'%3E%3Cline x1='18' y1='0' x2='18' y2='42' stroke='%23cdb8f0' stroke-opacity='.55' stroke-width='1'/%3E%3Cg stroke='%23a78bd0' stroke-width='1.6' fill='none' stroke-linecap='round'%3E%3Cpath d='M14 48L5 42L2 50M14 51L4 52L2 60M15 54L7 62L8 68M16 56L12 64L14 70'/%3E%3Cpath d='M22 48L31 42L34 50M22 51L32 52L34 60M21 54L29 62L28 68M20 56L24 64L22 70'/%3E%3C/g%3E%3Cellipse cx='18' cy='53' rx='7' ry='8' fill='%232b1740' stroke='%238a2be2' stroke-width='1.4'/%3E%3Ccircle cx='18' cy='45' r='4.5' fill='%232b1740' stroke='%238a2be2' stroke-width='1.2'/%3E%3Ccircle cx='16.4' cy='44.6' r='1.1' fill='%23ff7a18'/%3E%3Ccircle cx='19.6' cy='44.6' r='1.1' fill='%23ff7a18'/%3E%3C/svg%3E");--craneo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg stroke='%23f6f2ff' stroke-opacity='.55' stroke-width='3.400' stroke-linecap='round'%3E%3Cpath d='M7 37L37 42M37 37L7 42'/%3E%3C/g%3E%3Cg fill='%23f6f2ff' fill-opacity='.7' stroke='%231a0f24' stroke-width='1.300'%3E%3Cellipse cx='22' cy='18' rx='16' ry='15'/%3E%3Crect x='15' y='29' width='14' height='7' rx='2.500'/%3E%3C/g%3E%3Cellipse cx='16' cy='18' rx='4.500' ry='5.200' fill='%231a0f24'/%3E%3Cellipse cx='28' cy='18' rx='4.500' ry='5.200' fill='%231a0f24'/%3E%3Cpath d='M22 23L19.500 28H24.500Z' fill='%231a0f24'/%3E%3Cpath d='M18.500 29V35M22 29V35M25.500 29V35' stroke='%231a0f24' stroke-width='1.200'/%3E%3C/svg%3E");--murci:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg transform='translate(0 18)'%3E%3Cg%3E%3CanimateTransform attributeName='transform' type='scale' values='1 1%3B1 .42%3B1 1' dur='.32s' repeatCount='indefinite'/%3E%3Cg transform='translate(0 -18)'%3E%3Cg fill='%2324103a' stroke='%23ff9a3c' stroke-width='1.3' stroke-linejoin='round'%3E%3Cpath d='M44 17C51 8 64 5 79 11C74 14 73 18 71 23C67 19 63 20 61 25C57 20 53 22 50 27C48 24 45 24 43 27Z'/%3E%3Cpath d='M44 17C51 8 64 5 79 11C74 14 73 18 71 23C67 19 63 20 61 25C57 20 53 22 50 27C48 24 45 24 43 27Z' transform='translate(80 0) scale(-1 1)'/%3E%3C/g%3E%3Cg stroke='%23ff9a3c' stroke-opacity='.55' stroke-width='.7' fill='none'%3E%3Cpath d='M44 18L78 12M44 19L71 23M44 20L61 25M44 21L50 27'/%3E%3Cpath d='M44 18L78 12M44 19L71 23M44 20L61 25M44 21L50 27' transform='translate(80 0) scale(-1 1)'/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/g%3E%3Cg fill='%2324103a' stroke='%23ff9a3c' stroke-width='1.3' stroke-linejoin='round'%3E%3Cpath d='M40 31C37 29 36 25 36 21L34 9L38.500 14Q40 13.200 41.500 14L46 9L44 21C44 25 43 29 40 31Z'/%3E%3C/g%3E%3Ccircle cx='38' cy='19' r='1.300' fill='%23ff3b30'/%3E%3Ccircle cx='42' cy='19' r='1.300' fill='%23ff3b30'/%3E%3C/svg%3E");--bruja:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150' viewBox='0 0 300 150'%3E%0A%3Cdefs%3E%3CradialGradient id='l' cx='.5' cy='.5' r='.5'%3E%3Cstop offset='0' stop-color='%23fff1d6' stop-opacity='.55'/%3E%3Cstop offset='.7' stop-color='%23ffd9a0' stop-opacity='.22'/%3E%3Cstop offset='1' stop-color='%23ffd9a0' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%0A%3Ccircle cx='190' cy='62' r='66' fill='url(%23l)'/%3E%0A%3Cg fill='%230d0617' stroke='%239a6bff' stroke-width='1.4' stroke-linejoin='round' stroke-linecap='round'%3E%0A%3Cpath d='M6 108L58 100L62 114L10 132Q22 118 6 108Z'/%3E%0A%3Cpath d='M16 111L60 105M18 120L61 109M12 126L62 112' stroke-width='.8' fill='none'/%3E%0A%3Cpath d='M58 106L262 70' stroke-width='5' fill='none'/%3E%0A%3Cpath d='M70 84C92 72 120 62 150 62C158 62 164 66 166 72L150 96C130 108 104 114 82 112C92 104 84 92 70 84Z'/%3E%0A%3Cpath d='M96 90Q80 88 70 100Q84 98 98 100Z'/%3E%0A%3Cpath d='M150 60C160 52 174 48 186 52L196 70L170 92C160 86 154 74 150 60Z'/%3E%0A%3Cpath d='M186 56L198 66L236 70L240 76L192 78Z'/%3E%0A%3Cpath d='M120 100L112 124L126 120L134 104ZM136 100L136 124L150 118L148 98Z'/%3E%0A%3Cpath d='M188 52C186 44 188 38 194 35C202 33 208 38 209 45L216 49L209 51C207 56 200 60 192 58Z'/%3E%0A%3Cpath d='M194 34C186 36 176 40 168 52C180 48 188 48 192 52Z' stroke-width='1'/%3E%0A%3Cpath d='M170 54C160 56 150 62 144 72C156 66 166 66 172 66Z' stroke-width='1'/%3E%0A%3Cpath d='M180 38C186 22 188 10 178 -2C198 4 212 14 214 30Z' transform='translate(0 4)'/%3E%0A%3Cellipse cx='198' cy='36' rx='24' ry='5' transform='rotate(-10 198 36)'/%3E%0A%3C/g%3E%3C/svg%3E");--tumbas:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='84' viewBox='0 0 640 84'%3E%3Cg fill='%231d1230' stroke='%235a3590' stroke-width='1.500'%3E%3Cpath d='M30 84V40a16 16 0 0 1 32 0v44z'/%3E%3Cpath d='M120 84V50a13 13 0 0 1 26 0v34z'/%3E%3Cpath d='M330 84V34a19 19 0 0 1 38 0v50z'/%3E%3Cpath d='M520 84V46a15 15 0 0 1 30 0v38z'/%3E%3C/g%3E%3Cg stroke='%237a55b3' stroke-width='2' fill='none'%3E%3Cpath d='M46 46v16M39 52h14'/%3E%3Cpath d='M349 42v18M341 49h16'/%3E%3C/g%3E%3Cpath d='M0 84C60 74 120 78 200 80C280 82 340 74 420 78C500 82 580 76 640 82V84z' fill='%23150c20'/%3E%3Cg transform='translate(240 84)'%3E%3Cg fill='%23f6f2ff' stroke='%231a0f24' stroke-width='1.2'%3E%3Cellipse cx='0' cy='-30' rx='9' ry='8.500'/%3E%3Crect x='-6' y='-23' width='12' height='5' rx='2'/%3E%3Cpath d='M-6 -17Q0 -20 6 -17V-6H-6Z'/%3E%3C/g%3E%3Cpath d='M-4 -14H4M-4 -10H4' stroke='%231a0f24' stroke-width='1.200'/%3E%3Ccircle cx='-3.500' cy='-30' r='2.400' fill='%231a0f24'/%3E%3Ccircle cx='3.500' cy='-30' r='2.400' fill='%231a0f24'/%3E%3Cpath d='M-6 -16L-14 -26M6 -16L14 -26' stroke='%23f6f2ff' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(445 84)'%3E%3Cg fill='%23f6f2ff' stroke='%231a0f24' stroke-width='1.2'%3E%3Cellipse cx='0' cy='-30' rx='9' ry='8.500'/%3E%3Crect x='-6' y='-23' width='12' height='5' rx='2'/%3E%3Cpath d='M-6 -17Q0 -20 6 -17V-6H-6Z'/%3E%3C/g%3E%3Cpath d='M-4 -14H4M-4 -10H4' stroke='%231a0f24' stroke-width='1.200'/%3E%3Ccircle cx='-3.500' cy='-30' r='2.400' fill='%231a0f24'/%3E%3Ccircle cx='3.500' cy='-30' r='2.400' fill='%231a0f24'/%3E%3Cpath d='M-6 -16L-14 -26M6 -16L14 -26' stroke='%23f6f2ff' stroke-width='3' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");--reclinado:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='170' viewBox='0 0 300 170'%3E%0A%3Cg stroke='%23f6f2ff' stroke-linecap='round' fill='none' stroke-opacity='.92'%3E%0A%3Cpath d='M70 62L96 100' stroke-width='6'/%3E%0A%3Cpath d='M96 100L136 92' stroke-width='9'/%3E%0A%3Cpath d='M88 80Q74 100 84 122' stroke-width='5'/%3E%0A%3Cpath d='M84 122L108 134' stroke-width='5'/%3E%0A%3Cpath d='M170 118L222 100L252 128' stroke-width='9'/%3E%0A%3Cpath d='M252 128L292 112' stroke-width='5'/%3E%0A%3Cpath d='M170 126L240 140L262 148' stroke-width='8'/%3E%0A%3Cpath d='M262 148L292 156' stroke-width='5'/%3E%0A%3Cpath d='M96 60L120 92L130 70' stroke-width='5'/%3E%0A%3Cpath d='M130 70L142 40' stroke-width='5'/%3E%0A%3C/g%3E%0A%3Cg fill='%23f6f2ff' stroke='%231a0f24' stroke-width='1.6'%3E%0A%3Cellipse cx='64' cy='42' rx='19' ry='17'/%3E%3Crect x='54' y='56' width='20' height='9' rx='3'/%3E%0A%3Cpath d='M94 70Q108 60 134 78L146 112Q132 124 112 112Q98 96 94 70Z'/%3E%0A%3Cellipse cx='158' cy='118' rx='22' ry='15'/%3E%0A%3Ccircle cx='222' cy='100' r='7'/%3E%3Ccircle cx='252' cy='128' r='7'/%3E%3Ccircle cx='292' cy='112' r='5'/%3E%3Ccircle cx='292' cy='156' r='5'/%3E%0A%3Cpath d='M138 36h14v22h-14z' fill='%23ff7a18' stroke='%231a0f24'/%3E%0A%3Crect x='136' y='30' width='18' height='4' rx='1' fill='%23f6f2ff'/%3E%0A%3C/g%3E%0A%3Cellipse cx='57' cy='42' rx='5' ry='6' fill='%231a0f24'/%3E%3Cellipse cx='72' cy='42' rx='5' ry='6' fill='%231a0f24'/%3E%3Cpath d='M64 46L61 52H67Z' fill='%231a0f24'/%3E%0A%3Cpath d='M102 80Q116 74 128 86M104 90Q118 84 132 96M108 100Q120 96 138 106' stroke='%231a0f24' stroke-width='3' fill='none'/%3E%0A%3Cpath d='M144 30L150 14' stroke='%23ff7a18' stroke-width='2'/%3E%0A%3Cellipse cx='158' cy='118' rx='8' ry='5' fill='%231a0f24'/%3E%0A%3C/svg%3E");}
+  :root.halloween .modal{position:relative;z-index:1;}
+  :root.halloween .modal::after{content:"";position:absolute;inset:0;background:var(--tr) top right / 76px no-repeat,var(--tl) top left / 58px no-repeat,var(--craneo) left 10px bottom 8px / 30px no-repeat;pointer-events:none;z-index:2;}
+  :root.halloween .modal::before{content:"";position:absolute;top:0;left:62%;width:36px;height:72px;background:var(--arana) center top / contain no-repeat;pointer-events:none;z-index:3;transform-origin:50% 0;animation:hwColgar 4.2s ease-in-out infinite;}
+  :root.halloween body::after{content:"";position:fixed;left:0;top:7vh;width:210px;height:105px;background:var(--bruja) center / contain no-repeat;opacity:.9;pointer-events:none;z-index:-1;transform:translate(-20vw,0);animation:hwBruja 40s linear 5s infinite;}
+  :root.halloween::before{content:"";position:fixed;left:0;top:0;width:72px;height:36px;background:var(--murci) center / contain no-repeat;pointer-events:none;z-index:20;opacity:.9;transform:translate(110vw,30vh);animation:hwMurcielago 34s linear 11s infinite;}
+  :root.halloween::after{content:"";position:fixed;left:0;right:0;bottom:0;height:120px;background:var(--reclinado) right 5vw bottom 0 / 210px auto no-repeat,var(--tumbas) left bottom / auto 64px repeat-x;opacity:.75;pointer-events:none;z-index:-1;}
+  :root.halloween :is(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on)::after{content:"";position:absolute;left:0;top:0;width:60px;height:30px;background:var(--murci) center / contain no-repeat;pointer-events:none;z-index:0;opacity:.9;transform:translate(-10vw,18vh);animation:hwMurciOverlay 15s linear infinite;}
+
+  @keyframes hwColgar{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
+  @keyframes hwBruja{0%{transform:translate(-30vw,0);}7.5%{transform:translate(110vw,-3vh);}100%{transform:translate(110vw,-3vh);}}
+  @keyframes hwMurcielago{0%{transform:translate(108vw,30vh);}8%{transform:translate(84vw,24vh);}16%{transform:translate(60vw,34vh);}24%{transform:translate(36vw,26vh);}32%{transform:translate(12vw,36vh);}40%{transform:translate(-10vw,28vh);}100%{transform:translate(-10vw,28vh);}}
+  @keyframes hwMurciOverlay{0%{transform:translate(-8vw,20vh);}25%{transform:translate(28vw,12vh);}50%{transform:translate(58vw,24vh);}75%{transform:translate(86vw,14vh);}100%{transform:translate(108vw,22vh);}}
+  @media (prefers-reduced-motion:reduce){
+    body::after,html::before,.overlay::after,.modal::before,#vel::after,#velReg::after,#velOp::after,#velFoto::after,#velExp::after{animation:none !important;}
+  }
+  @media (max-width:600px){ :root.halloween body::after{width:140px;height:70px;top:5vh;} }
+  :root:has(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on)::before{display:none;}
+
+  /* Esqueleto que se asoma de vez en cuando por detrás del contenedor y se vuelve a esconder */
+  :root.halloween{--esqueleto:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='84' viewBox='0 0 90 84'%3E%0A%3Cg fill='%23f6f2ff' stroke='%231a0f24' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M26 62L12 40' stroke='%23f6f2ff' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M64 62L78 40' stroke='%23f6f2ff' stroke-width='6' stroke-linecap='round' fill='none'/%3E%0A%3Ccircle cx='11' cy='38' r='5'/%3E%3Ccircle cx='79' cy='38' r='5'/%3E%0A%3Cpath d='M6 32l-2-6M10 30l-1-6M14 31l1-6M83 31l2-6M79 29l1-6M75 30l0-6' stroke='%23f6f2ff' stroke-width='2.4' stroke-linecap='round'/%3E%0A%3Crect x='41' y='38' width='8' height='10' rx='2'/%3E%0A%3Cpath d='M30 84V58Q30 50 45 50Q60 50 60 58V84Z'/%3E%0A%3Cpath d='M34 60H56M34 67H56M34 74H56M45 52V84' stroke='%231a0f24' stroke-width='2.2' fill='none'/%3E%0A%3Cellipse cx='45' cy='22' rx='21' ry='19'/%3E%3Crect x='33' y='36' width='24' height='8' rx='3'/%3E%3C/g%3E%0A%3Cellipse cx='36' cy='22' rx='6.500' ry='7.500' fill='%231a0f24'/%3E%3Cellipse cx='54' cy='22' rx='6.500' ry='7.500' fill='%231a0f24'/%3E%0A%3Cpath d='M45 28L41 35H49Z' fill='%231a0f24'/%3E%3Cpath d='M39 40V43M45 40V43M51 40V43' stroke='%231a0f24' stroke-width='1.6'/%3E%3C/svg%3E");}
+  :root.halloween main{position:relative;}
+  :root.halloween main::before{content:"";position:absolute;top:-58px;right:84px;width:72px;height:67px;background:var(--esqueleto) center / contain no-repeat;z-index:-1;pointer-events:none;opacity:0;transform:translateY(64px);animation:hwEsqueleto 47s ease-in-out 9s infinite;}
+  /* Puntero de Halloween: flecha naranja y, sobre lo que se puede apretar, una calabaza */
+  :root.halloween{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cpath d='M3 2L3 20L8 15L11.5 23L15 21.5L11.5 13.5L18.5 13.5Z' fill='%23ff7a18' stroke='%231a0f24' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M3 2L3 20L8 15' fill='none' stroke='%23fff3e0' stroke-opacity='.6' stroke-width='.8'/%3E%3C/svg%3E") 3 2,auto;}
+  :root.halloween :is(button,a,select,summary,label,.btn,.tab,.stats-tab,.cell-ventana,.tile,[role=button],input[type=checkbox],input[type=radio],input[type=file]):not(:disabled){cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 8c3-5 7-5 9-3-3 0-5 1-6 3z' fill='%236fcf3a' stroke='%231a0f24' stroke-width='1'/%3E%3Cellipse cx='15' cy='18' rx='12' ry='9.5' fill='%23ff7a18' stroke='%231a0f24' stroke-width='1.6'/%3E%3Cpath d='M15 9v19M9 10c-3 5-3 11 0 16M21 10c3 5 3 11 0 16' stroke='%23c2410c' stroke-width='1.1' fill='none'/%3E%3Cpath d='M8 16l3 -3l2.5 3.5zM22 16l-3 -3l-2.5 3.5zM9 21q6 5 12 0q-3 2 -6 1.2q-3 .8 -6 -1.2z' fill='%231a0f24'/%3E%3C/svg%3E") 15 16,pointer;}
+  @keyframes hwEsqueleto{0%,70%{opacity:0;transform:translateY(64px);}71%{opacity:1;transform:translateY(64px);}77%{opacity:1;transform:translateY(2px);}80%{transform:translateY(2px) rotate(-5deg);}83%{transform:translateY(2px) rotate(5deg);}86%{transform:translateY(2px) rotate(0);}92%{opacity:1;transform:translateY(64px);}93%,100%{opacity:0;transform:translateY(64px);}}
+  @media (prefers-reduced-motion:reduce){ .toolbar::before,main::before{animation:none !important;} }
+
+  /* Araña que baja desde arriba de la pantalla colgada de su hilo y se vuelve a esconder */
+  :root.halloween main::after{content:"";position:fixed;left:14%;top:0;width:36px;height:300px;background:var(--arana) center bottom / 36px 72px no-repeat,linear-gradient(rgba(205,184,240,.55),rgba(205,184,240,.55)) center top / 1px calc(100% - 40px) no-repeat;pointer-events:none;z-index:20;transform:translateY(-300px);animation:hwBajar 38s ease-in-out 14s infinite;}
+  :root.halloween:has(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on) main::after{display:none;}
+  @keyframes hwBajar{0%,58%{transform:translateY(-300px);}66%{transform:translateY(-70px);}68%{transform:translateY(-78px);}70%{transform:translateY(-66px);}72%{transform:translateY(-74px);}78%{transform:translateY(-300px);}100%{transform:translateY(-300px);}}
+  @media (prefers-reduced-motion:reduce){ :root.halloween main::after{animation:none !important;} }
 </style>
 </head>
 <body>
@@ -278,6 +342,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <button class="btn" id="verRegistro" type="button">Registro</button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
     <button class="btn" id="tema" type="button" aria-label="Cambiar tema">Tema: Auto</button>
+    <button class="btn" id="halloween" type="button" aria-pressed="true" title="Encender o apagar el tema de Halloween">🎃 Halloween</button>
     <button class="btn" id="salir" type="button">Cerrar sesión</button>
   </div>
 </header>
@@ -326,6 +391,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="fvimg" id="fvImg"></div>
     <div class="sub" id="fvInfo" style="margin-top:0;"></div>
     <div class="acciones" id="fvAcc">
+      <button class="btn" id="fvDescargar" type="button">⬇ Descargar</button>
       <button class="btn" id="fvBorrar" type="button">Borrar foto</button>
       <button class="btn primary" id="fvCerrar" type="button">Cerrar</button>
     </div>
@@ -383,7 +449,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
-      <div class="fotos-h"><b>Fotos del departamento</b><span id="mFotosN"></span></div>
+      <div class="fotos-h"><b>Fotos del departamento</b><span id="mFotosN"></span><button type="button" class="btn small" id="fBajar" hidden>⬇ Descargar</button></div>
       <div class="fgrid" id="mFotosGrid"></div>
       <div class="fbtns">
         <button type="button" class="btn small" id="fTomar">📷 Tomar foto</button>
@@ -400,7 +466,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.6.5';
+const CAL_VERSION = '1.11.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -898,6 +964,7 @@ function pintarFotos(){
   $('mFotosN').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length ? arr.length + ' de ' + FOTOS_MAX : 'sin fotos';
   $('mFotosGrid').innerHTML = arr.map((f, i) => `<button type="button" class="fth${f.estado === 'sub' ? ' sub' : ''}" data-i="${i}" aria-label="Foto ${i + 1}">${f.m ? `<img alt="" src="data:image/jpeg;base64,${f.m}">` : ''}</button>`).join('');
   $('fTomar').disabled = $('fGaleria').disabled = arr.length >= FOTOS_MAX;
+  $('fBajar').hidden = !arr.some(f => f.estado !== 'sub' && f.id);
 }
 async function abrirFotos(d){
   pintarFotos();
@@ -970,7 +1037,7 @@ async function verFoto(i){
   if(!actual) return;
   const base = claveBase(actual), f = (fotosDe[base] || [])[i];
   if(!f || f.estado !== 'ok') return;
-  fotoVista = {base, f, confirmar: false};
+  fotoVista = {base, f, confirmar: false, full: ''};
   fvReset();
   $('fvImg').innerHTML = f.m ? `<img alt="Foto del departamento" src="data:image/jpeg;base64,${f.m}">` : '';
   $('fvInfo').textContent = [dptoTxt(base), NOMBRE_SCOPE[f.z] || '', fechaFoto(f.ts), f.u].filter(Boolean).join(' · ');
@@ -980,6 +1047,7 @@ async function verFoto(i){
   $('velFoto').classList.add('on');
   try{
     const j = await llamar('calidadFotoVer', {ids: [f.id]}, false, 60000);
+    if(fotoVista && fotoVista.f === f && j && j.ok && j.fotos && j.fotos[f.id]) fotoVista.full = j.fotos[f.id];
     if(fotoVista && fotoVista.f === f && j && j.ok && j.fotos && j.fotos[f.id]) $('fvImg').innerHTML = `<img alt="Foto del departamento" src="data:image/jpeg;base64,${j.fotos[f.id]}">`;
     else if(fotoVista && fotoVista.f === f) $('fvInfo').textContent += ' · (no se pudo cargar la foto completa)';
   }catch(e){ if(fotoVista && fotoVista.f === f) $('fvInfo').textContent += ' · (no se pudo cargar la foto completa)'; }
@@ -1044,6 +1112,17 @@ function crearZip(archivos){
 }
 function b64Bytes(b64){ const bin = atob(b64), u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
 const limpiarNombre = t => String(t).replace(/[\\/:*?"<>|]+/g, '-').trim() || 'x';
+function fechaArchivo(ts){ const d = new Date(ts || Date.now()), dos = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + dos(d.getMonth() + 1) + '-' + dos(d.getDate()) + '_' + dos(d.getHours()) + dos(d.getMinutes()); }
+// Nombre: Piso - Departamento - zona - trabajador - fecha
+function nombreFotoArchivo(base, f){
+  const q = base.split('|');
+  return [q[0], q[1] === 'Pasillo' ? 'Pasillo' : 'Dpto ' + q[1], NOMBRE_SCOPE[f.z] || f.z, f.u, fechaArchivo(f.ts)].filter(Boolean).map(limpiarNombre).join(' - ');
+}
+function bajarBlob(blob, nombre){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 60000);
+}
 let exp = {estado: '', lista: [], hechas: [], confirmar: false, timer: 0};
 function pintarExp(txt, btn, danger, ocultarBtn){
   $('eTxt').textContent = txt;
@@ -1099,7 +1178,7 @@ async function exportarZip(){
         const dos = n => String(n).padStart(2, '0');
         const fecha = d.getFullYear() + '-' + dos(d.getMonth() + 1) + '-' + dos(d.getDate()) + '_' + dos(d.getHours()) + dos(d.getMinutes());
         const carpeta = limpiarNombre(q[0]) + '/' + limpiarNombre(q[1] === 'Pasillo' ? 'Pasillo' : 'Dpto ' + q[1]) + '/';
-        const baseNom = carpeta + limpiarNombre(NOMBRE_SCOPE[f.z] || f.z) + '_' + fecha;
+        const baseNom = carpeta + nombreFotoArchivo(f.b, f);
         usados[baseNom] = (usados[baseNom] || 0) + 1;
         archivos.push({id, nombre: baseNom + '_' + usados[baseNom] + '.jpg', datos: b64Bytes(b64), fecha: d});
       });
@@ -1433,6 +1512,16 @@ $('tema').addEventListener('click', () => {
   aplicarTema();
 });
 aplicarTema();
+// Halloween: encendido por defecto; el botón lo apaga y lo vuelve a encender (queda guardado en este aparato).
+let halloween = leerLocal('calidadHalloween') !== '0';
+function aplicarHalloween(){
+  document.documentElement.classList.toggle('halloween', halloween);
+  $('halloween').classList.toggle('on', halloween);
+  $('halloween').setAttribute('aria-pressed', halloween ? 'true' : 'false');
+  $('halloween').textContent = halloween ? '🎃 Halloween: Sí' : '🎃 Halloween: No';
+}
+$('halloween').addEventListener('click', () => { halloween = !halloween; guardarLocal('calidadHalloween', halloween ? null : '0'); aplicarHalloween(); });
+aplicarHalloween();
 $('salir').addEventListener('click', () => {
   const t = token;
   cerrarSesion('');
@@ -1495,6 +1584,37 @@ $('fGaleria').addEventListener('click', () => $('fGal').click());
 $('mFotosGrid').addEventListener('click', e => { const b = e.target.closest('.fth'); if(b && !b.classList.contains('sub')) verFoto(Number(b.dataset.i)); });
 $('fvCerrar').addEventListener('click', cerrarFoto);
 $('fvBorrar').addEventListener('click', borrarFotoVista);
+$('fvDescargar').addEventListener('click', () => {
+  if(!fotoVista) return;
+  const {base, f, full} = fotoVista, b64 = full || f.m;
+  if(!b64){ aviso('La foto aún no carga. Espera un momento.'); return; }
+  bajarBlob(new Blob([b64Bytes(b64)], {type: 'image/jpeg'}), nombreFotoArchivo(base, f) + '.jpg');
+  if(!full) aviso('Se descargó la versión pequeña; la completa aún cargaba. Reintenta en unos segundos para la completa.');
+});
+let bajandoDpto = false;
+$('fBajar').addEventListener('click', async () => {
+  if(!actual || bajandoDpto) return;
+  const base = claveBase(actual), fotos = (fotosDe[base] || []).filter(f => f.estado !== 'sub' && f.id);
+  if(!fotos.length) return;
+  bajandoDpto = true; const btn = $('fBajar'); btn.disabled = true; const txt0 = btn.textContent;
+  try{
+    const archivos = [], usados = {};
+    for(let i = 0; i < fotos.length; i += 3){
+      const lote = fotos.slice(i, i + 3); btn.textContent = 'Bajando ' + Math.min(fotos.length, i + 3) + '/' + fotos.length;
+      const j = await llamar('calidadFotoVer', {ids: lote.map(f => f.id)}, false, 90000);
+      if(!(j && j.ok && j.fotos)) throw new Error('x');
+      lote.forEach(f => {
+        const b64 = j.fotos[f.id]; if(!b64) return;
+        const n = nombreFotoArchivo(base, f); usados[n] = (usados[n] || 0) + 1;
+        archivos.push({nombre: n + (usados[n] > 1 ? '_' + usados[n] : '') + '.jpg', datos: b64Bytes(b64), fecha: new Date(f.ts || Date.now())});
+      });
+    }
+    if(!archivos.length) throw new Error('x');
+    if(archivos.length === 1) bajarBlob(new Blob([archivos[0].datos], {type: 'image/jpeg'}), archivos[0].nombre);
+    else{ const q = base.split('|'); bajarBlob(crearZip(archivos), limpiarNombre(q[0] + ' - ' + (q[1] === 'Pasillo' ? 'Pasillo' : 'Dpto ' + q[1])) + '.zip'); }
+  }catch(e){ aviso('No se pudieron descargar las fotos. Revisa tu internet e intenta de nuevo.'); }
+  bajandoDpto = false; btn.disabled = false; btn.textContent = txt0;
+});
 $('verFotos').addEventListener('click', abrirExportar);
 $('eCerrar').addEventListener('click', cerrarExportar);
 $('eAccion').addEventListener('click', accionExportar);
