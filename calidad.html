@@ -4,7 +4,7 @@
 <script>try{var t=localStorage.getItem('calidadTema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t);}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <script>if(window.top !== window.self){ document.documentElement.style.display = 'none'; try{ window.top.location = window.self.location; }catch(e){} }</script>
 <meta name="theme-color" content="#f2f3f1" media="(prefers-color-scheme: light)">
@@ -501,7 +501,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.21.0';
+const CAL_VERSION = '1.24.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -524,6 +524,7 @@ let fotosCount = {};
 const fotosDe = {};
 const fotosEstado = {};
 let cadenaFotos = Promise.resolve();
+let cadenaFotosPendiente = 0;
 let cargando = false;
 let actual = null;
 let estadoSel = '';
@@ -568,7 +569,7 @@ async function llamar(action, extra, rapido, limite){
   const tope = setTimeout(() => ctl.abort(), limite || TIEMPO_MAX);
   try{
     const res = await fetch(DB_URL, {method:'POST', keepalive: !!rapido, signal: ctl.signal, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action, token, dispositivo: leerLocal('progresoObraDisp') || '', dispositivoEtiqueta: etiquetaDispositivo(), ...extra})});
-    if(!res.ok) throw new Error('red');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const j = JSON.parse(await res.text());
     if(j && j.error === 'sin_sesion' && token) cerrarSesion('Tu sesión venció. Ingresa tu PIN de nuevo.');
     else if(j && j.error === 'dispositivo_ocupado' && token) cerrarSesion(msgDispositivoOcupado(j.tipo));
@@ -1036,7 +1037,7 @@ function anadirFotos(files){
   lista.forEach(file => {
     const ent = {estado: 'sub', m: '', z: zona, ts: Date.now(), u: miEtiqueta()};
     arr.push(ent);
-    cadenaFotos = cadenaFotos.then(() => subirUna(base, zona, file, ent)).catch(() => {});
+    cadenaFotosPendiente++; cadenaFotos = cadenaFotos.then(() => subirUna(base, zona, file, ent)).catch(() => {}).then(() => { cadenaFotosPendiente--; });
   });
   if(actual && estadoSel !== 'observado'){ estadoSel = 'observado'; elegir('observado'); }
   pintarFotos();
@@ -1473,13 +1474,13 @@ async function cargar(inicial){
       errorCarga = j && j.error === 'dispositivo_ocupado' ? 'Esta cuenta ya está abierta en otro ' + (j.tipo === 'pc' ? 'computador' : 'celular') + ' y no se permite un segundo dispositivo del mismo tipo. Cierra la sesión en el otro dispositivo o pide al administrador que la libere.'
         : j && j.error === 'sin_sesion' ? 'Tu sesión venció. Vuelve a entrar.'
         : j && typeof j === 'object' && j.error ? 'La base de datos respondió con un error (' + String(j.error) + '). Reintenta; si sigue igual, avisa al administrador.'
-        : j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no reconoce esta versión. Falta publicar la versión nueva del script.' : 'La base de datos respondió con un formato inesperado.';
+        : j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no entregó los datos de Calidad (respuesta: ' + esc(JSON.stringify(j).slice(0, 140)) + '). Lo más probable es que el script publicado en Google sea una versión anterior a la de este panel. Versión del panel: ' + CAL_VERSION + '.' : 'La base de datos respondió con un formato inesperado.';
       if(!inicial) falloCarga('No se pudo cargar. Reintenta.');
       infoDeError(errorCarga);
       return 'fallo';
     }
   }catch(e){
-    errorCarga = e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet.';
+    errorCarga = e && e.message === 'tiempo' ? 'La base de datos tarda demasiado en responder. Intenta de nuevo.' : 'No se pudo conectar con la base de datos. Revisa tu internet. (Detalle técnico: ' + esc(String(e && e.name || 'Error') + ': ' + String(e && e.message || '').slice(0, 120)) + ')';
     if(!inicial) falloCarga(e && e.message === 'tiempo' ? 'La base tarda demasiado en responder.' : 'Sin conexión con la base de datos.');
     infoDeError(errorCarga);
     return 'fallo';
@@ -1686,6 +1687,51 @@ setInterval(() => { if(!document.hidden && token) cargar(); }, 60000);
 
 if(token && nombre){ entrarVista(); cargarInicial(); }
 else{ cerrarSesion(''); }
+
+// ---- Actualización automática de Calidad ----
+// Si hay una versión más nueva publicada, la página se recarga sola. No se borra nada del equipo:
+// la sesión, las preferencias y los borradores quedan guardados porque solo se vuelve a pedir la página.
+let ultimaRevisionCal = 0;
+function versionMayorCal(a, b){
+  const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number);
+  for(let i = 0; i < 3; i++){ if((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); }
+  return false;
+}
+function calOcupada(){
+  return enVuelo > 0 || cadenaFotosPendiente > 0 || ['vel', 'velReg', 'velOp', 'velFoto', 'velExp'].some(id => $(id).classList.contains('on'));
+}
+async function versionCalPublicada(){
+  if(!/^https?:$/.test(location.protocol)) return null;
+  const ctl = new AbortController(), corte = setTimeout(() => ctl.abort(), 8000);
+  try{
+    const res = await fetch(location.origin + location.pathname + '?_v=' + Date.now(), {cache: 'no-store', signal: ctl.signal});
+    if(!res.ok) return null;
+    const m = (await res.text()).match(/const CAL_VERSION = '([0-9.]+)'/);
+    return m ? m[1] : null;
+  }catch(e){ return null; }
+  finally{ clearTimeout(corte); }
+}
+async function comprobarVersionCal(){
+  ultimaRevisionCal = Date.now();
+  const v = await versionCalPublicada();
+  if(!v || !versionMayorCal(v, CAL_VERSION)){ try{ sessionStorage.removeItem('calIntentosAct'); }catch(e){} return; }
+  if(calOcupada()){ setTimeout(comprobarVersionCal, 45000); return; }  // no interrumpe una revisión ni una subida de fotos
+  let n = 0;
+  try{ n = Number(sessionStorage.getItem('calIntentosAct') || 0); }catch(e){}
+  if(n >= 2){ aviso('Hay una versión nueva de Calidad (v' + v + '). Cierra y vuelve a abrir la página para usarla.'); return; }
+  try{ sessionStorage.setItem('calIntentosAct', String(n + 1)); sessionStorage.setItem('calActualizadoA', v); }catch(e){}
+  location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
+}
+setTimeout(() => {
+  if(/[?&](v|_v)=/.test(location.search)){ try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} }
+  let a = null;
+  try{ a = sessionStorage.getItem('calActualizadoA'); sessionStorage.removeItem('calActualizadoA'); }catch(e){}
+  if(a && a === CAL_VERSION) setTimeout(() => aviso('Calidad se actualizó a la versión ' + CAL_VERSION + '.'), 1200);
+  comprobarVersionCal();
+}, 0);
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionCal > 600000) comprobarVersionCal();
+});
 </script>
 </body>
 </html>
