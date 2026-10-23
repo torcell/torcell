@@ -538,7 +538,9 @@ async function bienvenida(res){
   const v = lg('lgV3'), r = lg('lgV3r'), e = lg('lgV3e');
   r.style.width = '0%'; e.textContent = '0%'; e.classList.remove('listo'); v.classList.remove('ver', 'ab'); v.style.height = '0px';
   pantalla('lgHecho');
-  await dormir(60);
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  void v.offsetHeight;
+  await dormir(80);
   v.style.height = (lg('lgV3in').scrollHeight + 4) + 'px'; v.classList.add('ab');
   await dormir(480); v.classList.add('ver'); await dormir(300);
   const t0 = performance.now();

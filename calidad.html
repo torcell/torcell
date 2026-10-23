@@ -439,7 +439,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <div id="carga" class="on" role="status" aria-live="polite">
-  <div class="v3" id="cargaV3"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="cargaIn"><small>Obra Bellavista, La Florida</small><b id="cargaTit">Cargando panel de Calidad</b><div class="carga"><div class="pista" role="progressbar" aria-label="Cargando" id="cargaPista"><div class="rell" id="cargaRell"></div></div><div class="est" id="cargaEst">0%</div></div></div></div></div>
+  <div class="v3" id="cargaV3" style="height:0"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="cargaIn"><small>Obra Bellavista, La Florida</small><b id="cargaTit">Cargando panel de Calidad</b><div class="carga"><div class="pista" role="progressbar" aria-label="Cargando" id="cargaPista"><div class="rell" id="cargaRell"></div></div><div class="est" id="cargaEst">0%</div></div></div></div></div>
 </div>
 <div id="aviso" role="alert"><span id="avisoTxt"></span><button type="button" id="avisoX" aria-label="Cerrar aviso">✕</button></div>
 <div id="velOp">
@@ -493,7 +493,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.30.2';
+const CAL_VERSION = '1.30.3';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -598,7 +598,10 @@ function cargaMostrar(){
   carga.prog = 0; carga.meta = 88; carga.t0 = performance.now() + 800;
   cancelAnimationFrame(carga.raf); cargaBucle();
   carga.abierta = (async () => {
-    await dormir(60);
+    // espera a que el navegador pinte la línea cerrada; si no, la apertura salta sin transición
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    void v.offsetHeight;
+    await dormir(80);
     v.style.height = ($('cargaIn').scrollHeight + 4) + 'px'; v.classList.add('ab');
     await dormir(480); v.classList.add('ver'); await dormir(300);
   })();
@@ -608,6 +611,7 @@ function cargaCortar(){
   cancelAnimationFrame(carga.raf);
   carga.el.classList.remove('on', 'sale');
 }
+window.addEventListener('pageshow', e => { if(e.persisted) location.reload(); });
 // Espera a que la página esté de verdad lista: documento cargado, tipografías, imágenes decodificadas y un cuadro ya pintado.
 async function paginaLista(){
   const tope = dormir(6000);
