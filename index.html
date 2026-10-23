@@ -325,6 +325,15 @@
   .lg-salir{background:none;border:0;color:var(--sub);text-decoration:underline;font-size:13px;padding:6px;}
   .lg-hecho{align-items:center;justify-content:center;gap:14px;text-align:center;background:var(--lg-azul);color:#fff;}
   .lg-hecho .ok{font-size:44px;}
+  .lg-hecho.bien .ok{display:none;}
+  .lg-hecho.bien{padding:0;}
+  .lg-hecho.bien #lgHechoTxt{width:100%;background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.35);border-bottom:1px solid rgba(255,255,255,.35);padding:20px 12px;animation:lgEnt .35s ease-out both;}
+  .lg-hecho.bien #lgHechoTxt small{display:block;font-size:12px;font-weight:400;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+  .lg-hecho.bien #lgHechoTxt b{display:block;font-size:24px;line-height:1.2;margin:4px 0 8px;padding:0 12px;}
+  .lg-hecho.bien #lgHechoTxt span{display:inline-block;border-radius:999px;background:rgba(255,255,255,.14);font-size:12.5px;font-weight:400;padding:3px 12px;}
+  @keyframes lgEnt{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .lg-espera{display:inline-block;width:22px;height:22px;border:3px solid var(--border-strong);border-top-color:var(--lg-azul);border-radius:50%;animation:lgGira .8s linear infinite;margin:auto;}
+  @keyframes lgGira{to{transform:rotate(360deg);}}
   @media (prefers-reduced-motion:reduce){.lg-app{animation:none;transition:none;}}
   .lg-cab img.lg-logo{width:auto;height:34px;max-width:100%;object-fit:contain;}
   @media (max-width:899px){.lg-cab{flex-direction:column;align-items:flex-start;gap:10px;}}
@@ -484,7 +493,7 @@ async function irA(dest){
 // ---- PIN ----
 const gate = {pin: '', fallos: 0, bloqueado: false, ocupado: false};
 function gatePintar(){
-  lg('lgVisor').innerHTML = gate.pin ? gate.pin.split('').map(() => '<i></i>').join('') : '<em>' + (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches ? 'Escribe tu PIN o usa los números' : 'Toca los números') + '</em>';
+  lg('lgVisor').innerHTML = gate.ocupado ? '<span class="lg-espera" role="status" aria-label="Verificando"></span>' : gate.pin ? gate.pin.split('').map(() => '<i></i>').join('') : '<em>' + (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches ? 'Escribe tu PIN o usa los números' : 'Toca los números') + '</em>';
   const b = lg('lgEntrar'); b.disabled = gate.pin.length < 4 || gate.bloqueado || gate.ocupado;
   b.textContent = gate.ocupado ? '…' : 'Entrar';
 }
@@ -510,7 +519,23 @@ function resultado(res, recordar, via){
   gate.pin = ''; gate.fallos = 0; gatePintar();
   if(!Array.isArray(res.secciones)) res.secciones = SECC_BASE[res.rol].slice();
   guardarHub({token: res.token || '', nombre: res.nombre || '', rol: res.rol, secciones: res.secciones, recordar: !!recordar});
-  elegir(res, recordar);
+  bienvenida(res).then(() => elegir(res, recordar));
+}
+const CARGO_TXT = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica'};
+function saludoDe(nombre){
+  const p = String(nombre || '').split(/\s+/).filter(x => x && !/\.$/.test(x));
+  const primero = (p[0] || '').toLowerCase();
+  return /a$/.test(primero) ? 'Bienvenida' : 'Bienvenido';
+}
+function bienvenida(res){
+  const nom = limpioNombre(res.nombre || '') || 'Admin';
+  const h = lg('lgHecho'); h.classList.add('bien');
+  const t = lg('lgHechoTxt'); t.innerHTML = '';
+  const e1 = document.createElement('small'), e2 = document.createElement('b'), e3 = document.createElement('span');
+  e1.textContent = saludoDe(nom); e2.textContent = nom; e3.textContent = CARGO_TXT[res.rol] || 'Usuario';
+  t.append(e1, e2, e3);
+  pantalla('lgHecho');
+  return dormir(1500).then(() => { h.classList.remove('bien'); });
 }
 function mensajeElegir(t, mal){ const m = lg('lgMsgElegir'); m.textContent = t || ''; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
 function mostrarOpciones(lista){
