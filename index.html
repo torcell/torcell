@@ -324,14 +324,22 @@
   .lg-quien{font-size:14px;color:var(--sub);margin:0;}
   .lg-salir{background:none;border:0;color:var(--sub);text-decoration:underline;font-size:13px;padding:6px;}
   .lg-hecho{align-items:center;justify-content:center;gap:14px;text-align:center;background:var(--lg-azul);color:#fff;}
-  .lg-hecho .ok{font-size:44px;}
-  .lg-hecho.bien .ok{display:none;}
-  .lg-hecho.bien{padding:0;}
-  .lg-hecho.bien #lgHechoTxt{width:100%;background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.35);border-bottom:1px solid rgba(255,255,255,.35);padding:20px 12px;animation:lgEnt .35s ease-out both;}
-  .lg-hecho.bien #lgHechoTxt small{display:block;font-size:12px;font-weight:400;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
-  .lg-hecho.bien #lgHechoTxt b{display:block;font-size:24px;line-height:1.2;margin:4px 0 8px;padding:0 12px;}
-  .lg-hecho.bien #lgHechoTxt span{display:inline-block;border-radius:999px;background:rgba(255,255,255,.14);font-size:12.5px;font-weight:400;padding:3px 12px;}
-  @keyframes lgEnt{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .lg-hecho{padding:0;}
+  .v3{position:relative;width:100%;height:0;transition:height .5s cubic-bezier(.65,0,.35,1);}
+  .v3 .bd{position:absolute;left:0;right:0;height:2px;background:#fff;transition:top .5s cubic-bezier(.65,0,.35,1),bottom .5s cubic-bezier(.65,0,.35,1);}
+  .v3 .t{top:50%;}.v3 .bt{bottom:50%;}
+  .v3.ab .t{top:0;}.v3.ab .bt{bottom:0;}
+  .v3 .fondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;color:#fff;text-align:center;}
+  .v3 .in{padding:20px 16px;opacity:0;transition:opacity .25s;}
+  .v3.ver .in{opacity:1;}
+  .v3 small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+  .v3 b{display:block;font-size:24px;line-height:1.2;margin:4px 0 8px;}
+  .v3 .cargo{display:inline-block;border-radius:999px;background:rgba(255,255,255,.14);font-size:12.5px;padding:3px 12px;}
+  .v3 .carga{width:min(240px,72%);margin:18px auto 0;}
+  .v3 .pista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
+  .v3 .rell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+  .v3 .est{margin-top:9px;height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
+  .v3 .est.listo{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
   .lg-espera{display:inline-block;width:22px;height:22px;border:3px solid var(--border-strong);border-top-color:var(--lg-azul);border-radius:50%;animation:lgGira .8s linear infinite;margin:auto;}
   @keyframes lgGira{to{transform:rotate(360deg);}}
   @media (prefers-reduced-motion:reduce){.lg-app{animation:none;transition:none;}}
@@ -375,7 +383,7 @@
         <button type="button" class="lg-salir" id="lgSalir">Salir y cambiar de cuenta</button>
       </div>
     </section>
-    <section class="lg-p lg-hecho" id="lgHecho"><div class="ok">✓</div><div id="lgHechoTxt">Entrando…</div></section>
+    <section class="lg-p lg-hecho" id="lgHecho"><div class="v3" id="lgV3"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="lgV3in"><small id="lgV3s"></small><b id="lgV3n"></b><span class="cargo" id="lgV3c"></span><div class="carga"><div class="pista"><div class="rell" id="lgV3r"></div></div><div class="est" id="lgV3e">0%</div></div></div></div></div></section>
   </div>
 </div>
 <script>
@@ -471,9 +479,6 @@ async function irA(dest){
   if(saliendo) return; saliendo = true;
   ls('destinoPreferido', dest);
   precargar(dest);
-  lg('lgHechoTxt').textContent = TXT_DEST[dest] || 'Entrando…';
-  pantalla('lgHecho');
-  await dormir(260);
   lg('loginGate').classList.add('saliendo');
   await dormir(170);
   location.replace(PAGINAS[dest]);
@@ -527,15 +532,20 @@ function saludoDe(nombre){
   const primero = (p[0] || '').toLowerCase();
   return /a$/.test(primero) ? 'Bienvenida' : 'Bienvenido';
 }
-function bienvenida(res){
+async function bienvenida(res){
   const nom = limpioNombre(res.nombre || '') || 'Admin';
-  const h = lg('lgHecho'); h.classList.add('bien');
-  const t = lg('lgHechoTxt'); t.innerHTML = '';
-  const e1 = document.createElement('small'), e2 = document.createElement('b'), e3 = document.createElement('span');
-  e1.textContent = saludoDe(nom); e2.textContent = nom; e3.textContent = CARGO_TXT[res.rol] || 'Usuario';
-  t.append(e1, e2, e3);
+  lg('lgV3s').textContent = saludoDe(nom); lg('lgV3n').textContent = nom; lg('lgV3c').textContent = CARGO_TXT[res.rol] || 'Usuario';
+  const v = lg('lgV3'), r = lg('lgV3r'), e = lg('lgV3e');
+  r.style.width = '0%'; e.textContent = '0%'; e.classList.remove('listo'); v.classList.remove('ver', 'ab'); v.style.height = '0px';
   pantalla('lgHecho');
-  return dormir(1500).then(() => { h.classList.remove('bien'); });
+  await dormir(60);
+  v.style.height = (lg('lgV3in').scrollHeight + 4) + 'px'; v.classList.add('ab');
+  await dormir(480); v.classList.add('ver'); await dormir(300);
+  const t0 = performance.now();
+  await new Promise(ok => (function paso(a){ const f = Math.min(1, (a - t0) / 1500), p = Math.round(100 * (1 - Math.pow(1 - f, 3))); r.style.width = p + '%'; e.textContent = p + '%'; if(f < 1) requestAnimationFrame(paso); else ok(); })(t0));
+  e.textContent = '¡Listo!'; e.classList.add('listo'); await dormir(650);
+  v.classList.remove('ver'); await dormir(240);
+  v.style.height = '0px'; v.classList.remove('ab'); await dormir(520);
 }
 function mensajeElegir(t, mal){ const m = lg('lgMsgElegir'); m.textContent = t || ''; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
 function mostrarOpciones(lista){
