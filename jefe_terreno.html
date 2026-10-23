@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('terreno')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
 <title>Jefe de Terreno · Obra Bellavista</title>
 <script>try{var t=localStorage.getItem('ofTema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t);}catch(e){}</script>
 <style>
@@ -98,8 +99,8 @@ td input[type=date]{min-width:130px}
 <body>
 <header>
   <div class="t"><h1>🏗️ Jefe de Terreno</h1><p>Obra Bellavista · La Florida · <span id="quien">Sandoval · Jefe de Terreno</span></p></div>
-  <a class="btn no-adm" href="calidad.html">✅ Calidad</a><a class="btn no-adm" href="avance_obra.html">📊 Dashboard de avance</a>
-  <a class="btn solo-adm" href="index.html?menu=1">🔀 Cambiar de sección</a>
+  
+  <a class="btn" href="index.html?menu=1">🔀 Cambiar de sección</a>
   <button class="btn" id="tema" type="button">🌙 Tema</button>
   <button class="btn" id="salir" type="button">Cerrar sesión</button>
   <button class="btn" id="guardarBtn" type="button" hidden>💾 Guardar cambios</button>
@@ -124,7 +125,10 @@ td input[type=date]{min-width:130px}
   let tok = '', nom = '';
   try{ tok = localStorage.getItem(K) || ''; nom = localStorage.getItem(N) || ''; }catch(e){}
   if(!tok){ document.documentElement.style.display = 'none'; try{ sessionStorage.setItem('progresoObraAvisoGate', ''); }catch(e){} location.replace('index.html?s=1'); return; }
-  try{ if(localStorage.getItem('progresoObraEsAdmin') === '1') document.body.classList.add('adm'); }catch(e){}
+  try{ fetch(URL_DB, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'miAcceso', token: tok})}).then(r => r.json()).then(j => {
+    if(j && j.error === 'sin_sesion'){ try{ localStorage.removeItem(K); localStorage.removeItem(N); sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} location.replace('index.html?s=1'); }
+    else if(j && j.ok && j.secciones && j.secciones.indexOf('terreno') === -1){ try{ sessionStorage.setItem('progresoObraAvisoGate', 'No tienes acceso a esa sección. Elige una de las disponibles.'); }catch(e){} location.replace('index.html?menu=1'); }
+  }).catch(() => {}); }catch(e){}
   if(nom) document.getElementById('quien').textContent = nom + ' · ' + "Jefe de Terreno";
   document.getElementById('salir').addEventListener('click', () => {
     try{ fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}); }catch(e){}

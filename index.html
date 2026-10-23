@@ -295,7 +295,16 @@
   .lg-dest button .ic{flex:none;width:38px;height:38px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;color:var(--lg-azul);}
   .lg-dest button .ic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:miter;stroke-linecap:square;}
   .lg-dest button::after{content:"›";margin-left:auto;font-size:22px;font-weight:400;color:var(--sub);padding-left:8px;}
-  .lg-dest button[hidden]{display:none;}
+  .lg-dest button.lock{background:var(--bg);color:var(--sub);cursor:not-allowed;border-left-color:var(--border-strong);}
+  .lg-dest button.lock small{color:var(--sub);}
+  .lg-dest button.lock .ic{color:var(--sub);background:transparent;}
+  .lg-dest button.lock::after{content:"Bloqueado";font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--sub);}
+  .lg-dest button.lock:hover{background:var(--bg);border-left-color:var(--border-strong);}
+  .lg-dest button.lock:active{background:var(--bg);color:var(--sub);border-color:var(--border-strong);}
+  .lg-dest button.lock:active small,.lg-dest button.lock:active::after{color:var(--sub);}
+  .lg-dest button.lock:active .ic{color:var(--sub);border-color:var(--border-strong);}
+  .lg-dest button.lock .ic svg{opacity:.6;}
+  #lgMsgElegir{min-height:18px;margin:0;font-size:12.5px;}
   .lg-dest button:hover{background:var(--bg);border-left-color:var(--accent);}
   .lg-dest button.pref{border-left-color:var(--accent);}
   .lg-dest button:active{background:var(--lg-azul);color:#fff;border-color:var(--lg-azul);}
@@ -340,6 +349,7 @@
       <div class="lg-cuerpo">
         <h2 class="lg-titulo">¿A dónde quieres entrar?</h2>
         <p class="lg-quien" id="lgQuien"></p>
+        <p class="lg-msg" id="lgMsgElegir" aria-live="polite"></p>
         <div class="lg-dest">
           <button type="button" data-dest="panel"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Panel de cerámica<small>Solo cerámica: avance, pagos y trabajadores</small></span></button>
           <button type="button" data-dest="calidad"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M7.5 12.5l3 3 6-7"/></svg></span><span>Control de calidad<small>Revisión de cerámica y frague</small></span></button>
@@ -357,7 +367,9 @@
 const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
 const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html'};
-const DESTINOS = {1: ['panel', 'terreno', 'oficina', 'calidad', 'avance'], 2: ['panel'], 3: ['panel'], 4: ['terreno'], 5: ['calidad'], 6: ['oficina']};
+const SECC_BASE = {1: ['panel', 'calidad', 'avance', 'terreno', 'oficina'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance']};
+const DESTINOS = SECC_BASE;
+const NOM_SECC = {panel: 'Panel de cerámica', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica'};
 const TXT_DEST = {panel: 'Entrando al panel de cerámica…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…'};
 const CARGOS_CALIDAD = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
 const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre'];
@@ -367,15 +379,30 @@ function ls(k, v){ try{ if(v === undefined) return localStorage.getItem(k); if(v
 function ss(k, v){ try{ if(v === undefined) return sessionStorage.getItem(k); if(v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); }catch(e){} return null; }
 let DB_URL = ls('progresoObraDbUrl') || DEFAULT_DB_URL;
 /*MOCK_AQUI*/
+function etiquetaDispositivo(){
+  const u = navigator.userAgent || '';
+  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
+  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
+  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
+  return so + ' · ' + nav;
+}
 async function llamarLogin(extra){
   try{
-    const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({action:'login', dispositivo: ls('progresoObraDisp') || ''}, extra))});
+    const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({action:'login', dispositivo: ls('progresoObraDisp') || '', dispositivoEtiqueta: etiquetaDispositivo()}, extra))});
     if(!res.ok) return null;
     const j = await res.json();
     return (j && typeof j.ok === 'boolean') ? j : null;
   }catch(e){ return null; }
 }
 
+async function llamarApi(extra){
+  try{
+    const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({dispositivo: ls('progresoObraDisp') || '', dispositivoEtiqueta: etiquetaDispositivo()}, extra))});
+    if(!res.ok) return null;
+    const j = await res.json();
+    return (j && typeof j.ok === 'boolean') ? j : null;
+  }catch(e){ return null; }
+}
 // ---- sesión guardada ----
 const CLAVES_PANEL = ['progresoObraToken', 'progresoObraName', 'progresoObraRol'];
 const CLAVES_CAL = ['calidadToken', 'calidadNombre', 'calidadCargo'];
@@ -384,25 +411,35 @@ function limpiarTodo(){
   CLAVES_CAL.forEach(k => ls(k, null));
   CLAVES_OT.forEach(k => ls(k, null));
   ls('progresoObraEsAdmin', null);
+  ss('hubSesion', null); ls('hubSesion', null);
 }
 function leerPanel(){ const t = ss('progresoObraToken') || ls('progresoObraToken'); const r = Number(ss('progresoObraRol') || ls('progresoObraRol')); return (t && r >= 1 && r <= 4) ? {token: t, rol: r, nombre: ss('progresoObraName') || ls('progresoObraName') || ''} : null; }
 function leerTE(){ const t = ls('terrenoToken'); return t ? {token: t, nombre: ls('terrenoNombre') || ''} : null; }
 function leerOT(){ const t = ls('oficinaToken'); return t ? {token: t, nombre: ls('oficinaNombre') || ''} : null; }
 function leerCal(){ const t = ls('calidadToken'); return t ? {token: t, nombre: ls('calidadNombre') || '', cargo: ls('calidadCargo') || ''} : null; }
+function leerHub(){
+  try{ const t = ss('hubSesion') || ls('hubSesion'); const h = t ? JSON.parse(t) : null; return (h && h.token && Array.isArray(h.secciones)) ? h : null; }catch(e){ return null; }
+}
+function guardarHub(h){
+  try{ (h.recordar ? localStorage : sessionStorage).setItem('hubSesion', JSON.stringify(h)); (h.recordar ? sessionStorage : localStorage).removeItem('hubSesion'); }catch(e){}
+}
+function hubLegacy(){
+  const p = leerPanel(), c = leerCal(), o = leerOT(), te = leerTE();
+  const base = p || c || o || te; if(!base) return null;
+  const rol = p ? p.rol : c ? ({'Admin': 1, 'Jefe de Terreno': 4, 'Calidad': 5}[c.cargo] || 0) : te ? 4 : 6;
+  return {token: base.token, nombre: base.nombre, rol, secciones: SECC_BASE[rol] || (c ? ['calidad'] : []), recordar: true};
+}
 function guardar(res, recordar, dest){
   limpiarTodo();
-  const doble = (res.rol === 1 || res.rol === 4);
-  const paraPanel = [1, 2, 3].indexOf(res.rol) !== -1 && (dest === 'panel' || (doble && recordar));
-  const paraCal = !!CARGOS_CALIDAD[res.rol] && (dest === 'calidad' || res.rol === 4 || (doble && recordar));
-  const paraOT = [1, 6].indexOf(res.rol) !== -1 && (dest === 'oficina' || (doble && recordar));
-  const paraTE = [1, 4].indexOf(res.rol) !== -1 && (dest === 'terreno' || (doble && recordar));
-  if(paraPanel){
+  const lista = res.secciones || SECC_BASE[res.rol] || [];
+  guardarHub({token: res.token || '', nombre: res.nombre || '', rol: res.rol, secciones: lista, recordar: !!recordar});
+  if(dest === 'panel' && lista.indexOf('panel') !== -1 && [1, 2, 3].indexOf(res.rol) !== -1){
     const st = recordar ? localStorage : sessionStorage;
     try{ st.setItem('progresoObraToken', res.token || ''); st.setItem('progresoObraName', res.nombre || ''); st.setItem('progresoObraRol', String(res.rol)); }catch(e){}
   }
-  if(paraCal){ ls('calidadToken', res.token || ''); ls('calidadNombre', String(res.nombre || '')); ls('calidadCargo', CARGOS_CALIDAD[res.rol]); }
-  if(paraTE){ ls('terrenoToken', res.token || ''); ls('terrenoNombre', String(res.nombre || '')); }
-  if(paraOT){ ls('oficinaToken', res.token || ''); ls('oficinaNombre', String(res.nombre || '')); }
+  if(dest === 'calidad' && lista.indexOf('calidad') !== -1){ ls('calidadToken', res.token || ''); ls('calidadNombre', String(res.nombre || '')); ls('calidadCargo', CARGOS_CALIDAD[res.rol] || 'Invitado'); }
+  if(dest === 'terreno' && lista.indexOf('terreno') !== -1){ ls('terrenoToken', res.token || ''); ls('terrenoNombre', String(res.nombre || '')); }
+  if(dest === 'oficina' && lista.indexOf('oficina') !== -1){ ls('oficinaToken', res.token || ''); ls('oficinaNombre', String(res.nombre || '')); }
   if(res.rol === 1) ls('progresoObraEsAdmin', '1');
   if(res.dispositivo) ls('progresoObraDisp', res.dispositivo);
 }
@@ -455,6 +492,7 @@ function sacudir(){ const v = lg('lgVisor'); v.classList.remove('error'); void v
 function resultado(res, recordar, via){
   if(res === null){ gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
   if(!res.ok){
+    if(res.error === 'dispositivo_ocupado'){ sacudir(); gate.pin = ''; gatePintar(); gateMensaje(res.tipo === 'unico' ? 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.' : 'Esta cuenta ya está abierta en otro ' + (res.tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Cierra la sesión allá o pídele al administrador que libere el cupo.', true); return; }
     if(res.error === 'demasiados_intentos'){ sacudir(); gate.pin = ''; gatePintar(); gateBloquear(30, 'Demasiados intentos seguidos.'); return; }
     if(via === 'google'){ gateMensaje('Ese Gmail no está autorizado. Pídele al administrador que lo agregue.', true); return; }
     gate.fallos++; sacudir(); gate.pin = ''; gatePintar();
@@ -462,23 +500,43 @@ function resultado(res, recordar, via){
     else gateMensaje(`PIN incorrecto. Te quedan ${5 - gate.fallos} intentos`, true);
     return;
   }
-  if(!DESTINOS[res.rol]){ gateMensaje('Esa cuenta no tiene un cargo válido en la pestaña "Usuarios".', true); return; }
+  if(!SECC_BASE[res.rol]){ gateMensaje('Esa cuenta no tiene un cargo válido en la pestaña "Usuarios".', true); return; }
   gate.pin = ''; gate.fallos = 0; gatePintar();
-  const lista = DESTINOS[res.rol];
-  if(lista.length === 1){ guardar(res, recordar, lista[0]); irA(lista[0]); }
-  else { elegir(res, recordar); }
+  if(!Array.isArray(res.secciones)) res.secciones = SECC_BASE[res.rol].slice();
+  guardarHub({token: res.token || '', nombre: res.nombre || '', rol: res.rol, secciones: res.secciones, recordar: !!recordar});
+  elegir(res, recordar);
 }
+function mensajeElegir(t, mal){ const m = lg('lgMsgElegir'); m.textContent = t || ''; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
 function mostrarOpciones(lista){
   const pref = ls('destinoPreferido');
-  document.querySelectorAll('.lg-dest button').forEach(b => { b.hidden = lista.indexOf(b.dataset.dest) === -1; b.classList.toggle('pref', b.dataset.dest === pref); });
+  document.querySelectorAll('.lg-dest button').forEach(b => {
+    const bloq = lista.indexOf(b.dataset.dest) === -1;
+    b.classList.toggle('lock', bloq); b.setAttribute('aria-disabled', bloq ? 'true' : 'false');
+    b.classList.toggle('pref', !bloq && b.dataset.dest === pref);
+  });
   return pref;
 }
-function elegir(res, recordar){
-  lg('lgQuien').textContent = 'Hola, ' + limpioNombre(res.nombre || (res.rol === 1 ? 'Admin' : 'Jefe de Terreno')) + '.';
-  const pref = mostrarOpciones(DESTINOS[res.rol]);
+function elegir(res, recordar, aviso){
+  lg('lgQuien').textContent = 'Hola, ' + limpioNombre(res.nombre || 'Admin') + '. Elige a dónde ir.';
+  mensajeElegir(aviso || '', !!aviso);
+  const pref = mostrarOpciones(res.secciones || SECC_BASE[res.rol] || []);
   datosElegir = {res, recordar};
   pantalla('lgElegir');
-  if(PAGINAS[pref]) precargar(pref);
+  if(PAGINAS[pref] && (res.secciones || []).indexOf(pref) !== -1) precargar(pref);
+}
+async function refrescarAcceso(){
+  if(!datosElegir || !datosElegir.res.token) return;
+  const r = await llamarApi({action: 'miAcceso', token: datosElegir.res.token});
+  if(!r || !datosElegir) return;
+  if(!r.ok){
+    if(r.error === 'sin_sesion'){ limpiarTodo(); datosElegir = null; pantalla('lgPin'); gateMensaje('Tu sesión venció. Ingresa tu PIN de nuevo.', true); }
+    return;
+  }
+  if(Array.isArray(r.secciones)){
+    datosElegir.res.secciones = r.secciones;
+    guardarHub({token: datosElegir.res.token, nombre: datosElegir.res.nombre, rol: datosElegir.res.rol, secciones: r.secciones, recordar: datosElegir.recordar});
+    mostrarOpciones(r.secciones);
+  }
 }
 let datosElegir = null;
 function limpioNombre(n){ return String(n || '').replace(/[.\s]+$/, ''); }
@@ -510,7 +568,9 @@ async function intentarPin(){
   });
   document.querySelectorAll('.lg-dest button').forEach(b => b.addEventListener('click', () => {
     const dest = b.dataset.dest;
-    if(datosElegir) guardar(datosElegir.res, datosElegir.recordar, dest);
+    if(!datosElegir) return;
+    if((datosElegir.res.secciones || []).indexOf(dest) === -1){ mensajeElegir('No tienes acceso a «' + NOM_SECC[dest] + '». Si lo necesitas, pídele autorización al administrador.', true); return; }
+    guardar(datosElegir.res, datosElegir.recordar, dest);
     irA(dest);
   }));
   lg('lgSalir').addEventListener('click', () => { limpiarTodo(); datosElegir = null; pantalla('lgPin'); });
@@ -555,27 +615,20 @@ function iniciarGoogle(){
     if(aviso) gateMensaje(aviso, true);
     history.replaceState(null, '', location.pathname);
   } else {
-    const p = leerPanel(), c = leerCal(), o = leerOT(), te = leerTE();
-    const cand = []; if(p) cand.push('panel'); if(c) cand.push('calidad'); if(o) cand.push('oficina'); if(te) cand.push('terreno');
-    const esAdminGuardado = ls('progresoObraEsAdmin') === '1' || (p && p.rol === 1) || (c && c.cargo === 'Admin');
-    if(params.get('menu') && (window.__PRUEBA || (cand.length && esAdminGuardado))){
-      const base = p || c || o || te || {token: 'demo-111111', nombre: 'Ismael'};
-      datosElegir = {res: {token: base.token, nombre: base.nombre, rol: 1}, recordar: window.__PRUEBA ? true : !!(ls('progresoObraToken') || ls('calidadToken') || ls('oficinaToken') || ls('terrenoToken'))};
-      lg('lgQuien').textContent = 'Hola, ' + limpioNombre(base.nombre || 'Admin') + '. Elige a dónde ir.';
-      mostrarOpciones(DESTINOS[1]);
-      history.replaceState(null, '', location.pathname);
-      pantalla('lgElegir'); return;
-    }
-    if(cand.length){
+    let hub = leerHub() || hubLegacy();
+    if(!hub && window.__PRUEBA && params.get('menu')) hub = {token: '', nombre: 'Ismael', rol: 1, secciones: SECC_BASE[1].slice(), recordar: true};
+    if(hub){
+      const lista = hub.secciones;
+      const resHub = {token: hub.token, nombre: hub.nombre, rol: hub.rol, secciones: lista};
       const pref = ls('destinoPreferido');
-      const rolGuardado = p ? p.rol : te && !c ? 4 : (c ? Number(Object.keys(CARGOS_CALIDAD).filter(k => CARGOS_CALIDAD[k] === c.cargo)[0]) : 6);
-      const lista = DESTINOS[rolGuardado] || cand;
-      const nombre = (p || c || o || te).nombre;
-      if(lista.length === 1){ irA(lista[0]); return; }
-      if(pref && lista.indexOf(pref) !== -1 && (pref === 'avance' || cand.indexOf(pref) !== -1)){ irA(pref); return; }
-      lg('lgQuien').textContent = 'Hola, ' + limpioNombre(nombre) + '.';
-      mostrarOpciones(lista);
-      pantalla('lgElegir'); return;
+      if(!params.get('menu')){
+        const directo = lista.length === 1 ? lista[0] : (pref && lista.indexOf(pref) !== -1 ? pref : '');
+        if(directo){ guardar(resHub, hub.recordar, directo); irA(directo); return; }
+      }
+      history.replaceState(null, '', location.pathname);
+      elegir(resHub, hub.recordar, aviso);
+      refrescarAcceso();
+      return;
     }
     if(aviso) gateMensaje(aviso, true);
   }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('panel')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1152,6 +1153,7 @@
         <button class="btn" id="statsOpenBtn">📊 Estadísticas</button>
         <button class="btn admin-only" id="cambiosBtn">🕘 Cambios por cuenta</button>
         <button class="btn solo-admin" id="accesosBtn">🔓 Inicios de sesión</button>
+        <button class="btn solo-admin" id="seccionesBtn">🔑 Permisos de secciones</button>
         <button class="btn admin-only" id="avisosBtn">🔔 Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
@@ -1558,7 +1560,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.58.0';
+const APP_VERSION = '0.60.1';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2084,7 +2086,8 @@ let dispMultiples = [];
 let dispAvisados = '';
 const NOMBRE_TIPO_DISP = {cel: 'celular', pc: 'computador'};
 function msgDispositivoOcupado(tipo){
-  return 'Esta cuenta ya está abierta en otro ' + (NOMBRE_TIPO_DISP[tipo] || 'aparato') + '. Solo se permite 1 celular y 1 computador por cuenta. Pídele al administrador que libere el cupo.';
+  if(tipo === 'unico') return 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.';
+  return 'Esta cuenta ya está abierta en otro ' + (tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Solo se permite 1 computador y 1 celular/tablet. Pídele al administrador que libere el cupo.';
 }
 function actualizarAlertaDispositivos(lista, avisar){
   dispMultiples = Array.isArray(lista) ? lista : [];
@@ -2172,6 +2175,7 @@ async function dbLoad(){
         if(appListo){ sesionVencida(msgDispositivoOcupado(jp.tipo)); } else { sesionInvalida = true; limpiarSesionGuardada(); }
         return null;
       }
+      else if(jp && jp.error === 'sin_permiso'){ irAlMenu('No tienes acceso al panel de cerámica. Elige una de las secciones disponibles.'); return null; }
       else if(jp && jp.error === 'sin_sesion'){
         if(appListo){ sesionVencida(); } else { sesionInvalida = true; limpiarSesionGuardada(); }
         return null;
@@ -4174,6 +4178,60 @@ async function llamarDb(accion, extra){
   if(j && j.error === 'sin_sesion' && sessionToken && accion !== 'logout') sesionVencida();
   return j;
 }
+// ---- permisos de invitado por sección ----
+const SECC_INV = [['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica']];
+const DEMO_USUARIOS = [
+  {nombre: 'Silvia Gonzales', cargo: 'Calidad', base: ['calidad'], extra: [], doble: true, dobleBase: true},
+  {nombre: 'Sandoval', cargo: 'Jefe de Terreno', base: ['terreno', 'calidad', 'avance'], extra: [], doble: false},
+  {nombre: 'Edwin Carroz', cargo: 'Oficina Técnica', base: ['oficina', 'avance'], extra: [], doble: false},
+  {nombre: 'Rafael', cargo: 'Trabajador', base: ['panel'], extra: [], doble: false}
+];
+async function abrirPermisosSecciones(){
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><b style="font-size:16px;flex:1;">Permisos de secciones</b><button type="button" class="btn small" id="secCerrar">Cerrar</button></div><p style="margin:0 0 12px;font-size:12.5px;color:var(--sub);">Cada persona entra solo a lo suyo. Marca una sección para dejarla entrar como invitada. Por defecto cada cuenta usa un solo aparato (PC, celular o tablet); marca «Celular / tablet extra» para permitirle además un segundo aparato. Los cambios se guardan al marcar y valen la próxima vez que abra el menú.</p><div id="secCuerpo" style="font-size:13px;">Cargando…</div></div>';
+  document.body.appendChild(ov);
+  const cerrar = () => ov.remove();
+  ov.addEventListener('click', e => { if(e.target === ov) cerrar(); });
+  ov.querySelector('#secCerrar').addEventListener('click', cerrar);
+  let usuarios = null, demo = !DB_URL;
+  if(demo){
+    try{ usuarios = JSON.parse(localStorage.getItem('pruebaPermisosSecciones')) || null; }catch(e){}
+    if(!usuarios) usuarios = JSON.parse(JSON.stringify(DEMO_USUARIOS));
+  } else {
+    const j = await llamarDb('seccionesListar');
+    if(!j || !j.ok){ ov.querySelector('#secCuerpo').textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 61 o más nueva.'; return; }
+    usuarios = j.usuarios;
+  }
+  const cuerpo = ov.querySelector('#secCuerpo');
+  const filas = usuarios.map((u, i) => '<tr><td style="padding:8px 6px;border-top:1px solid var(--border);"><b>' + esc(u.nombre) + '</b><div style="font-size:11.5px;color:var(--sub);">' + esc(u.cargo) + '</div></td>' + SECC_INV.map(([k, n]) => {
+    const propia = u.base.indexOf(k) !== -1;
+    return '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (propia ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (u.extra.indexOf(k) !== -1 ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="' + esc(n) + ' para ' + esc(u.nombre) + '">') + '</td>';
+  }).join('') + '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (u.dobleBase ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-d="1"' + (u.doble ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="Celular o tablet extra para ' + esc(u.nombre) + '">') + '</td></tr>').join('');
+  cuerpo.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:6px;font-size:11.5px;color:var(--sub);">Persona</th>' + SECC_INV.map(([k, n]) => '<th style="padding:6px;font-size:11.5px;color:var(--sub);">' + n + '</th>').join('') + '<th style="padding:6px;font-size:11.5px;color:var(--sub);">Celular / tablet extra</th></tr></thead><tbody>' + filas + '</tbody></table>' + (demo ? '<p style="font-size:11.5px;color:var(--sub);margin-top:10px;">Versión de prueba: los permisos quedan solo en este aparato.</p>' : '');
+  cuerpo.addEventListener('change', async e => {
+    const t = e.target; if(!t.dataset.u) return;
+    if(t.dataset.d){
+      const ud = usuarios[t.dataset.u];
+      if(demo){ ud.doble = t.checked; try{ localStorage.setItem('pruebaPermisosSecciones', JSON.stringify(usuarios)); }catch(err){} avisoToast('Permiso guardado.', 'ok'); return; }
+      t.disabled = true;
+      const jd = await llamarDb('dispositivoDobleGuardar', {nombre: ud.nombre, doble: t.checked});
+      t.disabled = false;
+      if(jd && jd.ok){ ud.doble = jd.doble; avisoToast('Permiso guardado.', 'ok'); }
+      else { t.checked = !t.checked; avisoToast('No se pudo guardar el permiso. ¿Está publicada la versión 62 del script?', 'error'); }
+      return;
+    }
+    const u = usuarios[t.dataset.u], k = t.dataset.s;
+    const nuevo = u.extra.filter(x => x !== k); if(t.checked) nuevo.push(k);
+    if(demo){ u.extra = nuevo; try{ localStorage.setItem('pruebaPermisosSecciones', JSON.stringify(usuarios)); }catch(err){} avisoToast('Permiso guardado.', 'ok'); return; }
+    t.disabled = true;
+    const j = await llamarDb('seccionesGuardar', {nombre: u.nombre, extra: nuevo});
+    t.disabled = false;
+    if(j && j.ok){ u.extra = j.extra; avisoToast('Permiso guardado.', 'ok'); }
+    else { t.checked = !t.checked; avisoToast('No se pudo guardar el permiso.', 'error'); }
+  });
+}
+document.getElementById('seccionesBtn').addEventListener('click', abrirPermisosSecciones);
 let avisoToastTimer = null;
 function avisoToast(texto, tipo){
   const el = document.getElementById('avisoToast');
@@ -6349,6 +6407,10 @@ function irAlLogin(msg){
   try{ sessionStorage.setItem('progresoObraAvisoGate', msg || ''); }catch(err){}
   sessionToken = null; limpiarSesionGuardada();
   location.replace('index.html?s=1');
+}
+function irAlMenu(msg){
+  try{ sessionStorage.setItem('progresoObraAvisoGate', msg || ''); }catch(err){}
+  location.replace('index.html?menu=1');
 }
 function sesionVencida(msg){ irAlLogin(msg || 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }
 
