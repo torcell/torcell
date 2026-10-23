@@ -94,9 +94,81 @@ td input[type=date]{min-width:130px}
 .btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
 :root[data-tema="oscuro"] .btn.pri{color:#06222b}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+#cargaGlobal{position:fixed;inset:0;z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+#cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
+#cargaGlobal .cg3{position:relative;width:100%;height:0;transition:height .5s cubic-bezier(.65,0,.35,1);}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;height:2px;background:#fff;transition:top .5s cubic-bezier(.65,0,.35,1),bottom .5s cubic-bezier(.65,0,.35,1);}
+#cargaGlobal .cgt{top:50%;}#cargaGlobal .cgbt{bottom:50%;}
+#cargaGlobal .cg3.cgab .cgt{top:0;}#cargaGlobal .cg3.cgab .cgbt{bottom:0;}
+#cargaGlobal .cgfondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;text-align:center;}
+#cargaGlobal .cgin{padding:24px 16px;opacity:0;transition:opacity .25s;}
+#cargaGlobal .cg3.cgver .cgin{opacity:1;}
+#cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+#cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
+#cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
+#cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
+#cargaGlobal .cgrell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
+#cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+
 </style>
 </head>
 <body>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3" id="cgV3" style="height:0"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Jefe de Terreno</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div></div>
+<script>
+(function(){
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst');
+  var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  var st = {meta: 88, prog: 0, t0: performance.now() + 800, raf: 0, fin: null};
+  function bucle(){
+    var t = Math.max(0, performance.now() - st.t0);
+    var obj = st.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 1100));
+    st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.25 : 0.12);
+    if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
+    rell.style.width = st.prog + '%';
+    if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
+    if(el.isConnected) st.raf = requestAnimationFrame(bucle);
+  }
+  bucle();
+  var abierta = (async function(){
+    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    void v.offsetHeight; await dormir(80);
+    v.style.height = (document.getElementById('cgIn').scrollHeight + 4) + 'px'; v.classList.add('cgab');
+    await dormir(480); v.classList.add('cgver'); await dormir(300);
+  })();
+  async function paginaLista(){
+    var tope = dormir(6000);
+    var listo = (async function(){
+      if(document.readyState !== 'complete') await new Promise(function(r){ window.addEventListener('load', r, {once: true}); });
+      try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+      try{ await Promise.all(Array.prototype.slice.call(document.images).map(function(i){ return i.decode ? i.decode().catch(function(){}) : 0; })); }catch(e){}
+      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    })();
+    await Promise.race([listo, tope]);
+  }
+  window.CargaPagina = {
+    el: el,
+    fin: function(){
+      if(st.fin) return st.fin;
+      st.fin = (async function(){
+        await abierta; await paginaLista();
+        st.meta = 100;
+        while(st.prog < 100) await dormir(30);
+        est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(650);
+        v.classList.remove('cgver'); await dormir(240);
+        v.style.height = '0px'; v.classList.remove('cgab'); await dormir(520);
+        el.classList.add('cgsale'); await dormir(350);
+        cancelAnimationFrame(st.raf); el.remove();
+      })();
+      return st.fin;
+    }
+  };
+  setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
+  window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });
+})();
+</script>
 <header>
   <div class="t"><h1>🏗️ Jefe de Terreno</h1><p>Obra Bellavista · La Florida · <span id="quien">Sandoval · Jefe de Terreno</span></p></div>
   
@@ -360,6 +432,7 @@ document.getElementById('reset').addEventListener('click', () => {
   b.addEventListener('click', () => { t = T[(T.indexOf(t) + 1) % 3]; try{ localStorage.setItem('ofTema', t); }catch(e){} p(); }); p();
 })();
 pintar();
+if(window.CargaPagina) CargaPagina.fin();
 </script>
 </body>
 </html>

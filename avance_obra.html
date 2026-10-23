@@ -1,4 +1,5 @@
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('avance')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
+<meta charset="utf-8">
 <title>Avance de Obra</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +89,6 @@ nav.tabs button.lock{color:var(--muted);background:repeating-linear-gradient(135
 #soloPc div{max-width:34ch;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.45}
 #soloPc b{font-family:var(--f-display);font-size:24px;font-weight:600}
 #soloPc p{margin:0;color:var(--muted)}
-#cargando{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:30;font-size:15px;color:var(--muted)}
 button{transition:transform .08s ease}
 button:active{transform:scale(.97)}
 button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -385,8 +385,79 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   .selector button:nth-last-child(3){border-bottom:1px solid var(--line)}
 }
 @media (prefers-reduced-motion:reduce){.plegable{transition:none}.temblor{animation:none}button{transition:none}button:active{transform:none}#tip{transition:none}}
-</style>
 
+#cargaGlobal{position:fixed;inset:0;z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+#cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
+#cargaGlobal .cg3{position:relative;width:100%;height:0;transition:height .5s cubic-bezier(.65,0,.35,1);}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;height:2px;background:#fff;transition:top .5s cubic-bezier(.65,0,.35,1),bottom .5s cubic-bezier(.65,0,.35,1);}
+#cargaGlobal .cgt{top:50%;}#cargaGlobal .cgbt{bottom:50%;}
+#cargaGlobal .cg3.cgab .cgt{top:0;}#cargaGlobal .cg3.cgab .cgbt{bottom:0;}
+#cargaGlobal .cgfondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;text-align:center;}
+#cargaGlobal .cgin{padding:24px 16px;opacity:0;transition:opacity .25s;}
+#cargaGlobal .cg3.cgver .cgin{opacity:1;}
+#cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+#cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
+#cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
+#cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
+#cargaGlobal .cgrell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
+#cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+
+</style>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3" id="cgV3" style="height:0"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando dashboard de avance</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div></div>
+<script>
+(function(){
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst');
+  var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  var st = {meta: 88, prog: 0, t0: performance.now() + 800, raf: 0, fin: null};
+  function bucle(){
+    var t = Math.max(0, performance.now() - st.t0);
+    var obj = st.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 1100));
+    st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.25 : 0.12);
+    if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
+    rell.style.width = st.prog + '%';
+    if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
+    if(el.isConnected) st.raf = requestAnimationFrame(bucle);
+  }
+  bucle();
+  var abierta = (async function(){
+    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    void v.offsetHeight; await dormir(80);
+    v.style.height = (document.getElementById('cgIn').scrollHeight + 4) + 'px'; v.classList.add('cgab');
+    await dormir(480); v.classList.add('cgver'); await dormir(300);
+  })();
+  async function paginaLista(){
+    var tope = dormir(6000);
+    var listo = (async function(){
+      if(document.readyState !== 'complete') await new Promise(function(r){ window.addEventListener('load', r, {once: true}); });
+      try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+      try{ await Promise.all(Array.prototype.slice.call(document.images).map(function(i){ return i.decode ? i.decode().catch(function(){}) : 0; })); }catch(e){}
+      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    })();
+    await Promise.race([listo, tope]);
+  }
+  window.CargaPagina = {
+    el: el,
+    fin: function(){
+      if(st.fin) return st.fin;
+      st.fin = (async function(){
+        await abierta; await paginaLista();
+        st.meta = 100;
+        while(st.prog < 100) await dormir(30);
+        est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(650);
+        v.classList.remove('cgver'); await dormir(240);
+        v.style.height = '0px'; v.classList.remove('cgab'); await dormir(520);
+        el.classList.add('cgsale'); await dormir(350);
+        cancelAnimationFrame(st.raf); el.remove();
+      })();
+      return st.fin;
+    }
+  };
+  setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
+  window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });
+})();
+</script>
 <div class="wrap">
   <header class="top">
     <div class="idrow">
@@ -717,7 +788,6 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   </div>
 </div>
 <div id="tip" role="tooltip"></div>
-<div id="cargando">Cargando datos de la obra…</div>
 <div id="soloPc" hidden><div><b>Este panel está hecho, por ahora, solo para computador.</b><p>Ábrelo desde un computador de escritorio o un notebook para verlo bien.</p></div></div>
 
 <script>
@@ -1036,14 +1106,14 @@ function objetivosIniciales(){
 }
 
 async function iniciar(){
-  if (esCelular()) { document.getElementById("soloPc").hidden = false; document.getElementById("cargando").remove(); return; }
+  if (esCelular()) { document.getElementById("soloPc").hidden = false; if (window.CargaPagina) CargaPagina.fin(); return; }
   const [reales] = await Promise.all([PRUEBA ? Promise.resolve({ items: FOTO, nombre: "Prueba", rol: "1" }) : cargarReales(), cargarPrograma()]);
   if (reales) aplicarReales(CONFIG, reales);
   CONFIG.programa = PROG_LEIDO || programaInicial();
   if (!CONFIG.programa.objetivos) CONFIG.programa.objetivos = objetivosIniciales();
   delete CONFIG.programa.tareas;
   arrancar();
-  document.getElementById("cargando").remove();
+  if (window.CargaPagina) await CargaPagina.fin();
 }
 
 function arrancar(){
