@@ -1065,17 +1065,6 @@
       <div class="lg-carga"><div class="lg-barra" id="lgBarra" role="progressbar" aria-label="Cargando"></div></div>
       <p id="lgSplashMsg">Preparando el piso…</p>
     </section>
-    <section class="lg-p lg-form" id="lgPin">
-      <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Progreso</b><span>Obra Bellavista, La Florida</span></div></div>
-      <div class="lg-cuerpo">
-        <h2 class="lg-titulo">Ingresa tu PIN</h2>
-        <div class="lg-visor" id="lgVisor"><em>Toca los números</em></div>
-        <p class="lg-msg" id="lgMsgPin" aria-live="polite"></p>
-        <div class="lg-teclas" id="lgTeclas"></div>
-        <label class="lg-recordar"><input type="checkbox" id="lgRecordar" checked><span><b>Recordar este aparato</b><span id="lgTxtRecordar">Entrarás directo, sin PIN. Dura de 7 a 30 días según tu cuenta.</span></span></label>
-        <p class="lg-pie">¿Olvidaste tu PIN? Pídeselo al administrador.</p>
-      </div>
-    </section>
     <section class="lg-p lg-form" id="lgUrl">
       <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Progreso</b><span>Obra Bellavista, La Florida</span></div></div>
       <div class="lg-cuerpo">
@@ -1571,7 +1560,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.56.0';
+const APP_VERSION = '0.57.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3688,7 +3677,7 @@ async function cerrarSesionYLimpiar(){
     try{ localStorage.removeItem('po_' + STORAGE_KEY); localStorage.removeItem('po_' + STORAGE_KEY + '-docs'); }catch(e){}
     try{ if(window.storage && typeof window.storage.delete === 'function'){ window.storage.delete(STORAGE_KEY, true); window.storage.delete(STORAGE_KEY + '-docs', true); } }catch(e){}
   }
-  location.reload();
+  location.replace('index.html?s=1');
 }
 document.getElementById('logoutBtn').addEventListener('click', () => {
   if(dirtyCellIds.size > 0 || settingsDirty) askConfirm('Hay cambios sin guardar. Si cierras la sesión se pierden. ¿Cerrar sesión igual?', cerrarSesionYLimpiar);
@@ -6353,79 +6342,7 @@ function gateIniciar(){
   const sincronizar = () => { lg('lgModo').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙'; };
   lg('toggleDark').addEventListener('click', () => setTimeout(sincronizar, 0));
   gateArrancarBarra();
-  const teclas = lg('lgTeclas');
-  ['1','2','3','4','5','6','7','8','9'].forEach(n => teclas.insertAdjacentHTML('beforeend', `<button type="button" data-n="${n}">${n}</button>`));
-  teclas.insertAdjacentHTML('beforeend', '<button type="button" class="aux" id="lgBorrar" aria-label="Borrar">⌫ Borrar</button><button type="button" data-n="0">0</button><button type="button" class="entrar" id="lgEntrar" disabled>Entrar</button>');
-  teclas.addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if(!b || b.disabled) return;
-    if(b.dataset.n !== undefined) gateSumar(b.dataset.n);
-    else if(b.id === 'lgBorrar'){ gate.pin = gate.pin.slice(0, -1); gateMensaje(''); gatePintar(); }
-    else if(b.id === 'lgEntrar') gateIntentar();
-  });
-  document.addEventListener('keydown', (e) => {
-    if(gate.el.classList.contains('off') || !lg('lgPin').classList.contains('on')) return;
-    if(/^\d$/.test(e.key)) gateSumar(e.key);
-    else if(e.key === 'Backspace'){ gate.pin = gate.pin.slice(0, -1); gatePintar(); }
-    else if(e.key === 'Enter') gateIntentar();
-  });
-  lg('lgRecordar').addEventListener('change', () => {
-    lg('lgTxtRecordar').textContent = lg('lgRecordar').checked ? 'Entrarás directo, sin PIN. Dura de 7 a 30 días según tu cuenta.' : 'Pedirá el PIN cada vez que cierres y abras el panel';
-  });
 }
-function gatePintar(){
-  lg('lgVisor').innerHTML = gate.pin ? gate.pin.split('').map(() => '<i></i>').join('') : '<em>' + (window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches ? 'Escribe tu PIN o usa los números' : 'Toca los números') + '</em>';
-  const b = lg('lgEntrar'); b.disabled = gate.pin.length < 4 || gate.bloqueado || gate.ocupado;
-  b.textContent = gate.ocupado ? '…' : 'Entrar';
-}
-function gateMensaje(t, mal){ const m = lg('lgMsgPin'); m.textContent = t; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
-function gateSumar(n){ if(gate.bloqueado || gate.ocupado || gate.pin.length >= 12) return; gate.pin += n; gateMensaje(''); gatePintar(); }
-function gateBloquear(seg, texto){
-  gate.bloqueado = true; let q = seg; gatePintar();
-  gateMensaje(`${texto} Espera ${q} s`, true);
-  const t = setInterval(() => {
-    q--; gateMensaje(`${texto} Espera ${q} s`, true);
-    if(q <= 0){ clearInterval(t); gate.bloqueado = false; gate.fallos = 0; gateMensaje(''); gatePintar(); }
-  }, 1000);
-}
-async function gateLoginFetch(pin){
-  try{
-    const res = await fetch(DB_URL, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: 'login', pin, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo()})});
-    if(!res.ok) return null;
-    const json = await res.json();
-    return (json && typeof json.ok === 'boolean') ? json : null;
-  }catch(err){ return null; }
-}
-async function gateIntentar(){
-  if(gate.bloqueado || gate.ocupado || gate.pin.length < 4 || !gate.resolver) return;
-  gate.ocupado = true; gatePintar();
-  const pin = gate.pin;
-  const res = await gateLoginFetch(pin);
-  gate.ocupado = false;
-  const v = lg('lgVisor');
-  const fallo = (texto) => { v.classList.remove('error'); void v.offsetWidth; v.classList.add('error'); gate.pin = ''; gatePintar(); gateMensaje(texto, true); };
-  if(res === null){ gatePintar(); gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
-  if(!res.ok){
-    if(res.error === 'demasiados_intentos'){ fallo(''); gateBloquear(30, 'Demasiados PIN incorrectos seguidos.'); return; }
-    if(res.error === 'dispositivo_ocupado'){ fallo(msgDispositivoOcupado(res.tipo)); return; }
-    gate.fallos++;
-    if(gate.fallos >= 5){ fallo(''); gateBloquear(15, 'Demasiados intentos en este aparato.'); }
-    else fallo(`PIN incorrecto. Te quedan ${5 - gate.fallos} intentos`);
-    return;
-  }
-  if([1, 2, 3, 4].indexOf(res.rol) === -1){ fallo(res.rol === 5 || res.rol === 6 ? 'Ese PIN es de otra sección. Entra desde la página principal.' : 'Ese PIN no tiene un cargo válido en la pestaña "Usuarios".'); return; }
-  guardarSesionLocal(res, lg('lgRecordar').checked);
-  gate.pin = ''; gate.fallos = 0; gatePintar();
-  if(res.debil) setTimeout(() => avisoToast('Tu PIN tiene menos de 6 dígitos y es fácil de adivinar. Pídele al administrador que lo cambie por uno más largo.', 'error'), 1800);
-  const f = gate.resolver; gate.resolver = null; f(res);
-}
-function gatePedirPin(mensaje){
-  return new Promise(resolver => {
-    gate.resolver = resolver; gate.pin = ''; gate.fallos = 0;
-    gatePintar(); gateMensaje(mensaje || '', !!mensaje);
-    gatePantalla('lgPin');
-  });
-}
-let reautenticando = false;
 function gatePedirUrl(){
   return new Promise(resolver => {
     gatePantalla('lgUrl');
@@ -6440,23 +6357,12 @@ function gatePedirUrl(){
     inp.onkeydown = (e) => { if(e.key === 'Enter') ir(); };
   });
 }
-async function sesionVencida(msg){
-  if(reautenticando) return;
-  reautenticando = true;
-  const rolPrev = rolActual(), nomPrev = sessionName || '';
+function irAlLogin(msg){
+  try{ sessionStorage.setItem('progresoObraAvisoGate', msg || ''); }catch(err){}
   sessionToken = null; limpiarSesionGuardada();
-  try{
-    const res = await gatePedirPin(msg || 'Tu sesión venció. Ingresa tu PIN para seguir.');
-    if(res.rol === rolPrev && (rolPrev !== 3 || res.nombre === nomPrev)){
-      sessionToken = res.token || null;
-      await gateOcultar();
-      avisoToast('Sesión renovada.', 'ok');
-      if(typeof saveNow === 'function' && (dirtyCellIds.size > 0 || settingsDirty)) saveNow();
-    } else {
-      location.reload();
-    }
-  } finally { reautenticando = false; }
+  location.replace('index.html?s=1');
 }
+function sesionVencida(msg){ irAlLogin(msg || 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }
 
 (async function init(){
   gateIniciar();
@@ -6472,23 +6378,12 @@ async function sesionVencida(msg){
     let reintentar = true;
     while(reintentar){
     if(!sessionToken){
-      await dormir(pidioUrl ? 400 : 1450);
-      let aviso = '';
-      try{ aviso = sessionStorage.getItem('progresoObraAvisoGate') || ''; sessionStorage.removeItem('progresoObraAvisoGate'); }catch(err){}
-      const res = await gatePedirPin(aviso);
-      aplicarRolDeLogin(res);
-      gatePantalla('lgSplash'); gateArrancarBarra(['Colocando cerámica…', 'Cortando cerámica…', 'Viendo cómo pisan antes de 48 hrs…', 'Comprobando tu sesión…']);
+      irAlLogin('');
+      return;
     }
     await loadState();
-    if(sesionInvalida){
-      try{ sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(err){}
-      location.reload(); return;
-    }
-    if(cargaFallo){
-      cargaFallo = false; sessionToken = null;
-      try{ sessionStorage.setItem('progresoObraAvisoGate', 'No se pudieron cargar los datos de la base de datos. Revisa tu conexión e ingresa tu PIN de nuevo.'); }catch(err){}
-      continue;
-    }
+    if(sesionInvalida){ irAlLogin('Tu sesión venció. Ingresa tu PIN de nuevo.'); return; }
+    if(cargaFallo){ irAlLogin('No se pudieron cargar los datos de la base de datos. Revisa tu conexión e ingresa tu PIN de nuevo.'); return; }
     reintentar = false;
     }
   }

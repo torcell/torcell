@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Oficina Técnica · Obra Bellavista</title>
+<script>try{var t=localStorage.getItem('ofTema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t);}catch(e){}</script>
+<style>
+:root{--bg:#f2f3f1;--panel:#fff;--text:#1d2327;--sub:#5d666c;--line:#c9cdcb;--head:#0b2b36;--acc:#0b6b86;--ok:#1d7a3e;--warn:#b26a00;--bad:#b3261e;--okb:#e2f3e7;--warnb:#fbefd9;--badb:#fbe3e1;}
+@media (prefers-color-scheme:dark){:root:not([data-tema="claro"]){--bg:#14171a;--panel:#1d2226;--text:#e8ebed;--sub:#9aa5ab;--line:#3a4247;--head:#0b2b36;--acc:#5cc3df;--ok:#6fd08d;--warn:#f0b255;--bad:#ff8a80;--okb:#1d3a27;--warnb:#3d2e12;--badb:#43201d;}}
+:root[data-tema="oscuro"]{--bg:#14171a;--panel:#1d2226;--text:#e8ebed;--sub:#9aa5ab;--line:#3a4247;--head:#0b2b36;--acc:#5cc3df;--ok:#6fd08d;--warn:#f0b255;--bad:#ff8a80;--okb:#1d3a27;--warnb:#3d2e12;--badb:#43201d;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 'Segoe UI',system-ui,sans-serif}
+header{background:var(--head);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header .t{flex:1;min-width:200px}
+header h1{margin:0;font-size:18px}
+header p{margin:2px 0 0;font-size:12.5px;opacity:.8}
+.btn{border:2px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:0;text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:36px}
+.btn:hover{background:rgba(127,127,127,.18)}
+.btn:active{transform:scale(.97)}
+.aviso{margin:12px 16px 0;padding:10px 14px;border:2px solid var(--warn);background:var(--warnb);color:var(--text);font-size:13.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.aviso span{flex:1;min-width:200px}
+main{padding:12px 16px 40px;max-width:1280px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--panel);border:2px solid var(--line);padding:10px 12px}
+.kpi label{display:block;font-size:12px;color:var(--sub);font-weight:600}
+.kpi input{width:100%;border:0;border-bottom:2px dashed var(--line);background:transparent;color:var(--text);font:800 24px 'Segoe UI',sans-serif;padding:2px 0;outline:none;border-radius:0}
+.kpi input:focus{border-bottom-color:var(--acc)}
+.kpi small{color:var(--sub);font-size:11.5px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.card{background:var(--panel);border:2px solid var(--line);grid-column:span 12;min-width:0}
+@media (min-width:900px){.card.m{grid-column:span 6}}
+.card h2{margin:0;padding:10px 12px;font-size:15px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:8px}
+.card h2 .n{font-weight:500;font-size:12px;color:var(--sub);margin-left:auto}
+.cu{padding:10px 12px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-size:11.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;padding:4px 6px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+td input,td select{width:100%;min-width:120px;border:1px solid transparent;background:transparent;color:var(--text);font:inherit;padding:5px 4px;border-radius:0}
+td input:hover,td select:hover{border-color:var(--line)}
+td input:focus,td select:focus{border-color:var(--acc);outline:none;background:var(--bg)}
+td.x{width:34px;text-align:center}
+.est{border:2px solid;font:700 12px "Segoe UI",sans-serif;padding:4px 0;cursor:pointer;width:118px;white-space:nowrap;text-align:center;border-radius:0;background:transparent}
+.est.ok{color:var(--ok);background:var(--okb)} .est.warn{color:var(--warn);background:var(--warnb)} .est.bad{color:var(--bad);background:var(--badb)}
+.del{border:0;background:transparent;color:var(--sub);font-size:16px;cursor:pointer;padding:4px 8px;border-radius:0}
+.del:hover{color:var(--bad)}
+.add{margin-top:8px;font-size:12.5px;color:var(--acc);border-color:var(--acc)}
+ul.lista{list-style:none;margin:0;padding:0}
+ul.lista li{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+ul.lista input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc);flex:none}
+ul.lista input[type=text]{flex:1;border:1px solid transparent;background:transparent;color:var(--text);font:inherit;padding:5px 4px;min-width:0;border-radius:0}
+ul.lista input[type=text]:hover{border-color:var(--line)}
+ul.lista input[type=text]:focus{border-color:var(--acc);outline:none;background:var(--bg)}
+ul.lista li.hecho input[type=text]{text-decoration:line-through;color:var(--sub)}
+.barra{height:10px;background:var(--line);min-width:60px}
+.barra i{display:block;height:100%;background:var(--acc)}
+.pie{margin:18px 0 0;font-size:12px;color:var(--sub);text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="t"><h1>📐 Oficina Técnica</h1><p>Obra Bellavista · La Florida · <span id="quien">Edwin Carroz · Encargado de Oficina Técnica</span></p></div>
+  <a class="btn" href="calidad.html">✅ Calidad</a><a class="btn" href="avance_obra.html">📊 Dashboard de avance</a>
+  <button class="btn" id="tema" type="button">🌙 Tema</button>
+  <button class="btn" id="salir" type="button">Cerrar sesión</button>
+</header>
+<div class="aviso"><span><b>Datos de ejemplo.</b> Todo lo que ves está inventado y se puede cambiar: escribe sobre los textos, toca el estado para cambiarlo, agrega o borra filas. Se guarda en este aparato.</span><button class="btn" id="reset" type="button">Restablecer ejemplo</button></div>
+<main>
+  <section class="kpis" id="kpis"></section>
+  <div class="grid" id="grid"></div>
+  <p class="pie">Encargado de Oficina Técnica: estados de pago, documentación, materiales y contratos. Las obligaciones del mes se basan en lo habitual de la normativa chilena; confírmalas con tu procedimiento.</p>
+</main>
+<script>
+(function(){
+  const K = 'oficinaToken', N = 'oficinaNombre', URL_DB = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
+  let tok = '', nom = '';
+  try{ tok = localStorage.getItem(K) || ''; nom = localStorage.getItem(N) || ''; }catch(e){}
+  if(!tok){ document.documentElement.style.display = 'none'; try{ sessionStorage.setItem('progresoObraAvisoGate', ''); }catch(e){} location.replace('index.html?s=1'); return; }
+  if(nom) document.getElementById('quien').textContent = nom + ' · ' + "Oficina Técnica";
+  document.getElementById('salir').addEventListener('click', () => {
+    try{ fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}); }catch(e){}
+    try{ localStorage.removeItem(K); localStorage.removeItem(N); }catch(e){}
+    location.replace('index.html?s=1');
+  });
+})();
+const CFG = {"id": "oficina", "v": 1, "kpis": [{"t": "Avance físico", "s": "% de la obra"}, {"t": "Próximo estado de pago", "s": "fecha de pago"}, {"t": "Cierre del estado de pago", "s": "1 semana antes"}, {"t": "RDI abiertas", "s": "sin respuesta"}, {"t": "Documentos por vencer", "s": "este mes"}], "secciones": [{"id": "pago", "t": "Estado de pago", "ic": "💳", "nota": "partidas del mes", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Partida"}, {"t": "Avance mes", "k": "pct"}, {"t": "Monto $", "k": "num"}, {"t": "Estado", "k": "est", "ok": "Cobrado", "warn": "Por cobrar", "bad": "Observado"}]}, {"id": "obl", "t": "Obligaciones del mes", "ic": "⏰", "ancho": "m", "tipo": "check"}, {"id": "docs", "t": "Control documental", "ic": "📁", "ancho": "m", "tipo": "check"}, {"id": "rdi", "t": "RDI y consultas al proyecto", "ic": "❓", "nota": "requerimientos de información", "ancho": "m", "tipo": "tabla", "cols": [{"t": "N°"}, {"t": "Consulta"}, {"t": "A quién"}, {"t": "Estado", "k": "est", "ok": "Respondida", "warn": "Enviada", "bad": "Sin respuesta"}]}, {"id": "mat", "t": "Materiales y bodega", "ic": "🧱", "nota": "stock vs pedido", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Material"}, {"t": "Unidad"}, {"t": "Stock"}, {"t": "Pedido"}, {"t": "Estado", "k": "est", "ok": "Al día", "warn": "Pedido", "bad": "Falta"}]}, {"id": "subs", "t": "Subcontratos", "ic": "👷", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Contratista"}, {"t": "Trabajo"}, {"t": "Avance", "k": "pct"}, {"t": "Documentos", "k": "est", "ok": "Al día", "warn": "Por vencer", "bad": "Faltan"}]}, {"id": "adic", "t": "Adicionales y modificaciones de contrato", "ic": "➕", "ancho": "c12", "tipo": "tabla", "cols": [{"t": "Detalle"}, {"t": "Monto $", "k": "num"}, {"t": "Fecha"}, {"t": "Estado", "k": "est", "ok": "Aprobado", "warn": "En revisión", "bad": "Rechazado"}]}], "datos": {"kpis": ["41%", "28-oct", "21-oct", "3", "2"], "sec": {"pago": [["Cerámica pisos 1 a 8", "70", "18500000", "ok"], ["Frague pisos 1 a 6", "55", "4200000", "warn"], ["Cerámica muros baño", "35", "9800000", "warn"], ["Instalación de puertas", "10", "2100000", "bad"]], "obl": [["F30 y F30-1 (1.ª semana, antes del 1.er miércoles)", false], ["Hoja de Ruta (miércoles de la 1.ª semana)", true], ["Cierre del estado de pago (1 semana antes del pago)", false], ["Planilla de avance firmada por ITO", false], ["Facturas de subcontratos recibidas", true]], "docs": [["Libro de obras al día", true], ["Planos vigentes y última revisión impresa en obra", true], ["Certificados de materiales (cerámica, adhesivo, fragüe)", false], ["Pólizas y garantías vigentes", true], ["Protocolos de calidad firmados", false], ["Actas de reunión semanal archivadas", true]], "rdi": [["001", "Junta de dilatación en pasillo piso 5", "Arquitecto", "ok"], ["002", "Altura de cerámica en muro de baño", "Arquitecto", "warn"], ["003", "Desnivel en losa terraza", "Calculista", "bad"]], "mat": [["Cerámica 60x60", "m²", "420", "800", "warn"], ["Adhesivo cerámico", "sacos", "65", "60", "ok"], ["Fragüe gris", "kg", "90", "200", "bad"], ["Crucetas 2 mm", "bolsas", "30", "40", "ok"]], "subs": [["Cerámica Sepúlveda", "Cerámica y frague", "52", "ok"], ["Puertas del Sur", "Instalación de puertas", "10", "warn"], ["Eléctrica Rojas", "Canalizaciones", "75", "bad"]], "adic": [["Refuerzo de impermeabilización en baños", "3200000", "12-oct", "warn"], ["Cambio de cerámica en hall", "1800000", "03-oct", "ok"], ["Nicho adicional en cocina", "650000", "08-oct", "bad"]]}}};
+const KEY = 'of_' + CFG.id;
+let D;
+function cargar(){ try{ const g = JSON.parse(localStorage.getItem(KEY)); if(g && g.v === CFG.v) return g; }catch(e){} return JSON.parse(JSON.stringify(CFG.datos)); }
+function guardar(){ D.v = CFG.v; try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){} }
+D = cargar();
+const ESTADOS = ['ok', 'warn', 'bad'];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function pintar(){
+  document.getElementById('kpis').innerHTML = CFG.kpis.map((k, i) => `<div class="kpi"><label for="k${i}">${esc(k.t)}</label><input id="k${i}" data-k="${i}" value="${esc(D.kpis[i])}"><small>${esc(k.s || '')}</small></div>`).join('');
+  document.getElementById('grid').innerHTML = CFG.secciones.map(s => {
+    const d = D.sec[s.id];
+    let c = '';
+    if(s.tipo === 'tabla'){
+      c = `<table><thead><tr>${s.cols.map(x => `<th>${esc(x.t)}</th>`).join('')}<th></th></tr></thead><tbody>` +
+        d.map((f, r) => `<tr>${s.cols.map((x, j) => `<td>${celda(s, x, f[j], r, j)}</td>`).join('')}<td class="x"><button class="del" data-del="${s.id}:${r}" title="Borrar fila" aria-label="Borrar fila">✕</button></td></tr>`).join('') +
+        `</tbody></table><button class="btn add" data-add="${s.id}" type="button">＋ Agregar fila</button>`;
+    } else {
+      c = `<ul class="lista">` + d.map((f, r) => `<li class="${f[1] ? 'hecho' : ''}"><input type="checkbox" data-chk="${s.id}:${r}" ${f[1] ? 'checked' : ''} aria-label="Hecho"><input type="text" data-txt="${s.id}:${r}" value="${esc(f[0])}"><button class="del" data-del="${s.id}:${r}" title="Borrar" aria-label="Borrar">✕</button></li>`).join('') +
+        `</ul><button class="btn add" data-add="${s.id}" type="button">＋ Agregar</button>`;
+    }
+    const n = s.tipo === 'check' ? `${d.filter(f => f[1]).length} de ${d.length} listos` : (s.nota || '');
+    return `<section class="card ${s.ancho || 'm'}"><h2>${s.ic} ${esc(s.t)}<span class="n">${esc(n)}</span></h2><div class="cu">${c}</div></section>`;
+  }).join('');
+}
+function celda(s, x, v, r, j){
+  const id = `${s.id}:${r}:${j}`;
+  if(x.k === 'est') return `<button class="est ${esc(v)}" type="button" data-est="${id}">${({ok:x.ok||'Listo', warn:x.warn||'En curso', bad:x.bad||'Atrasado'})[v] || ''}</button>`;
+  if(x.k === 'pct') return `<div style="display:flex;align-items:center;gap:6px"><input data-c="${id}" value="${esc(v)}" style="width:52px;min-width:52px" inputmode="numeric">%<div class="barra" style="flex:1"><i style="width:${Math.max(0, Math.min(100, Number(v) || 0))}%"></i></div></div>`;
+  if(x.k === 'sel') return `<select data-c="${id}">${x.op.map(o => `<option${o === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  return `<input data-c="${id}" value="${esc(v)}"${x.k === 'num' ? ' inputmode="decimal"' : ''}>`;
+}
+const ST = id => CFG.secciones.find(s => s.id === id);
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(t.dataset.k !== undefined){ D.kpis[t.dataset.k] = t.value; guardar(); return; }
+  if(t.dataset.c){ const [s, r, j] = t.dataset.c.split(':'); D.sec[s][r][j] = t.value; guardar(); if(ST(s).cols[j].k === 'pct'){ const b = t.closest('td').querySelector('.barra i'); if(b) b.style.width = Math.max(0, Math.min(100, Number(t.value) || 0)) + '%'; } return; }
+  if(t.dataset.txt){ const [s, r] = t.dataset.txt.split(':'); D.sec[s][r][0] = t.value; guardar(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.dataset.c){ const [s, r, j] = t.dataset.c.split(':'); D.sec[s][r][j] = t.value; guardar(); }
+  if(t.dataset.chk){ const [s, r] = t.dataset.chk.split(':'); D.sec[s][r][1] = t.checked; guardar(); pintar(); }
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.est){ const [s, r, j] = b.dataset.est.split(':'); const a = D.sec[s][r][j]; D.sec[s][r][j] = ESTADOS[(ESTADOS.indexOf(a) + 1) % 3]; guardar(); pintar(); }
+  else if(b.dataset.del){ const [s, r] = b.dataset.del.split(':'); D.sec[s].splice(Number(r), 1); guardar(); pintar(); }
+  else if(b.dataset.add){ const s = ST(b.dataset.add); D.sec[s.id].push(s.tipo === 'check' ? ['Nuevo punto', false] : s.cols.map(x => x.k === 'est' ? 'warn' : x.k === 'sel' ? x.op[0] : x.k === 'pct' ? '0' : '')); guardar(); pintar(); }
+});
+document.getElementById('reset').addEventListener('click', () => {
+  if(!confirm('¿Volver a los datos de ejemplo? Se borran los cambios que hiciste.')) return;
+  D = JSON.parse(JSON.stringify(CFG.datos)); guardar(); pintar();
+});
+(function(){
+  const T = ['auto', 'claro', 'oscuro']; let t = 'auto'; try{ t = localStorage.getItem('ofTema') || 'auto'; }catch(e){}
+  const b = document.getElementById('tema'), p = () => { b.textContent = '🌙 Tema: ' + t; if(t === 'auto') document.documentElement.removeAttribute('data-tema'); else document.documentElement.setAttribute('data-tema', t); };
+  b.addEventListener('click', () => { t = T[(T.indexOf(t) + 1) % 3]; try{ localStorage.setItem('ofTema', t); }catch(e){} p(); }); p();
+})();
+pintar();
+</script>
+</body>
+</html>
