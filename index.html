@@ -329,9 +329,10 @@
         <h2 class="lg-titulo">¿A dónde quieres entrar?</h2>
         <p class="lg-quien" id="lgQuien"></p>
         <div class="lg-dest">
-          <button type="button" data-dest="panel"><span class="ic">🏗️</span><span>Panel de obra<small>Avance, pagos y trabajadores</small></span></button>
+          <button type="button" data-dest="panel"><span class="ic">🏗️</span><span>Panel de cerámica<small>Solo cerámica: avance, pagos y trabajadores</small></span></button>
           <button type="button" data-dest="calidad"><span class="ic">✅</span><span>Control de calidad<small>Revisión de cerámica y frague</small></span></button>
           <button type="button" data-dest="avance"><span class="ic">📊</span><span>Dashboard de avance<small>Resumen del avance de la obra</small></span></button>
+          <button type="button" data-dest="terreno"><span class="ic">🏗️</span><span>Jefe de Terreno<small>Programación, personal y seguridad</small></span></button>
           <button type="button" data-dest="oficina"><span class="ic">📐</span><span>Oficina Técnica<small>Pagos, materiales y documentos</small></span></button>
         </div>
         <button type="button" class="lg-salir" id="lgSalir">Salir y cambiar de cuenta</button>
@@ -343,11 +344,11 @@
 <script>
 const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
-const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html'};
-const DESTINOS = {1: ['panel', 'calidad', 'avance', 'oficina'], 2: ['panel'], 3: ['panel'], 4: ['panel', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina']};
-const TXT_DEST = {panel: 'Entrando al panel…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…'};
+const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html'};
+const DESTINOS = {1: ['panel', 'terreno', 'oficina', 'calidad', 'avance'], 2: ['panel'], 3: ['panel'], 4: ['terreno'], 5: ['calidad'], 6: ['oficina']};
+const TXT_DEST = {panel: 'Entrando al panel de cerámica…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…'};
 const CARGOS_CALIDAD = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
-const CLAVES_OT = ['oficinaToken', 'oficinaNombre'];
+const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre'];
 const lg = id => document.getElementById(id);
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k, v){ try{ if(v === undefined) return localStorage.getItem(k); if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} return null; }
@@ -372,19 +373,22 @@ function limpiarTodo(){
   CLAVES_OT.forEach(k => ls(k, null));
 }
 function leerPanel(){ const t = ss('progresoObraToken') || ls('progresoObraToken'); const r = Number(ss('progresoObraRol') || ls('progresoObraRol')); return (t && r >= 1 && r <= 4) ? {token: t, rol: r, nombre: ss('progresoObraName') || ls('progresoObraName') || ''} : null; }
+function leerTE(){ const t = ls('terrenoToken'); return t ? {token: t, nombre: ls('terrenoNombre') || ''} : null; }
 function leerOT(){ const t = ls('oficinaToken'); return t ? {token: t, nombre: ls('oficinaNombre') || ''} : null; }
 function leerCal(){ const t = ls('calidadToken'); return t ? {token: t, nombre: ls('calidadNombre') || '', cargo: ls('calidadCargo') || ''} : null; }
 function guardar(res, recordar, dest){
   limpiarTodo();
   const doble = (res.rol === 1 || res.rol === 4);
-  const paraPanel = [1, 2, 3, 4].indexOf(res.rol) !== -1 && (dest === 'panel' || (doble && recordar));
-  const paraCal = !!CARGOS_CALIDAD[res.rol] && (dest === 'calidad' || (doble && recordar));
+  const paraPanel = [1, 2, 3].indexOf(res.rol) !== -1 && (dest === 'panel' || (doble && recordar));
+  const paraCal = !!CARGOS_CALIDAD[res.rol] && (dest === 'calidad' || res.rol === 4 || (doble && recordar));
   const paraOT = [1, 6].indexOf(res.rol) !== -1 && (dest === 'oficina' || (doble && recordar));
+  const paraTE = [1, 4].indexOf(res.rol) !== -1 && (dest === 'terreno' || (doble && recordar));
   if(paraPanel){
     const st = recordar ? localStorage : sessionStorage;
     try{ st.setItem('progresoObraToken', res.token || ''); st.setItem('progresoObraName', res.nombre || ''); st.setItem('progresoObraRol', String(res.rol)); }catch(e){}
   }
   if(paraCal){ ls('calidadToken', res.token || ''); ls('calidadNombre', String(res.nombre || '')); ls('calidadCargo', CARGOS_CALIDAD[res.rol]); }
+  if(paraTE){ ls('terrenoToken', res.token || ''); ls('terrenoNombre', String(res.nombre || '')); }
   if(paraOT){ ls('oficinaToken', res.token || ''); ls('oficinaNombre', String(res.nombre || '')); }
   if(res.dispositivo) ls('progresoObraDisp', res.dispositivo);
 }
@@ -536,13 +540,13 @@ function iniciarGoogle(){
     if(aviso) gateMensaje(aviso, true);
     history.replaceState(null, '', location.pathname);
   } else {
-    const p = leerPanel(), c = leerCal(), o = leerOT();
-    const cand = []; if(p) cand.push('panel'); if(c) cand.push('calidad'); if(o) cand.push('oficina');
+    const p = leerPanel(), c = leerCal(), o = leerOT(), te = leerTE();
+    const cand = []; if(p) cand.push('panel'); if(c) cand.push('calidad'); if(o) cand.push('oficina'); if(te) cand.push('terreno');
     if(cand.length){
       const pref = ls('destinoPreferido');
-      const rolGuardado = p ? p.rol : (c ? Number(Object.keys(CARGOS_CALIDAD).filter(k => CARGOS_CALIDAD[k] === c.cargo)[0]) : 6);
+      const rolGuardado = p ? p.rol : te && !c ? 4 : (c ? Number(Object.keys(CARGOS_CALIDAD).filter(k => CARGOS_CALIDAD[k] === c.cargo)[0]) : 6);
       const lista = DESTINOS[rolGuardado] || cand;
-      const nombre = (p || c || o).nombre;
+      const nombre = (p || c || o || te).nombre;
       if(lista.length === 1){ irA(lista[0]); return; }
       if(pref && lista.indexOf(pref) !== -1 && (pref === 'avance' || cand.indexOf(pref) !== -1)){ irA(pref); return; }
       lg('lgQuien').textContent = 'Hola, ' + nombre + '.';
