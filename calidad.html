@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('calidad')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
-<script>try{var t=localStorage.getItem('calidadTema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t);}catch(e){}</script>
+<script>try{var t=localStorage.getItem('calidadTema');document.documentElement.setAttribute('data-tema',(t==='claro'||t==='oscuro'||t==='auto')?t:'obra');if(t==='auto')document.documentElement.removeAttribute('data-tema');}catch(e){document.documentElement.setAttribute('data-tema','obra');}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
@@ -248,6 +248,13 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .v3 .est.listo{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
 
+/* ===== Tema Obra (por defecto): misma paleta de la pantalla de carga, sobrio y plano ===== */
+:root[data-tema="obra"]{color-scheme:dark;--bg:#0b2b36;--panel:#10384a;--soft:#0d3242;--border:#24505f;--strong:#3d6d7e;--text:#eef4f6;--sub:#a3bcc6;--ok:#43b97f;--warn:#f0a23a;--bad:#ef6a5e;--accent:#4f8fd6;--accent2:#2f6f8f;--head:#0b2b36;}
+:root[data-tema="obra"] .btn.primary,:root[data-tema="obra"] .conectado{background:var(--accent);border-color:var(--accent);}
+:root[data-tema="obra"] .pestanas button.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+:root[data-tema="obra"] :is(main,.toolbar,.modal){border-top:2px solid #fff;box-shadow:none;}
+:root[data-tema="obra"] .infobar{border-left-color:var(--accent);}
+:root[data-tema="obra"] header.top{border-image:linear-gradient(90deg,#fff,rgba(255,255,255,.15)) 1;}
 /* ===== Halloween (solo noche). Se enciende y apaga con el botón del encabezado. Sin animaciones infinitas ni difuminados. ===== */
 :root.halloween{color-scheme:dark;--bg:#160d20;--panel:#1c1226;--soft:#160e1e;--border:#33204a;--strong:#6b3fa0;--text:#f4ebff;--sub:#bba6d8;--ok:#6fcf3a;--warn:#ffb300;--bad:#ff5a4a;--accent:#ff7a18;--accent2:#8a2be2;--telarana:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23e9dcff' stroke-opacity='.28' stroke-width='1'%3E%3Cg transform='translate(64 0) scale(-1 1)'%3E%3Cpath d='M0 0L64 0M0 0L58 22M0 0L44 44M0 0L22 58M0 0L0 64'/%3E%3Cpath d='M14 0Q12 12 0 14M28 0Q24 24 0 28M42 0Q36 36 0 42M56 0Q48 48 0 56'/%3E%3C/g%3E%3C/svg%3E");}
 :root.halloween,:root.halloween html{background:#0b0610;}
@@ -364,7 +371,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <button class="btn" id="irPanel" type="button">🔀 Cambiar de sección</button>
     <button class="btn" id="verRegistro" type="button">Registro</button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
-    <button class="btn" id="tema" type="button" aria-label="Cambiar tema">Tema: Auto</button>
+    <button class="btn" id="tema" type="button" aria-label="Cambiar tema">Tema: Obra</button>
     <button class="btn" id="halloween" type="button" aria-pressed="true" title="Encender o apagar el tema de Halloween">🎃 Halloween</button>
     <button class="btn" id="salir" type="button">Cerrar sesión</button>
   </div>
@@ -431,7 +438,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     </div>
   </div>
 </div>
-<div id="carga" role="status" aria-live="polite">
+<div id="carga" class="on" role="status" aria-live="polite">
   <div class="v3" id="cargaV3"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="cargaIn"><small>Obra Bellavista, La Florida</small><b id="cargaTit">Cargando panel de Calidad</b><div class="carga"><div class="pista" role="progressbar" aria-label="Cargando" id="cargaPista"><div class="rell" id="cargaRell"></div></div><div class="est" id="cargaEst">0%</div></div></div></div></div>
 </div>
 <div id="aviso" role="alert"><span id="avisoTxt"></span><button type="button" id="avisoX" aria-label="Cerrar aviso">✕</button></div>
@@ -486,7 +493,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.29.0';
+const CAL_VERSION = '1.30.2';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -568,7 +575,7 @@ async function llamar(action, extra, rapido, limite){
 }
 
 const dormir = ms => new Promise(r => setTimeout(r, ms));
-const carga = {el: $('carga'), meta: 88, prog: 0, raf: 0, t0: 0, abierta: null};
+const carga = {el: $('carga'), meta: 88, prog: 0, raf: 0, t0: 0, abierta: null, iniciada: false};
 function cargaBucle(){
   const t = Math.max(0, performance.now() - carga.t0);
   const objetivo = carga.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 1100));
@@ -582,7 +589,8 @@ function cargaBucle(){
   if(carga.el.classList.contains('on')) carga.raf = requestAnimationFrame(cargaBucle);
 }
 function cargaMostrar(){
-  if(carga.el.classList.contains('on') && !carga.el.classList.contains('sale')) return;
+  if(carga.iniciada && carga.el.classList.contains('on') && !carga.el.classList.contains('sale')) return;
+  carga.iniciada = true;
   const v = $('cargaV3');
   v.classList.remove('ver', 'ab'); v.style.height = '0px';
   $('cargaEst').classList.remove('listo'); $('cargaEst').textContent = '0%'; $('cargaRell').style.width = '0%';
@@ -596,11 +604,24 @@ function cargaMostrar(){
   })();
 }
 function cargaCortar(){
+  carga.iniciada = false;
   cancelAnimationFrame(carga.raf);
   carga.el.classList.remove('on', 'sale');
 }
+// Espera a que la página esté de verdad lista: documento cargado, tipografías, imágenes decodificadas y un cuadro ya pintado.
+async function paginaLista(){
+  const tope = dormir(6000);
+  const listo = (async () => {
+    if(document.readyState !== 'complete') await new Promise(r => window.addEventListener('load', r, {once: true}));
+    try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+    try{ await Promise.all(Array.from(document.images).filter(i => i.src && !i.complete || i.decode).map(i => i.decode().catch(() => {}))); }catch(e){}
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  })();
+  await Promise.race([listo, tope]);
+}
 async function cargaOcultar(){
   if(carga.abierta) await carga.abierta;
+  await paginaLista();
   carga.meta = 100;
   while(carga.prog < 100) await dormir(30);
   const e = $('cargaEst'); e.textContent = '¡Listo!'; e.classList.add('listo');
@@ -1454,9 +1475,9 @@ function falloCarga(sub){
   else aviso(errorCarga);
 }
 
-const TEMAS = ['auto', 'claro', 'oscuro'];
-const NOMBRE_TEMA = {auto:'Auto', claro:'Claro', oscuro:'Oscuro'};
-let tema = TEMAS.indexOf(leerLocal('calidadTema')) === -1 ? 'auto' : leerLocal('calidadTema');
+const TEMAS = ['obra', 'claro', 'oscuro', 'auto'];
+const NOMBRE_TEMA = {obra:'Obra', claro:'Claro', oscuro:'Oscuro', auto:'Auto'};
+let tema = TEMAS.indexOf(leerLocal('calidadTema')) === -1 ? 'obra' : leerLocal('calidadTema');
 function aplicarTema(){
   if(tema === 'auto') document.documentElement.removeAttribute('data-tema');
   else document.documentElement.setAttribute('data-tema', tema);
@@ -1465,19 +1486,19 @@ function aplicarTema(){
 }
 $('tema').addEventListener('click', () => {
   tema = TEMAS[(TEMAS.indexOf(tema) + 1) % TEMAS.length];
-  guardarLocal('calidadTema', tema === 'auto' ? null : tema);
+  guardarLocal('calidadTema', tema === 'obra' ? null : tema);
   aplicarTema();
 });
 aplicarTema();
-// Halloween: encendido por defecto; el botón lo apaga y lo vuelve a encender (queda guardado en este aparato).
-let halloween = leerLocal('calidadHalloween') !== '0';
+// Halloween: apagado por defecto (el tema por defecto es Obra); el botón lo enciende y lo apaga (queda guardado en este aparato).
+let halloween = leerLocal('calidadHalloween') === '1';
 function aplicarHalloween(){
   document.documentElement.classList.toggle('halloween', halloween);
   $('halloween').classList.toggle('on', halloween);
   $('halloween').setAttribute('aria-pressed', halloween ? 'true' : 'false');
   $('halloween').textContent = halloween ? '🎃 Halloween: Sí' : '🎃 Halloween: No';
 }
-$('halloween').addEventListener('click', () => { halloween = !halloween; guardarLocal('calidadHalloween', halloween ? null : '0'); aplicarHalloween(); });
+$('halloween').addEventListener('click', () => { halloween = !halloween; guardarLocal('calidadHalloween', halloween ? '1' : null); aplicarHalloween(); });
 aplicarHalloween();
 $('salir').addEventListener('click', () => {
   const t = token;
