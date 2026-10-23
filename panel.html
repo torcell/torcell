@@ -1117,6 +1117,8 @@
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
     <button class="btn small solo-admin" id="irCalidadBtn">✔ Ir a Calidad</button>
+    <button class="btn small solo-admin" id="irOficinaBtn">📐 Oficina Técnica</button>
+    <button class="btn small solo-admin" id="irTerrenoBtn">🏗️ Jefe de Terreno</button>
     <button class="btn small" id="irAvanceBtn" style="display:none;">📊 Dashboard de avance</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
     <div class="rb-der" id="rbDer" style="display:none;">
@@ -1569,7 +1571,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.55.0';
+const APP_VERSION = '0.56.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4100,6 +4102,8 @@ async function cargarAccesos(){
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay inicios de sesión registrados.</p>';
 }
 document.getElementById('irAvanceBtn').addEventListener('click', () => { window.location.href = 'avance_obra.html'; });
+document.getElementById('irOficinaBtn').addEventListener('click', () => { window.location.href = 'oficina_tecnica.html'; });
+document.getElementById('irTerrenoBtn').addEventListener('click', () => { window.location.href = 'jefe_terreno.html'; });
 document.getElementById('irCalidadBtn').addEventListener('click', () => {
   // Pasa la sesión de admin a Calidad para no pedir el PIN de nuevo.
   try{
