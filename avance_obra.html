@@ -1,3 +1,4 @@
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('avance')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
 <title>Avance de Obra</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,6 +56,9 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .hdr-der{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .sesion{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);border:1px solid var(--line);background:var(--surface);padding:5px 10px 5px 5px}
 .sesion b{color:var(--ink);font-weight:600}
+.btn-menu{font:500 13px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:6px 12px;cursor:pointer;border-radius:0}
+.btn-menu:hover{border-color:var(--accent);color:var(--accent)}
+.btn-menu:active{transform:scale(.97)}
 .sesion .ini{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);font:600 12px var(--f-body)}
 .corte{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:var(--muted)}
 .corte b{font-family:var(--f-mono);font-size:15px;color:var(--ink);font-weight:500}
@@ -392,6 +396,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
       <div class="muted" id="hdrSub">Torre única · 2 <span class="term" data-term="subterraneo">subterráneos</span> · 145 departamentos desde el piso 2</div>
     </div>
     <div class="hdr-der">
+      <button type="button" class="btn-menu" id="irMenu">Cambiar de sección</button>
       <div class="sesion" id="sesion"><span class="ini" aria-hidden="true">AS</span><span>Conectado como: <b>A. Sandoval</b> · Jefe de Terreno</span></div>
       <div class="corte"><span class="term" data-term="corte">Fecha de corte</span><b id="corteTxt"></b></div>
     </div>
@@ -927,6 +932,7 @@ async function cargarReales(){
       body: JSON.stringify({ action: "loadPrivado", token, dispositivo: leerSes("progresoObraDisp") || "", dispositivoEtiqueta: etiquetaDispositivo() }) });
     if (!r.ok) throw new Error("red");
     const j = JSON.parse(await r.text());
+    if (j && j.error === "sin_permiso") { irAlMenu("No tienes acceso al Dashboard de avance. Elige una de las secciones disponibles."); return null; }
     if (!j || j.ok !== true || !j.items) { AVISO_SIN_SESION = j && j.error === "sin_sesion" ? "La sesión del panel venció: se muestran datos de prueba. Vuelve a entrar con tu PIN." : "La base de datos no entregó los datos: se muestran datos de prueba."; return null; }
     return { items: j.items, nombre: leerSes("progresoObraName") || "", rol: leerSes("progresoObraRol") || "" };
   } catch (e) {
@@ -1435,7 +1441,9 @@ const TIPFN = {
 
 // vistas
 $("corteTxt").textContent = fmt(CONFIG.corte);
-const CARGOS = { "1": "Admin", "2": "Supervisor", "3": "Contratista", "4": "Jefe de Terreno" };
+const CARGOS = { "1": "Admin", "2": "Supervisor", "3": "Contratista", "4": "Jefe de Terreno", "5": "Calidad", "6": "Oficina Técnica" };
+$("irMenu").addEventListener("click", () => { location.href = "index.html?menu=1"; });
+function irAlMenu(msg){ try { sessionStorage.setItem("progresoObraAvisoGate", msg); } catch (e) {} location.replace("index.html?menu=1"); }
 if (MR) {
   const hora = new Date().toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago" });
   $("hdrEyebrow").innerHTML = `<span class="pill real">Datos reales</span><span>Cerámica y frague reales · demás partidas con datos de ejemplo · leído a las ${hora}</span>`;
