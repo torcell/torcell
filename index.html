@@ -371,6 +371,7 @@ function limpiarTodo(){
   CLAVES_PANEL.forEach(k => { ss(k, null); ls(k, null); });
   CLAVES_CAL.forEach(k => ls(k, null));
   CLAVES_OT.forEach(k => ls(k, null));
+  ls('progresoObraEsAdmin', null);
 }
 function leerPanel(){ const t = ss('progresoObraToken') || ls('progresoObraToken'); const r = Number(ss('progresoObraRol') || ls('progresoObraRol')); return (t && r >= 1 && r <= 4) ? {token: t, rol: r, nombre: ss('progresoObraName') || ls('progresoObraName') || ''} : null; }
 function leerTE(){ const t = ls('terrenoToken'); return t ? {token: t, nombre: ls('terrenoNombre') || ''} : null; }
@@ -390,6 +391,7 @@ function guardar(res, recordar, dest){
   if(paraCal){ ls('calidadToken', res.token || ''); ls('calidadNombre', String(res.nombre || '')); ls('calidadCargo', CARGOS_CALIDAD[res.rol]); }
   if(paraTE){ ls('terrenoToken', res.token || ''); ls('terrenoNombre', String(res.nombre || '')); }
   if(paraOT){ ls('oficinaToken', res.token || ''); ls('oficinaNombre', String(res.nombre || '')); }
+  if(res.rol === 1) ls('progresoObraEsAdmin', '1');
   if(res.dispositivo) ls('progresoObraDisp', res.dispositivo);
 }
 
@@ -542,6 +544,15 @@ function iniciarGoogle(){
   } else {
     const p = leerPanel(), c = leerCal(), o = leerOT(), te = leerTE();
     const cand = []; if(p) cand.push('panel'); if(c) cand.push('calidad'); if(o) cand.push('oficina'); if(te) cand.push('terreno');
+    const esAdminGuardado = ls('progresoObraEsAdmin') === '1' || (p && p.rol === 1) || (c && c.cargo === 'Admin');
+    if(params.get('menu') && (window.__PRUEBA || (cand.length && esAdminGuardado))){
+      const base = p || c || o || te || {token: 'demo-111111', nombre: 'Ismael'};
+      datosElegir = {res: {token: base.token, nombre: base.nombre, rol: 1}, recordar: window.__PRUEBA ? true : !!(ls('progresoObraToken') || ls('calidadToken') || ls('oficinaToken') || ls('terrenoToken'))};
+      lg('lgQuien').textContent = 'Hola, ' + (base.nombre || 'Admin') + '. Elige a dónde ir.';
+      mostrarOpciones(DESTINOS[1]);
+      history.replaceState(null, '', location.pathname);
+      pantalla('lgElegir'); return;
+    }
     if(cand.length){
       const pref = ls('destinoPreferido');
       const rolGuardado = p ? p.rol : te && !c ? 4 : (c ? Number(Object.keys(CARGOS_CALIDAD).filter(k => CARGOS_CALIDAD[k] === c.cargo)[0]) : 6);

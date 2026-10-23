@@ -63,6 +63,9 @@ input.tit{font:700 15px 'Segoe UI',sans-serif;color:var(--text);background:trans
 input.tit:hover{border-color:var(--line)} input.tit:focus{border-color:var(--acc);outline:none;background:var(--bg)}
 input.thin{font:inherit;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--sub);background:transparent;border:1px dashed transparent;padding:2px 4px;width:100%;min-width:90px;border-radius:0}
 input.thin:hover{border-color:var(--line)} input.thin:focus{border-color:var(--acc);outline:none;background:var(--bg);color:var(--text)}
+.solo-adm{display:none !important}
+body.adm .solo-adm{display:inline-flex !important}
+body.adm .no-adm{display:none !important}
 #guardarBtn[hidden]{display:none}
 .curva{margin-bottom:10px}
 .cvctl{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px}
@@ -95,7 +98,8 @@ td input[type=date]{min-width:130px}
 <body>
 <header>
   <div class="t"><h1>📐 Oficina Técnica</h1><p>Obra Bellavista · La Florida · <span id="quien">Edwin Carroz · Encargado de Oficina Técnica</span></p></div>
-  <a class="btn" href="calidad.html">✅ Calidad</a><a class="btn" href="avance_obra.html">📊 Dashboard de avance</a>
+  <a class="btn no-adm" href="calidad.html">✅ Calidad</a><a class="btn no-adm" href="avance_obra.html">📊 Dashboard de avance</a>
+  <a class="btn solo-adm" href="index.html?menu=1">🔀 Cambiar de sección</a>
   <button class="btn" id="tema" type="button">🌙 Tema</button>
   <button class="btn" id="salir" type="button">Cerrar sesión</button>
   <button class="btn" id="guardarBtn" type="button" hidden>💾 Guardar cambios</button>
@@ -120,6 +124,7 @@ td input[type=date]{min-width:130px}
   let tok = '', nom = '';
   try{ tok = localStorage.getItem(K) || ''; nom = localStorage.getItem(N) || ''; }catch(e){}
   if(!tok){ document.documentElement.style.display = 'none'; try{ sessionStorage.setItem('progresoObraAvisoGate', ''); }catch(e){} location.replace('index.html?s=1'); return; }
+  try{ if(localStorage.getItem('progresoObraEsAdmin') === '1') document.body.classList.add('adm'); }catch(e){}
   if(nom) document.getElementById('quien').textContent = nom + ' · ' + "Oficina Técnica";
   document.getElementById('salir').addEventListener('click', () => {
     try{ fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}); }catch(e){}
