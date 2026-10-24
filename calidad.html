@@ -286,8 +286,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   :root.halloween .modal{position:relative;z-index:1;}
   :root.halloween .modal::after{content:"";position:absolute;inset:0;background:var(--tr) top right / 76px no-repeat,var(--tl) top left / 58px no-repeat,var(--craneo) left 10px bottom 8px / 30px no-repeat;pointer-events:none;z-index:2;}
   :root.halloween .modal::before{content:"";position:absolute;top:0;left:62%;width:36px;height:72px;background:var(--arana) center top / contain no-repeat;pointer-events:none;z-index:3;transform-origin:50% 0;animation:hwColgar 4.2s ease-in-out infinite;}
-  :root.halloween body::after{content:"";position:fixed;left:0;top:7vh;width:210px;height:105px;background:var(--bruja) center / contain no-repeat;opacity:.9;pointer-events:none;z-index:-1;transform:translate(-20vw,0);animation:hwBruja 40s linear 5s infinite;}
-  :root.halloween::before{content:"";position:fixed;left:0;top:0;width:72px;height:36px;background:var(--murci) 0 0 / 400% 100% no-repeat;pointer-events:none;z-index:20;opacity:.9;transform:translate(110vw,30vh);animation:hwMurcielago 34s linear 11s infinite,hwAleteo .36s steps(1,end) infinite;}
+  :root.halloween body::after{content:"";position:fixed;left:0;top:0;width:210px;height:105px;background:var(--bruja) center / contain no-repeat;opacity:0;pointer-events:none;z-index:-1;transform:translate(-30vw,0);}
+  :root.halloween::before{content:"";position:fixed;left:0;top:0;width:72px;height:36px;background:var(--murci) 0 0 / 400% 100% no-repeat;pointer-events:none;z-index:20;opacity:0;transform:translate(110vw,30vh);animation:hwAleteo .36s steps(1,end) infinite;}
   :root.halloween::after{content:"";position:fixed;left:0;right:0;bottom:0;height:64px;background:var(--tumbas) left bottom / auto 64px repeat-x;opacity:.75;pointer-events:none;z-index:-1;}
   :root.halloween :is(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on)::after{content:"";position:absolute;left:0;top:0;width:60px;height:30px;background:var(--murci) 0 0 / 400% 100% no-repeat;pointer-events:none;z-index:0;opacity:.9;transform:translate(-10vw,18vh);animation:hwMurciOverlay 15s linear infinite,hwAleteo .36s steps(1,end) infinite;}
 
@@ -298,8 +298,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   @media (prefers-reduced-motion:reduce){
     body::after,html::before,.overlay::after,.modal::before,#vel::after,#velReg::after,#velOp::after,#velFoto::after,#velExp::after{animation:none !important;}
   }
-  @media (max-width:600px){ :root.halloween body::after{width:140px;height:70px;top:5vh;} }
-  :root:has(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on)::before{display:none;}
+  @media (max-width:600px){ :root.halloween body::after{width:140px;height:70px;} }
+  :root:has(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on) #fantasma{animation-play-state:paused;}
 
   /* Esqueleto que se asoma de vez en cuando por detrás del contenedor y se vuelve a esconder */
   :root.halloween main{position:relative;}
@@ -333,9 +333,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 
   /* Fantasmita que flota suavemente en la esquina inferior izquierda */
   #fantasma{display:none;}
-  @media (min-width:700px){ :root.halloween #fantasma{display:block;position:fixed;left:1.6vw;bottom:92px;width:50px;height:60px;z-index:5;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 100 120'%3E%3Cdefs%3E%3CradialGradient id='h' cx='.5' cy='.45' r='.6'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.9'/%3E%3Cstop offset='1' stop-color='%23c9b3ff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='50' cy='58' rx='50' ry='56' fill='url(%23h)' opacity='.45'/%3E%3Cpath d='M16 104V52C16 26 32 10 50 10S84 26 84 52V104L72 94L61 106L50 94L39 106L28 94Z' fill='%23f4f0ff' stroke='%23b9a4ee' stroke-width='2' stroke-linejoin='round'/%3E%3Cellipse cx='38' cy='50' rx='6.5' ry='9' fill='%231a0f24'/%3E%3Cellipse cx='62' cy='50' rx='6.5' ry='9' fill='%231a0f24'/%3E%3Cellipse cx='50' cy='70' rx='6' ry='8' fill='%231a0f24'/%3E%3Cpath d='M16 66Q4 62 6 76Q10 74 16 76Z M84 66Q96 62 94 76Q90 74 84 76Z' fill='%23f4f0ff' stroke='%23b9a4ee' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;animation:hwFlotar 4.6s ease-in-out infinite;} }
-  @keyframes hwFlotar{0%,100%{transform:translateY(0);opacity:.8;}50%{transform:translateY(-9px);opacity:.97;}}
-  :root.halloween:has(#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on) #fantasma{display:none;}
+  @media (min-width:700px){ :root.halloween #fantasma{display:block;position:fixed;left:1.6vw;top:60vh;width:50px;height:60px;z-index:5;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 100 120'%3E%3Cdefs%3E%3CradialGradient id='h' cx='.5' cy='.45' r='.6'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.9'/%3E%3Cstop offset='1' stop-color='%23c9b3ff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='50' cy='58' rx='50' ry='56' fill='url(%23h)' opacity='.45'/%3E%3Cpath d='M16 104V52C16 26 32 10 50 10S84 26 84 52V104L72 94L61 106L50 94L39 106L28 94Z' fill='%23f4f0ff' stroke='%23b9a4ee' stroke-width='2' stroke-linejoin='round'/%3E%3Cellipse cx='38' cy='50' rx='6.5' ry='9' fill='%231a0f24'/%3E%3Cellipse cx='62' cy='50' rx='6.5' ry='9' fill='%231a0f24'/%3E%3Cellipse cx='50' cy='70' rx='6' ry='8' fill='%231a0f24'/%3E%3Cpath d='M16 66Q4 62 6 76Q10 74 16 76Z M84 66Q96 62 94 76Q90 74 84 76Z' fill='%23f4f0ff' stroke='%23b9a4ee' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;animation:hwFlotar 4.6s ease-in-out infinite;opacity:0;transition:opacity 1.4s ease;}
+  :root.halloween #fantasma.ver{opacity:.85;} }
+  @keyframes hwFlotar{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
   @media (prefers-reduced-motion:reduce){ #fantasma{animation:none !important;} }
 
   /* Esqueletos (imagen elegida, sin fondo) que se asoman por los costados del panel central */
@@ -492,7 +492,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.31.0';
+const CAL_VERSION = '1.32.1';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1678,6 +1678,66 @@ setTimeout(() => {
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionCal > 600000) comprobarVersionCal();
 });
+
+/* ---- Halloween: bruja y murciélago con trayectos rectos al azar; fantasma que cambia de lugar ---- */
+(function(){
+  const R=document.documentElement, rnd=(a,b)=>a+Math.random()*(b-a);
+  const quieto=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const activo=()=>R.classList.contains('halloween');
+  const hayVelo=()=>!!document.querySelector('#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on');
+  // Trayecto recto: lado y altura al azar (solo mitad superior), ángulo máx. ±20°
+  function trayecto(ancho,alto,maxY){
+    const W=innerWidth,H=innerHeight,dir=Math.random()<.5?1:-1;
+    const largo=W+2*ancho, ang=rnd(-20,20)*Math.PI/180, dy=Math.tan(ang)*largo;
+    const lo=H*.03, hi=Math.max(lo+1,H*maxY-alto);
+    let y0=rnd(lo,hi); if(y0+dy<lo||y0+dy>hi){ y0=dy>=0?rnd(lo,Math.max(lo,hi-dy)):rnd(Math.min(hi,lo-dy),hi); }
+    const y1=Math.min(hi,Math.max(lo,y0+dy));
+    const x0=dir>0?-ancho:W, x1=dir>0?W:-ancho;
+    return {dir,x0,x1,y0,y1};
+  }
+  function lanzar(el,pseudo,ancho,alto,maxY,dur,onda){
+    if(!activo()||quieto()||document.hidden) return false;
+    const t=trayecto(ancho,alto,maxY), f=t.dir>0?1:-1, k=[];
+    for(let i=0;i<=8;i++){ const u=i/8, y=t.y0+(t.y1-t.y0)*u+(onda?Math.sin(u*Math.PI*6)*onda:0);
+      k.push({transform:`translate(${t.x0+(t.x1-t.x0)*u}px,${y}px) scaleX(${f})`,opacity:(i===0||i===8)?0:.9,offset:u}); }
+    k[0].opacity=.9; k[8].opacity=.9;
+    const an=el.animate(k,{duration:dur,easing:'linear',pseudoElement:pseudo,fill:'none'});
+    if(hayVelo()) an.pause();
+    return true;
+  }
+  const mob=()=>innerWidth<=600;
+  function bucle(el,pseudo,anchoF,altoF,maxY,durF,onda,pausaMin,pausaMax,primera){
+    const ciclo=()=>{
+      if(hayVelo()){ setTimeout(ciclo,400); return; }
+      const w=anchoF(),h=altoF(),d=durF();
+      const ok=lanzar(el,pseudo,w,h,maxY,d,onda);
+      setTimeout(ciclo,(ok?d:0)+rnd(pausaMin,pausaMax));
+    };
+    setTimeout(ciclo,primera);
+  }
+  bucle(document.body,'::after',()=>mob()?140:210,()=>mob()?70:105,.5,()=>rnd(9000,13000),0,9000,22000,4000);
+  bucle(R,'::before',()=>72,()=>36,.55,()=>rnd(7000,10000),14,6000,16000,9000);
+  // Al abrir un panel, se pausan (siguen visibles); al cerrarlo, continúan
+  let pausado=false;
+  new MutationObserver(()=>{ const v=hayVelo(); if(v===pausado) return; pausado=v;
+    document.getAnimations().forEach(a=>{ const t=a.effect&&a.effect.pseudoElement; if(t==='::after'||t==='::before'){ if(a.effect.target===document.body||a.effect.target===R){ v?a.pause():a.play(); } } });
+  }).observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
+  // Fantasma: se desvanece, reaparece en otro sitio
+  const g=document.getElementById('fantasma');
+  if(g){
+    const poner=()=>{ g.style.left=rnd(3,92)+'vw'; g.style.top=rnd(18,80)+'vh'; };
+    const ciclo=()=>{
+      if(!activo()||quieto()){ g.classList.remove('ver'); setTimeout(ciclo,2000); return; }
+      if(hayVelo()){ setTimeout(ciclo,400); return; }
+      poner(); g.classList.add('ver');
+      const quedar=rnd(6000,11000), t0=performance.now(); let usado=0, ult=t0;
+      const espera=()=>{ const n=performance.now(); if(!hayVelo()) usado+=n-ult; ult=n;
+        if(usado>=quedar){ g.classList.remove('ver'); setTimeout(ciclo,1600+rnd(600,2500)); } else setTimeout(espera,250); };
+      setTimeout(espera,250);
+    };
+    setTimeout(ciclo,1500);
+  }
+})();
 </script>
 </body>
 </html>
