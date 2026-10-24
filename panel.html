@@ -482,17 +482,23 @@
 
   .overlay{position:fixed;inset:0;background:rgba(20,22,20,.62);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
   .overlay.show{animation:overlayIn .16s ease;}
-  .overlay.overlayClosing{animation:overlayOut .14s ease forwards;}
+  .overlay.overlayClosing{animation:overlayOut .2s ease forwards;}
   @keyframes overlayIn{ from{opacity:0;} to{opacity:1;} }
   @keyframes girar{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   @keyframes overlayOut{ from{opacity:1;} to{opacity:0;} }
   #overlay{z-index:90;}
   #inputOverlay{z-index:85;}
   .overlay.show{display:flex;}
-  .modal{background:var(--panel);border:1px solid var(--border-strong);border-radius:0;max-width:420px;width:100%;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:modalPop .16s ease;max-height:92vh;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;}
-  @keyframes modalPop{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
-  @keyframes modalPopOut{ from{opacity:1; transform:scale(1);} to{opacity:0; transform:scale(.96);} }
-  .modal.modalClosing{ animation:modalPopOut .14s ease forwards; }
+  .modal{background:var(--panel);border:1px solid var(--border-strong);border-radius:0;max-width:420px;width:100%;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:modalPop .28s cubic-bezier(.22,.8,.3,1);max-height:92vh;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;}
+  /* Las ventanas se abren y se cierran en vertical, desde una línea al centro (solo se revela el contenido, no se estira) */
+  @keyframes modalPop{ from{opacity:0; clip-path:inset(50% -30px 50% -30px);} to{opacity:1; clip-path:inset(-30px -30px -30px -30px);} }
+  @keyframes modalPopOut{ from{opacity:1; clip-path:inset(-30px -30px -30px -30px);} to{opacity:0; clip-path:inset(50% -30px 50% -30px);} }
+  .modal.modalClosing{ animation:modalPopOut .2s cubic-bezier(.4,0,.6,1) forwards; }
+  .ovDin{animation:overlayIn .16s ease;}
+  .ovDin>div{animation:modalPop .28s cubic-bezier(.22,.8,.3,1);}
+  .ovDin.ovCierra{animation:overlayOut .2s ease forwards;}
+  .ovDin.ovCierra>div{animation:modalPopOut .2s cubic-bezier(.4,0,.6,1) forwards;}
+  @media (prefers-reduced-motion:reduce){ .modal,.modal.modalClosing,.ovDin,.ovDin>div{animation-duration:.01s !important;} }
   @keyframes roleFlash{ 0%{filter:brightness(1);} 40%{filter:brightness(1.7);} 100%{filter:brightness(1);} }
   .role-flash{ animation:roleFlash .5s ease; }
 
@@ -3626,7 +3632,7 @@ function closeOverlayAnimated(overlayEl){
     overlayEl.classList.remove('show');
     overlayEl.classList.remove('overlayClosing');
     modal.classList.remove('modalClosing');
-  }, 140);
+  }, 200);
 }
 function closeModal(){ closeOverlayAnimated(overlay); pendingAction = null; }
 modalCancel.addEventListener('click', closeModal);
@@ -4266,6 +4272,29 @@ async function llamarDb(accion, extra){
   if(j && j.error === 'sin_sesion' && sessionToken && accion !== 'logout') sesionVencida();
   return j;
 }
+
+// Ventanas creadas por código: cierre animado y alto que se ajusta suave cuando cambia el contenido (cargando → datos, pestañas, filas que se abren)
+function cerrarDin(ov){
+  if(!ov.isConnected || ov.classList.contains('ovCierra')) return;
+  ov.classList.add('ovCierra');
+  setTimeout(() => ov.remove(), 200);
+}
+function autoAlto(caja, cont){
+  if(!window.ResizeObserver || !caja.animate || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  let prevC = cont.offsetHeight, mostrada = caja.offsetHeight, anim = null;
+  new ResizeObserver(() => {
+    const c = cont.offsetHeight; if(c === prevC) return;
+    const desde = anim ? caja.getBoundingClientRect().height : mostrada;
+    const hasta = Math.min(mostrada + (c - prevC), Math.round(innerHeight * 0.9));
+    prevC = c; mostrada = hasta;
+    if(anim){ anim.cancel(); anim = null; }
+    if(Math.abs(hasta - desde) < 6) return;
+    const ov = caja.style.overflow; caja.style.overflow = 'hidden';
+    anim = caja.animate([{height: desde + 'px'}, {height: hasta + 'px'}], {duration: 260, easing: 'cubic-bezier(.22,.8,.3,1)'});
+    const fin = () => { caja.style.overflow = ov; anim = null; };
+    anim.onfinish = fin; anim.oncancel = () => { caja.style.overflow = ov; };
+  }).observe(cont);
+}
 // ---- permisos de invitado por sección ----
 const SECC_INV = [['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica']];
 const DEMO_USUARIOS = [
@@ -4278,8 +4307,10 @@ async function abrirPermisosSecciones(){
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
   ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><b style="font-size:16px;flex:1;">Permisos de secciones</b><button type="button" class="btn small" id="secCerrar">Cerrar</button></div><p style="margin:0 0 12px;font-size:12.5px;color:var(--sub);">Cada persona entra solo a lo suyo. Marca una sección para dejarla entrar como invitada. Por defecto cada cuenta usa un solo aparato (PC, celular o tablet); marca «Celular / tablet extra» para permitirle además un segundo aparato. Los cambios se guardan al marcar y valen la próxima vez que abra el menú.</p><div id="secCuerpo" style="font-size:13px;">Cargando…</div></div>';
+  ov.className = 'ovDin';
   document.body.appendChild(ov);
-  const cerrar = () => ov.remove();
+  autoAlto(ov.firstElementChild, ov.querySelector('#secCuerpo'));
+  const cerrar = () => cerrarDin(ov);
   ov.addEventListener('click', e => { if(e.target === ov) cerrar(); });
   ov.querySelector('#secCerrar').addEventListener('click', cerrar);
   let usuarios = null, demo = !DB_URL;
@@ -4339,9 +4370,11 @@ async function abrirAdministracion(){
     + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🛠 Administración' + (demo ? ' (prueba)' : '') + '</b><button class="btn" id="admCerrar" type="button">Cerrar</button></div>'
     + '<div style="display:flex;gap:6px;margin-bottom:12px;"><button class="btn" id="admTU" type="button">Usuarios</button><button class="btn" id="admTE" type="button">Encargados</button></div>'
     + '<div id="admCuerpo" style="font-size:13px;">Cargando…</div><div id="admMsg" style="min-height:20px;margin-top:10px;font-size:12.5px;font-weight:600;"></div></div>';
+  ov.className = 'ovDin';
   document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#admCuerpo');
-  ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'admCerrar') ov.remove(); });
+  autoAlto(ov.firstElementChild, cuerpo);
+  ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'admCerrar') cerrarDin(ov); });
   let datos;
   if(demo){ try{ datos = JSON.parse(localStorage.getItem('pruebaAdmin')); }catch(e){} if(!datos) datos = JSON.parse(JSON.stringify(ADM_DEMO)); }
   else {
@@ -4443,11 +4476,11 @@ async function abrirAdministracion(){
     cuerpo.innerHTML = '<div style="color:var(--sub);margin-bottom:8px;">Este nombre aparece en cada botón del menú de inicio.</div>'
       + ADM_SECC.map(([k, n]) => '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><label style="width:170px;">' + n + '</label><input data-k="' + k + '" value="' + esc(datos.encargados[k] || '') + '" maxlength="60" style="flex:1;"></div>').join('')
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn primary" id="admEG" type="button">Guardar y cerrar</button><button class="btn" id="admEC" type="button">Cerrar sin guardar</button></div>';
-    cuerpo.querySelector('#admEC').addEventListener('click', () => ov.remove());
+    cuerpo.querySelector('#admEC').addEventListener('click', () => cerrarDin(ov));
     cuerpo.querySelector('#admEG').addEventListener('click', async () => {
       const enc = {}; cuerpo.querySelectorAll('input[data-k]').forEach(i => { enc[i.dataset.k] = i.value.trim(); });
       const j = await accion('adminEncargadosGuardar', {encargados: enc}); if(!j) return;
-      datos.encargados = demo ? {...datos.encargados, ...enc} : j.encargados; if(demo) guardarDemo(); avisoToast('Encargados guardados.', 'ok'); ov.remove();
+      datos.encargados = demo ? {...datos.encargados, ...enc} : j.encargados; if(demo) guardarDemo(); avisoToast('Encargados guardados.', 'ok'); cerrarDin(ov);
     });
   }
   ov.querySelector('#admTU').addEventListener('click', verUsuarios);
