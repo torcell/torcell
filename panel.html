@@ -202,6 +202,8 @@
   .db-badge.error{color:#fff;background:#a5334f;border-color:#a5334f;}
 
   .admin-only{display:none;}
+  .solo-asist{display:none !important;}
+  body.puede-asist .solo-asist{display:inline-flex !important;}
   .solo-admin{display:none !important;}
   body.is-admin .solo-admin{display:inline-flex !important;}
   body.is-admin .admin-only{display:inline-flex;}
@@ -1102,15 +1104,42 @@
 .rd-d.bad{border-left-color:var(--bad,#c0392b);}
 .rd-d small{display:block;font-size:11px;color:var(--sub);}.rd-d b{display:block;font-size:14px;}.rd-d span{font-size:12px;color:var(--sub);}
 .rd-tit{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin:12px 0 6px;}
-.rd-f{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(180px,2fr) 90px 100px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
+.rd-f{display:grid;grid-template-columns:minmax(220px,2.2fr) minmax(150px,1.4fr) 80px 90px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
 .rd-b span{font-size:12px;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
+
+.as-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.as-bar input[type=date]{font:inherit;padding:5px 8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:0;}
+.as-dia{font-size:13px;font-weight:700;}
+.as-aviso{font-size:12px;color:var(--sub);border:1px dashed var(--border);padding:7px 10px;margin-bottom:8px;}
+.as-fila{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--border);}
+.as-seg{display:flex;}
+.as-seg button{font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);cursor:pointer;border-radius:0;margin-left:-1px;transition:background .12s,color .12s;}
+.as-seg button:first-child{margin-left:0;}
+.as-seg button:hover{background:rgba(127,127,127,.15);}
+.as-seg button.on-P{background:var(--ok,#43a047);border-color:var(--ok,#43a047);color:#fff;position:relative;}
+.as-seg button.on-F{background:var(--bad,#c0392b);border-color:var(--bad,#c0392b);color:#fff;position:relative;}
+.as-seg button.on-S{background:var(--warn,#d99a00);border-color:var(--warn,#d99a00);color:#fff;position:relative;}
+.as-sub{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12.5px;padding:6px 8px;background:rgba(127,127,127,.1);border-left:4px solid var(--warn,#d99a00);}
+.as-sub select,.as-sub input{font:inherit;font-size:12.5px;padding:4px 6px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:0;}
+.as-pie{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.as-msg{font-size:12.5px;flex:1;min-width:160px;}
+@media(max-width:560px){.as-fila{grid-template-columns:1fr;}}
 .rd-vacio{padding:18px;color:var(--sub);border:1px dashed var(--border);text-align:center;}
-@media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-b{grid-column:1/-1;order:3}}
+@media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-n{grid-column:1/-1}.rd-b{grid-column:1/-1;order:3}}
+.rd-sub{font-size:12px;color:var(--sub);margin:-2px 0 8px;}
+.rd-fr b{font-weight:700;}
+.rd-h summary{cursor:pointer;font-size:12px;color:var(--accent);list-style:none;border:1px solid var(--border);padding:4px 8px;text-align:center;}
+.rd-h summary::-webkit-details-marker{display:none;}
+.rd-h[open]{grid-column:1/-1;order:9;}
+.rd-h[open] summary{width:90px;margin-bottom:6px;}
+.rd-hv{font-size:12px;color:var(--sub);padding:4px 0;}
+.rd-hl{font-size:12.5px;padding:5px 0;border-top:1px dashed var(--border);}
+.rd-hl small{display:block;font-size:11px;color:var(--sub);}
 
 </style>
 </head>
@@ -1236,6 +1265,7 @@
       <div class="tb-btns">
         <button class="btn primary admin-only" id="saveNowBtn">💾 Guardar ahora</button>
         <button class="btn" id="dbBtn">Conectar base de datos</button>
+        <button class="btn solo-asist" id="asistBtn">🗓 Asistencia</button>
         <button class="btn admin-only" id="exportBtn">Exportar datos</button>
         <button class="btn admin-only" id="importBtn">Importar datos</button>
         <button class="btn solo-admin" id="espaciadoBtn" style="grid-column:1 / -1;"></button>
@@ -1674,7 +1704,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.63.0';
+const APP_VERSION = '0.64.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1868,6 +1898,7 @@ function applyRoleUI(){
   document.body.classList.toggle('is-admin', isAdmin);
   document.body.classList.toggle('is-supervisor', isSupervisor || isJefe);
   document.body.classList.toggle('is-worker', !!workerSession);
+  document.body.classList.toggle('puede-asist', !!(isAdmin || isSupervisor));
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
   const normNom = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const veDashboard = !isAdmin && ((isJefe || isSupervisor) && normNom(sessionName).indexOf('sandoval') !== -1);
@@ -4344,6 +4375,7 @@ async function abrirPermisosSecciones(){
     usuarios = j.usuarios;
   }
   const cuerpo = ov.querySelector('#secCuerpo');
+  usuarios.sort(ORD_USU);
   const filas = usuarios.map((u, i) => '<tr><td style="padding:8px 6px;border-top:1px solid var(--border);"><b>' + esc(u.nombre) + '</b><div style="font-size:11.5px;color:var(--sub);">' + esc(u.cargo) + '</div></td>' + SECC_INV.map(([k, n]) => {
     const propia = u.base.indexOf(k) !== -1;
     return '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (propia ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (u.extra.indexOf(k) !== -1 ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="' + esc(n) + ' para ' + esc(u.nombre) + '">') + '</td>';
@@ -4379,7 +4411,9 @@ const ADM_DEMO = {
     {fila: 2, nombre: 'Silvia Gonzales', cargo: 'Calidad', rol: 5, bloqueo: null},
     {fila: 3, nombre: 'Sandoval', cargo: 'Jefe de Terreno', rol: 4, bloqueo: null},
     {fila: 4, nombre: 'Edwin Carroz', cargo: 'Oficina Técnica', rol: 6, bloqueo: null},
-    {fila: 5, nombre: 'Rafael', cargo: 'Trabajador', rol: 3, bloqueo: {permanente: false, hasta: Date.now() + 3 * 86400000, motivo: 'Vacaciones'}}
+    {fila: 5, nombre: 'Rafael', cargo: 'Trabajador', rol: 3, bloqueo: {permanente: false, hasta: Date.now() + 3 * 86400000, motivo: 'Vacaciones'}},
+    {fila: 6, nombre: 'Ignacio', cargo: 'Supervisor', rol: 2, bloqueo: null},
+    {fila: 7, nombre: 'Ismael S.', cargo: 'Admin', rol: 1, bloqueo: null}
   ],
   encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzales', avance: 'A. Sandoval', terreno: 'A. Sandoval', oficina: 'Edwin Carroz', admin: 'Ismael S.'}
 };
@@ -4400,7 +4434,7 @@ async function abrirAdministracion(){
   if(demo){ try{ datos = JSON.parse(localStorage.getItem('pruebaAdmin')); }catch(e){} if(!datos) datos = JSON.parse(JSON.stringify(ADM_DEMO)); }
   else {
     const j = await llamarDb('adminUsuarios');
-    if(!j || !j.ok){ cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 63 o más nueva.'; return; }
+    if(!j || !j.ok){ cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.'; return; }
     datos = {usuarios: j.usuarios, encargados: j.encargados};
   }
   function admMsg(t, ok){ const m = ov.querySelector('#admMsg'); if(m){ m.textContent = t; m.style.color = ok ? 'var(--ok, #43a047)' : '#d9534f'; } }
@@ -4419,10 +4453,11 @@ async function abrirAdministracion(){
     if(demo) return {ok: true, demo: true};
     const j = await llamarDb(nombreAccion, extra);
     if(j && j.ok) return j;
-    const t = (j && ERR[j.error]) || 'No se pudo guardar. ¿Está publicada la versión 63 del script?'; admMsg(t, false); avisoToast(t, 'error');
+    const t = (j && ERR[j.error]) || 'No se pudo guardar. ¿Está publicada la versión 64 del script?'; admMsg(t, false); avisoToast(t, 'error');
     return null;
   }
   function verUsuarios(){
+    datos.usuarios.sort(ORD_USU);
     const filas = datos.usuarios.map((u, i) => {
       const b = u.bloqueo;
       const estado = b ? '<span style="color:var(--bad);font-weight:600;">Bloqueado ' + (b.permanente ? 'permanente' : 'hasta ' + fmt(b.hasta)) + '</span>' + (b.motivo ? '<div style="font-size:11.5px;color:var(--sub);">' + esc(b.motivo) + '</div>' : '') : '<span style="color:var(--sub);">Activo</span>';
@@ -4510,71 +4545,149 @@ async function abrirAdministracion(){
 }
 document.getElementById('adminBtn').addEventListener('click', abrirAdministracion);
 /* ===== Rendimiento por trabajador (compartido: panel y admin) ===== */
+/* ===== Rendimiento por trabajador v64 (compartido: panel y admin) · semana / mes / total, con asistencia ===== */
+const RD_MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const RD_MC = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function rdIso(d){ return d.toISOString().substring(0, 10); }
+function rdFecha(s){ return new Date(s + 'T00:00:00Z'); }
+function rdSuma(s, n){ const d = rdFecha(s); d.setUTCDate(d.getUTCDate() + n); return rdIso(d); }
+function rdLunes(s){ const d = rdFecha(s); return rdSuma(s, -((d.getUTCDay() + 6) % 7)); }
+function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function rendDemo(){
-  const nombres = ['Rafael Soto', 'Jorge Díaz', 'Luis Mella', 'Pedro Araya', 'Marcos Vera', 'Iván Rojas'];
+  const nombres = ['Rafael', 'Raymond', 'Luis', 'Pedro', 'Marcos', 'Iván'];
   const factor = [1.25, 1.1, 1, 0.85, 0.6, 0.35];
-  const hoy = new Date(); const lun = new Date(Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())); lun.setUTCDate(lun.getUTCDate() - ((lun.getUTCDay() + 6) % 7));
   let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const lun = rdLunes(rdHoy());
   const trabajadores = nombres.map((nombre, i) => {
-    const semanas = [];
+    const dias = [], asistencia = [];
     for(let k = 11; k >= 0; k--){
-      const d = new Date(lun); d.setUTCDate(d.getUTCDate() - 7 * k);
       if(i === 5 && k > 5) continue;
-      const m2 = Math.round(factor[i] * (38 + rnd() * 26) * 10) / 10;
-      semanas.push({s: d.toISOString().substring(0, 10), cat: 'Cerámica', m2: m2, n: Math.max(1, Math.round(m2 / 9)), d: Math.max(1, Math.min(6, Math.round(2 + factor[i] * 2.2 + rnd() * 1.5))), t: Math.round((1.5 / factor[i]) * 10) / 10 * Math.max(1, Math.round(m2 / 9)), tn: Math.max(1, Math.round(m2 / 9))});
+      const l = rdSuma(lun, -7 * k);
+      for(let j = 0; j < 6; j++){
+        const f = rdSuma(l, j); if(f > rdHoy()) continue;
+        if(j === 5){ if(rnd() < 0.25){ asistencia.push({d: f, e: 'P', fr: 1, m: '', s: ''}); dias.push({d: f, cat: 'Cerámica', m2: Math.round(factor[i] * 6 * 10) / 10, n: 1, t: 1, tn: 1}); } continue; }
+        const r = rnd();
+        if(r < 0.07 + (1 - factor[i]) * 0.1){ asistencia.push({d: f, e: 'F', fr: 0, m: '', s: ''}); continue; }
+        if(r < 0.14 + (1 - factor[i]) * 0.1){ asistencia.push({d: f, e: 'S', fr: 0.5, m: 'sin cancha', s: 'medio día'}); dias.push({d: f, cat: 'Cerámica', m2: Math.round(factor[i] * 4 * 10) / 10, n: 1, t: 1, tn: 1}); continue; }
+        asistencia.push({d: f, e: 'P', fr: 1, m: '', s: ''});
+        dias.push({d: f, cat: 'Cerámica', m2: Math.round(factor[i] * (7 + rnd() * 5) * 10) / 10, n: 1 + Math.round(rnd()), t: Math.round((1.5 / factor[i]) * 10) / 10, tn: 1});
+      }
     }
-    return {nombre, semanas};
+    return {nombre, dias, asistencia};
   });
-  return {ok: true, trabajadores, cobertura: {terminadas: 412, conFecha: 388, conM2: 405}};
+  return {ok: true, trabajadores, cobertura: {terminadas: 412, conFecha: 388, conM2: 405}, jornada: {entrada: 8, horas: 9}};
 }
 function renderRendimiento(raiz, datos, esc){
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
-  const semanasAll = Array.from(new Set(datos.trabajadores.flatMap(t => t.semanas.map(w => w.s)))).sort();
-  raiz.innerHTML = '<div class="rd-ctl"><label>Período <select id="rdPer"><option value="4">Últimas 4 semanas</option><option value="8" selected>Últimas 8 semanas</option><option value="12">Últimas 12 semanas</option><option value="0">Todo</option></select></label>'
-    + '<label>Categoría <select id="rdCat"><option value="">Cerámica y Frague</option><option value="Cerámica">Cerámica</option><option value="Frague">Frague</option></select></label></div><div id="rdOut"></div>';
-  const out = raiz.querySelector('#rdOut');
-  function pintar(){
-    const n = Number(raiz.querySelector('#rdPer').value), cat = raiz.querySelector('#rdCat').value;
-    const hoyLun = (() => { const d = new Date(); const u = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); u.setUTCDate(u.getUTCDate() - ((u.getUTCDay() + 6) % 7)); return u; })();
-    const lista = []; const total = n || Math.max(1, semanasAll.length);
-    let desde = semanasAll[0] || ''; 
-    if(n){ for(let k = n - 1; k >= 0; k--){ const d = new Date(hoyLun); d.setUTCDate(d.getUTCDate() - 7 * k); lista.push(d.toISOString().substring(0, 10)); } }
-    else { if(semanasAll.length){ const a = new Date(semanasAll[0] + 'T00:00:00Z'); while(a <= hoyLun){ lista.push(a.toISOString().substring(0, 10)); a.setUTCDate(a.getUTCDate() + 7); } } }
-    const filas = datos.trabajadores.map(t => {
-      const por = {}; lista.forEach(s => por[s] = {m2: 0, n: 0, d: 0, t: 0, tn: 0});
-      t.semanas.forEach(w => { if(por[w.s] && (!cat || w.cat === cat)){ const p = por[w.s]; p.m2 += w.m2; p.n += w.n; p.d = Math.max(p.d, w.d); p.t += w.t; p.tn += w.tn; } });
-      const serie = lista.map(s => por[s].m2);
-      const m2 = serie.reduce((a, b) => a + b, 0), partidas = lista.reduce((a, s) => a + por[s].n, 0);
-      const dias = lista.reduce((a, s) => a + por[s].d, 0), semAct = lista.filter(s => por[s].m2 > 0 || por[s].d > 0).length;
-      const tt = lista.reduce((a, s) => a + por[s].t, 0), tn = lista.reduce((a, s) => a + por[s].tn, 0);
-      const mitad = Math.floor(serie.length / 2), a1 = serie.slice(0, mitad).reduce((x, y) => x + y, 0), a2 = serie.slice(mitad).reduce((x, y) => x + y, 0);
-      return {nombre: t.nombre, m2, partidas, dias, semAct, serie, porSem: m2 / lista.length, tiempo: tn ? tt / tn : null, tend: a1 > 0 ? (a2 - a1) / a1 : (a2 > 0 ? 1 : 0)};
+  const hoy = rdHoy(), hoyLun = rdLunes(hoy);
+  let primera = hoy;
+  datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d < primera) primera = x.d; }); (t.asistencia || []).forEach(x => { if(x.d < primera) primera = x.d; }); });
+  const lun0 = rdLunes(primera);
+  const nSem = l => Math.round((rdFecha(l) - rdFecha(lun0)) / 604800000) + 1;
+  const todasSem = []; for(let l = lun0; l <= hoyLun; l = rdSuma(l, 7)) todasSem.push(l);
+  const sabActivo = {};
+  datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(rdFecha(x.d).getUTCDay() === 6) sabActivo[rdLunes(x.d)] = 1; }); (t.asistencia || []).forEach(x => { if(rdFecha(x.d).getUTCDay() === 6) sabActivo[rdLunes(x.d)] = 1; }); });
+  /* info de una semana: rango lun–vie (o sáb si alguien fue), y en qué meses caen sus días */
+  function infoSem(l){
+    const fin = rdSuma(l, sabActivo[l] ? 5 : 4), a = rdFecha(l), b = rdFecha(fin);
+    const cuenta = {}; for(let k = 0; k <= (sabActivo[l] ? 5 : 4); k++){ const m = rdFecha(rdSuma(l, k)).getUTCMonth(); cuenta[m] = (cuenta[m] || 0) + 1; }
+    const meses = Object.keys(cuenta).map(Number);
+    const rango = a.getUTCMonth() === b.getUTCMonth() ? a.getUTCDate() + ' – ' + b.getUTCDate() + ' ' + RD_MC[b.getUTCMonth()] : a.getUTCDate() + ' ' + RD_MC[a.getUTCMonth()] + ' – ' + b.getUTCDate() + ' ' + RD_MC[b.getUTCMonth()];
+    const mixta = meses.length > 1;
+    const nota = mixta ? meses.map(m => cuenta[m] + (cuenta[m] === 1 ? ' día' : ' días') + ' en ' + RD_MES[m]).join(', ') : '';
+    return {l, fin, rango, mixta, nota, n: nSem(l), tag: mixta ? ' (' + meses.map(m => RD_MC[m]).join('-') + ')' : ''};
+  }
+  const nombreSem = l => { const w = infoSem(l); return 'Semana ' + w.n + ' · ' + w.rango + w.tag; };
+  /* estadística de un trabajador en un rango de fechas */
+  function stat(t, desde, hasta, cat){
+    const r = {m2: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
+    t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat)){ r.m2 += x.m2; r.n += x.n; r.act[x.d] = 1; } });
+    (t.asistencia || []).forEach(x => {
+      if(x.d < desde || x.d > hasta) return;
+      r.reg++; if(rdFecha(x.d).getUTCDay() === 6) r.sab++;
+      if(x.e === 'F'){ r.F++; r.disp += 1; }
+      else if(x.e === 'P'){ r.P++; r.trab += 1; r.disp += 1; }
+      else if(x.e === 'S'){ r.S++; r.trab += x.fr; r.disp += x.m === 'sin cancha' ? x.fr : 1; (x.m === 'sin cancha' ? r.sc : r.otros).push(x); }
     });
-    if(!filas.some(f => f.m2 > 0 || f.dias > 0)){ out.innerHTML = '<div class="rd-vacio">Todavía no hay trabajo terminado con fecha en este período.</div>'; return; }
-    filas.sort((a, b) => b.m2 - a.m2);
-    const activos = filas.filter(f => f.m2 > 0), prom = activos.reduce((a, f) => a + f.m2, 0) / Math.max(1, activos.length), maxM2 = Math.max(1, ...filas.map(f => f.m2));
-    const totalM2 = filas.reduce((a, f) => a + f.m2, 0);
-    const porDias = filas.slice().sort((a, b) => b.dias - a.dias);
-    const sem = lista.map((s, i) => datos.trabajadores.reduce((a, t) => a + t.semanas.filter(w => w.s === s && (!cat || w.cat === cat)).reduce((x, w) => x + w.m2, 0), 0));
-    const maxS = Math.max(1, ...sem), W = 900, Hh = 130, bw = W / sem.length;
-    const barras = sem.map((v, i) => { const h = v / maxS * (Hh - 22); return '<rect x="' + (i * bw + 4) + '" y="' + (Hh - 16 - h) + '" width="' + Math.max(4, bw - 8) + '" height="' + h + '" fill="var(--accent)"><title>Semana del ' + lista[i].split('-').reverse().join('-') + ': ' + fmt(v) + ' m²</title></rect>'
-      + (sem.length <= 14 ? '<text x="' + (i * bw + bw / 2) + '" y="' + (Hh - 3) + '" font-size="9" text-anchor="middle" fill="var(--sub)">' + lista[i].substring(8) + '/' + lista[i].substring(5, 7) + '</text>' : ''); }).join('');
-    const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
-    const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
-    const cob = datos.cobertura || {};
-    out.innerHTML = '<div class="rd-res"><div><b>' + fmt(totalM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom / lista.length) + ' m²</b><span>promedio por trabajador por semana</span></div><div><b>' + activos.length + ' de ' + filas.length + '</b><span>trabajadores con m² en el período</span></div></div>'
-      + '<div class="rd-dest"><div class="rd-d ok"><small>Más rinde</small><b>' + esc(filas[0].nombre) + '</b><span>' + fmt(filas[0].m2) + ' m²</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(filas[filas.length - 1].nombre) + '</b><span>' + fmt(filas[filas.length - 1].m2) + ' m²</span></div>'
-      + '<div class="rd-d ok"><small>Más días con actividad</small><b>' + esc(porDias[0].nombre) + '</b><span>' + porDias[0].dias + ' días</span></div><div class="rd-d bad"><small>Menos días con actividad</small><b>' + esc(porDias[porDias.length - 1].nombre) + '</b><span>' + porDias[porDias.length - 1].dias + ' días</span></div></div>'
-      + '<div class="rd-tit">Ranking</div><div class="rd-tabla">' + filas.map((f, i) => {
-        const pct = prom ? f.m2 / prom * 100 : 0, flecha = f.tend > 0.1 ? '<span style="color:var(--ok,#43a047)">▲ ' + Math.round(f.tend * 100) + '%</span>' : f.tend < -0.1 ? '<span style="color:var(--bad,#c0392b)">▼ ' + Math.abs(Math.round(f.tend * 100)) + '%</span>' : '<span style="color:var(--sub)">= estable</span>';
-        return '<div class="rd-f"><div class="rd-n"><b>' + (i + 1) + '. ' + esc(f.nombre) + '</b><small>' + f.partidas + ' partidas · ' + f.semAct + ' de ' + lista.length + ' semanas con actividad' + (f.tiempo != null ? ' · ' + fmt(f.tiempo) + ' días por partida' : '') + (f.m2 ? '' : ' · sin m² en el período') + '</small></div>'
-          + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (f.m2 / maxM2 * 100) + '%;background:' + color(pct) + '"></i></div><span>' + fmt(f.m2) + ' m² · <b style="color:' + color(pct) + '">' + Math.round(pct) + '%</b> del promedio</span></div>'
-          + '<div class="rd-d2">' + f.dias + ' días<small>con actividad</small></div><div class="rd-s">' + spark(f.serie) + '<small>' + flecha + '</small></div></div>';
+    r.conAsist = r.reg > 0;
+    r.dias = r.conAsist ? r.trab : Object.keys(r.act).length;
+    r.porDia = r.dias ? r.m2 / r.dias : 0;
+    r.asistPct = r.disp ? r.trab / r.disp * 100 : null;
+    return r;
+  }
+  const fd = x => { const d = rdFecha(x); return d.getUTCDate() + ' ' + RD_MC[d.getUTCMonth()]; };
+  function fraseAsist(r){
+    const p = [];
+    if(!r.conAsist) return 'asistencia sin registrar';
+    p.push(r.F ? 'Tuvo ' + r.F + (r.F === 1 ? ' falta' : ' faltas') : 'Sin faltas');
+    if(r.sc.length) p.push(r.sc.length > 2 ? 'se fue antes por falta de cancha ' + r.sc.length + ' días' : 'se fue antes por falta de cancha ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
+    if(r.otros.length) p.push(r.otros.length > 2 ? 'salió antes ' + r.otros.length + ' días' : 'salió antes ' + r.otros.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
+    return p.join(' · ');
+  }
+  raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="rdVista"><option value="semana">Semana</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
+    + '<label id="rdSelW">Semana <select id="rdSem"></select></label><label id="rdSelM">Mes <select id="rdMes"></select></label>'
+    + '<label>Categoría <select id="rdCat"><option value="">Cerámica y Frague</option><option value="Cerámica">Cerámica</option><option value="Frague">Frague</option></select></label></div><div id="rdOut"></div>';
+  const out = raiz.querySelector('#rdOut'), $ = id => raiz.querySelector('#' + id);
+  /* selectores */
+  const hayDatoSem = l => datos.trabajadores.some(t => t.dias.some(x => rdLunes(x.d) === l) || (t.asistencia || []).some(x => rdLunes(x.d) === l));
+  $('rdSem').innerHTML = todasSem.slice().reverse().map(l => '<option value="' + l + '">' + esc(nombreSem(l)) + '</option>').join('');
+  $('rdSem').value = hayDatoSem(hoyLun) ? hoyLun : (todasSem.slice().reverse().find(hayDatoSem) || hoyLun);
+  const meses = []; { let a = new Date(primera.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z'); while(a <= z){ meses.push(rdIso(a).substring(0, 7)); a.setUTCMonth(a.getUTCMonth() + 1); } }
+  $('rdMes').innerHTML = meses.slice().reverse().map(m => '<option value="' + m + '">' + RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4) + '</option>').join('');
+  $('rdMes').value = hoy.substring(0, 7);
+  const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
+  const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
+  function pintar(){
+    const vista = $('rdVista').value, cat = $('rdCat').value;
+    $('rdSelW').style.display = vista === 'semana' ? '' : 'none'; $('rdSelM').style.display = vista === 'mes' ? '' : 'none';
+    let desde, hasta, titulo, sub = '';
+    if(vista === 'semana'){ const l = $('rdSem').value, w = infoSem(l); desde = l; hasta = rdSuma(l, 6); titulo = 'Semana ' + w.n + ' · ' + w.rango + w.tag; sub = w.nota; }
+    else if(vista === 'mes'){ const m = $('rdMes').value; desde = m + '-01'; hasta = m + '-31'; titulo = RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4); sub = 'Suma por la fecha real de cada día: las semanas que mezclan dos meses se reparten día a día.'; }
+    else { desde = '0000-01-01'; hasta = '9999-12-31'; titulo = 'Total acumulado'; sub = 'Desde la semana ' + 1 + ' (' + fd(primera) + ') hasta hoy · ' + todasSem.length + ' semanas.'; }
+    const filas = datos.trabajadores.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat)}));
+    if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
+    const act = filas.filter(f => f.r.dias > 0);
+    const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
+    const prom = totDias ? act.reduce((a, f) => a + f.r.m2, 0) / totDias : 0;
+    filas.forEach(f => { f.pct = prom && f.r.dias ? f.r.porDia / prom * 100 : null; });
+    const conPct = filas.filter(f => f.pct != null).sort((a, b) => b.pct - a.pct);
+    const conAs = filas.filter(f => f.r.asistPct != null).sort((a, b) => b.r.asistPct - a.r.asistPct || a.r.F - b.r.F);
+    const maxM2 = Math.max(1, ...filas.map(f => f.r.m2));
+    const sinAs = filas.filter(f => !f.r.conAsist && (f.r.m2 > 0)).length;
+    const asEq = conAs.length ? conAs.reduce((a, f) => a + f.r.trab, 0) / Math.max(1e-9, conAs.reduce((a, f) => a + f.r.disp, 0)) * 100 : null;
+    /* gráfico de m² por semana (últimas 12, o todas en Total hasta 30) */
+    const lim = vista === 'total' ? 30 : 12; const semG = todasSem.slice(-lim);
+    const sm = semG.map(l => datos.trabajadores.reduce((a, t) => a + stat(t, l, rdSuma(l, 6), cat).m2, 0)), maxS = Math.max(1, ...sm), W = 900, Hh = 130, bw = W / sm.length;
+    const selL = vista === 'semana' ? $('rdSem').value : '';
+    const barras = sm.map((v, i) => { const h = v / maxS * (Hh - 34); const w = infoSem(semG[i]);
+      return '<rect x="' + (i * bw + 4) + '" y="' + (Hh - 16 - h) + '" width="' + Math.max(4, bw - 8) + '" height="' + h + '" fill="var(--accent)" opacity="' + (selL && selL !== semG[i] ? '.45' : '1') + '"><title>Semana ' + w.n + ' · ' + w.rango + ': ' + fmt(v) + ' m²</title></rect>'
+      + '<text x="' + (i * bw + bw / 2) + '" y="' + (Hh - 18 - h) + '" font-size="9" text-anchor="middle" fill="var(--text)">' + (v ? fmt(v) : '') + '</text>'
+      + (sm.length <= 16 ? '<text x="' + (i * bw + bw / 2) + '" y="' + (Hh - 3) + '" font-size="9" text-anchor="middle" fill="var(--sub)">S' + w.n + '</text>' : ''); }).join('');
+    const hist = f => {
+      const sems = todasSem.slice().reverse().map(l => ({l, r: stat(f.t, l, rdSuma(l, 6), cat)})).filter(x => x.r.m2 > 0 || x.r.reg > 0 || x.r.dias > 0);
+      if(!sems.length) return '<div class="rd-hv">Sin historial todavía.</div>';
+      const tot = stat(f.t, '0000-01-01', '9999-12-31', cat);
+      return '<div class="rd-hv"><b>Acumulado:</b> ' + fmt(tot.m2) + ' m² en ' + sems.length + ' semanas · ' + (tot.conAsist ? tot.F + (tot.F === 1 ? ' falta' : ' faltas') + ' en total' : 'asistencia sin registrar') + '</div>'
+        + sems.map(x => { const w = infoSem(x.l); return '<div class="rd-hl"><b>' + esc(f.nombre) + ': ' + fmt(x.r.m2) + ' m²</b> · Semana ' + w.n + ' · ' + w.rango + w.tag + ' | ' + fraseAsist(x.r) + (w.mixta ? '<small>' + w.nota + '</small>' : '') + '</div>'; }).join('');
+    };
+    const ord = filas.slice().sort((a, b) => (b.pct == null ? -1 : b.pct) - (a.pct == null ? -1 : a.pct) || b.r.m2 - a.r.m2);
+    out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '')
+      + '<div class="rd-res"><div><b>' + fmt(totM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom) + ' m²</b><span>promedio por día trabajado (100%)</span></div><div><b>' + (asEq == null ? '—' : Math.round(asEq) + '%') + '</b><span>asistencia del equipo' + (asEq == null ? ' (sin registrar)' : '') + '</span></div></div>'
+      + '<div class="rd-dest">'
+      + (conPct.length ? '<div class="rd-d ok"><small>Más rinde</small><b>' + esc(conPct[0].nombre) + '</b><span>' + Math.round(conPct[0].pct) + '% del promedio</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(conPct[conPct.length - 1].nombre) + '</b><span>' + Math.round(conPct[conPct.length - 1].pct) + '% del promedio</span></div>' : '')
+      + (conAs.length ? '<div class="rd-d ok"><small>Mejor asistencia</small><b>' + esc(conAs[0].nombre) + '</b><span>' + Math.round(conAs[0].r.asistPct) + '% · ' + conAs[0].r.F + (conAs[0].r.F === 1 ? ' falta' : ' faltas') + '</span></div><div class="rd-d bad"><small>Peor asistencia</small><b>' + esc(conAs[conAs.length - 1].nombre) + '</b><span>' + Math.round(conAs[conAs.length - 1].r.asistPct) + '% · ' + conAs[conAs.length - 1].r.F + (conAs[conAs.length - 1].r.F === 1 ? ' falta' : ' faltas') + '</span></div>' : '<div class="rd-d"><small>Asistencia</small><b>Sin registrar</b><span>Usa el botón Asistencia del panel</span></div>')
+      + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
+        const r = f.r, p = f.pct;
+        const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? 'Semana ' + infoSem($('rdSem').value).n + ' · ' + infoSem($('rdSem').value).rango + infoSem($('rdSem').value).tag : esc(titulo)) + ' | ' + fraseAsist(r);
+        return '<div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small></div>'
+          + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span>' + (p == null ? 'sin días para comparar' : '<b style="color:' + color(p) + '">' + Math.round(p) + '%</b> del promedio por día') + '</span></div>'
+          + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
+          + '<details class="rd-h"><summary>Historial</summary>' + hist(f) + '</details></div>';
       }).join('') + '</div>'
       + '<div class="rd-tit">m² por semana del equipo</div><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;max-width:900px;height:auto;">' + barras + '</svg>'
-      + '<div class="rd-nota"><b>Sobre los datos.</b> Los m² y las fechas salen de lo que se marca como terminado en el panel' + (cob.terminadas ? ' (' + cob.conFecha + ' de ' + cob.terminadas + ' partidas terminadas tienen fecha; ' + cob.conM2 + ' tienen m²)' : '') + '. Las partidas sin fecha no entran en el cálculo. «Días con actividad» cuenta los días en que se marcó una partida o un terminado del trabajador: <b>no es asistencia real</b>, porque hoy el sistema no registra quién fue a trabajar cada día.</div>';
+      + '<div class="rd-nota"><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</div>';
   }
-  raiz.querySelector('#rdPer').addEventListener('change', pintar); raiz.querySelector('#rdCat').addEventListener('change', pintar);
+  ['rdVista', 'rdSem', 'rdMes', 'rdCat'].forEach(id => $(id).addEventListener('change', pintar));
   pintar();
 }
 
@@ -4591,10 +4704,103 @@ async function abrirRendimiento(){
   if(demo){ await new Promise(r => setTimeout(r, 250)); datos = rendDemo(); }
   else { datos = await llamarDb('rendimientoDatos'); }
   const cuerpo = ov.querySelector('#rdCuerpo');
-  if(!datos || !datos.ok){ cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 63 o más nueva.'; return; }
+  if(!datos || !datos.ok){ cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.'; return; }
   renderRendimiento(cuerpo, datos, esc);
 }
 document.getElementById('rendBtn').addEventListener('click', abrirRendimiento);
+
+
+const ORD_USU = (a, b) => { const o = {1: 0, 2: 1, 4: 2, 6: 3, 5: 4, 3: 5}; return (o[a.rol] ?? 9) - (o[b.rol] ?? 9); }; // admins primero, trabajadores al final
+// ===== v64: Asistencia diaria (Presente / Falta / Se fue antes) =====
+const ASIST_DEMO = {};
+async function abrirAsistencia(){
+  const demo = !DB_URL;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🗓 Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
+  ov.className = 'ovDin';
+  document.body.appendChild(ov);
+  const cuerpo = ov.querySelector('#asCuerpo');
+  autoAlto(ov.firstElementChild, cuerpo);
+  const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  let fecha = rdHoy(), estado = {}, lista = [], ocupado = false;
+  const dow = f => new Date(f + 'T00:00:00Z').getUTCDay();
+  const sumar = (f, n) => rdSuma(f, n);
+  const cerrar = () => cerrarDin(ov);
+  async function cargar(){
+    cuerpo.innerHTML = '<div class="as-aviso">Cargando asistencia…</div>';
+    let r;
+    if(demo){ await new Promise(x => setTimeout(x, 150)); r = {ok: true, registros: JSON.parse(JSON.stringify(ASIST_DEMO[fecha] || {})), trabajadores: activeWorkers().length ? activeWorkers() : ALL_WORKERS.slice(0, 8)}; }
+    else r = await llamarDb('asistenciaDia', {fecha});
+    if(!r || !r.ok){ cuerpo.innerHTML = '<div class="as-aviso">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div><div class="as-pie"><button class="btn" type="button" id="asX">Cerrar</button></div>'; cuerpo.querySelector('#asX').onclick = cerrar; return; }
+    lista = r.trabajadores || []; estado = {};
+    Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; estado[n] = {e: x.e, m: x.m || '', s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lista.indexOf(n) === -1) lista.push(n); });
+    pintar();
+  }
+  function pintar(msg, error){
+    const d = dow(fecha), sab = d === 6;
+    let h = '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><input type="date" id="asFecha" value="' + fecha + '" max="' + rdHoy() + '"><button class="btn" type="button" id="asSig"' + (fecha >= rdHoy() ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Hoy</button><span class="as-dia">' + DIAS[d] + '</span></div>';
+    if(d === 0) h += '<div class="as-aviso">Los domingos no se registra asistencia.</div>';
+    else {
+      if(sab) h += '<div class="as-aviso">Sábado: marca solo a quienes fueron. Quien no se marca simplemente no fue (no cuenta como falta).</div>';
+      h += lista.length ? lista.map((n, i) => {
+        const x = estado[n] || {e: ''};
+        let f = '<div class="as-fila"><b>' + esc(n) + '</b><div class="as-seg" data-i="' + i + '"><button type="button" data-e="P" class="' + (x.e === 'P' ? 'on-P' : '') + '">Presente</button>' + (sab ? '' : '<button type="button" data-e="F" class="' + (x.e === 'F' ? 'on-F' : '') + '">Falta</button>') + '<button type="button" data-e="S" class="' + (x.e === 'S' ? 'on-S' : '') + '">Se fue antes</button></div>';
+        if(x.e === 'S'){
+          const hora = /^\d\d:\d\d$/.test(x.s) ? x.s : '';
+          f += '<div class="as-sub" data-i="' + i + '"><label>Motivo <select data-k="m"><option value="sin cancha"' + (x.m !== 'otro' ? ' selected' : '') + '>No hay cancha</option><option value="otro"' + (x.m === 'otro' ? ' selected' : '') + '>Otro</option></select></label><label>Salida <select data-k="t"><option value="medio dia"' + (x.s !== 'hora' && !hora ? ' selected' : '') + '>Medio día</option><option value="hora"' + (hora || x.s === 'hora' ? ' selected' : '') + '>A una hora</option></select></label>' + ((hora || x.s === 'hora') ? '<label>Hora <input type="time" data-k="h" value="' + (hora || '15:00') + '"></label>' : '') + '</div>';
+        }
+        return f + '</div>';
+      }).join('') : '<div class="as-aviso">No hay trabajadores activos.</div>';
+    }
+    h += '<div class="as-pie">' + (d === 0 ? '' : '<button class="btn" type="button" id="asTodos">Todos presentes</button>') + '<span class="as-msg" id="asMsg" style="color:' + (error ? 'var(--bad,#c0392b)' : 'var(--sub)') + '">' + esc(msg || 'Toca otra vez un botón para quitar la marca.') + '</span><button class="btn primary" type="button" id="asGuardar"' + (d === 0 ? ' disabled' : '') + '>Guardar y cerrar</button><button class="btn" type="button" id="asX">Cerrar sin guardar</button></div>';
+    cuerpo.innerHTML = h;
+    const ir = f => { if(f > rdHoy()) return; fecha = f; cargar(); };
+    cuerpo.querySelector('#asAnt').onclick = () => ir(sumar(fecha, -1));
+    cuerpo.querySelector('#asSig').onclick = () => ir(sumar(fecha, 1));
+    cuerpo.querySelector('#asHoy').onclick = () => ir(rdHoy());
+    cuerpo.querySelector('#asFecha').onchange = e => { if(e.target.value) ir(e.target.value); };
+    cuerpo.querySelector('#asX').onclick = cerrar;
+    const todos = cuerpo.querySelector('#asTodos');
+    if(todos) todos.onclick = () => { lista.forEach(n => { if(!estado[n] || !estado[n].e) estado[n] = {e: 'P', m: '', s: ''}; }); pintar(); };
+    cuerpo.querySelectorAll('.as-seg button').forEach(b => b.onclick = () => {
+      const n = lista[Number(b.parentNode.dataset.i)], e = b.dataset.e;
+      if(estado[n] && estado[n].e === e) estado[n] = {e: '', m: '', s: ''};
+      else estado[n] = {e, m: e === 'S' ? 'sin cancha' : '', s: e === 'S' ? 'medio dia' : ''};
+      pintar();
+    });
+    cuerpo.querySelectorAll('.as-sub').forEach(sb => {
+      const n = lista[Number(sb.dataset.i)];
+      sb.querySelectorAll('[data-k]').forEach(c => c.onchange = () => {
+        const k = c.dataset.k;
+        if(k === 'm') estado[n].m = c.value;
+        if(k === 't'){ estado[n].s = c.value === 'hora' ? '15:00' : 'medio dia'; pintar(); }
+        if(k === 'h') estado[n].s = c.value || '15:00';
+      });
+    });
+    cuerpo.querySelector('#asGuardar').onclick = guardar;
+  }
+  async function guardar(){
+    if(ocupado) return; ocupado = true;
+    const btn = cuerpo.querySelector('#asGuardar'); if(btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
+    const items = lista.map(n => { const x = estado[n] || {e: ''}; return {trabajador: n, e: x.e || 'N', m: x.m, s: x.s}; });
+    for(const it of items){ if(it.e === 'S' && it.s !== 'medio dia' && !/^\d\d:\d\d$/.test(it.s)){ ocupado = false; pintar('Falta la hora de salida de ' + it.trabajador + '.', true); return; } }
+    let r;
+    if(demo){
+      const reg = {};
+      items.forEach(it => { if(it.e === 'N') return; reg[it.trabajador] = {e: it.e, m: it.m, s: it.s === 'medio dia' ? 'medio día' : it.s}; });
+      ASIST_DEMO[fecha] = reg; r = {ok: true};
+    } else r = await llamarDb('asistenciaGuardar', {fecha, items});
+    ocupado = false;
+    if(r && r.ok){ avisoToast('Asistencia guardada.', 'ok'); cerrar(); return; }
+    const ERRA = {fecha_futura: 'No se puede registrar un día que aún no llega.', domingo: 'Los domingos no se registra asistencia.', sin_sesion: 'Tu sesión venció.'};
+    const t = (r && ERRA[r.error]) || 'No se pudo guardar. Revisa la conexión y que el Apps Script esté publicado en la versión 64.';
+    pintar(t, true); avisoToast(t, 'error');
+  }
+  ov.addEventListener('click', e => { if(e.target === ov) cerrar(); });
+  cargar();
+}
+document.getElementById('asistBtn').addEventListener('click', abrirAsistencia);
 
 
 let avisoToastTimer = null;
