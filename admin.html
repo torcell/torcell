@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||h.rol!==1){try{sessionStorage.setItem('progresoObraAvisoGate','Esa sección es solo para el administrador.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
-<title>Administración · Obra Bellavista</title>
+<title>Panel de Admin · Obra Bellavista</title>
 <style>
 :root{--bg:#0b2b36;--panel:#10384a;--soft:#0d3242;--border:#24505f;--strong:#3d6d7e;--text:#eef4f6;--sub:#a3bcc6;--ok:#43b97f;--warn:#f0a23a;--bad:#ef6a5e;--accent:#4f8fd6;--accent2:#2f6f8f;color-scheme:dark;}
 *{box-sizing:border-box;}
@@ -69,6 +69,26 @@ main h2{margin:0 0 4px;font-size:17px;}
   nav.lado button small{display:none;}
   main{padding:14px 12px;}
 }
+.rd-ctl{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--sub);}
+.rd-ctl select{margin-left:6px;}
+.rd-res{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:10px;}
+.rd-res>div{border:1px solid var(--border);border-top:3px solid var(--accent);padding:9px 11px;}
+.rd-res b{display:block;font-size:20px;}.rd-res span{font-size:11.5px;color:var(--sub);}
+.rd-dest{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:12px;}
+.rd-d{border:1px solid var(--border);border-left:5px solid var(--ok,#43a047);padding:7px 10px;}
+.rd-d.bad{border-left-color:var(--bad,#c0392b);}
+.rd-d small{display:block;font-size:11px;color:var(--sub);}.rd-d b{display:block;font-size:14px;}.rd-d span{font-size:12px;color:var(--sub);}
+.rd-tit{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin:12px 0 6px;}
+.rd-f{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(180px,2fr) 90px 100px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
+.rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
+.rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
+.rd-b span{font-size:12px;}
+.rd-d2{text-align:center;font-weight:600;}
+.rd-s{text-align:center;}
+.rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
+.rd-vacio{padding:18px;color:var(--sub);border:1px dashed var(--border);text-align:center;}
+@media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-b{grid-column:1/-1;order:3}}
+
 @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
 
 #cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
@@ -107,7 +127,7 @@ main h2{margin:0 0 4px;font-size:17px;}
 </style>
 </head>
 <body>
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando administración</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Admin</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div>
 <script>
 (function(){
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
@@ -166,7 +186,7 @@ main h2{margin:0 0 4px;font-size:17px;}
 </script>
 
 <header class="top">
-  <h1><small>Obra Bellavista, La Florida</small>Administración</h1>
+  <h1><small>Obra Bellavista, La Florida</small>Panel de Admin</h1>
   <span class="quien" id="quien"></span>
   <button class="btn" id="irMenu" type="button">🔀 Cambiar de sección</button>
 </header>
@@ -175,6 +195,7 @@ main h2{margin:0 0 4px;font-size:17px;}
     <button type="button" data-t="usuarios" class="on">Usuarios<small>crear, renombrar, bloquear</small></button>
     <button type="button" data-t="permisos">Permisos<small>secciones y aparatos</small></button>
     <button type="button" data-t="encargados">Encargados<small>quién responde por cada página</small></button>
+    <button type="button" data-t="rendimiento">Rendimiento<small>m² y actividad por trabajador</small></button>
     <button type="button" data-t="ventanas">Ventanas<small>qué puede abrir cada uno</small></button>
   </nav>
   <main id="main"></main>
@@ -188,8 +209,8 @@ const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion'); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
-const SECC = [['panel','Panel de cerámica'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica']];
-const SECC_INV = SECC.filter(x => x[0] !== 'panel');
+const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['admin','Panel de Admin']];
+const SECC_INV = SECC.filter(x => x[0] !== 'panel' && x[0] !== 'admin');
 const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.'};
 const fmt = ms => new Date(ms).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
 let tTimer = 0;
@@ -204,7 +225,7 @@ const BD = (function(){
       {fila:3,nombre:'Sandoval',cargo:'Jefe de Terreno',rol:4,bloqueo:null,base:['terreno','calidad','avance'],extra:[],doble:false},
       {fila:4,nombre:'Edwin Carroz',cargo:'Oficina Técnica',rol:6,bloqueo:null,base:['oficina','avance'],extra:[],doble:false},
       {fila:5,nombre:'Rafael',cargo:'Trabajador',rol:3,bloqueo:{permanente:false,hasta:Date.now()+3*86400000,motivo:'Vacaciones'},base:['panel'],extra:[],doble:false}],
-    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzales',avance:'A. Sandoval',terreno:'A. Sandoval',oficina:'Edwin Carroz'}};
+    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzales',avance:'A. Sandoval',terreno:'A. Sandoval',oficina:'Edwin Carroz',admin:'Ismael S.'}};
   const guardar = () => { try{ localStorage.setItem('pruebaAdminHtml', JSON.stringify(estado)); }catch(e){} };
   const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica'};
   const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance']};
@@ -212,6 +233,7 @@ const BD = (function(){
   const por = f => estado.usuarios.find(u => u.fila === f);
   return async function(a, x){
     await dormir(120);
+    if(a === 'rendimientoDatos') return rendDemo();
     if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados};
     if(a === 'seccionesListar') return {ok:true, usuarios:estado.usuarios.filter(u => u.rol !== 1)};
     if(a === 'seccionesGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.extra = x.extra; guardar(); return {ok:true, extra:u.extra}; }
@@ -243,6 +265,75 @@ async function accion(a, x){
   if(j && j.ok) return j;
   toast((j && ERR[j.error]) || 'No se pudo guardar. ¿Está publicada la versión 63 del script?', true);
   return null;
+}
+
+/* ===== Rendimiento por trabajador (compartido: panel y admin) ===== */
+function rendDemo(){
+  const nombres = ['Rafael Soto', 'Jorge Díaz', 'Luis Mella', 'Pedro Araya', 'Marcos Vera', 'Iván Rojas'];
+  const factor = [1.25, 1.1, 1, 0.85, 0.6, 0.35];
+  const hoy = new Date(); const lun = new Date(Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())); lun.setUTCDate(lun.getUTCDate() - ((lun.getUTCDay() + 6) % 7));
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const trabajadores = nombres.map((nombre, i) => {
+    const semanas = [];
+    for(let k = 11; k >= 0; k--){
+      const d = new Date(lun); d.setUTCDate(d.getUTCDate() - 7 * k);
+      if(i === 5 && k > 5) continue;
+      const m2 = Math.round(factor[i] * (38 + rnd() * 26) * 10) / 10;
+      semanas.push({s: d.toISOString().substring(0, 10), cat: 'Cerámica', m2: m2, n: Math.max(1, Math.round(m2 / 9)), d: Math.max(1, Math.min(6, Math.round(2 + factor[i] * 2.2 + rnd() * 1.5))), t: Math.round((1.5 / factor[i]) * 10) / 10 * Math.max(1, Math.round(m2 / 9)), tn: Math.max(1, Math.round(m2 / 9))});
+    }
+    return {nombre, semanas};
+  });
+  return {ok: true, trabajadores, cobertura: {terminadas: 412, conFecha: 388, conM2: 405}};
+}
+function renderRendimiento(raiz, datos, esc){
+  const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
+  const semanasAll = Array.from(new Set(datos.trabajadores.flatMap(t => t.semanas.map(w => w.s)))).sort();
+  raiz.innerHTML = '<div class="rd-ctl"><label>Período <select id="rdPer"><option value="4">Últimas 4 semanas</option><option value="8" selected>Últimas 8 semanas</option><option value="12">Últimas 12 semanas</option><option value="0">Todo</option></select></label>'
+    + '<label>Categoría <select id="rdCat"><option value="">Cerámica y Frague</option><option value="Cerámica">Cerámica</option><option value="Frague">Frague</option></select></label></div><div id="rdOut"></div>';
+  const out = raiz.querySelector('#rdOut');
+  function pintar(){
+    const n = Number(raiz.querySelector('#rdPer').value), cat = raiz.querySelector('#rdCat').value;
+    const hoyLun = (() => { const d = new Date(); const u = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); u.setUTCDate(u.getUTCDate() - ((u.getUTCDay() + 6) % 7)); return u; })();
+    const lista = []; const total = n || Math.max(1, semanasAll.length);
+    let desde = semanasAll[0] || ''; 
+    if(n){ for(let k = n - 1; k >= 0; k--){ const d = new Date(hoyLun); d.setUTCDate(d.getUTCDate() - 7 * k); lista.push(d.toISOString().substring(0, 10)); } }
+    else { if(semanasAll.length){ const a = new Date(semanasAll[0] + 'T00:00:00Z'); while(a <= hoyLun){ lista.push(a.toISOString().substring(0, 10)); a.setUTCDate(a.getUTCDate() + 7); } } }
+    const filas = datos.trabajadores.map(t => {
+      const por = {}; lista.forEach(s => por[s] = {m2: 0, n: 0, d: 0, t: 0, tn: 0});
+      t.semanas.forEach(w => { if(por[w.s] && (!cat || w.cat === cat)){ const p = por[w.s]; p.m2 += w.m2; p.n += w.n; p.d = Math.max(p.d, w.d); p.t += w.t; p.tn += w.tn; } });
+      const serie = lista.map(s => por[s].m2);
+      const m2 = serie.reduce((a, b) => a + b, 0), partidas = lista.reduce((a, s) => a + por[s].n, 0);
+      const dias = lista.reduce((a, s) => a + por[s].d, 0), semAct = lista.filter(s => por[s].m2 > 0 || por[s].d > 0).length;
+      const tt = lista.reduce((a, s) => a + por[s].t, 0), tn = lista.reduce((a, s) => a + por[s].tn, 0);
+      const mitad = Math.floor(serie.length / 2), a1 = serie.slice(0, mitad).reduce((x, y) => x + y, 0), a2 = serie.slice(mitad).reduce((x, y) => x + y, 0);
+      return {nombre: t.nombre, m2, partidas, dias, semAct, serie, porSem: m2 / lista.length, tiempo: tn ? tt / tn : null, tend: a1 > 0 ? (a2 - a1) / a1 : (a2 > 0 ? 1 : 0)};
+    });
+    if(!filas.some(f => f.m2 > 0 || f.dias > 0)){ out.innerHTML = '<div class="rd-vacio">Todavía no hay trabajo terminado con fecha en este período.</div>'; return; }
+    filas.sort((a, b) => b.m2 - a.m2);
+    const activos = filas.filter(f => f.m2 > 0), prom = activos.reduce((a, f) => a + f.m2, 0) / Math.max(1, activos.length), maxM2 = Math.max(1, ...filas.map(f => f.m2));
+    const totalM2 = filas.reduce((a, f) => a + f.m2, 0);
+    const porDias = filas.slice().sort((a, b) => b.dias - a.dias);
+    const sem = lista.map((s, i) => datos.trabajadores.reduce((a, t) => a + t.semanas.filter(w => w.s === s && (!cat || w.cat === cat)).reduce((x, w) => x + w.m2, 0), 0));
+    const maxS = Math.max(1, ...sem), W = 900, Hh = 130, bw = W / sem.length;
+    const barras = sem.map((v, i) => { const h = v / maxS * (Hh - 22); return '<rect x="' + (i * bw + 4) + '" y="' + (Hh - 16 - h) + '" width="' + Math.max(4, bw - 8) + '" height="' + h + '" fill="var(--accent)"><title>Semana del ' + lista[i].split('-').reverse().join('-') + ': ' + fmt(v) + ' m²</title></rect>'
+      + (sem.length <= 14 ? '<text x="' + (i * bw + bw / 2) + '" y="' + (Hh - 3) + '" font-size="9" text-anchor="middle" fill="var(--sub)">' + lista[i].substring(8) + '/' + lista[i].substring(5, 7) + '</text>' : ''); }).join('');
+    const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
+    const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
+    const cob = datos.cobertura || {};
+    out.innerHTML = '<div class="rd-res"><div><b>' + fmt(totalM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom / lista.length) + ' m²</b><span>promedio por trabajador por semana</span></div><div><b>' + activos.length + ' de ' + filas.length + '</b><span>trabajadores con m² en el período</span></div></div>'
+      + '<div class="rd-dest"><div class="rd-d ok"><small>Más rinde</small><b>' + esc(filas[0].nombre) + '</b><span>' + fmt(filas[0].m2) + ' m²</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(filas[filas.length - 1].nombre) + '</b><span>' + fmt(filas[filas.length - 1].m2) + ' m²</span></div>'
+      + '<div class="rd-d ok"><small>Más días con actividad</small><b>' + esc(porDias[0].nombre) + '</b><span>' + porDias[0].dias + ' días</span></div><div class="rd-d bad"><small>Menos días con actividad</small><b>' + esc(porDias[porDias.length - 1].nombre) + '</b><span>' + porDias[porDias.length - 1].dias + ' días</span></div></div>'
+      + '<div class="rd-tit">Ranking</div><div class="rd-tabla">' + filas.map((f, i) => {
+        const pct = prom ? f.m2 / prom * 100 : 0, flecha = f.tend > 0.1 ? '<span style="color:var(--ok,#43a047)">▲ ' + Math.round(f.tend * 100) + '%</span>' : f.tend < -0.1 ? '<span style="color:var(--bad,#c0392b)">▼ ' + Math.abs(Math.round(f.tend * 100)) + '%</span>' : '<span style="color:var(--sub)">= estable</span>';
+        return '<div class="rd-f"><div class="rd-n"><b>' + (i + 1) + '. ' + esc(f.nombre) + '</b><small>' + f.partidas + ' partidas · ' + f.semAct + ' de ' + lista.length + ' semanas con actividad' + (f.tiempo != null ? ' · ' + fmt(f.tiempo) + ' días por partida' : '') + (f.m2 ? '' : ' · sin m² en el período') + '</small></div>'
+          + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (f.m2 / maxM2 * 100) + '%;background:' + color(pct) + '"></i></div><span>' + fmt(f.m2) + ' m² · <b style="color:' + color(pct) + '">' + Math.round(pct) + '%</b> del promedio</span></div>'
+          + '<div class="rd-d2">' + f.dias + ' días<small>con actividad</small></div><div class="rd-s">' + spark(f.serie) + '<small>' + flecha + '</small></div></div>';
+      }).join('') + '</div>'
+      + '<div class="rd-tit">m² por semana del equipo</div><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;max-width:900px;height:auto;">' + barras + '</svg>'
+      + '<div class="rd-nota"><b>Sobre los datos.</b> Los m² y las fechas salen de lo que se marca como terminado en el panel' + (cob.terminadas ? ' (' + cob.conFecha + ' de ' + cob.terminadas + ' partidas terminadas tienen fecha; ' + cob.conM2 + ' tienen m²)' : '') + '. Las partidas sin fecha no entran en el cálculo. «Días con actividad» cuenta los días en que se marcó una partida o un terminado del trabajador: <b>no es asistencia real</b>, porque hoy el sistema no registra quién fue a trabajar cada día.</div>';
+  }
+  raiz.querySelector('#rdPer').addEventListener('change', pintar); raiz.querySelector('#rdCat').addEventListener('change', pintar);
+  pintar();
 }
 
 /* ---------- vistas ---------- */
@@ -333,12 +424,18 @@ function vistaEncargados(){
     const j = await accion('adminEncargadosGuardar', {encargados:enc}); if(j){ datos.encargados = j.encargados; toast('Encargados guardados.'); await dormir(700); location.href = 'index.html?menu=1'; }
   });
 }
+async function vistaRendimiento(){
+  main.innerHTML = '<h2>Rendimiento por trabajador</h2><p class="nota">Cuánto avanza cada trabajador por semana, con los m² y las fechas que ya guarda el panel.</p><div class="tarjeta" id="rdCuerpo">Cargando…</div>';
+  const j = await api('rendimientoDatos');
+  if(!j || !j.ok){ $('rdCuerpo').textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 63 o más nueva.'; return; }
+  renderRendimiento($('rdCuerpo'), j, esc);
+}
 function vistaVentanas(){
   main.innerHTML = '<h2>Ventanas</h2><p class="nota">Aquí se decidirá qué ventanas y botones puede ver y abrir cada persona dentro de cada página.</p><div class="proximo">Próximamente. Falta definir la lista de ventanas de cada página que se pueden encender o apagar.</div>';
 }
 async function ir(t){
   tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else vistaVentanas();
+  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'rendimiento') await vistaRendimiento(); else vistaVentanas();
 }
 $('lado').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if(b) ir(b.dataset.t); });
 $('irMenu').addEventListener('click', () => { location.href = 'index.html?menu=1'; });

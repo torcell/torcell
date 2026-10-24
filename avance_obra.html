@@ -1013,7 +1013,7 @@ function etiquetaDispositivo(){
 let AVISO_SIN_SESION = "";
 async function cargarReales(){
   const token = leerSes("progresoObraToken");
-  if (!token) { AVISO_SIN_SESION = "Sin sesión del panel: se muestran datos de prueba. Entra al panel con tu PIN y vuelve a abrir esta página."; return null; }
+  if (!token) { AVISO_SIN_SESION = "Sin sesión del Panel de Cerámica y Frague: se muestran datos de prueba. Entra al panel con tu PIN y vuelve a abrir esta página."; return null; }
   let url = URL_BASE_DEFECTO; try { url = localStorage.getItem("progresoObraDbUrl") || URL_BASE_DEFECTO; } catch (e) {}
   const ctl = new AbortController(); const tope = setTimeout(() => ctl.abort(), 30000);
   try {
@@ -1022,7 +1022,7 @@ async function cargarReales(){
     if (!r.ok) throw new Error("red");
     const j = JSON.parse(await r.text());
     if (j && j.error === "sin_permiso") { irAlMenu("No tienes acceso al Dashboard de avance. Elige una de las secciones disponibles."); return null; }
-    if (!j || j.ok !== true || !j.items) { AVISO_SIN_SESION = j && j.error === "sin_sesion" ? "La sesión del panel venció: se muestran datos de prueba. Vuelve a entrar con tu PIN." : "La base de datos no entregó los datos: se muestran datos de prueba."; return null; }
+    if (!j || j.ok !== true || !j.items) { AVISO_SIN_SESION = j && j.error === "sin_sesion" ? "La sesión del Panel de Cerámica y Frague venció: se muestran datos de prueba. Vuelve a entrar con tu PIN." : "La base de datos no entregó los datos: se muestran datos de prueba."; return null; }
     return { items: j.items, nombre: leerSes("progresoObraName") || "", rol: leerSes("progresoObraRol") || "" };
   } catch (e) {
     AVISO_SIN_SESION = "No se pudo conectar con la base de datos: se muestran datos de prueba.";
@@ -1538,7 +1538,7 @@ if (MR) {
   $("hdrEyebrow").innerHTML = `<span class="pill real">Datos reales</span><span>Cerámica y frague reales · demás partidas con datos de ejemplo · leído a las ${hora}</span>`;
   $("hdrTitulo").textContent = CONFIG.obra.nombre;
   $("hdrSub").innerHTML = `${deptos.length} departamentos y ${pasillos.length} pasillos · sin programa cargado, se muestra solo lo real`;
-  $("pie").textContent = "Cerámica y frague se leen de la base de datos del panel. Las demás partidas (marcadas con E) tienen datos de ejemplo hasta que se ingresen los reales en la pestaña Datos.";
+  $("pie").textContent = "Cerámica y frague se leen de la base de datos del Panel de Cerámica y Frague. Las demás partidas (marcadas con E) tienen datos de ejemplo hasta que se ingresen los reales en la pestaña Datos.";
   $("notaCurva").textContent = `Cerámica y frague juntos, por m² terminados. Lo terminado antes del ${fmt(CONFIG.inicio)} no tiene fecha guardada en la base de datos, por eso la curva parte desde ahí. Pasa el cursor por el gráfico para ver los valores.`;
   $("lgPlan").hidden = true; $("panelRestr").hidden = true; $("panelAvisos").hidden = true;
   const nom = CONFIG.sesion.nombre || "Usuario", ini = nom.split(/[\s.]+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("");
@@ -1739,7 +1739,7 @@ function renderCurvaS(){
     if (MR) nota += " El detalle de cada partida está en la pestaña Datos.";
   } else {
     const c = CURVA;
-    nota = esBase(c) ? `Avance real leído de la base de datos del panel (m² terminados). Antes del ${fmt(wdDate(primerRealDe(c)))} no hay fechas guardadas: ese tramo es una estimación en línea recta desde el inicio programado. La proyección usa el ritmo de las últimas semanas.`
+    nota = esBase(c) ? `Avance real leído de la base de datos del Panel de Cerámica y Frague (m² terminados). Antes del ${fmt(wdDate(primerRealDe(c)))} no hay fechas guardadas: ese tramo es una estimación en línea recta desde el inicio programado. La proyección usa el ritmo de las últimas semanas.`
       : MR ? (puntosReales(c).length ? `Avance ingresado en la pestaña Datos (${puntosReales(c).length} registro${puntosReales(c).length === 1 ? "" : "s"}). La proyección sigue el ritmo entre los dos últimos registros.` : "Sin avances todavía: ingrésalos en la pestaña Datos.")
       : "Datos de demostración.";
     if (MR && !S.tienePlan) nota += " Sin programa: ingresa las fechas programadas en Datos.";
@@ -1877,7 +1877,7 @@ function renderAvancesManual(){
   $("avTitulo").innerHTML = `Avances registrados · ${T(p.cod, esc(p.nom.split(" (")[0]))}`;
   if (esBase(p.cod)) {
     $("avNota").textContent = "";
-    $("avCuerpo").innerHTML = `<p class="note">El avance de ${esc(p.nom.toLowerCase())} viene de la base de datos del panel (m² terminados por departamento). Se cambia desde el panel, no aquí. Hoy va en ${pct(realHoy(p.cod))}.</p>`;
+    $("avCuerpo").innerHTML = `<p class="note">El avance de ${esc(p.nom.toLowerCase())} viene de la base de datos del Panel de Cerámica y Frague (m² terminados por departamento). Se cambia desde el panel, no aquí. Hoy va en ${pct(realHoy(p.cod))}.</p>`;
     return;
   }
   $("avNota").textContent = p.ejemplo && !puntosReales(p.cod).length

@@ -771,8 +771,8 @@ function infoDeCarga(j){
   if(Number(r.ult)) txt += '. Último avance registrado: ' + fechaCorta(Number(r.ult));
   txt += '. Servidor v' + esc(String(j.backendVersion || '?')) + ' · base ' + esc(base) + '.';
   let tipo = '';
-  if(r.filas === 0){ tipo = 'warn'; txt += '<br>La base de datos no tiene ninguna partida. Revisa que el panel esté guardando en esta misma base.'; }
-  else if(r.term === 0){ tipo = 'warn'; txt += '<br>No hay ninguna partida terminada en la base de datos. Si en el panel ves avance, el panel no está guardando aquí: compara el código de la base con el que usa el panel.'; }
+  if(r.filas === 0){ tipo = 'warn'; txt += '<br>La base de datos no tiene ninguna partida. Revisa que el Panel de Cerámica y Frague esté guardando en esta misma base.'; }
+  else if(r.term === 0){ tipo = 'warn'; txt += '<br>No hay ninguna partida terminada en la base de datos. Si en el Panel de Cerámica y Frague ves avance, el Panel de Cerámica y Frague no está guardando aquí: compara el código de la base con el que usa el panel.'; }
   else if(!listos){ txt += '<br>Ningún departamento tiene cerámica y frague terminados al mismo tiempo, por eso no hay nada por revisar todavía.'; }
   pintarInfo(tipo, txt);
 }
@@ -1460,7 +1460,7 @@ async function cargar(inicial){
       errorCarga = j && j.error === 'dispositivo_ocupado' ? (j.tipo === 'unico' ? 'Esta cuenta ya está abierta en otro aparato y por defecto solo se permite uno.' : 'Esta cuenta ya está abierta en otro ' + (j.tipo === 'pc' ? 'computador' : 'celular o tablet') + ' y no se permite un segundo dispositivo del mismo tipo.') + ' Cierra la sesión en el otro dispositivo o pide al administrador que la libere.'
         : j && j.error === 'sin_sesion' ? 'Tu sesión venció. Vuelve a entrar.'
         : j && typeof j === 'object' && j.error ? 'La base de datos respondió con un error (' + String(j.error) + '). Reintenta; si sigue igual, avisa al administrador.'
-        : j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no entregó los datos de Calidad (respuesta: ' + esc(JSON.stringify(j).slice(0, 140)) + '). Lo más probable es que el script publicado en Google sea una versión anterior a la de este panel. Versión del panel: ' + CAL_VERSION + '.' : 'La base de datos respondió con un formato inesperado.';
+        : j && typeof j === 'object' && !j.celdas ? 'La base de datos respondió, pero no entregó los datos de Calidad (respuesta: ' + esc(JSON.stringify(j).slice(0, 140)) + '). Lo más probable es que el script publicado en Google sea una versión anterior a la de este panel. Versión del panel de Calidad: ' + CAL_VERSION + '.' : 'La base de datos respondió con un formato inesperado.';
       if(!inicial) falloCarga('No se pudo cargar. Reintenta.');
       infoDeError(errorCarga);
       return 'fallo';

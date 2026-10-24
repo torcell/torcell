@@ -281,23 +281,59 @@
   @keyframes hwLadoD{0%,66%{opacity:0;transform:translateX(-96px) rotate(6deg);}67%{opacity:1;transform:translateX(-96px) rotate(6deg);}73%,80%{opacity:1;transform:translateX(0) rotate(6deg);}83%{transform:translateX(0) rotate(-2deg);}86%{transform:translateX(0) rotate(6deg);}92%{opacity:1;transform:translateX(-96px) rotate(6deg);}93%,100%{opacity:0;transform:translateX(-96px) rotate(6deg);}}
   body.tema5:has(.overlay.show) #esqueletos{display:none;}
 
-#cargaGlobal{position:fixed;inset:0;z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+#cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
 #cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
 #cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
-#cargaGlobal .cg3{position:relative;width:100%;height:0;}
-#cargaGlobal .cgbd{position:absolute;left:0;right:0;height:2px;background:#fff;}
-#cargaGlobal .cgt{top:0;}#cargaGlobal .cgbt{bottom:0;}
-#cargaGlobal .cgfondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;text-align:center;}
-#cargaGlobal .cgin{padding:24px 16px;opacity:0;transition:opacity .25s;}
-#cargaGlobal .cg3.cgver .cgin{opacity:1;}
+#cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:#fff;will-change:transform;}
+#cargaGlobal .cgfondo{position:absolute;inset:0;background:rgba(255,255,255,.08);transform:scaleY(0);will-change:transform;}
+#cargaGlobal .cgin{position:absolute;inset:2px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;text-align:center;opacity:0;will-change:opacity;}
+#cargaGlobal .cgabre .cgbd.cgt{animation:cgSube .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgbd.cgbt{animation:cgBaja .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgfondo{animation:cgAbre .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgin{animation:cgAparece .22s ease .34s forwards;}
+#cargaGlobal .cgcierra .cgin{opacity:1;animation:cgDesaparece .2s ease forwards;}
+#cargaGlobal .cgcierra .cgbd.cgt{transform:translateY(calc(var(--H) / -2 + 1px));animation:cgSubeR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgbd.cgbt{transform:translateY(calc(var(--H) / 2 - 1px));animation:cgBajaR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgfondo{transform:scaleY(1);animation:cgCierra .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+@keyframes cgSube{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / -2 + 1px));}}
+@keyframes cgBaja{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / 2 - 1px));}}
+@keyframes cgSubeR{from{transform:translateY(calc(var(--H) / -2 + 1px));}to{transform:translateY(0);}}
+@keyframes cgBajaR{from{transform:translateY(calc(var(--H) / 2 - 1px));}to{transform:translateY(0);}}
+@keyframes cgAbre{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes cgCierra{from{transform:scaleY(1);}to{transform:scaleY(0);}}
+@keyframes cgAparece{from{opacity:0;}to{opacity:1;}}
+@keyframes cgDesaparece{from{opacity:1;}to{opacity:0;}}
 #cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
 #cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
 #cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
-#cargaGlobal .cgrell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
 #cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+@media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
+@media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
   #lgSplash{display:none !important;}
+.rd-ctl{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--sub);}
+.rd-ctl select{margin-left:6px;}
+.rd-res{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:10px;}
+.rd-res>div{border:1px solid var(--border);border-top:3px solid var(--accent);padding:9px 11px;}
+.rd-res b{display:block;font-size:20px;}.rd-res span{font-size:11.5px;color:var(--sub);}
+.rd-dest{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:12px;}
+.rd-d{border:1px solid var(--border);border-left:5px solid var(--ok,#43a047);padding:7px 10px;}
+.rd-d.bad{border-left-color:var(--bad,#c0392b);}
+.rd-d small{display:block;font-size:11px;color:var(--sub);}.rd-d b{display:block;font-size:14px;}.rd-d span{font-size:12px;color:var(--sub);}
+.rd-tit{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin:12px 0 6px;}
+.rd-f{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(180px,2fr) 90px 100px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
+.rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
+.rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
+.rd-b span{font-size:12px;}
+.rd-d2{text-align:center;font-weight:600;}
+.rd-s{text-align:center;}
+.rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
+.rd-vacio{padding:18px;color:var(--sub);border:1px dashed var(--border);text-align:center;}
+@media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-b{grid-column:1/-1;order:3}}
+
   .lg-app{transition:opacity .16s ease,transform .16s ease;animation:lgEntraApp .28s ease-out both;}
   @keyframes lgEntraApp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   .lg.saliendo .lg-app{opacity:0;transform:scale(.985);}
@@ -308,7 +344,8 @@
   .lg-o{display:flex;align-items:center;gap:10px;width:100%;color:var(--sub);font-size:12px;font-weight:600;}
   .lg-o::before,.lg-o::after{content:"";flex:1;height:1px;background:var(--border-strong);}
   .lg-dest{display:flex;flex-direction:column;gap:8px;}
-  .lg-dest button{min-height:72px;border:1px solid var(--border-strong);border-left:4px solid var(--border-strong);background:var(--panel);color:var(--text);font-size:15px;font-weight:700;display:flex;align-items:center;gap:14px;padding:0 14px;text-align:left;border-radius:0;transition:background .12s,border-color .12s;}
+  .lg-dest button[hidden]{display:none !important;}
+.lg-dest button{min-height:72px;border:1px solid var(--border-strong);border-left:4px solid var(--border-strong);background:var(--panel);color:var(--text);font-size:15px;font-weight:700;display:flex;align-items:center;gap:14px;padding:0 14px;text-align:left;border-radius:0;transition:background .12s,border-color .12s;}
   .lg-dest button small.enc{font-size:11.5px;font-weight:600;color:var(--lg-azul);margin-top:3px;}
   body.dark .lg-dest button small.enc,html.dark .lg-dest button small.enc{color:var(--text);}
   .lg-dest button.lock small.enc{color:var(--sub);}
@@ -336,7 +373,7 @@
   .lg .lg-modo:hover{background:rgba(255,255,255,.12);}
   @media (min-width:900px) and (min-height:600px){
     .lg .lg-modo{position:absolute;top:14px;left:14px;right:auto;width:auto;height:32px;background:transparent;}
-    .lg-app{height:min(580px,92dvh);}
+    .lg-app{height:min(690px,94dvh);}
     .lg-form .lg-cuerpo{justify-content:safe center;}
   }
   .lg-quien{font-size:14px;color:var(--sub);margin:0;}
@@ -391,7 +428,8 @@
         <p class="lg-quien" id="lgQuien"></p>
         <p class="lg-msg" id="lgMsgElegir" aria-live="polite"></p>
         <div class="lg-dest">
-          <button type="button" data-dest="panel"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Panel de cerámica<small>Avance y pagos de cerámica</small><small class="enc">Encargado: Ismael S.</small></span></button>
+          <button type="button" data-dest="admin"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span><span>Panel de Admin<small>Usuarios, permisos y rendimiento</small><small class="enc">Encargado: Ismael S.</small></span></button>
+          <button type="button" data-dest="panel"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Panel de Cerámica y Frague<small>Avance y pagos de cerámica y frague</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="calidad"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M7.5 12.5l3 3 6-7"/></svg></span><span>Control de calidad<small>Revisión de cerámica y frague</small><small class="enc">Encargado: Silvia Gonzales</small></span></button>
           <button type="button" data-dest="avance"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg></span><span>Dashboard de avance<small>Resumen del avance de la obra</small><small class="enc">Encargado: A. Sandoval</small></span></button>
           <button type="button" data-dest="terreno"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17"/><path d="M9 4h6v3H9zM8.5 12h7M8.5 16h5"/></svg></span><span>Jefe de Terreno<small>Programación, personal y seguridad</small><small class="enc">Encargado: A. Sandoval</small></span></button>
@@ -406,11 +444,11 @@
 <script>
 const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
-const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html'};
-const SECC_BASE = {1: ['panel', 'calidad', 'avance', 'terreno', 'oficina'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance']};
+const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', admin: 'admin.html'};
+const SECC_BASE = {1: ['admin', 'panel', 'calidad', 'avance', 'terreno', 'oficina'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance']};
 const DESTINOS = SECC_BASE;
-const NOM_SECC = {panel: 'Panel de cerámica', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica'};
-const TXT_DEST = {panel: 'Entrando al panel de cerámica…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…'};
+const NOM_SECC = {admin: 'Panel de Admin', panel: 'Panel de Cerámica y Frague', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica'};
+const TXT_DEST = {admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…'};
 const CARGOS_CALIDAD = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
 const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre'];
 const lg = id => document.getElementById(id);
@@ -594,6 +632,7 @@ function mostrarOpciones(lista){
   const pref = ls('destinoPreferido');
   document.querySelectorAll('.lg-dest button').forEach(b => {
     const bloq = lista.indexOf(b.dataset.dest) === -1;
+    if(b.dataset.dest === 'admin'){ b.hidden = bloq; if(bloq) return; }
     b.classList.toggle('lock', bloq); b.setAttribute('aria-disabled', bloq ? 'true' : 'false');
     b.classList.toggle('pref', !bloq && b.dataset.dest === pref);
   });
