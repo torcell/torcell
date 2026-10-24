@@ -232,10 +232,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 #carga.on{display:flex;}
 #carga.sale{animation:overlayOut .35s ease forwards;}
 #carga{padding:0;gap:0;}
-.v3{position:relative;width:100%;height:0;transition:height .5s cubic-bezier(.65,0,.35,1);}
-.v3 .bd{position:absolute;left:0;right:0;height:2px;background:#fff;transition:top .5s cubic-bezier(.65,0,.35,1),bottom .5s cubic-bezier(.65,0,.35,1);}
-.v3 .t{top:50%;}.v3 .bt{bottom:50%;}
-.v3.ab .t{top:0;}.v3.ab .bt{bottom:0;}
+.v3{position:relative;width:100%;height:0;}
+.v3 .bd{position:absolute;left:0;right:0;height:2px;background:#fff;}
+.v3 .t{top:0;}.v3 .bt{bottom:0;}
 .v3 .fondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;color:#fff;text-align:center;}
 .v3 .in{padding:24px 16px;opacity:0;transition:opacity .25s;}
 .v3.ver .in{opacity:1;}
@@ -493,7 +492,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.30.3';
+const CAL_VERSION = '1.31.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -575,11 +574,24 @@ async function llamar(action, extra, rapido, limite){
 }
 
 const dormir = ms => new Promise(r => setTimeout(r, ms));
+function animAlto(v, a, b, ms){
+  return new Promise(res => {
+    let t = 0, last = null;
+    const paso = ts => {
+      if(last === null) last = ts;
+      t += Math.min(ts - last, 24); last = ts;
+      const k = Math.min(1, t / ms), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      v.style.height = (a + (b - a) * e) + 'px';
+      if(k < 1) requestAnimationFrame(paso); else res();
+    };
+    requestAnimationFrame(paso);
+  });
+}
 const carga = {el: $('carga'), meta: 88, prog: 0, raf: 0, t0: 0, abierta: null, iniciada: false};
 function cargaBucle(){
   const t = Math.max(0, performance.now() - carga.t0);
-  const objetivo = carga.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 1100));
-  carga.prog += (objetivo - carga.prog) * (carga.meta >= 100 ? 0.25 : 0.12);
+  const objetivo = carga.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 450));
+  carga.prog += (objetivo - carga.prog) * (carga.meta >= 100 ? 0.35 : 0.2);
   if(carga.meta >= 100 && carga.prog > 99.5) carga.prog = 100;
   const p = Math.round(carga.prog);
   $('cargaRell').style.width = carga.prog + '%';
@@ -595,15 +607,14 @@ function cargaMostrar(){
   v.classList.remove('ver', 'ab'); v.style.height = '0px';
   $('cargaEst').classList.remove('listo'); $('cargaEst').textContent = '0%'; $('cargaRell').style.width = '0%';
   carga.el.classList.remove('sale'); carga.el.classList.add('on');
-  carga.prog = 0; carga.meta = 88; carga.t0 = performance.now() + 800;
+  carga.prog = 0; carga.meta = 88; carga.t0 = performance.now() + 350;
   cancelAnimationFrame(carga.raf); cargaBucle();
   carga.abierta = (async () => {
     // espera a que el navegador pinte la línea cerrada; si no, la apertura salta sin transición
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    void v.offsetHeight;
-    await dormir(80);
-    v.style.height = ($('cargaIn').scrollHeight + 4) + 'px'; v.classList.add('ab');
-    await dormir(480); v.classList.add('ver'); await dormir(300);
+    const H = $('cargaIn').scrollHeight + 4;
+    setTimeout(() => v.classList.add('ver'), 260);
+    await animAlto(v, 0, H, 480);
   })();
 }
 function cargaCortar(){
@@ -629,10 +640,10 @@ async function cargaOcultar(){
   carga.meta = 100;
   while(carga.prog < 100) await dormir(30);
   const e = $('cargaEst'); e.textContent = '¡Listo!'; e.classList.add('listo');
-  await dormir(650);
-  const v = $('cargaV3');
-  v.classList.remove('ver'); await dormir(240);
-  v.style.height = '0px'; v.classList.remove('ab'); await dormir(520);
+  await dormir(450);
+  const v = $('cargaV3'), H2 = v.getBoundingClientRect().height;
+  v.classList.remove('ver'); await dormir(200);
+  await animAlto(v, H2, 0, 450);
   carga.el.classList.add('sale');
   await dormir(350);
   cargaCortar();
@@ -1463,7 +1474,7 @@ async function cargarInicial(){
   }
   if(!token) return;
   if(r === 'ok'){
-    const falta = 2200 - (Date.now() - t0);
+    const falta = 1400 - (Date.now() - t0);
     if(falta > 0) await dormir(falta);
     await cargaOcultar();
   }else{
