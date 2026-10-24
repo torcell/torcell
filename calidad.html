@@ -226,25 +226,38 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .caja-cuerpo{flex:6;justify-content:center;padding:36px 56px;gap:14px;}
   .caja h2{font-size:25px;}
 }
-#carga{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:24px;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);--mortero:#d9cdb8;--frague:#8d8a84;}
-#carga::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
-#carga>*{position:relative;}
-#carga.on{display:flex;}
-#carga.sale{animation:overlayOut .35s ease forwards;}
-#carga{padding:0;gap:0;}
-.v3{position:relative;width:100%;height:0;}
-.v3 .bd{position:absolute;left:0;right:0;height:2px;background:#fff;}
-.v3 .t{top:0;}.v3 .bt{bottom:0;}
-.v3 .fondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;color:#fff;text-align:center;}
-.v3 .in{padding:24px 16px;opacity:0;transition:opacity .25s;}
-.v3.ver .in{opacity:1;}
-.v3 small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
-.v3 b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
-.v3 .carga{width:min(280px,76%);margin:20px auto 0;}
-.v3 .pista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
-.v3 .rell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
-.v3 .est{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-.v3 .est.listo{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+#cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
+#cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
+#cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:#fff;will-change:transform;}
+#cargaGlobal .cgfondo{position:absolute;inset:0;background:rgba(255,255,255,.08);transform:scaleY(0);will-change:transform;}
+#cargaGlobal .cgin{position:absolute;inset:2px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;text-align:center;opacity:0;will-change:opacity;}
+#cargaGlobal .cgabre .cgbd.cgt{animation:cgSube .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgbd.cgbt{animation:cgBaja .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgfondo{animation:cgAbre .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgin{animation:cgAparece .22s ease .34s forwards;}
+#cargaGlobal .cgcierra .cgin{opacity:1;animation:cgDesaparece .2s ease forwards;}
+#cargaGlobal .cgcierra .cgbd.cgt{transform:translateY(calc(var(--H) / -2 + 1px));animation:cgSubeR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgbd.cgbt{transform:translateY(calc(var(--H) / 2 - 1px));animation:cgBajaR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgfondo{transform:scaleY(1);animation:cgCierra .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+@keyframes cgSube{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / -2 + 1px));}}
+@keyframes cgBaja{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / 2 - 1px));}}
+@keyframes cgSubeR{from{transform:translateY(calc(var(--H) / -2 + 1px));}to{transform:translateY(0);}}
+@keyframes cgBajaR{from{transform:translateY(calc(var(--H) / 2 - 1px));}to{transform:translateY(0);}}
+@keyframes cgAbre{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes cgCierra{from{transform:scaleY(1);}to{transform:scaleY(0);}}
+@keyframes cgAparece{from{opacity:0;}to{opacity:1;}}
+@keyframes cgDesaparece{from{opacity:1;}to{opacity:0;}}
+#cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+#cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
+#cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
+#cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
+#cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
+#cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+@media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
+@media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
 
 /* ===== Tema Obra (por defecto): misma paleta de la pantalla de carga, sobrio y plano ===== */
@@ -350,6 +363,63 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 </style>
 </head>
 <body>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Calidad</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div>
+<script>
+(function(){
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var textoBase = tit.textContent;
+  var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null};
+  // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
+  function terminadas(nodo){
+    return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
+  }
+  function bucle(){
+    var t = Math.max(0, performance.now() - st.t0);
+    var obj = st.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 450));
+    st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
+    rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
+    if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
+    if(st.meta < 100) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
+    if(el.isConnected) st.raf = requestAnimationFrame(bucle);
+  }
+  bucle();
+  var abierta = terminadas(v);
+  async function paginaLista(){
+    var tope = dormir(6000);
+    var listo = (async function(){
+      if(document.readyState !== 'complete') await new Promise(function(r){ window.addEventListener('load', r, {once: true}); });
+      try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+      try{ await Promise.all(Array.prototype.slice.call(document.images).map(function(i){ return i.decode ? i.decode().catch(function(){}) : 0; })); }catch(e){}
+      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    })();
+    await Promise.race([listo, tope]);
+  }
+  window.CargaPagina = {
+    el: el,
+    cortar: function(){ cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
+    fin: function(){
+      if(st.fin) return st.fin;
+      st.fin = (async function(){
+        await abierta; await paginaLista();
+        st.meta = 100;
+        while(st.prog < 100) await dormir(30);
+        est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
+        v.classList.remove('cgabre'); v.classList.add('cgcierra');
+        await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+        await terminadas(v);
+        el.classList.add('cgsale');
+        await new Promise(function(r){ var t = setTimeout(r, 600); el.addEventListener('transitionend', function(){ clearTimeout(t); r(); }, {once: true}); });
+        CargaPagina.cortar();
+      })();
+      return st.fin;
+    }
+  };
+  setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
+  window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });
+})();
+</script>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
 <div id="esqueletos" aria-hidden="true"><div class="esqlado i"></div><div class="esqlado d"></div></div>
@@ -437,9 +507,6 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     </div>
   </div>
 </div>
-<div id="carga" class="on" role="status" aria-live="polite">
-  <div class="v3" id="cargaV3" style="height:0"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="cargaIn"><small>Obra Bellavista, La Florida</small><b id="cargaTit">Cargando panel de Calidad</b><div class="carga"><div class="pista" role="progressbar" aria-label="Cargando" id="cargaPista"><div class="rell" id="cargaRell"></div></div><div class="est" id="cargaEst">0%</div></div></div></div></div>
-</div>
 <div id="aviso" role="alert"><span id="avisoTxt"></span><button type="button" id="avisoX" aria-label="Cerrar aviso">✕</button></div>
 <div id="velOp">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="oTit">
@@ -492,7 +559,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.32.2';
+const CAL_VERSION = '1.33.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -587,69 +654,10 @@ function animAlto(v, a, b, ms){
     requestAnimationFrame(paso);
   });
 }
-const carga = {el: $('carga'), meta: 88, prog: 0, raf: 0, t0: 0, abierta: null, iniciada: false};
-function cargaBucle(){
-  const t = Math.max(0, performance.now() - carga.t0);
-  const objetivo = carga.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 450));
-  carga.prog += (objetivo - carga.prog) * (carga.meta >= 100 ? 0.35 : 0.2);
-  if(carga.meta >= 100 && carga.prog > 99.5) carga.prog = 100;
-  const p = Math.round(carga.prog);
-  $('cargaRell').style.width = carga.prog + '%';
-  if(!$('cargaEst').classList.contains('listo')) $('cargaEst').textContent = p + '%';
-  if(carga.meta < 100) $('cargaTit').textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : 'Cargando panel de Calidad';
-  $('cargaPista').setAttribute('aria-valuenow', p);
-  if(carga.el.classList.contains('on')) carga.raf = requestAnimationFrame(cargaBucle);
-}
-function cargaMostrar(){
-  if(carga.iniciada && carga.el.classList.contains('on') && !carga.el.classList.contains('sale')) return;
-  carga.iniciada = true;
-  const v = $('cargaV3');
-  v.classList.remove('ver', 'ab'); v.style.height = '0px';
-  $('cargaEst').classList.remove('listo'); $('cargaEst').textContent = '0%'; $('cargaRell').style.width = '0%';
-  carga.el.classList.remove('sale'); carga.el.classList.add('on');
-  carga.prog = 0; carga.meta = 88; carga.t0 = performance.now() + 350;
-  cancelAnimationFrame(carga.raf); cargaBucle();
-  carga.abierta = (async () => {
-    // espera a que el navegador MUESTRE de verdad el fondo (primer pintado real); si no, parte la animación "a oscuras" y aparece ya abierta
-    await new Promise(res => { let ok = false; const f = () => { if(!ok){ ok = true; res(); } }; try{ new PerformanceObserver(l => { if(l.getEntries().some(e => e.name === 'first-paint')) f(); }).observe({type: 'paint', buffered: true}); }catch(e){ f(); return; } setTimeout(f, 900); });
-    await dormir(40);
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const H = $('cargaIn').scrollHeight + 4;
-    setTimeout(() => v.classList.add('ver'), 260);
-    await animAlto(v, 0, H, 480);
-  })();
-}
-function cargaCortar(){
-  carga.iniciada = false;
-  cancelAnimationFrame(carga.raf);
-  carga.el.classList.remove('on', 'sale');
-}
-window.addEventListener('pageshow', e => { if(e.persisted) location.reload(); });
-// Espera a que la página esté de verdad lista: documento cargado, tipografías, imágenes decodificadas y un cuadro ya pintado.
-async function paginaLista(){
-  const tope = dormir(6000);
-  const listo = (async () => {
-    if(document.readyState !== 'complete') await new Promise(r => window.addEventListener('load', r, {once: true}));
-    try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
-    try{ await Promise.all(Array.from(document.images).filter(i => i.src && !i.complete || i.decode).map(i => i.decode().catch(() => {}))); }catch(e){}
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-  })();
-  await Promise.race([listo, tope]);
-}
-async function cargaOcultar(){
-  if(carga.abierta) await carga.abierta;
-  await paginaLista();
-  carga.meta = 100;
-  while(carga.prog < 100) await dormir(30);
-  const e = $('cargaEst'); e.textContent = '¡Listo!'; e.classList.add('listo');
-  await dormir(450);
-  const v = $('cargaV3'), H2 = v.getBoundingClientRect().height;
-  v.classList.remove('ver'); await dormir(200);
-  await animAlto(v, H2, 0, 450);
-  carga.el.classList.add('sale');
-  await dormir(350);
-  cargaCortar();
-}
+// La pantalla de carga vive en la página (CargaPagina): se abre y se cierra sola con animaciones CSS.
+function cargaMostrar(){}
+function cargaCortar(){ if(window.CargaPagina) CargaPagina.cortar(); }
+async function cargaOcultar(){ if(window.CargaPagina) await CargaPagina.fin(); }
 
 function irAlMenu(msg){
   cargaCortar();

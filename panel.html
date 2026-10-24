@@ -1053,63 +1053,65 @@
   @keyframes hwLadoD{0%,66%{opacity:0;transform:translateX(-96px) rotate(6deg);}67%{opacity:1;transform:translateX(-96px) rotate(6deg);}73%,80%{opacity:1;transform:translateX(0) rotate(6deg);}83%{transform:translateX(0) rotate(-2deg);}86%{transform:translateX(0) rotate(6deg);}92%{opacity:1;transform:translateX(-96px) rotate(6deg);}93%,100%{opacity:0;transform:translateX(-96px) rotate(6deg);}}
   body.tema5:has(.overlay.show) #esqueletos{display:none;}
 
-#cargaGlobal{position:fixed;inset:0;z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+#cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
 #cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
 #cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
-#cargaGlobal .cg3{position:relative;width:100%;height:0;}
-#cargaGlobal .cgbd{position:absolute;left:0;right:0;height:2px;background:#fff;}
-#cargaGlobal .cgt{top:0;}#cargaGlobal .cgbt{bottom:0;}
-#cargaGlobal .cgfondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;text-align:center;}
-#cargaGlobal .cgin{padding:24px 16px;opacity:0;transition:opacity .25s;}
-#cargaGlobal .cg3.cgver .cgin{opacity:1;}
+#cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:#fff;will-change:transform;}
+#cargaGlobal .cgfondo{position:absolute;inset:0;background:rgba(255,255,255,.08);transform:scaleY(0);will-change:transform;}
+#cargaGlobal .cgin{position:absolute;inset:2px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;text-align:center;opacity:0;will-change:opacity;}
+#cargaGlobal .cgabre .cgbd.cgt{animation:cgSube .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgbd.cgbt{animation:cgBaja .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgfondo{animation:cgAbre .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgin{animation:cgAparece .22s ease .34s forwards;}
+#cargaGlobal .cgcierra .cgin{opacity:1;animation:cgDesaparece .2s ease forwards;}
+#cargaGlobal .cgcierra .cgbd.cgt{transform:translateY(calc(var(--H) / -2 + 1px));animation:cgSubeR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgbd.cgbt{transform:translateY(calc(var(--H) / 2 - 1px));animation:cgBajaR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgfondo{transform:scaleY(1);animation:cgCierra .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+@keyframes cgSube{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / -2 + 1px));}}
+@keyframes cgBaja{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / 2 - 1px));}}
+@keyframes cgSubeR{from{transform:translateY(calc(var(--H) / -2 + 1px));}to{transform:translateY(0);}}
+@keyframes cgBajaR{from{transform:translateY(calc(var(--H) / 2 - 1px));}to{transform:translateY(0);}}
+@keyframes cgAbre{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes cgCierra{from{transform:scaleY(1);}to{transform:scaleY(0);}}
+@keyframes cgAparece{from{opacity:0;}to{opacity:1;}}
+@keyframes cgDesaparece{from{opacity:1;}to{opacity:0;}}
 #cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
 #cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
 #cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
-#cargaGlobal .cgrell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
 #cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+@media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
+@media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
   #lgSplash{display:none !important;}
 </style>
 </head>
 <body class="lg-on">
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3" id="cgV3" style="height:0"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de cerámica</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de cerámica</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div>
 <script>
 (function(){
-  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst');
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var textoBase = tit.textContent;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null};
-  function alto(a, b, ms){
-    return new Promise(function(res){
-      var t = 0, last = null;
-      function paso(ts){
-        if(last === null) last = ts;
-        t += Math.min(ts - last, 24); last = ts;
-        var k = Math.min(1, t / ms), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-        v.style.height = (a + (b - a) * e) + 'px';
-        if(k < 1) requestAnimationFrame(paso); else res();
-      }
-      requestAnimationFrame(paso);
-    });
+  // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
+  function terminadas(nodo){
+    return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 450));
     st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
-    rell.style.width = st.prog + '%';
+    rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
+    if(st.meta < 100) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
-  function pintado(){ return new Promise(function(res){ var ok=false; function f(){ if(!ok){ ok=true; res(); } } try{ var po=new PerformanceObserver(function(l){ if(l.getEntries().some(function(e){ return e.name==='first-paint'; })) f(); }); po.observe({type:'paint',buffered:true}); }catch(e){ f(); return; } setTimeout(f,900); }); }
-  var abierta = (async function(){
-    await pintado(); await dormir(40);
-    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-    var H = document.getElementById('cgIn').scrollHeight + 4;
-    setTimeout(function(){ v.classList.add('cgver'); }, 260);
-    await alto(0, H, 480);
-  })();
+  var abierta = terminadas(v);
   async function paginaLista(){
     var tope = dormir(6000);
     var listo = (async function(){
@@ -1122,6 +1124,7 @@
   }
   window.CargaPagina = {
     el: el,
+    cortar: function(){ cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     fin: function(){
       if(st.fin) return st.fin;
       st.fin = (async function(){
@@ -1129,11 +1132,12 @@
         st.meta = 100;
         while(st.prog < 100) await dormir(30);
         est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
-        var H2 = v.getBoundingClientRect().height;
-        v.classList.remove('cgver'); await dormir(200);
-        await alto(H2, 0, 450);
-        el.classList.add('cgsale'); await dormir(350);
-        cancelAnimationFrame(st.raf); el.remove();
+        v.classList.remove('cgabre'); v.classList.add('cgcierra');
+        await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+        await terminadas(v);
+        el.classList.add('cgsale');
+        await new Promise(function(r){ var t = setTimeout(r, 600); el.addEventListener('transitionend', function(){ clearTimeout(t); r(); }, {once: true}); });
+        CargaPagina.cortar();
       })();
       return st.fin;
     }
