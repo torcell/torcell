@@ -460,6 +460,16 @@ function leerCal(){ const t = ls('calidadToken'); return t ? {token: t, nombre: 
 function leerHub(){
   try{ const t = ss('hubSesion') || ls('hubSesion'); const h = t ? JSON.parse(t) : null; return (h && h.token && Array.isArray(h.secciones)) ? h : null; }catch(e){ return null; }
 }
+function aplicarEncargados(enc){
+  try{
+    document.querySelectorAll('button[data-dest]').forEach(function(b){
+      var e = enc && enc[b.dataset.dest], t = b.querySelector('.enc');
+      if(e && t) t.textContent = 'Encargado: ' + e;
+    });
+    ls('hubEncargados', JSON.stringify(enc));
+  }catch(e){}
+}
+try{ var encGuardados = JSON.parse(ls('hubEncargados') || 'null'); if(encGuardados) aplicarEncargados(encGuardados); }catch(e){}
 function guardarHub(h){
   try{ (h.recordar ? localStorage : sessionStorage).setItem('hubSesion', JSON.stringify(h)); (h.recordar ? sessionStorage : localStorage).removeItem('hubSesion'); }catch(e){}
 }
@@ -530,6 +540,7 @@ function resultado(res, recordar, via){
   if(res === null){ gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
   if(!res.ok){
     if(res.error === 'dispositivo_ocupado'){ sacudir(); gate.pin = ''; gatePintar(); gateMensaje(res.tipo === 'unico' ? 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.' : 'Esta cuenta ya está abierta en otro ' + (res.tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Cierra la sesión allá o pídele al administrador que libere el cupo.', true); return; }
+    if(res.error === 'bloqueado'){ sacudir(); gate.pin = ''; gatePintar(); gateMensaje(res.permanente ? 'Tu acceso está bloqueado. Habla con el administrador.' : 'Tu acceso está bloqueado hasta el ' + new Date(res.hasta).toLocaleDateString('es-CL') + '.' , true); return; }
     if(res.error === 'demasiados_intentos'){ sacudir(); gate.pin = ''; gatePintar(); gateBloquear(30, 'Demasiados intentos seguidos.'); return; }
     if(via === 'google'){ gateMensaje('Ese Gmail no está autorizado. Pídele al administrador que lo agregue.', true); return; }
     gate.fallos++; sacudir(); gate.pin = ''; gatePintar();
@@ -593,6 +604,7 @@ function elegir(res, recordar, aviso){
   mensajeElegir(aviso || '', !!aviso);
   const pref = mostrarOpciones(res.secciones || SECC_BASE[res.rol] || []);
   datosElegir = {res, recordar};
+  if(res.encargados) aplicarEncargados(res.encargados);
   pantalla('lgElegir');
   if(PAGINAS[pref] && (res.secciones || []).indexOf(pref) !== -1) precargar(pref);
 }
@@ -604,6 +616,7 @@ async function refrescarAcceso(){
     if(r.error === 'sin_sesion'){ limpiarTodo(); datosElegir = null; pantalla('lgPin'); gateMensaje('Tu sesión venció. Ingresa tu PIN de nuevo.', true); }
     return;
   }
+  if(r.encargados) aplicarEncargados(r.encargados);
   if(Array.isArray(r.secciones)){
     datosElegir.res.secciones = r.secciones;
     guardarHub({token: datosElegir.res.token, nombre: datosElegir.res.nombre, rol: datosElegir.res.rol, secciones: r.secciones, recordar: datosElegir.recordar});
