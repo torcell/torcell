@@ -492,7 +492,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.32.1';
+const CAL_VERSION = '1.32.2';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -610,7 +610,9 @@ function cargaMostrar(){
   carga.prog = 0; carga.meta = 88; carga.t0 = performance.now() + 350;
   cancelAnimationFrame(carga.raf); cargaBucle();
   carga.abierta = (async () => {
-    // espera a que el navegador pinte la línea cerrada; si no, la apertura salta sin transición
+    // espera a que el navegador MUESTRE de verdad el fondo (primer pintado real); si no, parte la animación "a oscuras" y aparece ya abierta
+    await new Promise(res => { let ok = false; const f = () => { if(!ok){ ok = true; res(); } }; try{ new PerformanceObserver(l => { if(l.getEntries().some(e => e.name === 'first-paint')) f(); }).observe({type: 'paint', buffered: true}); }catch(e){ f(); return; } setTimeout(f, 900); });
+    await dormir(40);
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const H = $('cargaIn').scrollHeight + 4;
     setTimeout(() => v.classList.add('ver'), 260);

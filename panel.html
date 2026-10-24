@@ -1102,7 +1102,9 @@
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
+  function pintado(){ return new Promise(function(res){ var ok=false; function f(){ if(!ok){ ok=true; res(); } } try{ var po=new PerformanceObserver(function(l){ if(l.getEntries().some(function(e){ return e.name==='first-paint'; })) f(); }); po.observe({type:'paint',buffered:true}); }catch(e){ f(); return; } setTimeout(f,900); }); }
   var abierta = (async function(){
+    await pintado(); await dormir(40);
     await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
     var H = document.getElementById('cgIn').scrollHeight + 4;
     setTimeout(function(){ v.classList.add('cgver'); }, 260);
