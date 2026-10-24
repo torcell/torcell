@@ -1424,7 +1424,7 @@
   <span id="cargandoTexto">Cargando…</span>
 </div>
 
-<div id="avisoToast" style="position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--text);border:1px solid var(--border-strong);padding:10px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;z-index:96;max-width:90vw;text-align:center;"></div>
+<div id="avisoToast" style="position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--text);border:1px solid var(--border-strong);padding:10px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;z-index:2000;max-width:90vw;text-align:center;"></div>
 
 <div id="avisoDatosViejos" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#8a6a1f;color:#fff;padding:9px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;align-items:center;gap:12px;z-index:94;max-width:90vw;">
   <span>⏱ Esto se cargó hace rato -- puede que alguien más haya guardado algo mientras tanto.</span>
@@ -4334,7 +4334,7 @@ async function abrirAdministracion(){
   ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:820px;width:100%;max-height:90vh;overflow:auto;padding:16px;">'
     + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🛠 Administración' + (demo ? ' (prueba)' : '') + '</b><button class="btn" id="admCerrar" type="button">Cerrar</button></div>'
     + '<div style="display:flex;gap:6px;margin-bottom:12px;"><button class="btn" id="admTU" type="button">Usuarios</button><button class="btn" id="admTE" type="button">Encargados</button></div>'
-    + '<div id="admCuerpo" style="font-size:13px;">Cargando…</div></div>';
+    + '<div id="admCuerpo" style="font-size:13px;">Cargando…</div><div id="admMsg" style="min-height:20px;margin-top:10px;font-size:12.5px;font-weight:600;"></div></div>';
   document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#admCuerpo');
   ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'admCerrar') ov.remove(); });
@@ -4345,6 +4345,7 @@ async function abrirAdministracion(){
     if(!j || !j.ok){ cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 63 o más nueva.'; return; }
     datos = {usuarios: j.usuarios, encargados: j.encargados};
   }
+  function admMsg(t, ok){ const m = ov.querySelector('#admMsg'); if(m){ m.textContent = t; m.style.color = ok ? 'var(--ok, #43a047)' : '#d9534f'; } }
   const guardarDemo = () => { try{ localStorage.setItem('pruebaAdmin', JSON.stringify(datos)); }catch(e){} };
   const ERR = {nombre_repetido: 'Ya existe una persona con ese nombre.', nombre_invalido: 'El nombre debe tener al menos 2 letras.', fecha_invalida: 'Elige una fecha futura.', datos_invalidos: 'Datos no válidos. Recarga la lista.', rol_invalido: 'Cargo no válido.'};
   const fmt = ms => new Date(ms).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'});
@@ -4360,7 +4361,7 @@ async function abrirAdministracion(){
     if(demo) return {ok: true, demo: true};
     const j = await llamarDb(nombreAccion, extra);
     if(j && j.ok) return j;
-    avisoToast((j && ERR[j.error]) || 'No se pudo guardar. ¿Está publicada la versión 63 del script?', 'error');
+    const t = (j && ERR[j.error]) || 'No se pudo guardar. ¿Está publicada la versión 63 del script?'; admMsg(t, false); avisoToast(t, 'error');
     return null;
   }
   function verUsuarios(){
@@ -4368,7 +4369,7 @@ async function abrirAdministracion(){
       const b = u.bloqueo;
       const estado = b ? '<span style="color:var(--bad);font-weight:600;">Bloqueado ' + (b.permanente ? 'permanente' : 'hasta ' + fmt(b.hasta)) + '</span>' + (b.motivo ? '<div style="font-size:11.5px;color:var(--sub);">' + esc(b.motivo) + '</div>' : '') : '<span style="color:var(--sub);">Activo</span>';
       const acc = u.rol === 1 ? '<span style="font-size:11px;color:var(--sub);">no se puede bloquear</span>' :
-        '<button class="btn" data-a="ren" data-i="' + i + '" type="button">Renombrar</button> <button class="btn" data-a="pin" data-i="' + i + '" type="button">PIN nuevo</button> '
+        '<button class="btn" data-a="ren" data-i="' + i + '" type="button">Renombrar</button> <button class="btn" data-a="car" data-i="' + i + '" type="button">Cargo</button> <button class="btn" data-a="pin" data-i="' + i + '" type="button">PIN nuevo</button> '
         + (b ? '<button class="btn" data-a="des" data-i="' + i + '" type="button">Desbloquear</button>' : '<button class="btn" data-a="blq" data-i="' + i + '" type="button">Bloquear</button>');
       return '<tr><td style="' + celda + '"><b>' + esc(u.nombre || '(sin nombre)') + '</b><div style="font-size:11.5px;color:var(--sub);">' + esc(u.cargo) + '</div></td><td style="' + celda + '">' + estado + '</td><td style="' + celda + 'text-align:right;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">' + acc + '</td></tr><tr id="admF' + i + '" hidden><td colspan="3" style="padding:0 6px 10px;"></td></tr>';
     }).join('');
@@ -4402,7 +4403,14 @@ async function abrirAdministracion(){
           if(nuevo.length < 2 || nuevo === u.nombre) return;
           if(datos.usuarios.some(x => x !== u && x.nombre.toLowerCase() === nuevo.toLowerCase())){ avisoToast(ERR.nombre_repetido, 'error'); return; }
           const j = await accion('adminRenombrar', {...base, nuevo}); if(!j) return;
-          u.nombre = nuevo; if(demo) guardarDemo(); avisoToast('Nombre cambiado.', 'ok'); verUsuarios();
+          u.nombre = nuevo; if(demo) guardarDemo(); admMsg('Nombre cambiado.', true); verUsuarios();
+        });
+      } else if(a === 'car'){
+        td.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="admCS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" type="button" id="admCG">Guardar cargo</button></div><div style="font-size:11.5px;color:var(--sub);margin-top:4px;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
+        td.querySelector('#admCG').addEventListener('click', async () => {
+          const rol = Number(td.querySelector('#admCS').value);
+          const j = await accion('adminCargo', {...base, rol}); if(!j) return;
+          u.rol = rol; u.cargo = demo ? ({2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica'})[rol] : j.cargo; if(demo) guardarDemo(); admMsg('Cargo cambiado.', true); verUsuarios();
         });
       } else if(a === 'pin'){
         td.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span>¿Generar un PIN nuevo para <b>' + esc(u.nombre) + '</b>? El anterior deja de servir.</span><button class="btn primary" type="button" id="admPG">Sí, generar</button></div>';
@@ -4420,21 +4428,22 @@ async function abrirAdministracion(){
           if(!perm){ if(!fe.value){ avisoToast(ERR.fecha_invalida, 'error'); return; } const [y, m, d] = fe.value.split('-').map(Number); hasta = new Date(y, m - 1, d, 23, 59, 59).getTime(); if(hasta <= Date.now()){ avisoToast(ERR.fecha_invalida, 'error'); return; } }
           const motivo = td.querySelector('#admBM').value.trim();
           const j = await accion('adminBloquear', {...base, permanente: perm, hasta, motivo}); if(!j) return;
-          u.bloqueo = demo ? {permanente: perm, hasta, motivo} : j.bloqueo; if(demo) guardarDemo(); avisoToast('Bloqueado.', 'ok'); verUsuarios();
+          u.bloqueo = demo ? {permanente: perm, hasta, motivo} : j.bloqueo; if(demo) guardarDemo(); admMsg('Bloqueado.', true); verUsuarios();
         });
       } else if(a === 'des'){
-        (async () => { const j = await accion('adminDesbloquear', base); if(!j) return; u.bloqueo = null; if(demo) guardarDemo(); avisoToast('Desbloqueado.', 'ok'); verUsuarios(); })();
+        (async () => { const j = await accion('adminDesbloquear', base); if(!j) return; u.bloqueo = null; if(demo) guardarDemo(); admMsg('Desbloqueado.', true); verUsuarios(); })();
       }
     }));
   }
   function verEncargados(){
     cuerpo.innerHTML = '<div style="color:var(--sub);margin-bottom:8px;">Este nombre aparece en cada botón del menú de inicio.</div>'
       + ADM_SECC.map(([k, n]) => '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><label style="width:170px;">' + n + '</label><input data-k="' + k + '" value="' + esc(datos.encargados[k] || '') + '" maxlength="60" style="flex:1;"></div>').join('')
-      + '<button class="btn primary" id="admEG" type="button">Guardar encargados</button>';
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn primary" id="admEG" type="button">Guardar y cerrar</button><button class="btn" id="admEC" type="button">Cerrar sin guardar</button></div>';
+    cuerpo.querySelector('#admEC').addEventListener('click', () => ov.remove());
     cuerpo.querySelector('#admEG').addEventListener('click', async () => {
       const enc = {}; cuerpo.querySelectorAll('input[data-k]').forEach(i => { enc[i.dataset.k] = i.value.trim(); });
       const j = await accion('adminEncargadosGuardar', {encargados: enc}); if(!j) return;
-      datos.encargados = demo ? {...datos.encargados, ...enc} : j.encargados; if(demo) guardarDemo(); avisoToast('Encargados guardados.', 'ok');
+      datos.encargados = demo ? {...datos.encargados, ...enc} : j.encargados; if(demo) guardarDemo(); avisoToast('Encargados guardados.', 'ok'); ov.remove();
     });
   }
   ov.querySelector('#admTU').addEventListener('click', verUsuarios);

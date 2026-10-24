@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||h.rol!==1){try{sessionStorage.setItem('progresoObraAvisoGate','Esa sección es solo para el administrador.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
+<title>Administración · Obra Bellavista</title>
+<style>
+:root{--bg:#0b2b36;--panel:#10384a;--soft:#0d3242;--border:#24505f;--strong:#3d6d7e;--text:#eef4f6;--sub:#a3bcc6;--ok:#43b97f;--warn:#f0a23a;--bad:#ef6a5e;--accent:#4f8fd6;--accent2:#2f6f8f;color-scheme:dark;}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;}
+body{min-height:100vh;}
+button,input,select{font:inherit;color:inherit;}
+.btn{background:transparent;border:1px solid var(--strong);padding:7px 12px;cursor:pointer;border-radius:0;transition:background .15s,border-color .15s;}
+.btn:hover{border-color:#fff;background:rgba(255,255,255,.06);}
+.btn:active{transform:translateY(1px);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn.primary:hover{filter:brightness(1.1);}
+.btn.bad{border-color:var(--bad);color:var(--bad);}
+.btn:disabled{opacity:.5;cursor:default;}
+input,select{background:var(--soft);border:1px solid var(--strong);padding:7px 9px;border-radius:0;min-width:0;}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+header.top{border-bottom:2px solid #fff;background:var(--bg);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+header.top h1{font-size:18px;margin:0;flex:1;min-width:200px;}
+header.top h1 small{display:block;font-size:11.5px;font-weight:400;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.quien{font-size:12px;color:var(--sub);}
+.cuerpo{display:grid;grid-template-columns:210px 1fr;gap:0;max-width:1100px;margin:0 auto;}
+nav.lado{border-right:1px solid var(--border);padding:14px 0;}
+nav.lado button{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;padding:11px 16px;cursor:pointer;color:var(--sub);}
+nav.lado button:hover{color:#fff;background:rgba(255,255,255,.04);}
+nav.lado button.on{color:#fff;border-left-color:var(--accent);background:rgba(79,143,214,.12);}
+nav.lado button small{display:block;font-size:11px;opacity:.8;margin-top:1px;}
+main{padding:18px;min-width:0;}
+main h2{margin:0 0 4px;font-size:17px;}
+.nota{color:var(--sub);font-size:12.5px;margin:0 0 14px;}
+.tarjeta{background:var(--panel);border:1px solid var(--border);border-top:2px solid #fff;padding:14px;margin-bottom:14px;}
+.fila{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--border);flex-wrap:wrap;}
+.fila:first-child{border-top:0;}
+.fila .quien2{flex:1;min-width:160px;}
+.fila .quien2 b{display:block;}
+.fila .quien2 small{color:var(--sub);font-size:11.5px;}
+.acc{display:flex;gap:6px;flex-wrap:wrap;}
+.pildora{display:inline-block;border-radius:999px;padding:2px 10px;font-size:11.5px;border:1px solid var(--strong);color:var(--sub);}
+.pildora.bad{border-color:var(--bad);color:var(--bad);}
+.pildora.ok{border-color:var(--ok);color:var(--ok);}
+.extra{flex-basis:100%;background:var(--soft);border:1px solid var(--border);padding:10px;}
+.extra[hidden]{display:none;}
+.fila-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.fila-f input{flex:1;min-width:150px;}
+.pinbox{text-align:center;padding:18px 10px;}
+.pinbox .pin{font-size:38px;font-weight:700;letter-spacing:8px;margin:10px 0;font-variant-numeric:tabular-nums;}
+.matriz{width:100%;border-collapse:collapse;}
+.matriz th{font-size:11.5px;color:var(--sub);font-weight:600;padding:6px;text-align:center;}
+.matriz th:first-child,.matriz td:first-child{text-align:left;}
+.matriz td{padding:9px 6px;border-top:1px solid var(--border);text-align:center;}
+.matriz td small{color:var(--sub);font-size:11px;}
+.matriz input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);padding:0;}
+.proximo{border:1px dashed var(--strong);padding:16px;color:var(--sub);}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);background:#fff;color:#0b2b36;padding:10px 16px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:90vw;}
+#toast.on{opacity:1;transform:translate(-50%,0);}
+#toast.err{background:var(--bad);color:#fff;}
+.demo{background:#6b3fa0;color:#fff;text-align:center;padding:7px;font-size:12.5px;}
+@media(max-width:760px){
+  .cuerpo{grid-template-columns:1fr;}
+  nav.lado{display:flex;border-right:0;border-bottom:1px solid var(--border);padding:0;overflow-x:auto;}
+  nav.lado button{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;width:auto;}
+  nav.lado button.on{border-bottom-color:var(--accent);}
+  nav.lado button small{display:none;}
+  main{padding:14px 12px;}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;}}
+
+#cargaGlobal{position:fixed;inset:0;z-index:99990;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+#cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
+#cargaGlobal .cg3{position:relative;width:100%;height:0;}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;height:2px;background:#fff;}
+#cargaGlobal .cgt{top:0;}#cargaGlobal .cgbt{bottom:0;}
+#cargaGlobal .cgfondo{position:absolute;inset:2px 0;background:rgba(255,255,255,.08);overflow:hidden;text-align:center;}
+#cargaGlobal .cgin{padding:24px 16px;opacity:0;transition:opacity .25s;}
+#cargaGlobal .cg3.cgver .cgin{opacity:1;}
+#cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+#cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
+#cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
+#cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
+#cargaGlobal .cgrell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
+#cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+
+</style>
+</head>
+<body>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3" id="cgV3" style="height:0"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando administración</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div></div></div></div></div>
+<script>
+(function(){
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst');
+  var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null};
+  function alto(a, b, ms){
+    return new Promise(function(res){
+      var t = 0, last = null;
+      function paso(ts){
+        if(last === null) last = ts;
+        t += Math.min(ts - last, 24); last = ts;
+        var k = Math.min(1, t / ms), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+        v.style.height = (a + (b - a) * e) + 'px';
+        if(k < 1) requestAnimationFrame(paso); else res();
+      }
+      requestAnimationFrame(paso);
+    });
+  }
+  function bucle(){
+    var t = Math.max(0, performance.now() - st.t0);
+    var obj = st.meta >= 100 ? 100 : 88 * (1 - Math.exp(-t / 450));
+    st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
+    rell.style.width = st.prog + '%';
+    if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
+    if(el.isConnected) st.raf = requestAnimationFrame(bucle);
+  }
+  bucle();
+  var abierta = (async function(){
+    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    var H = document.getElementById('cgIn').scrollHeight + 4;
+    setTimeout(function(){ v.classList.add('cgver'); }, 260);
+    await alto(0, H, 480);
+  })();
+  async function paginaLista(){
+    var tope = dormir(6000);
+    var listo = (async function(){
+      if(document.readyState !== 'complete') await new Promise(function(r){ window.addEventListener('load', r, {once: true}); });
+      try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+      try{ await Promise.all(Array.prototype.slice.call(document.images).map(function(i){ return i.decode ? i.decode().catch(function(){}) : 0; })); }catch(e){}
+      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    })();
+    await Promise.race([listo, tope]);
+  }
+  window.CargaPagina = {
+    el: el,
+    fin: function(){
+      if(st.fin) return st.fin;
+      st.fin = (async function(){
+        await abierta; await paginaLista();
+        st.meta = 100;
+        while(st.prog < 100) await dormir(30);
+        est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
+        var H2 = v.getBoundingClientRect().height;
+        v.classList.remove('cgver'); await dormir(200);
+        await alto(H2, 0, 450);
+        el.classList.add('cgsale'); await dormir(350);
+        cancelAnimationFrame(st.raf); el.remove();
+      })();
+      return st.fin;
+    }
+  };
+  setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
+  window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });
+})();
+</script>
+
+<header class="top">
+  <h1><small>Obra Bellavista, La Florida</small>Administración</h1>
+  <span class="quien" id="quien"></span>
+  <button class="btn" id="irMenu" type="button">🔀 Cambiar de sección</button>
+</header>
+<div class="cuerpo">
+  <nav class="lado" id="lado">
+    <button type="button" data-t="usuarios" class="on">Usuarios<small>crear, renombrar, bloquear</small></button>
+    <button type="button" data-t="permisos">Permisos<small>secciones y aparatos</small></button>
+    <button type="button" data-t="encargados">Encargados<small>quién responde por cada página</small></button>
+    <button type="button" data-t="ventanas">Ventanas<small>qué puede abrir cada uno</small></button>
+  </nav>
+  <main id="main"></main>
+</div>
+<div id="toast" role="status"></div>
+<script>
+const DEMO = false;
+const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
+const $ = id => document.getElementById(id);
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion'); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
+const SECC = [['panel','Panel de cerámica'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica']];
+const SECC_INV = SECC.filter(x => x[0] !== 'panel');
+const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.'};
+const fmt = ms => new Date(ms).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
+let tTimer = 0;
+function toast(t, err){ const e = $('toast'); e.textContent = t; e.className = 'on' + (err ? ' err' : ''); clearTimeout(tTimer); tTimer = setTimeout(() => e.className = '', 2800); }
+
+/* ---------- acceso a datos: real (Apps Script) o demo ---------- */
+const H = hub(), TOKEN = H && H.token || '', DB_URL = ls('progresoObraDbUrl') || DEFAULT_DB_URL;
+const BD = (function(){
+  const g = () => { try{ return JSON.parse(ls('pruebaAdminHtml')); }catch(e){ return null; } };
+  const estado = g() || {
+    usuarios:[{fila:2,nombre:'Silvia Gonzales',cargo:'Calidad',rol:5,bloqueo:null,base:['calidad'],extra:[],doble:true,dobleBase:true},
+      {fila:3,nombre:'Sandoval',cargo:'Jefe de Terreno',rol:4,bloqueo:null,base:['terreno','calidad','avance'],extra:[],doble:false},
+      {fila:4,nombre:'Edwin Carroz',cargo:'Oficina Técnica',rol:6,bloqueo:null,base:['oficina','avance'],extra:[],doble:false},
+      {fila:5,nombre:'Rafael',cargo:'Trabajador',rol:3,bloqueo:{permanente:false,hasta:Date.now()+3*86400000,motivo:'Vacaciones'},base:['panel'],extra:[],doble:false}],
+    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzales',avance:'A. Sandoval',terreno:'A. Sandoval',oficina:'Edwin Carroz'}};
+  const guardar = () => { try{ localStorage.setItem('pruebaAdminHtml', JSON.stringify(estado)); }catch(e){} };
+  const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica'};
+  const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance']};
+  const pin = () => String(100000 + Math.floor(Math.random()*899999));
+  const por = f => estado.usuarios.find(u => u.fila === f);
+  return async function(a, x){
+    await dormir(120);
+    if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados};
+    if(a === 'seccionesListar') return {ok:true, usuarios:estado.usuarios.filter(u => u.rol !== 1)};
+    if(a === 'seccionesGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.extra = x.extra; guardar(); return {ok:true, extra:u.extra}; }
+    if(a === 'dispositivoDobleGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.doble = !!x.doble; guardar(); return {ok:true, doble:u.doble}; }
+    if(a === 'adminCrearUsuario'){
+      if(estado.usuarios.some(u => u.nombre.toLowerCase() === x.nombre.toLowerCase())) return {ok:false,error:'nombre_repetido'};
+      estado.usuarios.push({fila:estado.usuarios.length+2,nombre:x.nombre,cargo:CARGO[x.rol],rol:x.rol,bloqueo:null,base:BASE[x.rol]||['panel'],extra:[],doble:false}); guardar(); return {ok:true,pin:pin()};
+    }
+    if(a === 'adminCargo'){ const u = por(x.fila); u.rol = x.rol; u.cargo = CARGO[x.rol]; u.base = BASE[x.rol]; guardar(); return {ok:true,rol:x.rol,cargo:u.cargo}; }
+    if(a === 'adminRenombrar'){ por(x.fila).nombre = x.nuevo; guardar(); return {ok:true,nombre:x.nuevo}; }
+    if(a === 'adminPinNuevo') return {ok:true,pin:pin()};
+    if(a === 'adminBloquear'){ const b = {permanente:!!x.permanente,hasta:x.hasta||0,motivo:x.motivo||''}; por(x.fila).bloqueo = b; guardar(); return {ok:true,bloqueo:b}; }
+    if(a === 'adminDesbloquear'){ por(x.fila).bloqueo = null; guardar(); return {ok:true}; }
+    if(a === 'adminEncargadosGuardar'){ Object.assign(estado.encargados, x.encargados); guardar(); return {ok:true,encargados:estado.encargados}; }
+    return {ok:false};
+  };
+})();
+async function api(a, x){
+  if(DEMO) return BD(a, x || {});
+  try{
+    const r = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:a, token:TOKEN, ...(x||{})})});
+    const j = JSON.parse(await r.text());
+    if(j && j.error === 'sin_sesion'){ try{ sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Entra de nuevo.'); }catch(e){} location.replace('index.html?menu=1'); }
+    return j;
+  }catch(e){ return null; }
+}
+async function accion(a, x){
+  const j = await api(a, x);
+  if(j && j.ok) return j;
+  toast((j && ERR[j.error]) || 'No se pudo guardar. ¿Está publicada la versión 63 del script?', true);
+  return null;
+}
+
+/* ---------- vistas ---------- */
+let datos = null, tab = 'usuarios';
+const main = $('main');
+function mostrarPin(nombre, pin, volver){
+  main.innerHTML = '<div class="tarjeta pinbox"><div style="color:var(--sub);">PIN de <b style="color:var(--text);">' + esc(nombre) + '</b></div><div class="pin">' + esc(pin) + '</div>'
+    + '<div style="font-size:12.5px;color:var(--sub);max-width:420px;margin:0 auto 14px;">Se muestra una sola vez; después queda protegido y nadie puede verlo. Entrégaselo en persona, sin enviarlo por mensaje.</div><button class="btn primary" id="pinOk" type="button">Listo, ya lo anoté</button></div>';
+  $('pinOk').addEventListener('click', volver);
+}
+function vistaUsuarios(){
+  const filas = datos.usuarios.map((u, i) => {
+    const b = u.bloqueo;
+    const est = b ? '<span class="pildora bad">Bloqueado ' + (b.permanente ? 'permanente' : 'hasta ' + fmt(b.hasta)) + '</span>' : '<span class="pildora ok">Activo</span>';
+    const acc = u.rol === 1 ? '<span class="nota" style="margin:0;">no se puede bloquear</span>'
+      : '<button class="btn" data-a="ren" data-i="' + i + '" type="button">Renombrar</button><button class="btn" data-a="car" data-i="' + i + '" type="button">Cargo</button><button class="btn" data-a="pin" data-i="' + i + '" type="button">PIN nuevo</button>' + (b ? '<button class="btn" data-a="des" data-i="' + i + '" type="button">Desbloquear</button>' : '<button class="btn bad" data-a="blq" data-i="' + i + '" type="button">Bloquear</button>');
+    return '<div class="fila"><div class="quien2"><b>' + esc(u.nombre || '(sin nombre)') + '</b><small>' + esc(u.cargo) + (b && b.motivo ? ' · ' + esc(b.motivo) : '') + '</small></div>' + est + '<div class="acc">' + acc + '</div><div class="extra" id="ex' + i + '" hidden></div></div>';
+  }).join('');
+  main.innerHTML = '<h2>Usuarios</h2><p class="nota">Al bloquear, renombrar o cambiar el PIN, la persona sale de inmediato de todos sus aparatos. Los PIN no se pueden ver: solo generar uno nuevo.</p>'
+    + '<div style="margin-bottom:12px;"><button class="btn primary" id="nuevoB" type="button">+ Crear usuario</button></div><div class="tarjeta" id="nuevoF" hidden></div><div class="tarjeta">' + filas + '</div>';
+  const nf = $('nuevoF');
+  $('nuevoB').addEventListener('click', () => {
+    nf.hidden = !nf.hidden; if(nf.hidden) return;
+    nf.innerHTML = '<div class="fila-f"><input id="nN" placeholder="Nombre y apellido" maxlength="60"><select id="nR"><option value="3">Trabajador</option><option value="2">Supervisor</option><option value="4">Jefe de Terreno</option><option value="5">Calidad</option><option value="6">Oficina Técnica</option></select><button class="btn primary" id="nG" type="button">Crear y generar PIN</button></div>';
+    $('nG').addEventListener('click', async () => {
+      const nombre = $('nN').value.trim(), rol = Number($('nR').value);
+      if(nombre.length < 2){ toast(ERR.nombre_invalido, true); return; }
+      if(datos.usuarios.some(u => u.nombre.toLowerCase() === nombre.toLowerCase())){ toast(ERR.nombre_repetido, true); return; }
+      const j = await accion('adminCrearUsuario', {nombre, rol}); if(!j) return;
+      const r = await api('adminUsuarios'); if(r && r.ok) datos.usuarios = r.usuarios;
+      mostrarPin(nombre, j.pin, vistaUsuarios);
+    });
+  });
+  main.querySelectorAll('button[data-a]').forEach(btn => btn.addEventListener('click', () => {
+    const u = datos.usuarios[btn.dataset.i], a = btn.dataset.a, ex = $('ex' + btn.dataset.i), base = {fila:u.fila, nombre:u.nombre};
+    if(!ex.hidden && ex.dataset.a === a){ ex.hidden = true; return; }
+    ex.hidden = false; ex.dataset.a = a;
+    if(a === 'ren'){
+      ex.innerHTML = '<div class="fila-f"><input id="rN" value="' + esc(u.nombre) + '" maxlength="60"><button class="btn primary" id="rG" type="button">Guardar nombre</button></div><div class="nota" style="margin:6px 0 0;">Sus permisos y bloqueos se mantienen. Saldrá de sus aparatos y tendrá que volver a entrar.</div>';
+      $('rG').addEventListener('click', async () => {
+        const nuevo = $('rN').value.trim(); if(nuevo.length < 2 || nuevo === u.nombre) return;
+        if(datos.usuarios.some(x => x !== u && x.nombre.toLowerCase() === nuevo.toLowerCase())){ toast(ERR.nombre_repetido, true); return; }
+        const j = await accion('adminRenombrar', {...base, nuevo}); if(!j) return; u.nombre = nuevo; toast('Nombre cambiado.'); vistaUsuarios();
+      });
+    } else if(a === 'car'){
+      ex.innerHTML = '<div class="fila-f"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="cS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" id="cG" type="button">Guardar cargo</button></div><div class="nota" style="margin:6px 0 0;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
+      $('cG').addEventListener('click', async () => { const rol = Number($('cS').value); const j = await accion('adminCargo', {...base, rol}); if(!j) return; u.rol = rol; u.cargo = j.cargo; toast('Cargo cambiado.'); vistaUsuarios(); });
+    } else if(a === 'pin'){
+      ex.innerHTML = '<div class="fila-f"><span>¿Generar un PIN nuevo para <b>' + esc(u.nombre) + '</b>? El anterior deja de servir.</span><button class="btn primary" id="pG" type="button">Sí, generar</button></div>';
+      $('pG').addEventListener('click', async () => { const j = await accion('adminPinNuevo', base); if(j) mostrarPin(u.nombre, j.pin, vistaUsuarios); });
+    } else if(a === 'blq'){
+      const man = new Date(Date.now() + 86400000).toISOString().substring(0, 10);
+      ex.innerHTML = '<div class="fila-f"><select id="bT"><option value="t">Temporal, hasta la fecha</option><option value="p">Permanente (hasta que yo lo saque)</option></select><input type="date" id="bF" value="' + man + '" min="' + man + '" style="flex:0 0 auto;"><input id="bM" placeholder="Motivo (opcional)" maxlength="120"><button class="btn bad" id="bG" type="button">Bloquear</button></div>';
+      $('bT').addEventListener('change', () => { $('bF').style.display = $('bT').value === 't' ? '' : 'none'; });
+      $('bG').addEventListener('click', async () => {
+        const perm = $('bT').value === 'p'; let hasta = 0;
+        if(!perm){ const v = $('bF').value; if(!v){ toast(ERR.fecha_invalida, true); return; } const [y, m, d] = v.split('-').map(Number); hasta = new Date(y, m-1, d, 23, 59, 59).getTime(); if(hasta <= Date.now()){ toast(ERR.fecha_invalida, true); return; } }
+        const j = await accion('adminBloquear', {...base, permanente:perm, hasta, motivo:$('bM').value.trim()}); if(!j) return;
+        u.bloqueo = j.bloqueo; toast('Bloqueado.'); vistaUsuarios();
+      });
+    } else if(a === 'des'){
+      (async () => { const j = await accion('adminDesbloquear', base); if(!j) return; u.bloqueo = null; toast('Desbloqueado.'); vistaUsuarios(); })();
+    }
+  }));
+}
+async function vistaPermisos(){
+  main.innerHTML = '<h2>Permisos</h2><p class="nota">Marca a qué otras secciones puede entrar cada persona, además de las suyas. Los cambios se guardan al marcar.</p><div class="tarjeta" id="pc">Cargando…</div>';
+  const j = await api('seccionesListar');
+  if(!j || !j.ok){ $('pc').textContent = 'No se pudo cargar. Revisa la conexión y que el script esté publicado.'; return; }
+  const us = j.usuarios.filter(u => u.nombre);
+  $('pc').innerHTML = '<div style="overflow-x:auto;"><table class="matriz"><thead><tr><th>Persona</th>' + SECC_INV.map(s => '<th>' + s[1] + '</th>').join('') + '<th>Celular / tablet extra</th></tr></thead><tbody>'
+    + us.map((u, i) => '<tr><td><b>' + esc(u.nombre) + '</b><br><small>' + esc(u.cargo) + '</small></td>' + SECC_INV.map(([k]) => (u.base.indexOf(k) !== -1 ? '<td><small>incluido</small></td>' : '<td><input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + ((u.extra || []).indexOf(k) !== -1 ? ' checked' : '') + '></td>')).join('')
+      + (u.dobleBase ? '<td><small>incluido</small></td>' : '<td><input type="checkbox" data-u="' + i + '" data-d="1"' + (u.doble ? ' checked' : '') + '></td>') + '</tr>').join('') + '</tbody></table></div>';
+  $('pc').addEventListener('change', async e => {
+    const t = e.target; if(t.dataset.u === undefined) return; const u = us[t.dataset.u]; t.disabled = true;
+    if(t.dataset.d){ const r = await accion('dispositivoDobleGuardar', {nombre:u.nombre, doble:t.checked}); t.disabled = false; if(r){ u.doble = r.doble; toast('Permiso guardado.'); } else t.checked = !t.checked; return; }
+    const nuevo = (u.extra || []).filter(x => x !== t.dataset.s); if(t.checked) nuevo.push(t.dataset.s);
+    const r = await accion('seccionesGuardar', {nombre:u.nombre, extra:nuevo}); t.disabled = false; if(r){ u.extra = r.extra; toast('Permiso guardado.'); } else t.checked = !t.checked;
+  });
+}
+function vistaEncargados(){
+  main.innerHTML = '<h2>Encargados</h2><p class="nota">Este nombre aparece en cada botón del menú de inicio.</p><div class="tarjeta">'
+    + SECC.map(([k, n]) => '<div class="fila"><label class="quien2" for="e_' + k + '"><b>' + n + '</b></label><input id="e_' + k + '" data-k="' + k + '" value="' + esc(datos.encargados[k] || '') + '" maxlength="60" style="flex:1;min-width:200px;"></div>').join('')
+    + '<div style="margin-top:12px;"><button class="btn primary" id="eG" type="button">Guardar y cerrar</button> <button class="btn" id="eC" type="button">Cerrar sin guardar</button></div></div>';
+  $('eC').addEventListener('click', () => { location.href = 'index.html?menu=1'; });
+  $('eG').addEventListener('click', async () => {
+    const enc = {}; main.querySelectorAll('input[data-k]').forEach(i => enc[i.dataset.k] = i.value.trim());
+    const j = await accion('adminEncargadosGuardar', {encargados:enc}); if(j){ datos.encargados = j.encargados; toast('Encargados guardados.'); await dormir(700); location.href = 'index.html?menu=1'; }
+  });
+}
+function vistaVentanas(){
+  main.innerHTML = '<h2>Ventanas</h2><p class="nota">Aquí se decidirá qué ventanas y botones puede ver y abrir cada persona dentro de cada página.</p><div class="proximo">Próximamente. Falta definir la lista de ventanas de cada página que se pueden encender o apagar.</div>';
+}
+async function ir(t){
+  tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else vistaVentanas();
+}
+$('lado').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if(b) ir(b.dataset.t); });
+$('irMenu').addEventListener('click', () => { location.href = 'index.html?menu=1'; });
+async function iniciar(){
+  $('quien').textContent = DEMO ? 'Modo prueba · datos de ejemplo' : ('Admin' + (H && H.nombre ? ' · ' + H.nombre : ''));
+  const j = await api('adminUsuarios');
+  if(!j || !j.ok){ main.innerHTML = '<div class="tarjeta">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 63 o más nueva.</div>'; if(window.CargaPagina) await CargaPagina.fin(); return; }
+  datos = {usuarios:j.usuarios, encargados:j.encargados};
+  await ir('usuarios');
+  if(window.CargaPagina) await CargaPagina.fin();
+}
+iniciar();
+</script>
+</body>
+</html>
