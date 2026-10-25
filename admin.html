@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||h.rol!==1){try{sessionStorage.setItem('progresoObraAvisoGate','Esa sección es solo para el administrador.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||h.rol!==1){try{sessionStorage.setItem('progresoObraAvisoGate','Esa sección es solo para el administrador.');}catch(e){}document.documentElement.style.display='none';location.replace('index.html?menu=1');}}catch(e){}})();</script>
 <title>Panel de Admin · Obra Bellavista</title>
 <style>
 :root{--bg:#0b2b36;--panel:#10384a;--soft:#0d3242;--border:#24505f;--strong:#3d6d7e;--text:#eef4f6;--sub:#a3bcc6;--ok:#43b97f;--warn:#f0a23a;--bad:#ef6a5e;--accent:#4f8fd6;--accent2:#2f6f8f;color-scheme:dark;}
@@ -90,13 +90,18 @@ main h2{margin:0 0 4px;font-size:17px;}
 @media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-b{grid-column:1/-1;order:3}}
 .rd-sub{font-size:12px;color:var(--sub);margin:-2px 0 8px;}
 .rd-fr b{font-weight:700;}
-.rd-h summary{cursor:pointer;font-size:12px;color:var(--accent);list-style:none;border:1px solid var(--border);padding:4px 8px;text-align:center;}
-.rd-h summary::-webkit-details-marker{display:none;}
-.rd-h[open]{grid-column:1/-1;order:9;}
-.rd-h[open] summary{width:90px;margin-bottom:6px;}
+.rd-hbtn{font:inherit;cursor:pointer;font-size:12px;color:var(--accent);background:none;border:1px solid var(--border);padding:4px 8px;width:100%;text-align:center;border-radius:0;}
+.rd-hbtn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.rd-hp{padding:2px 0 10px;}
+.rd-hp[hidden]{display:none;}
 .rd-hv{font-size:12px;color:var(--sub);padding:4px 0;}
-.rd-hl{font-size:12.5px;padding:5px 0;border-top:1px dashed var(--border);}
-.rd-hl small{display:block;font-size:11px;color:var(--sub);}
+.rd-hl{display:grid;grid-template-columns:92px 140px 108px 1fr;gap:4px 12px;align-items:baseline;font-size:12.5px;padding:6px 0;border-top:1px dashed var(--border);}
+.rd-hl .hm{text-align:right;font-variant-numeric:tabular-nums;}
+.rd-hl .hs{font-weight:600;}
+.rd-hl .hr,.rd-hl .ha{color:var(--sub);}
+.rd-hl .ha.sin{font-style:italic;}
+.rd-hl small{grid-column:2/-1;font-size:11px;color:var(--sub);}
+@media(max-width:700px){.rd-hl{grid-template-columns:80px 1fr;}.rd-hl .ha,.rd-hl small{grid-column:1/-1;}}
 
 @media(prefers-reduced-motion:reduce){*{transition:none !important;}}
 
@@ -151,7 +156,6 @@ main h2{margin:0 0 4px;font-size:17px;}
 </head>
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Admin</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
-
 <script>
 (function(){
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
@@ -307,7 +311,7 @@ async function api(a, x){
   try{
     const r = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:a, token:TOKEN, ...(x||{})})});
     const j = JSON.parse(await r.text());
-    if(j && j.error === 'sin_sesion'){ try{ sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Entra de nuevo.'); }catch(e){} salirConError('index.html?menu=1','sesion'); }
+    if(j && j.error === 'sin_sesion'){ try{ sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Entra de nuevo.'); }catch(e){} location.replace('index.html?menu=1'); }
     return j;
   }catch(e){ return null; }
 }
@@ -366,11 +370,11 @@ function renderRendimiento(raiz, datos, esc){
   function infoSem(l){
     const fin = rdSuma(l, sabActivo[l] ? 5 : 4), a = rdFecha(l), b = rdFecha(fin);
     const cuenta = {}; for(let k = 0; k <= (sabActivo[l] ? 5 : 4); k++){ const m = rdFecha(rdSuma(l, k)).getUTCMonth(); cuenta[m] = (cuenta[m] || 0) + 1; }
-    const meses = Object.keys(cuenta).map(Number);
+    const meses = []; for(let k = 0; k <= (sabActivo[l] ? 5 : 4); k++){ const m = rdFecha(rdSuma(l, k)).getUTCMonth(); if(meses.indexOf(m) < 0) meses.push(m); }
     const rango = a.getUTCMonth() === b.getUTCMonth() ? a.getUTCDate() + ' – ' + b.getUTCDate() + ' ' + RD_MC[b.getUTCMonth()] : a.getUTCDate() + ' ' + RD_MC[a.getUTCMonth()] + ' – ' + b.getUTCDate() + ' ' + RD_MC[b.getUTCMonth()];
     const mixta = meses.length > 1;
     const nota = mixta ? meses.map(m => cuenta[m] + (cuenta[m] === 1 ? ' día' : ' días') + ' en ' + RD_MES[m]).join(', ') : '';
-    return {l, fin, rango, mixta, nota, n: nSem(l), tag: mixta ? ' (' + meses.map(m => RD_MC[m]).join('-') + ')' : ''};
+    return {l, fin, rango, mixta, nota, n: nSem(l), tag: mixta ? ' (' + meses.map(m => RD_MC[m]).join('-') + ')' : '', corto: 'Semana ' + nSem(l) + ' ' + meses.map(m => RD_MC[m].charAt(0).toUpperCase() + RD_MC[m].slice(1)).join('-')};
   }
   const nombreSem = l => { const w = infoSem(l); return 'Semana ' + w.n + ' · ' + w.rango + w.tag; };
   /* estadística de un trabajador en un rango de fechas */
@@ -443,7 +447,7 @@ function renderRendimiento(raiz, datos, esc){
       if(!sems.length) return '<div class="rd-hv">Sin historial todavía.</div>';
       const tot = stat(f.t, '0000-01-01', '9999-12-31', cat);
       return '<div class="rd-hv"><b>Acumulado:</b> ' + fmt(tot.m2) + ' m² en ' + sems.length + ' semanas · ' + (tot.conAsist ? tot.F + (tot.F === 1 ? ' falta' : ' faltas') + ' en total' : 'asistencia sin registrar') + '</div>'
-        + sems.map(x => { const w = infoSem(x.l); return '<div class="rd-hl"><b>' + esc(f.nombre) + ': ' + fmt(x.r.m2) + ' m²</b> · Semana ' + w.n + ' · ' + w.rango + w.tag + ' | ' + fraseAsist(x.r) + (w.mixta ? '<small>' + w.nota + '</small>' : '') + '</div>'; }).join('');
+        + sems.map(x => { const w = infoSem(x.l); return '<div class="rd-hl"><b class="hm">' + fmt(x.r.m2) + ' m²</b><span class="hs">' + w.corto + '</span><span class="hr">' + w.rango + '</span><span class="ha' + (x.r.conAsist ? '' : ' sin') + '">' + fraseAsist(x.r) + '</span>' + (w.mixta ? '<small>' + w.nota + '</small>' : '') + '</div>'; }).join('');
     };
     const ord = filas.slice().sort((a, b) => (b.pct == null ? -1 : b.pct) - (a.pct == null ? -1 : a.pct) || b.r.m2 - a.r.m2);
     out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '')
@@ -453,15 +457,16 @@ function renderRendimiento(raiz, datos, esc){
       + (conAs.length ? '<div class="rd-d ok"><small>Mejor asistencia</small><b>' + esc(conAs[0].nombre) + '</b><span>' + Math.round(conAs[0].r.asistPct) + '% · ' + conAs[0].r.F + (conAs[0].r.F === 1 ? ' falta' : ' faltas') + '</span></div><div class="rd-d bad"><small>Peor asistencia</small><b>' + esc(conAs[conAs.length - 1].nombre) + '</b><span>' + Math.round(conAs[conAs.length - 1].r.asistPct) + '% · ' + conAs[conAs.length - 1].r.F + (conAs[conAs.length - 1].r.F === 1 ? ' falta' : ' faltas') + '</span></div>' : '<div class="rd-d"><small>Asistencia</small><b>Sin registrar</b><span>Usa el botón Asistencia del panel</span></div>')
       + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
         const r = f.r, p = f.pct;
-        const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? 'Semana ' + infoSem($('rdSem').value).n + ' · ' + infoSem($('rdSem').value).rango + infoSem($('rdSem').value).tag : esc(titulo)) + ' | ' + fraseAsist(r);
-        return '<div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small></div>'
+        const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
+        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small></div>'
           + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span>' + (p == null ? 'sin días para comparar' : '<b style="color:' + color(p) + '">' + Math.round(p) + '%</b> del promedio por día') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
-          + '<details class="rd-h"><summary>Historial</summary>' + hist(f) + '</details></div>';
+          + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
       }).join('') + '</div>'
       + '<div class="rd-tit">m² por semana del equipo</div><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;max-width:900px;height:auto;">' + barras + '</svg>'
       + '<div class="rd-nota"><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</div>';
   }
+  out.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
   ['rdVista', 'rdSem', 'rdMes', 'rdCat'].forEach(id => $(id).addEventListener('change', pintar));
   pintar();
 }
