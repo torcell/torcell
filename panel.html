@@ -1843,7 +1843,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.67.2';
+const APP_VERSION = '0.67.3';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2858,7 +2858,7 @@ function populateFilters(){
   poblarFiltroPiso();
   const trabSel = document.getElementById('filterTrabajador');
   trabSel.innerHTML = '<option value="">Todos los trabajadores</option>' +
-    ALL_WORKERS.map(w => `<option value="${w}">${w}</option>`).join('') + '<option value="__sin__">Sin asignar</option>';
+    ALL_WORKERS.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('') + '<option value="__sin__">Sin asignar</option>';
   poblarResto();
 }
 function poblarFiltroPiso(){
@@ -2872,7 +2872,7 @@ function poblarFiltroPiso(){
       .sort((a,b) => cmpPisos(parseInt(a.match(/-?\d+/)), parseInt(b.match(/-?\d+/))));
   }
   if(vistaPisos === 'mov'){ const av = pisosConAvanceActual(); pisos = pisos.filter(p => av.has(p)); }
-  const htmlPisos = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${p}">${p}</option>`).join('');
+  const htmlPisos = '<option value="">Todos los pisos</option>' + pisos.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
   if(pisoSel.innerHTML !== htmlPisos){
     pisoSel.innerHTML = htmlPisos;
     if(pisos.includes(pisoPrevia)) pisoSel.value = pisoPrevia;
@@ -2882,7 +2882,7 @@ function poblarResto(){
 
   const cats = [...uniq(FLOOR_BLOCKS.map(f => f.categoria)), 'Pasillos'];
   const tabsEl = document.getElementById('catTabs');
-  tabsEl.innerHTML = cats.map(c => `<div class="tab ${c===activeCategoria?'active':''}" data-cat="${c}">${c}</div>`).join('');
+  tabsEl.innerHTML = cats.map(c => `<div class="tab ${c===activeCategoria?'active':''}" data-cat="${esc(c)}">${esc(c)}</div>`).join('');
   tabsEl.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
       switchCategoria(t.getAttribute('data-cat'));
@@ -2897,19 +2897,19 @@ function renderWorkerPanel(){
     const ws = workerStatus[w] || defaultWorkerEntry(w);
     return `
     <div class="worker-row">
-      <div class="wname">${w}<button class="rename-btn" data-worker="${w}" title="Renombrar">✎</button></div>
+      <div class="wname">${esc(w)}<button class="rename-btn" data-worker="${esc(w)}" title="Renombrar">✎</button></div>
       <div class="wcontrols">
-        <select data-worker="${w}" data-field="especialidad">
+        <select data-worker="${esc(w)}" data-field="especialidad">
           <option value="ceramista" ${ws.especialidad==='ceramista'?'selected':''}>Ceramista</option>
           <option value="fraguador" ${ws.especialidad==='fraguador'?'selected':''}>Fraguador</option>
         </select>
-        <select data-worker="${w}" data-field="estado">
+        <select data-worker="${esc(w)}" data-field="estado">
           <option value="activo" ${ws.estado==='activo'?'selected':''}>Activo</option>
           <option value="inactivo" ${ws.estado==='inactivo'?'selected':''}>Inactivo</option>
           <option value="finiquitado" ${ws.estado==='finiquitado'?'selected':''}>Finiquitado</option>
         </select>
-        <button class="rename-btn" data-worker-datos="${w}" title="Ver/editar datos del trabajador">Datos</button>
-        <button class="rename-btn" data-worker-historial="${w}" title="Ver historial de pagos">Historial</button>
+        <button class="rename-btn" data-worker-datos="${esc(w)}" title="Ver/editar datos del trabajador">Datos</button>
+        <button class="rename-btn" data-worker-historial="${esc(w)}" title="Ver historial de pagos">Historial</button>
       </div>
     </div>`;
   }).join('');
@@ -2926,7 +2926,7 @@ function renderWorkerPanel(){
   listEl.querySelectorAll('.rename-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const oldName = e.target.getAttribute('data-worker');
-      const bodyHtml = `<input type="text" id="renameInput" style="width:100%;" value="${oldName}">`;
+      const bodyHtml = `<input type="text" id="renameInput" style="width:100%;" value="${esc(oldName)}">`;
       openInputModal('Renombrar trabajador', bodyHtml, () => {
         const newName = document.getElementById('renameInput').value.trim();
         if(!newName || newName === oldName) return;
@@ -2975,7 +2975,7 @@ function renderWorkerDocsList(worker){
   if(!docs.length){ box.innerHTML = '<p style="font-size:12px;color:var(--sub);margin:4px 0;">Sin archivos guardados.</p>'; return; }
   box.innerHTML = docs.map((d, i) => `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;font-size:12px;">
-      <a href="${d.dataUrl}" download="${d.name}" style="color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${d.name}</a>
+      <a href="${esc(d.dataUrl)}" download="${esc(d.name)}" style="color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${esc(d.name)}</a>
       <button class="btn small" data-remove-doc="${i}">Quitar</button>
     </div>`).join('');
   box.querySelectorAll('[data-remove-doc]').forEach(b => {
@@ -2993,19 +2993,19 @@ function openWorkerDatosModal(worker){
   const bodyHtml = `
     <div class="rate-row"><label>AFP</label><select id="datosAfp" style="width:220px;">
       <option value="" ${!ws.afp || ws.afp==='No especificada' ? 'selected' : ''}>Elegir AFP</option>
-      ${AFP_OPTIONS.map(a => `<option value="${a}" ${ws.afp===a?'selected':''}>${a}</option>`).join('')}
+      ${AFP_OPTIONS.map(a => `<option value="${esc(a)}" ${ws.afp===a?'selected':''}>${esc(a)}</option>`).join('')}
     </select></div>
-    <div class="rate-row"><label>RUT</label><input type="text" id="datosRut" style="width:220px;" value="${ws.rut||''}"></div>
-    <div class="rate-row"><label>Teléfono</label><input type="text" id="datosTelefono" style="width:220px;" value="${ws.telefono||''}"></div>
-    <div class="rate-row"><label>Correo</label><input type="text" id="datosCorreo" style="width:220px;" value="${ws.correo||''}"></div>
-    <div class="rate-row"><label>Nacionalidad</label><input type="text" id="datosNacionalidad" style="width:220px;" value="${ws.nacionalidad||''}"></div>
-    <div class="rate-row"><label>Dirección</label><input type="text" id="datosDireccion" style="width:220px;" value="${ws.direccion||''}"></div>
+    <div class="rate-row"><label>RUT</label><input type="text" id="datosRut" style="width:220px;" value="${esc(ws.rut||'')}"></div>
+    <div class="rate-row"><label>Teléfono</label><input type="text" id="datosTelefono" style="width:220px;" value="${esc(ws.telefono||'')}"></div>
+    <div class="rate-row"><label>Correo</label><input type="text" id="datosCorreo" style="width:220px;" value="${esc(ws.correo||'')}"></div>
+    <div class="rate-row"><label>Nacionalidad</label><input type="text" id="datosNacionalidad" style="width:220px;" value="${esc(ws.nacionalidad||'')}"></div>
+    <div class="rate-row"><label>Dirección</label><input type="text" id="datosDireccion" style="width:220px;" value="${esc(ws.direccion||'')}"></div>
 
-    <p style="margin:14px 0 6px;font-size:11.5px;color:var(--sub);">El PIN de acceso de ${worker} se agrega directo en la pestaña "Usuarios" de la base de datos (PIN, Nombre = "${worker}" exacto, Rol = 3).</p>
+    <p style="margin:14px 0 6px;font-size:11.5px;color:var(--sub);">El PIN de acceso de ${esc(worker)} se agrega directo en la pestaña "Usuarios" de la base de datos (PIN, Nombre = "${esc(worker)}" exacto, Rol = 3).</p>
 
     <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Precio que ve este trabajador si inicia sesión</p>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;"><input type="checkbox" id="datosVePrecioReal" ${ws.vePrecioReal?'checked':''}> Puede ver su precio real (si no, ve el precio base)</label>
-    <div class="rate-row"><label>Tarifa propia Cerámica ($/m², opcional)</label><input type="number" id="datosTarifaPropia" style="width:220px;" value="${ws.tarifaPropia||''}" placeholder="vacío = precio base"></div>
+    <div class="rate-row"><label>Tarifa propia Cerámica ($/m², opcional)</label><input type="number" id="datosTarifaPropia" style="width:220px;" value="${esc(ws.tarifaPropia||'')}" placeholder="vacío = precio base"></div>
 
     <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Archivos (foto carnet, contrato, etc.)</p>
     <div id="datosDocsList"></div>
@@ -5219,7 +5219,7 @@ function renderHistorialTrabajo(){
   }).join('');
 }
 document.getElementById('histTodosBtn').addEventListener('click', () => {
-  document.getElementById('histTrabajador').innerHTML = '<option value="">Todos los trabajadores</option>' + ALL_WORKERS.map(w => `<option value="${w}">${w}</option>`).join('');
+  document.getElementById('histTrabajador').innerHTML = '<option value="">Todos los trabajadores</option>' + ALL_WORKERS.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
   renderHistorialTrabajo();
   document.getElementById('histTodosOverlay').classList.add('show');
 });
@@ -5245,7 +5245,7 @@ let reporteCamposEditados = false;
 const ASUNTO_BASE = 'Avance de obra Bellavista, La Florida — {semana}';
 const MENSAJE_BASE = 'Hola, les comparto el avance de la obra Bellavista, La Florida correspondiente a la {semana}.\n\nAbajo va el detalle de los pisos que tuvieron movimiento: quién está trabajando en cada departamento y cómo va cada parte (piso, muro baño y muro cocina).\n\nSaludos.';
 let reporteVista = null;
-const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[ch]));
 const DIAS_PROG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const ERRORES_REPORTE = {
   sin_sesion: 'Tu sesión venció. Vuelve a iniciar sesión.',
@@ -5552,7 +5552,7 @@ function renderSupervisorWorkersList(){
   document.getElementById('supervisorWorkersList').innerHTML = ALL_WORKERS.map(w => {
     const ws = workerStatus[w] || defaultWorkerEntry(w);
     return `<div class="worker-row">
-      <div class="wname">${w}</div>
+      <div class="wname">${esc(w)}</div>
       <div class="wcontrols">
         <span style="font-size:12px;color:var(--sub);min-width:72px;">${especialidadLabel[ws.especialidad]||'Ceramista'}</span>
         <span style="font-size:12px;color:var(--sub);min-width:72px;">${estadoLabel[ws.estado]||'Activo'}</span>
@@ -5614,7 +5614,7 @@ function abrirObservacionModal(id){
   const nombresObs = [...listaArea, ...[...selected].filter(n => !listaArea.includes(n))];
   const presetsHtml = nombresObs.length ? nombresObs.map(p => `
       <label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;">
-        <input type="checkbox" class="obsPresetChk" value="${p}" ${selected.has(p)?'checked':''}> ${p}
+        <input type="checkbox" class="obsPresetChk" value="${esc(p)}" ${selected.has(p)?'checked':''}> ${esc(p)}
       </label>`).join('') : '<p style="font-size:12px;color:var(--sub);margin:0;">No hay opciones frecuentes todavía.</p>';
   const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
       ${isAdmin ? '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;"><button class="btn small" id="btnEditarPresets" type="button">✎ Editar opciones</button></div>' : ''}
@@ -5639,7 +5639,7 @@ function abrirEditorPresets(volverAId){
   const lista = () => OBS_POR_AREA[areaEd] || (OBS_POR_AREA[areaEd] = []);
   const listaHtml = () => lista().length ? lista().map((p,i) => `
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
-        <span style="font-size:12.5px;">${p}</span>
+        <span style="font-size:12.5px;">${esc(p)}</span>
         <button class="btn small" data-quitar-preset="${i}" type="button">Quitar</button>
       </div>`).join('') : '<p style="font-size:12px;color:var(--sub);">No queda ninguna opción.</p>';
   const bodyHtml = `
@@ -6234,7 +6234,7 @@ function abrirConfigLiquidacion(){
   const sel = document.getElementById('liqWorkerSelect');
 
   const liqWorkers = ALL_WORKERS.filter(w => !workerStatus[w] || workerStatus[w].estado !== 'finiquitado');
-  sel.innerHTML = liqWorkers.map(w => `<option value="${w}">${w}</option>`).join('');
+  sel.innerHTML = liqWorkers.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
   const today = new Date().toISOString().slice(0,10);
   document.getElementById('liqFecha').value = today;
   document.getElementById('liqTipoPago').value = 'quincena';
@@ -6287,13 +6287,13 @@ function updateAfpPctInfo(){
     if(metodo === 'pct') document.getElementById('liqAfpMetodo').value = 'fijo';
     document.getElementById('liqAfpFijoBox').style.display = '';
     document.getElementById('liqAfpPctBox').style.display = 'none';
-    info.innerHTML = worker ? `<span style="color:#c0546f;">Por eso el % está bloqueado: ${worker} no tiene una AFP registrada. Ábrela en "Gestionar trabajadores → Datos" y elige una (no dejes "No especificada"). Mientras tanto se usa el monto fijo por día.</span>` : '';
+    info.innerHTML = worker ? `<span style="color:#c0546f;">Por eso el % está bloqueado: ${esc(worker)} no tiene una AFP registrada. Ábrela en "Gestionar trabajadores → Datos" y elige una (no dejes "No especificada"). Mientras tanto se usa el monto fijo por día.</span>` : '';
     return;
   }
   if(tieneAfp){
     const comision = AFP_RATES[afp];
     const total = AFP_COTIZACION_OBLIGATORIA + comision;
-    info.innerHTML = `${worker} está en <b>${afp}</b>: ${AFP_COTIZACION_OBLIGATORIA}% cotización obligatoria + ${comision}% comisión = <b>${total.toFixed(2).replace('.',',')}%</b> a descontar del "Precio Total" de esta liquidación. (El Seguro de Invalidez y Sobrevivencia y el aporte del empleador no se descuentan de aquí, los paga aparte quien contrata.)`;
+    info.innerHTML = `${esc(worker)} está en <b>${afp}</b>: ${AFP_COTIZACION_OBLIGATORIA}% cotización obligatoria + ${comision}% comisión = <b>${total.toFixed(2).replace('.',',')}%</b> a descontar del "Precio Total" de esta liquidación. (El Seguro de Invalidez y Sobrevivencia y el aporte del empleador no se descuentan de aquí, los paga aparte quien contrata.)`;
   }
   document.getElementById('liqAfpFijoBox').style.display = metodo === 'pct' ? 'none' : '';
   document.getElementById('liqAfpPctBox').style.display = metodo === 'pct' ? 'block' : 'none';
@@ -6645,7 +6645,7 @@ function renderLiqHist(){
   const workers = [...new Set(grupos.map(g => g.worker))].sort((a, b) => a.localeCompare(b, 'es'));
   const periodos = [...new Set(grupos.map(lhPeriodoClave))];
   wSel.innerHTML = '<option value="">Todos los trabajadores</option>' + workers.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
-  pSel.innerHTML = '<option value="">Todas las quincenas/meses</option>' + periodos.map(c => `<option value="${c}">${lhPeriodoEtiqueta(c)}</option>`).join('');
+  pSel.innerHTML = '<option value="">Todas las quincenas/meses</option>' + periodos.map(c => `<option value="${esc(c)}">${esc(lhPeriodoEtiqueta(c))}</option>`).join('');
   wSel.value = workers.includes(wPrev) ? wPrev : ''; pSel.value = periodos.includes(pPrev) ? pPrev : '';
   pintarLiqHist();
 }

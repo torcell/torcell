@@ -294,7 +294,7 @@ window.addEventListener('beforeunload', e => { if(sucio){ e.preventDefault(); e.
 D = cargar();
 const ESTADOS = ['ok', 'warn', 'bad'];
 const TIPOS = [['txt', 'Texto'], ['num', 'Monto o número'], ['pct', 'Porcentaje %'], ['est', 'Estado (semáforo)'], ['fecha', 'Fecha'], ['chk', 'Check ✓']];
-const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 const ST = id => D.defs.find(s => s.id === id);
 const ED = !!CFG.editor;
 const numC = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', '.')); return isFinite(n) ? n : null; };

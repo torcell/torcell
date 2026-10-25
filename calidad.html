@@ -632,7 +632,7 @@ const ESPERA_MS = 3000;
 const espera = {};
 
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 let scope = 'piso';
 let ordenDesc = true;
 try{ ordenDesc = localStorage.getItem('calidadOrdenPisos') !== 'asc'; }catch(e){}
@@ -942,8 +942,8 @@ function areasHtml(d){
   const pill = (nombre, c) => {
     if(!c) return '';
     const dato = celdas[c[0]];
-    if(dato && dato.t) return `<span class="pill ok${dato.w ? ' quien' : ''}"><span>${nombre} ✓${dato.ts ? ' ' + new Date(dato.ts).toLocaleDateString('es-CL', {day:'2-digit', month:'short'}) : ''}</span>${dato.w ? '<i>' + esc(dato.w) + '</i>' : ''}</span>`;
-    return `<span class="pill">${nombre} ${c[2] || (dato && dato.m) ? 'pendiente' : 'sin m²'}</span>`;
+    if(dato && dato.t) return `<span class="pill ok${dato.w ? ' quien' : ''}"><span>${esc(nombre)} ✓${dato.ts ? ' ' + new Date(dato.ts).toLocaleDateString('es-CL', {day:'2-digit', month:'short'}) : ''}</span>${dato.w ? '<i>' + esc(dato.w) + '</i>' : ''}</span>`;
+    return `<span class="pill">${esc(nombre)} ${c[2] || (dato && dato.m) ? 'pendiente' : 'sin m²'}</span>`;
   };
   return Object.keys(mapa).sort((a, b) => (a === 'Piso' ? 0 : a === 'Pasillos' ? 0 : 1) - (b === 'Piso' ? 0 : b === 'Pasillos' ? 0 : 1) || a.localeCompare(b)).map(a =>
     `<div class="area${f(a) ? ' act' : ''}"><b><span>${esc(NOMBRE_AREA[a] || a)}</span></b>${pill('Cerámica', mapa[a].cer)}${pill('Frague', mapa[a].fra)}</div>`).join('');

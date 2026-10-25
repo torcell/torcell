@@ -1477,7 +1477,7 @@ const ORD_B = { ya: 0, hoy: 1, pronto: 2, ok: 3, cub: 4 };
 
 // funciones chicas que ocupo en todas las vistas
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 const T = (k, txt) => `<span class="term" data-term="${k}">${txt ?? TERMS[k][0]}</span>`;
 const pct = (x, d = 1) => (x * 100).toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
 const num = (x, d = 1) => x.toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d });
