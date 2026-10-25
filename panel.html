@@ -904,15 +904,6 @@
     background:linear-gradient(180deg,var(--marco-fondo-arriba) 0%,var(--marco-fondo) 70%);
     border-radius:0; box-shadow:none;
   }
-  /* línea doble del lado derecho: hueco oscuro de 2px + línea dorada de 1px */
-  body.tema4 :is(.tb-group,.toolbar,.pt,.stat-card,.mc-pop,.obj-item,.worker-panel,.vt-sec,.rec-item,.aviso-grupo)::before{
-    content:""; position:absolute; left:calc(100% + 2px); top:4px; bottom:4px; width:3px;
-    border-top:1px solid var(--marco-oro); border-bottom:1px solid var(--marco-oro);
-    background:linear-gradient(to right,var(--marco-hueco) 2px,var(--marco-oro) 2px);
-    pointer-events:none;
-  }
-  /* Ventanas con scroll propio: la línea doble se dibuja con sombra para que no la corte el overflow */
-  body.tema4 :is(.modal,.lg-app){box-shadow:2px 0 0 0 var(--marco-hueco),3px 0 0 0 var(--marco-oro);}
   body.tema4 .overlay{background:rgba(1,10,19,.72);}
   /* Colores que daban información: se conservan como una franja interior */
   body.tema4 .stat-card.st-pendiente{box-shadow:inset 0 3px 0 var(--pendiente);}
@@ -938,9 +929,6 @@
   body.tema4 select,body.tema4 input[type=text],body.tema4 input[type=number],body.tema4 textarea{background:var(--marco-fondo-arriba);border-color:var(--marco-oro);color:var(--text);}
   body.tema4 .floor-title h2{position:relative;border:2px solid transparent;border-image:linear-gradient(to right,var(--marco-oscuro) 0%,var(--marco-oro) 40%) 1;background:linear-gradient(180deg,var(--marco-fondo-arriba) 0%,var(--marco-fondo) 70%);border-radius:0;box-shadow:none;padding:5px 12px;}
   body.tema4 .floor-title .line{background:var(--marco-oro);}
-  /* La línea derecha sobresale 5px: deja ese espacio y evita que content-visibility la corte */
-  body.tema4 .floor-block{padding-right:6px;}
-  body.tema4 .stats-grid,body.tema4 .rec-bar{padding-right:6px;}
 
   /* Rendimiento: el difuminado del fondo y el brillo infinito de las pestañas quedan guardados pero apagados.
      Para volver a encenderlos: agrega la clase "blur-fondo" o "brillo-pestanas" al <body>. */
@@ -1013,6 +1001,24 @@
     .dz-cards{grid-template-columns:1fr;}
     .dz-det .dz-fl{grid-template-columns:70px minmax(0,1fr);}
   }
+
+
+  /* ===== Dorado de día: mismo marco, con colores claros ===== */
+  html:has(body.tema4:not(.dark)){background:#f3ecd9;}
+  body.tema4:not(.dark){
+    --marco-oscuro:#dcc994; --marco-oro:#b8892f; --marco-oro-vivo:#8f6a14; --marco-hueco:#f3ecd9;
+    --marco-fondo:#fbf5e6; --marco-fondo-arriba:#fffdf7;
+    --pagina-fondo:#f3ecd9; --pagina-fondo2:#faf4e4;
+    --bg:#f3ecd9; --panel:#fffaf0; --panel-soft:#f6eedc; --border:#e6d9b8; --border-strong:#b8892f;
+    --text:#2b2210; --sub:#6f6040; --accent:#8f6a14; --accent2:#b8892f;
+    color-scheme:light;
+  }
+  body.tema4:not(.dark) .overlay{background:rgba(70,52,12,.42);}
+  body.tema4:not(.dark) .rec-item{background:linear-gradient(180deg,#fffaea 0%,#fbf1d6 70%);}
+  body.tema4:not(.dark) .rec-item.atrasado{background:linear-gradient(180deg,#fdeae4 0%,#fbe0d8 70%);}
+  body.tema4:not(.dark) .btn.primary{background:linear-gradient(180deg,#f6e6b4,#ebd18c);color:#3a2a05;}
+  body.tema4:not(.dark) .tab.active,body.tema4:not(.dark) .stats-tab.activa{background:linear-gradient(180deg,#f6e6b4,#ebd18c);color:#3a2a05;}
+  body.tema4:not(.dark) .vt-sec-title{border-bottom-color:var(--border);}
 
   /* ===== Tema 5 · Halloween (solo noche). Sin animaciones infinitas ni difuminados, para no cargar la página. ===== */
   html:has(body.tema5){background:#0b0610;}
@@ -1365,16 +1371,13 @@
         <option value="">Tema original</option>
         <option value="tema1">Tema 2</option>
         <option value="tema3">Tema 3</option>
-        <option value="tema4">Marco dorado (noche)</option>
+        <option value="tema6">Tema 5</option>
+        <option value="tema7">Tema 6</option>
+        <option value="tema8">Tema 7</option>
+        <option value="tema9">Tema 8</option>
         <option value="tema5">🎃 Halloween (noche)</option>
       </select>
-      <select id="disenoSelector" title="Cómo se ven los pisos y departamentos">
-        <option value="">Diseño actual</option>
-        <option value="A">A · Tabla tipo Excel</option>
-        <option value="B">B · Tarjetas por dpto</option>
-        <option value="C">C · Mapa del piso</option>
-        <option value="D">D · Celdas de color</option>
-      </select>
+      <button class="btn" id="doradoBtn" type="button" title="Marco dorado: se puede usar de día y de noche">✦ Dorado: No</button>
     </div>
   </header>
 
@@ -1839,7 +1842,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.65.2';
+const APP_VERSION = '0.66.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5964,7 +5967,7 @@ document.getElementById('turboBtn').addEventListener('click', (e) => {
   render();
 });
 document.getElementById('toggleDark').addEventListener('click', (e) => {
-  if(document.body.classList.contains('tema4') || document.body.classList.contains('tema5')){ avisoToast('Este tema es solo nocturno. Cambia de tema para volver al modo día.'); return; }
+  if(document.body.classList.contains('tema5')){ avisoToast('Este tema es solo nocturno. Cambia de tema para volver al modo día.'); return; }
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
   const dark = document.body.classList.toggle('dark');
   document.documentElement.classList.toggle('dark', dark);
@@ -5985,38 +5988,51 @@ function aplicarNocheMarco(on){
     modoAntesMarco = null;
   }
 }
+// Temas 5 a 8: cada uno cambia la forma de ver pisos y departamentos y funciona de día y de noche.
+const TEMAS_DZ = {tema6: 'A', tema7: 'B', tema8: 'C', tema9: 'D'};
+let doradoOn = false;
+try{ doradoOn = localStorage.getItem('progresoObraDorado') === '1'; }catch(err){}
+function aplicarDorado(){
+  const cl = document.body.classList, hal = cl.contains('tema5'), btn = document.getElementById('doradoBtn');
+  cl.toggle('tema4', doradoOn && !hal);
+  btn.textContent = '✦ Dorado: ' + (doradoOn && !hal ? 'Sí' : 'No');
+  btn.classList.toggle('primary', doradoOn && !hal);
+  btn.disabled = hal;
+  btn.title = hal ? 'Halloween ya trae sus propios colores' : 'Marco dorado: se puede usar de día y de noche';
+}
+function aplicarTema(v){
+  const cl = document.body.classList;
+  cl.remove('tema1', 'tema2', 'tema3', 'tema5', 'tema6', 'tema7', 'tema8', 'tema9', 'dz-A', 'dz-B', 'dz-C', 'dz-D');
+  if(TEMAS_DZ[v]) cl.add('tema3', v, 'dz-' + TEMAS_DZ[v]);
+  else{
+    if(v) cl.add(v);
+    if(v === 'tema5') cl.add('tema3');
+  }
+  aplicarNocheMarco(v === 'tema5');
+  aplicarDorado();
+}
 document.getElementById('temaSelector').addEventListener('change', (e) => {
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
-  document.body.classList.remove('tema1', 'tema2', 'tema3', 'tema4', 'tema5');
-  if(e.target.value) document.body.classList.add(e.target.value);
-  if(e.target.value === 'tema4' || e.target.value === 'tema5') document.body.classList.add('tema3');
-  aplicarNocheMarco(e.target.value === 'tema4' || e.target.value === 'tema5');
+  aplicarTema(e.target.value);
   if(ventanaId) cerrarVentana();
   render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
   try{ localStorage.setItem('progresoObraTemaV3', e.target.value); }catch(err){}
 });
-try{
-  const guardadoV2 = localStorage.getItem('progresoObraTemaV3');
-  const temaGuardado = guardadoV2 === null ? 'tema3' : guardadoV2;
-  if(temaGuardado === 'tema1' || temaGuardado === 'tema3'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
-  else if(temaGuardado === 'tema4' || temaGuardado === 'tema5'){ document.body.classList.add('tema3', temaGuardado); document.getElementById('temaSelector').value = temaGuardado; aplicarNocheMarco(true); }
-  else if(/^tema[6-9]$/.test(temaGuardado)){ document.body.classList.add('tema3'); document.getElementById('temaSelector').value = 'tema3'; }
-}catch(err){}
-// Diseño de pisos y departamentos (A–D): va aparte del tema, así se puede usar con día, noche, marco dorado o Halloween.
-function aplicarDiseno(v){
-  document.body.classList.remove('dz-A', 'dz-B', 'dz-C', 'dz-D');
-  if(v) document.body.classList.add('dz-' + v);
-}
-document.getElementById('disenoSelector').addEventListener('change', (e) => {
-  aplicarDiseno(e.target.value);
-  try{ localStorage.setItem('progresoObraDisenoV1', e.target.value); }catch(err){}
-  render();
+document.getElementById('doradoBtn').addEventListener('click', () => {
+  doradoOn = !doradoOn;
+  document.body.classList.add('theme-anim'); void document.body.offsetWidth;
+  aplicarDorado();
+  setTimeout(() => document.body.classList.remove('theme-anim'), 750);
+  try{ localStorage.setItem('progresoObraDorado', doradoOn ? '1' : '0'); }catch(err){}
 });
 try{
-  const dg = localStorage.getItem('progresoObraDisenoV1') || '';
-  if(/^[ABCD]$/.test(dg)){ aplicarDiseno(dg); document.getElementById('disenoSelector').value = dg; }
-}catch(err){}
+  let guardado = localStorage.getItem('progresoObraTemaV3');
+  if(guardado === 'tema4'){ guardado = 'tema3'; doradoOn = true; try{ localStorage.setItem('progresoObraDorado', '1'); localStorage.setItem('progresoObraTemaV3', 'tema3'); }catch(err){} }
+  const tema = guardado === null ? 'tema3' : guardado;
+  if(tema === 'tema1' || tema === 'tema3' || tema === 'tema5' || TEMAS_DZ[tema]){ aplicarTema(tema); document.getElementById('temaSelector').value = tema; }
+  else aplicarDorado();
+}catch(err){ aplicarDorado(); }
 document.getElementById('saveNowBtn').addEventListener('click', pedirGuardar);
 
 document.getElementById('dbBtn').addEventListener('click', () => {
