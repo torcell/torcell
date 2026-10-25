@@ -169,6 +169,24 @@
   .aviso-item button{flex:0 0 auto;}
   #materialesOverlay .modal{max-width:1000px;display:flex;flex-direction:column;max-height:90vh;}
   .mat-scroll{overflow:auto;min-height:0;flex:1 1 auto;}
+  .areas-movil{display:flex;gap:6px;margin:0 0 10px;}
+  .areas-movil label{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 4px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;min-height:38px;}
+  .areas-movil label.on{border-color:var(--accent);background:var(--panel-soft);}
+  .areas-movil input{margin:0;width:16px;height:16px;accent-color:var(--accent);}
+  .mat-pestanas{display:flex;gap:0;margin:0 0 10px;border:1px solid var(--border-strong);width:max-content;max-width:100%;}
+  .mat-pestanas .btn{border:0;border-radius:0;}
+  .mat-pestanas .btn.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}
+  .cer-sec{margin:0 0 14px;}
+  .cer-sec h4{margin:0 0 6px;font-size:13px;}
+  .cer-fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 6px;font-size:12.5px;}
+  .cer-fila input,.cer-fila select{padding:5px 6px;font-size:12.5px;}
+  .cer-sec .cer-fila input[type=number]{width:84px !important;flex:none;text-align:center;}
+  .cer-zona{border:1px solid var(--border);padding:10px;margin:0 0 8px;background:var(--panel-soft);}
+  .cer-zona>b{display:block;margin:0 0 8px;font-size:13px;}
+  .cer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+  .cer-grid label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--sub);}
+  .cer-grid input,.cer-grid select{width:100%;padding:5px 6px;font-size:12.5px;box-sizing:border-box;}
+  .cer-aviso{font-size:12px;color:var(--sub);margin:0 0 8px;}
   .mat-tabla{width:100%;border-collapse:collapse;font-size:12.5px;}
   .mat-tabla th, .mat-tabla td{border:1px solid var(--border);padding:6px 7px;text-align:center;vertical-align:middle;}
   .mat-tabla th{background:var(--panel-soft);font-size:11.5px;color:var(--sub);position:sticky;top:0;z-index:1;}
@@ -1741,9 +1759,11 @@
 <div class="overlay" id="materialesOverlay">
   <div class="modal">
     <h3>Materiales por departamento</h3>
-    <p style="margin:0 0 8px;font-size:12px;color:var(--sub);">Se calcula con los m² de cada partida más la merma. Los datos de cada material se editan en la hoja «materiales» de la base de datos y se cargan al abrir el panel; los que estén en 0 aparecen como "falta dato".</p>
-    <div class="mat-scroll">
-      <details id="matAjustesBox" open><summary style="cursor:pointer;font-weight:700;font-size:13px;margin-bottom:6px;">Ajustes por material (solo lectura)</summary>
+    <div class="mat-pestanas" role="tablist"><button type="button" class="btn small on" data-matvista="mat">Materiales</button><button type="button" class="btn small" data-matvista="cer">Cerámicas</button></div>
+    <div class="mat-scroll" id="matVistaCer" hidden></div>
+    <p style="margin:0 0 8px;font-size:12px;color:var(--sub);" id="matNotaMat">Se calcula con los m² de cada partida más la merma. Tamaños, piezas por caja, merma y pegamento se editan en la pestaña «Cerámicas»; los que estén en 0 aparecen como "falta dato".</p>
+    <div class="mat-scroll" id="matVistaMat">
+      <details id="matAjustesBox" open><summary style="cursor:pointer;font-weight:700;font-size:13px;margin-bottom:6px;">Ajustes por material (resumen de lo que se está usando)</summary>
         <table class="mat-tabla mat-ajustes" id="matAjustes"></table>
       </details>
       <div class="mat-resumen" id="matResumen"></div>
@@ -1753,7 +1773,7 @@
       </div>
       <table class="mat-tabla" id="matLista"></table>
     </div>
-    <div class="actions"><button class="btn primary" id="matCerrarBtn">Cerrar</button></div>
+    <div class="actions"><button class="btn primary" id="matCerrarBtn">Guardar y cerrar</button></div>
   </div>
 </div>
 
@@ -1848,7 +1868,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.68.1';
+const APP_VERSION = '0.69.1';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1967,6 +1987,17 @@ function mezclarMateriales(m){
   const base = matPorDefecto();
   if(m && m.params) MAT_TIPOS.forEach(([k]) => { if(m.params[k]) base[k] = {...base[k], ...m.params[k]}; });
   MATERIALES = {params: base, ok: (m && m.ok && typeof m.ok === 'object') ? {...m.ok} : {}};
+  aplicarCeramicas();
+}
+/* Lo guardado en la pestaña «Cerámicas» manda sobre los datos de la hoja: tamaño, piezas por caja, merma y pegamento de cada zona */
+function aplicarCeramicas(){
+  if(!ceramicas || !ceramicas.zonas) return;
+  MAT_TIPOS.forEach(([k]) => {
+    const z = ceramicas.zonas[k]; if(!z) return;
+    const pal = (ceramicas.catalogo || []).find(p => p.id === z.pal); if(!pal) return;
+    MATERIALES.params[k] = {...MATERIALES.params[k], ancho: pal.ancho, largo: pal.largo, porCaja: pal.porCaja, kgSaco: z.kgSaco, consumo: z.consumo, merma: z.merma};
+  });
+  matNivelesCache = null;
 }
 function guardarM2DelPeriodo(desde, hasta){
   const porTrabajador = {};
@@ -1987,6 +2018,7 @@ const AFP_COTIZACION_OBLIGATORIA = 10;
 let allowGuestPrices = false;
 let espaciadoDptos = true;
 let temaPrincipal = null;
+let ceramicas = null;
 let OBJETIVOS = [];
 let cfgCargada = false;
 let isAdmin = false;
@@ -2258,6 +2290,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
     if(remote.cierreAnterior !== undefined) cierreAnterior = remote.cierreAnterior;
     if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
+    if(isAdmin && remote.ceramicas && typeof remote.ceramicas === 'object') ceramicas = remote.ceramicas;
     if(isAdmin && remote.materiales) mezclarMateriales(remote.materiales);
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
   }
@@ -2519,7 +2552,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -2541,7 +2574,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -2586,6 +2619,7 @@ function applyLoadedPayload(parsed){
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
   if(parsed.cierreAnterior !== undefined) cierreAnterior = parsed.cierreAnterior;
   if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
+  if(isAdmin && parsed.ceramicas && typeof parsed.ceramicas === 'object') ceramicas = parsed.ceramicas;
   if(isAdmin && parsed.materiales) mezclarMateriales(parsed.materiales);
   if(isAdmin && parsed.recordatorios && parsed.recordatorios.hechos) recordatoriosHechos = {...parsed.recordatorios.hechos, ...recordatoriosHechos};
   if(isAdmin && Array.isArray(parsed.objetivos)) OBJETIVOS = parsed.objetivos.filter(o => o && typeof o.id === 'string');
@@ -2707,7 +2741,7 @@ async function doSaveCycle(){
 
   const guardadoCompleto = forzarGuardadoCompleto || (dirtySnap.size === 0 && !settingsDirty);
   if(guardadoCompleto) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -2764,7 +2798,7 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 // Ventana previa: muestra lo que cambió desde el último guardado y pide confirmar.
-const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', temaPrincipal:'Tema principal', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área'};
+const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', temaPrincipal:'Tema principal', ceramicas:'Cerámicas de la obra', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área'};
 function resumenCambiosPendientes(){
   const bool = v => v ? 'Sí' : 'No';
   const fm2 = v => (v === null || v === undefined || v === '') ? '—' : String(v).replace('.', ',') + ' m²';
@@ -3737,30 +3771,45 @@ function cellHtml(cell){
     </div>`;
 }
 
+/* ===== Celular: tres casillas (Piso, Muro baño, Muro cocina) para elegir qué columnas se ven ===== */
+const AREA_GRUPO = {'Piso':'piso', 'Pasillos':'piso', 'Muro Baños':'bano', 'Muro Cocina':'cocina'};
+const AREAS_MOVIL_ETQ = [['piso','Piso'], ['bano','Muro baño'], ['cocina','Muro cocina']];
+let areasMovil = {piso:true, bano:true, cocina:true};
+try{ const g = JSON.parse(localStorage.getItem('progresoObraAreasMovilV1') || 'null'); if(g && typeof g === 'object') AREAS_MOVIL_ETQ.forEach(([k]) => { if(typeof g[k] === 'boolean') areasMovil[k] = g[k]; }); }catch(err){}
+const esMovil = () => window.matchMedia('(max-width:700px)').matches;
+function areasVista(fb){
+  if(!esMovil()) return fb.areas;
+  return fb.areas.filter(a => !AREA_GRUPO[a] || areasMovil[AREA_GRUPO[a]]);
+}
+function barraAreasMovil(){
+  if(!esMovil() || activeCategoria === 'Pasillos') return '';
+  return '<div class="areas-movil" role="group" aria-label="Qué mostrar">' + AREAS_MOVIL_ETQ.map(([k, n]) => `<label class="${areasMovil[k] ? 'on' : ''}"><input type="checkbox" data-areasmov="${k}"${areasMovil[k] ? ' checked' : ''}> ${n}</label>`).join('') + '</div>';
+}
 function renderFloorTable(fb){
   const filtering = matchesActiveFilters();
   const deptRows = fb.depts.filter(d => {
     if(!filtering) return true;
-    return fb.areas.some(area => {
+    return areasVista(fb).some(area => {
       const c = d.cells[area];
       if(!c) return false;
       return passesFilters(cellById[c.id]);
     });
   });
   if(deptRows.length === 0) return '';
+  const areasV = areasVista(fb);
 
   return `
     <div class="floor-block">
       <div class="floor-title"><h2>${fb.piso}</h2><div class="line"></div><div class="badge">${deptRows.length} departamento(s)</div></div>
       <div class="table-wrap">
         <table class="dept-table">
-          <colgroup><col class="col-dpto">${fb.areas.map(() => '<col>').join('')}</colgroup>
-          <thead><tr><th>Dpto</th>${fb.areas.map(a => `<th>${(fb.categoria==='Frague'?'FRAGUE':'CERÁMICA')+' - '+AREA_LABEL[a]}</th>`).join('')}</tr></thead>
+          <colgroup><col class="col-dpto">${areasV.map(() => '<col>').join('')}</colgroup>
+          <thead><tr><th>Dpto</th>${areasV.map(a => `<th>${(fb.categoria==='Frague'?'FRAGUE':'CERÁMICA')+' - '+AREA_LABEL[a]}</th>`).join('')}</tr></thead>
           <tbody>
             ${deptRows.map(d => `
               <tr>
                 <td${matAtributos(fb.categoria === 'Cerámica' ? fb.piso + '|' + d.dpto : null)}><span class="dpto-inner">${d.dpto}</span></td>
-                ${fb.areas.map(area => {
+                ${areasV.map(area => {
                   const c = d.cells[area];
                   if(!c) return '<td><span class="cell-empty">—</span></td>';
                   if(filtering && !passesFilters(cellById[c.id])) return '<td><span class="cell-empty">(no coincide)</span></td>';
@@ -3793,7 +3842,7 @@ function dzFila(cell, st){
   </div>`;
 }
 function dzAreasHtml(fb, d, filtering){
-  return fb.areas.map(area => {
+  return areasVista(fb).map(area => {
     const c = d.cells[area];
     let cuerpo;
     if(!c) cuerpo = '<span class="cell-empty">—</span>';
@@ -3806,7 +3855,7 @@ function dzAreasHtml(fb, d, filtering){
   }).join('');
 }
 function dzSegHtml(fb, d, clase){
-  return `<span class="${clase}">${fb.areas.map(area => { const c = d.cells[area]; return c ? `<i class="st-${resolveEstado(getState(c.id))}"></i>` : '<i></i>'; }).join('')}</span>`;
+  return `<span class="${clase}">${areasVista(fb).map(area => { const c = d.cells[area]; return c ? `<i class="st-${resolveEstado(getState(c.id))}"></i>` : '<i></i>'; }).join('')}</span>`;
 }
 function dzMatHtml(fb, d){
   if(!isAdmin || fb.categoria !== 'Cerámica') return '';
@@ -3815,7 +3864,7 @@ function dzMatHtml(fb, d){
 }
 function dzFiltrados(fb){
   const filtering = matchesActiveFilters();
-  return {filtering, deptRows: fb.depts.filter(d => !filtering || fb.areas.some(area => { const c = d.cells[area]; return c && passesFilters(cellById[c.id]); }))};
+  return {filtering, deptRows: fb.depts.filter(d => !filtering || areasVista(fb).some(area => { const c = d.cells[area]; return c && passesFilters(cellById[c.id]); }))};
 }
 function dzTitulo(fb, n){
   return `<div class="floor-title"><h2>${fb.piso}</h2><div class="line"></div><div class="badge">${n} departamento(s)</div></div>`;
@@ -4182,7 +4231,7 @@ function matCambio(){
 function abrirMateriales(key){
   if(!isAdmin) return;
   matFoco = key || null;
-  renderMateriales();
+  mostrarMatVista('mat');
   document.getElementById('materialesOverlay').classList.add('show');
   if(key){
     const fila = document.querySelector(`#matLista tr[data-matfila="${CSS.escape(key)}"]`);
@@ -4195,6 +4244,78 @@ document.getElementById('matCerrarBtn').addEventListener('click', () => {
   closeOverlayAnimated(document.getElementById('materialesOverlay'));
   render();
   if(matSucio){ matSucio = false; enqueueSave(); }
+});
+/* ===== Pestaña «Cerámicas»: palmetas de la obra y a qué zona va cada una ===== */
+const CER_ZONAS = [['piso','Piso'],['muroBano','Muro baño'],['muroCocina','Muro cocina'],['pasillo','Pasillo']];
+function ceramicasBase(){
+  const p = MATERIALES.params, cat = [{id:'p15x60', ancho:15, largo:60, porCaja:p.piso.porCaja || 0}, {id:'p30x60', ancho:30, largo:60, porCaja:p.muroBano.porCaja || 0}, {id:'p60x60', ancho:60, largo:60, porCaja:0}];
+  const z = (k, pal) => ({pal, merma:p[k].merma, kgSaco:p[k].kgSaco, consumo:p[k].consumo, traslape:'recto', sentido:'', junta:3, dilatCada:0, dilatAncho:0, nota:''});
+  return {catalogo: cat, zonas: {piso:z('piso','p15x60'), muroBano:z('muroBano','p30x60'), muroCocina:z('muroCocina','p30x60'), pasillo:z('pasillo','p60x60')}};
+}
+function ceramicasTrabajo(){
+  if(!ceramicas) ceramicas = ceramicasBase();
+  CER_ZONAS.forEach(([k]) => { if(!ceramicas.zonas[k]) ceramicas.zonas[k] = ceramicasBase().zonas[k]; });
+  return ceramicas;
+}
+const cerNombrePal = p => String(p.ancho).replace('.', ',') + ' × ' + String(p.largo).replace('.', ',') + ' cm';
+function renderCeramicas(){
+  const c = ceramicas || ceramicasBase(), box = document.getElementById('matVistaCer');
+  const nums = (v) => String(v == null ? 0 : v);
+  const sel = (arr, v) => arr.map(([val, txt]) => `<option value="${esc(val)}"${val === v ? ' selected' : ''}>${esc(txt)}</option>`).join('');
+  box.innerHTML = (ceramicas ? '' : '<div class="cer-aviso">Todavía no guardaste datos aquí: el panel sigue usando los de la hoja «materiales». Lo que cambies o confirmes pasa a mandar.</div>')
+    + '<div class="cer-sec"><h4>Palmetas de la obra</h4>'
+    + c.catalogo.map(p => `<div class="cer-fila" data-pal="${esc(p.id)}"><input type="number" min="0" step="any" inputmode="decimal" data-pc="ancho" value="${nums(p.ancho)}" aria-label="Ancho en cm"> × <input type="number" min="0" step="any" inputmode="decimal" data-pc="largo" value="${nums(p.largo)}" aria-label="Largo en cm"> cm · piezas por caja <input type="number" min="0" step="any" inputmode="decimal" data-pc="porCaja" value="${nums(p.porCaja)}" aria-label="Piezas por caja"><button type="button" class="btn small" data-cer-act="delPal">Quitar</button></div>`).join('')
+    + '<button type="button" class="btn small" data-cer-act="addPal">+ Agregar palmeta</button></div>'
+    + '<div class="cer-sec"><h4>¿Dónde va cada una?</h4>' + CER_ZONAS.map(([k, n]) => {
+      const z = (c.zonas && c.zonas[k]) || ceramicasBase().zonas[k];
+      return `<div class="cer-zona" data-zona="${k}"><b>${n}</b><div class="cer-grid">`
+        + `<label>Palmeta<select data-zc="pal">${sel(c.catalogo.map(p => [p.id, cerNombrePal(p)]), z.pal)}</select></label>`
+        + `<label>Merma %<input type="number" min="0" step="any" inputmode="decimal" data-zc="merma" value="${nums(z.merma)}"></label>`
+        + `<label>Traslape<select data-zc="traslape">${sel([['recto','Recto (sin traslape)'],['1/2','1/2'],['1/3','1/3'],['1/4','1/4'],['otro','Otro (ver nota)']], z.traslape)}</select></label>`
+        + `<label>Sentido de colocación<select data-zc="sentido">${sel([['','Sin definir'],['horizontal','Horizontal'],['vertical','Vertical'],['diagonal','Diagonal']], z.sentido)}</select></label>`
+        + `<label>Junta (mm)<input type="number" min="0" step="any" inputmode="decimal" data-zc="junta" value="${nums(z.junta)}"></label>`
+        + `<label>Dilatación cada (m)<input type="number" min="0" step="any" inputmode="decimal" data-zc="dilatCada" value="${nums(z.dilatCada)}"></label>`
+        + `<label>Ancho dilatación (mm)<input type="number" min="0" step="any" inputmode="decimal" data-zc="dilatAncho" value="${nums(z.dilatAncho)}"></label>`
+        + `<label>Pegamento: kg por saco<input type="number" min="0" step="any" inputmode="decimal" data-zc="kgSaco" value="${nums(z.kgSaco)}"></label>`
+        + `<label>Pegamento: consumo kg/m²<input type="number" min="0" step="any" inputmode="decimal" data-zc="consumo" value="${nums(z.consumo)}"></label>`
+        + `<label style="grid-column:1 / -1;">Nota (cómo va la cerámica, detalles)<input type="text" maxlength="120" data-zc="nota" value="${esc(z.nota || '')}"></label>`
+        + '</div></div>';
+    }).join('') + '</div>';
+}
+function cerCambio(){ aplicarCeramicas(); matCambio(); markSettingsDirty('ceramicas'); }
+function mostrarMatVista(v){
+  document.querySelectorAll('.mat-pestanas [data-matvista]').forEach(b => b.classList.toggle('on', b.dataset.matvista === v));
+  document.getElementById('matVistaCer').hidden = v !== 'cer';
+  document.getElementById('matVistaMat').hidden = v !== 'mat';
+  document.getElementById('matNotaMat').hidden = v !== 'mat';
+  if(v === 'cer') renderCeramicas(); else renderMateriales();
+}
+document.querySelector('.mat-pestanas').addEventListener('click', (e) => { const b = e.target.closest('[data-matvista]'); if(b) mostrarMatVista(b.dataset.matvista); });
+document.getElementById('matVistaCer').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cer-act]'); if(!b || !isAdmin) return;
+  const c = ceramicasTrabajo();
+  if(b.dataset.cerAct === 'addPal'){
+    if(c.catalogo.length >= 20){ avisoToast('Son demasiadas palmetas (máximo 20).', 'error'); return; }
+    c.catalogo.push({id: 'p' + Date.now().toString(36).slice(-7), ancho: 30, largo: 60, porCaja: 0});
+  } else if(b.dataset.cerAct === 'delPal'){
+    const id = b.closest('[data-pal]').dataset.pal;
+    const uso = CER_ZONAS.filter(([k]) => c.zonas[k] && c.zonas[k].pal === id).map(([, n]) => n);
+    if(uso.length){ avisoToast('Esa palmeta está en uso (' + uso.join(', ') + '). Cambia primero la palmeta de esa zona.', 'error'); return; }
+    if(c.catalogo.length <= 1){ avisoToast('Tiene que quedar al menos una palmeta.', 'error'); return; }
+    c.catalogo = c.catalogo.filter(p => p.id !== id);
+  }
+  cerCambio(); renderCeramicas();
+});
+document.getElementById('matVistaCer').addEventListener('change', (e) => {
+  if(!isAdmin) return;
+  const num = v => { const n = parseFloat(String(v).replace(',', '.')); return (isFinite(n) && n >= 0) ? n : 0; };
+  const c = ceramicasTrabajo();
+  const pc = e.target.closest('[data-pc]'), zc = e.target.closest('[data-zc]');
+  if(pc){ const p = c.catalogo.find(x => x.id === pc.closest('[data-pal]').dataset.pal); if(p) p[pc.dataset.pc] = num(pc.value); }
+  else if(zc){ const z = c.zonas[zc.closest('[data-zona]').dataset.zona]; const f = zc.dataset.zc; z[f] = ['pal','traslape','sentido','nota'].includes(f) ? String(zc.value).replace(/[<>]/g, '').substring(0, f === 'nota' ? 120 : 20) : num(zc.value); }
+  else return;
+  cerCambio();
+  if(pc || (zc && zc.dataset.zc === 'pal')) renderCeramicas();
 });
 document.getElementById('matFiltroPiso').addEventListener('change', renderMateriales);
 document.getElementById('matSoloPend').addEventListener('change', renderMateriales);
@@ -5043,8 +5164,8 @@ async function abrirAsistencia(){
     } else r = await llamarDb('asistenciaGuardar', {fecha, items});
     ocupado = false;
     if(r && r.ok){ avisoToast('Asistencia guardada.', 'ok'); cerrar(); return; }
-    const ERRA = {fecha_futura: 'No se puede registrar un día que aún no llega.', domingo: 'Los domingos no se registra asistencia.', sin_sesion: 'Tu sesión venció.'};
-    const t = (r && ERRA[r.error]) || 'No se pudo guardar. Revisa la conexión y que el Apps Script esté publicado en la versión 64.';
+    const ERRA = {fecha_futura: 'No se puede registrar un día que aún no llega.', domingo: 'Los domingos no se registra asistencia.', sin_sesion: 'Tu sesión venció.', sin_permiso: 'Tu cuenta no tiene permiso para registrar asistencia.', no_se_guardo: 'El servidor respondió, pero la asistencia no quedó en la hoja. Publica la versión 72 del Apps Script y vuelve a intentar.'};
+    const t = (r && ERRA[r.error]) || ('No se pudo guardar' + (r && r.error ? ' (' + r.error + ')' : '') + '. Revisa la conexión y que el Apps Script esté publicado en la versión 72 o más nueva.');
     pintar(t, true); avisoToast(t, 'error');
   }
   ov.addEventListener('click', e => { if(e.target === ov) cerrar(); });
@@ -5700,6 +5821,14 @@ function abrirEditorPresets(volverAId){
 }
 
 
+document.getElementById('content').addEventListener('change', (e) => {
+  const cb = e.target.closest('input[data-areasmov]'); if(!cb) return;
+  areasMovil[cb.dataset.areasmov] = cb.checked;
+  if(!AREAS_MOVIL_ETQ.some(([k]) => areasMovil[k])){ areasMovil[cb.dataset.areasmov] = true; cb.checked = true; avisoToast('Deja al menos una casilla marcada.'); return; }
+  try{ localStorage.setItem('progresoObraAreasMovilV1', JSON.stringify(areasMovil)); }catch(err){}
+  render();
+});
+window.matchMedia('(max-width:700px)').addEventListener('change', () => { if(typeof render === 'function' && document.getElementById('content').children.length) render(); });
 function render(){
   matNivelesCache = null;
   if(vistaPisos === 'mov') poblarFiltroPiso();
@@ -5716,7 +5845,7 @@ function render(){
     html = visibleBlocks.map(dz === 'B' ? renderFloorCards : dz === 'C' ? renderFloorMapa : renderFloorTable).filter(Boolean).join('') ||
       '<p style="color:var(--sub);text-align:center;padding:40px 0;">No hay partidas que coincidan con el filtro.</p>';
   }
-  contentEl.innerHTML = html;
+  contentEl.innerHTML = barraAreasMovil() + html;
   actualizarAvisos();
   equalizeRowNameHeights();
   ajustarTamanoDpto();
@@ -6087,7 +6216,7 @@ document.getElementById('principalBtn').addEventListener('click', () => {
   if(!isAdmin) return;
   temaPrincipal = temaActual();
   markSettingsDirty('temaPrincipal');
-  scheduleSave();
+  enqueueSave();
   actualizarPrincipalBtn();
   avisoToast('Listo: este tema quedó como principal para quienes no hayan elegido otro.');
 });

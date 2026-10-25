@@ -89,7 +89,11 @@ body.bloq{overflow:hidden;}
 .mhead h2{min-width:0;}
 .mquien{flex:0 1 auto;max-width:46%;font-size:12px;font-weight:600;color:var(--sub);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.seg{display:grid;grid-template-columns:repeat(var(--n,2),1fr);gap:0;}
+.seg button[hidden]{display:none;}
+.seg button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.tile.c{border-top-color:var(--accent);}.tile.c small{color:var(--accent);}
+.archnota{border:1px solid var(--border);background:var(--soft);padding:9px 12px;font-size:12.5px;line-height:1.35;color:var(--text);}.archnota[hidden]{display:none;}
 .seg button{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:10px 4px;font-size:12.5px;font-weight:600;min-height:44px;margin-left:-1px;}
 .seg button:first-child{margin-left:0;}
 .seg button:hover{border-color:var(--accent);position:relative;}
@@ -97,7 +101,6 @@ body.bloq{overflow:hidden;}
 .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .seg button.on[data-e="revisado"]{background:var(--ok);border-color:var(--ok);}
 .seg button.on[data-e="observado"]{background:var(--bad);border-color:var(--bad);}
-.seg button.on[data-e="pendiente"]{background:var(--warn);border-color:var(--warn);color:#2c302c;}
 .obswrap{display:grid;grid-template-rows:0fr;opacity:0;margin-top:-12px;transition:grid-template-rows .24s ease,opacity .2s ease,margin .24s ease;pointer-events:none;}
 .obswrap.on{grid-template-rows:1fr;opacity:1;margin-top:0;pointer-events:auto;}
 .obsin{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;}
@@ -511,6 +514,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <option value="nolisto">Sin terminar</option>
       <option value="revisado">Revisados</option>
       <option value="observado">Con observaciones</option>
+      <option value="corregido">Corregidos</option>
     </select></div>
     <div class="grp"><label for="ordenPisos">Orden de pisos</label><button type="button" class="btn primary" id="ordenPisos" aria-pressed="true">↓ Mayor a menor</button></div>
   </div>
@@ -574,9 +578,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="sub" id="mSub"></div>
     <div class="areas" id="mAreas"></div>
     <div class="seg" id="mSeg">
-      <button type="button" data-e="pendiente">Por revisar</button>
-      <button type="button" data-e="revisado">Revisado</button>
-      <button type="button" data-e="observado">Observaciones</button>
+      <button type="button" data-e="revisado">Sin observaciones</button>
+      <button type="button" data-e="observado">Con observación</button>
+      <button type="button" data-e="corregido" hidden>Corregido</button>
     </div>
     <div class="obswrap" id="mObs">
       <div class="obsin">
@@ -589,6 +593,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="fotos" id="mFotos" hidden>
       <div class="fotos-h"><b>Fotos del departamento</b><span id="mFotosN"></span><button type="button" class="btn small" id="fBajar" hidden>⬇ Descargar</button></div>
       <div class="fgrid" id="mFotosGrid"></div>
+      <div class="archnota" id="mArch" hidden></div>
       <div class="fbtns">
         <button type="button" class="btn small" id="fTomar">📷 Tomar foto</button>
         <button type="button" class="btn small" id="fGaleria">🖼 Galería</button>
@@ -624,6 +629,9 @@ const opcionesDe = () => opciones[scope] || [];
 let opcionesEdit = [];
 let fotosOk = false;
 let fotosCount = {};
+let archivadas = {};
+const totalFotos = b => ((fotosDe[b] || []).length || fotosCount[b] || 0) + (Number(archivadas[b]) || 0);
+const conObs = e => e === 'observado' || e === 'corregido';
 const fotosDe = {};
 const fotosEstado = {};
 let cadenaFotos = Promise.resolve();
@@ -785,10 +793,11 @@ const textoDias = n => n === 0 ? 'Listo hoy' : n === 1 ? 'Hace 1 día' : 'Hace '
 const claseDias = n => n >= 6 ? ' d2' : n >= 3 ? ' d1' : '';
 function etiqueta(r){
   if(r.e === 'revisado') return '✓ Revisado';
+  if(r.e === 'corregido') return '✓ Corregido';
   if(r.e === 'observado') return '⚠ ' + (r.c || 1) + ' obs.';
   return 'Por revisar';
 }
-const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : '';
+const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : e === 'corregido' ? 'c' : '';
 
 let primerPintado = true;
 let pisoGuardado = leerLocal('calidadFiltroPiso'), pisoPendiente = !!pisoGuardado;
@@ -843,7 +852,7 @@ function pintar(){
     i.title = n + (n === 1 ? ' departamento listo' : ' departamentos listos') + ' para revisar';
     bt.setAttribute('aria-label', bt.querySelector('.ptxt').textContent + ': ' + n + ' listos para revisar');
   });
-  $('nRev').textContent = cuenta('revisado');
+  $('nRev').textContent = cuenta('revisado') + cuenta('corregido');
   $('nObs').textContent = cuenta('observado');
   $('nNo').textContent = cuenta('nolisto');
   const sel = $('filtro');
@@ -854,7 +863,7 @@ function pintar(){
   const pisos = [...new Map(todos.filter(x => !soloAvance || pisosConAvance.has(x.d.p)).map(x => [x.d.p, x.d.n])).entries()].sort((a, b) => sentido * (a[1] - b[1])).map(x => x[0]);
   sel.innerHTML = '<option value="">Filtrar por piso</option>' + pisos.map(p => `<option value="${esc(p)}"${p === previo ? ' selected' : ''}>${esc(p)}</option>`).join('');
   const fe = $('filtroEstado').value;
-  const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe));
+  const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe || (fe === 'revisado' && x.r.e === 'corregido')));
   if(!vis.length){
     $('lista').innerHTML = '<div class="vacio">No hay departamentos para mostrar con este filtro.</div>';
     return;
@@ -867,7 +876,7 @@ function pintar(){
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
       ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b>${esc(x.d.d)}</b><small>${falta(x.e)}</small></div>`
-      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small>${fotosCount[claveBase(x.d)] ? `<i class="fcnt" title="Fotos">📷 ${fotosCount[claveBase(x.d)]}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}">📷 ${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
     '</div></section>').join('');
 }
 
@@ -881,15 +890,27 @@ function fechaHora(ts){
 function elegir(e){
   estadoSel = e;
   document.querySelectorAll('#mSeg button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
-  $('mObs').classList.toggle('on', e === 'observado');
-  const mod = document.querySelector('#vel .modal'); if(mod) mod.classList.toggle('obs-on', e === 'observado');
-  $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = e === 'observado' ? 0 : -1; });
-  $('mEditar').tabIndex = e === 'observado' ? 0 : -1;
+  $('mObs').classList.toggle('on', conObs(e));
+  const mod = document.querySelector('#vel .modal'); if(mod) mod.classList.toggle('obs-on', conObs(e));
+  $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = conObs(e) ? 0 : -1; });
+  $('mEditar').tabIndex = conObs(e) ? 0 : -1;
   $('mErr').textContent = '';
+  ajustarSeg();
+}
+// Con fotos (guardadas o archivadas) el departamento no puede quedar "sin observaciones":
+// solo se puede dejar "Corregido" (las fotos se quedan) cuando ya tenía observaciones.
+function ajustarSeg(){
+  if(!actual) return;
+  const n = nFotosActual(), r = revision(actual);
+  const bR = document.querySelector('#mSeg [data-e="revisado"]'), bC = document.querySelector('#mSeg [data-e="corregido"]');
+  bR.disabled = n > 0;
+  bR.title = n > 0 ? 'Este departamento tiene fotos, por eso debe quedar con observación.' : '';
+  bC.hidden = !(n > 0 && conObs(r.e));
+  $('mSeg').style.setProperty('--n', bC.hidden ? 2 : 3);
 }
 
 function parseItems(r){
-  if(!r || r.e !== 'observado') return {};
+  if(!r || !conObs(r.e)) return {};
   const out = {};
   String(r.d || '').split(', ').forEach(x => {
     const m = x.match(/^(.+) ×(\d+)$/);
@@ -903,11 +924,11 @@ let listaAbierta = false;
 function nFotosActual(){
   if(!actual) return 0;
   const b = claveBase(actual);
-  return (fotosDe[b] || []).length || fotosCount[b] || 0;
+  return totalFotos(b);
 }
 function pintarResumenObs(){
   const n = nFotosActual();
-  $('mObsFotos').innerHTML = '<span>📷 Fotos: ' + n + '</span>' + (n ? '' : '<small>Sube fotos abajo o elige las observaciones</small>');
+  $('mObsFotos').innerHTML = '<span>📷 Fotos: ' + n + '</span>' + (n ? '<small>Con fotos queda con observación. Cuando se arregle, marca Corregido.</small>' : '<small>Sube fotos abajo o elige las observaciones</small>');
   const marcadas = $('mLista').querySelectorAll('input[type=checkbox]:checked').length;
   $('mElegir').textContent = listaAbierta ? '− Ocultar observaciones' : (marcadas ? '＋ Elegir observaciones (' + marcadas + ' marcadas)' : '＋ Elegir observaciones');
   $('mLista').hidden = !listaAbierta;
@@ -918,7 +939,7 @@ function pintarLista(sel, mantener){
   if(!mantener) listaAbierta = Object.keys(sel).length > 0;
   const nombres = [...opcionesDe(), ...Object.keys(sel).filter(n => !opcionesDe().includes(n))];
   $('mLista').innerHTML = nombres.length ? nombres.map((n, i) => `<div class="obsfila" data-i="${i}"><label><input type="checkbox" value="${esc(n)}"${sel[n] ? ' checked' : ''}><span>${esc(n)}</span></label>${SIN_CANTIDAD.includes(n) ? '<span class="cant-no" aria-hidden="true"></span>' : `<input type="number" class="cant" min="1" max="999" step="1" inputmode="numeric" placeholder="1" aria-label="Cantidad de ${esc(n)}" value="${sel[n] || ''}"${sel[n] ? '' : ' disabled'}>`}</div>`).join('') : '<div class="vacio-op">No hay opciones. Agrégalas con "Editar opciones".</div>';
-  $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = estadoSel === 'observado' ? 0 : -1; });
+  $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = conObs(estadoSel) ? 0 : -1; });
   ordenarMarcadas();
   pintarResumenObs();
 }
@@ -968,9 +989,10 @@ function abrir(k){
   $('mGuardar').textContent = 'Guardar ' + NOMBRE_SCOPE[scope];
   $('mQuien').textContent = nombreCorto(r.u);
   $('mQuien').title = r.u ? 'Revisó: ' + r.u : '';
-  estadoSel = r.e;
+  const conFotos = nFotosActual() > 0;
+  estadoSel = (conFotos && !conObs(r.e)) ? 'observado' : r.e === 'pendiente' ? '' : r.e;
   pintarLista(parseItems(r));
-  elegir(r.e);
+  elegir(estadoSel);
   document.body.classList.add('bloq');
   $('vel').classList.add('on');
   abrirFotos(d);
@@ -1029,7 +1051,11 @@ function pintarFotos(){
   const arr = fotosDe[base] || [];
   const est = fotosEstado[base];
   pintarResumenObs();
-  $('mFotosN').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length ? arr.length + ' de ' + FOTOS_MAX : 'sin fotos';
+  ajustarSeg();
+  const na = Number(archivadas[base]) || 0;
+  $('mArch').hidden = !na;
+  $('mArch').textContent = na ? '📦 Hubo ' + na + ' foto' + (na === 1 ? '' : 's') + ' en este departamento y ' + (na === 1 ? 'está archivada' : 'están archivadas') + ' (descargada' + (na === 1 ? '' : 's') + ' y borrada' + (na === 1 ? '' : 's') + ' de la base para liberar espacio). El ícono conserva la cantidad de fotos.' : '';
+  $('mFotosN').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length ? arr.length + ' de ' + FOTOS_MAX : na ? 'sin fotos en la base' : 'sin fotos';
   $('mFotosGrid').innerHTML = arr.map((f, i) => `<button type="button" class="fth${f.estado === 'sub' ? ' sub' : ''}" data-i="${i}" aria-label="Foto ${i + 1}">${f.m ? `<img alt="" src="data:image/jpeg;base64,${f.m}">` : ''}</button>`).join('');
   $('fTomar').disabled = $('fGaleria').disabled = arr.length >= FOTOS_MAX;
   $('fBajar').hidden = !arr.some(f => f.estado !== 'sub' && f.id);
@@ -1289,7 +1315,7 @@ async function borrarExportadas(){
   const n = exp.hechas.length;
   if(!exp.confirmar){
     exp.confirmar = true;
-    pintarExp('¿Seguro? Se borrarán ' + n + ' foto' + (n === 1 ? '' : 's') + ' de la base de datos y no se podrán recuperar desde aquí. Solo quedarán en el ZIP que descargaste.', 'Sí, borrar ahora', true);
+    pintarExp('¿Seguro? Se borrarán ' + n + ' foto' + (n === 1 ? '' : 's') + ' de la base de datos y no se podrán recuperar desde aquí. Solo quedarán en el ZIP que descargaste. Cada departamento conservará el ícono con la cantidad de fotos y un aviso de que están archivadas.', 'Sí, borrar ahora', true);
     exp.timer = setTimeout(() => { if(exp.estado === 'descargado'){ exp.confirmar = false; pintarExp('Descargaste ' + n + ' foto' + (n === 1 ? '' : 's') + '. Puedes borrarlas de la base para liberar espacio.', 'Borrar ' + n + ' foto' + (n === 1 ? '' : 's') + ' de la base', true); } }, 8000);
     return;
   }
@@ -1299,7 +1325,8 @@ async function borrarExportadas(){
   let borradas = 0;
   try{
     for(let i = 0; i < exp.hechas.length; i += 100){
-      const j = await llamar('calidadFotoBorrar', {ids: exp.hechas.slice(i, i + 100)}, false, 120000);
+      const j = await llamar('calidadFotoBorrar', {ids: exp.hechas.slice(i, i + 100), archivar: true}, false, 120000);
+      if(j && j.archivadas && typeof j.archivadas === 'object') archivadas = j.archivadas;
       if(!(j && j.ok)) throw new Error('x');
       borradas += j.borradas || 0;
     }
@@ -1344,6 +1371,8 @@ function guardarRevision(){
   if(!actual) return;
   const sel = seleccion();
   const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
+  if(!estadoSel){ $('mErr').textContent = 'Elige "Sin observaciones" o "Con observación".'; return; }
+  if(estadoSel === 'revisado' && nFotosActual() > 0){ $('mErr').textContent = 'Este departamento tiene fotos: debe quedar con observación.'; return; }
   if(estadoSel === 'observado' && !items.length){
     const nf = nFotosActual();
     if(!nf){ $('mErr').textContent = 'Sube al menos una foto o elige una observación.'; return; }
@@ -1353,9 +1382,9 @@ function guardarRevision(){
 }
 function enviarRevision(k, estadoNuevo, items, cerrar){
   const previo = revisiones[k];
-  const envio = {clave: k, estado: estadoNuevo, items: estadoNuevo === 'observado' ? items : [], nonce: nuevoNonce(), ts: Date.now()};
+  const envio = {clave: k, estado: estadoNuevo, items: conObs(estadoNuevo) ? items : [], nonce: nuevoNonce(), ts: Date.now()};
   revisiones[k] = {e: estadoNuevo, d: items.map(x => x.t + ' ×' + x.c).join(', '), c: items.reduce((t, x) => t + x.c, 0), ts: Date.now(), u: (cargo ? cargo + ' - ' : '') + nombre};
-  if(estadoNuevo !== 'observado'){ revisiones[k].d = ''; revisiones[k].c = 0; }
+  if(!conObs(estadoNuevo)){ revisiones[k].d = ''; revisiones[k].c = 0; }
   locales[k] = {rev: Object.assign({}, revisiones[k]), previo, estado: 'enviando', okTs: 0};
   marcarEspera(k);
   if(cerrar) cerrarModal();
@@ -1382,7 +1411,7 @@ function marcarObservadoPorFoto(base, sc){
   if(!e.aplica || !e.ok) return;
   const k = clave(d, sc), r = revision(d, sc);
   if(r.e === 'observado') return;
-  enviarRevision(k, 'observado', [{t: 'Con fotos', c: 1}], false);
+  enviarRevision(k, 'observado', [{t: 'Con fotos', c: Math.max(1, totalFotos(base))}], false);
   if(actual && claveBase(actual) === base && sc === scope){
     estadoSel = 'observado';
     pintarLista({});
@@ -1489,6 +1518,7 @@ async function cargar(inicial){
       if(typeof cargoSrv === 'string' && cargoSrv !== cargo){ cargo = cargoSrv; guardarLocal('calidadCargo', cargo); pintarQuien(); }
       fotosOk = !!(j.fotos && typeof j.fotos === 'object' && !Array.isArray(j.fotos));
       if(fotosOk) fotosCount = j.fotos;
+      archivadas = (j.archivadas && typeof j.archivadas === 'object' && !Array.isArray(j.archivadas)) ? j.archivadas : {};
       ajustarFotosUI();
       if(j.opciones && typeof j.opciones === 'object' && !Array.isArray(j.opciones)) opciones = Object.assign({}, opciones, j.opciones);
       cargado = true;
