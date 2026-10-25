@@ -884,16 +884,13 @@
   .lg-modo{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-size:16px;padding:0;}
 
   /* ===== Tema 4 · Marco dorado (solo noche) ===== */
-  html:has(body.tema4){background:#061826;}
   body.tema4{
     --marco-oscuro:#463714; --marco-oro:#785a28; --marco-oro-vivo:#c89b3c; --marco-hueco:#010a13;
     --marco-fondo:#1a1c21; --marco-fondo-arriba:#0c0d0f;
-    --pagina-fondo:#061826; --pagina-fondo2:#0a2a40;
-    --bg:#061826; --panel:#1a1c21; --panel-soft:#14161a; --border:#1e2126; --border-strong:#785a28;
+    --panel:#1a1c21; --panel-soft:#14161a; --border:#1e2126; --border-strong:#785a28;
     --text:#f0e6d2; --sub:#a09b8c; --accent:#c89b3c; --accent2:#785a28; --radius:0px;
     --pagado:#0d9488; --pagado-bg:rgba(13,148,136,.14); --pagado-border:rgba(13,148,136,.45);
     --pagado-pill-bg:rgba(13,148,136,.55); --pagado-pill-text:#eafaf7;
-    background:var(--pagina-fondo);
     color-scheme:dark;
   }
   /* El marco: todo contenedor con borde, sombra o fondo propio */
@@ -1004,12 +1001,10 @@
 
 
   /* ===== Dorado de día: mismo marco, con colores claros ===== */
-  html:has(body.tema4:not(.dark)){background:#f3ecd9;}
   body.tema4:not(.dark){
     --marco-oscuro:#dcc994; --marco-oro:#b8892f; --marco-oro-vivo:#8f6a14; --marco-hueco:#f3ecd9;
     --marco-fondo:#fbf5e6; --marco-fondo-arriba:#fffdf7;
-    --pagina-fondo:#f3ecd9; --pagina-fondo2:#faf4e4;
-    --bg:#f3ecd9; --panel:#fffaf0; --panel-soft:#f6eedc; --border:#e6d9b8; --border-strong:#b8892f;
+    --panel:#fffaf0; --panel-soft:#f6eedc; --border:#e6d9b8; --border-strong:#b8892f;
     --text:#2b2210; --sub:#6f6040; --accent:#8f6a14; --accent2:#b8892f;
     color-scheme:light;
   }
@@ -1033,8 +1028,6 @@
   }
   /* Cielo y niebla: una sola capa fija, sin repintar al hacer scroll */
   html:has(body.tema5){background:radial-gradient(circle at 90% 4%,rgba(255,150,40,.30) 0,rgba(255,122,24,.10) 9%,transparent 22%),radial-gradient(ellipse at 15% 0%,rgba(138,43,226,.28),transparent 55%),linear-gradient(to top,rgba(138,43,226,.22),transparent 120px),linear-gradient(180deg,#1a0b2a 0,#0b0610 900px) #0b0610;}
-  body.tema4::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 30% 20%,var(--pagina-fondo2),var(--pagina-fondo) 70%);}
-  body.tema4{background:var(--pagina-fondo);}
   body.tema5 :is(.tb-group,.toolbar,.pt,.stat-card,.modal,.mc-pop,.obj-item,.worker-panel,.vt-sec,.rec-item,.aviso-grupo,.lg-app){
     background:var(--telarana) top right / 46px no-repeat, linear-gradient(180deg,#221432 0%,var(--panel) 75%);
     border:1px solid var(--border-strong); border-top:3px solid var(--accent); border-radius:0;
@@ -1122,7 +1115,7 @@
   body.tema5 :is(button,a,select,summary,label,.btn,.tab,.stats-tab,.cell-ventana,.tile,[role=button],input[type=checkbox],input[type=radio],input[type=file]):not(:disabled){cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 8c3-5 7-5 9-3-3 0-5 1-6 3z' fill='%236fcf3a' stroke='%231a0f24' stroke-width='1'/%3E%3Cellipse cx='15' cy='18' rx='12' ry='9.5' fill='%23ff7a18' stroke='%231a0f24' stroke-width='1.6'/%3E%3Cpath d='M15 9v19M9 10c-3 5-3 11 0 16M21 10c3 5 3 11 0 16' stroke='%23c2410c' stroke-width='1.1' fill='none'/%3E%3Cpath d='M8 16l3 -3l2.5 3.5zM22 16l-3 -3l-2.5 3.5zM9 21q6 5 12 0q-3 2 -6 1.2q-3 .8 -6 -1.2z' fill='%231a0f24'/%3E%3C/svg%3E") 15 16,pointer;}
   @keyframes hwEsqueleto{0%,70%{opacity:0;transform:translateY(64px);}71%{opacity:1;transform:translateY(64px);}77%{opacity:1;transform:translateY(2px);}80%{transform:translateY(2px) rotate(-5deg);}83%{transform:translateY(2px) rotate(5deg);}86%{transform:translateY(2px) rotate(0);}92%{opacity:1;transform:translateY(64px);}93%,100%{opacity:0;transform:translateY(64px);}}
   /* El fondo lo pinta el elemento raíz: el cuerpo transparente deja ver las capas decorativas que van detrás */
-  body.tema4,body.tema5{background:transparent;}
+  body.tema5{background:transparent;}
 
   /* Araña que baja desde arriba de la pantalla colgada de su hilo y se vuelve a esconder */
   body.tema5::after{content:"";position:fixed;left:14%;top:0;width:36px;height:300px;background:var(--arana) center bottom / 36px 72px no-repeat,linear-gradient(rgba(205,184,240,.55),rgba(205,184,240,.55)) center top / 1px calc(100% - 40px) no-repeat;pointer-events:none;z-index:20;transform:translateY(-300px);animation:hwBajar 38s ease-in-out 14s infinite;}
@@ -1842,7 +1835,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.66.0';
+const APP_VERSION = '0.66.2';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3868,7 +3861,7 @@ function renderPasillosTable(){
                   if(!p) return '<td><span class="cell-empty">—</span></td>';
                   if(filtering && !passesFilters(cellById[p.id])) return '<td><span class="cell-empty">(no coincide)</span></td>';
                   const st = getState(p.id);
-                  return `<td class="cell-td ${claseEstadoTd(st)}">${cellHtml(cellById[p.id])}</td>`;
+                  return `<td class="cell-td ${claseEstadoTd(st)}">${dzCeldaTabla(cellById[p.id], st)}</td>`;
                 }).join('')}
               </tr>`).join('')}
           </tbody>
@@ -5809,7 +5802,7 @@ function refrescarCelda(id){
     const cell = cellById[cid];
     if(!cell) return;
     td.className = 'cell-td ' + claseEstadoTd(getState(cid));
-    td.innerHTML = cellHtml(cell);
+    td.innerHTML = dzCeldaTabla(cell, getState(cid));
   });
   matNivelesCache = null;
   actualizarMarcasMateriales();
