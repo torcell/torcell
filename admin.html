@@ -418,7 +418,7 @@ function renderRendimiento(raiz, datos, esc){
   /* Cerámica y Frague se miden por separado: cada grupo tiene su propio promedio y ranking.
      La asistencia (no tiene categoría) se cuenta en el grupo donde la persona más trabajó. */
   const sepul = n => /^sepulveda/.test(String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase());
-  const grupoPrincipal = t => { let c = 0, f = 0; t.dias.forEach(x => { if(x.cat === 'Frague') f += x.m2 || 0; else c += x.m2 || 0; }); return f > c ? 'Frague' : 'Cerámica'; };
+  const grupoPrincipal = t => { if(t.especialidad === 'fraguador') return 'Frague'; if(t.especialidad === 'ceramista') return 'Cerámica'; let c = 0, f = 0; t.dias.forEach(x => { if(x.cat === 'Frague') f += x.m2 || 0; else c += x.m2 || 0; }); return f > c ? 'Frague' : 'Cerámica'; };
   function listaGrupo(cat){
     return datos.trabajadores.filter(t => !sepul(t.nombre) && (grupoPrincipal(t) === cat || t.dias.some(x => x.cat === cat)))
       .map(t => grupoPrincipal(t) === cat ? t : Object.assign({}, t, {asistencia: []}));
