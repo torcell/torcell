@@ -946,6 +946,13 @@
   body.dz-A table.dept-table td.cell-td.st-entregado,body.dz-D table.dept-table td.cell-td.st-entregado{border-left-color:var(--entregado);}
   body.dz-A table.dept-table td.cell-td.st-pagado,body.dz-D table.dept-table td.cell-td.st-pagado{border-left-color:var(--pagado);}
   body.dz-A td.dpto-col,body.dz-D td.dpto-col{position:sticky;left:0;z-index:3;}
+  /* Temas 5 y 8: el "!" de materiales va en la esquina, sin agregar altura al cuadro */
+  body.dz-A table.dept-table td.dpto-col.mat-pend,body.dz-A table.dept-table td.dpto-col.mat-prep,
+  body.dz-D table.dept-table td.dpto-col.mat-pend,body.dz-D table.dept-table td.dpto-col.mat-prep{padding-top:8px;}
+  @media (max-width:700px){body.dz-A table.dept-table td.dpto-col.mat-pend,body.dz-A table.dept-table td.dpto-col.mat-prep,body.dz-D table.dept-table td.dpto-col.mat-pend,body.dz-D table.dept-table td.dpto-col.mat-prep{padding-top:4px;}
+  body.dz-A td.dpto-col.mat-pend::before,body.dz-A td.dpto-col.mat-prep::before,body.dz-D td.dpto-col.mat-pend::before,body.dz-D td.dpto-col.mat-prep::before{top:0;left:0;width:12px;height:12px;font-size:9px;line-height:12px;}}
+  body.dz-A td.dpto-col.mat-pend::before,body.dz-A td.dpto-col.mat-prep::before,
+  body.dz-D td.dpto-col.mat-pend::before,body.dz-D td.dpto-col.mat-prep::before{top:3px;left:3px;margin-left:0;width:15px;height:15px;font-size:10px;line-height:15px;}
   body.dz-A .cell-td[class*="st-"]{background:var(--panel);box-shadow:none;}
   body.dz-A table.dept-table tbody tr:nth-child(even) td.cell-td[class*="st-"]{background:var(--panel-soft);}
   body.dz-D .cell-td.st-pendiente{background:color-mix(in srgb,var(--pendiente) 16%,var(--panel));box-shadow:none;}
@@ -1370,6 +1377,7 @@
         <option value="tema9">Tema 8</option>
         <option value="tema5">🎃 Halloween (noche)</option>
       </select>
+      <button class="btn solo-admin" id="principalBtn" type="button" title="Todos los que no hayan elegido su propio tema verán este (tema y dorado)">☆ Asignar como tema principal</button>
       <button class="btn" id="doradoBtn" type="button" title="Marco dorado: se puede usar de día y de noche">✦ Dorado: No</button>
     </div>
   </header>
@@ -1835,7 +1843,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.66.2';
+const APP_VERSION = '0.67.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1973,6 +1981,7 @@ function guardarM2DelPeriodo(desde, hasta){
 const AFP_COTIZACION_OBLIGATORIA = 10;
 let allowGuestPrices = false;
 let espaciadoDptos = true;
+let temaPrincipal = null;
 let OBJETIVOS = [];
 let cfgCargada = false;
 let isAdmin = false;
@@ -2236,6 +2245,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
     if(typeof remote.espaciadoDptos === 'boolean') espaciadoDptos = remote.espaciadoDptos;
+    if(remote.temaPrincipal && typeof remote.temaPrincipal === 'object'){ temaPrincipal = remote.temaPrincipal; aplicarTemaPrincipal(); }
     if(isAdmin && Array.isArray(remote.objetivos) && !seccionesSucias.has('objetivos') && !seccionesTodas) OBJETIVOS = remote.objetivos.filter(o => o && typeof o.id === 'string');
     if(remote.obsPorArea && typeof remote.obsPorArea === 'object'){
       Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(remote.obsPorArea[a])) OBS_POR_AREA[a] = remote.obsPorArea[a].filter(x => typeof x === 'string'); });
@@ -2504,7 +2514,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
+        config: { workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -2526,7 +2536,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, records, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -2692,7 +2702,7 @@ async function doSaveCycle(){
 
   const guardadoCompleto = forzarGuardadoCompleto || (dirtySnap.size === 0 && !settingsDirty);
   if(guardadoCompleto) await mergeRemoteBeforeSave();
-  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
+  const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -2749,7 +2759,7 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 // Ventana previa: muestra lo que cambió desde el último guardado y pide confirmar.
-const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área'};
+const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', temaPrincipal:'Tema principal', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área'};
 function resumenCambiosPendientes(){
   const bool = v => v ? 'Sí' : 'No';
   const fm2 = v => (v === null || v === undefined || v === '') ? '—' : String(v).replace('.', ',') + ' m²';
@@ -5992,6 +6002,29 @@ function aplicarDorado(){
   btn.classList.toggle('primary', doradoOn && !hal);
   btn.disabled = hal;
   btn.title = hal ? 'Halloween ya trae sus propios colores' : 'Marco dorado: se puede usar de día y de noche';
+  actualizarPrincipalBtn();
+}
+function temaActual(){
+  const v = document.getElementById('temaSelector').value;
+  return {tema: v, dorado: !!doradoOn && v !== 'tema5'};
+}
+function actualizarPrincipalBtn(){
+  const b = document.getElementById('principalBtn'); if(!b) return;
+  const t = temaPrincipal, c = temaActual();
+  const igual = !!t && t.tema === c.tema && !!t.dorado === c.dorado;
+  b.textContent = igual ? '★ Tema principal' : '☆ Asignar como tema principal';
+  b.classList.toggle('primary', igual);
+}
+function aplicarTemaPrincipal(){
+  if(!temaPrincipal) return;
+  let propio = null;
+  try{ propio = localStorage.getItem('progresoObraTemaV3'); }catch(err){}
+  if(propio === null){
+    doradoOn = !!temaPrincipal.dorado;
+    aplicarTema(temaPrincipal.tema);
+    document.getElementById('temaSelector').value = temaPrincipal.tema;
+  }
+  actualizarPrincipalBtn();
 }
 function aplicarTema(v){
   const cl = document.body.classList;
@@ -6003,6 +6036,7 @@ function aplicarTema(v){
   }
   aplicarNocheMarco(v === 'tema5');
   aplicarDorado();
+  actualizarPrincipalBtn();
 }
 document.getElementById('temaSelector').addEventListener('change', (e) => {
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
@@ -6011,6 +6045,14 @@ document.getElementById('temaSelector').addEventListener('change', (e) => {
   render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
   try{ localStorage.setItem('progresoObraTemaV3', e.target.value); }catch(err){}
+});
+document.getElementById('principalBtn').addEventListener('click', () => {
+  if(!isAdmin) return;
+  temaPrincipal = temaActual();
+  markSettingsDirty('temaPrincipal');
+  scheduleSave();
+  actualizarPrincipalBtn();
+  avisoToast('Listo: este tema quedó como principal para quienes no hayan elegido otro.');
 });
 document.getElementById('doradoBtn').addEventListener('click', () => {
   doradoOn = !doradoOn;
