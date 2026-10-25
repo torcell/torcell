@@ -984,6 +984,13 @@
   .dz-cards .dz-fl{grid-template-columns:minmax(0,1fr);gap:4px;padding:8px 10px;}
   .dz-fila .dz-info{flex:1 1 auto;}
   .dz-fila .worker-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  :is(.dz-fila,.dz-ex) .worker-name{background:none;border:0;padding:0;font-size:15px;box-shadow:none;}
+  :is(.dz-fila,.dz-ex) .worker-name.unassigned{border:0;font-weight:500;}
+  :is(.dz-ex,.dz-fila) .estado-badge{width:min(var(--ancho-estado),96px);}
+  .dz-ex.cell-ventana{flex-direction:column;align-items:flex-start;gap:3px;padding:4px 2px;}
+  .dz-ex1{display:flex;align-items:center;gap:8px;min-width:0;}
+  .dz-ex1 .worker-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dz-ex2 .price-block{justify-content:flex-start;}
   .dz-ar{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);}
   .dz-cl{min-width:0;}
   .dz-fila.cell-ventana{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;}
@@ -1360,10 +1367,13 @@
         <option value="tema3">Tema 3</option>
         <option value="tema4">Marco dorado (noche)</option>
         <option value="tema5">🎃 Halloween (noche)</option>
-        <option value="tema6">A · Tabla tipo Excel</option>
-        <option value="tema7">B · Tarjetas por dpto (noche)</option>
-        <option value="tema8">C · Mapa del piso (marco dorado)</option>
-        <option value="tema9">D · Celdas de color (🎃 Halloween)</option>
+      </select>
+      <select id="disenoSelector" title="Cómo se ven los pisos y departamentos">
+        <option value="">Diseño actual</option>
+        <option value="A">A · Tabla tipo Excel</option>
+        <option value="B">B · Tarjetas por dpto</option>
+        <option value="C">C · Mapa del piso</option>
+        <option value="D">D · Celdas de color</option>
       </select>
     </div>
   </header>
@@ -1678,7 +1688,7 @@
       <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
       <button class="btn primary" id="reporteEnviarBtn">Enviar ahora</button>
       <button class="btn" id="reporteTextoBtn">Copiar texto</button>
-      <button class="btn" id="reporteImagenBtn">Guardar imagen</button>
+      <button class="btn" id="reporteImagenBtn" title="Baja la vista previa como imagen a este equipo. No cambia lo que se envía por correo.">Descargar vista previa</button>
       <button class="btn" id="reporteCloseBtn">Cerrar</button>
     </div>
   </div>
@@ -1829,7 +1839,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.65.0';
+const APP_VERSION = '0.65.2';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3744,7 +3754,7 @@ function renderFloorTable(fb){
                   if(!c) return '<td><span class="cell-empty">—</span></td>';
                   if(filtering && !passesFilters(cellById[c.id])) return '<td><span class="cell-empty">(no coincide)</span></td>';
                   const st = getState(c.id);
-                  return `<td class="cell-td ${claseEstadoTd(st)}">${cellHtml(cellById[c.id])}</td>`;
+                  return `<td class="cell-td ${claseEstadoTd(st)}">${dzCeldaTabla(cellById[c.id], st)}</td>`;
                 }).join('')}
               </tr>`).join('')}
           </tbody>
@@ -3753,6 +3763,15 @@ function renderFloorTable(fb){
     </div>`;
 }
 
+function dzCeldaTabla(cell, st){
+  const dz = document.body.classList.contains('dz-A') || document.body.classList.contains('dz-D');
+  if(!dz || !vistaVentana()) return cellHtml(cell);
+  const hasWorker = !!st.trabajador, estado = resolveEstado(st);
+  return `<div class="cell-block cell-ventana dz-ex" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">
+    <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</span></div>
+    <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
+  </div>`;
+}
 /* ---- Diseños B y C de los temas nuevos: tarjetas por dpto y mapa del piso ---- */
 const dzSel = {};
 function dzFila(cell, st){
@@ -5945,7 +5964,7 @@ document.getElementById('turboBtn').addEventListener('click', (e) => {
   render();
 });
 document.getElementById('toggleDark').addEventListener('click', (e) => {
-  if(document.body.classList.contains('tema4') || document.body.classList.contains('tema5') || document.body.classList.contains('tema7')){ avisoToast('Este tema es solo nocturno. Cambia de tema para volver al modo día.'); return; }
+  if(document.body.classList.contains('tema4') || document.body.classList.contains('tema5')){ avisoToast('Este tema es solo nocturno. Cambia de tema para volver al modo día.'); return; }
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
   const dark = document.body.classList.toggle('dark');
   document.documentElement.classList.toggle('dark', dark);
@@ -5966,21 +5985,12 @@ function aplicarNocheMarco(on){
     modoAntesMarco = null;
   }
 }
-// Temas A–D: cada uno trae su paleta y su forma de mostrar pisos y departamentos.
-const TEMAS_DZ = {tema6: {base: [], noche: false, dz: 'A'}, tema7: {base: [], noche: true, dz: 'B'}, tema8: {base: ['tema4'], noche: true, dz: 'C'}, tema9: {base: ['tema5'], noche: true, dz: 'D'}};
-function aplicarTema(v){
-  const cl = document.body.classList, d = TEMAS_DZ[v];
-  cl.remove('tema1', 'tema2', 'tema3', 'tema4', 'tema5', 'tema6', 'tema7', 'tema8', 'tema9', 'dz-A', 'dz-B', 'dz-C', 'dz-D');
-  if(d){ cl.add('tema3', ...d.base, v, 'dz-' + d.dz); }
-  else{
-    if(v) cl.add(v);
-    if(v === 'tema4' || v === 'tema5') cl.add('tema3');
-  }
-  aplicarNocheMarco(v === 'tema4' || v === 'tema5' || !!(d && d.noche));
-}
 document.getElementById('temaSelector').addEventListener('change', (e) => {
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
-  aplicarTema(e.target.value);
+  document.body.classList.remove('tema1', 'tema2', 'tema3', 'tema4', 'tema5');
+  if(e.target.value) document.body.classList.add(e.target.value);
+  if(e.target.value === 'tema4' || e.target.value === 'tema5') document.body.classList.add('tema3');
+  aplicarNocheMarco(e.target.value === 'tema4' || e.target.value === 'tema5');
   if(ventanaId) cerrarVentana();
   render();
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
@@ -5990,7 +6000,22 @@ try{
   const guardadoV2 = localStorage.getItem('progresoObraTemaV3');
   const temaGuardado = guardadoV2 === null ? 'tema3' : guardadoV2;
   if(temaGuardado === 'tema1' || temaGuardado === 'tema3'){ document.body.classList.add(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
-  else if(temaGuardado === 'tema4' || temaGuardado === 'tema5' || TEMAS_DZ[temaGuardado]){ aplicarTema(temaGuardado); document.getElementById('temaSelector').value = temaGuardado; }
+  else if(temaGuardado === 'tema4' || temaGuardado === 'tema5'){ document.body.classList.add('tema3', temaGuardado); document.getElementById('temaSelector').value = temaGuardado; aplicarNocheMarco(true); }
+  else if(/^tema[6-9]$/.test(temaGuardado)){ document.body.classList.add('tema3'); document.getElementById('temaSelector').value = 'tema3'; }
+}catch(err){}
+// Diseño de pisos y departamentos (A–D): va aparte del tema, así se puede usar con día, noche, marco dorado o Halloween.
+function aplicarDiseno(v){
+  document.body.classList.remove('dz-A', 'dz-B', 'dz-C', 'dz-D');
+  if(v) document.body.classList.add('dz-' + v);
+}
+document.getElementById('disenoSelector').addEventListener('change', (e) => {
+  aplicarDiseno(e.target.value);
+  try{ localStorage.setItem('progresoObraDisenoV1', e.target.value); }catch(err){}
+  render();
+});
+try{
+  const dg = localStorage.getItem('progresoObraDisenoV1') || '';
+  if(/^[ABCD]$/.test(dg)){ aplicarDiseno(dg); document.getElementById('disenoSelector').value = dg; }
 }catch(err){}
 document.getElementById('saveNowBtn').addEventListener('click', pedirGuardar);
 
