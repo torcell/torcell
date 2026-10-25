@@ -173,7 +173,8 @@ main h2{margin:0 0 4px;font-size:17px;}
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
-    st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : st.volver ? 0.1 : 0.2);
+    if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 2000)); }
+    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
@@ -197,6 +198,7 @@ main h2{margin:0 0 4px;font-size:17px;}
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
+      avisarIntento(tipo);
       if(st.cerrando){ location.replace(destino); return Promise.resolve(); }
       st.err = (async function(){
         var TXT = {sesion: 'Ya hay una cuenta activa, volviendo a pantalla de sesión.', permiso: 'No te corresponde estar aquí, volviendo al menú.', nosesion: 'No hay una sesión iniciada, volviendo a pantalla de sesión.'};
@@ -206,7 +208,7 @@ main h2{margin:0 0 4px;font-size:17px;}
         while(st.prog < 89.4 || st.prog > 91) await dormir(30);
         el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
         var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
-        await dormir(1500);
+        await dormir(3000);
         st.volver = true;
         while(st.prog > 0.6) await dormir(30);
         await dormir(250);
@@ -235,6 +237,8 @@ main h2{margin:0 0 4px;font-size:17px;}
       return st.fin;
     }
   };
+  /* Avisa al administrador (por el servidor) que alguien llegó a esta pantalla de error */
+  function avisarIntento(tipo){ try{ var cu = ''; try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; cu = h.nombre || h.cuenta || ''; }catch(e){} fetch('https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec', {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'alertaAcceso', tipo: tipo, pagina: location.pathname.split('/').pop() || 'index', ua: String(navigator.userAgent || '').substring(0, 120), cuenta: cu})}).catch(function(){}); }catch(e){} }
   window.salirConError = function(destino, tipo){ if(tipo && window.CargaPagina && document.getElementById('cargaGlobal') && !st.cerrando) return window.CargaPagina.error(destino, tipo); location.replace(destino); };
   if(window.__gateErr) window.CargaPagina.error(window.__gateErr.d, window.__gateErr.t);
   setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);

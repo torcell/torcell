@@ -1265,7 +1265,8 @@
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
-    st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : st.volver ? 0.1 : 0.2);
+    if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 2000)); }
+    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
@@ -1289,6 +1290,7 @@
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
+      avisarIntento(tipo);
       if(st.cerrando){ location.replace(destino); return Promise.resolve(); }
       st.err = (async function(){
         var TXT = {sesion: 'Ya hay una cuenta activa, volviendo a pantalla de sesión.', permiso: 'No te corresponde estar aquí, volviendo al menú.', nosesion: 'No hay una sesión iniciada, volviendo a pantalla de sesión.'};
@@ -1298,7 +1300,7 @@
         while(st.prog < 89.4 || st.prog > 91) await dormir(30);
         el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
         var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
-        await dormir(1500);
+        await dormir(3000);
         st.volver = true;
         while(st.prog > 0.6) await dormir(30);
         await dormir(250);
@@ -1327,6 +1329,8 @@
       return st.fin;
     }
   };
+  /* Avisa al administrador (por el servidor) que alguien llegó a esta pantalla de error */
+  function avisarIntento(tipo){ try{ var cu = ''; try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; cu = h.nombre || h.cuenta || ''; }catch(e){} fetch('https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec', {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'alertaAcceso', tipo: tipo, pagina: location.pathname.split('/').pop() || 'index', ua: String(navigator.userAgent || '').substring(0, 120), cuenta: cu})}).catch(function(){}); }catch(e){} }
   window.salirConError = function(destino, tipo){ if(tipo && window.CargaPagina && document.getElementById('cargaGlobal') && !st.cerrando) return window.CargaPagina.error(destino, tipo); location.replace(destino); };
   if(window.__gateErr) window.CargaPagina.error(window.__gateErr.d, window.__gateErr.t);
   setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
@@ -1436,6 +1440,7 @@
       <div class="tb-btns">
         <button class="btn" id="statsOpenBtn">📊 Estadísticas</button>
         <button class="btn solo-admin" id="rendBtn">📈 Rendimiento</button>
+        <button class="btn solo-admin" id="alertasBtn">🚨 Alertas</button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
         <button class="btn admin-only" id="turboBtn" title="Marcar Pagado activa Terminado y Partida; marcar Terminado activa Partida">⚡ Turbo</button>
@@ -1843,7 +1848,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.67.3';
+const APP_VERSION = '0.68.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4932,6 +4937,27 @@ async function abrirRendimiento(){
   renderRendimiento(cuerpo, datos, esc);
 }
 document.getElementById('rendBtn').addEventListener('click', abrirRendimiento);
+
+/* ===== Alertas de seguridad (solo administrador): intentos de entrada, PIN incorrecto, guardados que borraban datos ===== */
+async function abrirAlertas(){
+  const demo = !DB_URL;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:860px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🚨 Alertas de seguridad' + (demo ? ' (prueba, sin datos)' : '') + '</b><button class="btn" id="alCerrar" type="button">Cerrar</button></div><div id="alCuerpo" style="font-size:13px;">Cargando…</div></div>';
+  ov.className = 'ovDin';
+  document.body.appendChild(ov);
+  autoAlto(ov.firstElementChild, ov.querySelector('#alCuerpo'));
+  ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'alCerrar') cerrarDin(ov); });
+  const cuerpo = ov.querySelector('#alCuerpo');
+  if(demo){ cuerpo.textContent = 'En la copia de prueba no hay servidor, así que no hay alertas para mostrar.'; return; }
+  const j = await llamarDb('alertasListar');
+  if(!j || !j.ok){ cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 70 o más nueva.'; return; }
+  const TIT = j.titulos || {};
+  const color = g => g === 'alta' ? '#c0392b' : g === 'media' ? '#d99a00' : 'var(--sub)';
+  cuerpo.innerHTML = '<div style="color:var(--sub);margin-bottom:10px;">Se avisa por correo a ' + (j.correos || 0) + ' dirección(es) (el dueño del script y las que pongas en Propiedades del script → <b>ALERTAS_CORREOS</b>, separadas por coma). Se muestran las últimas 120.</div>'
+    + (j.alertas.length ? j.alertas.map(a => '<div style="border-left:4px solid ' + color(a.g) + ';padding:6px 10px;margin:0 0 8px;background:var(--panel-soft);"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;"><b>' + esc(TIT[a.t] || a.t) + '</b><small style="color:' + color(a.g) + ';text-transform:uppercase;">' + esc(a.g) + '</small><small style="color:var(--sub);margin-left:auto;">' + esc(a.f) + '</small></div><div>' + (a.c ? '<b>' + esc(a.c) + ':</b> ' : '') + esc(a.d) + '</div>' + (a.a ? '<small style="color:var(--sub);">' + esc(a.a) + '</small>' : '') + '</div>').join('') : '<div style="padding:12px;color:var(--sub);">Todo tranquilo: no hay alertas registradas.</div>');
+}
+document.getElementById('alertasBtn').addEventListener('click', abrirAlertas);
 
 
 const ORD_USU = (a, b) => { const o = {1: 0, 2: 1, 4: 2, 6: 3, 5: 4, 3: 5}; return (o[a.rol] ?? 9) - (o[b.rol] ?? 9); }; // admins primero, trabajadores al final
