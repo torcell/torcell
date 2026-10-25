@@ -413,8 +413,16 @@ function renderRendimiento(raiz, datos, esc){
   }
   raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="rdVista"><option value="semana">Semana</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
     + '<label id="rdSelW">Semana <select id="rdSem"></select></label><label id="rdSelM">Mes <select id="rdMes"></select></label>'
-    + '<label>Categoría <select id="rdCat"><option value="">Cerámica y Frague</option><option value="Cerámica">Cerámica</option><option value="Frague">Frague</option></select></label></div><div id="rdOut"></div>';
-  const out = raiz.querySelector('#rdOut'), $ = id => raiz.querySelector('#' + id);
+    + '</div><div id="rdOutC"></div><div id="rdOutF"></div>';
+  const $ = id => raiz.querySelector('#' + id);
+  /* Cerámica y Frague se miden por separado: cada grupo tiene su propio promedio y ranking.
+     La asistencia (no tiene categoría) se cuenta en el grupo donde la persona más trabajó. */
+  const sepul = n => /^sepulveda/.test(String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase());
+  const grupoPrincipal = t => { let c = 0, f = 0; t.dias.forEach(x => { if(x.cat === 'Frague') f += x.m2 || 0; else c += x.m2 || 0; }); return f > c ? 'Frague' : 'Cerámica'; };
+  function listaGrupo(cat){
+    return datos.trabajadores.filter(t => !sepul(t.nombre) && (grupoPrincipal(t) === cat || t.dias.some(x => x.cat === cat)))
+      .map(t => grupoPrincipal(t) === cat ? t : Object.assign({}, t, {asistencia: []}));
+  }
   /* selectores */
   const hayDatoSem = l => datos.trabajadores.some(t => t.dias.some(x => rdLunes(x.d) === l) || (t.asistencia || []).some(x => rdLunes(x.d) === l));
   $('rdSem').innerHTML = todasSem.slice().reverse().map(l => '<option value="' + l + '">' + esc(nombreSem(l)) + '</option>').join('');
@@ -424,15 +432,18 @@ function renderRendimiento(raiz, datos, esc){
   $('rdMes').value = hoy.substring(0, 7);
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
-  function pintar(){
-    const vista = $('rdVista').value, cat = $('rdCat').value;
+  function pintar(){ pintarGrupo('Cerámica', 'Cerámica', $('rdOutC')); pintarGrupo('Frague', 'Frague', $('rdOutF')); }
+  function pintarGrupo(cat, etq, out){
+    const vista = $('rdVista').value, lista = listaGrupo(cat);
+    if(!lista.length){ out.innerHTML = ''; return; }
     $('rdSelW').style.display = vista === 'semana' ? '' : 'none'; $('rdSelM').style.display = vista === 'mes' ? '' : 'none';
     let desde, hasta, titulo, sub = '';
     if(vista === 'semana'){ const l = $('rdSem').value, w = infoSem(l); desde = l; hasta = rdSuma(l, 6); titulo = 'Semana ' + w.n + ' · ' + w.rango + w.tag; sub = w.nota; }
     else if(vista === 'mes'){ const m = $('rdMes').value; desde = m + '-01'; hasta = m + '-31'; titulo = RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4); sub = 'Suma por la fecha real de cada día: las semanas que mezclan dos meses se reparten día a día.'; }
     else { desde = '0000-01-01'; hasta = '9999-12-31'; titulo = 'Total acumulado'; sub = 'Desde la semana ' + 1 + ' (' + fd(primera) + ') hasta hoy · ' + todasSem.length + ' semanas.'; }
-    const filas = datos.trabajadores.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat)}));
-    if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
+    titulo = etq + ' · ' + titulo;
+    const filas = lista.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat)}));
+    if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ if(cat === 'Frague'){ out.innerHTML = ''; return; } out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
     const act = filas.filter(f => f.r.dias > 0);
     const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
     const prom = totDias ? act.reduce((a, f) => a + f.r.m2, 0) / totDias : 0;
@@ -444,7 +455,7 @@ function renderRendimiento(raiz, datos, esc){
     const asEq = conAs.length ? conAs.reduce((a, f) => a + f.r.trab, 0) / Math.max(1e-9, conAs.reduce((a, f) => a + f.r.disp, 0)) * 100 : null;
     /* gráfico de m² por semana (últimas 12, o todas en Total hasta 30) */
     const lim = vista === 'total' ? 30 : 12; const semG = todasSem.slice(-lim);
-    const sm = semG.map(l => datos.trabajadores.reduce((a, t) => a + stat(t, l, rdSuma(l, 6), cat).m2, 0)), maxS = Math.max(1, ...sm), W = 900, Hh = 130, bw = W / sm.length;
+    const sm = semG.map(l => lista.reduce((a, t) => a + stat(t, l, rdSuma(l, 6), cat).m2, 0)), maxS = Math.max(1, ...sm), W = 900, Hh = 130, bw = W / sm.length;
     const selL = vista === 'semana' ? $('rdSem').value : '';
     const barras = sm.map((v, i) => { const h = v / maxS * (Hh - 34); const w = infoSem(semG[i]);
       return '<rect x="' + (i * bw + 4) + '" y="' + (Hh - 16 - h) + '" width="' + Math.max(4, bw - 8) + '" height="' + h + '" fill="var(--accent)" opacity="' + (selL && selL !== semG[i] ? '.45' : '1') + '"><title>Semana ' + w.n + ' · ' + w.rango + ': ' + fmt(v) + ' m²</title></rect>'
@@ -474,8 +485,8 @@ function renderRendimiento(raiz, datos, esc){
       + '<div class="rd-tit">m² por semana del equipo</div><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;max-width:900px;height:auto;">' + barras + '</svg>'
       + '<div class="rd-nota"><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</div>';
   }
-  out.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
-  ['rdVista', 'rdSem', 'rdMes', 'rdCat'].forEach(id => $(id).addEventListener('change', pintar));
+  raiz.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
+  ['rdVista', 'rdSem', 'rdMes'].forEach(id => $(id).addEventListener('change', pintar));
   pintar();
 }
 
