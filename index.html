@@ -311,6 +311,20 @@
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;min-height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
 #cargaGlobal .cgest.cglisto{text-align:center;font-size:13px;font-weight:700;letter-spacing:.8px;color:#fff;}
+#cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
+#cargaGlobal .cgerr svg{flex:none;}
+#cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
+#cargaGlobal .cgbd,#cargaGlobal .cgin small,#cargaGlobal .cgin b,#cargaGlobal .cgest{transition:color .3s ease,background-color .3s ease;}
+#cargaGlobal.cgerror .cgbd{background:#ff5252;box-shadow:0 0 10px rgba(255,82,82,.55);}
+#cargaGlobal.cgerror .cgin small,#cargaGlobal.cgerror .cgin b,#cargaGlobal.cgerror .cgest{color:#ff6b6b;}
+#cargaGlobal.cgerror .cgin b{text-shadow:0 0 14px rgba(255,82,82,.35);}
+#cargaGlobal.cgerror .cgpista{background:rgba(255,82,82,.22);}
+#cargaGlobal .cgrell{position:relative;}
+#cargaGlobal .cgrell::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#ff3d3d,#ff9a9a);box-shadow:0 0 8px rgba(255,82,82,.8);opacity:0;transition:opacity .3s ease;}
+#cargaGlobal.cgerror .cgrell::after{opacity:1;}
+#cargaGlobal .cgin.cgtiembla{opacity:1;animation:cgTiembla .5s cubic-bezier(.36,.07,.19,.97) both;}
+@keyframes cgTiembla{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
+@media(prefers-reduced-motion:reduce){#cargaGlobal .cgin.cgtiembla{animation:none;}}
 @media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
 @media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
   #lgSplash{display:none !important;}
@@ -324,15 +338,42 @@
 .rd-d.bad{border-left-color:var(--bad,#c0392b);}
 .rd-d small{display:block;font-size:11px;color:var(--sub);}.rd-d b{display:block;font-size:14px;}.rd-d span{font-size:12px;color:var(--sub);}
 .rd-tit{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin:12px 0 6px;}
-.rd-f{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(180px,2fr) 90px 100px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
+.rd-f{display:grid;grid-template-columns:minmax(220px,2.2fr) minmax(150px,1.4fr) 80px 90px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
 .rd-b span{font-size:12px;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
+
+.as-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.as-bar input[type=date]{font:inherit;padding:5px 8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:0;}
+.as-dia{font-size:13px;font-weight:700;}
+.as-aviso{font-size:12px;color:var(--sub);border:1px dashed var(--border);padding:7px 10px;margin-bottom:8px;}
+.as-fila{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--border);}
+.as-seg{display:flex;}
+.as-seg button{font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);cursor:pointer;border-radius:0;margin-left:-1px;transition:background .12s,color .12s;}
+.as-seg button:first-child{margin-left:0;}
+.as-seg button:hover{background:rgba(127,127,127,.15);}
+.as-seg button.on-P{background:var(--ok,#43a047);border-color:var(--ok,#43a047);color:#fff;position:relative;}
+.as-seg button.on-F{background:var(--bad,#c0392b);border-color:var(--bad,#c0392b);color:#fff;position:relative;}
+.as-seg button.on-S{background:var(--warn,#d99a00);border-color:var(--warn,#d99a00);color:#fff;position:relative;}
+.as-sub{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12.5px;padding:6px 8px;background:rgba(127,127,127,.1);border-left:4px solid var(--warn,#d99a00);}
+.as-sub select,.as-sub input{font:inherit;font-size:12.5px;padding:4px 6px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:0;}
+.as-pie{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.as-msg{font-size:12.5px;flex:1;min-width:160px;}
+@media(max-width:560px){.as-fila{grid-template-columns:1fr;}}
 .rd-vacio{padding:18px;color:var(--sub);border:1px dashed var(--border);text-align:center;}
-@media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-b{grid-column:1/-1;order:3}}
+@media(max-width:700px){.rd-f{grid-template-columns:1fr 1fr;}.rd-n{grid-column:1/-1}.rd-b{grid-column:1/-1;order:3}}
+.rd-sub{font-size:12px;color:var(--sub);margin:-2px 0 8px;}
+.rd-fr b{font-weight:700;}
+.rd-h summary{cursor:pointer;font-size:12px;color:var(--accent);list-style:none;border:1px solid var(--border);padding:4px 8px;text-align:center;}
+.rd-h summary::-webkit-details-marker{display:none;}
+.rd-h[open]{grid-column:1/-1;order:9;}
+.rd-h[open] summary{width:90px;margin-bottom:6px;}
+.rd-hv{font-size:12px;color:var(--sub);padding:4px 0;}
+.rd-hl{font-size:12.5px;padding:5px 0;border-top:1px dashed var(--border);}
+.rd-hl small{display:block;font-size:11px;color:var(--sub);}
 
   .lg-app{transition:opacity .16s ease,transform .16s ease;animation:lgEntraApp .28s ease-out both;}
   @keyframes lgEntraApp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -389,7 +430,17 @@
   .v3 small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
   .v3 b{display:block;font-size:24px;line-height:1.2;margin:4px 0 8px;}
   .v3 .cargo{display:inline-block;border-radius:999px;background:rgba(255,255,255,.14);font-size:12.5px;padding:3px 12px;}
-  .v3 .carga{width:min(240px,72%);margin:18px auto 0;}
+  .v3 .bd,.v3 .in small,.v3 .in b,.v3 .cargo{transition:color .3s ease,background-color .3s ease;}
+  .v3.err .bd{background:#ff5252;box-shadow:0 0 10px rgba(255,82,82,.55);}
+  .v3.err .in small,.v3.err .in b{color:#ff6b6b;}
+  .v3.err .cargo{background:rgba(255,82,82,.2);color:#ff9a9a;}
+  .v3 .lgerr{display:none;align-items:center;justify-content:center;gap:8px;margin:14px auto 0;max-width:min(380px,92%);font-size:12.5px;font-weight:700;line-height:1.3;color:#ff6b6b;opacity:0;text-align:left;}
+  .v3.err .lgerr{display:flex;}
+  .v3.err.errver .lgerr{opacity:1;transition:opacity .3s ease;}
+  .v3 .lgerr svg{flex:none;}
+  .v3 .in.tiembla{animation:lgTiembla .5s cubic-bezier(.36,.07,.19,.97) both;}
+  @keyframes lgTiembla{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
+  @media(prefers-reduced-motion:reduce){.v3 .in.tiembla{animation:none;}}
   .v3 .pista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
   .v3 .rell{height:100%;width:0;background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
   .v3 .est{margin-top:9px;height:16px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
@@ -428,24 +479,24 @@
         <p class="lg-quien" id="lgQuien"></p>
         <p class="lg-msg" id="lgMsgElegir" aria-live="polite"></p>
         <div class="lg-dest">
-          <button type="button" data-dest="admin"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span><span>Panel de Admin<small>Usuarios, permisos y rendimiento</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="panel"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Panel de Cerámica y Frague<small>Avance y pagos de cerámica y frague</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="calidad"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M7.5 12.5l3 3 6-7"/></svg></span><span>Control de calidad<small>Revisión de cerámica y frague</small><small class="enc">Encargado: Silvia Gonzales</small></span></button>
           <button type="button" data-dest="avance"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg></span><span>Dashboard de avance<small>Resumen del avance de la obra</small><small class="enc">Encargado: A. Sandoval</small></span></button>
           <button type="button" data-dest="terreno"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17"/><path d="M9 4h6v3H9zM8.5 12h7M8.5 16h5"/></svg></span><span>Jefe de Terreno<small>Programación, personal y seguridad</small><small class="enc">Encargado: A. Sandoval</small></span></button>
           <button type="button" data-dest="oficina"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg></span><span>Oficina Técnica<small>Pagos y documentos</small><small class="enc">Encargado: Edwin Carroz</small></span></button>
+          <button type="button" data-dest="admin"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span><span>Panel de Admin<small>Usuarios, permisos y rendimiento</small><small class="enc">Encargado: Ismael S.</small></span></button>
         </div>
         <button type="button" class="lg-salir" id="lgSalir">Salir y cambiar de cuenta</button>
       </div>
     </section>
-    <section class="lg-p lg-hecho" id="lgHecho"><div class="v3" id="lgV3"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="lgV3in"><small id="lgV3s"></small><b id="lgV3n"></b><span class="cargo" id="lgV3c"></span><div class="carga"><div class="pista"><div class="rell" id="lgV3r"></div></div><div class="est" id="lgV3e">0%</div></div></div></div></div></section>
+    <section class="lg-p lg-hecho" id="lgHecho"><div class="v3" id="lgV3"><div class="bd t"></div><div class="bd bt"></div><div class="fondo"><div class="in" id="lgV3in"><small id="lgV3s"></small><b id="lgV3n"></b><span class="cargo" id="lgV3c"></span><div class="lgerr" id="lgV3err" role="alert"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="lgV3errT"></span></div></div></div></div></section>
   </div>
 </div>
 <script>
 const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
 const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', admin: 'admin.html'};
-const SECC_BASE = {1: ['admin', 'panel', 'calidad', 'avance', 'terreno', 'oficina'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance']};
+const SECC_BASE = {1: ['panel', 'calidad', 'avance', 'terreno', 'oficina', 'admin'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance']};
 const DESTINOS = SECC_BASE;
 const NOM_SECC = {admin: 'Panel de Admin', panel: 'Panel de Cerámica y Frague', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica'};
 const TXT_DEST = {admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…'};
@@ -578,7 +629,7 @@ function resultado(res, recordar, via){
   if(res === null){ gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
   if(!res.ok){
     if(res.error === 'dispositivo_ocupado'){ sacudir(); gate.pin = ''; gatePintar(); gateMensaje(res.tipo === 'unico' ? 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.' : 'Esta cuenta ya está abierta en otro ' + (res.tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Cierra la sesión allá o pídele al administrador que libere el cupo.', true); return; }
-    if(res.error === 'bloqueado'){ sacudir(); gate.pin = ''; gatePintar(); gateMensaje(res.permanente ? 'Tu acceso está bloqueado. Habla con el administrador.' : 'Tu acceso está bloqueado hasta el ' + new Date(res.hasta).toLocaleDateString('es-CL') + '.' , true); return; }
+    if(res.error === 'bloqueado'){ gate.pin = ''; gatePintar(); bloqueadoFlujo(res); return; }
     if(res.error === 'demasiados_intentos'){ sacudir(); gate.pin = ''; gatePintar(); gateBloquear(30, 'Demasiados intentos seguidos.'); return; }
     if(via === 'google'){ gateMensaje('Ese Gmail no está autorizado. Pídele al administrador que lo agregue.', true); return; }
     gate.fallos++; sacudir(); gate.pin = ''; gatePintar();
@@ -611,21 +662,35 @@ function animAlto(v, a, b, ms){
     requestAnimationFrame(paso);
   });
 }
-async function bienvenida(res){
-  const nom = limpioNombre(res.nombre || '') || 'Admin';
+async function bienvenida(res, bloqueo){
+  const nom = limpioNombre(res.nombre || '') || (bloqueo ? 'Usuario' : 'Admin');
   lg('lgV3s').textContent = saludoDe(nom); lg('lgV3n').textContent = nom; lg('lgV3c').textContent = CARGO_TXT[res.rol] || 'Usuario';
-  const v = lg('lgV3'), r = lg('lgV3r'), e = lg('lgV3e');
-  r.style.width = '0%'; e.textContent = '0%'; e.classList.remove('listo'); v.classList.remove('ver'); v.style.height = '0px';
+  const v = lg('lgV3'), inn = lg('lgV3in');
+  v.classList.remove('ver', 'err', 'errver'); inn.classList.remove('tiembla'); v.style.height = '0px';
   pantalla('lgHecho');
   await new Promise(ok => requestAnimationFrame(() => requestAnimationFrame(ok)));
-  const H = lg('lgV3in').scrollHeight + 4;
+  let H = inn.scrollHeight + 4;
   setTimeout(() => v.classList.add('ver'), 260);
   await animAlto(v, 0, H, 480);
-  const t0 = performance.now();
-  await new Promise(ok => (function paso(a){ const f = Math.min(1, (a - t0) / 900), p = Math.round(100 * (1 - Math.pow(1 - f, 3))); r.style.width = p + '%'; e.textContent = p + '%'; if(f < 1) requestAnimationFrame(paso); else ok(); })(t0));
-  e.textContent = '¡Listo!'; e.classList.add('listo'); await dormir(450);
+  if(!bloqueo){ await dormir(1300); }
+  else {
+    await dormir(900);
+    lg('lgV3errT').textContent = bloqueo;
+    v.classList.add('err');
+    const H2 = inn.scrollHeight + 4;
+    v.classList.add('errver'); inn.classList.add('tiembla');
+    await animAlto(v, H, H2, 260); H = H2;
+    await dormir(3000);
+  }
   v.classList.remove('ver'); await dormir(200);
   await animAlto(v, H, 0, 450);
+}
+async function bloqueadoFlujo(res){
+  gate.bloqueado = true; gatePintar();
+  const txt = res.permanente ? 'Usuario bloqueado. Habla con el administrador.' : 'Usuario bloqueado hasta el ' + new Date(res.hasta).toLocaleDateString('es-CL') + '.';
+  await bienvenida(res, txt);
+  gate.bloqueado = false; gate.pin = ''; gate.fallos = 0; gateMensaje(''); gatePintar();
+  pantalla('lgPin');
 }
 function mensajeElegir(t, mal){ const m = lg('lgMsgElegir'); m.textContent = t || ''; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
 function mostrarOpciones(lista){
