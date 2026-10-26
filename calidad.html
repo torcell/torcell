@@ -91,12 +91,19 @@ body.bloq{overflow:hidden;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
 .seg{display:grid;grid-template-columns:repeat(var(--n,2),1fr);gap:0;}
 .seg button[hidden]{display:none;}
+.segnota{font-size:12px;color:var(--sub);line-height:1.35;margin-top:-6px;}.segnota[hidden],#mObsToggle[hidden]{display:none;}
 .seg button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 .tile.c{border-top-color:var(--accent);}.tile.c small{color:var(--accent);}
 .archnota{border:1px solid var(--border);background:var(--soft);padding:9px 12px;font-size:12.5px;line-height:1.35;color:var(--text);}.archnota[hidden]{display:none;}
 .seg button{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:10px 4px;font-size:12.5px;font-weight:600;min-height:44px;margin-left:-1px;}
 .seg button:first-child{margin-left:0;}
-.seg button:hover{border-color:var(--accent);position:relative;}
+.seg button{cursor:pointer;position:relative;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .08s ease,filter .18s ease;}
+.seg button:not(:disabled):not(.on):hover{border-color:var(--accent);z-index:1;background:color-mix(in srgb,var(--accent) 14%,var(--panel));box-shadow:inset 0 0 0 1px var(--accent),inset 0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);}
+.seg button.on{box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);}
+.seg button.on::before{content:"✓";margin-right:5px;font-weight:700;}
+.seg button.on:not(:disabled):hover{filter:brightness(1.12);z-index:1;}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;z-index:2;}
+.seg button:disabled{cursor:not-allowed;}
 .seg button:active{transform:scale(.96);}
 .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
 .seg button.on[data-e="revisado"]{background:var(--ok);border-color:var(--ok);}
@@ -201,6 +208,21 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .fvimg img{display:block;width:100%;max-height:62vh;object-fit:contain;}
 .ebarra{height:8px;background:var(--soft);border:1px solid var(--border);}
 .ebarra div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s ease;}
+/* ---- Opciones de baldosa para celular (prueba): .mv-a / .mv-b / .mv-c en <html> ---- */
+.tile .ns{display:none;}.tile .ns i{font-style:normal;}
+.mv-a .tile .nf,.mv-b .tile .nf,.mv-c .tile .nf{display:none;}
+.mv-a .tile .ns,.mv-b .tile .ns,.mv-c .tile .ns{display:block;}
+.mv-a .piso h2,.mv-c .piso h2{position:sticky;top:0;z-index:6;background:var(--bg);margin:0 -2px 8px;padding:8px 2px 6px;font-size:13px;color:var(--text);}
+.mv-a .tile b,.mv-c .tile b{font-size:24px;letter-spacing:.02em;}
+.mv-a .tile .ns i,.mv-c .tile .ns i{display:none;}
+.mv-b .tile b{font-size:23px;letter-spacing:.02em;}
+.mv-b .tile .ns i{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--sub);line-height:1;margin-bottom:3px;}
+.mv-b .tile .ns i::before{content:"P";}
+.mv-c .lista{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+.mv-c .tile{min-height:64px;padding:8px 2px 6px;}
+.mv-c .tile b{font-size:20px;min-height:20px;}
+.mv-c .tile small{font-size:9.5px;}
+.mv-a .tile.pas b .ns,.mv-b .tile.pas b .ns,.mv-c .tile.pas b .ns{font-size:13px;}
 .tile .fcnt{position:absolute;top:3px;right:4px;font-style:normal;font-size:10px;font-weight:700;color:var(--sub);}
 .tile{position:relative;overflow:hidden;}
 .tile.esperando{cursor:wait;opacity:.8;}
@@ -582,6 +604,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <button type="button" data-e="observado">Con observación</button>
       <button type="button" data-e="corregido" hidden>Corregido</button>
     </div>
+    <div class="segnota" id="mSegNota" hidden></div>
+    <button type="button" class="btn small" id="mObsToggle" hidden>＋ Detallar observaciones</button>
     <div class="obswrap" id="mObs">
       <div class="obsin">
         <div class="obshead"><span>¿Qué está mal?</span><button class="btn small" id="mEditar" type="button">✎ Editar opciones</button></div>
@@ -604,12 +628,12 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="err" id="mErr"></div>
     <div class="acciones">
       <button class="btn" id="mCancel" type="button">Cancelar</button>
-      <button class="btn primary" id="mGuardar" type="button">Guardar</button>
+      <button class="btn primary" id="mGuardar" type="button">Guardar y cerrar</button>
     </div>
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.33.0';
+const CAL_VERSION = '1.34.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -630,6 +654,7 @@ let opcionesEdit = [];
 let fotosOk = false;
 let fotosCount = {};
 let archivadas = {};
+let obsAbierto = false;
 const totalFotos = b => ((fotosDe[b] || []).length || fotosCount[b] || 0) + (Number(archivadas[b]) || 0);
 const conObs = e => e === 'observado' || e === 'corregido';
 const fotosDe = {};
@@ -748,6 +773,12 @@ function estado(d, sc){
   return {aplica: a.aplica || b.aplica, ok: a.ok && b.ok, ts: Math.max(a.ts, b.ts), cer: a.ok, fra: b.ok, cerSin: !!a.sin, fraSin: !!b.sin};
 }
 
+// Número corto del dpto (2201 en el piso 22 -> 01) para pantallas chicas; los nombres no numéricos quedan completos.
+function dptoCorto(d){
+  const t = String(d.d), n = String(Math.abs(d.n));
+  return /^\d+$/.test(t) && t.length > n.length && t.indexOf(n) === 0 ? t.slice(n.length) : t;
+}
+const pisoNum = d => String(d.p).replace(/^Piso\s*/i, '');
 const nombreCorto = u => { const t = String(u || ''); const i = t.indexOf(' - '); return i === -1 ? t : t.substring(i + 3); };
 function revision(d, sc){
   const r = revisiones[clave(d, sc)];
@@ -875,8 +906,8 @@ function pintar(){
   $('lista').innerHTML = Object.keys(grupos).sort((a, b) => sentido * (grupos[a].n - grupos[b].n)).map(p =>
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
-      ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b>${esc(x.d.d)}</b><small>${falta(x.e)}</small></div>`
-      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b>${esc(x.d.d)}</b><small>${esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}">📷 ${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
+      ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${falta(x.e)}</small></div>`
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}">📷 ${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
     '</div></section>').join('');
 }
 
@@ -890,8 +921,11 @@ function fechaHora(ts){
 function elegir(e){
   estadoSel = e;
   document.querySelectorAll('#mSeg button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
-  $('mObs').classList.toggle('on', conObs(e));
-  const mod = document.querySelector('#vel .modal'); if(mod) mod.classList.toggle('obs-on', conObs(e));
+  const abre = conObs(e) && obsAbierto;
+  $('mObs').classList.toggle('on', abre);
+  const mod = document.querySelector('#vel .modal'); if(mod) mod.classList.toggle('obs-on', abre);
+  $('mObsToggle').hidden = !conObs(e);
+  $('mObsToggle').textContent = obsAbierto ? '− Ocultar observaciones' : '＋ Detallar observaciones';
   $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = conObs(e) ? 0 : -1; });
   $('mEditar').tabIndex = conObs(e) ? 0 : -1;
   $('mErr').textContent = '';
@@ -906,6 +940,8 @@ function ajustarSeg(){
   bR.disabled = n > 0;
   bR.title = n > 0 ? 'Este departamento tiene fotos, por eso debe quedar con observación.' : '';
   bC.hidden = !(n > 0 && conObs(r.e));
+  $('mSegNota').hidden = !(n > 0 && conObs(estadoSel));
+  $('mSegNota').textContent = 'Con fotos queda con observación. Cuando se arregle, marca Corregido.';
   $('mSeg').style.setProperty('--n', bC.hidden ? 2 : 3);
 }
 
@@ -986,9 +1022,10 @@ function abrir(k){
   if(r.ts) partes.push('Última modificación: ' + fechaHora(r.ts));
   $('mSub').textContent = partes.filter(Boolean).join(' · ');
   $('mAreas').innerHTML = areasHtml(d);
-  $('mGuardar').textContent = 'Guardar ' + NOMBRE_SCOPE[scope];
+  $('mGuardar').textContent = 'Guardar y cerrar';
   $('mQuien').textContent = nombreCorto(r.u);
   $('mQuien').title = r.u ? 'Revisó: ' + r.u : '';
+  obsAbierto = false;
   const conFotos = nFotosActual() > 0;
   estadoSel = (conFotos && !conObs(r.e)) ? 'observado' : r.e === 'pendiente' ? '' : r.e;
   pintarLista(parseItems(r));
@@ -1706,6 +1743,7 @@ $('verFotos').addEventListener('click', abrirExportar);
 $('eCerrar').addEventListener('click', cerrarExportar);
 $('eAccion').addEventListener('click', accionExportar);
 $('mGuardar').addEventListener('click', guardarRevision);
+$('mObsToggle').addEventListener('click', () => { obsAbierto = !obsAbierto; elegir(estadoSel); });
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
   if(e.target.id === 'opNueva'){ e.preventDefault(); agregarOpcion(); }

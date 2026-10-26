@@ -544,6 +544,12 @@
   body.is-guest .tb-groups,body.is-guest .rb-der,body.is-guest #principalBtn,body.is-guest .solo-admin,body.is-guest .admin-only,body.is-guest .solo-asist{display:none !important;}
   .vt-lectura .vt-confirma,.vt-lectura .vt-acciones{display:none !important;}
   .vt-lectura .vt-pasos{pointer-events:none;}
+  .cell-ventana{position:relative;}
+  .cal-ico{position:absolute;top:2px;right:3px;font-size:11px;line-height:1;font-weight:800;pointer-events:none;}
+  .cal-ico.ok{color:#2e9e6a;}
+  .cal-ico.obs{color:#e08a1e;}
+  .vt-valor.cal-revisado{color:#2e9e6a;}
+  .vt-valor.cal-observado,.vt-valor.cal-corregido{color:#e08a1e;}
   .obs-ico{display:none;}
   @keyframes pisoEntra{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
   .floor-block.piso-entra{animation:pisoEntra .18s ease-out;}
@@ -1059,6 +1065,7 @@
   body.dz-D .cell-td.st-entregado{background:color-mix(in srgb,var(--entregado) 22%,var(--panel));box-shadow:none;}
   body.dz-D .cell-td.st-pagado{background:color-mix(in srgb,var(--pagado) 24%,var(--panel));box-shadow:none;}
   .dz-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  @media (min-width:1100px){.dz-cards{grid-template-columns:repeat(4,minmax(0,1fr));}}
   .dz-card{background:var(--panel);border:1px solid var(--border-strong);min-width:0;}
   .dz-ch{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--panel-soft);border-bottom:1px solid var(--border-strong);}
   .dz-ch b{font-size:18px;color:var(--text);margin-right:auto;}
@@ -1518,15 +1525,15 @@
       <div class="tb-btns">
         <button class="btn primary admin-only" id="saveNowBtn">💾 Guardar ahora</button>
         <button class="btn" id="dbBtn">Conectar base de datos</button>
-        <button class="btn solo-asist" id="asistBtn">🗓 Asistencia</button>
         <button class="btn admin-only" id="exportBtn">Exportar datos</button>
         <button class="btn admin-only" id="importBtn">Importar datos</button>
-        <button class="btn solo-admin" id="espaciadoBtn" style="grid-column:1 / -1;"></button>
-        <input type="file" id="importFile" accept="application/json" style="display:none;">
-        <button class="btn admin-only" id="reporteBtn">📧 Reporte semanal</button>
         <button class="btn admin-only" id="diagnosticoBtn">🩺 Diagnóstico</button>
+        <button class="btn admin-only" id="reporteBtn">📧 Reporte semanal</button>
+        <button class="btn solo-asist" id="asistBtn">🗓 Asistencia</button>
         <button class="btn admin-only" id="cambiosBtn">🕘 Cambios por cuenta</button>
         <button class="btn solo-admin" id="accesosBtn">🔓 Inicios de sesión</button>
+        <button class="btn solo-admin" id="alertasBtn">🚨 Alertas</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
       </div>
     </div>
     <div class="tb-group">
@@ -1550,10 +1557,10 @@
       <div class="tb-btns">
         <button class="btn" id="statsOpenBtn">📊 Estadísticas</button>
         <button class="btn solo-admin" id="rendBtn">📈 Rendimiento</button>
-        <button class="btn solo-admin" id="alertasBtn">🚨 Alertas</button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
         <button class="btn admin-only" id="turboBtn" title="Marcar Pagado activa Terminado y Partida; marcar Terminado activa Partida">⚡ Turbo</button>
+        <button class="btn solo-admin" id="espaciadoBtn"></button>
         <button class="btn admin-only" id="avisosBtn">🔔 Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
         <button class="btn admin-only" id="permisosBtn">🔑 Permisos por cargo</button>
         <button class="btn solo-admin" id="seccionesBtn">🔑 Permisos de secciones</button>
@@ -1960,7 +1967,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.70.0';
+const APP_VERSION = '0.71.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2399,6 +2406,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
     if(typeof remote.espaciadoDptos === 'boolean') espaciadoDptos = remote.espaciadoDptos;
+    if(remote.calidad && typeof remote.calidad === 'object') CAL_REV = remote.calidad;
     if(remote.temaPrincipal && typeof remote.temaPrincipal === 'object'){ temaPrincipal = remote.temaPrincipal; aplicarTemaPrincipal(); }
     if(isAdmin && Array.isArray(remote.objetivos) && !seccionesSucias.has('objetivos') && !seccionesTodas) OBJETIVOS = remote.objetivos.filter(o => o && typeof o.id === 'string');
     if(remote.obsPorArea && typeof remote.obsPorArea === 'object'){
@@ -3720,7 +3728,7 @@ function etiquetaEstado(cell, estado){
 function cellVentanaHtml(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${escVt(st.nota)}">${escVt(st.nota)}</div></div>` : '';
-  return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}
+  return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
     <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div></div>
     <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
     ${nota}
@@ -3752,6 +3760,31 @@ function pasosVentanaHtml(cell, st, destino){
     if(activo){ const ts = cambio ? Date.now() : fechas[n - 1]; fecha = ts ? fechaCorta(ts) : 'sin fecha'; }
     return `<button type="button" class="vt-paso ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-vtn="${n}" ${habilitado ? '' : 'disabled'}><span class="vt-caja">${activo ? '✓' : ''}</span><span class="vt-nombre">${nombres[n - 1]}</span><span class="vt-fecha">${fecha}</span></button>`;
   }).join('');
+}
+// ---- Calidad → Panel (solo lectura): revisiones hechas en la sección de Calidad ----
+let CAL_REV = {};
+const CAL_PISO_REVISADO_HASTA = 9; // igual que calidad.html: hasta ese piso se da por revisado si no hay registro
+const CAL_SCOPE = {'Piso': 'piso', 'Muro Baños': 'muros', 'Muro Cocina': 'cocina'};
+function calidadDe(cell){
+  if(!cell || cell.dpto === 'Pasillo' || cell.area === 'Pasillos') return null;
+  const sc = CAL_SCOPE[cell.area]; if(!sc) return null;
+  const r = CAL_REV[cell.piso + '|' + cell.dpto + '|' + sc];
+  if(r && r.e) return r;
+  return null;
+}
+function calIco(cell){
+  const r = calidadDe(cell); if(!r) return '';
+  if(r.e === 'revisado') return '<span class="cal-ico ok" title="Calidad: revisado sin observaciones">✔</span>';
+  if(r.e === 'observado' || r.e === 'corregido') return '<span class="cal-ico obs" title="Calidad: ' + (r.e === 'corregido' ? 'corregido' : 'con observación') + '">' + (r.e === 'corregido' ? '↺' : '⚠') + '</span>';
+  return '';
+}
+function calidadSecHtml(cell){
+  const r = calidadDe(cell); if(!r) return '';
+  const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Observación corregida', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
+  const f = r.ts ? new Date(r.ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
+  const det = r.d ? '<small style="display:block;white-space:normal">' + escVt(r.d) + '</small>' : '';
+  const quien = (r.u || f) ? '<small style="display:block;white-space:normal">' + escVt([r.u, f].filter(Boolean).join(' · ')) + '</small>' : '';
+  return `<div class="vt-sec"><div class="vt-sec-title">Calidad</div><div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${quien}</div></div></div>`;
 }
 function pintarVentana(){
   const id = ventanaId, cell = cellById[id];
@@ -3785,6 +3818,7 @@ function pintarVentana(){
         <div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar"${hayCambio ? '' : ' disabled'}>Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar"${hayCambio ? '' : ' disabled'}>Confirmar cambio</button></div></div>
       <div class="vt-sec"><div class="vt-sec-title">Metraje</div>
         <div class="vt-sec-body"><div class="vt-valor${m2 ? '' : ' vacio'}">${precio}</div>${isAdmin ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="m2">✎ Editar m²</button></div>` : ''}</div></div>
+      ${calidadSecHtml(cell)}
       <div class="vt-sec"><div class="vt-sec-title">Observación</div>
         <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '✎ Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
     </div>
@@ -4004,7 +4038,7 @@ function dzCeldaTabla(cell, st){
   const dz = document.body.classList.contains('dz-A') || document.body.classList.contains('dz-D');
   if(!dz || !vistaVentana()) return cellHtml(cell);
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-ex" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}
+  return `<div class="cell-block cell-ventana dz-ex" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
     <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</span></div>
     <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
   </div>`;
@@ -4013,13 +4047,13 @@ function dzCeldaTabla(cell, st){
 const dzSel = {};
 function dzFila(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-fila" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}
+  return `<div class="cell-block cell-ventana dz-fila" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
     <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
     <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
   </div>`;
 }
 function dzAreasHtml(fb, d, filtering){
-  return areasVista(fb).map(area => {
+  return (d.esPasillo ? ['Pasillos'] : areasVista(fb)).map(area => {
     const c = d.cells[area];
     let cuerpo;
     if(!c) cuerpo = '<span class="cell-empty">—</span>';
@@ -4032,6 +4066,7 @@ function dzAreasHtml(fb, d, filtering){
   }).join('');
 }
 function dzSegHtml(fb, d, clase){
+  if(d.esPasillo) return `<span class="${clase}"><i class="st-${resolveEstado(getState(d.cells.Pasillos.id))}"></i></span>`;
   return `<span class="${clase}">${areasVista(fb).map(area => { const c = d.cells[area]; return c ? `<i class="st-${resolveEstado(getState(c.id))}"></i>` : '<i></i>'; }).join('')}</span>`;
 }
 function dzNum(fb, d){
@@ -4057,7 +4092,10 @@ function dzTitulo(fb, n){
 function renderFloorCards(fb){
   const {filtering, deptRows} = dzFiltrados(fb);
   if(!deptRows.length) return '';
-  return `<div class="floor-block" data-piso="${esc(fb.piso)}">${dzTitulo(fb, deptRows.length)}<div class="dz-cards">${deptRows.map(d => `
+  // Igual que en Calidad: 4 tarjetas arriba y abajo las que sobran + el Pasillo al final
+  const filas = deptRows.concat((fb.pasillo && cellById[fb.pasillo.id] && (!filtering || passesFilters(cellById[fb.pasillo.id]))) ? [{dpto: 'Pasillo', esPasillo: true, cells: {Pasillos: fb.pasillo}}] : []);
+  return `<div class="floor-block" data-piso="${esc(fb.piso)}">${dzTitulo(fb, deptRows.length)}<div class="dz-cards">${filas.map(d => d.esPasillo ? `
+    <div class="dz-card"><div class="dz-ch"><b>Pasillo</b>${dzSegHtml(fb, d, 'dz-seg')}</div>${dzAreasHtml(fb, d, filtering)}</div>` : `
     <div class="dz-card"><div class="dz-ch${dzMatClase(fb, d)}"><b>${dzNum(fb, d)}</b>${dzMatHtml(fb, d)}${dzSegHtml(fb, d, 'dz-seg')}</div>${dzAreasHtml(fb, d, filtering)}</div>`).join('')}</div></div>`;
 }
 function renderFloorMapa(fb){
