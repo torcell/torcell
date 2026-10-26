@@ -155,6 +155,7 @@ td input[type=date]{min-width:130px}
 (function(){
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
   var textoBase = tit.textContent;
+  var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
@@ -205,6 +206,36 @@ td input[type=date]{min-width:130px}
         location.replace(destino);
       })();
       return st.err;
+    },
+    salir: function(destino, titulo, trabajo){
+      if(st.salida) return st.salida;
+      st.salida = (async function(){
+        cancelAnimationFrame(st.raf); st.cerrando = true;
+        if(el.parentNode) el.remove();
+        var h = document.createElement('div'); h.innerHTML = plantilla;
+        var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
+        var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1';
+        var hecho = false;
+        Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
+        var p = 0, ini = performance.now() + 250;
+        await new Promise(function(r){
+          (function f(){
+            var t = Math.max(0, performance.now() - ini);
+            var fin = hecho && performance.now() > ini + 650;
+            var obj = fin ? 100 : 88 * (1 - Math.exp(-t / 300));
+            p += (obj - p) * (fin ? 0.35 : 0.2);
+            if(fin && p > 99.5) p = 100;
+            rl.style.transform = 'scaleX(' + (p / 100) + ')'; es.textContent = Math.round(p) + '%';
+            if(p >= 100) r(); else requestAnimationFrame(f);
+          })();
+        });
+        es.textContent = '¡Listo!'; es.classList.add('cglisto');
+        await dormir(250);
+        location.replace(destino);
+      })();
+      return st.salida;
     },
     fin: function(){
       if(st.err) return st.err;
@@ -269,9 +300,11 @@ td input[type=date]{min-width:130px}
   }).catch(() => {}); }catch(e){}
   if(nom) document.getElementById('quien').textContent = nom + ' · ' + "Oficina Técnica";
   document.getElementById('salir').addEventListener('click', () => {
-    try{ fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}); }catch(e){}
+    let trabajo = Promise.resolve();
+    try{ trabajo = Promise.race([fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}), new Promise(r => setTimeout(r, 2500))]); }catch(e){}
     try{ localStorage.removeItem(K); localStorage.removeItem(N); }catch(e){}
-    location.replace('index.html?s=1');
+    if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?s=1', 'Volviendo a inicio de sesión…', trabajo);
+    else trabajo.then(() => location.replace('index.html?s=1'));
   });
 })();
 const CFG = {"id": "oficina", "v": 2, "kpis": [{"t": "Avance físico", "s": "% de la obra"}, {"t": "Próximo estado de pago", "s": "fecha de pago"}, {"t": "Cierre del estado de pago", "s": "1 semana antes"}, {"t": "RDI abiertas", "s": "sin respuesta"}, {"t": "Documentos por vencer", "s": "este mes"}], "secciones": [{"id": "pago", "t": "Estado de pago", "ic": "💳", "nota": "partidas del mes", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Partida"}, {"t": "Avance mes", "k": "pct"}, {"t": "Monto $", "k": "num"}, {"t": "Estado", "k": "est", "ok": "Cobrado", "warn": "Por cobrar", "bad": "Observado"}]}, {"id": "curva", "t": "Curva S · avance acumulado", "ic": "📈", "ancho": "c12", "tipo": "curva", "ini": "2026-09-07", "fin": "2026-11-16", "cols": [{"t": "Semana"}, {"t": "Programado acumulado %", "k": "num"}, {"t": "Real acumulado %", "k": "num"}]}, {"id": "obl", "t": "Obligaciones del mes", "ic": "⏰", "ancho": "m", "tipo": "check"}, {"id": "docs", "t": "Control documental", "ic": "📁", "ancho": "m", "tipo": "check"}, {"id": "rdi", "t": "RDI y consultas al proyecto", "ic": "❓", "nota": "requerimientos de información", "ancho": "m", "tipo": "tabla", "cols": [{"t": "N°"}, {"t": "Consulta"}, {"t": "A quién"}, {"t": "Estado", "k": "est", "ok": "Respondida", "warn": "Enviada", "bad": "Sin respuesta"}]}, {"id": "mat", "t": "Materiales y bodega", "ic": "🧱", "nota": "stock vs pedido", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Material"}, {"t": "Unidad"}, {"t": "Stock"}, {"t": "Pedido"}, {"t": "Estado", "k": "est", "ok": "Al día", "warn": "Pedido", "bad": "Falta"}]}, {"id": "subs", "t": "Subcontratos", "ic": "👷", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Contratista"}, {"t": "Trabajo"}, {"t": "Avance", "k": "pct"}, {"t": "Documentos", "k": "est", "ok": "Al día", "warn": "Por vencer", "bad": "Faltan"}]}, {"id": "adic", "t": "Adicionales y modificaciones de contrato", "ic": "➕", "ancho": "c12", "tipo": "tabla", "cols": [{"t": "Detalle"}, {"t": "Monto $", "k": "num"}, {"t": "Fecha"}, {"t": "Estado", "k": "est", "ok": "Aprobado", "warn": "En revisión", "bad": "Rechazado"}]}], "datos": {"kpis": ["41%", "28-oct", "21-oct", "3", "2"], "sec": {"pago": [["Cerámica pisos 1 a 8", "70", "18500000", "ok"], ["Frague pisos 1 a 6", "55", "4200000", "warn"], ["Cerámica muros baño", "35", "9800000", "warn"], ["Instalación de puertas", "10", "2100000", "bad"]], "curva": [["07-09", "5", "4"], ["14-09", "12", "10"], ["21-09", "20", "17"], ["28-09", "30", "26"], ["05-10", "42", "37"], ["12-10", "55", "41"], ["19-10", "66", "48"], ["26-10", "76", ""], ["02-11", "85", ""], ["09-11", "93", ""], ["16-11", "100", ""]], "obl": [["F30 y F30-1 (1.ª semana, antes del 1.er miércoles)", false], ["Hoja de Ruta (miércoles de la 1.ª semana)", true], ["Cierre del estado de pago (1 semana antes del pago)", false], ["Planilla de avance firmada por ITO", false], ["Facturas de subcontratos recibidas", true]], "docs": [["Libro de obras al día", true], ["Planos vigentes y última revisión impresa en obra", true], ["Certificados de materiales (cerámica, adhesivo, fragüe)", false], ["Pólizas y garantías vigentes", true], ["Protocolos de calidad firmados", false], ["Actas de reunión semanal archivadas", true]], "rdi": [["001", "Junta de dilatación en pasillo piso 5", "Arquitecto", "ok"], ["002", "Altura de cerámica en muro de baño", "Arquitecto", "warn"], ["003", "Desnivel en losa terraza", "Calculista", "bad"]], "mat": [["Cerámica 60x60", "m²", "420", "800", "warn"], ["Adhesivo cerámico", "sacos", "65", "60", "ok"], ["Fragüe gris", "kg", "90", "200", "bad"], ["Crucetas 2 mm", "bolsas", "30", "40", "ok"]], "subs": [["Cerámica Sepúlveda", "Cerámica y frague", "52", "ok"], ["Puertas del Sur", "Instalación de puertas", "10", "warn"], ["Eléctrica Rojas", "Canalizaciones", "75", "bad"]], "adic": [["Refuerzo de impermeabilización en baños", "3200000", "12-oct", "warn"], ["Cambio de cerámica en hall", "1800000", "03-oct", "ok"], ["Nicho adicional en cocina", "650000", "08-oct", "bad"]]}}, "editor": true};

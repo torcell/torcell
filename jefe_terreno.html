@@ -155,6 +155,7 @@ td input[type=date]{min-width:130px}
 (function(){
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
   var textoBase = tit.textContent;
+  var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
@@ -205,6 +206,36 @@ td input[type=date]{min-width:130px}
         location.replace(destino);
       })();
       return st.err;
+    },
+    salir: function(destino, titulo, trabajo){
+      if(st.salida) return st.salida;
+      st.salida = (async function(){
+        cancelAnimationFrame(st.raf); st.cerrando = true;
+        if(el.parentNode) el.remove();
+        var h = document.createElement('div'); h.innerHTML = plantilla;
+        var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
+        var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1';
+        var hecho = false;
+        Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
+        var p = 0, ini = performance.now() + 250;
+        await new Promise(function(r){
+          (function f(){
+            var t = Math.max(0, performance.now() - ini);
+            var fin = hecho && performance.now() > ini + 650;
+            var obj = fin ? 100 : 88 * (1 - Math.exp(-t / 300));
+            p += (obj - p) * (fin ? 0.35 : 0.2);
+            if(fin && p > 99.5) p = 100;
+            rl.style.transform = 'scaleX(' + (p / 100) + ')'; es.textContent = Math.round(p) + '%';
+            if(p >= 100) r(); else requestAnimationFrame(f);
+          })();
+        });
+        es.textContent = '¡Listo!'; es.classList.add('cglisto');
+        await dormir(250);
+        location.replace(destino);
+      })();
+      return st.salida;
     },
     fin: function(){
       if(st.err) return st.err;
@@ -269,9 +300,11 @@ td input[type=date]{min-width:130px}
   }).catch(() => {}); }catch(e){}
   if(nom) document.getElementById('quien').textContent = nom + ' · ' + "Jefe de Terreno";
   document.getElementById('salir').addEventListener('click', () => {
-    try{ fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}); }catch(e){}
+    let trabajo = Promise.resolve();
+    try{ trabajo = Promise.race([fetch(URL_DB, {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: tok})}).catch(() => {}), new Promise(r => setTimeout(r, 2500))]); }catch(e){}
     try{ localStorage.removeItem(K); localStorage.removeItem(N); }catch(e){}
-    location.replace('index.html?s=1');
+    if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?s=1', 'Volviendo a inicio de sesión…', trabajo);
+    else trabajo.then(() => location.replace('index.html?s=1'));
   });
 })();
 const CFG = {"id": "terreno", "v": 1, "kpis": [{"t": "Avance de la semana", "s": "% programado cumplido"}, {"t": "Personal hoy", "s": "personas en obra"}, {"t": "Accidentes del mes", "s": "con y sin tiempo perdido"}, {"t": "Restricciones abiertas", "s": "frenan el trabajo"}, {"t": "Pedidos pendientes", "s": "materiales por llegar"}], "secciones": [{"id": "prog", "t": "Programación de la semana", "ic": "🗓️", "nota": "qué se hace cada día", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Actividad"}, {"t": "Cuadrilla"}, {"t": "Día", "k": "sel", "op": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]}, {"t": "Estado", "k": "est", "ok": "Hecho", "warn": "En curso", "bad": "Atrasado"}]}, {"id": "pers", "t": "Personal y cuadrillas de hoy", "ic": "👷", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Cuadrilla / empresa"}, {"t": "Personas", "k": "num"}, {"t": "Dónde trabajan"}, {"t": "Asistencia", "k": "est", "ok": "Completa", "warn": "Falta alguien", "bad": "No llegó"}]}, {"id": "seg", "t": "Seguridad del día", "ic": "🦺", "ancho": "m", "tipo": "check"}, {"id": "pend", "t": "Pendientes del día", "ic": "📝", "ancho": "m", "tipo": "check"}, {"id": "rest", "t": "Restricciones", "ic": "⛔", "nota": "lo que frena al equipo", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Restricción"}, {"t": "Responsable"}, {"t": "Fecha límite"}, {"t": "Estado", "k": "est", "ok": "Resuelta", "warn": "En gestión", "bad": "Frena el trabajo"}]}, {"id": "ped", "t": "Pedidos de materiales", "ic": "📦", "ancho": "m", "tipo": "tabla", "cols": [{"t": "Material"}, {"t": "Cantidad"}, {"t": "Llega"}, {"t": "Estado", "k": "est", "ok": "Recibido", "warn": "Pedido", "bad": "Urgente"}]}, {"id": "cal", "t": "Observaciones de calidad por resolver", "ic": "✅", "ancho": "c12", "tipo": "tabla", "cols": [{"t": "Piso / Dpto"}, {"t": "Observación"}, {"t": "Responsable"}, {"t": "Estado", "k": "est", "ok": "Corregida", "warn": "Por corregir", "bad": "Reclamo repetido"}]}], "datos": {"kpis": ["85%", "24", "0", "2", "3"], "sec": {"prog": [["Cerámica de pisos, piso 9", "Cuadrilla Pérez", "Lun", "ok"], ["Frague de baños, piso 7", "Cuadrilla Soto", "Mar", "warn"], ["Instalación de puertas, piso 6", "Puertas del Sur", "Mié", "warn"], ["Limpieza fina, piso 4", "Aseo", "Vie", "bad"]], "pers": [["Cuadrilla Pérez (cerámica)", "6", "Piso 9", "ok"], ["Cuadrilla Soto (frague)", "4", "Piso 7", "warn"], ["Puertas del Sur", "3", "Piso 6", "ok"], ["Aseo y bodega", "2", "Todos", "bad"]], "seg": [["Charla de 5 minutos al inicio de la jornada", true], ["Uso de casco, zapatos y guantes en todo el personal", true], ["Andamios y barandas revisados", false], ["Orden y aseo en pasillos y escaleras", false], ["Extintores y vías de escape despejadas", true]], "pend": [["Revisar con Silvia los departamentos terminados", false], ["Firmar entrega de material a bodega", true], ["Coordinar grúa para subir cerámica", false], ["Enviar asistencia al administrador", false]], "rest": [["Falta fragüe gris", "Oficina Técnica", "25-oct", "bad"], ["Ascensor de carga en mantención", "Mantención", "24-oct", "warn"], ["Muro sin terminar para cerámica, piso 8", "Albañilería", "23-oct", "ok"]], "ped": [["Fragüe gris 25 kg", "8 sacos", "24-oct", "bad"], ["Cerámica 60x60", "300 m²", "28-oct", "warn"], ["Adhesivo cerámico", "60 sacos", "Hoy", "ok"]], "cal": [["Piso 3 · Dpto 302", "Cerámica con diferencia de nivel en cocina", "Cuadrilla Pérez", "warn"], ["Piso 5 · Dpto 504", "Frague manchado en baño", "Cuadrilla Soto", "bad"], ["Piso 2 · Dpto 201", "Cerámica trizada en living", "Cuadrilla Pérez", "ok"]]}}};

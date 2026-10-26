@@ -409,6 +409,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 (function(){
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
   var textoBase = tit.textContent;
+  var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
@@ -459,6 +460,36 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
         location.replace(destino);
       })();
       return st.err;
+    },
+    salir: function(destino, titulo, trabajo){
+      if(st.salida) return st.salida;
+      st.salida = (async function(){
+        cancelAnimationFrame(st.raf); st.cerrando = true;
+        if(el.parentNode) el.remove();
+        var h = document.createElement('div'); h.innerHTML = plantilla;
+        var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
+        var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1';
+        var hecho = false;
+        Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
+        var p = 0, ini = performance.now() + 250;
+        await new Promise(function(r){
+          (function f(){
+            var t = Math.max(0, performance.now() - ini);
+            var fin = hecho && performance.now() > ini + 650;
+            var obj = fin ? 100 : 88 * (1 - Math.exp(-t / 300));
+            p += (obj - p) * (fin ? 0.35 : 0.2);
+            if(fin && p > 99.5) p = 100;
+            rl.style.transform = 'scaleX(' + (p / 100) + ')'; es.textContent = Math.round(p) + '%';
+            if(p >= 100) r(); else requestAnimationFrame(f);
+          })();
+        });
+        es.textContent = '¡Listo!'; es.classList.add('cglisto');
+        await dormir(250);
+        location.replace(destino);
+      })();
+      return st.salida;
     },
     fin: function(){
       if(st.err) return st.err;
@@ -1636,8 +1667,12 @@ $('halloween').addEventListener('click', () => { halloween = !halloween; guardar
 aplicarHalloween();
 $('salir').addEventListener('click', () => {
   const t = token;
-  cerrarSesion('');
-  fetch(DB_URL, {method:'POST', keepalive: true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: t})}).catch(() => {});
+  const trabajo = Promise.race([fetch(DB_URL, {method:'POST', keepalive: true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'logout', token: t})}).catch(() => {}), new Promise(r => setTimeout(r, 2500))]);
+  token = ''; nombre = ''; cargo = '';
+  guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadCargo', null);
+  try{ sessionStorage.setItem('progresoObraAvisoGate', ''); }catch(e){}
+  if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?s=1', 'Volviendo a inicio de sesión…', trabajo);
+  else trabajo.then(() => location.replace('index.html?s=1'));
 });
 $('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargarInicial(); });
 $('refrescar').addEventListener('click', () => cargar());
