@@ -270,6 +270,8 @@ const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion'); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
 const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['admin','Panel de Admin']];
+const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Trabajador': 'panel', 'Supervisor': 'panel'};
+const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = SECC.filter(x => x[0] !== 'panel' && x[0] !== 'admin');
 const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.'};
 const fmt = ms => new Date(ms).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
@@ -559,7 +561,7 @@ async function vistaPermisos(){
   if(!j || !j.ok){ $('pc').textContent = 'No se pudo cargar. Revisa la conexión y que el script esté publicado.'; return; }
   const us = j.usuarios.filter(u => u.nombre);
   $('pc').innerHTML = '<div style="overflow-x:auto;"><table class="matriz"><thead><tr><th>Persona</th>' + SECC_INV.map(s => '<th>' + s[1] + '</th>').join('') + '<th>Celular / tablet extra</th></tr></thead><tbody>'
-    + us.map((u, i) => '<tr><td><b>' + esc(u.nombre) + '</b><br><small>' + esc(u.cargo) + '</small></td>' + SECC_INV.map(([k]) => (u.base.indexOf(k) !== -1 ? '<td><small>incluido</small></td>' : '<td><input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + ((u.extra || []).indexOf(k) !== -1 ? ' checked' : '') + '></td>')).join('')
+    + us.map((u, i) => '<tr><td><b>' + esc(u.nombre) + '</b><br><small>' + esc(u.cargo) + '</small></td>' + SECC_INV.map(([k]) => (seccionPropia(u) === k ? '<td><small>incluido</small></td>' : '<td><input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (u.base.indexOf(k) !== -1 || (u.extra || []).indexOf(k) !== -1 ? ' checked' : '') + (u.base.indexOf(k) !== -1 ? ' disabled title="Viene con su cargo"' : '') + '></td>')).join('')
       + (u.dobleBase ? '<td><small>incluido</small></td>' : '<td><input type="checkbox" data-u="' + i + '" data-d="1"' + (u.doble ? ' checked' : '') + '></td>') + '</tr>').join('') + '</tbody></table></div>';
   $('pc').addEventListener('change', async e => {
     const t = e.target; if(t.dataset.u === undefined) return; const u = us[t.dataset.u]; t.disabled = true;

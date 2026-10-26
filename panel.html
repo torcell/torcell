@@ -4976,6 +4976,8 @@ function autoAlto(caja, cont){
   }).observe(cont);
 }
 // ---- permisos de invitado por sección ----
+const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Trabajador': 'panel', 'Supervisor': 'panel'};
+const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = [['panel', 'Panel de Cerámica'], ['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica']];
 const DEMO_USUARIOS = [
   {nombre: 'Silvia Gonzales', cargo: 'Calidad', base: ['calidad'], extra: [], doble: true, dobleBase: true},
@@ -5005,8 +5007,8 @@ async function abrirPermisosSecciones(){
   const cuerpo = ov.querySelector('#secCuerpo');
   usuarios.sort(ORD_USU);
   const filas = usuarios.map((u, i) => '<tr><td style="padding:8px 6px;border-top:1px solid var(--border);"><b>' + esc(u.nombre) + '</b><div style="font-size:11.5px;color:var(--sub);">' + esc(u.cargo) + '</div></td>' + SECC_INV.map(([k, n]) => {
-    const propia = u.base.indexOf(k) !== -1;
-    return '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (propia ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (u.extra.indexOf(k) !== -1 ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="' + esc(n) + ' para ' + esc(u.nombre) + '">') + '</td>';
+    const propia = seccionPropia(u) === k, deCargo = u.base.indexOf(k) !== -1;
+    return '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (propia ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (deCargo || u.extra.indexOf(k) !== -1 ? ' checked' : '') + (deCargo ? ' disabled title="Viene con su cargo"' : '') + ' style="width:18px;height:18px;" aria-label="' + esc(n) + ' para ' + esc(u.nombre) + '">') + '</td>';
   }).join('') + '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (u.dobleBase ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-d="1"' + (u.doble ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="Celular o tablet extra para ' + esc(u.nombre) + '">') + '</td></tr>').join('');
   cuerpo.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:6px;font-size:11.5px;color:var(--sub);">Persona</th>' + SECC_INV.map(([k, n]) => '<th style="padding:6px;font-size:11.5px;color:var(--sub);">' + n + '</th>').join('') + '<th style="padding:6px;font-size:11.5px;color:var(--sub);">Celular / tablet extra</th></tr></thead><tbody>' + filas + '</tbody></table>' + (demo ? '<p style="font-size:11.5px;color:var(--sub);margin-top:10px;">Versión de prueba: los permisos quedan solo en este aparato.</p>' : '');
   cuerpo.addEventListener('change', async e => {
