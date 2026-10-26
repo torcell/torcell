@@ -127,9 +127,9 @@
   td.dpto-col{position:relative;}
   td.dpto-col[data-matkey]{cursor:pointer;}
   td.dpto-col.mat-pend{padding-top:28px;}
-  td.dpto-col.mat-pend::before{content:'!';position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#c0546f;color:#fff;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
+  td.dpto-col.mat-pend::before{content:attr(data-matn);position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#c0546f;color:#fff;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
   td.dpto-col.mat-prep{padding-top:28px;}
-  td.dpto-col.mat-prep::before{content:'!';position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
+  td.dpto-col.mat-prep::before{content:attr(data-matn);position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
   .mat-tabla tr.mat-prep td.mat-nombre::before{content:'!';display:inline-block;width:16px;height:16px;margin-right:6px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:11px;line-height:16px;text-align:center;}
   #cambiosOverlay .modal,#accesosOverlay .modal{max-width:620px;display:flex;flex-direction:column;max-height:90vh;}
   .cambios-barra{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap;}
@@ -187,6 +187,11 @@
   .cer-grid label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--sub);}
   .cer-grid input,.cer-grid select{width:100%;padding:5px 6px;font-size:12.5px;box-sizing:border-box;}
   .cer-aviso{font-size:12px;color:var(--sub);margin:0 0 8px;}
+  .cer-ficha{border:1px solid var(--border);background:var(--panel-soft);padding:10px;font-size:12px;line-height:1.45;color:var(--sub);}
+  .cer-ficha b{color:var(--text);}
+  .cer-ficha ul{margin:6px 0 0;padding-left:18px;}
+  .cer-alerta{margin-top:8px;padding:7px 9px;border:1px solid var(--warn,#d98e04);border-left-width:4px;font-size:12px;color:var(--text);}
+  .cer-hint{grid-column:1 / -1;font-size:11.5px;color:var(--sub);}.cer-hint.mal{color:var(--warn);font-weight:600;}
   .mat-tabla{width:100%;border-collapse:collapse;font-size:12.5px;}
   .mat-tabla th, .mat-tabla td{border:1px solid var(--border);padding:6px 7px;text-align:center;vertical-align:middle;}
   .mat-tabla th{background:var(--panel-soft);font-size:11.5px;color:var(--sub);position:sticky;top:0;z-index:1;}
@@ -536,6 +541,19 @@
   }
 
 
+  body.is-guest .tb-groups,body.is-guest .rb-der,body.is-guest #principalBtn,body.is-guest .solo-admin,body.is-guest .admin-only,body.is-guest .solo-asist{display:none !important;}
+  .vt-lectura .vt-confirma,.vt-lectura .vt-acciones{display:none !important;}
+  .vt-lectura .vt-pasos{pointer-events:none;}
+  .obs-ico{display:none;}
+  @keyframes pisoEntra{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .floor-block.piso-entra{animation:pisoEntra .18s ease-out;}
+  .piso-nav{display:none;gap:4px;margin:0 0 0 10px;align-self:center;}
+  .piso-flecha{font:inherit;font-size:12px;line-height:1;width:30px;height:30px;padding:0;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-radius:0;cursor:pointer;transition:background .12s ease,border-color .12s ease,transform .08s ease;}
+  .piso-flecha:hover:not(:disabled){border-color:var(--accent);background:var(--panel-soft);}
+  .piso-flecha:active:not(:disabled){transform:scale(.92);}
+  .piso-flecha:disabled{opacity:.35;cursor:default;}
+  @media (min-width:701px){.piso-nav{display:inline-flex;}}
+  .cell-ventana .worker-name,.cell-ventana .estado-badge,.cell-ventana .price-block,.cell-ventana .dz-info{cursor:inherit;}
   .cell-ventana{cursor:pointer;display:flex;flex-direction:column;gap:6px;position:relative;transition:box-shadow .12s ease,transform .12s ease;outline:none;}
   .cell-ventana{--luz:color-mix(in srgb,var(--accent) 30%,transparent);}
   .cell-ventana::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .28s ease;background:linear-gradient(to bottom,var(--luz) 0%,transparent 48%),linear-gradient(to top,var(--luz) 0%,transparent 48%);}
@@ -664,6 +682,69 @@
   .rename-btn:hover{color:var(--accent);border-color:var(--accent);}
   .guest-price-toggle{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);}
 
+  /* ---- Celular: número corto del dpto con el piso arriba; color del dpto = aviso de materiales ---- */
+  .dpto-inner .ns{display:none;}.dpto-inner .ns i{font-style:normal;}.dpto-inner .ns .pn{display:block;font-size:11px;font-weight:700;line-height:1.1;margin-top:2px;}
+  @media (max-width:700px){
+    table.dept-table td.dpto-col .dpto-inner .nf{display:none !important;}
+    table.dept-table td.dpto-col .dpto-inner .ns{display:block !important;}
+    table.dept-table td.dpto-col .dpto-inner{writing-mode:horizontal-tb !important;text-orientation:mixed !important;letter-spacing:0 !important;font-size:22px !important;line-height:1 !important;}
+    table.dept-table td.dpto-col{width:48px !important;}
+    col.col-dpto{width:48px !important;}
+    .dpto-inner .ns i{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;opacity:.75;margin-bottom:4px;}
+    .dpto-inner .ns i::before{content:"P";}
+    td.dpto-col.mat-pend::before,td.dpto-col.mat-prep::before{display:none !important;}
+    table.dept-table td.dpto-col.mat-pend,table.dept-table td.dpto-col.mat-prep{padding-top:4px !important;}
+    table.dept-table td.dpto-col.mat-pend{background:#c0546f !important;color:#fff !important;}
+    table.dept-table td.dpto-col.mat-prep{background:#f2b600 !important;color:#3a2a00 !important;}
+    /* Celda compacta, opción 1: sin etiqueta ni m²; el estado se lee por el color */
+    .ce-1 .cell-ventana .checks-row,.ce-1 .cell-ventana .cv-pie,.ce-1 .cell-ventana .nota-row{display:none;}
+    .ce-1 td.cell-td.st-pendiente{background:color-mix(in srgb,var(--pendiente) 32%,var(--panel)) !important;}
+    .ce-1 td.cell-td.st-proceso{background:color-mix(in srgb,var(--proceso) 60%,var(--panel)) !important;}
+    .ce-1 td.cell-td.st-entregado{background:color-mix(in srgb,var(--entregado) 55%,var(--panel)) !important;}
+    .ce-1 td.cell-td.st-pagado{background:color-mix(in srgb,var(--pagado) 50%,var(--panel)) !important;}
+    .ce-1 .cell-ventana .worker-name{font-size:12px;}
+    /* Celda compacta, opción 2: etiqueta arriba, nombre debajo, sin m² */
+    .ce-2 .cell-ventana{display:flex;flex-direction:column;}
+    .ce-2 .cell-ventana .checks-row{order:1;}
+    .ce-2 .cell-ventana .worker-row-top{order:2;}
+    .ce-2 .cell-ventana .cv-pie,.ce-2 .cell-ventana .nota-row{display:none;}
+    .ce-2 .cell-ventana .worker-name{font-size:12px;}
+    /* Mismos dos formatos en los temas de tarjeta con tabla (diseños A y D) */
+    .ce-1 .dz-ex .estado-badge,.ce-1 .dz-ex .dz-ex2,.ce-2 .dz-ex .dz-ex2{display:none !important;}
+    .ce-1 .dz-ex .worker-name,.ce-2 .dz-ex .worker-name{font-size:12px !important;}
+    .ce-1 .dz-ex1{width:100%;}
+    .ce-2 .dz-ex1{flex-direction:column;align-items:stretch;gap:4px;width:100%;}
+    .ce-2 .dz-ex .estado-badge{width:100% !important;max-width:96px;align-self:flex-start;}
+    .ce-2 .dz-ex .worker-name{white-space:normal !important;}
+    /* Opción 3 (automática): siempre etiqueta + nombre y sin m². Con 3 áreas visibles el nombre va debajo de la etiqueta; con 2 o menos, al lado. */
+    .ce-3 .floor-block[data-na="3"] .cell-ventana{display:flex;flex-direction:column;}
+    .ce-3 .floor-block[data-na="3"] .cell-ventana .checks-row{order:1;}
+    .ce-3 .floor-block[data-na="3"] .cell-ventana .worker-row-top{order:2;}
+    .ce-3 .floor-block[data-na="3"] .cell-ventana .cv-pie,.ce-3 .floor-block[data-na="3"] .cell-ventana .nota-row{display:none;}
+    .ce-3 .floor-block[data-na="3"] .cell-ventana .worker-name{font-size:12px;}
+    .ce-3 .floor-block[data-na="3"] .dz-ex1{flex-direction:column;align-items:stretch;gap:4px;width:100%;}
+    .ce-3 .floor-block[data-na="3"] .dz-ex .estado-badge{width:100% !important;max-width:96px;align-self:flex-start;}
+    .ce-3 .floor-block[data-na="3"] .dz-ex .worker-name{white-space:normal !important;}
+    .ce-3 .floor-block[data-na="3"] .dz-ex .dz-ex2{display:none !important;}
+    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana{display:flex;flex-direction:row;align-items:center;gap:6px;}
+    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .checks-row{order:1;flex:0 0 auto;margin:0;}
+    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .worker-row-top{order:2;flex:1 1 0;min-width:0;}
+    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .cv-pie,.ce-3 .floor-block:not([data-na="3"]) .cell-ventana .nota-row{display:none;}
+    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .worker-name{font-size:13px;}
+    .ce-3 .floor-block:not([data-na="3"]) .dz-ex .dz-ex2{display:none !important;}
+    .ce-3 .floor-block:not([data-na="3"]) .dz-ex1{flex-direction:row;align-items:center;gap:6px;width:100%;}
+    .ce-3 .floor-block:not([data-na="3"]) .dz-ex .estado-badge{flex:0 0 auto;}
+    .ce-3 .floor-block:not([data-na="3"]) .dz-ex .worker-name{font-size:13px !important;flex:1 1 0;min-width:0;}
+    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .worker-name,.ce-3 .floor-block:not([data-na="3"]) .dz-ex .worker-name{white-space:nowrap !important;overflow:hidden;}
+    .ce-3 .floor-block[data-na="3"] .cell-ventana .worker-name,.ce-3 .floor-block[data-na="3"] .dz-ex .worker-name{white-space:normal !important;}
+    table.dept-table td.dpto-col.dpto-largo .dpto-inner{font-size:10px !important;line-height:1.15 !important;word-break:normal !important;overflow-wrap:anywhere !important;max-width:100%;}
+    table.dept-table td.dpto-col.dpto-largo .dpto-inner .ns i{font-size:9px;}
+    /* Celular: el nombre va suelto (sin recuadro) y las observaciones se ven solo como un símbolo; el texto se lee al abrir el dpto */
+    .cell-ventana .worker-name{background:none !important;border:0 !important;box-shadow:none !important;padding:0 !important;}
+    .cell-ventana .nota-row{display:none !important;}
+    .cell-ventana{position:relative;}
+    .cell-ventana .obs-ico{display:block;position:absolute;right:3px;bottom:2px;font-size:12px;line-height:1;pointer-events:none;}
+  }
   .table-wrap{overflow:visible;}
   ::-webkit-scrollbar{width:10px;height:10px;}
   ::-webkit-scrollbar-thumb{background:var(--border-strong);}
@@ -1006,6 +1087,18 @@
   .dz-fila.cell-ventana{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;}
   .dz-fila .dz-info{min-width:0;display:flex;flex-direction:column;gap:2px;}
   .dz-fila .estado-badge{flex:none;align-self:center;}
+
+.dz-ch .ns,.dz-tile .ns{display:none;}.dz-ch .ns i,.dz-tile .ns i{font-style:normal;display:block;font-size:10px;line-height:1;opacity:.85;}.dz-ch .ns i::before,.dz-tile .ns i::before{content:"P";}
+@media (max-width:700px){
+  .dz-ch b .nf,.dz-tile b .nf{display:none !important;}
+  .dz-ch b .ns,.dz-tile b .ns{display:block !important;line-height:1;}
+  .dz-tile b .ns{font-size:19px;margin-bottom:0;}.dz-tile b{margin-bottom:8px;}
+  .dz-ch b{font-size:20px;}
+  .dz-mat{display:none !important;}
+  .dz-ch.dz-m-rojo,.dz-tile.dz-m-rojo{background:#c0546f !important;color:#fff !important;}.dz-ch.dz-m-rojo b,.dz-tile.dz-m-rojo b{color:#fff !important;}
+  .dz-ch.dz-m-amar,.dz-tile.dz-m-amar{background:#f2b600 !important;color:#3a2a00 !important;}.dz-ch.dz-m-amar b,.dz-tile.dz-m-amar b{color:#3a2a00 !important;}
+  .dz-det h3.dz-m-rojo{background:#c0546f;color:#fff;padding:6px 10px;}.dz-det h3.dz-m-amar{background:#f2b600;color:#3a2a00;padding:6px 10px;}
+}
   .dz-mat{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:12px;font-weight:800;color:#fff;cursor:pointer;}
   .dz-mat.rojo{background:#c0546f;}.dz-mat.amarillo{background:#f2b600;color:#3a2a00;}
   .dz-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:8px 0;}
@@ -1390,13 +1483,12 @@
       <span id="dbBadge" class="db-badge off">Guardado local</span>
       <button class="btn icon" id="toggleDark" title="Modo día/noche">🌙</button>
       <select id="temaSelector" title="Tema de colores">
-        <option value="">Tema original</option>
-        <option value="tema1">Tema 2</option>
-        <option value="tema3">Tema 3</option>
-        <option value="tema6">Tema 5</option>
-        <option value="tema7">Tema 6</option>
-        <option value="tema8">Tema 7</option>
-        <option value="tema9">Tema 8</option>
+        <option value="tema9">Tema 1</option>
+        <option value="tema6">Tema 2</option>
+        <option value="tema1">Tema 3</option>
+        <option value="tema3">Tema 4</option>
+        <option value="tema7">Tema 5</option>
+        <option value="tema8">Tema 6</option>
         <option value="tema5">🎃 Halloween (noche)</option>
       </select>
       <button class="btn solo-admin" id="principalBtn" type="button" title="Todos los que no hayan elegido su propio tema verán este (tema y dorado)">☆ Asignar como tema principal</button>
@@ -1868,7 +1960,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.69.1';
+const APP_VERSION = '0.70.0';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -1977,8 +2069,8 @@ const MAT_CAMPOS = [['ancho','Ancho (cm)'],['largo','Largo (cm)'],['porCaja','Pi
 function matPorDefecto(){
   return {
     piso:{ancho:15,largo:60,porCaja:14,kgSaco:25,consumo:5,merma:10},
-    muroBano:{ancho:30,largo:60,porCaja:0,kgSaco:25,consumo:4.5,merma:10},
-    muroCocina:{ancho:30,largo:60,porCaja:0,kgSaco:25,consumo:4.5,merma:10},
+    muroBano:{ancho:30,largo:60,porCaja:8,kgSaco:25,consumo:4.5,merma:10},
+    muroCocina:{ancho:30,largo:60,porCaja:8,kgSaco:25,consumo:4.5,merma:10},
     pasillo:{ancho:15,largo:60,porCaja:14,kgSaco:25,consumo:5,merma:10}
   };
 }
@@ -1987,16 +2079,38 @@ function mezclarMateriales(m){
   const base = matPorDefecto();
   if(m && m.params) MAT_TIPOS.forEach(([k]) => { if(m.params[k]) base[k] = {...base[k], ...m.params[k]}; });
   MATERIALES = {params: base, ok: (m && m.ok && typeof m.ok === 'object') ? {...m.ok} : {}};
+  matCompletarParams();
   aplicarCeramicas();
 }
 /* Lo guardado en la pestaña «Cerámicas» manda sobre los datos de la hoja: tamaño, piezas por caja, merma y pegamento de cada zona */
+/* Piezas por caja conocidas: 30×60 trae 8 palmetas y 60×60 trae 4. Si una palmeta guardada no tiene el dato, se completa. */
+function cerCajaConocida(ancho, largo){
+  const a = Number(ancho), l = Number(largo), lo = Math.min(a, l), hi = Math.max(a, l);
+  return lo === 30 && hi === 60 ? 8 : lo === 60 && hi === 60 ? 4 : 0;
+}
+function cerCompletarCajas(){
+  let cambio = false;
+  if(ceramicas && Array.isArray(ceramicas.catalogo)) ceramicas.catalogo.forEach(p => {
+    if(!(Number(p.porCaja) > 0)){ const n = cerCajaConocida(p.ancho, p.largo); if(n){ p.porCaja = n; cambio = true; } }
+  });
+  return cambio;
+}
+/* Si una zona quedó sin «piezas por caja» pero su tamaño tiene caja conocida (30×60 = 8, 60×60 = 4), se usa ese dato */
+function matCompletarParams(){
+  MAT_TIPOS.forEach(([k]) => {
+    const q = MATERIALES.params[k];
+    if(q && !(Number(q.porCaja) > 0)){ const n = cerCajaConocida(q.ancho, q.largo); if(n) q.porCaja = n; }
+  });
+}
 function aplicarCeramicas(){
-  if(!ceramicas || !ceramicas.zonas) return;
+  if(!ceramicas || !ceramicas.zonas){ matCompletarParams(); return; }
+  if(cerCompletarCajas() && isAdmin && typeof markSettingsDirty === 'function') markSettingsDirty('ceramicas');
   MAT_TIPOS.forEach(([k]) => {
     const z = ceramicas.zonas[k]; if(!z) return;
     const pal = (ceramicas.catalogo || []).find(p => p.id === z.pal); if(!pal) return;
     MATERIALES.params[k] = {...MATERIALES.params[k], ancho: pal.ancho, largo: pal.largo, porCaja: pal.porCaja, kgSaco: z.kgSaco, consumo: z.consumo, merma: z.merma};
   });
+  matCompletarParams();
   matNivelesCache = null;
 }
 function guardarM2DelPeriodo(desde, hasta){
@@ -2050,6 +2164,7 @@ let avisoDatosViejosDescartado = false;
 let dbErrorReason = '';
 let dbLastOkTs = null;
 
+const esInvitado = () => !!sessionToken && !isAdmin && !isSupervisor && !isJefe && !workerSession;
 function canSeePrices(){ return isAdmin || allowGuestPrices; }
 const esStaff = () => isAdmin || isSupervisor || isJefe;
 function puede(permiso){ return isAdmin || ((isSupervisor || isJefe) && misPermisos[permiso] === true); }
@@ -2075,6 +2190,7 @@ function applyRoleUI(){
   document.body.classList.toggle('is-admin', isAdmin);
   document.body.classList.toggle('is-supervisor', isSupervisor || isJefe);
   document.body.classList.toggle('is-worker', !!workerSession);
+  document.body.classList.toggle('is-guest', esInvitado());
   document.body.classList.toggle('puede-asist', !!(isAdmin || isSupervisor));
   document.body.classList.toggle('guest-hide-prices', !canSeePrices());
   const normNom = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -2082,7 +2198,7 @@ function applyRoleUI(){
   const btnAvance = document.getElementById('irAvanceBtn');
   if(btnAvance) btnAvance.style.display = veDashboard ? 'inline-flex' : 'none';
   const badge = document.getElementById('roleBadge');
-  const loggedIn = isAdmin || isSupervisor || isJefe || workerSession;
+  const loggedIn = isAdmin || isSupervisor || isJefe || workerSession || esInvitado();
   let label = '', cls = 'guest';
   if(isAdmin){ label = 'Conectado como: Admin' + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
   else if(isSupervisor){ label = 'Conectado como: Supervisor' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
@@ -2091,6 +2207,7 @@ function applyRoleUI(){
     const especialidad = (workerStatus[workerSession]||{}).especialidad === 'fraguador' ? 'Fraguador' : 'Ceramista';
     label = `Conectado como: ${especialidad} - ${workerSession}`; cls = 'worker';
   }
+  else if(esInvitado()){ label = 'Conectado como: Invitado' + (sessionName ? ' - ' + sessionName : '') + ' · solo lectura'; cls = 'guest'; }
   badge.textContent = label;
   badge.style.display = label ? '' : 'none';
   badge.className = 'role-badge ' + cls;
@@ -2881,6 +2998,7 @@ function switchCategoria(newCat){
 }
 
 let vistaPisos = 'mov';
+const pisosExtra = new Set();
 try{ if(localStorage.getItem('progresoObraVistaPisosV2') === 'todos') vistaPisos = 'todos'; }catch(err){}
 document.getElementById('filterVista').value = vistaPisos;
 const celdaConAvance = c => !!c && resolveEstado(getState(c.id)) !== 'pendiente';
@@ -3346,6 +3464,62 @@ document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
   } else { ptAbiertos.delete(w); const x = d.querySelector('.pt-det'); if(x) x.remove(); }
 }, true);
 
+
+/* Flechas ▲▼ junto al piso (solo PC): saltan al piso de arriba o abajo. Si estaba en "Solo con avance", lo pasan a "Con y sin avance" para poder ver pisos sin avance. */
+function pisosNavegables(){
+  const l = activeCategoria === 'Pasillos' ? ALL_FLOOR_NUMS.map(n => 'Piso ' + n)
+    : uniq(FLOOR_BLOCKS.filter(f => f.categoria === activeCategoria).map(f => f.piso));
+  return l.sort((a, b) => parseInt(String(a).match(/-?\d+/), 10) - parseInt(String(b).match(/-?\d+/), 10));
+}
+function pisoVecino(piso, dir){
+  const l = pisosNavegables(), i = l.indexOf(piso);
+  return i < 0 ? null : (l[i + dir] || null);
+}
+function pisoFlechasHtml(piso){
+  const up = pisoVecino(piso, 1), dn = pisoVecino(piso, -1);
+  return `<span class="piso-nav"><button type="button" class="piso-flecha" data-pisonav="1" data-piso="${esc(piso)}" title="Subir al ${esc(up || '')}"${up ? '' : ' disabled'}>▲</button><button type="button" class="piso-flecha" data-pisonav="-1" data-piso="${esc(piso)}" title="Bajar al ${esc(dn || '')}"${dn ? '' : ' disabled'}>▼</button></span>`;
+}
+function pisoVerCompleto(piso){
+  const buscar = () => [...document.querySelectorAll('.floor-block')].find(f => f.dataset.piso === piso);
+  const y = el => el.getBoundingClientRect().top + window.scrollY - 56;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const el = buscar(); if(!el) return;
+    el.classList.add('piso-entra');
+    setTimeout(() => el.classList.remove('piso-entra'), 260);
+    window.scrollTo({top: y(el), behavior: 'smooth'});
+    // el contenido de los pisos lejanos termina de medirse al llegar: si quedó corrido, se corrige sin animar
+    [450, 900].forEach(ms => setTimeout(() => { const e2 = buscar(); if(e2 && Math.abs(y(e2) - window.scrollY) > 6) window.scrollTo({top: y(e2)}); }, ms));
+  }));
+}
+
+/* Invitado (por ejemplo Calidad entrando al panel): solo lectura. Puede abrir dptos, filtrar, cambiar de categoría y de piso, y activar los checks de áreas; nada más. */
+document.addEventListener('click', (e) => {
+  if(!esInvitado()) return;
+  const t = e.target; if(!t.closest) return;
+  const OK = '[data-abrir], .tab, #catTabs, .areas-movil, .piso-flecha, .dz-tile, #btnOrdenPisos, #btnLimpiarFiltros, #toggleDark, #logoutBtn, #irMenuBtn, #scrollTopBtn, #ventanaOverlay, .toolbar select, .toolbar input, #temaSelector, #doradoBtn, #mvbarP, #mvbar, .stats-tab, .stat-card, .overlay .modal, .toast';
+  if(t.closest(OK)) return;
+  if(t.closest('button, [role="button"], a[href], input[type="checkbox"], [data-matkey], [data-dzmat], [data-vt], [data-vtn]')){ e.stopPropagation(); e.preventDefault(); }
+}, true);
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('.piso-flecha');
+  if(!b || b.disabled) return;
+  e.stopPropagation();
+  const dest = pisoVecino(b.dataset.piso, parseInt(b.dataset.pisonav, 10));
+  if(!dest) return;
+  const fp = document.getElementById('filterPiso');
+  if(fp.value){                       // un piso elegido: cambia al vecino
+    if(vistaPisos === 'mov') pisosExtra.add(dest);
+    poblarFiltroPiso();
+    fp.value = dest;
+    try{ localStorage.setItem('progresoObraPiso', dest); }catch(err){}
+    render();
+    pisoVerCompleto(dest);
+  } else {                            // todos los pisos: se agrega el vecino si no estaba y se lleva la vista hasta él
+    if(vistaPisos === 'mov') pisosExtra.add(dest);
+    render();
+    pisoVerCompleto(dest);
+  }
+}, true);
 function passesFilters(cell){
   const piso = document.getElementById('filterPiso').value;
   if(piso && cell.piso !== piso) return false;
@@ -3453,6 +3627,7 @@ function aplicarEstadoDestino(id, destino){
       if(n === 2){ st.terminado = true; st.terminadoTs = ahora; if(!st.partidaTs) st.partidaTs = ahora; }
       if(n === 3){ st.pagado = true; st.pagadoTs = ahora; if(!st.terminadoTs) st.terminadoTs = ahora; if(!st.partidaTs) st.partidaTs = ahora; }
     }
+    if(destino >= 2) matCheckTerminado(id);
   } else {
     if(destino < 3){ st.pagado = false; st.pagadoTs = null; }
     if(destino < 2){ st.terminado = false; st.terminadoTs = null; }
@@ -3536,7 +3711,7 @@ function abrirAsignar(id){
   document.getElementById('asignarOverlay').classList.add('show');
 }
 
-const vistaVentana = () => document.body.classList.contains('tema3') && !workerSession && (isAdmin || puede('estados') || puede('asignar') || puede('notas'));
+const vistaVentana = () => esInvitado() || (document.body.classList.contains('tema3') && !workerSession && (isAdmin || puede('estados') || puede('asignar') || puede('notas')));
 const escVt = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 function etiquetaEstado(cell, estado){
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
@@ -3545,7 +3720,7 @@ function etiquetaEstado(cell, estado){
 function cellVentanaHtml(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${escVt(st.nota)}">${escVt(st.nota)}</div></div>` : '';
-  return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">
+  return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}
     <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div></div>
     <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
     ${nota}
@@ -3614,10 +3789,12 @@ function pintarVentana(){
         <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '✎ Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
     </div>
     <div class="vt-foot"><button type="button" class="btn primary" data-vt="cerrar">Cerrar</button></div>`;
+  document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
 }
 document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   if(e.target.id === 'ventanaOverlay') return;
   const id = ventanaId; if(!id) return;
+  if(esInvitado()){ if(e.target.closest('[data-vt="cerrar"]')) cerrarVentana(); return; }
   const paso = e.target.closest('[data-vtn]');
   if(paso){
     if(paso.disabled) return;
@@ -3799,8 +3976,8 @@ function renderFloorTable(fb){
   const areasV = areasVista(fb);
 
   return `
-    <div class="floor-block">
-      <div class="floor-title"><h2>${fb.piso}</h2><div class="line"></div><div class="badge">${deptRows.length} departamento(s)</div></div>
+    <div class="floor-block" data-piso="${esc(fb.piso)}" data-na="${areasVista(fb).length}">
+      <div class="floor-title"><h2>${fb.piso}</h2>${pisoFlechasHtml(fb.piso)}<div class="line"></div><div class="badge">${deptRows.length} departamento(s)</div></div>
       <div class="table-wrap">
         <table class="dept-table">
           <colgroup><col class="col-dpto">${areasV.map(() => '<col>').join('')}</colgroup>
@@ -3808,7 +3985,7 @@ function renderFloorTable(fb){
           <tbody>
             ${deptRows.map(d => `
               <tr>
-                <td${matAtributos(fb.categoria === 'Cerámica' ? fb.piso + '|' + d.dpto : null)}><span class="dpto-inner">${d.dpto}</span></td>
+                <td${matAtributos(fb.categoria === 'Cerámica' ? fb.piso + '|' + d.dpto : null)}><span class="dpto-inner"><span class="nf">${d.dpto}</span><span class="ns"><i>${esc(String(fb.piso).replace(/^Piso\s*/i, ''))}</i>${esc(dptoCortoPanel(fb.piso, d.dpto))}</span></span></td>
                 ${areasV.map(area => {
                   const c = d.cells[area];
                   if(!c) return '<td><span class="cell-empty">—</span></td>';
@@ -3827,7 +4004,7 @@ function dzCeldaTabla(cell, st){
   const dz = document.body.classList.contains('dz-A') || document.body.classList.contains('dz-D');
   if(!dz || !vistaVentana()) return cellHtml(cell);
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-ex" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">
+  return `<div class="cell-block cell-ventana dz-ex" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}
     <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</span></div>
     <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
   </div>`;
@@ -3836,7 +4013,7 @@ function dzCeldaTabla(cell, st){
 const dzSel = {};
 function dzFila(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-fila" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">
+  return `<div class="cell-block cell-ventana dz-fila" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}
     <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
     <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
   </div>`;
@@ -3857,23 +4034,31 @@ function dzAreasHtml(fb, d, filtering){
 function dzSegHtml(fb, d, clase){
   return `<span class="${clase}">${areasVista(fb).map(area => { const c = d.cells[area]; return c ? `<i class="st-${resolveEstado(getState(c.id))}"></i>` : '<i></i>'; }).join('')}</span>`;
 }
+function dzNum(fb, d){
+  return `<span class="nf">${d.dpto}</span><span class="ns"><i>${esc(String(fb.piso).replace(/^Piso\s*/i, ''))}</i>${esc(dptoCortoPanel(fb.piso, d.dpto))}</span>`;
+}
+function dzMatClase(fb, d){
+  if(!isAdmin || fb.categoria !== 'Cerámica') return '';
+  const u = matUnidadPorClave()[fb.piso + '|' + d.dpto], nv = u ? matNivel(u) : null;
+  return nv ? (nv === 'rojo' ? ' dz-m-rojo' : ' dz-m-amar') : '';
+}
 function dzMatHtml(fb, d){
   if(!isAdmin || fb.categoria !== 'Cerámica') return '';
   const key = fb.piso + '|' + d.dpto, u = matUnidadPorClave()[key], nv = u ? matNivel(u) : null;
-  return nv ? `<span class="dz-mat ${nv === 'rojo' ? 'rojo' : 'amarillo'}" data-dzmat="${esc(key)}" title="${matTitulo(nv)}">!</span>` : '';
+  return nv ? `<span class="dz-mat ${nv === 'rojo' ? 'rojo' : 'amarillo'}" data-dzmat="${esc(key)}" title="${matTitulo(nv)} · checks de materiales pendientes: ${matChecksPendientes(u)}">${matChecksPendientes(u)}</span>` : '';
 }
 function dzFiltrados(fb){
   const filtering = matchesActiveFilters();
   return {filtering, deptRows: fb.depts.filter(d => !filtering || areasVista(fb).some(area => { const c = d.cells[area]; return c && passesFilters(cellById[c.id]); }))};
 }
 function dzTitulo(fb, n){
-  return `<div class="floor-title"><h2>${fb.piso}</h2><div class="line"></div><div class="badge">${n} departamento(s)</div></div>`;
+  return `<div class="floor-title"><h2>${fb.piso}</h2>${pisoFlechasHtml(fb.piso)}<div class="line"></div><div class="badge">${n} departamento(s)</div></div>`;
 }
 function renderFloorCards(fb){
   const {filtering, deptRows} = dzFiltrados(fb);
   if(!deptRows.length) return '';
   return `<div class="floor-block" data-piso="${esc(fb.piso)}">${dzTitulo(fb, deptRows.length)}<div class="dz-cards">${deptRows.map(d => `
-    <div class="dz-card"><div class="dz-ch"><b>${d.dpto}</b>${dzMatHtml(fb, d)}${dzSegHtml(fb, d, 'dz-seg')}</div>${dzAreasHtml(fb, d, filtering)}</div>`).join('')}</div></div>`;
+    <div class="dz-card"><div class="dz-ch${dzMatClase(fb, d)}"><b>${dzNum(fb, d)}</b>${dzMatHtml(fb, d)}${dzSegHtml(fb, d, 'dz-seg')}</div>${dzAreasHtml(fb, d, filtering)}</div>`).join('')}</div></div>`;
 }
 function renderFloorMapa(fb){
   const {filtering, deptRows} = dzFiltrados(fb);
@@ -3882,8 +4067,8 @@ function renderFloorMapa(fb){
   const sel = deptRows.find(d => d.dpto === dzSel[fb.piso]);
   const leg = ['pendiente', 'proceso', 'entregado', 'pagado'].map(e => `<span><i class="st-${e}"></i>${e === 'proceso' ? 'Partida' : e === 'entregado' ? 'Terminado' : e[0].toUpperCase() + e.slice(1)}</span>`).join('');
   return `<div class="floor-block" data-piso="${esc(fb.piso)}">${dzTitulo(fb, deptRows.length)}<div class="dz-leg">${leg}</div>
-    <div class="dz-mapa">${deptRows.map(d => `<button type="button" class="dz-tile${d.dpto === sel.dpto ? ' on' : ''}" data-dzpiso="${esc(fb.piso)}" data-dzdpto="${esc(d.dpto)}"><b>${d.dpto}</b>${dzSegHtml(fb, d, 'dz-bars')}</button>`).join('')}</div>
-    <div class="dz-det"><h3>Departamento ${sel.dpto} ${dzMatHtml(fb, sel)}</h3>${dzAreasHtml(fb, sel, filtering)}</div></div>`;
+    <div class="dz-mapa">${deptRows.map(d => `<button type="button" class="dz-tile${d.dpto === sel.dpto ? ' on' : ''}${dzMatClase(fb, d)}" data-dzpiso="${esc(fb.piso)}" data-dzdpto="${esc(d.dpto)}"><b>${dzNum(fb, d)}</b>${dzSegHtml(fb, d, 'dz-bars')}</button>`).join('')}</div>
+    <div class="dz-det"><h3 class="${dzMatClase(fb, sel).trim()}">Departamento ${sel.dpto} ${dzMatHtml(fb, sel)}</h3>${dzAreasHtml(fb, sel, filtering)}</div></div>`;
 }
 document.getElementById('content').addEventListener('click', (e) => {
   const t = e.target.closest && e.target.closest('.dz-tile');
@@ -3919,7 +4104,7 @@ function renderPasillosTable(){
           <tbody>
             ${rows.map(n => `
               <tr>
-                <td${matAtributos(byFloor[n+'|Cerámica'] ? 'Piso ' + n + '|Pasillo' : null)}><span class="dpto-inner">Piso ${n}</span></td>
+                <td${matAtributos(byFloor[n+'|Cerámica'] ? 'Piso ' + n + '|Pasillo' : null)}><span class="dpto-inner"><span class="nf">Piso ${n}</span><span class="ns"><i>${n}</i><span class="pn">Pasillo</span></span></span></td>
                 ${cats.map(cat => {
                   const p = byFloor[n+'|'+cat];
                   if(!p) return '<td><span class="cell-empty">—</span></td>';
@@ -4147,6 +4332,10 @@ function matNiveles(){
   matNivelesCache = niv;
   return niv;
 }
+function matChecksPendientes(u){
+  const req = u.celdas.filter(c => matCalculo(c));
+  return req.length ? req.filter(c => !matAreaListo(u, c)).length : 1;
+}
 function matNivel(u){ return matPendiente(u) ? (matNiveles()[u.pisoNum] || null) : null; }
 const matTitulo = (nv) => nv === 'rojo' ? 'Materiales sin confirmar: piso en movimiento o el de abajo' : nv === 'amarillo' ? 'Piso de arriba: empieza a preparar y pedir materiales' : 'Ver materiales';
 function matAtributos(key){
@@ -4154,7 +4343,7 @@ function matAtributos(key){
   const u = matUnidadPorClave()[key];
   const nv = u ? matNivel(u) : null;
   const cls = nv === 'rojo' ? ' mat-pend' : nv === 'amarillo' ? ' mat-prep' : '';
-  return ` class="dpto-col${cls}" data-matkey="${esc(key)}" title="${matTitulo(nv)}"`;
+  return ` class="dpto-col${cls}" data-matkey="${esc(key)}" data-matn="${u && nv ? matChecksPendientes(u) : ''}" title="${matTitulo(nv)}${u && nv ? ' · checks de materiales pendientes: ' + matChecksPendientes(u) : ''}"`;
 }
 function matCalculo(celda){
   const m2 = Number(getState(celda.id).m2) || 0;
@@ -4223,6 +4412,20 @@ function matOp(clave, valor){
   if(valor){ matOpsPend.set.add(clave); matOpsPend.del.delete(clave); }
   else { matOpsPend.del.add(clave); matOpsPend.set.delete(clave); }
 }
+/* Al marcar un área como terminada, su material queda con check (piso → piso, muro baño → muro baño, etc.) */
+function matCheckTerminado(id){
+  const c = cellById[id];
+  if(!c || !MAT_DE_AREA[c.area]) return;
+  const u = matUnidadesTodas().find(x => x.celdas.some(k => k.id === id));
+  if(!u) return;
+  const cl = matClaveArea(u, c);
+  if(MATERIALES.ok[u.key]){
+    delete MATERIALES.ok[u.key]; matOp(u.key, false);
+    u.celdas.forEach(k => { MATERIALES.ok[matClaveArea(u, k)] = true; matOp(matClaveArea(u, k), true); });
+  }
+  if(!MATERIALES.ok[cl]){ MATERIALES.ok[cl] = true; matOp(cl, true); }
+  if(isAdmin) matCambio(); else matNivelesCache = null;
+}
 function matCambio(){
   matNivelesCache = null;
   matSucio = true;
@@ -4248,14 +4451,20 @@ document.getElementById('matCerrarBtn').addEventListener('click', () => {
 /* ===== Pestaña «Cerámicas»: palmetas de la obra y a qué zona va cada una ===== */
 const CER_ZONAS = [['piso','Piso'],['muroBano','Muro baño'],['muroCocina','Muro cocina'],['pasillo','Pasillo']];
 function ceramicasBase(){
-  const p = MATERIALES.params, cat = [{id:'p15x60', ancho:15, largo:60, porCaja:p.piso.porCaja || 0}, {id:'p30x60', ancho:30, largo:60, porCaja:p.muroBano.porCaja || 0}, {id:'p60x60', ancho:60, largo:60, porCaja:0}];
-  const z = (k, pal) => ({pal, merma:p[k].merma, kgSaco:p[k].kgSaco, consumo:p[k].consumo, traslape:'recto', sentido:'', junta:3, dilatCada:0, dilatAncho:0, nota:''});
-  return {catalogo: cat, zonas: {piso:z('piso','p15x60'), muroBano:z('muroBano','p30x60'), muroCocina:z('muroCocina','p30x60'), pasillo:z('pasillo','p60x60')}};
+  const p = MATERIALES.params, cat = [{id:'p15x60', ancho:15, largo:60, porCaja:p.piso.porCaja || 0}, {id:'p30x60', ancho:30, largo:60, porCaja:p.muroBano.porCaja || 0}, {id:'p60x60', ancho:60, largo:60, porCaja:4}];
+  const z = (k, pal, dc, nota) => ({pal, merma:p[k].merma, kgSaco:p[k].kgSaco, consumo:p[k].consumo, traslape:'recto', sentido:'', junta:3, dilatCada:dc || 0, dilatAncho:5, nota:nota || ''});
+  return {catalogo: cat, zonas: {piso:z('piso','p15x60', 0, 'Dilatar 5 mm en el encuentro piso-muro y en espacios sobre 16 m².'), muroBano:z('muroBano','p30x60', 0, 'Dilatar 5 mm en el encuentro con el piso.'), muroCocina:z('muroCocina','p30x60', 0, 'Dilatar 5 mm en el encuentro con el piso.'), pasillo:z('pasillo','p60x60', 4, 'Pasillo hasta 2 m de ancho: dilatar 5 mm cada 4 m lineales.')}};
 }
 function ceramicasTrabajo(){
   if(!ceramicas) ceramicas = ceramicasBase();
   CER_ZONAS.forEach(([k]) => { if(!ceramicas.zonas[k]) ceramicas.zonas[k] = ceramicasBase().zonas[k]; });
   return ceramicas;
+}
+function cerHintCapa(consumo){
+  const c = Number(consumo) || 0, mm = c / 1.6;
+  if(!c) return {txt: 'Sin consumo definido: no se calculan sacos.', mal: false};
+  const t = 'Con ese consumo la capa queda en ≈ ' + (Math.round(mm * 10) / 10).toString().replace('.', ',') + ' mm (el saco rinde 1,6 kg/m² por mm; permitido de 2 a 15 mm).';
+  return {txt: mm < 2 || mm > 15 ? t + ' Está fuera de lo permitido.' : t, mal: mm < 2 || mm > 15};
 }
 const cerNombrePal = p => String(p.ancho).replace('.', ',') + ' × ' + String(p.largo).replace('.', ',') + ' cm';
 function renderCeramicas(){
@@ -4266,6 +4475,13 @@ function renderCeramicas(){
     + '<div class="cer-sec"><h4>Palmetas de la obra</h4>'
     + c.catalogo.map(p => `<div class="cer-fila" data-pal="${esc(p.id)}"><input type="number" min="0" step="any" inputmode="decimal" data-pc="ancho" value="${nums(p.ancho)}" aria-label="Ancho en cm"> × <input type="number" min="0" step="any" inputmode="decimal" data-pc="largo" value="${nums(p.largo)}" aria-label="Largo en cm"> cm · piezas por caja <input type="number" min="0" step="any" inputmode="decimal" data-pc="porCaja" value="${nums(p.porCaja)}" aria-label="Piezas por caja"><button type="button" class="btn small" data-cer-act="delPal">Quitar</button></div>`).join('')
     + '<button type="button" class="btn small" data-cer-act="addPal">+ Agregar palmeta</button></div>'
+    + '<div class="cer-sec"><h4>Ficha del pegamento (según el saco)</h4><div class="cer-ficha">Mezcla de arena, cemento y aditivos, categoría <b>C2</b> (sobre 1,0 MPa, UNE EN 12004). Se aplica con llana dentada.<ul>'
+    + '<li>Agua: <b>5,5 a 6 L por saco</b> (0,20 a 0,25 L por kilo).</li>'
+    + '<li>Rendimiento: <b>1,6 kg/m² por mm</b> de espesor. Espesor de 2 a 15 mm.</li>'
+    + '<li>Tiempo de trabajo 1 h. Tiempo abierto máx. 20 min a 20 °C. Secado 48 h.</li>'
+    + '<li>Temperatura de trabajo de 5 a 25 °C. Dura 9 meses desde el envasado.</li>'
+    + '<li>Cantería (junta) superior a 3 mm. Dilatación de 5 mm cada 4 m lineales en pasillo de hasta 2 m de ancho o en espacios sobre 16 m², y en todo encuentro piso-muro.</li></ul>'
+    + '<div class="cer-alerta">Ojo: sobre revestimientos de 50×50 cm, o tablas de más de 60 cm de largo, el saco dice «consultar a su ejecutivo». Las palmetas de 60×60 superan los 50×50.</div></div></div>'
     + '<div class="cer-sec"><h4>¿Dónde va cada una?</h4>' + CER_ZONAS.map(([k, n]) => {
       const z = (c.zonas && c.zonas[k]) || ceramicasBase().zonas[k];
       return `<div class="cer-zona" data-zona="${k}"><b>${n}</b><div class="cer-grid">`
@@ -4278,6 +4494,7 @@ function renderCeramicas(){
         + `<label>Ancho dilatación (mm)<input type="number" min="0" step="any" inputmode="decimal" data-zc="dilatAncho" value="${nums(z.dilatAncho)}"></label>`
         + `<label>Pegamento: kg por saco<input type="number" min="0" step="any" inputmode="decimal" data-zc="kgSaco" value="${nums(z.kgSaco)}"></label>`
         + `<label>Pegamento: consumo kg/m²<input type="number" min="0" step="any" inputmode="decimal" data-zc="consumo" value="${nums(z.consumo)}"></label>`
+        + `<div class="cer-hint${cerHintCapa(z.consumo).mal ? ' mal' : ''}" data-hint>${esc(cerHintCapa(z.consumo).txt)}</div>`
         + `<label style="grid-column:1 / -1;">Nota (cómo va la cerámica, detalles)<input type="text" maxlength="120" data-zc="nota" value="${esc(z.nota || '')}"></label>`
         + '</div></div>';
     }).join('') + '</div>';
@@ -4315,6 +4532,7 @@ document.getElementById('matVistaCer').addEventListener('change', (e) => {
   else if(zc){ const z = c.zonas[zc.closest('[data-zona]').dataset.zona]; const f = zc.dataset.zc; z[f] = ['pal','traslape','sentido','nota'].includes(f) ? String(zc.value).replace(/[<>]/g, '').substring(0, f === 'nota' ? 120 : 20) : num(zc.value); }
   else return;
   cerCambio();
+  if(zc && zc.dataset.zc === 'consumo'){ const h = zc.closest('.cer-zona').querySelector('[data-hint]'), r = cerHintCapa(c.zonas[zc.closest('[data-zona]').dataset.zona].consumo); if(h){ h.textContent = r.txt; h.classList.toggle('mal', r.mal); } }
   if(pc || (zc && zc.dataset.zc === 'pal')) renderCeramicas();
 });
 document.getElementById('matFiltroPiso').addEventListener('change', renderMateriales);
@@ -4686,7 +4904,7 @@ function autoAlto(caja, cont){
   }).observe(cont);
 }
 // ---- permisos de invitado por sección ----
-const SECC_INV = [['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica']];
+const SECC_INV = [['panel', 'Panel de Cerámica'], ['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica']];
 const DEMO_USUARIOS = [
   {nombre: 'Silvia Gonzales', cargo: 'Calidad', base: ['calidad'], extra: [], doble: true, dobleBase: true},
   {nombre: 'Sandoval', cargo: 'Jefe de Terreno', base: ['terreno', 'calidad', 'avance'], extra: [], doble: false},
@@ -5304,7 +5522,7 @@ async function resolverPeticionUI(id, aceptar){
       { const mot = !st.partida ? motivoBloqueoPartida(cellById[p.celda], p.tipo === 1) : null; if(mot){ avisoToast(textoBloqueoPartida(mot, cellById[p.celda]) + ' Rechaza esta petición o espera.', 'error'); return; } }
       const ahora = Date.now();
       if(p.tipo === 1){ st.trabajador = p.trabajador; st.partida = true; st.partidaTs = st.partidaTs || ahora; }
-      else { st.partida = true; st.partidaTs = st.partidaTs || ahora; st.terminado = true; st.terminadoTs = ahora; }
+      else { st.partida = true; st.partidaTs = st.partidaTs || ahora; st.terminado = true; st.terminadoTs = ahora; matCheckTerminado(p.celda); }
       markCellDirty(p.celda);
       const r = await enqueueSave();
       if(DB_URL && !r.dbOk){ avisoToast('No se pudo guardar el cambio; la petición sigue pendiente.'); return; }
@@ -5710,9 +5928,36 @@ function renderSupervisorWorkersList(){
   }).join('');
 }
 
+// Número corto del dpto para pantallas chicas: 2201 en el piso 22 -> 01. Los nombres no numéricos quedan completos.
+function dptoCortoPanel(piso, dpto){
+  const t = String(dpto), n = String(piso).replace(/^Piso\s*/i, '').replace('-', '');
+  return /^\d+$/.test(t) && n && t.length > n.length && t.indexOf(n) === 0 ? t.slice(n.length) : t;
+}
+
+/* Nombre del trabajador en celular: nombre y apellido si caben; si no, nombre + inicial del apellido; si tampoco, solo el nombre. */
+function ajustarNombresMovil(){
+  if(!window.matchMedia('(max-width:700px)').matches) return;
+  document.querySelectorAll('.cell-ventana .worker-name:not(.unassigned)').forEach(el => {
+    const fb = el.closest('.floor-block');
+    if(fb && fb.dataset.na === '3') return;
+    if(el.dataset.shown === undefined || el.dataset.shown !== el.textContent) el.dataset.full = el.textContent;
+    const full = el.dataset.full || '', t = full.trim().split(/\s+/);
+    const opciones = [full];
+    if(t.length > 1){ opciones.push(t[0] + ' ' + t[t.length - 1].charAt(0).toUpperCase() + '.'); opciones.push(t[0]); }
+    for(const o of opciones){
+      el.textContent = o; el.dataset.shown = o;
+      const cs = getComputedStyle(el), r = document.createRange();
+      r.selectNodeContents(el);
+      if(r.getBoundingClientRect().width <= el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 1) break;
+    }
+  });
+}
+let tNombresMovil = null;
+window.addEventListener('resize', () => { clearTimeout(tNombresMovil); tNombresMovil = setTimeout(() => { document.querySelectorAll('.cell-ventana .worker-name[data-full]').forEach(el => { el.textContent = el.dataset.full; delete el.dataset.shown; }); ajustarNombresMovil(); }, 150); });
 function ajustarTamanoDpto(){
   document.querySelectorAll('table.dept-table td.dpto-col').forEach(td => {
-    const len = td.textContent.trim().length;
+    const nf = td.querySelector('.nf');
+    const len = (nf ? nf.textContent : td.textContent).trim().length;
     td.classList.toggle('dpto-corto', len > 0 && len <= 4);
     td.classList.toggle('dpto-largo', len > 8);
   });
@@ -5840,7 +6085,7 @@ function render(){
   } else {
     const blocks = FLOOR_BLOCKS.filter(f => f.categoria === activeCategoria).sort((a,b) => cmpPisos(a.pisoNum, b.pisoNum));
     const pisoFilterVal = document.getElementById('filterPiso').value;
-    const visibleBlocks = blocks.filter(b => (!pisoFilterVal || b.piso === pisoFilterVal) && (vistaPisos !== 'mov' || bloqueConAvance(b)));
+    const visibleBlocks = blocks.filter(b => (!pisoFilterVal || b.piso === pisoFilterVal) && (vistaPisos !== 'mov' || bloqueConAvance(b) || pisosExtra.has(b.piso)));
     const dz = ['A', 'B', 'C', 'D'].find(l => document.body.classList.contains('dz-' + l));
     html = visibleBlocks.map(dz === 'B' ? renderFloorCards : dz === 'C' ? renderFloorMapa : renderFloorTable).filter(Boolean).join('') ||
       '<p style="color:var(--sub);text-align:center;padding:40px 0;">No hay partidas que coincidan con el filtro.</p>';
@@ -5849,6 +6094,8 @@ function render(){
   actualizarAvisos();
   equalizeRowNameHeights();
   ajustarTamanoDpto();
+  ajustarNombresMovil();
+  requestAnimationFrame(() => requestAnimationFrame(ajustarNombresMovil));
   igualarAltoCeldasTrabajador();
 
   const cellsForCount = activeCategoria === 'Pasillos'
@@ -5947,6 +6194,7 @@ function alCambioContenido(e){
     if(flag === 'pagado'){ state[id].pagadoTs = willBeOn ? Date.now() : null; }
     if(turboMode && flag === 'pagado' && willBeOn){ state[id].partida = true; state[id].terminado = true; if(!state[id].terminadoTs) state[id].terminadoTs = Date.now(); if(!state[id].partidaTs) state[id].partidaTs = Date.now(); }
     if(turboMode && flag === 'terminado' && willBeOn){ state[id].partida = true; if(!state[id].partidaTs) state[id].partidaTs = Date.now(); }
+    if(willBeOn && (flag === 'terminado' || flag === 'pagado')) matCheckTerminado(id);
     markCellDirty(id);
     scheduleSave(); refrescarCelda(id);
     const freshTd = document.querySelector(`[data-cellid="${id}"]`)?.closest('.cell-td');
@@ -5998,6 +6246,7 @@ document.getElementById('filterPiso').addEventListener('change', (e) => {
 });
 document.getElementById('filterVista').addEventListener('change', (e) => {
   vistaPisos = e.target.value === 'todos' ? 'todos' : 'mov';
+  pisosExtra.clear();
   try{ localStorage.setItem('progresoObraVistaPisosV2', vistaPisos); }catch(err){}
   poblarFiltroPiso();
   render();
@@ -6022,7 +6271,7 @@ document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
   document.getElementById('filterPiso').value = '';
   document.getElementById('filterTrabajador').value = '';
   document.getElementById('filterEstado').value = '';
-  document.getElementById('filterVista').value = 'mov'; vistaPisos = 'mov';
+  document.getElementById('filterVista').value = 'mov'; vistaPisos = 'mov'; pisosExtra.clear();
   try{ localStorage.setItem('progresoObraVistaPisosV2', 'mov'); }catch(err){}
   poblarFiltroPiso();
   document.getElementById('search').value = '';
@@ -6187,8 +6436,9 @@ function aplicarTemaPrincipal(){
   try{ propio = localStorage.getItem('progresoObraTemaV3'); }catch(err){}
   if(propio === null){
     doradoOn = !!temaPrincipal.dorado;
-    aplicarTema(temaPrincipal.tema);
-    document.getElementById('temaSelector').value = temaPrincipal.tema;
+    const tp = temaPrincipal.tema || 'tema9';
+    aplicarTema(tp);
+    document.getElementById('temaSelector').value = tp;
   }
   actualizarPrincipalBtn();
 }
@@ -6230,7 +6480,7 @@ document.getElementById('doradoBtn').addEventListener('click', () => {
 try{
   let guardado = localStorage.getItem('progresoObraTemaV3');
   if(guardado === 'tema4'){ guardado = 'tema3'; doradoOn = true; try{ localStorage.setItem('progresoObraDorado', '1'); localStorage.setItem('progresoObraTemaV3', 'tema3'); }catch(err){} }
-  const tema = guardado === null ? 'tema3' : guardado;
+  const tema = guardado === null || guardado === '' ? 'tema9' : guardado;
   if(tema === 'tema1' || tema === 'tema3' || tema === 'tema5' || TEMAS_DZ[tema]){ aplicarTema(tema); document.getElementById('temaSelector').value = tema; }
   else aplicarDorado();
 }catch(err){ aplicarDorado(); }
