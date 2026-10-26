@@ -1366,6 +1366,7 @@
 @media(max-width:700px){.rd-hl{grid-template-columns:80px 1fr;}.rd-hl .ha,.rd-hl small{grid-column:1/-1;}}
 
 .btn-marcado{background:#2f6f8f !important;color:#fff !important;border-color:#2f6f8f !important;pointer-events:none;}
+[data-a="blq"].btn-bd,[data-a="des"].btn-bd{min-width:116px;text-align:center;}
 </style>
 </head>
 <body class="lg-on">
@@ -5111,7 +5112,7 @@ async function abrirAdministracion(){
       const estado = b ? '<span style="color:var(--bad);font-weight:600;">Bloqueado ' + (b.permanente ? 'permanente' : 'hasta ' + fmt(b.hasta)) + '</span>' + (b.motivo ? '<div style="font-size:11.5px;color:var(--sub);">' + esc(b.motivo) + '</div>' : '') : '<span style="color:var(--sub);">Activo</span>';
       const acc = u.rol === 1 ? '<span style="font-size:11px;color:var(--sub);">no se puede bloquear</span>' :
         '<button class="btn" data-a="ren" data-i="' + i + '" type="button">Renombrar</button> <button class="btn" data-a="car" data-i="' + i + '" type="button">Cargo</button> <button class="btn" data-a="pin" data-i="' + i + '" type="button">PIN nuevo</button> '
-        + (b ? '<button class="btn" data-a="des" data-i="' + i + '" type="button">Desbloquear</button>' : '<button class="btn" data-a="blq" data-i="' + i + '" type="button">Bloquear</button>');
+        + (b ? '<button class="btn btn-bd" data-a="des" data-i="' + i + '" type="button">Desbloquear</button>' : '<button class="btn btn-bd" data-a="blq" data-i="' + i + '" type="button">Bloquear</button>');
       return '<tr><td style="' + celda + '"><b>' + esc(u.nombre || '(sin nombre)') + '</b><div style="font-size:11.5px;color:var(--sub);">' + esc(u.cargo) + '</div></td><td style="' + celda + '">' + estado + '</td><td style="' + celda + 'text-align:right;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">' + acc + '</td></tr><tr id="admF' + i + '" hidden><td colspan="3" style="padding:0 6px 10px;"></td></tr>';
     }).join('');
     cuerpo.innerHTML = '<div style="margin-bottom:10px;"><button class="btn primary" id="admNuevo" type="button">+ Crear usuario</button></div><div id="admNuevoF" hidden style="border:1px solid var(--border);padding:10px;margin-bottom:10px;"></div>'
