@@ -5004,7 +5004,7 @@ const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficin
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = [['panel', 'Panel de Cerámica'], ['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica'], ['bodega', 'Bodega']];
 const DEMO_USUARIOS = [
-  {nombre: 'Silvia Gonzales', cargo: 'Calidad', base: ['calidad'], extra: [], doble: true, dobleBase: true},
+  {nombre: 'Silvia Gonzalez', cargo: 'Calidad', base: ['calidad'], extra: [], doble: true, dobleBase: true},
   {nombre: 'Sandoval', cargo: 'Jefe de Terreno', base: ['terreno', 'calidad', 'avance'], extra: [], doble: false},
   {nombre: 'Edwin Carroz', cargo: 'Oficina Técnica', base: ['oficina', 'avance'], extra: [], doble: false},
   {nombre: 'Jefe de Bodega', cargo: 'Jefe de Bodega', base: ['bodega'], extra: [], doble: false},
@@ -5067,7 +5067,7 @@ document.getElementById('seccionesBtn').addEventListener('click', abrirPermisosS
 const ADM_SECC = [['panel', 'Panel de Cerámica y Frague'], ['calidad', 'Control de calidad'], ['avance', 'Dashboard de avance'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica'], ['bodega', 'Bodega'], ['admin', 'Panel de Admin']];
 const ADM_DEMO = {
   usuarios: [
-    {fila: 2, nombre: 'Silvia Gonzales', cargo: 'Calidad', rol: 5, bloqueo: null},
+    {fila: 2, nombre: 'Silvia Gonzalez', cargo: 'Calidad', rol: 5, bloqueo: null},
     {fila: 3, nombre: 'Sandoval', cargo: 'Jefe de Terreno', rol: 4, bloqueo: null},
     {fila: 4, nombre: 'Edwin Carroz', cargo: 'Oficina Técnica', rol: 6, bloqueo: null},
     {fila: 8, nombre: 'Jefe de Bodega', cargo: 'Jefe de Bodega', rol: 7, bloqueo: null},
@@ -5075,7 +5075,7 @@ const ADM_DEMO = {
     {fila: 6, nombre: 'Ignacio', cargo: 'Supervisor', rol: 2, bloqueo: null},
     {fila: 7, nombre: 'Ismael S.', cargo: 'Admin', rol: 1, bloqueo: null}
   ],
-  encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzales', avance: 'A. Sandoval', terreno: 'A. Sandoval', oficina: 'Edwin Carroz', bodega: 'Jefe de Bodega', admin: 'Ismael S.'}
+  encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzalez', avance: 'A. Sandoval', terreno: 'A. Sandoval', oficina: 'Edwin Carroz', bodega: 'Jefe de Bodega', admin: 'Ismael S.'}
 };
 async function abrirAdministracion(){
   const demo = !DB_URL;
