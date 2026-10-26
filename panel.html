@@ -1365,6 +1365,7 @@
 .rd-hl small{grid-column:2/-1;font-size:11px;color:var(--sub);}
 @media(max-width:700px){.rd-hl{grid-template-columns:80px 1fr;}.rd-hl .ha,.rd-hl small{grid-column:1/-1;}}
 
+.btn-marcado{background:#2f6f8f !important;color:#fff !important;border-color:#2f6f8f !important;pointer-events:none;}
 </style>
 </head>
 <body class="lg-on">
@@ -3521,16 +3522,26 @@ function pisoFlechasHtml(piso){
 function pisoVerCompleto(piso){
   const buscar = () => [...document.querySelectorAll('.floor-block')].find(f => f.dataset.piso === piso);
   const y = el => Math.max(0, el.getBoundingClientRect().top + window.scrollY - 56);
-  // Sin desplazamiento largo: se coloca el piso arriba de una vez (así no se pasa de largo y vuelve) y entra con un fundido corto.
+  // Desplazamiento suave y algo lento: el destino se recalcula en cada cuadro, así no se pasa de largo aunque el contenido termine de medirse.
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const el = buscar(); if(!el) return;
-    window.scrollTo({top: y(el), behavior: 'instant'});
-    el.classList.add('piso-entra');
-    setTimeout(() => el.classList.remove('piso-entra'), 260);
-    // el contenido de los pisos lejanos termina de medirse al llegar: si quedó corrido, se corrige sin animar
-    [250, 700].forEach(ms => setTimeout(() => { const e2 = buscar(); if(e2 && Math.abs(y(e2) - window.scrollY) > 6) window.scrollTo({top: y(e2), behavior: 'instant'}); }, ms));
+    const desde = window.scrollY, t0 = performance.now(), quieto = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const dur = quieto ? 0 : Math.min(1100, 650 + Math.abs(y(el) - desde) / 12);
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const paso = now => {
+      const t = dur ? Math.min(1, (now - t0) / dur) : 1, e2 = buscar() || el;
+      window.scrollTo({top: desde + (y(e2) - desde) * ease(t), behavior: 'instant'});
+      if(t < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
   }));
 }
+/* Las flechas ▲▼ solo van en el último piso que se ve: en los de arriba, el vecino ya está a la vista y el salto se veía como un tirón. */
+function soloUltimoPisoFlechas(){
+  const b = document.querySelectorAll('#content .floor-block');
+  b.forEach((f, i) => f.querySelectorAll('.piso-nav').forEach(n => { n.style.display = i === b.length - 1 ? '' : 'none'; }));
+}
+(function(){ const c = document.getElementById('content'); if(c) new MutationObserver(soloUltimoPisoFlechas).observe(c, {childList:true, subtree:true}); soloUltimoPisoFlechas(); })();
 
 /* Invitado (por ejemplo Calidad entrando al panel): solo lectura. Puede abrir dptos, filtrar, cambiar de categoría y de piso, y activar los checks de áreas; nada más. */
 document.addEventListener('click', (e) => {
@@ -4867,7 +4878,8 @@ async function cargarAccesos(){
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay inicios de sesión registrados.</p>';
 }
 document.getElementById('irAvanceBtn').addEventListener('click', () => { window.location.href = 'avance_obra.html'; });
-document.getElementById('irMenuBtn').addEventListener('click', () => { window.location.href = 'index.html?menu=1'; });
+function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
+document.getElementById('irMenuBtn').addEventListener('click', e => irMenuCarga(e.currentTarget));
 document.getElementById('accesosBtn').addEventListener('click', () => { document.getElementById('accesosCuenta').value = ''; document.getElementById('accesosOverlay').classList.add('show'); cargarAccesos(); });
 document.getElementById('accesosCuenta').addEventListener('change', cargarAccesos);
 document.getElementById('accesosRefrescarBtn').addEventListener('click', cargarAccesos);
