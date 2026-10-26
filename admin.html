@@ -269,8 +269,8 @@ const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&am
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion'); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
-const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['admin','Panel de Admin']];
-const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Trabajador': 'panel', 'Supervisor': 'panel'};
+const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['bodega','Bodega'],['admin','Panel de Admin']];
+const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = SECC.filter(x => x[0] !== 'admin');
 const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.'};
@@ -286,13 +286,14 @@ const BD = (function(){
     usuarios:[{fila:2,nombre:'Silvia Gonzales',cargo:'Calidad',rol:5,bloqueo:null,base:['calidad'],extra:[],doble:true,dobleBase:true},
       {fila:3,nombre:'Sandoval',cargo:'Jefe de Terreno',rol:4,bloqueo:null,base:['terreno','calidad','avance'],extra:[],doble:false},
       {fila:4,nombre:'Edwin Carroz',cargo:'Oficina Técnica',rol:6,bloqueo:null,base:['oficina','avance'],extra:[],doble:false},
+      {fila:8,nombre:'Jefe de Bodega',cargo:'Jefe de Bodega',rol:7,bloqueo:null,base:['bodega'],extra:[],doble:false},
       {fila:5,nombre:'Rafael',cargo:'Trabajador',rol:3,bloqueo:{permanente:false,hasta:Date.now()+3*86400000,motivo:'Vacaciones'},base:['panel'],extra:[],doble:false},
       {fila:6,nombre:'Ignacio',cargo:'Supervisor',rol:2,bloqueo:null,base:['panel'],extra:[],doble:false},
-      {fila:7,nombre:'Ismael S.',cargo:'Admin',rol:1,bloqueo:null,base:['panel','calidad','avance','terreno','oficina','admin'],extra:[],doble:false}],
-    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzales',avance:'A. Sandoval',terreno:'A. Sandoval',oficina:'Edwin Carroz',admin:'Ismael S.'}};
+      {fila:7,nombre:'Ismael S.',cargo:'Admin',rol:1,bloqueo:null,base:['panel','calidad','avance','terreno','oficina','bodega','admin'],extra:[],doble:false}],
+    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzales',avance:'A. Sandoval',terreno:'A. Sandoval',oficina:'Edwin Carroz',bodega:'Jefe de Bodega',admin:'Ismael S.'}};
   const guardar = () => { try{ localStorage.setItem('pruebaAdminHtml', JSON.stringify(estado)); }catch(e){} };
-  const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica'};
-  const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance']};
+  const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica',7:'Jefe de Bodega'};
+  const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance'],7:['bodega']};
   const pin = () => String(100000 + Math.floor(Math.random()*899999));
   const por = f => estado.usuarios.find(u => u.fila === f);
   return async function(a, x){
@@ -513,7 +514,7 @@ function vistaUsuarios(){
   const nf = $('nuevoF');
   $('nuevoB').addEventListener('click', () => {
     nf.hidden = !nf.hidden; if(nf.hidden) return;
-    nf.innerHTML = '<div class="fila-f"><input id="nN" placeholder="Nombre y apellido" maxlength="60"><select id="nR"><option value="3">Trabajador</option><option value="2">Supervisor</option><option value="4">Jefe de Terreno</option><option value="5">Calidad</option><option value="6">Oficina Técnica</option></select><button class="btn primary" id="nG" type="button">Crear y generar PIN</button></div>';
+    nf.innerHTML = '<div class="fila-f"><input id="nN" placeholder="Nombre y apellido" maxlength="60"><select id="nR"><option value="3">Trabajador</option><option value="2">Supervisor</option><option value="4">Jefe de Terreno</option><option value="5">Calidad</option><option value="6">Oficina Técnica</option><option value="7">Jefe de Bodega</option></select><button class="btn primary" id="nG" type="button">Crear y generar PIN</button></div>';
     $('nG').addEventListener('click', async () => {
       const nombre = $('nN').value.trim(), rol = Number($('nR').value);
       if(nombre.length < 2){ toast(ERR.nombre_invalido, true); return; }
@@ -535,7 +536,7 @@ function vistaUsuarios(){
         const j = await accion('adminRenombrar', {...base, nuevo}); if(!j) return; u.nombre = nuevo; toast('Nombre cambiado.'); vistaUsuarios();
       });
     } else if(a === 'car'){
-      ex.innerHTML = '<div class="fila-f"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="cS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" id="cG" type="button">Guardar cargo</button></div><div class="nota" style="margin:6px 0 0;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
+      ex.innerHTML = '<div class="fila-f"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="cS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica'],[7,'Jefe de Bodega']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" id="cG" type="button">Guardar cargo</button></div><div class="nota" style="margin:6px 0 0;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
       $('cG').addEventListener('click', async () => { const rol = Number($('cS').value); const j = await accion('adminCargo', {...base, rol}); if(!j) return; u.rol = rol; u.cargo = j.cargo; toast('Cargo cambiado.'); vistaUsuarios(); });
     } else if(a === 'pin'){
       ex.innerHTML = '<div class="fila-f"><span>¿Generar un PIN nuevo para <b>' + esc(u.nombre) + '</b>? El anterior deja de servir.</span><button class="btn primary" id="pG" type="button">Sí, generar</button></div>';

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACTUlEQVR42q3TT0hUURTH8e+9982Ijs48xzSMAqVMcxTFSgMrbCUVFSFEERREEEWtgv5AbWtTi4IgKmgR2aJwIREuJCRKMaSJCCyKFqIY6Ywzo/OHZt47Lfw7bu3sDtz7uxfO5yhfqFVYQ2nWWNbKRim13IjAQi+S/8nFU7IywBhDNpvFcVwEwTIGx3UxWqONmQ9cuOwCjlJYIssBiVgcO1hKcVEhRhuS6RS+wiKS6RSpVBqlNRrhr9J4xCWYyxE1FvhCrVJQ2yK3HjyWeGJWRERS6bScuXJTYomE9PT1i6puELuxTTwNu8Su3ynDAZ8M2j7xhtrESsYTXL10jusXztLbP8Dn0W+MTUzStK2WQEkJ+zv2sLW6ih8TkwQtQ//EVxoyaT4V+tAIeGqa5dfYuHwYCQuVNcLGOqEqJL+npuXt4LBkMhm5due+2JVbJBwskZ7yMjldtVlG/QXiDbXJ0hgFQGtwHLoOdLJ+XRmXb9/l3dBHjh7r4nw6QnN8lt6spiM6haM0IOhsOsPD7pe0b2/mzfMndO5t5+SRg0RiccIjYbpf99G6aQM/d+/jeHE5c94CLAQz/ySWL+Dn3tNn+It9XDx1goGWJnY01vPoxSsU0Pd+iD/TEZoOH+LGl+9QUYGKjlMXGUeUQi1STs7NYds2AKUBP5GZGDnXRVyXoB3A0ppodAa0xuu6eMUlYazlgEVIoMg5OTyWhVIKpRTZbA5B8FjzbFzAXQ3JcRzMgjhjvEt8RQSPx8ojrQEjkk85z/wq+6t3YWlq/2Mb/wEUnQi9f5WjWQAAAABJRU5ErkJggg==">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFSElEQVR42u2WbYydVRHHf3POc+7ufdvSwnZLaykFl9o0UpBISkUQmm7Z0tK0pq3UEGONRjHxCwmJxpcYo9EQg/E1vsREJEi6lhKBAqvbDQRoFyoNVA1uEVdTkG53t3tfl97nOWf8cO9e7qW19lu/7EmeD09mzsx/5sz8ZyS76nrlAh7DBT5zAOYAXHAA0bmEItL+Dyigqm0y1fPr5FZrei4A1lo0BGpxQtDQdkuMkHKO07Va3YpAyrnzSLUSi8EDFrAN0NHZIi5OF7Apx6LuS8ikO+teVEGEWhwzPjHFsiWXYsTgQ+DtkxPndG5RymJZ6GtkfaBiDEUbIa0ARATvPXEt5tM7t/Gpj29hVe+VpNOdCEISPM5GfPOHP+OJ4WcZeeShxlPAHZ/9EsMvHCKXy+FDaHPuVJmOHLeVJvnF+BssCJ592Yu4a9EKujSpAxARgvdYER78yffZtmHd/4xmYP8gn9+1nUy6k1ock3KOO+/YyNAzz51RM7PON5Qm2XPiGBkN2ABdLTXTBDAzM8Nvf/A9tm1Y1zRcq8VMFQqoKtZaXnzlKG+fnGDXltubhaeqbLr1JroX9VCqVIisRVXrzm3d+cCJY+QJxALGQNLaBdYYyuUKt3xkDZ/ccjtxnJByjl8+vJf7fv5ripVqozAN4+Mn2dy3jiU9C/EhkHIOHwI9l1zM+hvX8NAjj9F10TxMkjQjHxgfJa/K69Zxyjg+fLqKtiTKiBFCHLN9Yx+qSuQiHj/wDJ+75yuMvfkWxXKZQqlEoVQmiRPu3Nxfj16VoedHCCGgCp/Y1A8imNm0FyfZ859R8kGZEMu2RR/gSDoLAVqrxISgSMqx8sorEBEEeGDfY4hz5LJZrLU450i857JlS+n76A2ICKcKRe7+xrcZn5hCBG654Xp6ly+jWEvor0wxcGKULlWOG0f/4pUczS9gnvp2MmhlwjYy0XY9I8LpSoWNN9/IvHwegOGRlxg9/DJ/euEQALlMmr71t9I9Pcme8dfJG+WUMXxhwVLGrKOnPE3kw5m2jRG0FvPaG2OoKgrctXUzIY4pVyok3pN4j3Updm66rclgD//hSXCOPU883WS2Xf3rmc7mOGki8HD4dGDr8TF++vcj3HfsFa4rFyACaYnVaFCMcwzsH0RESOKEzetu5lf3f5fLlyxmflceVWXlVe9n7XXXIMDYm28xdHCE9MJunh05zOg//4UAa65exdJrVvMjyTKcRPxFHF6EKWsp2Iga8m4GGmkwPgSyuSwHnjvIg48+jnMRtTjmMzu2cvTpfby6fy/Lly5hw01rm5T76OABCpNTZDo7KRcK7H3qj3Uys5bd6z/G/dmL2bniWr7T+0G+fNVqvt57NfeuuJaX8/NQhUTeHQZm9v0zmTR3f/Vb7BscajrqSKUoVav849/H2b19azNtv98/iEml8N5jOzrY+9RQnRWBHf195ObPp4ShEjmqjW8mcogRRNv5vwnAWEsSAju+eA+77/0awwdfZGq6wI9/8zt6L7+M5e9bTHXmHZ7/8xEOH/0rmUyGOElIp9O8+rfXGD70EtWZd7i0p5u1H1pNrVrBiWBVMaqIKiUMBTEUMM1ClNateJZKy8USxjkWL+ymWCnTkUrRlcvVZZUqxXK5PjEbUfsQyOey5LNZACrVKsVSGTGmbfzmvCetgRkxlK1F3gugbRxroFZLsNagqiTe12XGEkW2rW1FhMR7fFPHYK09Y454EUIj7Wcdx03FhiHnouby0dFi8L0LiKoSWUs0q9No5zO2n5Z7ej4bUauj/7f1nM9WpHNL6RyAOQBnOf8FaPJecIMlU5YAAAAASUVORK5CYII=">
+<link rel="icon" type="image/png" sizes="48x48" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('bodega')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
+<title>Bodega · Obra Bellavista</title>
+<script>try{var t=localStorage.getItem('ofTema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t);}catch(e){}</script>
+<style>
+
+/* Mismos colores y esquinas rectas que el panel de cerámica y Calidad */
+:root{--bg:#f2f3f1;--panel:#fff;--soft:#f8f9f7;--border:#d7dad3;--strong:#b9bdb3;--text:#2c302c;--sub:#6c716a;--ok:#2e8b3a;--warn:#f07c00;--bad:#c0392b;--accent:#2f6f8f;--accent2:#7a3fa0;color-scheme:light;}
+@media (prefers-color-scheme:dark){:root:not([data-tema="claro"]){--bg:#14171a;--panel:#1d2124;--soft:#23282c;--border:#333a3f;--strong:#454e54;--text:#e9ecee;--sub:#9aa3a9;--ok:#4fb85b;--warn:#ff9a1f;--bad:#e5604f;color-scheme:dark;}}
+:root[data-tema="oscuro"]{--bg:#14171a;--panel:#1d2124;--soft:#23282c;--border:#333a3f;--strong:#454e54;--text:#e9ecee;--sub:#9aa3a9;--ok:#4fb85b;--warn:#ff9a1f;--bad:#e5604f;color-scheme:dark;}
+*{box-sizing:border-box;}
+[hidden]{display:none !important;}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+body{padding-block:18px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:14px;line-height:1.4;}
+button,input,select,textarea{font:inherit;border-radius:0;color:var(--text);}
+button{cursor:pointer;}
+.wrap{max-width:980px;margin:0 auto;}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px 14px;padding-bottom:12px;margin-bottom:14px;border-bottom:3px solid transparent;border-image:linear-gradient(90deg,var(--accent),var(--accent2)) 1;}
+header.top h1{margin:0;font-size:20px;line-height:1.2;text-wrap:balance;}
+header.top p{margin:3px 0 0;color:var(--sub);font-size:12.5px;}
+.cluster{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{border:1px solid var(--strong);background:var(--panel);padding:9px 14px;font-size:13px;min-height:40px;transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease;}
+.btn:not(:disabled):hover{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);}
+.btn:not(:disabled):active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+.btn.peligro{border-color:var(--bad);color:var(--bad);}
+.btn.small{min-height:32px;padding:5px 10px;font-size:12px;}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--soft);border:1px solid var(--border);}
+.pill.ok{color:var(--ok);} .pill.warn{color:var(--warn);} .pill.bad{color:var(--bad);}
+nav.tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--strong);margin-bottom:14px;}
+nav.tabs button{background:var(--panel);border:0;border-right:1px solid var(--strong);padding:11px 6px;font-weight:600;color:var(--sub);min-height:44px;}
+nav.tabs button:last-child{border-right:0;}
+nav.tabs button.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}
+.card{background:var(--panel);border:1px solid var(--border);padding:14px;margin-bottom:14px;}
+.card h2{margin:0 0 10px;font-size:15px;}
+.nota{color:var(--sub);font-size:12.5px;margin:0 0 10px;}
+.fila{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.fila > *{min-width:0;}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--sub);flex:1 1 160px;}
+input,select,textarea{background:var(--panel);border:1px solid var(--strong);padding:9px 10px;font-size:14px;min-height:40px;width:100%;}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.escaner{display:flex;gap:8px;flex-wrap:wrap;}
+.escaner input{flex:1 1 220px;font-size:16px;}
+.modo{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--strong);margin-bottom:12px;}
+.modo button{border:0;background:var(--panel);padding:10px;font-weight:700;color:var(--sub);min-height:42px;}
+.modo button + button{border-left:1px solid var(--strong);}
+.modo button.on.ent{background:var(--ok);color:#fff;}
+.modo button.on.sal{background:var(--warn);color:#fff;}
+.tabla{width:100%;border-collapse:collapse;}
+.tabla th{font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--sub);text-align:left;padding:6px 8px;border-bottom:1px solid var(--strong);}
+.tabla td{padding:9px 8px;border-top:1px solid var(--border);vertical-align:middle;}
+.tabla .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.uu{display:none;}
+.tabla small{display:block;color:var(--sub);font-size:11.5px;}
+.scroll{overflow-x:auto;}
+.cant{display:inline-flex;align-items:center;border:1px solid var(--strong);}
+.cant button{border:0;background:var(--soft);width:32px;height:32px;font-size:16px;}
+.cant input{width:56px;min-height:32px;border:0;border-left:1px solid var(--strong);border-right:1px solid var(--strong);text-align:center;padding:0;}
+.resumen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;}
+.resumen div{border:1px solid var(--border);border-top:3px solid var(--accent);padding:10px;background:var(--soft);}
+.resumen b{display:block;font-size:22px;font-variant-numeric:tabular-nums;}
+.resumen span{font-size:12px;color:var(--sub);}
+.vacio{padding:20px;border:1px dashed var(--strong);color:var(--sub);text-align:center;}
+.demo{border:1px dashed var(--warn);padding:10px;margin-bottom:14px;font-size:12.5px;}
+.demo .fila{gap:6px;margin-top:6px;}
+.velo{position:fixed;inset:0;background:rgba(10,15,18,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
+.velo.on{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--strong);width:min(620px,100%);max-height:92vh;overflow:auto;padding:16px;animation:sube .22s ease;}
+@keyframes sube{from{transform:translateY(14px);opacity:0;}to{transform:none;opacity:1;}}
+@media (prefers-reduced-motion:reduce){.modal{animation:none;}}
+.modal h3{margin:0 0 8px;font-size:17px;}
+.acciones{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px;}
+.aviso{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;font-size:13px;z-index:60;max-width:92vw;opacity:0;pointer-events:none;transition:opacity .2s;}
+.aviso.on{opacity:1;}
+.err{color:var(--bad);font-size:12.5px;min-height:18px;margin-top:6px;}
+video{width:100%;max-height:260px;background:#000;margin-top:8px;display:none;}
+video.on{display:block;}
+@media (max-width:560px){.carro .u{display:none;}.carro .uu{display:block !important;}.resumen b{font-size:18px;} nav.tabs button{font-size:12.5px;}}
+
+nav.tabs{grid-template-columns:repeat(auto-fit,minmax(0,1fr));}
+nav.tabs button{padding:11px 4px;}
+@media (max-width:640px){nav.tabs{grid-template-columns:repeat(3,minmax(0,1fr));}nav.tabs button{border-bottom:1px solid var(--strong);}}
+.modo{grid-template-columns:repeat(3,1fr);}
+.modo button.on.pre{background:var(--accent);color:#fff;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{border:1px solid var(--strong);background:var(--panel);padding:6px 12px;min-height:34px;font-size:12.5px;}
+.chip.sub{font-weight:700;}
+.chip.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+.alertaV{border:2px solid var(--bad);color:var(--bad);padding:10px 12px;margin-bottom:14px;font-size:13px;background:var(--panel);}
+.estado{border:2px solid var(--warn);padding:10px 12px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.solo{border:1px dashed var(--strong);padding:10px 12px;margin-bottom:14px;font-size:12.5px;color:var(--sub);}
+label.chk{display:flex;align-items:center;gap:8px;font-size:13px;}
+label.chk input{width:20px;min-height:20px;height:20px;}
+@media (min-width:641px){.mq{display:none !important;}}
+tr.venc td{background:rgba(192,57,43,.08);}
+body.lectura .edita{display:none !important;}
+.tabla td.n small{white-space:normal;}
+.tabla .pill{white-space:normal;text-align:center;}
+@media (max-width:640px){#tPre th:nth-child(4),#tPre td:nth-child(4),#tPre th:nth-child(3),#tPre td:nth-child(3),#tPre th:nth-child(5),#tPre td:nth-child(5),#tUso th:nth-child(2),#tUso td:nth-child(2){display:none;}#tPre td,#tPre th,#tUso td,#tUso th{padding:8px 4px;}#tPre .btn{padding:4px 5px;font-size:11px;min-height:30px;}#tPre .pill{font-size:11px;padding:2px 6px;}#tPre td,#tPre th{padding:8px 3px;}}
+
+#cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
+#cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
+#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
+#cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
+#cargaGlobal .cgbd{position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:#fff;will-change:transform;}
+#cargaGlobal .cgfondo{position:absolute;inset:0;background:rgba(255,255,255,.08);transform:scaleY(0);will-change:transform;}
+#cargaGlobal .cgin{position:absolute;inset:2px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;text-align:center;opacity:0;will-change:opacity;}
+#cargaGlobal .cgabre .cgbd.cgt{animation:cgSube .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgbd.cgbt{animation:cgBaja .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgfondo{animation:cgAbre .5s cubic-bezier(.65,0,.35,1) forwards;}
+#cargaGlobal .cgabre .cgin{animation:cgAparece .22s ease .34s forwards;}
+#cargaGlobal .cgcierra .cgin{opacity:1;animation:cgDesaparece .2s ease forwards;}
+#cargaGlobal .cgcierra .cgbd.cgt{transform:translateY(calc(var(--H) / -2 + 1px));animation:cgSubeR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgbd.cgbt{transform:translateY(calc(var(--H) / 2 - 1px));animation:cgBajaR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+#cargaGlobal .cgcierra .cgfondo{transform:scaleY(1);animation:cgCierra .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
+@keyframes cgSube{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / -2 + 1px));}}
+@keyframes cgBaja{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / 2 - 1px));}}
+@keyframes cgSubeR{from{transform:translateY(calc(var(--H) / -2 + 1px));}to{transform:translateY(0);}}
+@keyframes cgBajaR{from{transform:translateY(calc(var(--H) / 2 - 1px));}to{transform:translateY(0);}}
+@keyframes cgAbre{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes cgCierra{from{transform:scaleY(1);}to{transform:scaleY(0);}}
+@keyframes cgAparece{from{opacity:0;}to{opacity:1;}}
+@keyframes cgDesaparece{from{opacity:1;}to{opacity:0;}}
+#cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
+#cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
+#cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
+#cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
+#cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
+#cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
+#cargaGlobal .cgest.cglisto{color:#fff;}
+#cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
+#cargaGlobal .cgerr svg{flex:none;}
+#cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
+#cargaGlobal .cgbd,#cargaGlobal .cgin small,#cargaGlobal .cgin b,#cargaGlobal .cgest{transition:color .3s ease,background-color .3s ease;}
+#cargaGlobal.cgerror .cgbd{background:#ff5252;box-shadow:0 0 10px rgba(255,82,82,.55);}
+#cargaGlobal.cgerror .cgin small,#cargaGlobal.cgerror .cgin b,#cargaGlobal.cgerror .cgest{color:#ff6b6b;}
+#cargaGlobal.cgerror .cgin b{text-shadow:0 0 14px rgba(255,82,82,.35);}
+#cargaGlobal.cgerror .cgpista{background:rgba(255,82,82,.22);}
+#cargaGlobal .cgrell{position:relative;}
+#cargaGlobal .cgrell::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#ff3d3d,#ff9a9a);box-shadow:0 0 8px rgba(255,82,82,.8);opacity:0;transition:opacity .3s ease;}
+#cargaGlobal.cgerror .cgrell::after{opacity:1;}
+#cargaGlobal .cgin.cgtiembla{opacity:1;animation:cgTiembla .5s cubic-bezier(.36,.07,.19,.97) both;}
+@keyframes cgTiembla{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
+@media(prefers-reduced-motion:reduce){#cargaGlobal .cgin.cgtiembla{animation:none;}}
+@media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
+@media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
+
+</style>
+</head>
+<body>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Bodega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+
+<script>
+(function(){
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var textoBase = tit.textContent;
+  var plantilla = el.outerHTML;
+  var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
+  // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
+  function terminadas(nodo){
+    return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
+  }
+  function bucle(){
+    var t = Math.max(0, performance.now() - st.t0);
+    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
+    if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 5000)); }
+    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
+    rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
+    if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
+    if(st.meta < 100 && !st.err) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
+    if(el.isConnected) st.raf = requestAnimationFrame(bucle);
+  }
+  bucle();
+  var abierta = terminadas(v);
+  async function paginaLista(){
+    var tope = dormir(6000);
+    var listo = (async function(){
+      if(document.readyState !== 'complete') await new Promise(function(r){ window.addEventListener('load', r, {once: true}); });
+      try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
+      try{ await Promise.all(Array.prototype.slice.call(document.images).map(function(i){ return i.decode ? i.decode().catch(function(){}) : 0; })); }catch(e){}
+      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    })();
+    await Promise.race([listo, tope]);
+  }
+  window.CargaPagina = {
+    el: el,
+    cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
+    error: function(destino, tipo){
+      if(st.err) return st.err;
+      avisarIntento(tipo);
+      if(st.cerrando){ location.replace(destino); return Promise.resolve(); }
+      st.err = (async function(){
+        var TXT = {sesion: 'Ya hay una cuenta activa, volviendo a pantalla de sesión.', permiso: 'No te corresponde estar aquí, volviendo al menú.', nosesion: 'No hay una sesión iniciada, volviendo a pantalla de sesión.'};
+        document.getElementById('cgErrTxt').textContent = TXT[tipo] || TXT.sesion;
+        await abierta;
+        st.meta = 88; est.classList.remove('cglisto');
+        while(st.prog < 89.4 || st.prog > 91) await dormir(30);
+        el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
+        var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
+        st.volver = true;
+        while(st.prog > 0.6) await dormir(30);
+        await dormir(250);
+        location.replace(destino);
+      })();
+      return st.err;
+    },
+    salir: function(destino, titulo, trabajo){
+      if(st.salida) return st.salida;
+      st.salida = (async function(){
+        cancelAnimationFrame(st.raf); st.cerrando = true;
+        if(el.parentNode) el.remove();
+        var h = document.createElement('div'); h.innerHTML = plantilla;
+        var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
+        var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1';
+        var hecho = false;
+        Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
+        var p = 0, ini = performance.now() + 250;
+        await new Promise(function(r){
+          (function f(){
+            var t = Math.max(0, performance.now() - ini);
+            var fin = hecho && performance.now() > ini + 650;
+            var obj = fin ? 100 : 88 * (1 - Math.exp(-t / 300));
+            p += (obj - p) * (fin ? 0.35 : 0.2);
+            if(fin && p > 99.5) p = 100;
+            rl.style.transform = 'scaleX(' + (p / 100) + ')'; es.textContent = Math.round(p) + '%';
+            if(p >= 100) r(); else requestAnimationFrame(f);
+          })();
+        });
+        es.textContent = '¡Listo!'; es.classList.add('cglisto');
+        await dormir(250);
+        location.replace(destino);
+      })();
+      return st.salida;
+    },
+    fin: function(){
+      if(st.err) return st.err;
+      if(st.fin) return st.fin;
+      st.fin = (async function(){
+        await abierta; await paginaLista();
+        if(st.err) return;
+        st.meta = 100;
+        while(st.prog < 100){ if(st.err) return; await dormir(30); }
+        est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
+        if(st.err) return;
+        st.cerrando = true;
+        v.classList.remove('cgabre'); v.classList.add('cgcierra');
+        await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+        await terminadas(v);
+        el.classList.add('cgsale');
+        await new Promise(function(r){ var t = setTimeout(r, 600); el.addEventListener('transitionend', function(){ clearTimeout(t); r(); }, {once: true}); });
+        CargaPagina.cortar();
+      })();
+      return st.fin;
+    }
+  };
+  /* Avisa al administrador (por el servidor) que alguien llegó a esta pantalla de error */
+  function avisarIntento(tipo){ try{ var cu = ''; try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; cu = h.nombre || h.cuenta || ''; }catch(e){} fetch('https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec', {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'alertaAcceso', tipo: tipo, pagina: location.pathname.split('/').pop() || 'index', ua: String(navigator.userAgent || '').substring(0, 120), cuenta: cu})}).catch(function(){}); }catch(e){} }
+  window.salirConError = function(destino, tipo){ if(tipo && window.CargaPagina && document.getElementById('cargaGlobal') && !st.cerrando) return window.CargaPagina.error(destino, tipo); location.replace(destino); };
+  if(window.__gateErr) window.CargaPagina.error(window.__gateErr.d, window.__gateErr.t);
+  setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
+  window.addEventListener('pageshow', function(e){ if(e.persisted) location.reload(); });
+})();
+</script>
+<div class="wrap">
+  <header class="top">
+    <div><h1>Bodega · Obra Bellavista, La Florida</h1><p>Registro de materiales y herramientas con lector QR o pistola · <span id="quien">Jefe de Bodega</span></p></div>
+    <div class="cluster">
+      <button class="btn small" id="refrescar" type="button">↻ Actualizar</button>
+      <a class="btn small" href="index.html?menu=1" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;">Cambiar de sección</a>
+      <button class="btn small" id="tema" type="button">Tema: Auto</button>
+      <button class="btn small" id="salir" type="button">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="estado" id="estado" hidden><span id="estadoTxt"></span> <button class="btn small" id="reintentar" type="button">Reintentar</button></div>
+  <div class="solo" id="soloLect" hidden><b>Solo lectura.</b> Puedes mirar el stock, los movimientos y las herramientas. Registrar entradas, salidas y préstamos lo hace el Jefe de Bodega o el Admin.</div>
+  <div class="alertaV" id="alertaV" hidden></div>
+
+  <nav class="tabs" id="tabs">
+    <button type="button" data-t="mov" class="on edita">Escanear</button>
+    <button type="button" data-t="pre">Herramientas</button>
+    <button type="button" data-t="stock">Stock</button>
+    <button type="button" data-t="hist">Movimientos</button>
+    <button type="button" data-t="cat">Catálogo</button>
+    <button type="button" data-t="per">Personas</button>
+  </nav>
+
+  <section id="v-mov">
+    <div class="modo" id="modo"><button type="button" class="on ent" data-m="entrada">⬇ Recepción</button><button type="button" data-m="salida">⬆ Salida de obra</button><button type="button" data-m="prestamo">↔ Préstamo</button></div>
+    <div class="card">
+      <h2>Escanear</h2>
+      <p class="nota">Con la pistola, solo apunta y dispara: cada lectura suma una caja, saco, rollo u otro envase (en préstamo, una herramienta). También puedes usar la cámara del celular o escribir el código y apretar Enter.</p>
+      <div class="escaner">
+        <input id="codigo" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Código o QR leído…" aria-label="Código leído">
+        <button class="btn" id="camBtn" type="button">📷 Cámara</button>
+        <button class="btn primary" id="addBtn" type="button">Agregar</button>
+      </div>
+      <video id="video" playsinline muted></video>
+      <div class="err" id="err" role="alert"></div>
+    </div>
+    <div class="card">
+      <h2>Lo escaneado <span class="pill" id="cuenta">0 envases</span></h2>
+      <div id="lista"></div>
+      <div class="fila" style="margin-top:12px;">
+        <label class="f" id="lbProv" for="prov">Proveedor<input id="prov" maxlength="60" placeholder="Ej: Cerámicas del Sur"></label>
+        <label class="f" id="lbGuia" for="guia">N° guía o factura<input id="guia" maxlength="30" placeholder="Ej: 48213"></label>
+        <label class="f" id="lbDest" for="dest" hidden>Destino<input id="dest" maxlength="60" placeholder="Ej: Piso 12, dpto 1201"></label>
+        <label class="f" id="lbPers" for="pers" hidden><span id="persT">Quién retira</span><select id="pers"></select></label>
+        <label class="f" id="lbDias" for="dias" hidden>Días de préstamo<input id="dias" type="number" min="1" max="90" step="1" value="1"></label>
+      </div>
+      <div class="acciones">
+        <button class="btn peligro" id="vaciar" type="button">Descartar todo</button>
+        <button class="btn primary" id="revisar" type="button" disabled>Revisar resumen</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-pre" hidden>
+    <div class="card"><h2>Herramientas <span class="pill" id="preCuenta"></span></h2>
+      <p class="nota">Las herramientas se prestan a un trabajador o a un subcontrato y deben volver a bodega. Si pasa el plazo sin devolverse, aparece en rojo.</p>
+      <div class="scroll"><table class="tabla" id="tUso"></table></div></div>
+    <div class="card"><h2>Quién las tiene</h2>
+      <div class="chips" id="chipsPre"></div>
+      <div class="fila" style="margin:10px 0;"><label class="f" for="fPre">Mostrar<select id="fPre"><option value="pend">Solo lo que falta devolver</option><option value="todos">Todo el historial</option></select></label></div>
+      <div class="scroll"><table class="tabla" id="tPre"></table></div>
+      <div class="acciones edita" style="justify-content:flex-start;"><button class="btn primary" id="irPrestar" type="button">+ Registrar préstamo</button></div></div>
+  </section>
+
+  <section id="v-stock" hidden>
+    <div class="card"><h2>Stock en bodega</h2>
+      <div class="fila"><label class="f" for="bStock">Buscar<input id="bStock" placeholder="Nombre o código"></label><label class="f" for="bCat">Categoría<select id="bCat"></select></label></div>
+      <div class="scroll" style="margin-top:10px;"><table class="tabla" id="tStock"></table></div></div>
+  </section>
+
+  <section id="v-hist" hidden>
+    <div class="card"><h2>Movimientos</h2>
+      <div class="chips" id="chipsHist" style="margin-bottom:10px;"></div>
+      <div class="fila"><label class="f" for="fTipo">Tipo<select id="fTipo"><option value="">Todos</option><option value="entrada">Recepciones y devoluciones</option><option value="salida">Salidas y préstamos</option></select></label>
+        <label class="f" for="fBus">Buscar<input id="fBus" placeholder="Guía, proveedor, material, destino"></label></div>
+      <div class="scroll" style="margin-top:10px;"><table class="tabla" id="tHist"></table></div></div>
+  </section>
+
+  <section id="v-cat" hidden>
+    <div class="card edita" id="cardImp" hidden><h2>El catálogo está vacío</h2>
+      <p class="nota">Puedes cargar un catálogo de ejemplo con lo que trae una obra (cerámicas, morteros, fierro, instalaciones, herramientas, EPP…) y después editarlo, o ir creando los materiales a medida que escaneas.</p>
+      <div class="acciones" style="justify-content:flex-start;"><button class="btn primary" id="impEj" type="button">Cargar catálogo de ejemplo</button></div></div>
+    <div class="card"><h2>Catálogo de materiales</h2>
+      <p class="nota">Cada material tiene uno o más códigos (el del proveedor o una etiqueta propia), el envase en que viene (caja, saco, rollo…) y cuántas unidades trae cada envase. Un código nuevo se asocia aquí o al escanearlo por primera vez.</p>
+      <div class="fila" style="margin-bottom:10px;"><label class="f" for="cCat">Categoría<select id="cCat"></select></label></div>
+      <div class="scroll"><table class="tabla" id="tCat"></table></div>
+      <div class="acciones edita" style="justify-content:flex-start;"><button class="btn primary" id="nuevoMat" type="button">+ Material nuevo</button></div></div>
+  </section>
+
+  <section id="v-per" hidden>
+    <div class="card"><h2>Personas y subcontratos</h2>
+      <p class="nota">Aquí van los subcontratos y los trabajadores de la obra: a ellos se les entregan materiales y se les prestan herramientas. En el menú de arriba puedes filtrar por cada uno.</p>
+      <div class="scroll"><table class="tabla" id="tPer"></table></div>
+      <div class="acciones edita" style="justify-content:flex-start;"><button class="btn primary" id="nuevaPer" type="button">+ Persona o subcontrato</button></div></div>
+  </section>
+</div>
+
+<div class="velo" id="veloRes"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="resT">
+  <h3 id="resT">Resumen</h3><p class="nota" id="resSub"></p>
+  <div class="resumen"><div><b id="rLin">0</b><span>materiales distintos</span></div><div><b id="rBul">0</b><span id="rBulL">envases (cajas, sacos, rollos…)</span></div><div><b id="rUni">0</b><span>m² de cerámica</span></div></div>
+  <div class="scroll"><table class="tabla" id="resTabla"></table></div>
+  <div class="err" id="resErr" role="alert"></div>
+  <div class="acciones"><button class="btn" id="resVolver" type="button">Volver y corregir</button><button class="btn primary" id="resOk" type="button">Aceptar y guardar en bodega</button></div>
+</div></div>
+
+<div class="velo" id="veloMat"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="matT">
+  <h3 id="matT">Material</h3><p class="nota" id="matSub"></p>
+  <div class="fila"><label class="f" for="mNom" style="flex-basis:100%;">Nombre<input id="mNom" maxlength="80"></label>
+    <label class="f" for="mCat">Categoría<select id="mCat"></select></label>
+    <label class="f" for="mCod">Código(s), separados por coma<input id="mCod" maxlength="120"></label>
+    <label class="f" for="mEnv">Viene en<select id="mEnv"></select></label>
+    <label class="f" for="mPor">Unidades por envase<input id="mPor" type="number" min="1" step="1"></label>
+    <label class="f" for="mUni">Unidad<select id="mUni"></select></label>
+    <label class="f" for="mM2" id="lbM2">m² por envase (cerámica)<input id="mM2" type="number" min="0" step="0.01"></label>
+    <label class="f" for="mMin">Stock mínimo (en envases)<input id="mMin" type="number" min="0" step="1"></label>
+    <label class="chk" for="mRet" style="flex-basis:100%;"><input id="mRet" type="checkbox"> Es una herramienta que se presta y debe volver a bodega</label></div>
+  <div class="err" id="mErr"></div>
+  <div class="acciones"><button class="btn" id="mCan" type="button">Cancelar</button><button class="btn primary" id="mOk" type="button">Guardar y cerrar</button></div>
+</div></div>
+
+<div class="velo" id="veloPer"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="perT">
+  <h3 id="perT">Persona</h3>
+  <div class="fila"><label class="f" for="pNom" style="flex-basis:100%;">Nombre<input id="pNom" maxlength="60"></label>
+    <label class="f" for="pTipo">Es un<select id="pTipo"><option value="trabajador">Trabajador</option><option value="subcontrato">Subcontrato (empresa)</option></select></label>
+    <label class="f" for="pSub" id="lbPSub">Trabaja para<select id="pSub"></select></label>
+    <label class="chk" for="pAct" style="flex-basis:100%;"><input id="pAct" type="checkbox" checked> Está activo en la obra</label></div>
+  <div class="err" id="pErr"></div>
+  <div class="acciones"><button class="btn" id="pCan" type="button">Cancelar</button><button class="btn primary" id="pOk" type="button">Guardar y cerrar</button></div>
+</div></div>
+
+<div class="velo" id="veloDev"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="devT">
+  <h3 id="devT">Devolver a bodega</h3><p class="nota" id="devSub"></p>
+  <label class="f" for="devN">Cantidad que vuelve<input id="devN" type="number" min="1" step="1"></label>
+  <div class="err" id="devErr"></div>
+  <div class="acciones"><button class="btn" id="devCan" type="button">Cancelar</button><button class="btn primary" id="devOk" type="button">Devolver a bodega</button></div>
+</div></div>
+<div class="aviso" id="aviso" role="status"></div>
+<script>
+(function(){
+  var K='bodegaToken',N='bodegaNombre',URL_DB='https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
+  var tok='',nom='';
+  try{ tok=localStorage.getItem(K)||''; nom=localStorage.getItem(N)||''; }catch(e){}
+  if(!tok){ try{ sessionStorage.setItem('progresoObraAvisoGate',''); }catch(e){} salirConError('index.html?s=1','nosesion'); setTimeout(function(){ location.replace('index.html?s=1'); },12000); return; }
+  window.__bodCfg={K:K,N:N,URL:URL_DB,tok:tok};
+  window.__bodAcceso=fetch(URL_DB,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'miAcceso',token:tok})}).then(function(r){return r.json();}).then(function(j){
+    if(j&&j.error==='sin_sesion'){ try{ localStorage.removeItem(K); localStorage.removeItem(N); sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} salirConError('index.html?s=1','sesion'); }
+    else if(j&&j.ok&&j.secciones&&j.secciones.indexOf('bodega')===-1){ try{ sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.'); }catch(e){} salirConError('index.html?menu=1','permiso'); }
+    return j;
+  }).catch(function(){ return null; });
+  if(nom) document.getElementById('quien').textContent=nom+' · Jefe de Bodega';
+  document.getElementById('salir').addEventListener('click',function(){
+    var trabajo=Promise.resolve();
+    try{ trabajo=Promise.race([fetch(URL_DB,{method:'POST',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'logout',token:tok})}).catch(function(){}),new Promise(function(r){setTimeout(r,2500);})]); }catch(e){}
+    try{ localStorage.removeItem(K); localStorage.removeItem(N); }catch(e){}
+    if(window.CargaPagina&&window.CargaPagina.salir) window.CargaPagina.salir('index.html?s=1','Volviendo a inicio de sesión…',trabajo);
+    else trabajo.then(function(){ location.replace('index.html?s=1'); });
+  });
+})();
+</script>
+<script>
+(function(){
+'use strict';
+const CATS = ['Cerámica y revestimientos','Pegamentos y morteros','Hormigón y albañilería','Fierro y mallas','Maderas y moldajes','Aislación e impermeabilización','Instalación sanitaria y gasfitería','Instalación eléctrica','Pinturas y selladores','Puertas, ventanas y quincallería','Terminaciones y cielos','Fijaciones y ferretería','Herramientas y consumibles','Seguridad y EPP','Limpieza y faena'];
+const ENVASES = ['caja','saco','bolsa','balde','tambor','rollo','atado','pallet','galón','plancha','unidad'];
+const UNIDADES = ['palmetas','sacos','unidades','kg','litros','metros','m²','planchas','piezas','pares','rollos'];
+// [categoría, nombre, código, envase, unidades por envase, unidad, m² por envase, mínimo en envases, stock en envases]
+const L = [
+ [0,'Cerámica piso 30×60 gris','7801234500011','caja',8,'palmetas',1.44,40,80],
+ [0,'Cerámica muro baño 30×60 blanca','7801234500028','caja',8,'palmetas',1.44,40,64],
+ [0,'Cerámica pasillo 60×60 beige','7801234500035','caja',4,'palmetas',1.44,30,22],
+ [0,'Porcelanato 60×60 gris','7801234500042','caja',4,'palmetas',1.44,20,35],
+ [0,'Guardapolvo cerámico 8×60','7801234500059','caja',10,'piezas',0,10,14],
+ [0,'Perfil esquinero PVC 10 mm','7801234500066','atado',25,'piezas',0,4,9],
+ [0,'Cruceta 3 mm (bolsa 200)','7801234500073','bolsa',200,'unidades',0,6,18],
+ [1,'Adhesivo cerámico C2 25 kg','7809876500013','saco',1,'sacos',0,30,18],
+ [1,'Fragüe gris 5 kg','7809876500020','saco',1,'sacos',0,20,44],
+ [1,'Fragüe blanco 5 kg','7809876500037','saco',1,'sacos',0,15,12],
+ [1,'Mortero de nivelación 25 kg','7809876500044','saco',1,'sacos',0,10,16],
+ [1,'Cemento 25 kg','7809876500051','saco',1,'sacos',0,60,140],
+ [1,'Yeso cartón 25 kg','7809876500068','saco',1,'sacos',0,20,26],
+ [2,'Arena gruesa (saco 25 kg)','7802220000011','saco',1,'sacos',0,40,90],
+ [2,'Ladrillo fiscal','7802220000028','pallet',320,'unidades',0,2,6],
+ [2,'Bloque de hormigón 14 cm','7802220000035','pallet',108,'unidades',0,2,4],
+ [2,'Hormigón premezclado H25 (m³)','7802220000042','unidad',1,'unidades',0,0,0],
+ [3,'Fierro 8 mm × 12 m','7803330000019','atado',10,'piezas',0,6,15],
+ [3,'Fierro 10 mm × 12 m','7803330000026','atado',10,'piezas',0,6,11],
+ [3,'Malla acma C-92','7803330000033','unidad',1,'unidades',0,20,48],
+ [3,'Alambre negro n°18','7803330000040','rollo',1,'rollos',0,10,24],
+ [4,'Pino bruto 2×3×3,2 m','7804440000012','atado',20,'piezas',0,5,12],
+ [4,'Terciado moldaje 18 mm','7804440000029','unidad',1,'planchas',0,30,64],
+ [4,'Tablero OSB 11 mm','7804440000036','unidad',1,'planchas',0,15,28],
+ [5,'Aislante poliestireno 20 mm','7805550000015','atado',10,'planchas',0,4,8],
+ [5,'Membrana asfáltica 4 mm','7805550000022','rollo',1,'rollos',0,6,10],
+ [5,'Impermeabilizante acrílico 20 L','7805550000039','balde',1,'unidades',0,4,7],
+ [5,'Sellador de juntas poliuretano','7805550000046','caja',12,'unidades',0,3,5],
+ [6,'Tubo PVC sanitario 110 mm × 3 m','7806660000010','atado',10,'piezas',0,3,6],
+ [6,'Tubo PVC sanitario 75 mm × 3 m','7806660000027','atado',10,'piezas',0,3,5],
+ [6,'Tubería cobre 1/2" × 6 m','7806660000034','atado',10,'piezas',0,2,4],
+ [6,'Llave de paso 1/2"','7806660000041','caja',20,'unidades',0,2,3],
+ [6,'Inodoro blanco','7806660000058','caja',1,'unidades',0,6,14],
+ [6,'Lavamanos con pedestal','7806660000065','caja',1,'unidades',0,6,12],
+ [6,'Grifería lavamanos monomando','7806660000072','caja',1,'unidades',0,6,10],
+ [7,'Cable 2,5 mm² (rollo 100 m)','7807770000018','rollo',1,'rollos',0,6,9],
+ [7,'Cable 1,5 mm² (rollo 100 m)','7807770000025','rollo',1,'rollos',0,6,12],
+ [7,'Tubo conduit 20 mm × 3 m','7807770000032','atado',50,'piezas',0,2,5],
+ [7,'Caja de derivación 10×10','7807770000049','caja',50,'unidades',0,2,4],
+ [7,'Interruptor y enchufe (módulo)','7807770000056','caja',20,'unidades',0,5,8],
+ [7,'Tablero eléctrico 12 módulos','7807770000063','caja',1,'unidades',0,5,11],
+ [8,'Pintura látex blanca 20 L','7808880000014','balde',1,'unidades',0,8,15],
+ [8,'Pintura esmalte al agua 4 L','7808880000021','caja',4,'unidades',0,4,6],
+ [8,'Sellador muro 20 L','7808880000038','balde',1,'unidades',0,4,7],
+ [8,'Masilla muro 25 kg','7808880000045','balde',1,'unidades',0,6,9],
+ [9,'Puerta interior 80 cm','7809990000017','caja',1,'unidades',0,10,22],
+ [9,'Puerta principal 90 cm','7809990000024','caja',1,'unidades',0,5,9],
+ [9,'Ventana aluminio 120×100','7809990000031','caja',1,'unidades',0,6,13],
+ [9,'Chapa interior (con llaves)','7809990000048','caja',10,'unidades',0,3,5],
+ [10,'Plancha yeso cartón 10 mm','7801010000012','unidad',1,'planchas',0,60,120],
+ [10,'Perfil metalcon montante 60','7801010000029','atado',20,'piezas',0,6,14],
+ [10,'Perfil metalcon canal 61','7801010000036','atado',20,'piezas',0,6,12],
+ [10,'Cielo falso 60×60','7801010000043','caja',10,'unidades',0,6,10],
+ [11,'Tornillo yeso cartón 6×1" (caja 1000)','7801111000010','caja',1000,'unidades',0,6,11],
+ [11,'Clavo 3" (caja 5 kg)','7801111000027','caja',5,'kg',0,4,8],
+ [11,'Tarugo plástico 8 mm (caja 100)','7801111000034','caja',100,'unidades',0,6,9],
+ [11,'Perno de anclaje 3/8"','7801111000041','caja',50,'unidades',0,3,4],
+ [12,'Disco corte cerámica diamantado','7801212000015','caja',5,'unidades',0,2,3],
+ [12,'Disco corte metal 4½"','7801212000022','caja',25,'unidades',0,2,4],
+ [12,'Llana dentada 10 mm','7801212000039','unidad',1,'unidades',0,2,12,1],
+ [12,'Espátula 10 cm','7801212000046','unidad',1,'unidades',0,2,12,1],
+ [12,'Escoba industrial','7801212000060','unidad',1,'unidades',0,4,20,1],
+ [12,'Pala cuadrada','7801212000077','unidad',1,'unidades',0,3,10,1],
+ [12,'Carretilla','7801212000084','unidad',1,'unidades',0,2,8,1],
+ [12,'Taladro percutor','7801212000091','unidad',1,'unidades',0,1,4,1],
+ [12,'Esmeril angular 4½"','7801212000107','unidad',1,'unidades',0,1,5,1],
+ [12,'Cortadora de cerámica 90 cm','7801212000114','unidad',1,'unidades',0,1,3,1],
+ [12,'Nivel de burbuja 60 cm','7801212000121','unidad',1,'unidades',0,2,8,1],
+ [12,'Huincha de medir 8 m','7801212000138','unidad',1,'unidades',0,3,10,1],
+ [12,'Martillo','7801212000145','unidad',1,'unidades',0,2,8,1],
+ [12,'Escalera tijera 6 peldaños','7801212000152','unidad',1,'unidades',0,2,6,1],
+ [12,'Brocha 4"','7801212000053','caja',12,'unidades',0,1,2],
+ [13,'Casco de seguridad','7801313000019','caja',10,'unidades',0,2,4],
+ [13,'Guantes de cabritilla','7801313000026','caja',12,'pares',0,3,6],
+ [13,'Lentes de seguridad','7801313000033','caja',12,'unidades',0,2,4],
+ [13,'Zapatos de seguridad','7801313000040','caja',6,'pares',0,2,3],
+ [13,'Mascarilla desechable (caja 50)','7801313000057','caja',50,'unidades',0,3,5],
+ [14,'Bolsa de escombros 100 L','7801414000013','caja',10,'unidades',0,4,8],
+ [14,'Huaipe y paños','7801414000020','saco',1,'sacos',0,2,3],
+ [14,'Cinta de peligro 100 m','7801414000037','rollo',1,'rollos',0,4,9]
+];
+const EJEMPLO = L.map(r => ({cat:r[0], nombre:r[1], codigos:[r[2]], envase:r[3], porEnvase:r[4], unidad:r[5], m2Env:r[6], min:r[7], stockEnvases:r[8], ret:r[9] ? 1 : 0}));
+EJEMPLO.find(m => m.nombre.startsWith('Adhesivo cerámico')).codigos.push('BOD-ADH25');
+window.BODEGA_EJEMPLO = EJEMPLO;
+
+const cfg = window.__bodCfg;
+if(!cfg){ return; }
+let D = {materiales:[], mov:[], personas:[], prestamos:[]};
+let puede = false, rolOk = false;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Number(n).toLocaleString('es-CL', {maximumFractionDigits:2});
+const fecha = ts => new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'});
+const fechaC = ts => new Date(ts).toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'2-digit'});
+const limpio = (s, max) => String(s || '').replace(/[<>`|\u0000-\u001f]/g, '').trim().slice(0, max || 80);
+const nuevoNonce = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('n' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
+let toastT = 0;
+function aviso(t){ const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => a.classList.remove('on'), 2600); }
+function plural(env, n){ if(n === 1) return env; if(/ón$/.test(env)) return env.slice(0, -2) + 'ones'; return env + (/[lrnzd]$/.test(env) ? 'es' : 's'); }
+const envTxt = (m, n) => fmt(n) + ' ' + plural(m.envase, n);
+function cantTxt(m, unidades){
+  const env = unidades / m.porEnvase, partes = [];
+  if(m.porEnvase > 1 || m.envase !== 'unidad') partes.push(envTxt(m, Math.round(env * 100) / 100));
+  if(m.porEnvase > 1) partes.push(fmt(unidades) + ' ' + m.unidad);
+  if(m.m2Env > 0) partes.push(fmt(env * m.m2Env) + ' m²');
+  return partes.join(' · ') || (fmt(unidades) + ' ' + m.unidad);
+}
+const nivel = m => { const env = m.stock / m.porEnvase; return env <= 0 ? ['bad', 'Sin stock'] : env < m.min ? ['warn', 'Bajo el mínimo'] : ['ok', 'Normal']; };
+const matDe = id => D.materiales.find(m => m.id === id);
+const perDe = id => D.personas.find(p => p.id === id);
+const nomPer = id => { const p = perDe(id); return p ? p.nombre : '(persona eliminada)'; };
+const pend = l => Math.max(0, l.uni - l.dev);
+const vencido = l => pend(l) > 0 && l.limite < Date.now();
+const diasAtraso = l => Math.max(1, Math.ceil((Date.now() - l.limite) / 864e5));
+
+// ---------- Servidor ----------
+async function api(action, extra){
+  try{
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 30000);
+    const res = await fetch(cfg.URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(Object.assign({action, token:cfg.tok}, extra || {})), signal:ctl.signal});
+    clearTimeout(to);
+    const j = await res.json();
+    if(j && j.error === 'sin_sesion'){
+      try{ localStorage.removeItem(cfg.K); localStorage.removeItem(cfg.N); sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){}
+      if(window.salirConError) salirConError('index.html?s=1', 'sesion');
+      return {ok:false, error:'sin_sesion'};
+    }
+    return j || {ok:false, error:'red'};
+  }catch(e){ return {ok:false, error:'red'}; }
+}
+function msgError(r){
+  const e = r && r.error;
+  if(e === 'red') return 'No se pudo conectar. Revisa la señal y vuelve a apretar el botón: no se duplica nada.';
+  if(e === 'sin_stock') return 'No hay stock suficiente de «' + (r.material || 'un material') + '».';
+  if(e === 'sin_permiso') return 'Tu cuenta solo puede mirar la bodega.';
+  if(e === 'datos_invalidos') return 'Algo no cuadra con los datos. Revísalos e intenta de nuevo.';
+  if(e === 'devuelve_de_mas') return 'Estás devolviendo más de lo que se prestó.';
+  if(e === 'repetido') return 'Ya existe una persona con ese nombre.';
+  return 'No se pudo guardar (' + (e || 'error') + ').';
+}
+function aplicar(r){
+  D.materiales = r.materiales || []; D.mov = r.mov || []; D.personas = r.personas || []; D.prestamos = r.prestamos || [];
+  $('estado').hidden = true; pintarTodo();
+}
+async function recargar(){
+  if(!rolOk){
+    try{ const res = await fetch(cfg.URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'miAcceso', token:cfg.tok})}); const j = await res.json(); fijarRol(j); }catch(e){}
+  }
+  const r = await api('bodegaCargar');
+  if(r.ok){ aplicar(r); return true; }
+  if(r.error === 'sin_sesion') return false;
+  $('estadoTxt').textContent = r.error === 'sin_permiso' ? 'No tienes acceso a Bodega.' : 'No se pudo cargar la bodega. Revisa la señal.';
+  $('estado').hidden = false; return false;
+}
+function fijarRol(j){
+  if(!j || !j.ok) return;
+  rolOk = true; puede = j.rol === 'admin' || j.rol === 'bodega';
+  document.body.classList.toggle('lectura', !puede); $('soloLect').hidden = puede;
+  if(!puede && !$('v-mov').hidden) irTab('pre');
+}
+
+// ---------- Escanear ----------
+function leer(texto){
+  const t = String(texto || '').replace(/[<>`\u0000-\u001f]/g, '').trim().slice(0, 200);
+  const m = /^BOD\|([^|]+)(?:\|(\d{1,4}))?$/i.exec(t);
+  if(m) return {codigo:'BOD-' + m[1].toUpperCase(), env: m[2] ? Number(m[2]) : 1};
+  return {codigo: t, env: 1};
+}
+const buscarMat = cod => D.materiales.find(m => m.codigos.some(c => c.toLowerCase() === cod.toLowerCase()));
+let modo = 'entrada', carro = [], pendienteCod = null, nonceRes = '';
+const fac = m => modo === 'prestamo' ? 1 : m.porEnvase;
+function pintarCarro(){
+  const cont = $('lista'), pre = modo === 'prestamo';
+  if(!carro.length){ cont.innerHTML = '<div class="vacio">Aún no hay nada escaneado. Dispara la pistola o usa la cámara.</div>'; }
+  else{
+    cont.innerHTML = '<div class="scroll"><table class="tabla carro"><thead><tr><th>' + (pre ? 'Herramienta' : 'Material') + '</th><th class="n">Cantidad</th><th class="n u">Total</th><th></th></tr></thead><tbody>' + carro.map((l, i) => {
+      const m = matDe(l.mid); if(!m) return '';
+      const un = l.env * fac(m);
+      const alerta = modo !== 'entrada' && un > m.stock ? '<small style="color:var(--bad);">Sale más de lo que hay en bodega (' + esc(cantTxt(m, m.stock)) + ')</small>' : '';
+      const sub = pre ? 'Hay ' + esc(fmt(m.stock)) + ' en bodega' : (m.porEnvase > 1 ? 'Cada ' + esc(m.envase) + ' trae ' + fmt(m.porEnvase) + ' ' + esc(m.unidad) : 'Se cuenta por ' + esc(m.envase));
+      const lab = pre ? m.unidad : plural(m.envase, l.env), tot = pre ? fmt(un) + ' ' + m.unidad : cantTxt(m, un);
+      return '<tr><td><b>' + esc(m.nombre) + '</b><small>' + sub + '</small><small class="uu"><b>' + esc(tot) + '</b></small>' + alerta + '</td><td class="n"><span class="cant"><button type="button" data-d="-1" data-i="' + i + '" aria-label="Menos">−</button><input type="number" min="1" max="9999" value="' + l.env + '" data-i="' + i + '" aria-label="Cantidad de ' + esc(lab) + '"><button type="button" data-d="1" data-i="' + i + '" aria-label="Más">+</button></span><small>' + esc(lab) + '</small></td><td class="n u">' + esc(tot) + '</td><td class="n"><button class="btn small" type="button" data-x="' + i + '">Quitar</button></td></tr>';
+    }).join('') + '</tbody></table></div>';
+  }
+  const n = carro.reduce((t, l) => t + l.env, 0);
+  $('cuenta').textContent = n + (pre ? (n === 1 ? ' herramienta' : ' herramientas') : (n === 1 ? ' envase' : ' envases'));
+  $('revisar').disabled = !carro.length;
+}
+function agregarCodigo(texto){
+  $('err').textContent = '';
+  const r = leer(texto); if(!r.codigo) return;
+  const m = buscarMat(r.codigo);
+  if(!m){ pendienteCod = r.codigo; abrirMaterial(null, r.codigo); return; }
+  if(modo === 'prestamo' && !m.ret){ $('err').textContent = '«' + m.nombre + '» no está marcado como herramienta que se presta. Se marca en el Catálogo.'; return; }
+  const l = carro.find(x => x.mid === m.id);
+  if(l) l.env = Math.min(9999, l.env + r.env); else carro.push({mid:m.id, env:r.env});
+  pintarCarro(); aviso('+ ' + (modo === 'prestamo' ? fmt(r.env) + ' ' + m.unidad : envTxt(m, r.env)) + ' · ' + m.nombre);
+}
+$('lista').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.d){ const l = carro[b.dataset.i]; l.env = Math.max(1, Math.min(9999, l.env + Number(b.dataset.d))); pintarCarro(); }
+  else if(b.dataset.x){ carro.splice(Number(b.dataset.x), 1); pintarCarro(); }
+});
+$('lista').addEventListener('change', e => {
+  const i = e.target.dataset.i; if(i === undefined || e.target.tagName !== 'INPUT') return;
+  carro[i].env = Math.max(1, Math.min(9999, Math.round(Number(e.target.value)) || 1)); pintarCarro();
+});
+function enviarCodigo(){ const v = $('codigo').value; $('codigo').value = ''; if(v.trim()) agregarCodigo(v); $('codigo').focus(); }
+$('addBtn').addEventListener('click', enviarCodigo);
+$('codigo').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); enviarCodigo(); } });
+$('vaciar').addEventListener('click', () => { if(!carro.length) return; carro = []; pintarCarro(); aviso('Se descartó lo escaneado.'); });
+function opcionesPers(sel){
+  const act = D.personas.filter(p => p.activo || p.id === sel);
+  const subs = act.filter(p => p.tipo === 'subcontrato'), trab = act.filter(p => p.tipo === 'trabajador');
+  const op = p => '<option value="' + esc(p.id) + '"' + (p.id === sel ? ' selected' : '') + '>' + esc(p.nombre) + (p.sub ? ' (' + esc(p.sub) + ')' : '') + '</option>';
+  return '<option value="">Sin indicar</option>' + (subs.length ? '<optgroup label="Subcontratos">' + subs.map(op).join('') + '</optgroup>' : '') + (trab.length ? '<optgroup label="Trabajadores">' + trab.map(op).join('') + '</optgroup>' : '');
+}
+function pintarPersSel(){ const v = $('pers').value; $('pers').innerHTML = opcionesPers(v); $('pers').value = v; }
+function ajustarModo(){
+  $('lbProv').hidden = $('lbGuia').hidden = modo !== 'entrada'; $('lbDest').hidden = modo !== 'salida';
+  $('lbPers').hidden = modo === 'entrada'; $('lbDias').hidden = modo !== 'prestamo';
+  $('persT').textContent = modo === 'prestamo' ? 'Quién se lleva la herramienta' : 'Quién retira (opcional)';
+}
+$('modo').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b || b.dataset.m === modo) return;
+  modo = b.dataset.m; carro = [];
+  [...$('modo').children].forEach(x => { x.className = x.dataset.m === modo ? 'on ' + ({entrada:'ent', salida:'sal', prestamo:'pre'}[modo]) : ''; });
+  ajustarModo(); pintarCarro();
+});
+
+$('revisar').addEventListener('click', () => {
+  if(!carro.length) return;
+  const pre = modo === 'prestamo';
+  if(pre && !$('pers').value){ aviso('Elige quién se lleva la herramienta.'); $('pers').focus(); return; }
+  const filas = carro.map(l => ({m: matDe(l.mid), e: l.env})).filter(f => f.m);
+  const cant = filas.reduce((t, f) => t + f.e, 0), m2 = pre ? 0 : filas.reduce((t, f) => t + f.e * (f.m.m2Env || 0), 0);
+  nonceRes = nuevoNonce(); $('resErr').textContent = '';
+  const dias = Math.max(1, Math.min(90, Math.round(Number($('dias').value)) || 1)), lim = new Date(); lim.setDate(lim.getDate() + dias - 1);
+  const pn = $('pers').value ? nomPer($('pers').value) : 'sin indicar';
+  $('resT').textContent = modo === 'entrada' ? 'Resumen de la recepción' : modo === 'salida' ? 'Resumen de la salida' : 'Resumen del préstamo';
+  $('resSub').textContent = modo === 'entrada' ? ('Proveedor: ' + (limpio($('prov').value, 60) || 'sin indicar') + ' · Guía: ' + (limpio($('guia').value, 30) || 'sin indicar')) : modo === 'salida' ? ('Destino: ' + (limpio($('dest').value, 60) || 'sin indicar') + ' · Retira: ' + pn) : ('Para: ' + pn + ' · Devolver antes del ' + fechaC(lim.getTime()));
+  $('rLin').textContent = filas.length; $('rBul').textContent = fmt(cant); $('rUni').textContent = m2 ? fmt(m2) : '—';
+  $('rBulL').textContent = pre ? 'herramientas' : 'envases (cajas, sacos, rollos…)';
+  $('resTabla').innerHTML = '<thead><tr><th>' + (pre ? 'Herramienta' : 'Material') + '</th><th class="n">Cantidad</th><th class="n">Stock después</th></tr></thead><tbody>' + filas.map(f => {
+    const un = f.e * fac(f.m), des = f.m.stock + (modo === 'entrada' ? 1 : -1) * un;
+    const q = pre ? fmt(un) + ' ' + f.m.unidad : cantTxt(f.m, un), dq = pre ? fmt(Math.max(des, 0)) + ' ' + f.m.unidad : cantTxt(f.m, Math.max(des, 0));
+    return '<tr><td><b>' + esc(f.m.nombre) + '</b></td><td class="n">' + esc(q) + '</td><td class="n" style="' + (des < 0 ? 'color:var(--bad);font-weight:700;' : '') + '">' + esc(dq) + (des < 0 ? '<small>faltan ' + fmt(-des) + ' ' + esc(f.m.unidad) + '</small>' : '') + '</td></tr>';
+  }).join('') + '</tbody>';
+  const falta = modo !== 'entrada' && filas.some(f => f.m.stock - f.e * fac(f.m) < 0);
+  $('resOk').disabled = falta; $('resOk').title = falta ? 'No se puede sacar más de lo que hay. Corrige las cantidades.' : '';
+  $('resOk').textContent = pre ? 'Aceptar y registrar préstamo' : 'Aceptar y guardar en bodega';
+  $('veloRes').classList.add('on');
+});
+$('resVolver').addEventListener('click', () => $('veloRes').classList.remove('on'));
+$('resOk').addEventListener('click', async () => {
+  const btn = $('resOk'), txt = btn.textContent; btn.disabled = true; btn.textContent = 'Guardando…'; $('resErr').textContent = '';
+  const pre = modo === 'prestamo';
+  const r = pre
+    ? await api('bodegaPrestar', {nonce:nonceRes, persona:$('pers').value, dias:Math.max(1, Math.min(90, Math.round(Number($('dias').value)) || 1)), items:carro.map(l => ({mid:l.mid, uni:l.env}))})
+    : await api('bodegaMovimiento', {nonce:nonceRes, tipo:modo, guia:limpio($('guia').value, 30), prov:limpio($('prov').value, 60), dest:limpio($('dest').value, 60), persona:modo === 'salida' ? $('pers').value : '', items:carro.map(l => ({mid:l.mid, env:l.env}))});
+  btn.textContent = txt; btn.disabled = false;
+  if(!r.ok){ if(r.error !== 'sin_sesion') $('resErr').textContent = msgError(r); return; }
+  carro = []; $('prov').value = $('guia').value = $('dest').value = ''; $('pers').value = ''; $('dias').value = 1;
+  $('veloRes').classList.remove('on'); aplicar(r); pintarCarro();
+  aviso(modo === 'entrada' ? 'Recepción guardada en bodega.' : modo === 'salida' ? 'Salida guardada.' : 'Préstamo registrado.');
+});
+
+// ---------- Catálogo ----------
+const opts = (arr, sel) => arr.map((x, i) => '<option value="' + i + '"' + (sel === i ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
+const optsTxt = (arr, sel) => arr.map(x => '<option' + (sel === x ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
+let editando = null;
+function abrirMaterial(id, codigoNuevo){
+  if(!puede) return;
+  editando = id ? matDe(id) : null;
+  const m = editando;
+  $('matT').textContent = m ? 'Editar material' : (codigoNuevo ? 'Código nuevo' : 'Material nuevo');
+  $('matSub').textContent = codigoNuevo ? 'El código ' + codigoNuevo + ' no está en el catálogo. Completa el material para asociarlo y se agregará a lo escaneado.' : '';
+  $('mNom').value = m ? m.nombre : ''; $('mCod').value = m ? m.codigos.join(', ') : (codigoNuevo || '');
+  $('mCat').innerHTML = opts(CATS, m ? m.cat : 0); $('mEnv').innerHTML = optsTxt(ENVASES, m ? m.envase : 'caja'); $('mUni').innerHTML = optsTxt(UNIDADES, m ? m.unidad : 'unidades');
+  $('mPor').value = m ? m.porEnvase : 1; $('mM2').value = m ? (m.m2Env || '') : ''; $('mMin').value = m ? m.min : 0; $('mRet').checked = !!(m && m.ret);
+  $('mErr').textContent = ''; $('veloMat').classList.add('on'); $('mNom').focus();
+}
+$('mCan').addEventListener('click', () => { $('veloMat').classList.remove('on'); pendienteCod = null; });
+$('mOk').addEventListener('click', async () => {
+  const nombre = limpio($('mNom').value, 80), cods = $('mCod').value.split(',').map(c => limpio(c, 60)).filter(Boolean);
+  const por = Math.round(Number($('mPor').value)), min = Math.max(0, Math.round(Number($('mMin').value)) || 0), m2 = Math.max(0, Number($('mM2').value) || 0);
+  if(!nombre){ $('mErr').textContent = 'Escribe el nombre del material.'; return; }
+  if(!cods.length){ $('mErr').textContent = 'Agrega al menos un código.'; return; }
+  if(cods.length > 6){ $('mErr').textContent = 'Máximo 6 códigos por material.'; return; }
+  if(!(por >= 1)){ $('mErr').textContent = 'Las unidades por envase deben ser 1 o más.'; return; }
+  const choque = D.materiales.find(x => x !== editando && x.codigos.some(c => cods.some(k => k.toLowerCase() === c.toLowerCase())));
+  if(choque){ $('mErr').textContent = 'Un código ya pertenece a «' + choque.nombre + '».'; return; }
+  const datos = {nombre, cat:Number($('mCat').value), codigos:cods, envase:$('mEnv').value, unidad:$('mUni').value, porEnvase:por, m2Env:m2, min, ret:$('mRet').checked ? 1 : 0};
+  if(editando) datos.id = editando.id;
+  const b = $('mOk'); b.disabled = true; b.textContent = 'Guardando…';
+  const r = await api('bodegaMaterial', {material:datos});
+  b.disabled = false; b.textContent = 'Guardar y cerrar';
+  if(!r.ok){ if(r.error !== 'sin_sesion') $('mErr').textContent = r.error === 'codigo_repetido' ? 'Un código ya pertenece a «' + (r.con || 'otro material') + '».' : msgError(r); return; }
+  $('veloMat').classList.remove('on'); aplicar(r);
+  if(pendienteCod){ const c = pendienteCod; pendienteCod = null; agregarCodigo(c); }
+  aviso('Material guardado.');
+});
+$('nuevoMat').addEventListener('click', () => abrirMaterial(null, ''));
+$('tCat').addEventListener('click', e => { const b = e.target.closest('button[data-e]'); if(b) abrirMaterial(b.dataset.e); });
+$('impEj').addEventListener('click', async () => {
+  const b = $('impEj'); b.disabled = true; b.textContent = 'Cargando…';
+  const r = await api('bodegaImportar', {materiales:EJEMPLO});
+  b.disabled = false; b.textContent = 'Cargar catálogo de ejemplo';
+  if(!r.ok){ if(r.error !== 'sin_sesion') aviso(msgError(r)); return; }
+  aplicar(r); aviso(r.agregados + ' materiales cargados.');
+});
+
+// ---------- Personas ----------
+let editPer = null;
+function opcionesSub(sel){ return '<option value="">Sin subcontrato</option>' + D.personas.filter(p => p.tipo === 'subcontrato').map(p => '<option' + (p.nombre === sel ? ' selected' : '') + '>' + esc(p.nombre) + '</option>').join(''); }
+function abrirPersona(id){
+  if(!puede) return;
+  editPer = id ? perDe(id) : null; const p = editPer;
+  $('perT').textContent = p ? 'Editar persona' : 'Persona o subcontrato nuevo';
+  $('pNom').value = p ? p.nombre : ''; $('pTipo').value = p ? p.tipo : 'trabajador'; $('pSub').innerHTML = opcionesSub(p ? p.sub : ''); $('pAct').checked = p ? p.activo : true;
+  $('lbPSub').hidden = $('pTipo').value !== 'trabajador'; $('pErr').textContent = ''; $('veloPer').classList.add('on'); $('pNom').focus();
+}
+$('pTipo').addEventListener('change', () => { $('lbPSub').hidden = $('pTipo').value !== 'trabajador'; });
+$('pCan').addEventListener('click', () => $('veloPer').classList.remove('on'));
+$('pOk').addEventListener('click', async () => {
+  const nombre = limpio($('pNom').value, 60); if(!nombre){ $('pErr').textContent = 'Escribe el nombre.'; return; }
+  const tipo = $('pTipo').value, persona = {nombre, tipo, sub:tipo === 'trabajador' ? $('pSub').value : '', activo:$('pAct').checked};
+  if(editPer) persona.id = editPer.id;
+  const b = $('pOk'); b.disabled = true; b.textContent = 'Guardando…';
+  const r = await api('bodegaPersona', {persona});
+  b.disabled = false; b.textContent = 'Guardar y cerrar';
+  if(!r.ok){ if(r.error !== 'sin_sesion') $('pErr').textContent = msgError(r); return; }
+  $('veloPer').classList.remove('on'); aplicar(r); aviso('Guardado.');
+});
+$('nuevaPer').addEventListener('click', () => abrirPersona(null));
+$('tPer').addEventListener('click', e => { const b = e.target.closest('button[data-p]'); if(b) abrirPersona(b.dataset.p); });
+function pintarPer(){
+  const subs = D.personas.filter(p => p.tipo === 'subcontrato'), trab = D.personas.filter(p => p.tipo === 'trabajador');
+  const tienen = id => D.prestamos.filter(l => l.persona === id && pend(l) > 0);
+  const fila = p => { const t = tienen(p.id), v = t.some(vencido); return '<tr><td><b>' + esc(p.nombre) + '</b>' + (p.sub ? '<small>' + esc(p.sub) + '</small>' : '') + '</td><td>' + (p.tipo === 'subcontrato' ? 'Subcontrato' : 'Trabajador') + '</td><td>' + (p.activo ? '<span class="pill ok">Activo</span>' : '<span class="pill">Inactivo</span>') + '</td><td>' + (t.length ? '<span class="pill ' + (v ? 'bad' : 'warn') + '">' + (v ? 'Sin devolver' : 'Tiene herramientas') + '</span>' : '—') + '</td><td class="n edita"><button class="btn small" type="button" data-p="' + esc(p.id) + '">Editar</button></td></tr>'; };
+  const cab = t => '<tr><td colspan="5" style="background:var(--soft);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);">' + t + '</td></tr>';
+  $('tPer').innerHTML = '<thead><tr><th>Nombre</th><th>Tipo</th><th>Estado</th><th>Herramientas</th><th></th></tr></thead><tbody>' + (D.personas.length ? (subs.length ? cab('Subcontratos') + subs.map(fila).join('') : '') + (trab.length ? cab('Trabajadores') + trab.map(fila).join('') : '') : '<tr><td colspan="5"><div class="vacio">Aún no hay personas. Agrega los subcontratos y trabajadores de la obra.</div></td></tr>') + '</tbody>';
+}
+
+// ---------- Filtro por persona / subcontrato ----------
+let filtro = '';
+function coincide(pid){
+  if(!filtro) return true;
+  if(pid === filtro) return true;
+  const f = perDe(filtro), p = perDe(pid);
+  return !!(f && p && f.tipo === 'subcontrato' && p.sub === f.nombre);
+}
+function chips(){
+  const act = D.personas.filter(p => p.activo || p.id === filtro);
+  const subs = act.filter(p => p.tipo === 'subcontrato'), trab = act.filter(p => p.tipo === 'trabajador');
+  const c = (id, t, cls) => '<button type="button" class="chip' + (filtro === id ? ' on' : '') + (cls ? ' ' + cls : '') + '" data-f="' + esc(id) + '">' + t + '</button>';
+  return c('', 'Todos') + subs.map(p => c(p.id, '▣ ' + esc(p.nombre), 'sub')).join('') + trab.map(p => c(p.id, esc(p.nombre))).join('');
+}
+function pintarChips(){ $('chipsPre').innerHTML = $('chipsHist').innerHTML = chips(); }
+['chipsPre', 'chipsHist'].forEach(id => $(id).addEventListener('click', e => { const b = e.target.closest('button[data-f]'); if(!b) return; filtro = b.dataset.f; pintarChips(); pintarPre(); pintarHist(); }));
+
+// ---------- Vistas ----------
+function selCats(){ ['bCat', 'cCat'].forEach(id => { const v = $(id).value; $(id).innerHTML = '<option value="">Todas</option>' + opts(CATS, -1); $(id).value = v; }); }
+function agrupar(lista, fila, cols){
+  let html = '', ult = -1;
+  lista.slice().sort((a, b) => a.cat - b.cat).forEach(m => {
+    if(m.cat !== ult){ ult = m.cat; html += '<tr><td colspan="' + cols + '" style="background:var(--soft);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);">' + esc(CATS[m.cat]) + '</td></tr>'; }
+    html += fila(m);
+  });
+  return html;
+}
+function usoDe(mid){ let uso = 0, ven = 0; D.prestamos.forEach(l => { if(l.mid === mid){ const p = pend(l); uso += p; if(vencido(l)) ven += p; } }); return {uso, ven}; }
+function pintarStock(){
+  const q = limpio($('bStock').value, 40).toLowerCase(), c = $('bCat').value;
+  const l = D.materiales.filter(m => (c === '' || m.cat === Number(c)) && (!q || m.nombre.toLowerCase().includes(q) || m.codigos.some(x => x.toLowerCase().includes(q))));
+  $('tStock').innerHTML = '<thead><tr><th>Material</th><th class="n">En bodega</th><th class="n">Mínimo</th><th>Estado</th></tr></thead><tbody>' + (agrupar(l, m => {
+    const [cl, t] = nivel(m), u = m.ret ? usoDe(m.id) : {uso:0, ven:0};
+    const extra = u.uso ? '<small style="' + (u.ven ? 'color:var(--bad);font-weight:700;' : '') + '">En uso: ' + fmt(u.uso) + (u.ven ? ' · ' + fmt(u.ven) + ' sin devolver' : '') + '</small>' : '';
+    return '<tr><td><b>' + esc(m.nombre) + '</b>' + (m.ret ? ' <span class="pill">Herramienta</span>' : '') + '<small>' + esc(m.codigos.join(' · ')) + '</small></td><td class="n"><b>' + esc(cantTxt(m, m.stock)) + '</b>' + extra + '</td><td class="n">' + envTxt(m, m.min) + '</td><td><span class="pill ' + cl + '">' + t + '</span></td></tr>';
+  }, 4) || '<tr><td colspan="4"><div class="vacio">' + (D.materiales.length ? 'Nada coincide con la búsqueda.' : 'El catálogo está vacío.') + '</div></td></tr>') + '</tbody>';
+}
+function pintarHist(){
+  const tipo = $('fTipo').value, q = limpio($('fBus').value, 40).toLowerCase();
+  const nom = i => (matDe(i.mid) || {nombre:''}).nombre;
+  const l = D.mov.filter(x => (!tipo || x.tipo === tipo) && coincide(x.persona) && (!filtro || x.persona) && (!q || [x.guia, x.prov, x.dest, x.quien, x.persona ? nomPer(x.persona) : '', (x.items || []).map(nom).join(' ')].join(' ').toLowerCase().includes(q)));
+  $('tHist').innerHTML = '<thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Materiales</th><th>Registró</th></tr></thead><tbody>' + (l.map(x => {
+    const pers = x.persona ? '<small>' + (x.tipo === 'entrada' && x.guia === 'Devolución' ? 'Devuelve: ' : 'Para: ') + esc(nomPer(x.persona)) + '</small>' : '';
+    const det = x.tipo === 'entrada' ? (x.guia === 'Devolución' ? 'Devolución de herramienta' : esc(x.prov || '—') + '<small>Guía ' + esc(x.guia || '—') + '</small>') : esc(x.dest || '—');
+    return '<tr><td>' + fecha(x.ts) + '</td><td><span class="pill ' + (x.tipo === 'entrada' ? 'ok' : 'warn') + '">' + (x.tipo === 'entrada' ? (x.guia === 'Devolución' ? 'Devolución' : 'Recepción') : (/^Préstamo/.test(x.dest) ? 'Préstamo' : 'Salida')) + '</span></td><td>' + det + pers + '</td><td>' + (x.items || []).map(i => { const m = matDe(i.mid); return m ? esc(m.nombre) + ' <small>' + esc(cantTxt(m, i.unidades)) + '</small>' : '(material eliminado)'; }).join('') + '</td><td>' + esc(x.quien) + '</td></tr>';
+  }).join('') || '<tr><td colspan="5"><div class="vacio">Sin movimientos.</div></td></tr>') + '</tbody>';
+}
+function pintarCat(){
+  const c = $('cCat').value, l = D.materiales.filter(m => c === '' || m.cat === Number(c));
+  $('cardImp').hidden = !(puede && !D.materiales.length);
+  $('tCat').innerHTML = '<thead><tr><th>Material</th><th>Códigos</th><th class="n">Cada envase</th><th class="n">Mínimo</th><th></th></tr></thead><tbody>' + (agrupar(l, m => '<tr><td><b>' + esc(m.nombre) + '</b>' + (m.ret ? ' <span class="pill">Herramienta</span>' : '') + '</td><td><small style="color:var(--text)">' + esc(m.codigos.join(' · ')) + '</small></td><td class="n">' + (m.porEnvase > 1 ? '1 ' + esc(m.envase) + ' = ' + fmt(m.porEnvase) + ' ' + esc(m.unidad) : '1 ' + esc(m.envase)) + (m.m2Env ? '<small>' + fmt(m.m2Env) + ' m²</small>' : '') + '</td><td class="n">' + envTxt(m, m.min) + '</td><td class="n edita"><button class="btn small" type="button" data-e="' + esc(m.id) + '">Editar</button></td></tr>', 5) || '<tr><td colspan="5"><div class="vacio">Sin materiales.</div></td></tr>') + '</tbody>';
+}
+function pintarPre(){
+  const hs = D.materiales.filter(m => m.ret);
+  const venc = D.prestamos.filter(vencido);
+  $('preCuenta').textContent = D.prestamos.filter(l => pend(l) > 0).length + ' préstamos abiertos';
+  $('tUso').innerHTML = '<thead><tr><th>Herramienta</th><th class="n">En bodega</th><th class="n">En uso</th><th class="n">Sin devolver</th></tr></thead><tbody>' + (hs.map(m => {
+    const u = usoDe(m.id);
+    return '<tr><td><b>' + esc(m.nombre) + '</b></td><td class="n">' + fmt(m.stock) + '</td><td class="n">' + (u.uso ? '<b>' + fmt(u.uso) + ' en uso</b>' : '—') + '</td><td class="n">' + (u.ven ? '<span class="pill bad">' + fmt(u.ven) + ' sin devolver</span>' : '—') + '</td></tr>';
+  }).join('') || '<tr><td colspan="4"><div class="vacio">No hay herramientas. En el Catálogo marca un material como «herramienta que se presta».</div></td></tr>') + '</tbody>';
+  const todo = $('fPre').value === 'todos';
+  const l = D.prestamos.filter(x => coincide(x.persona) && (todo || pend(x) > 0)).slice().sort((a, b) => (vencido(b) - vencido(a)) || ((pend(b) > 0) - (pend(a) > 0)) || (a.limite - b.limite));
+  $('tPre').innerHTML = '<thead><tr><th>Quién</th><th>Herramienta</th><th class="n">Cant.</th><th>Se llevó</th><th>Devolver antes de</th><th>Estado</th><th></th></tr></thead><tbody>' + (l.map(x => {
+    const m = matDe(x.mid), p = pend(x), v = vencido(x), per = perDe(x.persona);
+    const est = p === 0 ? '<span class="pill ok">Devuelto</span>' : v ? '<span class="pill bad">No se ha devuelto · ' + diasAtraso(x) + (diasAtraso(x) === 1 ? ' día' : ' días') + ' de atraso</span>' : '<span class="pill warn">En uso</span>';
+    return '<tr' + (v ? ' class="venc"' : '') + '><td><b>' + esc(nomPer(x.persona)) + '</b>' + (per && per.sub ? '<small>' + esc(per.sub) + '</small>' : '') + '</td><td>' + esc(m ? m.nombre : '(eliminada)') + '<small class="mq">× ' + fmt(p || x.uni) + (p ? ' · devolver antes de ' + fechaC(x.limite) : '') + '</small></td><td class="n">' + (p ? fmt(p) + (p !== x.uni ? ' de ' + fmt(x.uni) : '') : fmt(x.uni)) + '</td><td>' + fechaC(x.ts) + '</td><td' + (v ? ' style="color:var(--bad);font-weight:700;"' : '') + '>' + fechaC(x.limite) + '</td><td>' + est + '</td><td class="n edita">' + (p ? '<button class="btn small" type="button" data-dev="' + esc(x.id) + '">Devolver</button>' : '') + '</td></tr>';
+  }).join('') || '<tr><td colspan="7"><div class="vacio">' + (filtro ? 'Esta persona no tiene herramientas ' + (todo ? 'registradas.' : 'pendientes.') : 'No hay herramientas pendientes de devolución.') + '</div></td></tr>') + '</tbody>';
+  const a = $('alertaV');
+  if(venc.length){
+    const res = venc.slice(0, 3).map(x => { const m = matDe(x.mid); return esc((m ? m.nombre : '?')) + ' (' + esc(nomPer(x.persona)) + ', ' + diasAtraso(x) + ' d)'; }).join(' · ');
+    a.innerHTML = '<b>⚠ ' + venc.length + (venc.length === 1 ? ' préstamo' : ' préstamos') + ' sin devolver fuera de plazo:</b> ' + res + (venc.length > 3 ? ' y ' + (venc.length - 3) + ' más' : '') + ' <button class="btn small" id="verVenc" type="button">Ver</button>'; a.hidden = false;
+  } else a.hidden = true;
+}
+$('alertaV').addEventListener('click', e => { if(e.target.id === 'verVenc'){ filtro = ''; $('fPre').value = 'pend'; irTab('pre'); pintarChips(); pintarPre(); } });
+$('fPre').addEventListener('change', pintarPre);
+$('irPrestar').addEventListener('click', () => { irTab('mov'); [...$('modo').children].find(b => b.dataset.m === 'prestamo').click(); });
+
+// ---------- Devolver ----------
+let devId = '', devNonce = '';
+$('tPre').addEventListener('click', e => {
+  const b = e.target.closest('button[data-dev]'); if(!b || !puede) return;
+  const l = D.prestamos.find(x => x.id === b.dataset.dev); if(!l) return; const m = matDe(l.mid);
+  devId = l.id; devNonce = nuevoNonce();
+  $('devSub').textContent = nomPer(l.persona) + ' tiene ' + fmt(pend(l)) + ' × ' + (m ? m.nombre : 'herramienta') + '.';
+  $('devN').max = pend(l); $('devN').value = pend(l); $('devErr').textContent = ''; $('veloDev').classList.add('on'); $('devN').focus();
+});
+$('devCan').addEventListener('click', () => $('veloDev').classList.remove('on'));
+$('devOk').addEventListener('click', async () => {
+  const n = Math.round(Number($('devN').value)); if(!(n >= 1)){ $('devErr').textContent = 'Escribe cuántas vuelven.'; return; }
+  const b = $('devOk'); b.disabled = true; b.textContent = 'Guardando…';
+  const r = await api('bodegaDevolver', {id:devId, uni:n, nonce:devNonce});
+  b.disabled = false; b.textContent = 'Devolver a bodega';
+  if(!r.ok){ if(r.error !== 'sin_sesion') $('devErr').textContent = msgError(r); return; }
+  $('veloDev').classList.remove('on'); aplicar(r); aviso('Devuelto a bodega.');
+});
+
+function pintarTodo(){ pintarPersSel(); pintarChips(); pintarStock(); pintarHist(); pintarCat(); pintarPre(); pintarPer(); pintarCarro(); }
+['bStock', 'bCat'].forEach(id => $(id).addEventListener('input', pintarStock)); $('cCat').addEventListener('change', pintarCat);
+$('fTipo').addEventListener('change', pintarHist); $('fBus').addEventListener('input', pintarHist);
+function irTab(t){
+  [...$('tabs').children].forEach(x => x.classList.toggle('on', x.dataset.t === t));
+  ['mov', 'pre', 'stock', 'hist', 'cat', 'per'].forEach(k => { $('v-' + k).hidden = k !== t; });
+  if(t === 'mov') $('codigo').focus();
+}
+$('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if(b) irTab(b.dataset.t); });
+$('refrescar').addEventListener('click', async () => { const ok = await recargar(); if(ok) aviso('Datos actualizados.'); });
+$('reintentar').addEventListener('click', recargar);
+
+// ---------- Cámara ----------
+let stream = null, tim = 0;
+async function camara(){
+  const v = $('video');
+  if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; clearInterval(tim); v.classList.remove('on'); $('camBtn').textContent = '📷 Cámara'; return; }
+  if(!('BarcodeDetector' in window) || !navigator.mediaDevices){ $('err').textContent = 'Este aparato o navegador no permite leer con la cámara. Usa la pistola o escribe el código.'; return; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    v.srcObject = stream; await v.play(); v.classList.add('on'); $('camBtn').textContent = '✖ Cerrar cámara';
+    const det = new BarcodeDetector({formats:['qr_code', 'ean_13', 'code_128', 'code_39']});
+    let ultimo = '', t0 = 0;
+    tim = setInterval(async () => { try{ const r = await det.detect(v); if(r.length){ const val = r[0].rawValue; if(val !== ultimo || Date.now() - t0 > 1800){ ultimo = val; t0 = Date.now(); agregarCodigo(val); } } }catch(e){} }, 250);
+  }catch(e){ $('err').textContent = 'No se pudo abrir la cámara. Revisa el permiso del navegador.'; }
+}
+$('camBtn').addEventListener('click', camara);
+
+const temas = ['auto', 'claro', 'oscuro']; let ti = 0;
+function aplicarTema(){
+  const t = temas[ti];
+  if(t === 'auto') document.documentElement.removeAttribute('data-tema'); else document.documentElement.setAttribute('data-tema', t);
+  $('tema').textContent = 'Tema: ' + t[0].toUpperCase() + t.slice(1);
+  try{ if(t === 'auto') localStorage.removeItem('ofTema'); else localStorage.setItem('ofTema', t); }catch(e){}
+}
+try{ const g = localStorage.getItem('ofTema'); if(g === 'claro' || g === 'oscuro') ti = temas.indexOf(g); }catch(e){}
+$('tema').addEventListener('click', () => { ti = (ti + 1) % 3; aplicarTema(); });
+aplicarTema();
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ ['veloRes', 'veloMat', 'veloPer', 'veloDev'].forEach(i => $(i).classList.remove('on')); } });
+
+selCats(); ajustarModo(); pintarCarro(); pintarTodo();
+(async function init(){
+  let j = null;
+  try{ j = await window.__bodAcceso; }catch(e){}
+  if(j && (j.error === 'sin_sesion' || (j.ok && j.secciones && j.secciones.indexOf('bodega') === -1))) return; // el portón ya lo está sacando
+  fijarRol(j);
+  if(!puede) irTab('pre');
+  await recargar();
+  if(window.CargaPagina) CargaPagina.fin();
+})();
+
+})();
+</script>
+</body>
+</html>

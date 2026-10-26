@@ -2142,6 +2142,7 @@ function matCompletarParams(){
 function aplicarCeramicas(){
   if(!ceramicas || !ceramicas.zonas){ matCompletarParams(); return; }
   if(cerCompletarCajas() && isAdmin && typeof markSettingsDirty === 'function') markSettingsDirty('ceramicas');
+  Object.keys(ceramicas.zonas).forEach(k => { const z = ceramicas.zonas[k]; if(z && typeof z.nota === 'string' && /dilat/i.test(z.nota)) z.nota = 'Junta de 3 mm entre cerámicas.'; if(z){ delete z.dilatCada; delete z.dilatAncho; } });
   MAT_TIPOS.forEach(([k]) => {
     const z = ceramicas.zonas[k]; if(!z) return;
     const pal = (ceramicas.catalogo || []).find(p => p.id === z.pal); if(!pal) return;
@@ -3519,14 +3520,15 @@ function pisoFlechasHtml(piso){
 }
 function pisoVerCompleto(piso){
   const buscar = () => [...document.querySelectorAll('.floor-block')].find(f => f.dataset.piso === piso);
-  const y = el => el.getBoundingClientRect().top + window.scrollY - 56;
+  const y = el => Math.max(0, el.getBoundingClientRect().top + window.scrollY - 56);
+  // Sin desplazamiento largo: se coloca el piso arriba de una vez (así no se pasa de largo y vuelve) y entra con un fundido corto.
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const el = buscar(); if(!el) return;
+    window.scrollTo({top: y(el), behavior: 'instant'});
     el.classList.add('piso-entra');
     setTimeout(() => el.classList.remove('piso-entra'), 260);
-    window.scrollTo({top: y(el), behavior: 'smooth'});
     // el contenido de los pisos lejanos termina de medirse al llegar: si quedó corrido, se corrige sin animar
-    [450, 900].forEach(ms => setTimeout(() => { const e2 = buscar(); if(e2 && Math.abs(y(e2) - window.scrollY) > 6) window.scrollTo({top: y(e2)}); }, ms));
+    [250, 700].forEach(ms => setTimeout(() => { const e2 = buscar(); if(e2 && Math.abs(y(e2) - window.scrollY) > 6) window.scrollTo({top: y(e2), behavior: 'instant'}); }, ms));
   }));
 }
 
@@ -4524,8 +4526,8 @@ document.getElementById('matCerrarBtn').addEventListener('click', () => {
 const CER_ZONAS = [['piso','Piso'],['muroBano','Muro baño'],['muroCocina','Muro cocina'],['pasillo','Pasillo']];
 function ceramicasBase(){
   const p = MATERIALES.params, cat = [{id:'p15x60', ancho:15, largo:60, porCaja:p.piso.porCaja || 0}, {id:'p30x60', ancho:30, largo:60, porCaja:p.muroBano.porCaja || 0}, {id:'p60x60', ancho:60, largo:60, porCaja:4}];
-  const z = (k, pal, dc, nota) => ({pal, merma:p[k].merma, kgSaco:p[k].kgSaco, consumo:p[k].consumo, traslape:'recto', sentido:'', junta:3, dilatCada:dc || 0, dilatAncho:5, nota:nota || ''});
-  return {catalogo: cat, zonas: {piso:z('piso','p15x60', 0, 'Dilatar 5 mm en el encuentro piso-muro y en espacios sobre 16 m².'), muroBano:z('muroBano','p30x60', 0, 'Dilatar 5 mm en el encuentro con el piso.'), muroCocina:z('muroCocina','p30x60', 0, 'Dilatar 5 mm en el encuentro con el piso.'), pasillo:z('pasillo','p60x60', 4, 'Pasillo hasta 2 m de ancho: dilatar 5 mm cada 4 m lineales.')}};
+  const z = (k, pal, dc, nota) => ({pal, merma:p[k].merma, kgSaco:p[k].kgSaco, consumo:p[k].consumo, traslape:'recto', sentido:'', junta:3, nota:nota || ''});
+  return {catalogo: cat, zonas: {piso:z('piso','p15x60', 0, 'Junta de 3 mm entre cerámicas.'), muroBano:z('muroBano','p30x60', 0, 'Junta de 3 mm entre cerámicas.'), muroCocina:z('muroCocina','p30x60', 0, 'Junta de 3 mm entre cerámicas.'), pasillo:z('pasillo','p60x60', 0, 'Junta de 3 mm entre cerámicas.')}};
 }
 function ceramicasTrabajo(){
   if(!ceramicas) ceramicas = ceramicasBase();
@@ -4552,7 +4554,7 @@ function renderCeramicas(){
     + '<li>Rendimiento: <b>1,6 kg/m² por mm</b> de espesor. Espesor de 2 a 15 mm.</li>'
     + '<li>Tiempo de trabajo 1 h. Tiempo abierto máx. 20 min a 20 °C. Secado 48 h.</li>'
     + '<li>Temperatura de trabajo de 5 a 25 °C. Dura 9 meses desde el envasado.</li>'
-    + '<li>Cantería (junta) superior a 3 mm. Dilatación de 5 mm cada 4 m lineales en pasillo de hasta 2 m de ancho o en espacios sobre 16 m², y en todo encuentro piso-muro.</li></ul>'
+    + '<li>Separación entre cerámicas (cantería): <b>3 mm</b>.</li></ul>'
     + '<div class="cer-alerta">Ojo: sobre revestimientos de 50×50 cm, o tablas de más de 60 cm de largo, el saco dice «consultar a su ejecutivo». Las palmetas de 60×60 superan los 50×50.</div></div></div>'
     + '<div class="cer-sec"><h4>¿Dónde va cada una?</h4>' + CER_ZONAS.map(([k, n]) => {
       const z = (c.zonas && c.zonas[k]) || ceramicasBase().zonas[k];
@@ -4562,8 +4564,6 @@ function renderCeramicas(){
         + `<label>Traslape<select data-zc="traslape">${sel([['recto','Recto (sin traslape)'],['1/2','1/2'],['1/3','1/3'],['1/4','1/4'],['otro','Otro (ver nota)']], z.traslape)}</select></label>`
         + `<label>Sentido de colocación<select data-zc="sentido">${sel([['','Sin definir'],['horizontal','Horizontal'],['vertical','Vertical'],['diagonal','Diagonal']], z.sentido)}</select></label>`
         + `<label>Junta (mm)<input type="number" min="0" step="any" inputmode="decimal" data-zc="junta" value="${nums(z.junta)}"></label>`
-        + `<label>Dilatación cada (m)<input type="number" min="0" step="any" inputmode="decimal" data-zc="dilatCada" value="${nums(z.dilatCada)}"></label>`
-        + `<label>Ancho dilatación (mm)<input type="number" min="0" step="any" inputmode="decimal" data-zc="dilatAncho" value="${nums(z.dilatAncho)}"></label>`
         + `<label>Pegamento: kg por saco<input type="number" min="0" step="any" inputmode="decimal" data-zc="kgSaco" value="${nums(z.kgSaco)}"></label>`
         + `<label>Pegamento: consumo kg/m²<input type="number" min="0" step="any" inputmode="decimal" data-zc="consumo" value="${nums(z.consumo)}"></label>`
         + `<div class="cer-hint${cerHintCapa(z.consumo).mal ? ' mal' : ''}" data-hint>${esc(cerHintCapa(z.consumo).txt)}</div>`
@@ -4976,13 +4976,14 @@ function autoAlto(caja, cont){
   }).observe(cont);
 }
 // ---- permisos de invitado por sección ----
-const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Trabajador': 'panel', 'Supervisor': 'panel'};
+const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
-const SECC_INV = [['panel', 'Panel de Cerámica'], ['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica']];
+const SECC_INV = [['panel', 'Panel de Cerámica'], ['calidad', 'Calidad'], ['avance', 'Dashboard'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica'], ['bodega', 'Bodega']];
 const DEMO_USUARIOS = [
   {nombre: 'Silvia Gonzales', cargo: 'Calidad', base: ['calidad'], extra: [], doble: true, dobleBase: true},
   {nombre: 'Sandoval', cargo: 'Jefe de Terreno', base: ['terreno', 'calidad', 'avance'], extra: [], doble: false},
   {nombre: 'Edwin Carroz', cargo: 'Oficina Técnica', base: ['oficina', 'avance'], extra: [], doble: false},
+  {nombre: 'Jefe de Bodega', cargo: 'Jefe de Bodega', base: ['bodega'], extra: [], doble: false},
   {nombre: 'Rafael', cargo: 'Trabajador', base: ['panel'], extra: [], doble: false}
 ];
 async function abrirPermisosSecciones(){
@@ -5039,17 +5040,18 @@ async function abrirPermisosSecciones(){
 }
 document.getElementById('seccionesBtn').addEventListener('click', abrirPermisosSecciones);
 // ---- Panel de Admin: usuarios, bloqueos y encargados (solo Admin) ----
-const ADM_SECC = [['panel', 'Panel de Cerámica y Frague'], ['calidad', 'Control de calidad'], ['avance', 'Dashboard de avance'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica'], ['admin', 'Panel de Admin']];
+const ADM_SECC = [['panel', 'Panel de Cerámica y Frague'], ['calidad', 'Control de calidad'], ['avance', 'Dashboard de avance'], ['terreno', 'Jefe de Terreno'], ['oficina', 'Oficina Técnica'], ['bodega', 'Bodega'], ['admin', 'Panel de Admin']];
 const ADM_DEMO = {
   usuarios: [
     {fila: 2, nombre: 'Silvia Gonzales', cargo: 'Calidad', rol: 5, bloqueo: null},
     {fila: 3, nombre: 'Sandoval', cargo: 'Jefe de Terreno', rol: 4, bloqueo: null},
     {fila: 4, nombre: 'Edwin Carroz', cargo: 'Oficina Técnica', rol: 6, bloqueo: null},
+    {fila: 8, nombre: 'Jefe de Bodega', cargo: 'Jefe de Bodega', rol: 7, bloqueo: null},
     {fila: 5, nombre: 'Rafael', cargo: 'Trabajador', rol: 3, bloqueo: {permanente: false, hasta: Date.now() + 3 * 86400000, motivo: 'Vacaciones'}},
     {fila: 6, nombre: 'Ignacio', cargo: 'Supervisor', rol: 2, bloqueo: null},
     {fila: 7, nombre: 'Ismael S.', cargo: 'Admin', rol: 1, bloqueo: null}
   ],
-  encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzales', avance: 'A. Sandoval', terreno: 'A. Sandoval', oficina: 'Edwin Carroz', admin: 'Ismael S.'}
+  encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzales', avance: 'A. Sandoval', terreno: 'A. Sandoval', oficina: 'Edwin Carroz', bodega: 'Jefe de Bodega', admin: 'Ismael S.'}
 };
 async function abrirAdministracion(){
   const demo = !DB_URL;
@@ -5106,14 +5108,14 @@ async function abrirAdministracion(){
     const nf = cuerpo.querySelector('#admNuevoF');
     cuerpo.querySelector('#admNuevo').addEventListener('click', () => {
       nf.hidden = !nf.hidden; if(nf.hidden) return;
-      nf.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input id="admNN" placeholder="Nombre y apellido" maxlength="60" style="flex:1;min-width:180px;"><select id="admNR"><option value="3">Trabajador</option><option value="2">Supervisor</option><option value="4">Jefe de Terreno</option><option value="5">Calidad</option><option value="6">Oficina Técnica</option></select><button class="btn primary" id="admNG" type="button">Crear y generar PIN</button></div>';
+      nf.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input id="admNN" placeholder="Nombre y apellido" maxlength="60" style="flex:1;min-width:180px;"><select id="admNR"><option value="3">Trabajador</option><option value="2">Supervisor</option><option value="4">Jefe de Terreno</option><option value="5">Calidad</option><option value="6">Oficina Técnica</option><option value="7">Jefe de Bodega</option></select><button class="btn primary" id="admNG" type="button">Crear y generar PIN</button></div>';
       nf.querySelector('#admNG').addEventListener('click', async () => {
         const nombre = nf.querySelector('#admNN').value.trim(), rol = Number(nf.querySelector('#admNR').value);
         if(nombre.length < 2){ avisoToast(ERR.nombre_invalido, 'error'); return; }
         if(datos.usuarios.some(u => u.nombre.toLowerCase() === nombre.toLowerCase())){ avisoToast(ERR.nombre_repetido, 'error'); return; }
         const j = await accion('adminCrearUsuario', {nombre, rol}); if(!j) return;
         const pin = demo ? String(100000 + Math.floor(Math.random() * 899999)) : j.pin;
-        if(demo){ datos.usuarios.push({fila: datos.usuarios.length + 2, nombre, cargo: {2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica'}[rol], rol, bloqueo: null}); guardarDemo(); }
+        if(demo){ datos.usuarios.push({fila: datos.usuarios.length + 2, nombre, cargo: {2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega'}[rol], rol, bloqueo: null}); guardarDemo(); }
         else { const r = await llamarDb('adminUsuarios'); if(r && r.ok) datos.usuarios = r.usuarios; }
         mostrarPin(nombre, pin);
       });
@@ -5133,11 +5135,11 @@ async function abrirAdministracion(){
           u.nombre = nuevo; if(demo) guardarDemo(); admMsg('Nombre cambiado.', true); verUsuarios();
         });
       } else if(a === 'car'){
-        td.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="admCS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" type="button" id="admCG">Guardar cargo</button></div><div style="font-size:11.5px;color:var(--sub);margin-top:4px;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
+        td.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="admCS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica'],[7,'Jefe de Bodega']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" type="button" id="admCG">Guardar cargo</button></div><div style="font-size:11.5px;color:var(--sub);margin-top:4px;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
         td.querySelector('#admCG').addEventListener('click', async () => {
           const rol = Number(td.querySelector('#admCS').value);
           const j = await accion('adminCargo', {...base, rol}); if(!j) return;
-          u.rol = rol; u.cargo = demo ? ({2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica'})[rol] : j.cargo; if(demo) guardarDemo(); admMsg('Cargo cambiado.', true); verUsuarios();
+          u.rol = rol; u.cargo = demo ? ({2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega'})[rol] : j.cargo; if(demo) guardarDemo(); admMsg('Cargo cambiado.', true); verUsuarios();
         });
       } else if(a === 'pin'){
         td.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span>¿Generar un PIN nuevo para <b>' + esc(u.nombre) + '</b>? El anterior deja de servir.</span><button class="btn primary" type="button" id="admPG">Sí, generar</button></div>';

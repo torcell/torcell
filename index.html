@@ -184,6 +184,7 @@
   body.dz-D .cell-td.st-entregado{background:color-mix(in srgb,var(--entregado) 22%,var(--panel));box-shadow:none;}
   body.dz-D .cell-td.st-pagado{background:color-mix(in srgb,var(--pagado) 24%,var(--panel));box-shadow:none;}
   .dz-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  @media (min-width:1100px){.dz-cards{grid-template-columns:repeat(4,minmax(0,1fr));}}
   .dz-card{background:var(--panel);border:1px solid var(--border-strong);min-width:0;}
   .dz-ch{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--panel-soft);border-bottom:1px solid var(--border-strong);}
   .dz-ch b{font-size:18px;color:var(--text);margin-right:auto;}
@@ -592,6 +593,7 @@
           <button type="button" data-dest="avance"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg></span><span>Dashboard de avance<small>Resumen del avance de la obra</small><small class="enc">Encargado: A. Sandoval</small></span></button>
           <button type="button" data-dest="terreno"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17"/><path d="M9 4h6v3H9zM8.5 12h7M8.5 16h5"/></svg></span><span>Jefe de Terreno<small>Programación, personal y seguridad</small><small class="enc">Encargado: A. Sandoval</small></span></button>
           <button type="button" data-dest="oficina"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg></span><span>Oficina Técnica<small>Pagos y documentos</small><small class="enc">Encargado: Edwin Carroz</small></span></button>
+          <button type="button" data-dest="bodega"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5v11H3z"/><path d="M8 20v-7h8v7M8 16.5h8"/></svg></span><span>Bodega<small>Materiales, recepción y salidas con QR</small><small class="enc">Encargado: Jefe de Bodega</small></span></button>
           <button type="button" data-dest="admin"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span><span>Panel de Admin<small>Usuarios, permisos y rendimiento</small><small class="enc">Encargado: Ismael S.</small></span></button>
         </div>
         <button type="button" class="lg-salir" id="lgSalir">Salir y cambiar de cuenta</button>
@@ -603,13 +605,13 @@
 <script>
 const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
-const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', admin: 'admin.html'};
-const SECC_BASE = {1: ['panel', 'calidad', 'avance', 'terreno', 'oficina', 'admin'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance']};
+const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', bodega: 'bodega.html', admin: 'admin.html'};
+const SECC_BASE = {1: ['panel', 'calidad', 'avance', 'terreno', 'oficina', 'bodega', 'admin'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance'], 7: ['bodega']};
 const DESTINOS = SECC_BASE;
-const NOM_SECC = {admin: 'Panel de Admin', panel: 'Panel de Cerámica y Frague', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica'};
-const TXT_DEST = {admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…'};
+const NOM_SECC = {admin: 'Panel de Admin', panel: 'Panel de Cerámica y Frague', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica', bodega: 'Bodega'};
+const TXT_DEST = {admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…', bodega: 'Entrando a Bodega…'};
 const CARGOS_CALIDAD = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
-const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre'];
+const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre', 'bodegaToken', 'bodegaNombre'];
 const lg = id => document.getElementById(id);
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k, v){ try{ if(v === undefined) return localStorage.getItem(k); if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} return null; }
@@ -652,6 +654,7 @@ function limpiarTodo(){
 }
 function leerPanel(){ const t = ss('progresoObraToken') || ls('progresoObraToken'); const r = Number(ss('progresoObraRol') || ls('progresoObraRol')); return (t && r >= 1 && r <= 4) ? {token: t, rol: r, nombre: ss('progresoObraName') || ls('progresoObraName') || ''} : null; }
 function leerTE(){ const t = ls('terrenoToken'); return t ? {token: t, nombre: ls('terrenoNombre') || ''} : null; }
+function leerBO(){ const t = ls('bodegaToken'); return t ? {token: t, nombre: ls('bodegaNombre') || ''} : null; }
 function leerOT(){ const t = ls('oficinaToken'); return t ? {token: t, nombre: ls('oficinaNombre') || ''} : null; }
 function leerCal(){ const t = ls('calidadToken'); return t ? {token: t, nombre: ls('calidadNombre') || '', cargo: ls('calidadCargo') || ''} : null; }
 function leerHub(){
@@ -671,9 +674,9 @@ function guardarHub(h){
   try{ (h.recordar ? localStorage : sessionStorage).setItem('hubSesion', JSON.stringify(h)); (h.recordar ? sessionStorage : localStorage).removeItem('hubSesion'); }catch(e){}
 }
 function hubLegacy(){
-  const p = leerPanel(), c = leerCal(), o = leerOT(), te = leerTE();
-  const base = p || c || o || te; if(!base) return null;
-  const rol = p ? p.rol : c ? ({'Admin': 1, 'Jefe de Terreno': 4, 'Calidad': 5}[c.cargo] || 0) : te ? 4 : 6;
+  const p = leerPanel(), c = leerCal(), o = leerOT(), te = leerTE(), bo = leerBO();
+  const base = p || c || o || te || bo; if(!base) return null;
+  const rol = p ? p.rol : c ? ({'Admin': 1, 'Jefe de Terreno': 4, 'Calidad': 5}[c.cargo] || 0) : te ? 4 : bo ? 7 : 6;
   return {token: base.token, nombre: base.nombre, rol, secciones: SECC_BASE[rol] || (c ? ['calidad'] : []), recordar: true};
 }
 function guardar(res, recordar, dest){
@@ -687,6 +690,7 @@ function guardar(res, recordar, dest){
   if(dest === 'calidad' && lista.indexOf('calidad') !== -1){ ls('calidadToken', res.token || ''); ls('calidadNombre', String(res.nombre || '')); ls('calidadCargo', CARGOS_CALIDAD[res.rol] || 'Invitado'); }
   if(dest === 'terreno' && lista.indexOf('terreno') !== -1){ ls('terrenoToken', res.token || ''); ls('terrenoNombre', String(res.nombre || '')); }
   if(dest === 'oficina' && lista.indexOf('oficina') !== -1){ ls('oficinaToken', res.token || ''); ls('oficinaNombre', String(res.nombre || '')); }
+  if(dest === 'bodega' && lista.indexOf('bodega') !== -1){ ls('bodegaToken', res.token || ''); ls('bodegaNombre', String(res.nombre || '')); }
   if(res.rol === 1) ls('progresoObraEsAdmin', '1');
   if(res.dispositivo) ls('progresoObraDisp', res.dispositivo);
 }
@@ -751,7 +755,7 @@ function resultado(res, recordar, via){
   guardarHub({token: res.token || '', nombre: res.nombre || '', rol: res.rol, secciones: res.secciones, recordar: !!recordar});
   bienvenida(res).then(() => elegir(res, recordar));
 }
-const CARGO_TXT = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica'};
+const CARGO_TXT = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega'};
 function saludoDe(nombre){
   const p = String(nombre || '').split(/\s+/).filter(x => x && !/\.$/.test(x));
   const primero = (p[0] || '').toLowerCase();
