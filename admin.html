@@ -272,7 +272,7 @@ function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStora
 const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['admin','Panel de Admin']];
 const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Trabajador': 'panel', 'Supervisor': 'panel'};
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
-const SECC_INV = SECC.filter(x => x[0] !== 'panel' && x[0] !== 'admin');
+const SECC_INV = SECC.filter(x => x[0] !== 'admin');
 const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.'};
 const fmt = ms => new Date(ms).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
 let tTimer = 0;
