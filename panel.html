@@ -357,9 +357,9 @@
   .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
   select, input[type=text], input[type=number]{background:var(--panel);border:1px solid var(--border-strong);color:var(--text);padding:7px 9px;border-radius:var(--radius);font-size:13px;outline:none;min-width:140px;}
   select:focus, input:focus{border-color:var(--accent);}
-  .tabs{display:flex;gap:0;border:1px solid var(--border-strong);}
+  .tabs{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;border:1px solid var(--border-strong);}
   .tabs-wrap{display:flex;justify-content:center;margin:2px 0 14px;}
-  .tab{padding:8px 14px;background:var(--panel);color:var(--sub);font-size:13px;cursor:pointer;border-right:1px solid var(--border-strong);}
+  .tab{padding:12px 14px;min-width:104px;background:var(--panel);color:var(--sub);font-size:14px;cursor:pointer;border-right:1px solid var(--border-strong);}
   .tab:last-child{border-right:none;}
   .tab.active{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:600;}
   @keyframes pestanaBrillo{0%,100%{box-shadow:0 0 5px 0 rgba(160,110,255,.45), inset 0 0 8px rgba(255,255,255,.12);}50%{box-shadow:0 0 14px 2px rgba(160,110,255,.85), inset 0 0 14px rgba(255,255,255,.28);}}
@@ -723,26 +723,28 @@
     .ce-2 .dz-ex .estado-badge{width:100% !important;max-width:96px;align-self:flex-start;}
     .ce-2 .dz-ex .worker-name{white-space:normal !important;}
     /* Opción 3 (automática): siempre etiqueta + nombre y sin m². Con 3 áreas visibles el nombre va debajo de la etiqueta; con 2 o menos, al lado. */
-    .ce-3 .floor-block[data-na="3"] .cell-ventana{display:flex;flex-direction:column;}
-    .ce-3 .floor-block[data-na="3"] .cell-ventana .checks-row{order:1;}
-    .ce-3 .floor-block[data-na="3"] .cell-ventana .worker-row-top{order:2;}
-    .ce-3 .floor-block[data-na="3"] .cell-ventana .cv-pie,.ce-3 .floor-block[data-na="3"] .cell-ventana .nota-row{display:none;}
-    .ce-3 .floor-block[data-na="3"] .cell-ventana .worker-name{font-size:12px;}
-    .ce-3 .floor-block[data-na="3"] .dz-ex1{flex-direction:column;align-items:stretch;gap:4px;width:100%;}
-    .ce-3 .floor-block[data-na="3"] .dz-ex .estado-badge{width:100% !important;max-width:96px;align-self:flex-start;}
-    .ce-3 .floor-block[data-na="3"] .dz-ex .worker-name{white-space:normal !important;}
-    .ce-3 .floor-block[data-na="3"] .dz-ex .dz-ex2{display:none !important;}
-    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana{display:flex;flex-direction:row;align-items:center;gap:6px;}
-    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .checks-row{order:1;flex:0 0 auto;margin:0;}
-    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .worker-row-top{order:2;flex:1 1 0;min-width:0;}
-    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .cv-pie,.ce-3 .floor-block:not([data-na="3"]) .cell-ventana .nota-row{display:none;}
-    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .worker-name{font-size:13px;}
-    .ce-3 .floor-block:not([data-na="3"]) .dz-ex .dz-ex2{display:none !important;}
-    .ce-3 .floor-block:not([data-na="3"]) .dz-ex1{flex-direction:row;align-items:center;gap:6px;width:100%;}
-    .ce-3 .floor-block:not([data-na="3"]) .dz-ex .estado-badge{flex:0 0 auto;}
-    .ce-3 .floor-block:not([data-na="3"]) .dz-ex .worker-name{font-size:13px !important;flex:1 1 0;min-width:0;}
-    .ce-3 .floor-block:not([data-na="3"]) .cell-ventana .worker-name,.ce-3 .floor-block:not([data-na="3"]) .dz-ex .worker-name{white-space:nowrap !important;overflow:hidden;}
-    .ce-3 .floor-block[data-na="3"] .cell-ventana .worker-name,.ce-3 .floor-block[data-na="3"] .dz-ex .worker-name{white-space:normal !important;}
+    @media (max-width:700px){
+    .floor-block:not([data-na="1"]) .cell-ventana{display:flex;flex-direction:column;}
+    .floor-block:not([data-na="1"]) .cell-ventana .checks-row{order:1;}
+    .floor-block:not([data-na="1"]) .cell-ventana .worker-row-top{order:2;}
+    .floor-block:not([data-na="1"]) .cell-ventana .cv-pie,.floor-block:not([data-na="1"]) .cell-ventana .nota-row{display:none;}
+    .floor-block:not([data-na="1"]) .cell-ventana .worker-name{font-size:12px;}
+    .floor-block:not([data-na="1"]) .dz-ex1{flex-direction:column;align-items:stretch;gap:4px;width:100%;}
+    .floor-block:not([data-na="1"]) .dz-ex .estado-badge{width:100% !important;max-width:96px;align-self:flex-start;}
+    .floor-block:not([data-na="1"]) .dz-ex .worker-name{white-space:normal !important;}
+    .floor-block:not([data-na="1"]) .dz-ex .dz-ex2{display:none !important;}
+    .floor-block[data-na="1"] .cell-ventana{display:flex;flex-direction:row;align-items:center;gap:6px;}
+    .floor-block[data-na="1"] .cell-ventana .checks-row{order:1;flex:0 0 auto;margin:0;}
+    .floor-block[data-na="1"] .cell-ventana .worker-row-top{order:2;flex:1 1 0;min-width:0;}
+    .floor-block[data-na="1"] .cell-ventana .cv-pie,.floor-block[data-na="1"] .cell-ventana .nota-row{display:none;}
+    .floor-block[data-na="1"] .cell-ventana .worker-name{font-size:13px;}
+    .floor-block[data-na="1"] .dz-ex .dz-ex2{display:none !important;}
+    .floor-block[data-na="1"] .dz-ex1{flex-direction:row;align-items:center;gap:6px;width:100%;}
+    .floor-block[data-na="1"] .dz-ex .estado-badge{flex:0 0 auto;}
+    .floor-block[data-na="1"] .dz-ex .worker-name{font-size:13px !important;flex:1 1 0;min-width:0;}
+    .floor-block[data-na="1"] .cell-ventana .worker-name,.floor-block[data-na="1"] .dz-ex .worker-name{white-space:nowrap !important;overflow:hidden;}
+    .floor-block:not([data-na="1"]) .cell-ventana .worker-name,.floor-block:not([data-na="1"]) .dz-ex .worker-name{white-space:normal !important;}
+    }
     table.dept-table td.dpto-col.dpto-largo .dpto-inner{font-size:10px !important;line-height:1.15 !important;word-break:normal !important;overflow-wrap:anywhere !important;max-width:100%;}
     table.dept-table td.dpto-col.dpto-largo .dpto-inner .ns i{font-size:9px;}
     /* Celular: el nombre va suelto (sin recuadro) y las observaciones se ven solo como un símbolo; el texto se lee al abrir el dpto */
@@ -1295,7 +1297,7 @@
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-#cargaGlobal .cgest.cglisto{color:#fff;}
+#cargaGlobal .cgest.cglisto{color:#fff;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
 #cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
 #cargaGlobal .cgerr svg{flex:none;}
 #cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
@@ -1370,7 +1372,7 @@
 </style>
 </head>
 <body class="lg-on">
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>
 (function(){
@@ -1420,6 +1422,7 @@
         st.meta = 88; est.classList.remove('cglisto');
         while(st.prog < 89.4 || st.prog > 91) await dormir(30);
         el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
+        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ sc.textContent = 'Obteniendo información del aparato…'; setTimeout(function(){ sc.textContent = 'Enviando aviso al administrador…'; }, 2300); } }
         var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
         st.volver = true;
         while(st.prog > 0.6) await dormir(30);
