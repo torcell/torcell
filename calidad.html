@@ -301,6 +301,26 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .err{min-height:16px;font-size:12.5px;color:var(--bad);}
 
 /* ===== Tema Obra (por defecto): misma paleta de la pantalla de carga, sobrio y plano ===== */
+/* Modo claro / oscuro / automático: fondo liso igual al panel de cerámica (solo el tema "obra" y Halloween conservan su fondo propio) */
+:root:not([data-tema="obra"]):not(.halloween), :root:not([data-tema="obra"]):not(.halloween) body{background:var(--bg);}
+:root:not([data-tema="obra"]):not(.halloween) body::before{display:none;}
+:root:not([data-tema="obra"]):not(.halloween) main{background:transparent;border-color:transparent;box-shadow:none;}
+:root:not([data-tema="obra"]):not(.halloween) .titles h1{color:var(--text);}
+:root:not([data-tema="obra"]):not(.halloween) .titles p{color:var(--sub);}
+:root:not([data-tema="obra"]):not(.halloween) .brand-logo.lt{display:block !important;}
+:root:not([data-tema="obra"]):not(.halloween) .brand-logo.dk{display:none !important;}
+:root:not([data-tema="obra"]):not(.halloween) .brand-logo{border-right-color:var(--strong) !important;}
+:root:not([data-tema="obra"]):not(.halloween) header.top{border-image:linear-gradient(90deg,var(--accent),var(--accent2)) 1;}
+:root:not([data-tema="obra"]):not(.halloween) #verCal{color:var(--sub) !important;}
+:root:not([data-tema="obra"]):not(.halloween) .msg{color:var(--sub);}
+:root:not([data-tema="obra"]):not(.halloween) .pestanas button:not(.on){background:var(--panel);color:var(--sub);border-color:var(--strong);}
+:root:not([data-tema="obra"]):not(.halloween) .pestanas button:not(.on):hover{background:var(--soft);color:var(--text);border-color:var(--accent);}
+:root[data-tema="oscuro"]{--bg:#14171a;--panel:#1d2124;--soft:#23282c;--border:#333a3f;--strong:#454e54;--text:#e9ecee;--sub:#9aa3a9;}
+:root[data-tema="oscuro"]:not(.halloween) .brand-logo.lt{display:none !important;}
+:root[data-tema="oscuro"]:not(.halloween) .brand-logo.dk{display:block !important;}
+@media (prefers-color-scheme:dark){:root:not([data-tema]):not(.halloween){--bg:#14171a;--panel:#1d2124;--soft:#23282c;--border:#333a3f;--strong:#454e54;--text:#e9ecee;--sub:#9aa3a9;}
+:root:not([data-tema]):not(.halloween) .brand-logo.lt{display:none !important;}
+:root:not([data-tema]):not(.halloween) .brand-logo.dk{display:block !important;}}
 :root[data-tema="obra"]{color-scheme:dark;--bg:#0b2b36;--panel:#10384a;--soft:#0d3242;--border:#24505f;--strong:#3d6d7e;--text:#eef4f6;--sub:#a3bcc6;--ok:#43b97f;--warn:#f0a23a;--bad:#ef6a5e;--accent:#4f8fd6;--accent2:#2f6f8f;--head:#0b2b36;}
 :root[data-tema="obra"] .btn.primary,:root[data-tema="obra"] .conectado{background:var(--accent);border-color:var(--accent);}
 :root[data-tema="obra"] .pestanas button.on{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -663,7 +683,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.34.0';
+const CAL_VERSION = '1.35.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";

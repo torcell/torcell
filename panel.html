@@ -5007,8 +5007,9 @@ async function abrirPermisosSecciones(){
   const cuerpo = ov.querySelector('#secCuerpo');
   usuarios.sort(ORD_USU);
   const filas = usuarios.map((u, i) => '<tr><td style="padding:8px 6px;border-top:1px solid var(--border);"><b>' + esc(u.nombre) + '</b><div style="font-size:11.5px;color:var(--sub);">' + esc(u.cargo) + '</div></td>' + SECC_INV.map(([k, n]) => {
-    const propia = seccionPropia(u) === k, deCargo = u.base.indexOf(k) !== -1;
-    return '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (propia ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (deCargo || u.extra.indexOf(k) !== -1 ? ' checked' : '') + (deCargo ? ' disabled title="Viene con su cargo"' : '') + ' style="width:18px;height:18px;" aria-label="' + esc(n) + ' para ' + esc(u.nombre) + '">') + '</td>';
+    const propia = seccionPropia(u) === k, deCargo = u.base.indexOf(k) !== -1, quitada = (u.quitar || []).indexOf(k) !== -1;
+    const marcado = (deCargo && !quitada) || (!deCargo && u.extra.indexOf(k) !== -1);
+    return '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);"><input type="checkbox" data-u="' + i + '" data-s="' + k + '"' + (marcado ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="' + esc(n) + ' para ' + esc(u.nombre) + '">' + (propia ? '<div style="font-size:11px;color:var(--sub);">incluido</div>' : '') + '</td>';
   }).join('') + '<td style="text-align:center;padding:8px 6px;border-top:1px solid var(--border);">' + (u.dobleBase ? '<span style="font-size:11px;color:var(--sub);">incluido</span>' : '<input type="checkbox" data-u="' + i + '" data-d="1"' + (u.doble ? ' checked' : '') + ' style="width:18px;height:18px;" aria-label="Celular o tablet extra para ' + esc(u.nombre) + '">') + '</td></tr>').join('');
   cuerpo.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:6px;font-size:11.5px;color:var(--sub);">Persona</th>' + SECC_INV.map(([k, n]) => '<th style="padding:6px;font-size:11.5px;color:var(--sub);">' + n + '</th>').join('') + '<th style="padding:6px;font-size:11.5px;color:var(--sub);">Celular / tablet extra</th></tr></thead><tbody>' + filas + '</tbody></table>' + (demo ? '<p style="font-size:11.5px;color:var(--sub);margin-top:10px;">Versión de prueba: los permisos quedan solo en este aparato.</p>' : '');
   cuerpo.addEventListener('change', async e => {
@@ -5024,12 +5025,15 @@ async function abrirPermisosSecciones(){
       return;
     }
     const u = usuarios[t.dataset.u], k = t.dataset.s;
-    const nuevo = u.extra.filter(x => x !== k); if(t.checked) nuevo.push(k);
-    if(demo){ u.extra = nuevo; try{ localStorage.setItem('pruebaPermisosSecciones', JSON.stringify(usuarios)); }catch(err){} avisoToast('Permiso guardado.', 'ok'); return; }
+    u.quitar = u.quitar || [];
+    const deCargo = u.base.indexOf(k) !== -1;
+    const nuevo = u.extra.filter(x => x !== k); if(t.checked && !deCargo) nuevo.push(k);
+    const quitar = u.quitar.filter(x => x !== k); if(!t.checked && deCargo) quitar.push(k);
+    if(demo){ u.extra = nuevo; u.quitar = quitar; try{ localStorage.setItem('pruebaPermisosSecciones', JSON.stringify(usuarios)); }catch(err){} avisoToast('Permiso guardado.', 'ok'); return; }
     t.disabled = true;
-    const j = await llamarDb('seccionesGuardar', {nombre: u.nombre, extra: nuevo});
+    const j = await llamarDb('seccionesGuardar', {nombre: u.nombre, extra: nuevo, quitar: quitar});
     t.disabled = false;
-    if(j && j.ok){ u.extra = j.extra; avisoToast('Permiso guardado.', 'ok'); }
+    if(j && j.ok){ u.extra = j.extra; u.quitar = j.quitar || []; avisoToast('Permiso guardado.', 'ok'); }
     else { t.checked = !t.checked; avisoToast('No se pudo guardar el permiso.', 'error'); }
   });
 }
