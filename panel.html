@@ -6041,20 +6041,28 @@ function dptoCortoPanel(piso, dpto){
 /* Nombre del trabajador en celular: nombre y apellido si caben; si no, nombre + inicial del apellido; si tampoco, solo el nombre. */
 function ajustarNombresMovil(){
   if(!window.matchMedia('(max-width:700px)').matches) return;
+  // Se hace por rondas (escribir todo, medir todo) para que el navegador calcule el diseño 3 veces en total y no una vez por nombre.
+  const lista = [];
   document.querySelectorAll('.cell-ventana .worker-name:not(.unassigned)').forEach(el => {
     const fb = el.closest('.floor-block');
-    if(fb && fb.dataset.na === '3') return;
+    if(fb && fb.dataset.na && fb.dataset.na !== '1') return;
     if(el.dataset.shown === undefined || el.dataset.shown !== el.textContent) el.dataset.full = el.textContent;
     const full = el.dataset.full || '', t = full.trim().split(/\s+/);
     const opciones = [full];
     if(t.length > 1){ opciones.push(t[0] + ' ' + t[t.length - 1].charAt(0).toUpperCase() + '.'); opciones.push(t[0]); }
-    for(const o of opciones){
-      el.textContent = o; el.dataset.shown = o;
-      const cs = getComputedStyle(el), r = document.createRange();
-      r.selectNodeContents(el);
-      if(r.getBoundingClientRect().width <= el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 1) break;
-    }
+    lista.push({el, opciones});
   });
+  let pend = lista;
+  for(let ronda = 0; ronda < 3 && pend.length; ronda++){
+    pend.forEach(x => { const o = x.opciones[Math.min(ronda, x.opciones.length - 1)]; if(x.el.textContent !== o) x.el.textContent = o; x.el.dataset.shown = o; });
+    const rango = document.createRange();
+    const medidas = pend.map(x => {
+      const cs = getComputedStyle(x.el);
+      rango.selectNodeContents(x.el);
+      return rango.getBoundingClientRect().width <= x.el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 1;
+    });
+    pend = pend.filter((x, i) => !medidas[i] && ronda + 1 < x.opciones.length);
+  }
 }
 let tNombresMovil = null;
 window.addEventListener('resize', () => { clearTimeout(tNombresMovil); tNombresMovil = setTimeout(() => { document.querySelectorAll('.cell-ventana .worker-name[data-full]').forEach(el => { el.textContent = el.dataset.full; delete el.dataset.shown; }); ajustarNombresMovil(); }, 150); });
