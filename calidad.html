@@ -432,7 +432,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
+  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
@@ -445,7 +445,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
+    if(st.meta < 100 && !st.err) tit.textContent = st.msg || (t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase);
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -462,6 +462,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   }
   window.CargaPagina = {
     el: el,
+    mensaje: function(t){ st.msg = String(t || ''); },
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
@@ -696,7 +697,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.36.3';
+const CAL_VERSION = '1.36.4';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1660,6 +1661,7 @@ async function cargarInicial(){
   if(r === 'ok'){
     const falta = 1400 - (Date.now() - t0);
     if(falta > 0) await dormir(falta);
+    await esperarActualizacionCal();
     await cargaOcultar();
   }else{
     cargaCortar();
@@ -1857,12 +1859,38 @@ async function comprobarVersionCal(){
   try{ sessionStorage.setItem('calIntentosAct', String(n + 1)); sessionStorage.setItem('calActualizadoA', v); }catch(e){}
   location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
 }
+// ===== primera revisión al abrir: la pantalla de carga dice qué está pasando (solo dice lo que es cierto) =====
+let actInicialCal = null, cargaCerradaCal = false;
+async function revisionInicialCal(){
+  ultimaRevisionCal = Date.now();
+  const msg = t => { if(!cargaCerradaCal && window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(t); };
+  msg('Buscando actualización…');
+  const v = await versionCalPublicada();
+  if(!v){ msg(''); return 'sin_dato'; }
+  if(!versionMayorCal(v, CAL_VERSION)){ try{ sessionStorage.removeItem('calIntentosAct'); }catch(e){} msg('Ya está actualizado'); return 'al_dia'; }
+  if(cargaCerradaCal){ comprobarVersionCal(); return 'despues'; }
+  let n = 0;
+  try{ n = Number(sessionStorage.getItem('calIntentosAct') || 0); }catch(e){}
+  if(n >= 2){ msg(''); aviso('Hay una versión nueva de Calidad (v' + v + '). Cierra y vuelve a abrir la página para usarla.'); return 'sin_dato'; }
+  msg('Actualizando…');
+  await dormir(800); // alcanza a leerse antes de recargar
+  try{ sessionStorage.setItem('calIntentosAct', String(n + 1)); sessionStorage.setItem('calActualizadoA', v); }catch(e){}
+  location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
+  return 'actualizando';
+}
+async function esperarActualizacionCal(){
+  const r = await Promise.race([actInicialCal, new Promise(f => setTimeout(() => f('tarde'), 3500))]);
+  if(r === 'al_dia') await dormir(900);
+  if(r === 'actualizando') await dormir(4000);
+  if(r === 'tarde' || r === 'actualizando'){ if(window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(''); }
+  cargaCerradaCal = true;
+}
 setTimeout(() => {
   if(/[?&](v|_v)=/.test(location.search)){ try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} }
   let a = null;
   try{ a = sessionStorage.getItem('calActualizadoA'); sessionStorage.removeItem('calActualizadoA'); }catch(e){}
   if(a && a === CAL_VERSION) setTimeout(() => aviso('Calidad se actualizó a la versión ' + CAL_VERSION + '.'), 1200);
-  comprobarVersionCal();
+  actInicialCal = revisionInicialCal();
 }, 0);
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionCal > 600000) comprobarVersionCal();
@@ -1950,4 +1978,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.36.3 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.36.4 · 27-10-2026 ==== -->

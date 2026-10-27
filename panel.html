@@ -366,7 +366,9 @@
   .pb-f input,.pb-f select{width:100%;min-width:0;}
   .pb-par{display:flex;gap:8px;align-items:flex-end;}
   .pb-par .pb-f{flex:1 1 0;min-width:0;}
-  canvas.pb-firma{width:100%;height:110px;border:1px solid var(--border-strong);background:#fff;touch-action:none;cursor:crosshair;display:block;}
+  .pb-quien{margin:0 0 12px;font-size:14px;padding:8px 10px;border:1px solid var(--border-strong);}
+  #pedirBodegaBtn{min-width:240px;}
+  #pedirBodegaBtn:active{transform:none;}
   .pb-tabla{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;}
   .pb-tabla td{padding:6px 4px;border-bottom:1px solid var(--border);}
   .tab{padding:12px 14px;min-width:104px;background:var(--panel);color:var(--sub);font-size:14px;cursor:pointer;border-right:1px solid var(--border-strong);}
@@ -1390,7 +1392,7 @@
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
+  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
@@ -1403,7 +1405,7 @@
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
+    if(st.meta < 100 && !st.err) tit.textContent = st.msg || (t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase);
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -1420,6 +1422,7 @@
   }
   window.CargaPagina = {
     el: el,
+    mensaje: function(t){ st.msg = String(t || ''); },
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
@@ -1816,8 +1819,7 @@
   <div class="modal" style="max-width:520px;max-height:calc(100dvh - 24px);overflow-y:auto;">
     <h3>📦 Pedir material a Bodega</h3>
     <p style="margin:0 0 12px;font-size:12px;" id="pbHora"></p>
-    <label class="pb-f" for="pbSol">Solicitado por (subcontrato, cuadrilla o nombre)<input type="text" id="pbSol" maxlength="60" list="pbNombres" autocomplete="off"></label>
-    <datalist id="pbNombres"></datalist>
+    <p class="pb-quien" id="pbQuien"></p>
     <div class="pb-par"><label class="pb-f" for="pbTipo">Va a<select id="pbTipo"><option value="depto">Un departamento</option><option value="piso">Un piso completo</option><option value="pasillo">Pasillos</option><option value="otro">Otro lugar</option></select></label>
       <label class="pb-f" for="pbDest" id="pbLbDest">Departamento<input type="text" id="pbDest" maxlength="60" placeholder="Ej: 302"></label></div>
     <label class="pb-f" for="pbBus">Buscar material<input type="text" id="pbBus" maxlength="40" placeholder="Escribe parte del nombre…"></label>
@@ -1829,8 +1831,6 @@
       <div class="pb-f"><button class="btn" id="pbAddO" type="button">Agregar</button></div></div>
     <table class="pb-tabla" id="pbLista"></table>
     <label class="pb-f" for="pbNota">Nota (opcional)<input type="text" id="pbNota" maxlength="200"></label>
-    <div class="pb-f">Firma de quien pide<canvas id="pbFirma" class="pb-firma" width="600" height="180" aria-label="Firma"></canvas></div>
-    <div style="margin:-4px 0 4px;"><button class="btn small" id="pbFirmaBorrar" type="button">Borrar firma</button></div>
     <div class="modal-error" id="pbErr" role="alert"></div>
     <div class="actions"><button class="btn" id="pbCan" type="button">Cancelar</button><button class="btn primary" id="pbOk" type="button">Guardar pedido y cerrar</button></div>
   </div>
@@ -2049,7 +2049,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.1';
+const APP_VERSION = '0.73.4';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2084,9 +2084,10 @@ function mostrarBannerActualizar(v){
 function recargarConVersion(v){
   let intentos = 0;
   try{ intentos = Number(sessionStorage.getItem('progresoObraIntentosAct') || 0); }catch(e){}
-  if(intentos >= 2){ mostrarBannerActualizar(v); return; }
+  if(intentos >= 2){ mostrarBannerActualizar(v); return false; }
   try{ sessionStorage.setItem('progresoObraIntentosAct', String(intentos + 1)); sessionStorage.setItem('progresoObraActualizadoA', v); }catch(e){}
   location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
+  return true;
 }
 async function comprobarVersion(){
   ultimaRevisionVersion = Date.now();
@@ -2100,6 +2101,32 @@ async function comprobarVersion(){
   if(sinGuardar || document.querySelector('.overlay.show')) mostrarBannerActualizar(v);
   else recargarConVersion(v);
 }
+// ===== primera revisión al abrir: la pantalla de carga dice qué está pasando (solo dice lo que es cierto) =====
+let actInicial = null, cargaCerrada = false;
+async function revisionInicial(){
+  ultimaRevisionVersion = Date.now();
+  const msg = t => { if(!cargaCerrada && window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(t); };
+  msg('Buscando actualización…');
+  const v = await versionPublicada();
+  if(!v){ msg(''); return 'sin_dato'; }
+  if(!versionMayor(v, APP_VERSION)){
+    try{ sessionStorage.removeItem('progresoObraIntentosAct'); }catch(e){}
+    msg('Ya está actualizado'); return 'al_dia';
+  }
+  const sinGuardar = dirtyCellIds.size > 0 || settingsDirty;
+  if(cargaCerrada && (sinGuardar || document.querySelector('.overlay.show'))){ mostrarBannerActualizar(v); return 'banner'; }
+  msg('Actualizando…');
+  if(!cargaCerrada) await new Promise(f => setTimeout(f, 800)); // alcanza a leerse antes de recargar
+  if(recargarConVersion(v)) return 'actualizando';
+  msg(''); return 'sin_dato';
+}
+async function esperarActualizacion(){
+  const r = await Promise.race([actInicial, new Promise(f => setTimeout(() => f('tarde'), 3500))]);
+  if(r === 'al_dia') await new Promise(f => setTimeout(f, 900));
+  if(r === 'actualizando') await new Promise(f => setTimeout(f, 4000));
+  if(r === 'tarde' || r === 'actualizando'){ if(window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(''); }
+  cargaCerrada = true;
+}
 setTimeout(() => {
   if(/[?&](v|_v)=/.test(location.search)){ try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} }
   let avisarA = null;
@@ -2108,7 +2135,7 @@ setTimeout(() => {
     try{ sessionStorage.removeItem('progresoObraActualizadoA'); }catch(e){}
     if(avisarA === APP_VERSION) setTimeout(() => avisoToast('Panel actualizado a la versión ' + APP_VERSION + '.', 'ok'), 1200);
   }
-  comprobarVersion();
+  actInicial = revisionInicial();
 }, 0);
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionVersion > REVISAR_VERSION_CADA_MS) comprobarVersion();
@@ -5005,7 +5032,7 @@ const PB_MUESTRA = [ // solo para la copia de prueba, que no tiene base de datos
   {id:'d2', nombre:'Fragüe gris 5 kg', envase:'bolsa', porEnvase:1, unidad:'bolsa'},
   {id:'d3', nombre:'Esquinero PVC', envase:'caja', porEnvase:20, unidad:'unidad'},
   {id:'d4', nombre:'Cruceta 3 mm', envase:'bolsa', porEnvase:200, unidad:'unidad'}];
-let pbCat = [], pbItems = [], pbNonce = '', pbTinta = false, pbDibuja = false;
+let pbCat = [], pbItems = [], pbNonce = '';
 const pbEl = id => document.getElementById(id);
 const pbLimpio = (t, n) => String(t || '').replace(/[<>`|\u0000-\u001f]/g, '').trim().slice(0, n || 80);
 const pbPlural = (env, n) => n === 1 ? env : (/ón$/.test(env) ? env.slice(0, -2) + 'ones' : env + (/[lrnzd]$/.test(env) ? 'es' : 's'));
@@ -5024,19 +5051,15 @@ async function pbApi(accion, extra){
   if(!DB_URL){ // copia de prueba
     if(accion === 'bodegaCatalogoPedir') return {ok:true, materiales:PB_MUESTRA};
     let l = []; try{ l = JSON.parse(localStorage.getItem('pruebaPedidosBodega') || '[]'); }catch(e){}
-    l.push({ts:Date.now(), solicito:extra.solicito, dest:extra.dest, tipo:extra.tipo, items:extra.items, nota:extra.nota});
+    l.push({ts:Date.now(), solicito:pbQuienTxt(), dest:extra.dest, tipo:extra.tipo, items:extra.items, nota:extra.nota});
     try{ localStorage.setItem('pruebaPedidosBodega', JSON.stringify(l)); }catch(e){}
     return {ok:true};
   }
   try{ return await llamarDb(accion, extra) || {ok:false, error:'red'}; }catch(e){ return {ok:false, error:'red'}; }
 }
-const pbCv = pbEl('pbFirma'), pbCtx = pbCv.getContext('2d');
-function pbLimpiarFirma(){ pbCtx.fillStyle = '#fff'; pbCtx.fillRect(0, 0, pbCv.width, pbCv.height); pbCtx.strokeStyle = '#111'; pbCtx.lineWidth = 3.2; pbCtx.lineCap = pbCtx.lineJoin = 'round'; pbTinta = false; }
-const pbPunto = e => { const r = pbCv.getBoundingClientRect(); return [(e.clientX - r.left) * pbCv.width / r.width, (e.clientY - r.top) * pbCv.height / r.height]; };
-pbCv.addEventListener('pointerdown', e => { pbDibuja = true; pbCv.setPointerCapture(e.pointerId); const [x, y] = pbPunto(e); pbCtx.beginPath(); pbCtx.moveTo(x, y); pbCtx.lineTo(x + .1, y + .1); pbCtx.stroke(); pbTinta = true; e.preventDefault(); });
-pbCv.addEventListener('pointermove', e => { if(!pbDibuja) return; const [x, y] = pbPunto(e); pbCtx.lineTo(x, y); pbCtx.stroke(); e.preventDefault(); });
-['pointerup', 'pointercancel'].forEach(ev => pbCv.addEventListener(ev, () => { pbDibuja = false; }));
-pbEl('pbFirmaBorrar').addEventListener('click', pbLimpiarFirma);
+// ===== quién pide: la sesión abierta (nombre y cargo) =====
+function pbCargoSesion(){ return isAdmin ? 'Administrador' : isSupervisor ? 'Capataz' : isJefe ? 'Jefe de obra' : 'Trabajador'; }
+function pbQuienTxt(){ return sessionName ? sessionName + ' (' + pbCargoSesion() + ')' : pbCargoSesion(); }
 function pbPintarLista(){
   pbEl('pbLista').innerHTML = pbItems.map((i, k) => {
     const m = i.mid ? pbMat(i.mid) : null;
@@ -5059,18 +5082,17 @@ pbEl('pbTipo').addEventListener('change', pbAjustarDest);
 pbEl('pbBus').addEventListener('input', pbOpcionesMat);
 pbEl('pbMat').addEventListener('change', pbEtiquetaUni);
 pbEl('pedirBodegaBtn').addEventListener('click', async () => {
-  const b = pbEl('pedirBodegaBtn'), txt = b.textContent; b.disabled = true; b.textContent = 'Abriendo…';
+  const b = pbEl('pedirBodegaBtn'); b.disabled = true;
   const r = await pbApi('bodegaCatalogoPedir', {});
-  b.disabled = false; b.textContent = txt;
+  b.disabled = false;
   if(!r || !r.ok){ avisoToast(r && r.error === 'sin_permiso' ? 'Tu cuenta no puede pedir a Bodega.' : 'No se pudo abrir el pedido. Revisa la señal e intenta de nuevo.', 'error'); return; }
   pbCat = (r.materiales || []).filter(m => m && m.id && m.nombre);
   pbItems = []; pbNonce = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('n' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
   pbEl('pbErr').textContent = ''; pbEl('pbTipo').value = 'depto'; pbEl('pbDest').value = ''; pbEl('pbBus').value = ''; pbEl('pbOtro').value = ''; pbEl('pbNota').value = ''; pbEl('pbCant').value = 1;
-  pbEl('pbSol').value = isAdmin ? '' : (sessionName || '');
-  pbEl('pbNombres').innerHTML = ALL_WORKERS.map(w => '<option value="' + esc(w) + '"></option>').join('');
+  pbEl('pbQuien').innerHTML = 'Pide: <b>' + esc(pbQuienTxt()) + '</b>';
   pbEl('pbHora').textContent = 'Se anota con la fecha y hora de ahora: ' + new Date().toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'}) + '.';
   pbAjustarDest(); pbOpcionesMat(); pbPintarLista();
-  pbEl('pedidoBodegaOverlay').classList.add('show'); pbLimpiarFirma();
+  pbEl('pedidoBodegaOverlay').classList.add('show');
 });
 pbEl('pbAdd').addEventListener('click', () => {
   const m = pbMat(pbEl('pbMat').value), c = Math.floor(Number(pbEl('pbCant').value));
@@ -5088,15 +5110,13 @@ pbEl('pbAddO').addEventListener('click', () => {
 pbEl('pbLista').addEventListener('click', e => { const b = e.target.closest('button[data-pbq]'); if(!b) return; pbItems.splice(Number(b.dataset.pbq), 1); pbPintarLista(); });
 pbEl('pbCan').addEventListener('click', () => closeOverlayAnimated(pbEl('pedidoBodegaOverlay')));
 pbEl('pbOk').addEventListener('click', async () => {
-  const dest = pbLimpio(pbEl('pbDest').value, 60), sol = pbLimpio(pbEl('pbSol').value, 60), err = pbEl('pbErr');
+  const dest = pbLimpio(pbEl('pbDest').value, 60), err = pbEl('pbErr');
   if(!dest){ err.textContent = 'Indica para dónde va el pedido.'; pbEl('pbDest').focus(); return; }
-  if(!sol){ err.textContent = 'Escribe quién pide (subcontrato, cuadrilla o nombre).'; pbEl('pbSol').focus(); return; }
   if(!pbItems.length){ err.textContent = 'Agrega al menos una cosa al pedido.'; return; }
-  if(!pbTinta){ err.textContent = 'Falta la firma de quien pide.'; return; }
   const b = pbEl('pbOk'), txt = b.textContent; b.disabled = true; b.textContent = 'Guardando…';
-  const r = await pbApi('bodegaPedidoCrear', {nonce:pbNonce, tipo:pbEl('pbTipo').value, dest:dest, solicito:sol, firma:pbCv.toDataURL('image/png'), nota:pbLimpio(pbEl('pbNota').value, 200), items:pbItems});
+  const r = await pbApi('bodegaPedidoCrear', {nonce:pbNonce, tipo:pbEl('pbTipo').value, dest:dest, nota:pbLimpio(pbEl('pbNota').value, 200), items:pbItems});
   b.disabled = false; b.textContent = txt;
-  if(!r || !r.ok){ err.textContent = r && r.error === 'firma_invalida' ? 'La firma no se pudo guardar. Bórrala y hazla de nuevo.' : r && r.error === 'sin_permiso' ? 'Tu cuenta no puede pedir a Bodega.' : 'No se pudo guardar el pedido. Revisa la señal y vuelve a apretar el botón: no se duplica.'; return; }
+  if(!r || !r.ok){ err.textContent = r && r.error === 'sin_permiso' ? 'Tu cuenta no puede pedir a Bodega.' : 'No se pudo guardar el pedido. Revisa la señal y vuelve a apretar el botón: no se duplica.'; return; }
   closeOverlayAnimated(pbEl('pedidoBodegaOverlay')); avisoToast('Pedido enviado a Bodega.', 'ok');
 });
 
@@ -5131,7 +5151,8 @@ function autoAlto(caja, cont){
   new ResizeObserver(() => {
     const c = cont.offsetHeight; if(c === prevC) return;
     const desde = anim ? caja.getBoundingClientRect().height : mostrada;
-    const hasta = Math.min(mostrada + (c - prevC), Math.round(innerHeight * 0.9));
+    const mh = parseFloat(getComputedStyle(caja).maxHeight);
+    const hasta = Math.min(mostrada + (c - prevC), Math.round(innerHeight * 0.9), isFinite(mh) ? mh : Infinity);
     prevC = c; mostrada = hasta;
     if(anim){ anim.cancel(); anim = null; }
     if(Math.abs(hasta - desde) < 6) return;
@@ -5528,10 +5549,11 @@ async function abrirAlertas(){
   const demo = !DB_URL;
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
-  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:860px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🚨 Alertas de seguridad' + (demo ? ' (prueba, sin datos)' : '') + '</b><button class="btn" id="alCerrar" type="button">Cerrar</button></div><div id="alCuerpo" style="font-size:13px;">Cargando…</div></div>';
+  // ===== alto fijo desde que abre (así no crece ni se mueve cuando llegan los datos) y solo se desplaza la lista =====
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:860px;width:100%;height:min(84vh,84dvh,640px);display:flex;flex-direction:column;padding:16px;overflow:hidden;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none;"><b style="font-size:16px;flex:1;">🚨 Alertas de seguridad' + (demo ? ' (prueba, sin datos)' : '') + '</b><button class="btn" id="alCerrar" type="button">Cerrar</button></div><div id="alCuerpo" style="font-size:13px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">Cargando…</div></div>';
   ov.className = 'ovDin';
+  ov.style.overscrollBehavior = 'contain'; ov.style.touchAction = 'pan-y';
   document.body.appendChild(ov);
-  autoAlto(ov.firstElementChild, ov.querySelector('#alCuerpo'));
   ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'alCerrar') cerrarDin(ov); });
   const cuerpo = ov.querySelector('#alCuerpo');
   if(demo){ cuerpo.textContent = 'En la copia de prueba no hay servidor, así que no hay alertas para mostrar.'; return; }
@@ -7919,6 +7941,7 @@ setTimeout(function(){
   appListo = true;
   const falta = 2700 - (Date.now() - t0);
   if(falta > 0) await dormir(falta);
+  await esperarActualizacion();
   gateOcultar();
 })();
 </script>
@@ -7944,4 +7967,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.1 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.4 · 27-10-2026 ==== -->
