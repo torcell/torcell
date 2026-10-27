@@ -1422,7 +1422,7 @@
         st.meta = 88; est.classList.remove('cglisto');
         while(st.prog < 89.4 || st.prog > 91) await dormir(30);
         el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
-        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ sc.textContent = 'Obteniendo información del aparato…'; setTimeout(function(){ sc.textContent = 'Enviando aviso al administrador…'; }, 2300); } }
+        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ var pasos = ['Obteniendo información del intruso…', 'Obteniendo dirección IP…', 'Obteniendo latitud y longitud…', 'Obteniendo proveedor de internet…', 'Identificando el aparato…', 'Enviando aviso a Ismael…']; pasos.forEach(function(t, k){ setTimeout(function(){ sc.textContent = t; }, k * 800); }); } }
         var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
         st.volver = true;
         while(st.prog > 0.6) await dormir(30);
@@ -1457,7 +1457,8 @@
         });
         es.textContent = '¡Listo!'; es.classList.add('cglisto');
         await dormir(250);
-        location.replace(destino);
+
+        try{ sessionStorage.setItem('cargaVuelta', '1'); }catch(e){} // para que el menú cierre la carga        location.replace(destino);
       })();
       return st.salida;
     },
@@ -2010,7 +2011,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.71.0';
+const APP_VERSION = '0.72.2';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -7793,3 +7794,4 @@ function sesionVencida(msg){ irAlLogin(msg || 'Tu sesión venció. Ingresa tu PI
 </script>
 </body>
 </html>
+<!-- ==== VERSION: Panel · v0.72.2 · 27-10-2026 ==== -->

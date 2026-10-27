@@ -212,7 +212,7 @@ main h2{margin:0 0 4px;font-size:17px;}
         st.meta = 88; est.classList.remove('cglisto');
         while(st.prog < 89.4 || st.prog > 91) await dormir(30);
         el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
-        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ sc.textContent = 'Obteniendo información del aparato…'; setTimeout(function(){ sc.textContent = 'Enviando aviso al administrador…'; }, 2300); } }
+        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ var pasos = ['Obteniendo información del intruso…', 'Obteniendo dirección IP…', 'Obteniendo latitud y longitud…', 'Obteniendo proveedor de internet…', 'Identificando el aparato…', 'Enviando aviso a Ismael…']; pasos.forEach(function(t, k){ setTimeout(function(){ sc.textContent = t; }, k * 800); }); } }
         var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
         st.volver = true;
         while(st.prog > 0.6) await dormir(30);
@@ -247,7 +247,8 @@ main h2{margin:0 0 4px;font-size:17px;}
         });
         es.textContent = '¡Listo!'; es.classList.add('cglisto');
         await dormir(250);
-        location.replace(destino);
+
+        try{ sessionStorage.setItem('cargaVuelta', '1'); }catch(e){} // para que el menú cierre la carga        location.replace(destino);
       })();
       return st.salida;
     },
@@ -676,3 +677,4 @@ iniciar();
 </script>
 </body>
 </html>
+<!-- ==== VERSION: Admin · v1.0.4 · 27-10-2026 ==== -->

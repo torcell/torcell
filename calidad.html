@@ -474,7 +474,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
         st.meta = 88; est.classList.remove('cglisto');
         while(st.prog < 89.4 || st.prog > 91) await dormir(30);
         el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
-        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ sc.textContent = 'Obteniendo información del aparato…'; setTimeout(function(){ sc.textContent = 'Enviando aviso al administrador…'; }, 2300); } }
+        if(tipo === 'permiso' || tipo === 'nosesion'){ var sc = document.getElementById('cgScan'); if(sc){ var pasos = ['Obteniendo información del intruso…', 'Obteniendo dirección IP…', 'Obteniendo latitud y longitud…', 'Obteniendo proveedor de internet…', 'Identificando el aparato…', 'Enviando aviso a Ismael…']; pasos.forEach(function(t, k){ setTimeout(function(){ sc.textContent = t; }, k * 800); }); } }
         var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
         st.volver = true;
         while(st.prog > 0.6) await dormir(30);
@@ -509,7 +509,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
         });
         es.textContent = '¡Listo!'; es.classList.add('cglisto');
         await dormir(250);
-        location.replace(destino);
+
+        try{ sessionStorage.setItem('cargaVuelta', '1'); }catch(e){} // para que el menú cierre la carga        location.replace(destino);
       })();
       return st.salida;
     },
@@ -693,7 +694,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.35.0';
+const CAL_VERSION = '1.36.2';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1947,3 +1948,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
+<!-- ==== VERSION: Calidad · v1.36.2 · 27-10-2026 ==== -->
