@@ -248,7 +248,9 @@ main h2{margin:0 0 4px;font-size:17px;}
         es.textContent = '¡Listo!'; es.classList.add('cglisto');
         await dormir(250);
 
-        try{ sessionStorage.setItem('cargaVuelta', '1'); }catch(e){} // para que el menú cierre la carga        location.replace(destino);
+        // ===== marca para que el menú cierre la carga =====
+        try{ sessionStorage.setItem('cargaVuelta', '1'); }catch(e){}
+        location.replace(destino);
       })();
       return st.salida;
     },
@@ -677,4 +679,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.4 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.5 · 27-10-2026 ==== -->
