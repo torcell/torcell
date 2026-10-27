@@ -437,8 +437,8 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
 @media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
 @media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
 
-.brand-logo{display:block;height:34px;width:auto;margin:0 0 10px;}
-.foot-logo{display:block;height:30px;width:auto;margin:18px auto 6px;}
+.brand-logo{display:block;height:34px;width:auto;align-self:flex-start;flex:none;margin:0 0 10px;}
+.foot-logo{display:block;height:30px;width:auto;align-self:center;flex:none;margin:18px auto 6px;}
 .brand-logo.dk,.foot-logo.dk{display:none;}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand-logo.lt,:root:not([data-theme="light"]) .foot-logo.lt{display:none;}:root:not([data-theme="light"]) .brand-logo.dk,:root:not([data-theme="light"]) .foot-logo.dk{display:block;}}
 :root[data-theme="dark"] .brand-logo.lt,:root[data-theme="dark"] .foot-logo.lt{display:none;}:root[data-theme="dark"] .brand-logo.dk,:root[data-theme="dark"] .foot-logo.dk{display:block;}
@@ -456,6 +456,13 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
+  }
+  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
+  function ponerTit(txt){
+    if(tit._t === undefined) tit._t = tit.textContent;
+    if(tit._t === txt) return;
+    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
+    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
   }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
@@ -507,12 +514,12 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
       if(st.salida) return st.salida;
       st.salida = (async function(){
         cancelAnimationFrame(st.raf); st.cerrando = true;
-        if(el.parentNode) el.remove();
+        tit.style.transition = 'opacity .2s ease'; tit.style.opacity = '0';
         var h = document.createElement('div'); h.innerHTML = plantilla;
         var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
         var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
-        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
-        void n.offsetWidth; n.style.opacity = '1';
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; ti.style.opacity = '1'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1'; setTimeout(function(){ if(el.parentNode) el.remove(); }, 300);
         var hecho = false;
         Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
         var p = 0, ini = performance.now() + 250;
@@ -2562,4 +2569,4 @@ iniciar();
 }catch(e){} })();
 /* ===== fin aviso de sitio ===== */
 </script>
-<!-- ==== VERSION: Avance de obra · v1.0.5 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Avance de obra · v1.0.7 · 27-10-2026 ==== -->

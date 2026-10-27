@@ -181,6 +181,13 @@ body.lectura .edita{display:none !important;}
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
+  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
+  function ponerTit(txt){
+    if(tit._t === undefined) tit._t = tit.textContent;
+    if(tit._t === txt) return;
+    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
+    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
@@ -231,12 +238,12 @@ body.lectura .edita{display:none !important;}
       if(st.salida) return st.salida;
       st.salida = (async function(){
         cancelAnimationFrame(st.raf); st.cerrando = true;
-        if(el.parentNode) el.remove();
+        tit.style.transition = 'opacity .2s ease'; tit.style.opacity = '0';
         var h = document.createElement('div'); h.innerHTML = plantilla;
         var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
         var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
-        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
-        void n.offsetWidth; n.style.opacity = '1';
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; ti.style.opacity = '1'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1'; setTimeout(function(){ if(el.parentNode) el.remove(); }, 300);
         var hecho = false;
         Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
         var p = 0, ini = performance.now() + 250;
@@ -465,7 +472,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   <h3 id="pedT">Nuevo pedido</h3><p class="nota" id="pedHora"></p>
   <div class="fila"><label class="f" for="peTipo">Va a<select id="peTipo"><option value="depto">Un departamento</option><option value="piso">Un piso completo</option><option value="pasillo">Pasillos</option><option value="otro">Otro lugar</option></select></label>
     <label class="f" for="peDest" id="lbPeDest">Departamento<input id="peDest" maxlength="60" placeholder="Ej: 302"></label>
-    <label class="f" for="peSol" style="flex-basis:100%;">Solicitado por (nombre)<input id="peSol" maxlength="60" autocomplete="off"></label></div>
+    <label class="f" for="peSol" style="flex-basis:100%;">Solicitado por (si lo dejas vacío, queda quien tiene la sesión)<input id="peSol" maxlength="60" autocomplete="off"></label></div>
   <div class="fila" style="margin-top:8px;"><label class="f" for="peBus" style="flex-basis:100%;">Buscar material del catálogo<input id="peBus" maxlength="40" placeholder="Escribe parte del nombre…"></label>
     <label class="f" for="peMat" style="flex-basis:100%;">Material<select id="peMat"></select></label>
     <label class="f" for="peCant">Cantidad<input id="peCant" type="number" min="1" step="1" value="1"></label>
@@ -475,8 +482,6 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
     <div class="acciones" style="align-self:flex-end;"><button class="btn" id="peAddO" type="button">Agregar</button></div></div>
   <div class="scroll" style="margin-top:8px;"><table class="tabla" id="peLista"></table></div>
   <label class="f" for="peNota" style="margin-top:8px;">Nota (opcional)<input id="peNota" maxlength="200"></label>
-  <div class="f" style="margin-top:8px;">Firma de quien pide<canvas id="peFirma" class="firma" width="600" height="180" aria-label="Firma"></canvas></div>
-  <div class="acciones" style="justify-content:flex-start;margin-top:4px;"><button class="btn small" id="peFirmaBorrar" type="button">Borrar firma</button></div>
   <div class="err" id="peErr" role="alert"></div>
   <div class="acciones"><button class="btn" id="peCan" type="button">Cancelar</button><button class="btn primary" id="peOk" type="button">Guardar pedido y cerrar</button></div>
 </div></div>
@@ -1029,7 +1034,7 @@ $('sinOk').addEventListener('click', async () => {
 // ---------- Pedidos (libreta) ----------
 const DEST_PED = {depto:'Departamento', piso:'Piso completo', pasillo:'Pasillos', otro:'Otro lugar'};
 const HINT_PED = {depto:['Departamento', 'Ej: 302'], piso:['Piso', 'Ej: Piso 4'], pasillo:['Pasillos de', 'Ej: Piso 3, ala norte'], otro:['Lugar', 'Ej: Acceso, bodega 2']};
-let pedItems = [], pedNonce = '', pedAcc = '', pedId = '', pedTinta = false;
+let pedItems = [], pedNonce = '', pedAcc = '', pedId = '';
 const uniDe = i => i.mid ? (i.uni != null ? i.uni : Math.round((i.env || 0) * (matDe(i.mid) || {porEnvase:1}).porEnvase)) : 1;
 const faltaDe = i => i.mid ? Math.max(0, uniDe(i) - (i.ent || 0)) : (i.ent ? 0 : 1);
 function cosasPed(x){
@@ -1054,7 +1059,7 @@ function pintarPed(){
     const cierre = !ab && x.tsEnt ? '<small>' + fecha(x.tsEnt) + (x.entrego ? ' · ' + esc(x.entrego) : '') + '</small>' : (x.estado === 'parcial' && x.tsEnt ? '<small>Última salida ' + fecha(x.tsEnt) + '</small>' : '');
     const rec = x.recibio ? '<small>Recibió: ' + esc(x.recibio) + '</small>' : '';
     const acc = '<button class="btn small" type="button" data-pv="' + esc(x.id) + '">Ver</button>' + (ab ? '<span class="edita"> <button class="btn small primary" type="button" data-pe="' + esc(x.id) + '">Entregado</button>' + (x.estado === 'pendiente' ? ' <button class="btn small" type="button" data-pa="' + esc(x.id) + '">Anular</button>' : '') + '</span>' : '');
-    return '<tr><td>' + fecha(x.ts) + '<small>Pidió: ' + esc(x.solicito || x.quien) + '</small></td><td><b>' + esc(x.dest) + '</b><small>' + esc(DEST_PED[x.tipo] || '') + '</small><small class="mq">' + fecha(x.ts) + ' · ' + esc(x.solicito || x.quien) + '</small></td><td>' + cosasPed(x) + (x.nota ? '<small>' + esc(x.nota) + '</small>' : '') + '</td><td><span class="pill ' + cl + '">' + est + '</span>' + cierre + rec + '</td><td>' + acc + '</td></tr>';
+    return '<tr><td>' + fecha(x.ts) + '<small>Pidió: ' + esc(x.solicito || x.quien) + '</small>' + (x.solicito && x.solicito !== x.quien ? '<small>Sesión: ' + esc(x.quien) + '</small>' : '') + '</td><td><b>' + esc(x.dest) + '</b><small>' + esc(DEST_PED[x.tipo] || '') + '</small><small class="mq">' + fecha(x.ts) + ' · ' + esc(x.solicito || x.quien) + '</small></td><td>' + cosasPed(x) + (x.nota ? '<small>' + esc(x.nota) + '</small>' : '') + '</td><td><span class="pill ' + cl + '">' + est + '</span>' + cierre + rec + '</td><td>' + acc + '</td></tr>';
   }).join('') || '<tr><td colspan="5"><div class="vacio">' + (f === 'pend' ? 'No hay pedidos pendientes.' : 'Sin pedidos.') + '</div></td></tr>') + '</tbody>';
   pintarPorDest();
 }
@@ -1102,22 +1107,12 @@ function ajustarDestPed(){ const h = HINT_PED[$('peTipo').value]; $('lbPeDest').
 $('peTipo').addEventListener('change', ajustarDestPed);
 $('peBus').addEventListener('input', opcionesPedMat);
 $('peMat').addEventListener('change', etiquetaCant);
-// ===== firma con dedo o mouse =====
-const cvF = $('peFirma'), ctxF = cvF.getContext('2d');
-function limpiarFirma(){ ctxF.fillStyle = '#fff'; ctxF.fillRect(0, 0, cvF.width, cvF.height); ctxF.strokeStyle = '#111'; ctxF.lineWidth = 3.2; ctxF.lineCap = ctxF.lineJoin = 'round'; pedTinta = false; }
-let dibujando = false;
-const puntoF = e => { const r = cvF.getBoundingClientRect(); return [(e.clientX - r.left) * cvF.width / r.width, (e.clientY - r.top) * cvF.height / r.height]; };
-cvF.addEventListener('pointerdown', e => { dibujando = true; cvF.setPointerCapture(e.pointerId); const [x, y] = puntoF(e); ctxF.beginPath(); ctxF.moveTo(x, y); ctxF.lineTo(x + .1, y + .1); ctxF.stroke(); pedTinta = true; e.preventDefault(); });
-cvF.addEventListener('pointermove', e => { if(!dibujando) return; const [x, y] = puntoF(e); ctxF.lineTo(x, y); ctxF.stroke(); e.preventDefault(); });
-['pointerup', 'pointercancel'].forEach(ev => cvF.addEventListener(ev, () => { dibujando = false; }));
-$('peFirmaBorrar').addEventListener('click', limpiarFirma);
 $('nuevoPed').addEventListener('click', () => {
   pedItems = []; pedNonce = nuevoNonce(); $('peErr').textContent = '';
   $('peTipo').value = 'depto'; $('peDest').value = ''; $('peBus').value = ''; $('peOtro').value = ''; $('peNota').value = ''; $('peCant').value = 1;
-  let n0 = ''; try{ n0 = localStorage.getItem(cfg.N) || ''; }catch(e){}
-  $('peSol').value = n0;
+  $('peSol').value = '';
   $('pedHora').textContent = 'Se anota con la fecha y hora de ahora: ' + fecha(Date.now()) + '.';
-  ajustarDestPed(); opcionesPedMat(); pintarListaPed(); $('veloPed').classList.add('on'); limpiarFirma(); $('peDest').focus();
+  ajustarDestPed(); opcionesPedMat(); pintarListaPed(); $('veloPed').classList.add('on'); $('peDest').focus();
 });
 $('peAdd').addEventListener('click', () => {
   const m = matDe($('peMat').value), c = Math.floor(Number($('peCant').value));
@@ -1137,13 +1132,11 @@ $('peCan').addEventListener('click', () => $('veloPed').classList.remove('on'));
 $('peOk').addEventListener('click', async () => {
   const dest = limpio($('peDest').value, 60), sol = limpio($('peSol').value, 60);
   if(!dest){ $('peErr').textContent = 'Indica para dónde va el pedido.'; $('peDest').focus(); return; }
-  if(!sol){ $('peErr').textContent = 'Escribe el nombre de quien pide.'; $('peSol').focus(); return; }
   if(!pedItems.length){ $('peErr').textContent = 'Agrega al menos una cosa al pedido.'; return; }
-  if(!pedTinta){ $('peErr').textContent = 'Falta la firma de quien pide.'; return; }
   const b = $('peOk'), txt = b.textContent; b.disabled = true; b.textContent = 'Guardando…';
-  const r = await api('bodegaPedidoCrear', {nonce:pedNonce, tipo:$('peTipo').value, dest:dest, solicito:sol, firma:cvF.toDataURL('image/png'), nota:limpio($('peNota').value, 200), items:pedItems});
+  const r = await api('bodegaPedidoCrear', {nonce:pedNonce, tipo:$('peTipo').value, dest:dest, solicito:sol, nota:limpio($('peNota').value, 200), items:pedItems});
   b.disabled = false; b.textContent = txt;
-  if(!r.ok){ if(r.error !== 'sin_sesion') $('peErr').textContent = r.error === 'firma_invalida' ? 'La firma no se pudo guardar. Bórrala y hazla de nuevo.' : msgError(r); return; }
+  if(!r.ok){ if(r.error !== 'sin_sesion') $('peErr').textContent = msgError(r); return; }
   $('veloPed').classList.remove('on'); aplicar(r); $('fPed').value = 'pend'; pintarPed(); aviso('Pedido anotado.');
 });
 // ===== entregar, anular y ver =====
@@ -1293,4 +1286,4 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.3.2 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.3.4 · 27-10-2026 ==== -->

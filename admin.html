@@ -175,6 +175,13 @@ main h2{margin:0 0 4px;font-size:17px;}
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
+  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
+  function ponerTit(txt){
+    if(tit._t === undefined) tit._t = tit.textContent;
+    if(tit._t === txt) return;
+    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
+    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
@@ -225,12 +232,12 @@ main h2{margin:0 0 4px;font-size:17px;}
       if(st.salida) return st.salida;
       st.salida = (async function(){
         cancelAnimationFrame(st.raf); st.cerrando = true;
-        if(el.parentNode) el.remove();
+        tit.style.transition = 'opacity .2s ease'; tit.style.opacity = '0';
         var h = document.createElement('div'); h.innerHTML = plantilla;
         var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
         var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
-        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
-        void n.offsetWidth; n.style.opacity = '1';
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; ti.style.opacity = '1'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1'; setTimeout(function(){ if(el.parentNode) el.remove(); }, 300);
         var hecho = false;
         Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
         var p = 0, ini = performance.now() + 250;
@@ -679,4 +686,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.5 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.6 · 27-10-2026 ==== -->

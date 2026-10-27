@@ -437,6 +437,13 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
+  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
+  function ponerTit(txt){
+    if(tit._t === undefined) tit._t = tit.textContent;
+    if(tit._t === txt) return;
+    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
+    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
@@ -445,7 +452,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) tit.textContent = st.msg || (t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase);
+    if(st.meta < 100 && !st.err) ponerTit(st.msg || (t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -488,12 +495,12 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       if(st.salida) return st.salida;
       st.salida = (async function(){
         cancelAnimationFrame(st.raf); st.cerrando = true;
-        if(el.parentNode) el.remove();
+        tit.style.transition = 'opacity .2s ease'; tit.style.opacity = '0';
         var h = document.createElement('div'); h.innerHTML = plantilla;
         var n = h.firstChild; n.style.opacity = '0'; n.style.transition = 'opacity .2s ease'; document.body.appendChild(n);
         var rl = n.querySelector('#cgRell'), es = n.querySelector('#cgEst'), ti = n.querySelector('#cgTit'), pi = n.querySelector('#cgPista');
-        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
-        void n.offsetWidth; n.style.opacity = '1';
+        ti.textContent = titulo || 'Volviendo a inicio de sesión…'; ti.style.opacity = '1'; if(pi) pi.setAttribute('aria-label', 'Cerrando sesión');
+        void n.offsetWidth; n.style.opacity = '1'; setTimeout(function(){ if(el.parentNode) el.remove(); }, 300);
         var hecho = false;
         Promise.resolve(trabajo).catch(function(){}).then(function(){ hecho = true; });
         var p = 0, ini = performance.now() + 250;
@@ -697,7 +704,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.36.4';
+const CAL_VERSION = '1.36.5';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1978,4 +1985,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.36.4 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.36.5 · 27-10-2026 ==== -->
