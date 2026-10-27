@@ -800,7 +800,7 @@ async function bienvenida(res, bloqueo){
 }
 async function bloqueadoFlujo(res){
   gate.bloqueado = true; gatePintar();
-  const txt = res.permanente ? 'Usuario bloqueado. Habla con el administrador.' : 'Usuario bloqueado hasta el ' + new Date(res.hasta).toLocaleDateString('es-CL') + '.';
+  const txt = res.permanente ? 'Usuario bloqueado. Pídele a Ismael que te desbloquee.' : 'Usuario bloqueado hasta el ' + new Date(res.hasta).toLocaleDateString('es-CL') + '.';
   await bienvenida(res, txt);
   gate.bloqueado = false; gate.pin = ''; gate.fallos = 0; gateMensaje(''); gatePintar();
   pantalla('lgPin');
@@ -940,6 +940,26 @@ function iniciarGoogle(){
   const idle = window.requestIdleCallback || (f => setTimeout(f, 1200));
   idle(() => { const d = ls('destinoPreferido'); precargar(PAGINAS[d] ? d : 'panel'); });
 })();
+</script>
+<script>
+/* ===== aviso si esta página corre en otro sitio ===== */
+(function(){ try{
+  if(sessionStorage.getItem('avSitio')) return; sessionStorage.setItem('avSitio', '1');
+  var tk = ''; try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null'); tk = (h && h.token) || ''; }catch(e){}
+  var pag = location.pathname.split('/').pop() || 'index';
+  // mando el dominio; si el servidor dice que no es el mío, mando también los datos del aparato
+  var mandar = function(x){ x.action = 'avisoSitio'; x.pagina = pag; x.host = location.hostname; x.token = tk; return fetch('https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec', {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(x)}).then(function(r){ return r.json(); }); };
+  setTimeout(function(){ mandar({}).then(function(j){
+    if(!j || !j.extra) return;
+    var n = navigator, c = n.connection || {}, inf = {lang: String(n.language || ''), langs: (n.languages || []).slice(0, 4).join(','), tz: '', pant: screen.width + 'x' + screen.height, ratio: window.devicePixelRatio || 1, plat: String((n.userAgentData && n.userAgentData.platform) || n.platform || ''), movil: !!(n.userAgentData && n.userAgentData.mobile), red: String(c.effectiveType || ''), ref: String(document.referrer || '').substring(0, 80), hora: new Date().toString().substring(0, 60)};
+    try{ inf.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(e){}
+    var ua = String(n.userAgent || '').substring(0, 120);
+    var ctl = new AbortController(), to = setTimeout(function(){ ctl.abort(); }, 3000);
+    var fin = function(geo){ inf.geo = geo; mandar({ua: ua, info: inf}).catch(function(){}); };
+    fetch('https://ipwho.is/', {signal: ctl.signal}).then(function(r){ return r.json(); }).then(function(g){ clearTimeout(to); fin(g && g.success !== false ? {ip: g.ip, ciudad: g.city, region: g.region, pais: g.country, isp: (g.connection && (g.connection.isp || g.connection.org)) || '', lat: g.latitude, lon: g.longitude} : null); }).catch(function(){ clearTimeout(to); fin(null); });
+  }).catch(function(){}); }, 4000);
+}catch(e){} })();
+/* ===== fin aviso de sitio ===== */
 </script>
 </body>
 </html>
