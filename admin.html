@@ -139,9 +139,10 @@ main h2{margin:0 0 4px;font-size:17px;}
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
 #cargaGlobal .cgest.cglisto{color:#fff;}
-#cargaGlobal .cgmsg{margin-top:10px;height:18px;line-height:18px;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.85);text-align:center;white-space:nowrap;}
+#cargaGlobal .cgmsg{height:0;margin:0;overflow:visible;line-height:18px;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.85);text-align:center;white-space:nowrap;transform:translateY(5px);pointer-events:none;}
+#cargaGlobal .cgerr{height:0;overflow:visible;transform:translateY(5px);}
 #cargaGlobal.cgerror .cgmsg{display:none;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
-#cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
+#cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
 #cargaGlobal .cgerr svg{flex:none;}
 #cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
 #cargaGlobal .cgbd,#cargaGlobal .cgin small,#cargaGlobal .cgin b,#cargaGlobal .cgest{transition:color .3s ease,background-color .3s ease;}
@@ -712,4 +713,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.7 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.8 · 28-10-2026 ==== -->
