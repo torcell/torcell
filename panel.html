@@ -153,6 +153,16 @@
   .dt-info small{color:var(--sub);font-size:11px;}
   .dt-info .lbl{font-weight:700;}
   .dt-libre{color:var(--sub);}
+  .dt-btns{display:flex;gap:6px;flex:0 0 auto;}
+  .dt-sec{display:none;border-top:1px dashed var(--border);padding:6px 0 4px;font-size:12px;}
+  .dt-sec.abierto{display:block;animation:dtSec .16s ease;}
+  @keyframes dtSec{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .dt-sec-r{padding:2px 0;}
+  .dt-sec-r small{display:block;color:var(--sub);font-size:11px;}
+  .dt-sec-r.ok{color:var(--text);}
+  .dt-sec-r.no{color:var(--sub);margin-top:4px;}
+  .dt-roja{border:1px solid rgba(192,57,43,.7);border-left:4px solid #c0392b;background:rgba(192,57,43,.14);color:#c0392b;padding:8px 12px;margin-bottom:8px;font-size:12.5px;font-weight:700;}
+  .dt-roja .btn{margin:6px 0 0;}
   .disp-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#c0392b;color:#fff;font-size:11px;font-weight:800;}
   .cambio-item{border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;margin-bottom:6px;font-size:12.5px;}
   .cambio-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--sub);font-size:11.5px;margin-bottom:3px;}
@@ -371,7 +381,7 @@
   #pedirBodegaBtn:active{transform:none;}
   .pb-tabla{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;}
   .pb-tabla td{padding:6px 4px;border-bottom:1px solid var(--border);}
-  .tab{padding:12px 14px;min-width:0;text-align:center;background:var(--panel);color:var(--sub);font-size:14px;cursor:pointer;border-right:1px solid var(--border-strong);}
+  .tab{padding:12px 14px;min-width:0;text-align:center;background:var(--panel);color:var(--sub);font-size:14px;font-weight:600;cursor:pointer;border-right:1px solid var(--border-strong);}
   .tab:last-child{border-right:none;}
   .tab.active{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-weight:600;}
   @keyframes pestanaBrillo{0%,100%{box-shadow:0 0 5px 0 rgba(160,110,255,.45), inset 0 0 8px rgba(255,255,255,.12);}50%{box-shadow:0 0 14px 2px rgba(160,110,255,.85), inset 0 0 14px rgba(255,255,255,.28);}}
@@ -1309,7 +1319,9 @@
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-#cargaGlobal .cgest.cglisto{color:#fff;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
+#cargaGlobal .cgest.cglisto{color:#fff;}
+#cargaGlobal .cgmsg{margin-top:10px;height:18px;line-height:18px;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.85);text-align:center;white-space:nowrap;}
+#cargaGlobal.cgerror .cgmsg{display:none;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
 #cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
 #cargaGlobal .cgerr svg{flex:none;}
 #cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
@@ -1384,35 +1396,52 @@
 </style>
 </head>
 <body class="lg-on">
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>
 (function(){
-  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit'), msgEl = document.getElementById('cgMsg');
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
+  var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
-  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
-  function ponerTit(txt){
-    if(tit._t === undefined) tit._t = tit.textContent;
-    if(tit._t === txt) return;
-    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
-    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  // Cambia el mensaje de abajo con un fundido corto (el título de la sección no se toca)
+  function ponerMsg(txt){
+    if(msgEl._t === undefined) msgEl._t = msgEl.textContent;
+    if(msgEl._t === txt) return;
+    msgEl._t = txt; msgEl.style.transition = 'opacity .18s ease'; msgEl.style.opacity = '0';
+    setTimeout(function(){ if(msgEl._t === txt){ msgEl.textContent = txt; msgEl.style.opacity = '1'; } }, 190);
+  }
+  // Progreso real: cada paso que termina suma su parte; mientras uno está en curso la barra avanza solo hasta la mitad de ese paso
+  function hito(k){
+    for(var i = 0; i < st.reg.length; i++){ if(st.reg[i].k === k && st.reg[i].on && !st.reg[i].ok){ st.reg[i].ok = true; st.ultHito = performance.now(); } }
+  }
+  function objetivoReal(){
+    var tot = 0, hecho = 0, sig = 0;
+    st.reg.forEach(function(r){ if(!r.on) return; tot += r.w; if(r.ok) hecho += r.w; else if(!sig) sig = r.w; });
+    var cre = sig ? (sig / tot * 100) * 0.5 * (1 - Math.exp(-Math.max(0, performance.now() - st.ultHito) / 1500)) : 0;
+    return Math.min(97, hecho / tot * 100 + cre);
+  }
+  function textoEstado(t){
+    if(st.msg) return st.msg;
+    var v = st.reg[1], d = st.reg[2];
+    if(v.on && !v.ok) return 'Comprobando versión…';
+    if(d.on && !d.ok) return t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : 'Cargando datos de la base de datos…';
+    return '';
   }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
-    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
+    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : st.err ? 90 * (1 - Math.exp(-t / 450)) : objetivoReal();
     if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 5000)); }
-    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    else st.prog += Math.max(0, obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) ponerTit(st.msg || (t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase));
+    if(st.meta < 100 && !st.err) ponerMsg(textoEstado(t));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -1427,9 +1456,12 @@
     })();
     await Promise.race([listo, tope]);
   }
+  paginaLista().then(function(){ hito('pagina'); });
   window.CargaPagina = {
     el: el,
     mensaje: function(t){ st.msg = String(t || ''); },
+    espera: function(k){ st.reg.forEach(function(r){ if(r.k === k) r.on = true; }); },
+    hecho: hito,
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
@@ -1491,6 +1523,7 @@
       st.fin = (async function(){
         await abierta; await paginaLista();
         if(st.err) return;
+        st.reg.forEach(function(r){ r.ok = true; }); st.msg = '';
         st.meta = 100;
         while(st.prog < 100){ if(st.err) return; await dormir(30); }
         est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
@@ -2056,7 +2089,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.7';
+const APP_VERSION = '0.73.9';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2113,25 +2146,24 @@ let actInicial = null, cargaCerrada = false;
 async function revisionInicial(){
   ultimaRevisionVersion = Date.now();
   const msg = t => { if(!cargaCerrada && window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(t); };
-  msg('Buscando actualización…');
-  const v = await versionPublicada();
+    const v = await versionPublicada();
   if(!v){ msg(''); return 'sin_dato'; }
   if(!versionMayor(v, APP_VERSION)){
     try{ sessionStorage.removeItem('progresoObraIntentosAct'); }catch(e){}
-    msg('Ya está actualizado'); return 'al_dia';
+    return 'al_dia';
   }
   const sinGuardar = dirtyCellIds.size > 0 || settingsDirty;
   if(cargaCerrada && (sinGuardar || document.querySelector('.overlay.show'))){ mostrarBannerActualizar(v); return 'banner'; }
-  msg('Actualizando…');
+  msg('Actualizando versión…');
   if(!cargaCerrada) await new Promise(f => setTimeout(f, 800)); // alcanza a leerse antes de recargar
   if(recargarConVersion(v)) return 'actualizando';
   msg(''); return 'sin_dato';
 }
 async function esperarActualizacion(){
   const r = await Promise.race([actInicial, new Promise(f => setTimeout(() => f('tarde'), 3500))]);
-  if(r === 'al_dia') await new Promise(f => setTimeout(f, 900));
   if(r === 'actualizando') await new Promise(f => setTimeout(f, 4000));
   if(r === 'tarde' || r === 'actualizando'){ if(window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(''); }
+  if(r !== 'actualizando' && window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('version');
   cargaCerrada = true;
 }
 setTimeout(() => {
@@ -2142,7 +2174,8 @@ setTimeout(() => {
     try{ sessionStorage.removeItem('progresoObraActualizadoA'); }catch(e){}
     if(avisarA === APP_VERSION) setTimeout(() => avisoToast('Panel actualizado a la versión ' + APP_VERSION + '.', 'ok'), 1200);
   }
-  actInicial = revisionInicial();
+  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('version');
+  actInicial = revisionInicial().then(r => { if(r !== 'actualizando' && window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('version'); return r; });
 }, 0);
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionVersion > REVISAR_VERSION_CADA_MS) comprobarVersion();
@@ -2642,6 +2675,16 @@ document.getElementById('avisoDatosViejosCerrar').addEventListener('click', () =
   avisoDatosViejosDescartado = true;
   document.getElementById('avisoDatosViejos').style.display = 'none';
 });
+function seccionPanel(){ return activeCategoria === 'Frague' ? 'frague' : activeCategoria === 'Pasillos' ? 'pasillos' : 'ceramica'; }
+let avisosSeccion = {};
+function avisarSeccion(){
+  if(!DB_URL || !sessionToken) return;
+  const sec = seccionPanel(), ahora = Date.now();
+  if(avisosSeccion[sec] && ahora - avisosSeccion[sec] < 15 * 60 * 1000) return;
+  avisosSeccion[sec] = ahora;
+  llamarDb('accesoSeccion', {dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo(), seccion: sec}).catch(() => {});
+}
+document.addEventListener('visibilitychange', () => { if(!document.hidden) avisarSeccion(); });
 function etiquetaDispositivo(){
   const u = navigator.userAgent || '';
   const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
@@ -2677,6 +2720,50 @@ function actualizarAlertaDispositivos(lista, avisar){
     }
   }
 }
+const NOMBRE_SECC = {ceramica:'Panel · Cerámica', frague:'Panel · Frague', pasillos:'Panel · Pasillos', avance:'Avance de obra', calidad:'Calidad', terreno:'Jefe de Terreno', oficina:'Oficina Técnica', bodega:'Bodega'};
+let seccAparatos = {mapa:{}, filas:0, ms:0, grande:false};
+function htmlSeccionesAparato(cuenta, x){
+  const lista = (seccAparatos.mapa || {})[cuenta + '|' + x.id] || [];
+  const por = {}; lista.forEach(e => { por[e.s] = e; });
+  const entro = Object.keys(NOMBRE_SECC).filter(k => por[k]);
+  const no = Object.keys(NOMBRE_SECC).filter(k => !por[k]);
+  let h = `<div class="dt-sec-r"><b>Primera vez:</b> ${fechaHoraCambio(x.p)}</div><div class="dt-sec-r"><b>Último uso:</b> ${fechaHoraCambio(x.t)}</div>`;
+  h += entro.length
+    ? entro.map(k => `<div class="dt-sec-r ok">✔ ${NOMBRE_SECC[k]}<small>primera vez ${fechaHoraCambio(por[k].p)} · último uso ${fechaHoraCambio(por[k].t)} · ${por[k].n} ${por[k].n === 1 ? 'entrada' : 'entradas'}</small></div>`).join('')
+    : '<div class="dt-sec-r no">Todavía no hay entradas a secciones registradas para este aparato.</div>';
+  if(entro.length && no.length) h += `<div class="dt-sec-r no">No ha entrado a: ${no.map(k => NOMBRE_SECC[k]).join(', ')}</div>`;
+  return h;
+}
+function htmlAvisoSecciones(){
+  if(seccAparatos.error) return '<div class="dt-roja">⚠ No se pudo leer el registro de entradas a secciones.</div>';
+  if(!seccAparatos.grande) return '';
+  return `<div class="dt-roja">⚠ El registro de entradas está muy grande (${seccAparatos.filas} filas, lectura de ${(seccAparatos.ms / 1000).toFixed(1)} s) y puede dejar lenta la página. Exporta una copia y libera espacio.<br><button type="button" class="btn small" id="seccExportarBtn">Exportar y liberar espacio</button></div>`;
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-disp-sec]'); if(!b) return;
+  const fila = b.closest('.dt-fila'), panelSec = fila && fila.nextElementSibling;
+  if(!panelSec || !panelSec.classList.contains('dt-sec')) return;
+  const abre = !panelSec.classList.contains('abierto');
+  panelSec.classList.toggle('abierto', abre);
+  b.setAttribute('aria-expanded', abre ? 'true' : 'false');
+  b.textContent = abre ? 'Ocultar entradas' : 'Ver entradas';
+});
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('#seccExportarBtn'); if(!b) return;
+  askConfirm('Se descarga una copia en CSV y después se borran las entradas que no se usan hace más de 90 días. ¿Seguir?', async () => {
+    b.disabled = true;
+    let j = null;
+    try{ j = await llamarDb('accesosSeccionesExportar', {}); }catch(err){ j = null; }
+    if(!j || !j.ok){ b.disabled = false; avisoToast('No se pudo exportar. No se borró nada.', 'error'); return; }
+    const csv = ['Cuenta;Aparato;Sección;Primera vez;Último uso;Entradas'].concat(j.filas.map(f => [f.cuenta, f.etiqueta, f.seccion, new Date(f.primera).toISOString(), new Date(f.ultima).toISOString(), f.veces].map(v => '"' + String(v).replace(/"/g, '""').replace(/^([=+\-@])/, "'$1") + '"').join(';'))).join('\n');
+    const url = URL.createObjectURL(new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'}));
+    const a = document.createElement('a'); a.href = url; a.download = 'entradas_secciones_' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+    let v = null;
+    try{ v = await llamarDb('accesosSeccionesVaciar', {dias: 90}); }catch(err){ v = null; }
+    if(v && v.ok){ avisoToast('Copia descargada. Se liberaron ' + v.borradas + ' filas.', 'ok'); cargarAccesos(); }
+    else { b.disabled = false; avisoToast('Se descargó la copia, pero no se pudo liberar espacio.', 'error'); }
+  });
+});
 function pintarDispositivosTodos(cuentas, todos){
   const box = document.getElementById('dispTodos');
   if(!box) return;
@@ -2687,9 +2774,9 @@ function pintarDispositivosTodos(cuentas, todos){
   const slot = (cuenta, tipo, lista) => {
     const tit = tipo === 'cel' ? '📱 Celular' : '💻 Computador';
     if(!lista.length) return `<div class="dt-fila"><div class="dt-info"><span class="lbl">${tit}</span><small class="dt-libre">Libre · nadie lo ha usado</small></div></div>`;
-    return lista.map(x => `<div class="dt-fila"><div class="dt-info"><span class="lbl">${tit} · ${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)} · último uso ${fechaHoraCambio(x.t)}</small></div><button type="button" class="btn small" data-disp-lib="${esc(x.id)}" data-cuenta="${esc(cuenta)}" data-nombre="${esc((NOMBRE_TIPO_DISP[x.k] || 'aparato') + ' ' + (x.e || ''))}">Liberar</button></div>`).join('');
+    return lista.map(x => `<div class="dt-fila"><div class="dt-info"><span class="lbl">${tit} · ${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)} · último uso ${fechaHoraCambio(x.t)}</small></div><div class="dt-btns"><button type="button" class="btn small" data-disp-sec="1" aria-expanded="false">Ver entradas</button><button type="button" class="btn small" data-disp-lib="${esc(x.id)}" data-cuenta="${esc(cuenta)}" data-nombre="${esc((NOMBRE_TIPO_DISP[x.k] || 'aparato') + ' ' + (x.e || ''))}">Liberar</button></div></div><div class="dt-sec">${htmlSeccionesAparato(cuenta, x)}</div>`).join('');
   };
-  box.innerHTML = '<div class="dt-tit">Aparatos por cuenta</div>' + nombres.map(c => {
+  box.innerHTML = htmlAvisoSecciones() + '<div class="dt-tit">Aparatos por cuenta</div>' + nombres.map(c => {
     const l = por[c] || [];
     return `<div class="dt-cuenta"><b>${esc(c)}</b>${slot(c, 'pc', l.filter(x => x.k !== 'cel'))}${slot(c, 'cel', l.filter(x => x.k === 'cel'))}</div>`;
   }).join('');
@@ -2734,7 +2821,7 @@ async function dbLoad(){
   try{
     let data = null;
     if(sessionToken){
-      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', token: sessionToken, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo()})});
+      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', token: sessionToken, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo(), seccion: seccionPanel()})});
       if(!resP.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${resP.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
       const jp = await resP.json();
       if(jp && jp.ok === true){ data = jp; }
@@ -3107,6 +3194,7 @@ function switchCategoria(newCat){
   setTimeout(() => {
     activeCategoria = newCat;
     try{ localStorage.setItem('progresoObraCategoria', activeCategoria); }catch(err){}
+    avisarSeccion();
     populateFilters();
     render();
     contentEl.style.transition = 'none';
@@ -4959,6 +5047,7 @@ async function cargarAccesos(){
   }
   if(Array.isArray(j.dispositivos)){ actualizarAlertaDispositivos(j.dispositivos, false); }
   pintarDispositivosMultiples();
+  seccAparatos = j.secciones || {mapa:{}, filas:0, ms:0, grande:false};
   pintarDispositivosTodos(j.cuentas, j.dispositivosTodos);
   sel.innerHTML = '<option value="">Todas las cuentas</option>' + (j.cuentas || []).map(c => `<option value="${esc(c)}"${c === cuenta ? ' selected' : ''}>${esc(c)}</option>`).join('');
   msg.textContent = j.accesos.length ? `Últimos ${j.accesos.length} inicios de sesión${cuenta ? ' de ' + cuenta : ''}.` : '';
@@ -7911,7 +8000,7 @@ setTimeout(function(){
 
 (async function init(){
   gateIniciar();
-  const t0 = Date.now();
+  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('datos');
   let pidioUrl = false;
   if(!DB_URL){
     await dormir(1300);
@@ -7930,6 +8019,7 @@ setTimeout(function(){
     if(sesionInvalida){ irAlLogin('Tu sesión venció. Ingresa tu PIN de nuevo.'); return; }
     if(cargaFallo){ irAlLogin('No se pudieron cargar los datos de la base de datos. Revisa tu conexión e ingresa tu PIN de nuevo.'); return; }
     reintentar = false;
+    if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
     }
   }
   try{ const savedCat = localStorage.getItem('progresoObraCategoria'); if(savedCat) activeCategoria = savedCat; }catch(err){}
@@ -7948,8 +8038,6 @@ setTimeout(function(){
   updateDbBadge();
   render();
   appListo = true;
-  const falta = 2700 - (Date.now() - t0);
-  if(falta > 0) await dormir(falta);
   await esperarActualizacion();
   gateOcultar();
 })();
@@ -7976,4 +8064,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.7 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.9 · 28-10-2026 ==== -->

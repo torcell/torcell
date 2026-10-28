@@ -92,6 +92,18 @@ video.on{display:block;}
 .qrtabla td{padding:7px 6px;border-bottom:1px solid var(--line,var(--strong));vertical-align:top;}
 .qrtabla small{display:block;color:var(--sub,#777);font-size:11.5px;}
 .qrtabla .mal td{color:var(--bad);}
+.modal-qr{width:min(780px,100%);}
+.qrbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
+.qrchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.qrchips .pill{font-size:11.5px;}
+.qrman{margin-top:10px;align-items:flex-start;}
+.qrtabla input[type=number]{width:70px;font:inherit;padding:4px 6px;border:1px solid var(--strong);background:var(--panel);color:var(--text);border-radius:0;}
+.qrtabla .x{font:inherit;padding:2px 8px;cursor:pointer;border:1px solid var(--strong);background:var(--panel);color:var(--text);border-radius:0;}
+.qrtabla tr.mod td{background:rgba(217,154,0,.12);}
+.qrtabla td .x{margin-top:4px;font-size:12px;}
+.qrhist{margin-top:12px;font-size:12px;color:var(--sub,#777);border-top:1px solid var(--strong);padding-top:8px;}
+.qrhist b{color:var(--text);}
+.qrhist div{padding:2px 0;}
 
 @media (max-width:560px){.carro .u{display:none;}.carro .uu{display:block !important;}.resumen b{font-size:18px;} nav.tabs button{font-size:12.5px;}}
 
@@ -148,7 +160,9 @@ body.lectura .edita{display:none !important;}
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-#cargaGlobal .cgest.cglisto{color:#fff;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
+#cargaGlobal .cgest.cglisto{color:#fff;}
+#cargaGlobal .cgmsg{margin-top:10px;height:18px;line-height:18px;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.85);text-align:center;white-space:nowrap;}
+#cargaGlobal.cgerror .cgmsg{display:none;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
 #cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
 #cargaGlobal .cgerr svg{flex:none;}
 #cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
@@ -176,35 +190,52 @@ body.lectura .edita{display:none !important;}
 </style>
 </head>
 <body>
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Bodega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Bodega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>
 (function(){
-  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit'), msgEl = document.getElementById('cgMsg');
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
+  var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
-  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
-  function ponerTit(txt){
-    if(tit._t === undefined) tit._t = tit.textContent;
-    if(tit._t === txt) return;
-    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
-    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  // Cambia el mensaje de abajo con un fundido corto (el título de la sección no se toca)
+  function ponerMsg(txt){
+    if(msgEl._t === undefined) msgEl._t = msgEl.textContent;
+    if(msgEl._t === txt) return;
+    msgEl._t = txt; msgEl.style.transition = 'opacity .18s ease'; msgEl.style.opacity = '0';
+    setTimeout(function(){ if(msgEl._t === txt){ msgEl.textContent = txt; msgEl.style.opacity = '1'; } }, 190);
+  }
+  // Progreso real: cada paso que termina suma su parte; mientras uno está en curso la barra avanza solo hasta la mitad de ese paso
+  function hito(k){
+    for(var i = 0; i < st.reg.length; i++){ if(st.reg[i].k === k && st.reg[i].on && !st.reg[i].ok){ st.reg[i].ok = true; st.ultHito = performance.now(); } }
+  }
+  function objetivoReal(){
+    var tot = 0, hecho = 0, sig = 0;
+    st.reg.forEach(function(r){ if(!r.on) return; tot += r.w; if(r.ok) hecho += r.w; else if(!sig) sig = r.w; });
+    var cre = sig ? (sig / tot * 100) * 0.5 * (1 - Math.exp(-Math.max(0, performance.now() - st.ultHito) / 1500)) : 0;
+    return Math.min(97, hecho / tot * 100 + cre);
+  }
+  function textoEstado(t){
+    if(st.msg) return st.msg;
+    var v = st.reg[1], d = st.reg[2];
+    if(v.on && !v.ok) return 'Comprobando versión…';
+    if(d.on && !d.ok) return t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : 'Cargando datos de la base de datos…';
+    return '';
   }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
-    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
+    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : st.err ? 90 * (1 - Math.exp(-t / 450)) : objetivoReal();
     if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 5000)); }
-    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    else st.prog += Math.max(0, obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
+    if(st.meta < 100 && !st.err) ponerMsg(textoEstado(t));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -219,8 +250,12 @@ body.lectura .edita{display:none !important;}
     })();
     await Promise.race([listo, tope]);
   }
+  paginaLista().then(function(){ hito('pagina'); });
   window.CargaPagina = {
     el: el,
+    mensaje: function(t){ st.msg = String(t || ''); },
+    espera: function(k){ st.reg.forEach(function(r){ if(r.k === k) r.on = true; }); },
+    hecho: hito,
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
@@ -281,6 +316,7 @@ body.lectura .edita{display:none !important;}
       st.fin = (async function(){
         await abierta; await paginaLista();
         if(st.err) return;
+        st.reg.forEach(function(r){ r.ok = true; }); st.msg = '';
         st.meta = 100;
         while(st.prog < 100){ if(st.err) return; await dormir(30); }
         est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
@@ -511,13 +547,24 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   <div class="err" id="devErr"></div>
   <div class="acciones"><button class="btn" id="devCan" type="button">Cancelar</button><button class="btn primary" id="devOk" type="button">Devolver a bodega</button></div>
 </div></div>
-<div class="velo" id="veloQR"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="qrT">
-  <h3 id="qrT">Leer QR</h3><p class="nota" id="qrSub">Apunta la cámara al QR. Apenas lo lea, abajo aparece lo que trae cargado.</p>
+<div class="velo" id="veloQR"><div class="modal modal-qr" role="dialog" aria-modal="true" aria-labelledby="qrT">
+  <h3 id="qrT">Leer QR</h3><p class="nota" id="qrSub">Apunta la cámara a los QR, uno tras otro. Lo que traen va quedando en la lista.</p>
+  <div class="qrbar"><button class="btn small" id="qrCam" type="button">📷 Cámara</button><span class="pill" id="qrCuenta">0 materiales</span></div>
   <video id="qrVideo" playsinline muted></video><canvas id="qrCv" hidden></canvas>
+  <div id="qrChips" class="qrchips"></div>
   <div id="qrRes"></div>
+  <div class="fila qrman">
+    <label class="f" for="qrCod">Agregar a mano: código del material<input id="qrCod" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Código o ID"></label>
+    <label class="f" for="qrCan">Cantidad (envases)<input id="qrCan" type="number" min="1" max="9999" step="1" value="1"></label>
+    <div class="acciones" style="align-self:flex-end;margin-top:0;"><button class="btn" id="qrAdd" type="button">Agregar</button></div>
+  </div>
   <div class="err" id="qrErr" role="alert"></div>
-  <label class="f" for="qrTxt" style="margin-top:8px;">O pega aquí el contenido del QR<input id="qrTxt" maxlength="400" autocomplete="off" spellcheck="false" placeholder="BODL|..."></label>
-  <div class="acciones"><button class="btn" id="qrOtro" type="button">📷 Escanear otro</button><button class="btn" id="qrPasar" type="button" disabled>Pasar a lo escaneado</button><button class="btn primary" id="qrCerrar" type="button">Cerrar</button></div>
+  <div id="qrHist"></div>
+  <div class="acciones"><button class="btn" id="qrLimpiar" type="button">Vaciar lista</button><button class="btn" id="qrPasar" type="button" disabled>Pasar a lo escaneado</button><button class="btn primary" id="qrGuardar" type="button" disabled>Agregar a la base de datos</button><button class="btn" id="qrCerrar" type="button">Cerrar</button></div>
+</div></div>
+<div class="velo" id="veloConf"><div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confT" style="width:min(420px,100%);">
+  <h3 id="confT">¿Estás seguro?</h3><p class="nota" id="confTxt"></p>
+  <div class="acciones"><button class="btn" id="confNo" type="button">No, dejar como está</button><button class="btn primary" id="confSi" type="button">Sí, modificar</button></div>
 </div></div>
 <div class="aviso" id="aviso" role="status"></div>
 <script>
@@ -527,7 +574,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   try{ tok=localStorage.getItem(K)||''; nom=localStorage.getItem(N)||''; }catch(e){}
   if(!tok){ try{ sessionStorage.setItem('progresoObraAvisoGate',''); }catch(e){} salirConError('index.html?s=1','nosesion'); setTimeout(function(){ location.replace('index.html?s=1'); },12000); return; }
   window.__bodCfg={K:K,N:N,URL:URL_DB,tok:tok};
-  window.__bodAcceso=fetch(URL_DB,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'miAcceso',token:tok})}).then(function(r){return r.json();}).then(function(j){
+  window.__bodAcceso=fetch(URL_DB,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'miAcceso',token:tok,seccion:'bodega',dispositivo:(function(){try{return localStorage.getItem('progresoObraDisp')||'';}catch(e){return '';}})(),})}).then(function(r){return r.json();}).then(function(j){
     if(j&&j.error==='sin_sesion'){ try{ localStorage.removeItem(K); localStorage.removeItem(N); sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} salirConError('index.html?s=1','sesion'); }
     else if(j&&j.ok&&j.secciones&&j.secciones.indexOf('bodega')===-1){ try{ sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.'); }catch(e){} salirConError('index.html?menu=1','permiso'); }
     return j;
@@ -638,7 +685,7 @@ window.BODEGA_EJEMPLO = EJEMPLO;
 
 const cfg = window.__bodCfg;
 if(!cfg){ return; }
-let D = {materiales:[], mov:[], personas:[], prestamos:[], sincat:[], pedidos:[]};
+let D = {materiales:[], mov:[], personas:[], prestamos:[], sincat:[], pedidos:[], qrs:[]};
 let pendienteEnv = 1, pendienteSin = null;
 let puede = false, rolOk = false;
 
@@ -692,13 +739,14 @@ function msgError(r){
   if(e === 'devuelve_de_mas') return 'Estás devolviendo más de lo que se prestó.';
   if(e === 'codigo_repetido') return 'Ese código ya pertenece a otro material.';
   if(e === 'firma_invalida') return 'La firma no se pudo guardar.';
+  if(e === 'qr_ya_cobrado') return 'Ese QR ya se cobró antes.';
   if(e === 'ya_cerrado') return 'Ese pedido ya estaba cerrado. Actualiza la pantalla.';
   if(e === 'no_existe') return 'Ese registro ya no existe. Actualiza la pantalla.';
   if(e === 'repetido') return 'Ya existe una persona con ese nombre.';
   return 'No se pudo guardar (' + (e || 'error') + ').';
 }
 function aplicar(r){
-  D.materiales = r.materiales || []; D.mov = r.mov || []; D.personas = r.personas || []; D.prestamos = r.prestamos || []; D.sincat = r.sincat || []; D.pedidos = r.pedidos || [];
+  D.materiales = r.materiales || []; D.mov = r.mov || []; D.personas = r.personas || []; D.prestamos = r.prestamos || []; D.sincat = r.sincat || []; D.pedidos = r.pedidos || []; D.qrs = r.qrs || [];
   $('estado').hidden = true; pintarTodo();
 }
 async function recargar(){
@@ -1241,38 +1289,70 @@ $('refrescar').addEventListener('click', async () => { const ok = await recargar
 $('reintentar').addEventListener('click', recargar);
 
 // ===== Lector de QR (lista de materiales) =====
-// Formato del QR: BODL|idMaterial:envases|idMaterial:envases ... (también entiende el BOD|codigo|n de siempre)
-let qrStream = null, qrTim = 0, qrItems = [], qrJsQR = null;
+// Formato: BODL|idQR|AAAAMMDDHHMM|idMaterial:envases|idMaterial:envases ...  (el idQR y la fecha dejan el registro de cuándo se hizo y cuándo se cobró)
+// También se entiende el formato viejo sin id (BODL|idMaterial:envases ...) y el BOD|codigo|n de siempre.
+let qrStream = null, qrTim = 0, qrJsQR = null, qrLineas = [], qrLeidos = {}, qrUlt = '', qrUltT = 0;
+const qrFecha = ts => { if(!ts) return '—'; const d = new Date(ts), z = n => String(n).padStart(2, '0'); return z(d.getDate()) + '-' + z(d.getMonth() + 1) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); };
 function qrParar(){
   if(qrStream){ qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
-  clearInterval(qrTim); $('qrVideo').classList.remove('on');
+  clearInterval(qrTim); $('qrVideo').classList.remove('on'); $('qrCam').textContent = '📷 Cámara';
 }
 function qrInterpretar(txt){
-  const t = String(txt || '').replace(/[<>`\u0000-\u001f]/g, '').trim().slice(0, 400);
-  if(/^BODL\|/i.test(t)){
-    const out = [];
-    t.split('|').slice(1).forEach(s => { const m = /^([A-Za-z0-9_-]{1,40}):(\d{1,4})$/.exec(s); if(m) out.push({ref:m[1], env:Number(m[2])}); });
-    return out.length ? out : null;
+  const t = String(txt || '').replace(/[<>`\u0000-\u001f]/g, '').trim().slice(0, 600), p = t.split('|');
+  if(/^BODL$/i.test(p[0])){
+    let id = '', creado = 0, desde = 1;
+    if(/^[A-Za-z0-9_-]{4,30}$/.test(p[1] || '') && !/:/.test(p[1]) && /^\d{12}$/.test(p[2] || '')){
+      id = p[1]; const f = p[2]; creado = new Date(+f.slice(0, 4), +f.slice(4, 6) - 1, +f.slice(6, 8), +f.slice(8, 10), +f.slice(10, 12)).getTime(); desde = 3;
+    }
+    const items = [];
+    p.slice(desde).forEach(s => { const m = /^([A-Za-z0-9_-]{1,40}):(\d{1,4})$/.exec(s); if(m) items.push({ref:m[1], env:Number(m[2])}); });
+    // un QR viejo sin id recibe uno calculado de su contenido, así tampoco se puede cobrar dos veces
+    if(!id && items.length){ let x = 2166136261; const c = items.map(i => i.ref + ':' + i.env).join('|'); for(let i = 0; i < c.length; i++){ x ^= c.charCodeAt(i); x = Math.imul(x, 16777619) >>> 0; } id = 'v' + x.toString(36); }
+    return items.length ? {id, creado, items} : null;
   }
-  if(/^BOD\|/i.test(t)){ const r = leer(t); return r.codigo ? [{ref:r.codigo, env:r.env}] : null; }
+  if(/^BOD$/i.test(p[0])){ const r = leer(t); return r.codigo ? {id:'', creado:0, items:[{ref:r.codigo, env:r.env}]} : null; }
   return null;
 }
+function qrBuscar(ref){ return matDe(ref) || buscarMat(ref) || null; }
+function qrAgregarLinea(ref, env, origen){
+  const m = qrBuscar(ref), clave = m ? m.id : 'c:' + String(ref).toLowerCase();
+  const l = qrLineas.find(x => x.clave === clave && x.origen === origen);
+  if(l){ l.env = Math.min(9999, l.env + env); l.base = l.env; } else qrLineas.push({clave, ref, env:Math.min(9999, env), base:Math.min(9999, env), orig:null, edit:false, origen, m});
+}
 function qrPintar(){
-  const filas = qrItems.map(it => {
-    const m = matDe(it.ref) || buscarMat(it.ref);
-    it.m = m || null;
-    if(!m) return '<tr class="mal"><td><b>No está en el catálogo</b><small>Código ' + esc(it.ref) + '</small></td><td>' + esc(fmt(it.env)) + '</td><td>—</td></tr>';
-    return '<tr><td><b>' + esc(m.nombre) + '</b><small>' + esc(m.cat || '') + '</small></td><td><b>' + esc(cantTxt(m, it.env * m.porEnvase)) + '</b></td><td>' + esc(cantTxt(m, m.stock)) + '</td></tr>';
+  qrLineas.forEach(l => { l.m = qrBuscar(l.ref); });
+  const celdaCant = (l, i) => l.edit
+    ? '<input type="number" min="1" max="9999" step="1" value="' + l.env + '" data-i="' + i + '" aria-label="Nueva cantidad"> <button class="x" type="button" data-ok="' + i + '">Listo</button>'
+    : '<b>' + l.env + '</b>' + (l.orig !== null ? '<small>Modificado · el QR traía ' + l.orig + '</small>' : '') + '<br><button class="x" type="button" data-m="' + i + '">Modificar</button>';
+  const filas = qrLineas.map((l, i) => {
+    const o = l.origen ? 'QR ' + esc(l.origen) : 'A mano';
+    const cls = l.orig !== null ? ' class="mod"' : '';
+    if(!l.m) return '<tr class="mal"><td><b>Sin catalogar</b><small>Código ' + esc(l.ref) + ' · irá a «Sin catalogar»</small></td><td>' + celdaCant(l, i) + '</td><td>—</td><td>' + o + '</td><td><button class="x" type="button" data-x="' + i + '" aria-label="Quitar">×</button></td></tr>';
+    return '<tr' + cls + '><td><b>' + esc(l.m.nombre) + '</b><small>' + esc(cantTxt(l.m, l.env * l.m.porEnvase)) + '</small></td><td>' + celdaCant(l, i) + '</td><td>' + esc(cantTxt(l.m, l.m.stock)) + '</td><td>' + o + '</td><td><button class="x" type="button" data-x="' + i + '" aria-label="Quitar">×</button></td></tr>';
   }).join('');
-  const ok = qrItems.filter(i => i.m).length;
-  $('qrRes').innerHTML = '<table class="qrtabla"><thead><tr><th>Material</th><th>Trae el QR</th><th>Stock actual</th></tr></thead><tbody>' + filas + '</tbody></table>';
-  $('qrSub').textContent = qrItems.length + (qrItems.length === 1 ? ' material leído' : ' materiales leídos') + (ok < qrItems.length ? ' (' + (qrItems.length - ok) + ' sin catálogo)' : '') + '.';
-  $('qrPasar').disabled = !ok || !puede;
+  $('qrRes').innerHTML = qrLineas.length ? '<table class="qrtabla"><thead><tr><th>Material</th><th>Envases</th><th>Stock actual</th><th>Viene de</th><th></th></tr></thead><tbody>' + filas + '</tbody></table>' : '';
+  const ids = Object.keys(qrLeidos);
+  $('qrChips').innerHTML = ids.map(id => '<span class="pill">QR ' + esc(id) + (qrLeidos[id].creado ? ' · hecho ' + esc(qrFecha(qrLeidos[id].creado)) : ' · sin fecha') + '</span>').join('');
+  const n = qrLineas.length, sc = qrLineas.filter(l => !l.m).length;
+  $('qrCuenta').textContent = n + (n === 1 ? ' material' : ' materiales') + (sc ? ' · ' + sc + ' sin catalogar' : '');
+  $('qrPasar').disabled = !qrLineas.some(l => l.m) || !puede;
+  $('qrGuardar').disabled = !n || !puede;
+  const h = (D.qrs || []).slice(0, 6);
+  $('qrHist').innerHTML = h.length ? '<div class="qrhist"><b>Últimos QR cobrados</b>' + h.map(q => '<div>QR ' + esc(q.id) + ' · hecho <b>' + esc(qrFecha(q.creado)) + '</b> · cobrado <b>' + esc(qrFecha(q.cobrado)) + '</b>' + (q.quien ? ' · ' + esc(q.quien) : '') + '</div>').join('') + '</div>' : '';
 }
 function qrRecibir(txt){
-  const it = qrInterpretar(txt);
-  if(!it){ $('qrErr').textContent = 'Ese QR no es una lista de materiales de la obra.'; return false; }
-  qrParar(); $('qrErr').textContent = ''; qrItems = it; qrPintar(); return true;
+  const r = qrInterpretar(txt);
+  if(!r){ $('qrErr').textContent = 'Ese QR no es una lista de materiales de la obra.'; return false; }
+  if(r.id){
+    const ya = (D.qrs || []).find(q => q.id === r.id);
+    if(ya){ $('qrErr').textContent = 'El QR ' + r.id + ' ya se cobró el ' + qrFecha(ya.cobrado) + (ya.quien ? ' (' + ya.quien + ')' : '') + '. No se puede cobrar de nuevo.'; return false; }
+    if(qrLeidos[r.id]){ $('qrErr').textContent = 'El QR ' + r.id + ' ya está en la lista.'; return false; }
+    qrLeidos[r.id] = {creado:r.creado, items:r.items};
+  }
+  $('qrErr').textContent = '';
+  r.items.forEach(it => qrAgregarLinea(it.ref, it.env, r.id));
+  qrPintar(); aviso('Leído: ' + r.items.length + (r.items.length === 1 ? ' material' : ' materiales') + (r.id ? ' del QR ' + r.id : '') + '.');
+  return true;
 }
 function qrCargarJsQR(){
   if(qrJsQR) return Promise.resolve(qrJsQR);
@@ -1282,18 +1362,19 @@ function qrCargarJsQR(){
   });
 }
 async function qrCamara(){
-  qrParar(); $('qrErr').textContent = ''; $('qrRes').innerHTML = ''; qrItems = []; $('qrPasar').disabled = true;
-  $('qrSub').textContent = 'Apunta la cámara al QR. Apenas lo lea, abajo aparece lo que trae cargado.';
-  if(!navigator.mediaDevices){ $('qrErr').textContent = 'Este aparato no permite usar la cámara. Pega el contenido del QR abajo.'; return; }
+  if(qrStream){ qrParar(); return; }
+  $('qrErr').textContent = '';
+  if(!navigator.mediaDevices){ $('qrErr').textContent = 'Este aparato no permite usar la cámara. Escribe el código abajo.'; return; }
   const v = $('qrVideo');
   try{
     qrStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    v.srcObject = qrStream; await v.play(); v.classList.add('on');
+    v.srcObject = qrStream; await v.play(); v.classList.add('on'); $('qrCam').textContent = '✖ Detener cámara';
     let det = null;
     if('BarcodeDetector' in window){ try{ det = new BarcodeDetector({formats:['qr_code']}); }catch(e){} }
     let jq = null;
-    if(!det){ try{ jq = await qrCargarJsQR(); }catch(e){ qrParar(); $('qrErr').textContent = 'Este navegador no puede leer QR con la cámara. Pega el contenido del QR abajo.'; return; } }
+    if(!det){ try{ jq = await qrCargarJsQR(); }catch(e){ qrParar(); $('qrErr').textContent = 'Este navegador no puede leer QR con la cámara. Escribe el código abajo.'; return; } }
     const cv = $('qrCv'), cx = cv.getContext('2d', {willReadFrequently:true});
+    // sigue escaneando: la cámara queda abierta y cada QR nuevo se suma a la lista
     qrTim = setInterval(async () => {
       try{
         let val = '';
@@ -1303,28 +1384,86 @@ async function qrCamara(){
           const d = cx.getImageData(0, 0, cv.width, cv.height), r = jq(d.data, d.width, d.height, {inversionAttempts:'dontInvert'});
           if(r) val = r.data;
         }
-        if(val) qrRecibir(val);
+        if(val && (val !== qrUlt || Date.now() - qrUltT > 3000)){ qrUlt = val; qrUltT = Date.now(); qrRecibir(val); }
       }catch(e){}
     }, 250);
   }catch(e){ $('qrErr').textContent = 'No se pudo abrir la cámara. Revisa el permiso del navegador.'; }
 }
-function qrAbrir(){ $('veloQR').classList.add('on'); $('qrTxt').value = ''; qrCamara(); }
+function qrReiniciar(){ qrLineas = []; qrLeidos = {}; qrUlt = ''; $('qrErr').textContent = ''; qrPintar(); }
+function qrAbrir(){ $('veloQR').classList.add('on'); $('qrCod').value = ''; qrReiniciar(); qrCamara(); }
 function qrCerrar(){ qrParar(); $('veloQR').classList.remove('on'); }
+function qrAgregarManual(){
+  const ref = limpio($('qrCod').value, 60), env = Math.max(1, Math.min(9999, Math.round(Number($('qrCan').value)) || 1));
+  if(!ref){ $('qrErr').textContent = 'Escribe el código del material.'; $('qrCod').focus(); return; }
+  $('qrErr').textContent = ''; qrAgregarLinea(ref, env, ''); $('qrCod').value = ''; $('qrCan').value = 1; qrPintar(); $('qrCod').focus();
+}
 $('leerQR').addEventListener('click', qrAbrir);
-$('qrOtro').addEventListener('click', qrCamara);
+$('qrCam').addEventListener('click', qrCamara);
 $('qrCerrar').addEventListener('click', qrCerrar);
-$('qrTxt').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); const v = $('qrTxt').value; $('qrTxt').value = ''; if(v.trim()){ qrParar(); qrRecibir(v); } } });
+$('qrLimpiar').addEventListener('click', qrReiniciar);
+$('qrAdd').addEventListener('click', qrAgregarManual);
+$('qrCod').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); const t = $('qrCod').value; if(/^(BODL|BOD)\|/i.test(t.trim())){ $('qrCod').value = ''; qrRecibir(t); } else qrAgregarManual(); } });
+$('qrRes').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.x !== undefined){ qrLineas.splice(Number(b.dataset.x), 1); qrPintar(); }
+  else if(b.dataset.m !== undefined) qrModificar(Number(b.dataset.m));
+  else if(b.dataset.ok !== undefined) qrListo(Number(b.dataset.ok));
+});
+function qrConfirmar(txt, siTxt){
+  return new Promise(ok => {
+    $('confTxt').textContent = txt; $('confSi').textContent = siTxt || 'Sí, modificar'; $('veloConf').classList.add('on');
+    const fin = v => { $('veloConf').classList.remove('on'); $('confSi').onclick = $('confNo').onclick = null; ok(v); };
+    $('confSi').onclick = () => fin(true); $('confNo').onclick = () => fin(false);
+  });
+}
+async function qrModificar(i){
+  const l = qrLineas[i]; if(!l) return;
+  const nom = l.m ? l.m.nombre : l.ref;
+  const si = await qrConfirmar('«' + nom + '» viene con ' + l.env + (l.origen ? ' en el QR ' + l.origen : ' (puesto a mano)') + '. Cambiar la cantidad puede descuadrar el stock. ¿Estás seguro de modificarla?');
+  if(!si) return;
+  l.edit = true; qrPintar();
+  const inp = $('qrRes').querySelector('input[data-i="' + i + '"]'); if(inp){ inp.focus(); inp.select(); }
+}
+function qrListo(i){
+  const l = qrLineas[i]; if(!l) return;
+  const inp = $('qrRes').querySelector('input[data-i="' + i + '"]');
+  const n = Math.max(1, Math.min(9999, Math.round(Number(inp && inp.value)) || l.env));
+  l.orig = n !== l.base ? l.base : null; l.env = n; l.edit = false; qrPintar();
+}
+$('qrRes').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.dataset.i !== undefined){ e.preventDefault(); qrListo(Number(e.target.dataset.i)); } });
 $('qrPasar').addEventListener('click', () => {
   let n = 0, salto = 0;
-  qrItems.forEach(it => {
-    const m = it.m; if(!m) return;
+  qrLineas.forEach(l => {
+    const m = l.m; if(!m) return;
     if(modo === 'prestamo' && !m.ret){ salto++; return; }
-    const l = carro.find(x => x.mid === m.id);
-    if(l) l.env = Math.min(9999, l.env + it.env); else carro.push({mid:m.id, env:Math.min(9999, it.env)});
+    const c = carro.find(x => x.mid === m.id);
+    if(c) c.env = Math.min(9999, c.env + l.env); else carro.push({mid:m.id, env:Math.min(9999, l.env)});
     n++;
   });
   pintarCarro(); qrCerrar(); irTab('mov');
-  aviso(n + (n === 1 ? ' material pasó' : ' materiales pasaron') + ' a lo escaneado' + (salto ? ' (' + salto + ' no se presta)' : '') + '.');
+  aviso(n + (n === 1 ? ' material pasó' : ' materiales pasaron') + ' a lo escaneado' + (salto ? ' (' + salto + ' no se presta)' : '') + '. Ojo: así no queda el registro del QR.');
+});
+$('qrGuardar').addEventListener('click', async () => {
+  if(!qrLineas.length) return;
+  if(qrLineas.some(l => l.edit)){ $('qrErr').textContent = 'Termina de modificar con «Listo» antes de guardar.'; return; }
+  const b = $('qrGuardar'), txt = b.textContent; b.disabled = true; b.textContent = 'Guardando…'; $('qrErr').textContent = '';
+  const juntos = {}, sin = {};
+  qrLineas.forEach(l => { if(l.m) juntos[l.m.id] = (juntos[l.m.id] || 0) + l.env; else sin[l.ref] = (sin[l.ref] || 0) + l.env; });
+  const r = await api('bodegaQrCobrar', {
+    nonce:nuevoNonce(),
+    qrs:Object.keys(qrLeidos).map(id => ({id, creado:qrLeidos[id].creado, items:qrLineas.filter(l => l.origen === id).map(l => ({ref:l.ref, env:l.env, orig:l.orig}))})),
+    items:Object.keys(juntos).map(mid => ({mid, env:Math.min(9999, juntos[mid])})),
+    sin:Object.keys(sin).map(codigo => ({codigo, cant:Math.min(9999, sin[codigo])}))
+  });
+  b.textContent = txt;
+  if(!r.ok){
+    b.disabled = false;
+    if(r.error === 'qr_ya_cobrado') $('qrErr').textContent = 'El QR ' + r.id + ' ya se cobró el ' + qrFecha(r.cobrado) + '. Sácalo de la lista (vacía y vuelve a leer los demás).';
+    else if(r.error !== 'sin_sesion') $('qrErr').textContent = msgError(r);
+    return;
+  }
+  aplicar(r); const n = qrLineas.length; qrReiniciar();
+  aviso('Guardado en la base de datos: ' + n + (n === 1 ? ' material.' : ' materiales.'));
 });
 
 // ---------- Cámara ----------
@@ -1353,7 +1492,7 @@ function aplicarTema(){
 try{ const g = localStorage.getItem('ofTema'); if(g === 'claro' || g === 'oscuro') ti = temas.indexOf(g); }catch(e){}
 $('tema').addEventListener('click', () => { ti = (ti + 1) % 3; aplicarTema(); });
 aplicarTema();
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ qrParar(); ['veloQR', 'veloRes', 'veloMat', 'veloPer', 'veloDev', 'veloSin', 'veloPed', 'veloEnt'].forEach(i => $(i).classList.remove('on')); } });
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ qrParar(); ['veloConf', 'veloQR', 'veloRes', 'veloMat', 'veloPer', 'veloDev', 'veloSin', 'veloPed', 'veloEnt'].forEach(i => $(i).classList.remove('on')); } });
 
 selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 (async function init(){
@@ -1362,7 +1501,9 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
   if(j && (j.error === 'sin_sesion' || (j.ok && j.secciones && j.secciones.indexOf('bodega') === -1))) return; // el portón ya lo está sacando
   fijarRol(j);
   if(!puede) irTab('ped');
+  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('datos');
   await recargar();
+  if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
   if(window.CargaPagina) CargaPagina.fin();
 })();
 
@@ -1390,4 +1531,4 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.3.5 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.3 · 28-10-2026 ==== -->

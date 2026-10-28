@@ -128,7 +128,9 @@ td input[type=date]{min-width:130px}
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-#cargaGlobal .cgest.cglisto{color:#fff;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
+#cargaGlobal .cgest.cglisto{color:#fff;}
+#cargaGlobal .cgmsg{margin-top:10px;height:18px;line-height:18px;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.85);text-align:center;white-space:nowrap;}
+#cargaGlobal.cgerror .cgmsg{display:none;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
 #cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
 #cargaGlobal .cgerr svg{flex:none;}
 #cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
@@ -152,35 +154,52 @@ td input[type=date]{min-width:130px}
 </style>
 </head>
 <body>
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Jefe de Terreno</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Jefe de Terreno</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>
 (function(){
-  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit'), msgEl = document.getElementById('cgMsg');
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false};
+  var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
-  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
-  function ponerTit(txt){
-    if(tit._t === undefined) tit._t = tit.textContent;
-    if(tit._t === txt) return;
-    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
-    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  // Cambia el mensaje de abajo con un fundido corto (el título de la sección no se toca)
+  function ponerMsg(txt){
+    if(msgEl._t === undefined) msgEl._t = msgEl.textContent;
+    if(msgEl._t === txt) return;
+    msgEl._t = txt; msgEl.style.transition = 'opacity .18s ease'; msgEl.style.opacity = '0';
+    setTimeout(function(){ if(msgEl._t === txt){ msgEl.textContent = txt; msgEl.style.opacity = '1'; } }, 190);
+  }
+  // Progreso real: cada paso que termina suma su parte; mientras uno está en curso la barra avanza solo hasta la mitad de ese paso
+  function hito(k){
+    for(var i = 0; i < st.reg.length; i++){ if(st.reg[i].k === k && st.reg[i].on && !st.reg[i].ok){ st.reg[i].ok = true; st.ultHito = performance.now(); } }
+  }
+  function objetivoReal(){
+    var tot = 0, hecho = 0, sig = 0;
+    st.reg.forEach(function(r){ if(!r.on) return; tot += r.w; if(r.ok) hecho += r.w; else if(!sig) sig = r.w; });
+    var cre = sig ? (sig / tot * 100) * 0.5 * (1 - Math.exp(-Math.max(0, performance.now() - st.ultHito) / 1500)) : 0;
+    return Math.min(97, hecho / tot * 100 + cre);
+  }
+  function textoEstado(t){
+    if(st.msg) return st.msg;
+    var v = st.reg[1], d = st.reg[2];
+    if(v.on && !v.ok) return 'Comprobando versión…';
+    if(d.on && !d.ok) return t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : 'Cargando datos de la base de datos…';
+    return '';
   }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
-    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
+    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : st.err ? 90 * (1 - Math.exp(-t / 450)) : objetivoReal();
     if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 5000)); }
-    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    else st.prog += Math.max(0, obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) tit.textContent = t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase;
+    if(st.meta < 100 && !st.err) ponerMsg(textoEstado(t));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -195,8 +214,12 @@ td input[type=date]{min-width:130px}
     })();
     await Promise.race([listo, tope]);
   }
+  paginaLista().then(function(){ hito('pagina'); });
   window.CargaPagina = {
     el: el,
+    mensaje: function(t){ st.msg = String(t || ''); },
+    espera: function(k){ st.reg.forEach(function(r){ if(r.k === k) r.on = true; }); },
+    hecho: hito,
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
@@ -257,6 +280,7 @@ td input[type=date]{min-width:130px}
       st.fin = (async function(){
         await abierta; await paginaLista();
         if(st.err) return;
+        st.reg.forEach(function(r){ r.ok = true; }); st.msg = '';
         st.meta = 100;
         while(st.prog < 100){ if(st.err) return; await dormir(30); }
         est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
@@ -321,7 +345,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   let tok = '', nom = '';
   try{ tok = localStorage.getItem(K) || ''; nom = localStorage.getItem(N) || ''; }catch(e){}
   if(!tok){ try{ sessionStorage.setItem('progresoObraAvisoGate', ''); }catch(e){} salirConError('index.html?s=1','nosesion'); setTimeout(function(){ location.replace('index.html?s=1'); }, 12000); return; }
-  try{ fetch(URL_DB, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'miAcceso', token: tok})}).then(r => r.json()).then(j => {
+  try{ fetch(URL_DB, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'miAcceso', token: tok, seccion:'terreno', dispositivo:(function(){try{return localStorage.getItem('progresoObraDisp')||'';}catch(e){return '';}})(),})}).then(r => r.json()).then(j => {
     if(j && j.error === 'sin_sesion'){ try{ localStorage.removeItem(K); localStorage.removeItem(N); sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} salirConError('index.html?s=1','sesion'); }
     else if(j && j.ok && j.secciones && j.secciones.indexOf('terreno') === -1){ try{ sessionStorage.setItem('progresoObraAvisoGate', 'No tienes acceso a esa sección. Elige una de las disponibles.'); }catch(e){} salirConError('index.html?menu=1','permiso'); }
   }).catch(() => {}); }catch(e){}
@@ -582,4 +606,4 @@ if(window.CargaPagina) CargaPagina.fin();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Jefe de Terreno · v1.0.6 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Jefe de Terreno · v1.0.8 · 28-10-2026 ==== -->

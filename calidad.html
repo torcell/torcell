@@ -100,7 +100,8 @@ body.bloq{overflow:hidden;}
 .seg button{cursor:pointer;position:relative;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .08s ease,filter .18s ease;}
 .seg button:not(:disabled):not(.on):hover{border-color:var(--accent);z-index:1;background:color-mix(in srgb,var(--accent) 14%,var(--panel));box-shadow:inset 0 0 0 1px var(--accent),inset 0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);}
 .seg button.on{box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);}
-.seg button.on::before{content:"✓";margin-right:5px;font-weight:700;}
+.seg button::before{content:"✓";margin-right:5px;font-weight:700;visibility:hidden;}
+.seg button.on::before{visibility:visible;}
 .seg button.on:not(:disabled):hover{filter:brightness(1.12);z-index:1;}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;z-index:2;}
 .seg button:disabled{cursor:not-allowed;}
@@ -146,7 +147,7 @@ body.bloq{overflow:hidden;}
 
 .pestanas button{position:relative;background:rgba(255,255,255,.12);color:rgba(255,255,255,.78);font-weight:600;border-color:rgba(255,255,255,.28);}
 .pestanas button:hover{background:rgba(255,255,255,.26);color:#fff;border-color:var(--accent);}
-.pestanas button.on{background:linear-gradient(90deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;font-weight:800;z-index:1;}
+.pestanas button.on{background:linear-gradient(90deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;z-index:1;}
 .areas{display:flex;flex-direction:column;gap:6px;}
 .area{border:1px solid var(--border);border-left:4px solid var(--strong);background:var(--soft);padding:7px 9px;display:flex;flex-wrap:wrap;gap:5px 6px;align-items:center;opacity:.42;filter:grayscale(.85);transition:opacity .2s ease;}
 .area.act{border:2px solid var(--accent);border-left-width:6px;background:color-mix(in srgb,var(--accent) 10%,var(--panel));opacity:1;filter:none;padding:8px 10px 9px 9px;}
@@ -281,7 +282,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 #cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
 #cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
 #cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-#cargaGlobal .cgest.cglisto{color:#fff;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
+#cargaGlobal .cgest.cglisto{color:#fff;}
+#cargaGlobal .cgmsg{margin-top:10px;height:18px;line-height:18px;font-size:12.5px;letter-spacing:.3px;color:rgba(255,255,255,.85);text-align:center;white-space:nowrap;}
+#cargaGlobal.cgerror .cgmsg{display:none;}#cargaGlobal .cgcarga{position:relative;}#cargaGlobal .cgscan{position:absolute;left:0;bottom:0;height:16px;line-height:16px;font-size:11px;letter-spacing:.3px;white-space:nowrap;color:#ff6b6b;font-weight:700;opacity:0;pointer-events:none;}#cargaGlobal.cgerror .cgscan{opacity:1;transition:opacity .25s ease;}@media(max-width:480px){#cargaGlobal .cgscan{font-size:10.5px;letter-spacing:.1px;}}
 #cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
 #cargaGlobal .cgerr svg{flex:none;}
 #cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
@@ -424,35 +427,52 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 </style>
 </head>
 <body>
-<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Calidad</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Calidad</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>
 (function(){
-  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit');
+  var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit'), msgEl = document.getElementById('cgMsg');
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
+  var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
-  // Cambia el título con un fundido corto (sin salto de letras al cambiar de ancho)
-  function ponerTit(txt){
-    if(tit._t === undefined) tit._t = tit.textContent;
-    if(tit._t === txt) return;
-    tit._t = txt; tit.style.transition = 'opacity .18s ease'; tit.style.opacity = '0';
-    setTimeout(function(){ if(tit._t === txt){ tit.textContent = txt; tit.style.opacity = '1'; } }, 190);
+  // Cambia el mensaje de abajo con un fundido corto (el título de la sección no se toca)
+  function ponerMsg(txt){
+    if(msgEl._t === undefined) msgEl._t = msgEl.textContent;
+    if(msgEl._t === txt) return;
+    msgEl._t = txt; msgEl.style.transition = 'opacity .18s ease'; msgEl.style.opacity = '0';
+    setTimeout(function(){ if(msgEl._t === txt){ msgEl.textContent = txt; msgEl.style.opacity = '1'; } }, 190);
+  }
+  // Progreso real: cada paso que termina suma su parte; mientras uno está en curso la barra avanza solo hasta la mitad de ese paso
+  function hito(k){
+    for(var i = 0; i < st.reg.length; i++){ if(st.reg[i].k === k && st.reg[i].on && !st.reg[i].ok){ st.reg[i].ok = true; st.ultHito = performance.now(); } }
+  }
+  function objetivoReal(){
+    var tot = 0, hecho = 0, sig = 0;
+    st.reg.forEach(function(r){ if(!r.on) return; tot += r.w; if(r.ok) hecho += r.w; else if(!sig) sig = r.w; });
+    var cre = sig ? (sig / tot * 100) * 0.5 * (1 - Math.exp(-Math.max(0, performance.now() - st.ultHito) / 1500)) : 0;
+    return Math.min(97, hecho / tot * 100 + cre);
+  }
+  function textoEstado(t){
+    if(st.msg) return st.msg;
+    var v = st.reg[1], d = st.reg[2];
+    if(v.on && !v.ok) return 'Comprobando versión…';
+    if(d.on && !d.ok) return t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : 'Cargando datos de la base de datos…';
+    return '';
   }
   function bucle(){
     var t = Math.max(0, performance.now() - st.t0);
-    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : (st.err ? 90 : 88) * (1 - Math.exp(-t / 450));
+    var obj = st.volver ? 0 : st.meta >= 100 ? 100 : st.err ? 90 * (1 - Math.exp(-t / 450)) : objetivoReal();
     if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 5000)); }
-    else st.prog += (obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
+    else st.prog += Math.max(0, obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
-    if(st.meta < 100 && !st.err) ponerTit(st.msg || (t > 9000 ? 'Despertando la base de datos, puede tardar un poco…' : textoBase));
+    if(st.meta < 100 && !st.err) ponerMsg(textoEstado(t));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
   bucle();
@@ -467,9 +487,12 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     })();
     await Promise.race([listo, tope]);
   }
+  paginaLista().then(function(){ hito('pagina'); });
   window.CargaPagina = {
     el: el,
     mensaje: function(t){ st.msg = String(t || ''); },
+    espera: function(k){ st.reg.forEach(function(r){ if(r.k === k) r.on = true; }); },
+    hecho: hito,
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
     error: function(destino, tipo){
       if(st.err) return st.err;
@@ -530,6 +553,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       st.fin = (async function(){
         await abierta; await paginaLista();
         if(st.err) return;
+        st.reg.forEach(function(r){ r.ok = true; }); st.msg = '';
         st.meta = 100;
         while(st.prog < 100){ if(st.err) return; await dormir(30); }
         est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
@@ -704,7 +728,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.36.5';
+const CAL_VERSION = '1.36.7';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1656,8 +1680,8 @@ async function cargar(inicial){
 }
 
 async function cargarInicial(){
-  const t0 = Date.now();
   cargaMostrar();
+  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('datos');
   let r = '';
   for(let i = 0; i < 4 && token; i++){
     r = await cargar(true);
@@ -1666,8 +1690,7 @@ async function cargarInicial(){
   }
   if(!token) return;
   if(r === 'ok'){
-    const falta = 1400 - (Date.now() - t0);
-    if(falta > 0) await dormir(falta);
+    if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
     await esperarActualizacionCal();
     await cargaOcultar();
   }else{
@@ -1871,15 +1894,14 @@ let actInicialCal = null, cargaCerradaCal = false;
 async function revisionInicialCal(){
   ultimaRevisionCal = Date.now();
   const msg = t => { if(!cargaCerradaCal && window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(t); };
-  msg('Buscando actualización…');
   const v = await versionCalPublicada();
   if(!v){ msg(''); return 'sin_dato'; }
-  if(!versionMayorCal(v, CAL_VERSION)){ try{ sessionStorage.removeItem('calIntentosAct'); }catch(e){} msg('Ya está actualizado'); return 'al_dia'; }
+  if(!versionMayorCal(v, CAL_VERSION)){ try{ sessionStorage.removeItem('calIntentosAct'); }catch(e){} return 'al_dia'; }
   if(cargaCerradaCal){ comprobarVersionCal(); return 'despues'; }
   let n = 0;
   try{ n = Number(sessionStorage.getItem('calIntentosAct') || 0); }catch(e){}
   if(n >= 2){ msg(''); aviso('Hay una versión nueva de Calidad (v' + v + '). Cierra y vuelve a abrir la página para usarla.'); return 'sin_dato'; }
-  msg('Actualizando…');
+  msg('Actualizando versión…');
   await dormir(800); // alcanza a leerse antes de recargar
   try{ sessionStorage.setItem('calIntentosAct', String(n + 1)); sessionStorage.setItem('calActualizadoA', v); }catch(e){}
   location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
@@ -1887,9 +1909,9 @@ async function revisionInicialCal(){
 }
 async function esperarActualizacionCal(){
   const r = await Promise.race([actInicialCal, new Promise(f => setTimeout(() => f('tarde'), 3500))]);
-  if(r === 'al_dia') await dormir(900);
   if(r === 'actualizando') await dormir(4000);
   if(r === 'tarde' || r === 'actualizando'){ if(window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje(''); }
+  if(r !== 'actualizando' && window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('version');
   cargaCerradaCal = true;
 }
 setTimeout(() => {
@@ -1897,7 +1919,8 @@ setTimeout(() => {
   let a = null;
   try{ a = sessionStorage.getItem('calActualizadoA'); sessionStorage.removeItem('calActualizadoA'); }catch(e){}
   if(a && a === CAL_VERSION) setTimeout(() => aviso('Calidad se actualizó a la versión ' + CAL_VERSION + '.'), 1200);
-  actInicialCal = revisionInicialCal();
+  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('version');
+  actInicialCal = revisionInicialCal().then(r => { if(r !== 'actualizando' && window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('version'); return r; });
 }, 0);
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible' && Date.now() - ultimaRevisionCal > 600000) comprobarVersionCal();
@@ -1985,4 +2008,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.36.5 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.36.7 · 28-10-2026 ==== -->
