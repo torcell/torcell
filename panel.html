@@ -239,6 +239,8 @@
   body.puede-asist .solo-asist{display:inline-flex !important;}
   .solo-admin{display:none !important;}
   body.is-admin .solo-admin{display:inline-flex !important;}
+  #doradoBtn{display:none !important;}
+  body.es-ismael #doradoBtn{display:inline-flex !important;}
   body.is-admin .admin-only{display:inline-flex;}
   body.is-admin .admin-only.block{display:block;}
   body.is-supervisor #tbGroups .admin-only{display:inline-flex;}
@@ -1290,7 +1292,7 @@
   @keyframes hwLadoD{0%,66%{opacity:0;transform:translateX(-96px) rotate(6deg);}67%{opacity:1;transform:translateX(-96px) rotate(6deg);}73%,80%{opacity:1;transform:translateX(0) rotate(6deg);}83%{transform:translateX(0) rotate(-2deg);}86%{transform:translateX(0) rotate(6deg);}92%{opacity:1;transform:translateX(-96px) rotate(6deg);}93%,100%{opacity:0;transform:translateX(-96px) rotate(6deg);}}
   body.tema5:has(.overlay.show) #esqueletos{display:none;}
 
-#cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
+#cargaGlobal{--H:164px;position:fixed;inset:0;width:100vw;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
 #cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
 #cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
 #cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
@@ -1625,7 +1627,6 @@
       <div class="tb-title">Datos y registros</div>
       <div class="tb-btns">
         <button class="btn primary admin-only" id="saveNowBtn">💾 Guardar ahora</button>
-        <button class="btn" id="dbBtn">Conectar base de datos</button>
         <button class="btn admin-only" id="exportBtn">Exportar datos</button>
         <button class="btn admin-only" id="importBtn">Importar datos</button>
         <button class="btn admin-only" id="diagnosticoBtn">🩺 Diagnóstico</button>
@@ -1660,8 +1661,6 @@
         <button class="btn solo-admin" id="rendBtn">📈 Rendimiento</button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
-        <button class="btn admin-only" id="turboBtn" title="Marcar Pagado activa Terminado y Partida; marcar Terminado activa Partida">⚡ Turbo</button>
-        <button class="btn solo-admin" id="espaciadoBtn"></button>
         <button class="btn admin-only" id="avisosBtn">🔔 Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
         <button class="btn admin-only" id="permisosBtn">🔑 Permisos por cargo</button>
         <button class="btn solo-admin" id="seccionesBtn">🔑 Permisos de secciones</button>
@@ -2090,7 +2089,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.10';
+const APP_VERSION = '0.73.13';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2346,6 +2345,7 @@ function actualizarBotonesCargo(){
 
 function applyRoleUI(){
   document.body.classList.toggle('is-admin', isAdmin);
+  document.body.classList.toggle('es-ismael', !!isAdmin && /^ismael s\b/.test(String(sessionName || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()));
   document.body.classList.toggle('is-supervisor', isSupervisor || isJefe);
   document.body.classList.toggle('is-worker', !!workerSession);
   document.body.classList.toggle('is-guest', esInvitado());
@@ -4132,7 +4132,7 @@ function actualizarEspaciado(){
   const b = document.getElementById('espaciadoBtn');
   if(b){ b.textContent = '↕ Espaciado entre dptos: ' + (espaciadoDptos ? 'Sí' : 'No'); b.classList.toggle('primary', espaciadoDptos); }
 }
-document.getElementById('espaciadoBtn').addEventListener('click', () => {
+document.getElementById('espaciadoBtn')?.addEventListener('click', () => {
   if(!isAdmin) return;
   espaciadoDptos = !espaciadoDptos;
   markSettingsDirty('espaciadoDptos');
@@ -5668,7 +5668,53 @@ document.getElementById('alertasBtn').addEventListener('click', abrirAlertas);
 
 const ORD_USU = (a, b) => { const o = {1: 0, 2: 1, 4: 2, 6: 3, 5: 4, 3: 5}; return (o[a.rol] ?? 9) - (o[b.rol] ?? 9); }; // admins primero, trabajadores al final
 // ===== v64: Asistencia diaria (Presente / Falta / Se fue antes) =====
+// Cada marca se guarda sola, fila por fila, en una cola. Cambiar de día no espera a la base de datos.
 const ASIST_DEMO = {};
+const ASIST_CACHE = {};   // fecha -> {estado, lista}
+const asCola = {pend: {}, corriendo: false, fallos: 0, parada: false};
+let asUI = null;          // función de la ventana abierta que repinta el aviso de guardado
+function asNPend(){ return Object.keys(asCola.pend).length; }
+function asEncolar(fecha, it){
+  if(!DB_URL){
+    const reg = ASIST_DEMO[fecha] = ASIST_DEMO[fecha] || {};
+    if(it.e === 'N') delete reg[it.trabajador]; else reg[it.trabajador] = {e: it.e, m: it.m, s: it.s === 'medio dia' ? 'medio día' : it.s};
+    if(asUI) asUI();
+    return;
+  }
+  asCola.pend[fecha + '|' + it.trabajador] = {fecha, it};
+  asCola.parada = false;
+  if(asUI) asUI();
+  asProcesar();
+}
+async function asProcesar(){
+  if(asCola.corriendo) return;
+  asCola.corriendo = true;
+  while(asNPend() && !asCola.parada){
+    const claves = Object.keys(asCola.pend), f = asCola.pend[claves[0]].fecha;
+    const lote = claves.filter(k => asCola.pend[k].fecha === f), items = lote.map(k => asCola.pend[k].it);
+    let r = null;
+    try{ r = await llamarDb('asistenciaGuardar', {fecha: f, items}); }catch(err){ r = null; }
+    if(r && r.ok){
+      lote.forEach((k, i) => { if(asCola.pend[k] && asCola.pend[k].it === items[i]) delete asCola.pend[k]; });
+      asCola.fallos = 0;
+    } else if(r && (r.error === 'sin_sesion')){
+      asCola.parada = true; avisoToast('Tu sesión venció: la asistencia marcada quedó sin guardar.', 'error');
+    } else if(r && ['fecha_futura', 'domingo', 'sin_permiso', 'fecha_invalida'].indexOf(r.error) !== -1){
+      lote.forEach(k => delete asCola.pend[k]);
+      avisoToast(r.error === 'sin_permiso' ? 'Tu cuenta no tiene permiso para registrar asistencia.' : 'No se pudo guardar la asistencia (' + r.error + ').', 'error');
+    } else {
+      asCola.fallos++;
+      if(asCola.fallos === 3) avisoToast('Sin conexión con la base de datos: la asistencia se sigue intentando guardar.', 'error');
+      if(asUI) asUI();
+      await new Promise(x => setTimeout(x, Math.min(15000, 1500 * asCola.fallos)));
+    }
+    if(asUI) asUI();
+  }
+  asCola.corriendo = false;
+  if(asUI) asUI();
+}
+window.addEventListener('beforeunload', e => { if(asNPend()){ e.preventDefault(); e.returnValue = ''; } });
+
 async function abrirAsistencia(){
   const demo = !DB_URL;
   const ov = document.createElement('div');
@@ -5679,21 +5725,52 @@ async function abrirAsistencia(){
   const cuerpo = ov.querySelector('#asCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
   const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  let fecha = rdHoy(), estado = {}, lista = [], ocupado = false;
+  let fecha = rdHoy(), estado = {}, lista = [], cargandoSil = false, cerrando = false;
   const dow = f => new Date(f + 'T00:00:00Z').getUTCDay();
   const sumar = (f, n) => rdSuma(f, n);
-  const cerrar = () => cerrarDin(ov);
-  async function cargar(){
-    cuerpo.innerHTML = '<div class="as-aviso">Cargando asistencia…</div>';
-    let r;
-    if(demo){ await new Promise(x => setTimeout(x, 150)); r = {ok: true, registros: JSON.parse(JSON.stringify(ASIST_DEMO[fecha] || {})), trabajadores: activeWorkers().length ? activeWorkers() : ALL_WORKERS.slice(0, 8)}; }
-    else r = await llamarDb('asistenciaDia', {fecha});
-    if(!r || !r.ok){ cuerpo.innerHTML = '<div class="as-aviso">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div><div class="as-pie"><button class="btn" type="button" id="asX">Cerrar</button></div>'; cuerpo.querySelector('#asX').onclick = cerrar; return; }
-    lista = r.trabajadores || []; estado = {};
-    Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; estado[n] = {e: x.e, m: x.m || '', s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lista.indexOf(n) === -1) lista.push(n); });
-    pintar();
+  const cerrar = () => { asUI = null; cerrarDin(ov); };
+  let listaBase = [];
+  function aEstado(r){
+    const est = {}, lis = (r.trabajadores || []).slice();
+    Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; est[n] = {e: x.e, m: x.m || '', s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lis.indexOf(n) === -1) lis.push(n); });
+    return {estado: est, lista: lis};
   }
-  function pintar(msg, error){
+  // Trae un día sin mostrar nada de "cargando". Las filas con cambios sin guardar no se pisan.
+  async function traer(f){
+    let r;
+    if(demo) r = {ok: true, registros: JSON.parse(JSON.stringify(ASIST_DEMO[f] || {})), trabajadores: activeWorkers().length ? activeWorkers() : ALL_WORKERS.slice(0, 8)};
+    else { try{ r = await llamarDb('asistenciaDia', {fecha: f}); }catch(err){ r = null; } }
+    if(!r || !r.ok) return false;
+    const nuevo = aEstado(r), ant = ASIST_CACHE[f];
+    Object.keys(asCola.pend).forEach(k => { const p = asCola.pend[k]; if(p.fecha !== f) return; const n = p.it.trabajador; if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
+    const cambio = !ant || JSON.stringify(ant.estado) !== JSON.stringify(nuevo.estado) || JSON.stringify(ant.lista) !== JSON.stringify(nuevo.lista);
+    if(cambio) ASIST_CACHE[f] = nuevo;
+    if(nuevo.lista.length) listaBase = nuevo.lista;
+    return cambio;
+  }
+  function precargar(){ [sumar(fecha, -1), sumar(fecha, -2), sumar(fecha, 1)].forEach(f => { if(f <= rdHoy() && !ASIST_CACHE[f]) traer(f); }); }
+  async function ir(f){
+    if(f > rdHoy() || cerrando) return;
+    fecha = f;
+    const c = ASIST_CACHE[f];
+    if(c){ estado = c.estado; lista = c.lista; }
+    else { estado = {}; lista = listaBase.slice(); ASIST_CACHE[f] = {estado, lista}; }
+    pintar();
+    const cambio = await traer(f);
+    if(fecha !== f || cerrando) return;
+    const n = ASIST_CACHE[f]; estado = n.estado; lista = n.lista;
+    if(cambio) pintar(); else avisarGuardado();
+    precargar();
+  }
+  function textoGuardado(){
+    if(asNPend()) return asCola.fallos ? 'Sin conexión: se reintenta solo…' : 'Guardando…';
+    return 'Todo guardado ✓';
+  }
+  function avisarGuardado(){
+    const m = cuerpo.querySelector('#asMsg'); if(!m) return;
+    m.textContent = textoGuardado(); m.style.color = asCola.fallos ? 'var(--bad,#c0392b)' : 'var(--sub)';
+  }
+  function pintar(){
     const d = dow(fecha), sab = d === 6;
     let h = '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><input type="date" id="asFecha" value="' + fecha + '" max="' + rdHoy() + '"><button class="btn" type="button" id="asSig"' + (fecha >= rdHoy() ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Hoy</button><span class="as-dia">' + DIAS[d] + '</span></div>';
     if(d === 0) h += '<div class="as-aviso">Los domingos no se registra asistencia.</div>';
@@ -5709,52 +5786,45 @@ async function abrirAsistencia(){
         return f + '</div>';
       }).join('') : '<div class="as-aviso">No hay trabajadores activos.</div>';
     }
-    h += '<div class="as-pie">' + (d === 0 ? '' : '<button class="btn" type="button" id="asTodos">Todos presentes</button>') + '<span class="as-msg" id="asMsg" style="color:' + (error ? 'var(--bad,#c0392b)' : 'var(--sub)') + '">' + esc(msg || 'Toca otra vez un botón para quitar la marca.') + '</span><button class="btn primary" type="button" id="asGuardar"' + (d === 0 ? ' disabled' : '') + '>Guardar y cerrar</button><button class="btn" type="button" id="asX">Cerrar sin guardar</button></div>';
+    h += '<div class="as-pie">' + (d === 0 ? '' : '<button class="btn" type="button" id="asTodos">Todos presentes</button>') + '<span class="as-msg" id="asMsg" style="color:var(--sub)">' + esc(textoGuardado()) + '</span><button class="btn primary" type="button" id="asGuardar">Guardar y cerrar</button></div>';
     cuerpo.innerHTML = h;
-    const ir = f => { if(f > rdHoy()) return; fecha = f; cargar(); };
     cuerpo.querySelector('#asAnt').onclick = () => ir(sumar(fecha, -1));
     cuerpo.querySelector('#asSig').onclick = () => ir(sumar(fecha, 1));
     cuerpo.querySelector('#asHoy').onclick = () => ir(rdHoy());
     cuerpo.querySelector('#asFecha').onchange = e => { if(e.target.value) ir(e.target.value); };
-    cuerpo.querySelector('#asX').onclick = cerrar;
+    const guardarFila = n => { const x = estado[n] || {e: ''}; asEncolar(fecha, {trabajador: n, e: x.e || 'N', m: x.m || '', s: x.s || ''}); };
     const todos = cuerpo.querySelector('#asTodos');
-    if(todos) todos.onclick = () => { lista.forEach(n => { if(!estado[n] || !estado[n].e) estado[n] = {e: 'P', m: '', s: ''}; }); pintar(); };
+    if(todos) todos.onclick = () => { lista.forEach(n => { if(!estado[n] || !estado[n].e){ estado[n] = {e: 'P', m: '', s: ''}; guardarFila(n); } }); pintar(); };
     cuerpo.querySelectorAll('.as-seg button').forEach(b => b.onclick = () => {
       const n = lista[Number(b.parentNode.dataset.i)], e = b.dataset.e;
       if(estado[n] && estado[n].e === e) estado[n] = {e: '', m: '', s: ''};
       else estado[n] = {e, m: e === 'S' ? 'sin cancha' : '', s: e === 'S' ? 'medio dia' : ''};
-      pintar();
+      guardarFila(n); pintar();
     });
     cuerpo.querySelectorAll('.as-sub').forEach(sb => {
       const n = lista[Number(sb.dataset.i)];
       sb.querySelectorAll('[data-k]').forEach(c => c.onchange = () => {
         const k = c.dataset.k;
         if(k === 'm') estado[n].m = c.value;
-        if(k === 't'){ estado[n].s = c.value === 'hora' ? '15:00' : 'medio dia'; pintar(); }
+        if(k === 't') estado[n].s = c.value === 'hora' ? '15:00' : 'medio dia';
         if(k === 'h') estado[n].s = c.value || '15:00';
+        guardarFila(n);
+        if(k === 't') pintar();
       });
     });
-    cuerpo.querySelector('#asGuardar').onclick = guardar;
+    cuerpo.querySelector('#asGuardar').onclick = async () => {
+      const bt = cuerpo.querySelector('#asGuardar'); cerrando = true;
+      if(bt){ bt.disabled = true; bt.textContent = asNPend() ? 'Guardando…' : 'Listo'; }
+      let t0 = Date.now();
+      while(asNPend() && asCola.fallos < 2 && Date.now() - t0 < 20000) await new Promise(x => setTimeout(x, 120));
+      if(asNPend()) avisoToast('Quedó asistencia por guardar: se sigue intentando. No cierres la página.', 'error');
+      else avisoToast('Asistencia guardada.', 'ok');
+      cerrar();
+    };
   }
-  async function guardar(){
-    if(ocupado) return; ocupado = true;
-    const btn = cuerpo.querySelector('#asGuardar'); if(btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
-    const items = lista.map(n => { const x = estado[n] || {e: ''}; return {trabajador: n, e: x.e || 'N', m: x.m, s: x.s}; });
-    for(const it of items){ if(it.e === 'S' && it.s !== 'medio dia' && !/^\d\d:\d\d$/.test(it.s)){ ocupado = false; pintar('Falta la hora de salida de ' + it.trabajador + '.', true); return; } }
-    let r;
-    if(demo){
-      const reg = {};
-      items.forEach(it => { if(it.e === 'N') return; reg[it.trabajador] = {e: it.e, m: it.m, s: it.s === 'medio dia' ? 'medio día' : it.s}; });
-      ASIST_DEMO[fecha] = reg; r = {ok: true};
-    } else r = await llamarDb('asistenciaGuardar', {fecha, items});
-    ocupado = false;
-    if(r && r.ok){ avisoToast('Asistencia guardada.', 'ok'); cerrar(); return; }
-    const ERRA = {fecha_futura: 'No se puede registrar un día que aún no llega.', domingo: 'Los domingos no se registra asistencia.', sin_sesion: 'Tu sesión venció.', sin_permiso: 'Tu cuenta no tiene permiso para registrar asistencia.', no_se_guardo: 'El servidor respondió, pero la asistencia no quedó en la hoja. Publica la versión 72 del Apps Script y vuelve a intentar.'};
-    const t = (r && ERRA[r.error]) || ('No se pudo guardar' + (r && r.error ? ' (' + r.error + ')' : '') + '. Revisa la conexión y que el Apps Script esté publicado en la versión 72 o más nueva.');
-    pintar(t, true); avisoToast(t, 'error');
-  }
-  ov.addEventListener('click', e => { if(e.target === ov) cerrar(); });
-  cargar();
+  asUI = avisarGuardado;
+  ov.addEventListener('click', e => { if(e.target === ov && !cerrando) document.getElementById('asCuerpo') && cuerpo.querySelector('#asGuardar') && cuerpo.querySelector('#asGuardar').click(); });
+  ir(fecha);
 }
 document.getElementById('asistBtn').addEventListener('click', abrirAsistencia);
 
@@ -6754,7 +6824,7 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
     });
   });
 });
-document.getElementById('turboBtn').addEventListener('click', (e) => {
+document.getElementById('turboBtn')?.addEventListener('click', (e) => {
   turboMode = !turboMode;
   e.target.classList.toggle('primary', turboMode);
   render();
@@ -6861,7 +6931,7 @@ try{
 }catch(err){ aplicarDorado(); }
 document.getElementById('saveNowBtn').addEventListener('click', pedirGuardar);
 
-document.getElementById('dbBtn').addEventListener('click', () => {
+document.getElementById('dbBtn')?.addEventListener('click', () => {
   const bodyHtml = `
     <p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Pega aquí la URL de tu backend/base de datos. Déjalo vacío para volver a guardar solo en este panel.</p>
     <p style="margin:0 0 10px;font-size:12.5px;color:#a97e00;">Nota: la conexión con la base de datos solo funciona desde el link oficial de la página. Pídeselo al administrador.</p>
@@ -8065,4 +8135,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.10 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.13 · 28-10-2026 ==== -->
