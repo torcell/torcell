@@ -1,4 +1,4 @@
-/* ===== carga.js 1.0.0 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.0.1 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
@@ -9,7 +9,7 @@
   s.textContent = `
 #cargaGlobal{--H:164px;position:fixed;inset:0;width:100vw;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
 #cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
-#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
+#cargaGlobal.cgsale{opacity:0;transition:opacity .45s ease .2s;pointer-events:none;}
 #cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
 #cargaGlobal .cgbd{position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:#fff;will-change:transform;}
 #cargaGlobal .cgfondo{position:absolute;inset:0;background:rgba(255,255,255,.08);transform:scaleY(0);will-change:transform;}
@@ -198,9 +198,9 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
         st.cerrando = true;
         v.classList.remove('cgabre'); v.classList.add('cgcierra');
         await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-        await terminadas(v);
+        // el fondo se desvanece al mismo tiempo que las franjas se juntan (sin tiempo muerto con la pantalla vacía)
         el.classList.add('cgsale');
-        await new Promise(function(r){ var t = setTimeout(r, 600); el.addEventListener('transitionend', function(){ clearTimeout(t); r(); }, {once: true}); });
+        await Promise.all([terminadas(v), new Promise(function(r){ var t = setTimeout(r, 1100); el.addEventListener('transitionend', function f(e){ if(e.target !== el) return; clearTimeout(t); el.removeEventListener('transitionend', f); r(); }); })]);
         CargaPagina.cortar();
       })();
       return st.fin;

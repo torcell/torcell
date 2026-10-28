@@ -119,7 +119,7 @@ main h2{margin:0 0 4px;font-size:17px;}
 </head>
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Admin</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
-<script src="carga.js?v=1"></script>
+<script src="carga.js?v=2"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 
 <header class="top">
@@ -478,7 +478,7 @@ $('lado').addEventListener('click', e => { const b = e.target.closest('button[da
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $('irMenu').addEventListener('click', e => irMenuCarga(e.currentTarget));
 async function iniciar(){
-  $('quien').textContent = DEMO ? 'Modo prueba · datos de ejemplo' : ('Admin' + (H && H.nombre ? ' · ' + H.nombre : ''));
+  $('quien').textContent = DEMO ? 'Modo prueba · datos de ejemplo' : ((H && /^ismael\b/i.test(H.nombre || '') ? 'Developer' : 'Admin') + (H && H.nombre ? ' · ' + H.nombre : ''));
   if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('datos');
   const j = await api('adminUsuarios');
   if(!j || !j.ok){ main.innerHTML = '<div class="tarjeta">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div>'; if(window.CargaPagina) await CargaPagina.fin(); return; }
@@ -509,6 +509,8 @@ iniciar();
 }catch(e){} })();
 /* ===== fin aviso de sitio ===== */
 </script>
+
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.12';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.10 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.12 · 28-10-2026 ==== -->

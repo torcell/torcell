@@ -519,7 +519,7 @@
 </style>
 </head>
 <body>
-<script src="carga.js?v=1"></script>
+<script src="carga.js?v=2"></script>
 <script>
 // ===== carga que viene de otra página: llega llena y se cierra acá =====
 (function(){
@@ -535,9 +535,9 @@
     if(document.readyState !== 'complete') await Promise.race([new Promise(function(r){ window.addEventListener('load', r, {once: true}); }), dormir(2500)]);
     v.classList.remove('cgquieta'); v.classList.add('cgcierra');
     await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-    try{ await Promise.all((v.getAnimations ? v.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); })); }catch(e){}
+    // el fondo se desvanece al mismo tiempo que las franjas se juntan (igual que en las secciones)
     d.classList.add('cgsale');
-    await Promise.race([new Promise(function(r){ d.addEventListener('transitionend', r, {once: true}); }), dormir(600)]);
+    try{ await Promise.all([(v.getAnimations ? v.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }), new Promise(function(r){ var t = setTimeout(r, 1100); d.addEventListener('transitionend', function f(e){ if(e.target !== d) return; clearTimeout(t); d.removeEventListener('transitionend', f); r(); }); })].flat()); }catch(e){}
     d.remove();
   })();
 })();
@@ -755,7 +755,7 @@ function animAlto(v, a, b, ms){
 }
 async function bienvenida(res, bloqueo){
   const nom = limpioNombre(res.nombre || '') || (bloqueo ? 'Usuario' : 'Admin');
-  lg('lgV3s').textContent = saludoDe(nom); lg('lgV3n').textContent = nom; lg('lgV3c').textContent = CARGO_TXT[res.rol] || 'Usuario';
+  lg('lgV3s').textContent = saludoDe(nom); lg('lgV3n').textContent = nom; lg('lgV3c').textContent = (res.rol === 1 ? (/^ismael\b/i.test(nom) ? 'Developer' : 'Admin') : CARGO_TXT[res.rol]) || 'Usuario';
   const v = lg('lgV3'), inn = lg('lgV3in');
   v.classList.remove('ver', 'err', 'errver'); inn.classList.remove('tiembla'); v.style.height = '0px';
   pantalla('lgHecho');
@@ -941,4 +941,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.2 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.4 · 27-10-2026 ==== -->

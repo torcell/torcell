@@ -1353,7 +1353,7 @@
 <body class="lg-on">
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
-<script src="carga.js?v=1"></script>
+<script src="carga.js?v=2"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
@@ -1886,7 +1886,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.14';
+const APP_VERSION = '0.73.16';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2155,7 +2155,7 @@ function applyRoleUI(){
   const badge = document.getElementById('roleBadge');
   const loggedIn = isAdmin || isSupervisor || isJefe || workerSession || esInvitado();
   let label = '', cls = 'guest';
-  if(isAdmin){ label = 'Conectado como: Admin' + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
+  if(isAdmin){ label = 'Conectado como: ' + (/^ismael\b/i.test(String(sessionName || '')) ? 'Developer' : 'Admin') + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
   else if(isSupervisor){ label = 'Conectado como: Supervisor' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(isJefe){ label = 'Conectado como: Jefe de Terreno' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(workerSession){
@@ -4954,7 +4954,7 @@ async function pbApi(accion, extra){
   try{ return await llamarDb(accion, extra) || {ok:false, error:'red'}; }catch(e){ return {ok:false, error:'red'}; }
 }
 // ===== quién pide: la sesión abierta (nombre y cargo) =====
-function pbCargoSesion(){ return isAdmin ? 'Administrador' : isSupervisor ? 'Capataz' : isJefe ? 'Jefe de obra' : 'Trabajador'; }
+function pbCargoSesion(){ return isAdmin ? (/^ismael\b/i.test(String(sessionName || '')) ? 'Developer' : 'Admin') : isSupervisor ? 'Capataz' : isJefe ? 'Jefe de obra' : 'Trabajador'; }
 function pbQuienTxt(){ return sessionName ? sessionName + ' (' + pbCargoSesion() + ')' : pbCargoSesion(); }
 function pbPintarLista(){
   pbEl('pbLista').innerHTML = pbItems.map((i, k) => {
@@ -7932,4 +7932,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.14 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.16 · 28-10-2026 ==== -->
