@@ -385,56 +385,7 @@
   @keyframes hwLadoD{0%,66%{opacity:0;transform:translateX(-96px) rotate(6deg);}67%{opacity:1;transform:translateX(-96px) rotate(6deg);}73%,80%{opacity:1;transform:translateX(0) rotate(6deg);}83%{transform:translateX(0) rotate(-2deg);}86%{transform:translateX(0) rotate(6deg);}92%{opacity:1;transform:translateX(-96px) rotate(6deg);}93%,100%{opacity:0;transform:translateX(-96px) rotate(6deg);}}
   body.tema5:has(.overlay.show) #esqueletos{display:none;}
 
-#cargaGlobal{--H:164px;position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
-#cargaGlobal::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 56px);pointer-events:none;}
-#cargaGlobal.cgsale{opacity:0;transition:opacity .35s ease;pointer-events:none;}
-#cargaGlobal .cgquieta .cgbd.cgt{transform:translateY(calc(var(--H) / -2 + 1px));}
-#cargaGlobal .cgquieta .cgbd.cgbt{transform:translateY(calc(var(--H) / 2 - 1px));}
-#cargaGlobal .cgquieta .cgfondo{transform:scaleY(1);}
-#cargaGlobal .cgquieta .cgin{opacity:1;}
-#cargaGlobal .cg3{position:relative;width:100%;height:var(--H);}
-#cargaGlobal .cgbd{position:absolute;left:0;right:0;top:calc(50% - 1px);height:2px;background:#fff;will-change:transform;}
-#cargaGlobal .cgfondo{position:absolute;inset:0;background:rgba(255,255,255,.08);transform:scaleY(0);will-change:transform;}
-#cargaGlobal .cgin{position:absolute;inset:2px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;text-align:center;opacity:0;will-change:opacity;}
-#cargaGlobal .cgabre .cgbd.cgt{animation:cgSube .5s cubic-bezier(.65,0,.35,1) forwards;}
-#cargaGlobal .cgabre .cgbd.cgbt{animation:cgBaja .5s cubic-bezier(.65,0,.35,1) forwards;}
-#cargaGlobal .cgabre .cgfondo{animation:cgAbre .5s cubic-bezier(.65,0,.35,1) forwards;}
-#cargaGlobal .cgabre .cgin{animation:cgAparece .22s ease .34s forwards;}
-#cargaGlobal .cgcierra .cgin{opacity:1;animation:cgDesaparece .2s ease forwards;}
-#cargaGlobal .cgcierra .cgbd.cgt{transform:translateY(calc(var(--H) / -2 + 1px));animation:cgSubeR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
-#cargaGlobal .cgcierra .cgbd.cgbt{transform:translateY(calc(var(--H) / 2 - 1px));animation:cgBajaR .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
-#cargaGlobal .cgcierra .cgfondo{transform:scaleY(1);animation:cgCierra .45s cubic-bezier(.65,0,.35,1) .2s forwards;}
-@keyframes cgSube{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / -2 + 1px));}}
-@keyframes cgBaja{from{transform:translateY(0);}to{transform:translateY(calc(var(--H) / 2 - 1px));}}
-@keyframes cgSubeR{from{transform:translateY(calc(var(--H) / -2 + 1px));}to{transform:translateY(0);}}
-@keyframes cgBajaR{from{transform:translateY(calc(var(--H) / 2 - 1px));}to{transform:translateY(0);}}
-@keyframes cgAbre{from{transform:scaleY(0);}to{transform:scaleY(1);}}
-@keyframes cgCierra{from{transform:scaleY(1);}to{transform:scaleY(0);}}
-@keyframes cgAparece{from{opacity:0;}to{opacity:1;}}
-@keyframes cgDesaparece{from{opacity:1;}to{opacity:0;}}
-#cargaGlobal small{display:block;font-size:12px;opacity:.8;letter-spacing:1px;text-transform:uppercase;}
-#cargaGlobal b{display:block;font-size:24px;line-height:1.2;margin:6px 0 0;}
-#cargaGlobal .cgcarga{width:min(280px,76%);margin:20px auto 0;}
-#cargaGlobal .cgpista{height:5px;background:rgba(255,255,255,.18);overflow:hidden;}
-#cargaGlobal .cgrell{height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#4f8fd6,#ffffff);box-shadow:0 0 8px rgba(111,166,232,.6);}
-#cargaGlobal .cgest{margin-top:9px;height:16px;line-height:16px;white-space:nowrap;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);font-variant-numeric:tabular-nums;text-align:right;}
-#cargaGlobal .cgest.cglisto{color:#fff;}
-#cargaGlobal .cgerr{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px auto 0;max-width:min(420px,92%);font-size:12.5px;line-height:1.3;font-weight:700;letter-spacing:.2px;opacity:0;text-align:left;color:#ff6b6b;}
-#cargaGlobal .cgerr svg{flex:none;}
-#cargaGlobal.cgerror .cgerr{opacity:1;transition:opacity .3s ease .1s;}
-#cargaGlobal .cgbd,#cargaGlobal .cgin small,#cargaGlobal .cgin b,#cargaGlobal .cgest{transition:color .3s ease,background-color .3s ease;}
-#cargaGlobal.cgerror .cgbd{background:#ff5252;box-shadow:0 0 10px rgba(255,82,82,.55);}
-#cargaGlobal.cgerror .cgin small,#cargaGlobal.cgerror .cgin b,#cargaGlobal.cgerror .cgest{color:#ff6b6b;}
-#cargaGlobal.cgerror .cgin b{text-shadow:0 0 14px rgba(255,82,82,.35);}
-#cargaGlobal.cgerror .cgpista{background:rgba(255,82,82,.22);}
-#cargaGlobal .cgrell{position:relative;}
-#cargaGlobal .cgrell::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#ff3d3d,#ff9a9a);box-shadow:0 0 8px rgba(255,82,82,.8);opacity:0;transition:opacity .3s ease;}
-#cargaGlobal.cgerror .cgrell::after{opacity:1;}
-#cargaGlobal .cgin.cgtiembla{opacity:1;animation:cgTiembla .5s cubic-bezier(.36,.07,.19,.97) both;}
-@keyframes cgTiembla{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
-@media(prefers-reduced-motion:reduce){#cargaGlobal .cgin.cgtiembla{animation:none;}}
-@media(max-width:480px){#cargaGlobal{--H:196px;}#cargaGlobal b{font-size:20px;}}
-@media(prefers-reduced-motion:reduce){#cargaGlobal .cgabre .cgbd,#cargaGlobal .cgabre .cgfondo,#cargaGlobal .cgcierra .cgbd,#cargaGlobal .cgcierra .cgfondo{animation-duration:.01s !important;animation-delay:0s !important;}}
+#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:#0b2b36;}
   #lgSplash{display:none !important;}
 .rd-ctl{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--sub);}
 .rd-ctl select{margin-left:6px;}
@@ -568,6 +519,7 @@
 </style>
 </head>
 <body>
+<script src="carga.js?v=1"></script>
 <script>
 // ===== carga que viene de otra página: llega llena y se cierra acá =====
 (function(){
@@ -989,4 +941,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.1 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.2 · 27-10-2026 ==== -->
