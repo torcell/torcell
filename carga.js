@@ -1,4 +1,4 @@
-/* ===== carga.js 1.0.1 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.1.0 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
@@ -70,6 +70,10 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit'), msgEl = document.getElementById('cgMsg');
   var textoBase = tit.textContent;
   var plantilla = el.outerHTML;
+  // ===== viene del menú: la carga ya está abierta ahí, así que acá sigue de largo sin abrirse otra vez =====
+  var entrando = false;
+  try{ entrando = sessionStorage.getItem('cargaEntrando') === '1'; sessionStorage.removeItem('cargaEntrando'); }catch(e){}
+  if(entrando){ v.classList.remove('cgabre'); v.classList.add('cgquieta'); }
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
@@ -113,6 +117,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   }
   bucle();
   var abierta = terminadas(v);
+  if(entrando){ st.t0 = st.ultHito = performance.now(); }
   async function paginaLista(){
     var tope = dormir(6000);
     var listo = (async function(){
@@ -196,7 +201,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
         est.textContent = '¡Listo!'; est.classList.add('cglisto'); await dormir(450);
         if(st.err) return;
         st.cerrando = true;
-        v.classList.remove('cgabre'); v.classList.add('cgcierra');
+        v.classList.remove('cgabre'); v.classList.remove('cgquieta'); v.classList.add('cgcierra');
         await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
         // el fondo se desvanece al mismo tiempo que las franjas se juntan (sin tiempo muerto con la pantalla vacía)
         el.classList.add('cgsale');

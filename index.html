@@ -385,7 +385,7 @@
   @keyframes hwLadoD{0%,66%{opacity:0;transform:translateX(-96px) rotate(6deg);}67%{opacity:1;transform:translateX(-96px) rotate(6deg);}73%,80%{opacity:1;transform:translateX(0) rotate(6deg);}83%{transform:translateX(0) rotate(-2deg);}86%{transform:translateX(0) rotate(6deg);}92%{opacity:1;transform:translateX(-96px) rotate(6deg);}93%,100%{opacity:0;transform:translateX(-96px) rotate(6deg);}}
   body.tema5:has(.overlay.show) #esqueletos{display:none;}
 
-#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:#0b2b36;}
+#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
   #lgSplash{display:none !important;}
 .rd-ctl{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--sub);}
 .rd-ctl select{margin-left:6px;}
@@ -519,7 +519,7 @@
 </style>
 </head>
 <body>
-<script src="carga.js?v=2"></script>
+<script src="carga.js?v=3"></script>
 <script>
 // ===== carga que viene de otra página: llega llena y se cierra acá =====
 (function(){
@@ -682,14 +682,22 @@ function precargar(dest){
   const l = document.createElement('link'); l.rel = 'prefetch'; l.href = PAGINAS[dest]; l.as = 'document'; document.head.appendChild(l);
 }
 let saliendo = false;
+// ===== carga al entrar a una sección: se abre acá mismo (sin esperar a que llegue la otra página) y la sección sigue desde ahí =====
+const TIT_CARGA = {panel: 'Cargando Panel de Cerámica y Frague', calidad: 'Cargando panel de Calidad', bodega: 'Cargando Bodega', avance: 'Cargando dashboard de avance', terreno: 'Cargando panel de Jefe de Terreno', oficina: 'Cargando panel de Oficina Técnica', admin: 'Cargando Panel de Admin'};
+const HTML_CARGA = '<div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">%TIT%</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div>';
 async function irA(dest){
   if(saliendo) return; saliendo = true;
   ls('destinoPreferido', dest);
   precargar(dest);
-  lg('loginGate').classList.add('saliendo');
-  await dormir(170);
+  const d = document.createElement('div'); d.id = 'cargaGlobal'; d.setAttribute('role', 'status'); d.setAttribute('aria-live', 'polite');
+  d.innerHTML = HTML_CARGA.replace('%TIT%', TIT_CARGA[dest] || 'Cargando…') + '</div>';
+  document.body.insertBefore(d, document.body.firstChild);
+  await dormir(620);   // lo que tarda en abrirse la carga
+  try{ sessionStorage.setItem('cargaEntrando', '1'); }catch(e){}
   location.replace(PAGINAS[dest]);
 }
+// si vuelve con el botón atrás, la carga que quedó abierta se saca
+window.addEventListener('pageshow', e => { if(e.persisted){ saliendo = false; const o = document.getElementById('cargaGlobal'); if(o) o.remove(); lg('loginGate').classList.remove('saliendo'); } });
 
 // ---- tema ----
 (function(){
@@ -941,4 +949,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.4 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.5 · 27-10-2026 ==== -->

@@ -131,7 +131,7 @@ body.lectura .edita{display:none !important;}
 .tabla .pill{white-space:normal;text-align:center;}
 @media (max-width:640px){#tPre th:nth-child(4),#tPre td:nth-child(4),#tPre th:nth-child(3),#tPre td:nth-child(3),#tPre th:nth-child(5),#tPre td:nth-child(5),#tUso th:nth-child(2),#tUso td:nth-child(2){display:none;}#tPre td,#tPre th,#tUso td,#tUso th{padding:8px 4px;}#tPre .btn{padding:4px 5px;font-size:11px;min-height:30px;}#tPre .pill{font-size:11px;padding:2px 6px;}#tPre td,#tPre th{padding:8px 3px;}}
 
-#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:#0b2b36;}
+#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
 
 .brand{display:flex;align-items:center;gap:14px;min-width:0;}
 .brand-logo{height:40px;width:auto;flex:none;display:block;padding-right:14px;border-right:1px solid var(--strong);}
@@ -145,7 +145,7 @@ body.lectura .edita{display:none !important;}
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Bodega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
-<script src="carga.js?v=2"></script>
+<script src="carga.js?v=3"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div class="wrap">
   <header class="top">
@@ -1329,7 +1329,7 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.8';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.9';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.4.8 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.9 · 28-10-2026 ==== -->
