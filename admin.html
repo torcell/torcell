@@ -10,6 +10,7 @@
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;var d,ty;if(!h||!h.token){d='index.html?s=1';ty='nosesion';try{sessionStorage.setItem('progresoObraAvisoGate','');}catch(e){}}else if(h.rol!==1){d='index.html?menu=1';ty='permiso';try{sessionStorage.setItem('progresoObraAvisoGate','Esa sección es solo para el administrador.');}catch(e){}}if(d){window.__gateErr={d:d,t:ty};setTimeout(function(){location.replace(d);},12000);}}catch(e){}})();</script>
 <title>Panel de Admin · Obra Bellavista</title>
+<link rel="stylesheet" href="carga.css?v=1">
 <style>
 :root{--bg:#0b2b36;--panel:#10384a;--soft:#0d3242;--border:#24505f;--strong:#3d6d7e;--text:#eef4f6;--sub:#a3bcc6;--ok:#43b97f;--warn:#f0a23a;--bad:#ef6a5e;--accent:#4f8fd6;--accent2:#2f6f8f;color-scheme:dark;}
 *{box-sizing:border-box;}
@@ -119,7 +120,8 @@ main h2{margin:0 0 4px;font-size:17px;}
 </head>
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Admin</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
-<script src="carga.js?v=3"></script>
+<script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
+<script src="carga.js?v=4"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 
 <header class="top">
@@ -510,7 +512,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.13';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.14';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.13 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.14 · 28-10-2026 ==== -->
