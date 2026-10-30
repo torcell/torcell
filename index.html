@@ -666,9 +666,11 @@ function guardar(res, recordar, dest){
   limpiarTodo();
   const lista = res.secciones || SECC_BASE[res.rol] || [];
   guardarHub({token: res.token || '', nombre: res.nombre || '', rol: res.rol, secciones: lista, recordar: !!recordar});
-  if((dest === 'panel' && lista.indexOf('panel') !== -1 && [1, 2, 3].indexOf(res.rol) !== -1) || (dest === 'avance' && lista.indexOf('avance') !== -1)){
+  if((dest === 'panel' && lista.indexOf('panel') !== -1) || (dest === 'avance' && lista.indexOf('avance') !== -1)){
     const st = recordar ? localStorage : sessionStorage;
-    try{ st.setItem('progresoObraToken', res.token || ''); st.setItem('progresoObraName', res.nombre || ''); st.setItem('progresoObraRol', String(res.rol)); }catch(e){}
+    // quien entra al panel con permiso extra (Sandoval, Edwin...) va como invitado: rol 0, solo lectura
+    const rolPanel = (dest === 'panel' && [1, 2, 3].indexOf(res.rol) === -1) ? 0 : res.rol;
+    try{ st.setItem('progresoObraToken', res.token || ''); st.setItem('progresoObraName', res.nombre || ''); st.setItem('progresoObraRol', String(rolPanel)); }catch(e){}
   }
   if(dest === 'calidad' && lista.indexOf('calidad') !== -1){ ls('calidadToken', res.token || ''); ls('calidadNombre', String(res.nombre || '')); ls('calidadCargo', CARGOS_CALIDAD[res.rol] || 'Invitado'); }
   if(dest === 'terreno' && lista.indexOf('terreno') !== -1){ ls('terrenoToken', res.token || ''); ls('terrenoNombre', String(res.nombre || '')); }
@@ -953,4 +955,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.7 · 30-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.8 · 30-10-2026 ==== -->
