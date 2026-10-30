@@ -593,8 +593,8 @@ const NOM_SECC = {molde: 'Molde de secciones', admin: 'Panel de Admin', panel: '
 const TXT_DEST = {molde: 'Abriendo el Molde de secciones…', admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…', bodega: 'Entrando a Bodega…'};
 const CARGOS_CALIDAD = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
 const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre', 'bodegaToken', 'bodegaNombre'];
-// molde: lo ve quien entra a Admin, no necesita permiso propio
-const accede = (l, d) => l.indexOf(d === 'molde' ? 'admin' : d) !== -1;
+// molde: por ahora lo ve y lo modifica cualquiera que haya iniciado sesión (después se reinicia)
+const accede = (l, d) => d === 'molde' ? true : l.indexOf(d) !== -1;
 const lg = id => document.getElementById(id);
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k, v){ try{ if(v === undefined) return localStorage.getItem(k); if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} return null; }
@@ -802,7 +802,7 @@ function mostrarOpciones(lista){
   const pref = ls('destinoPreferido');
   document.querySelectorAll('.lg-dest button').forEach(b => {
     const bloq = !accede(lista, b.dataset.dest);
-    if(b.dataset.dest === 'admin' || b.dataset.dest === 'molde'){ b.hidden = bloq; if(bloq) return; }
+    if(b.dataset.dest === 'admin'){ b.hidden = bloq; if(bloq) return; }
     b.classList.toggle('lock', bloq); b.setAttribute('aria-disabled', bloq ? 'true' : 'false');
     b.classList.toggle('pref', !bloq && b.dataset.dest === pref);
   });
@@ -955,4 +955,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.8 · 30-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.9 · 30-10-2026 ==== -->

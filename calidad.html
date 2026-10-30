@@ -92,6 +92,10 @@ body.bloq{overflow:hidden;}
 .modal .sub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
 .seg{display:grid;grid-template-columns:repeat(var(--n,2),1fr);gap:0;}
 .seg button[hidden]{display:none;}
+/* ==== invitado: solo mira ==== */
+#vel.lect #mSeg,#vel.lect #mLista,#vel.lect .fbtns{pointer-events:none;opacity:.55;}
+#vel.lect #mEditar,#vel.lect #mGuardar,#vel.lect .fbtns,#vel.lect #mElegir{display:none;}
+.avlect{font-size:12px;color:var(--sub);border:1px solid var(--border);padding:6px 9px;line-height:1.35;}.avlect[hidden]{display:none;}
 .segnota{font-size:12px;color:var(--sub);line-height:1.35;margin-top:-6px;}.segnota[hidden],#mObsToggle[hidden]{display:none;}
 .seg button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 .tile.c{border-top-color:var(--accent);}.tile.c small{color:var(--accent);}
@@ -495,6 +499,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="mhead"><h2 id="mTit"></h2><span class="mquien" id="mQuien"></span></div>
     <div class="sub" id="mSub"></div>
     <div class="areas" id="mAreas"></div>
+    <div class="avlect" id="mLect" hidden>Estás como invitado: puedes mirar, pero no modificar la revisión.</div>
     <div class="seg" id="mSeg">
       <button type="button" data-e="revisado">Sin observaciones</button>
       <button type="button" data-e="observado">Con observación</button>
@@ -529,7 +534,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.36.14';
+const CAL_VERSION = '1.36.15';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -927,6 +932,9 @@ function abrir(k){
   pintarLista(parseItems(r));
   elegir(estadoSel);
   document.body.classList.add('bloq');
+  $('vel').classList.toggle('lect', soloLectura());
+  $('mLect').hidden = !soloLectura();
+  $('mCancel').textContent = soloLectura() ? 'Cerrar' : 'Cancelar';
   $('vel').classList.add('on');
   abrirFotos(d);
 }
@@ -949,6 +957,8 @@ function aviso(texto){
 const FOTO_LADO = 1280, MINI_LADO = 220, FOTOS_MAX = 12, FOTO_MAX_CHARS = 700000;
 const miEtiqueta = () => (cargo ? cargo + ' - ' : '') + nombre;
 const esAdminCal = () => cargo === 'Admin';
+// solo Admin y Calidad editan; el resto entra como invitado (solo mira)
+const soloLectura = () => !(cargo === 'Admin' || cargo === 'Calidad');
 function ajustarFotosUI(){ $('verFotos').hidden = !(fotosOk && esAdminCal()); $('irPanel').hidden = false; }
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $('irPanel').addEventListener('click', e => irMenuCarga(e.currentTarget));
@@ -1015,7 +1025,7 @@ async function abrirFotos(d){
 }
 const MSG_FOTO = {limite: 'Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.', demasiadas: 'Demasiados envíos seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', foto_invalida: 'Esa foto no se pudo guardar. Prueba con otra.', clave_invalida: 'Ese departamento no se reconoce.'};
 function anadirFotos(files){
-  if(!actual || !fotosOk) return;
+  if(!actual || !fotosOk || soloLectura()) return;
   const base = claveBase(actual), zona = scope;
   const lista = Array.from(files || []).filter(f => !f.type || /^image\//.test(f.type));
   if(!lista.length) return;
@@ -1069,7 +1079,7 @@ async function verFoto(i){
   fvReset();
   $('fvImg').innerHTML = f.m ? `<img alt="Foto del departamento" src="data:image/jpeg;base64,${f.m}">` : '';
   $('fvInfo').textContent = [dptoTxt(base), NOMBRE_SCOPE[f.z] || '', fechaFoto(f.ts), f.u].filter(Boolean).join(' · ');
-  const puede = esAdminCal() || f.u === miEtiqueta();
+  const puede = !soloLectura() && (esAdminCal() || f.u === miEtiqueta());
   $('fvBorrar').hidden = !puede;
   $('fvAcc').classList.toggle('uno', !puede);
   $('velFoto').classList.add('on');
@@ -1087,7 +1097,7 @@ function cerrarFoto(){
   setTimeout(() => { v.classList.remove('on', 'out'); $('fvImg').innerHTML = ''; fvReset(); fotoVista = null; }, 140);
 }
 async function borrarFotoVista(){
-  if(!fotoVista) return;
+  if(!fotoVista || soloLectura()) return;
   const b = $('fvBorrar');
   if(!fotoVista.confirmar){
     fotoVista.confirmar = true; b.textContent = 'Confirmar: borrar'; b.classList.add('danger');
@@ -1302,7 +1312,7 @@ function verificarDudosos(intento){
 }
 
 function guardarRevision(){
-  if(!actual) return;
+  if(!actual || soloLectura()) return;
   const sel = seleccion();
   const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
   if(!estadoSel){ $('mErr').textContent = 'Elige "Sin observaciones" o "Con observación".'; return; }
@@ -1315,6 +1325,7 @@ function guardarRevision(){
   enviarRevision(clave(actual), estadoSel, items, true);
 }
 function enviarRevision(k, estadoNuevo, items, cerrar){
+  if(soloLectura()) return;
   const previo = revisiones[k];
   const envio = {clave: k, estado: estadoNuevo, items: conObs(estadoNuevo) ? items : [], nonce: nuevoNonce(), ts: Date.now()};
   revisiones[k] = {e: estadoNuevo, d: items.map(x => x.t + ' ×' + x.c).join(', '), c: items.reduce((t, x) => t + x.c, 0), ts: Date.now(), u: (cargo ? cargo + ' - ' : '') + nombre};
@@ -1365,6 +1376,7 @@ function pintarOpciones(){
   $('opLista').innerHTML = opcionesEdit.length ? opcionesEdit.map((o, i) => `<div class="opfila"><span>${esc(o)}</span><button class="btn small" type="button" data-q="${i}">Quitar</button></div>`).join('') : '<div class="vacio-op">No queda ninguna opción.</div>';
 }
 function abrirOpciones(){
+  if(soloLectura()) return;
   opcionesEdit = opcionesDe().slice();
   $('oTit').textContent = 'Opciones de observación · ' + NOMBRE_SCOPE[scope];
   pintarOpciones();
@@ -1809,4 +1821,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.36.14 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.36.15 · 30-10-2026 ==== -->

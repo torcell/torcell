@@ -562,7 +562,7 @@ async function recargar(){
 }
 function fijarRol(j){
   if(!j || !j.ok) return;
-  rolOk = true; puede = j.rol === 'admin' || j.rol === 'bodega';
+  rolOk = true; puede = true; // por ahora en Bodega editan todos los que tienen acceso
   document.body.classList.toggle('lectura', !puede); $('soloLect').hidden = puede;
   const lab = {admin:'Admin', bodega:'Jefe de Bodega', jefe:'Jefe de Terreno', supervisor:'Supervisor'}[j.rol];
   let nom0 = j.nombre || ''; try{ nom0 = nom0 || localStorage.getItem(cfg.N) || ''; }catch(e){}
@@ -1331,7 +1331,7 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.10';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.11';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.4.10 · 28-10-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.11 · 30-10-2026 ==== -->

@@ -106,6 +106,12 @@ td input[type=date]{min-width:130px}
 .foot-logo{display:block;height:32px;width:auto;margin:26px auto 14px;opacity:.9;}
 .btn-marcado{background:#2f6f8f !important;color:#fff !important;border-color:#2f6f8f !important;pointer-events:none;}
 </style>
+<style>
+/* ==== invitado: solo mira ==== */
+body.lectura main{pointer-events:none;}
+body.lectura #guardarBtn,body.lectura #reset,body.lectura #nuevoBar,body.lectura .del,body.lectura .add{display:none !important;}
+.avlect{font-size:12.5px;padding:8px 12px;margin:8px 14px;border:1px solid var(--border,#888);line-height:1.35;}
+</style>
 </head>
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Oficina Técnica</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
@@ -131,7 +137,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   <section class="kpis" id="kpis"></section>
   <div class="nuevobar" id="nuevoBar" hidden><button class="btn" id="nuevoBtn" type="button">＋ Nuevo cuadro</button><span>Crea un cuadro y elige qué datos lleva: texto, montos, porcentajes, estados, fechas o checks.</span></div>
   <div class="grid" id="grid"></div>
-  <p class="pie">Encargado de Oficina Técnica: estados de pago, documentación, materiales y contratos. Las obligaciones del mes se basan en lo habitual de la normativa chilena; confírmalas con tu procedimiento. · Versión 1.0.15</p>
+  <p class="pie">Encargado de Oficina Técnica: estados de pago, documentación, materiales y contratos. Las obligaciones del mes se basan en lo habitual de la normativa chilena; confírmalas con tu procedimiento. · Versión 1.0.16</p>
 </main>
 <div class="dlg" id="nuevoDlg" hidden><div class="dlgc" role="dialog" aria-label="Nuevo cuadro">
   <h3>Nuevo cuadro</h3>
@@ -407,4 +413,20 @@ if(window.CargaPagina) CargaPagina.fin();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Oficina Técnica · v1.0.15 · 28-10-2026 ==== -->
+<script>
+// ===== solo el dueño de la sección (y Admin) edita; el resto entra como invitado =====
+(function(){
+  var rol = 0;
+  try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null'); rol = h ? Number(h.rol) : 0; }catch(e){}
+  if([1,6].indexOf(rol) !== -1) return;
+  document.body.classList.add('lectura');
+  var av = document.createElement('div'); av.className = 'avlect';
+  av.textContent = 'Estás como invitado: puedes mirar, pero no modificar nada en esta sección.';
+  var m = document.querySelector('main'); if(m) m.parentNode.insertBefore(av, m);
+  ['beforeinput','input','keydown','paste','drop'].forEach(function(ev){
+    document.addEventListener(ev, function(e){ if(e.target && e.target.closest && e.target.closest('main') && (ev !== 'keydown' || e.key === 'Enter' || e.key.length === 1)){ e.preventDefault(); e.stopPropagation(); } }, true);
+  });
+  setInterval(function(){ document.querySelectorAll('main [contenteditable],main input,main select,main textarea').forEach(function(x){ if(x.getAttribute('contenteditable') !== null) x.setAttribute('contenteditable','false'); else x.disabled = true; }); }, 600);
+})();
+</script>
+<!-- ==== VERSION: Oficina Técnica · v1.0.16 · 30-10-2026 ==== -->
