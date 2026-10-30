@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||!Array.isArray(h.secciones)||h.secciones.indexOf('admin')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <link rel="stylesheet" href="carga.css?v=1">
-<!-- molde.html v0.5.2 -->
+<!-- molde.html v0.6.1 -->
 <style>
 /* ===== Colores ===== */
 :root{--fondo:#eef1f5;--panel:#fff;--tinta:#1b2433;--suave:#5d6b80;--linea:#d5dbe4;--azul:#1f3b63;--azul2:#2d5590;--listo:#2f9e5b}
@@ -88,6 +88,35 @@ td select{min-width:64px}
 .volver .btn{text-decoration:none}
 .btn-marcado{background:#2f6f8f !important;color:#fff !important;border-color:#2f6f8f !important;pointer-events:none}
 .ver{max-width:720px;margin:8px auto 24px;text-align:right;font-size:12px;color:var(--suave)}
+[hidden]{display:none !important}
+/* ===== Relleno de prueba ===== */
+.lado .ej{margin:14px 18px 0;min-width:0;width:calc(100% - 36px);background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.lado .ej:hover{background:rgba(255,255,255,.15)}
+@media (max-width:640px){.lado .ej{flex:0 0 auto;width:auto;margin:0 12px}}
+/* ===== Panel creado ===== */
+.pan{max-width:980px;margin:16px auto 8px;padding:0 4px}
+.pan-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--azul);color:#fff;padding:14px 18px}
+.pan-cab .t{flex:1;min-width:200px}
+.pan-cab h2{margin:0;font-size:19px}
+.pan-cab p{margin:2px 0 0;font-size:13px;opacity:.8}
+.pan-cab .btn{background:transparent;color:#fff;border-color:#fff;min-width:0}
+.pan-cab .btn:hover{background:rgba(255,255,255,.15)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi{background:var(--panel);border:1px solid var(--linea);padding:10px 12px}
+.kpi b{display:block;font-size:24px}
+.kpi span{font-size:12px;color:var(--suave)}
+.met{background:var(--panel);border:1px solid var(--linea);padding:10px 12px;margin-bottom:12px;font-size:13px}
+.piso{background:var(--panel);border:1px solid var(--linea);margin-bottom:8px}
+.piso summary{cursor:pointer;padding:10px 14px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.piso summary span{font-weight:400;color:var(--suave);font-size:13px}
+.dep{padding:8px 14px;border-top:1px solid var(--linea)}
+.dep b{font-size:13px}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pc{height:34px;padding:0 10px;border:1px solid var(--linea);background:#f3f5f8;color:var(--tinta);cursor:pointer;font-size:13px;transition:transform .08s,background .15s}
+.pc:active{transform:scale(.95)}
+.pc.e{background:#fbefd9;border-color:#d9a441}
+.pc.t{background:#e2f3e7;border-color:var(--listo)}
+.nota-piso{padding:6px 14px;font-size:12px;color:var(--suave);border-top:1px solid var(--linea)}
 @media (max-width:640px){.volver{margin:8px 8px 0}.ver{margin:8px 8px 16px}}
 </style>
 </head>
@@ -108,11 +137,12 @@ td select{min-width:64px}
     </div>
   </div>
 </div>
+<div class="pan" id="panelSec" hidden></div>
 <div class="ver" id="verTxt"></div>
 
 <script>
 // ===== Versión =====
-const VER = '0.5.2';
+const VER = '0.6.1';
 
 // ===== Secciones =====
 const SECC = {
@@ -237,6 +267,11 @@ const VISTAS = [
       o.append(l);
     });
     b.append(o);
+    const g = leer();
+    if(g && g.partidas){
+      const v = el('button','btn','Ver el panel ya creado'); v.style.marginTop = '14px';
+      v.onclick = () => abrirPanel(g); b.append(v);
+    }
   },
   // 2 obra
   b => {
@@ -374,6 +409,7 @@ function valida(){
 function pinta(){
   const l = $('#lado'); l.querySelectorAll('.paso').forEach(x => x.remove());
   PASOS.forEach((p, i) => l.append(el('div','paso' + (i === paso ? ' act' : i < paso ? ' ok' : ''), (i + 1) + '. ' + p)));
+  const ej = l.querySelector('.ej'); if(ej) l.append(ej); // el botón de prueba va al final
   // cel: mover al paso actual
   const ac = l.querySelector('.act'); if(ac && l.scrollWidth > l.clientWidth) l.scrollTo({left:ac.offsetLeft - 12, behavior:'smooth'});
   const c = $('#cont'); c.style.opacity = 0;
@@ -400,14 +436,110 @@ $('#sig').onclick = () => {
     {piso:d.piso, tipo:'otra', txt:d.txt}) : [];
   out.version = VER; out.guardado = new Date().toISOString();
   try{ localStorage.setItem('moldeConfigV3', JSON.stringify(out)); }catch(e){}
-  const c = $('#cont'); c.textContent = '';
-  c.append(titulo('Listo', 'Configuración guardada. Abre el panel de ' + C.nombre + ' en este mismo navegador.'));
-  const a = el('a','btn pri','Abrir panel'); a.href = 'canteria_prueba.html'; a.style.textDecoration = 'none';
-  c.append(a);
-  $('#sig').disabled = true;
+  abrirPanel(out);
 };
+// ===== Relleno de prueba =====
+function rellenar(){
+  C.seccion = 'canteria'; C.nombre = 'Cantería'; C.partidas = partidasTipo('canteria');
+  const q = {vp:[5, 3, 2], vv:[8, 0, 0], ar:[12, 6, 6], mc:[24, 18, 0], es:[45, 30, 12]};
+  C.partidas.forEach(p => { const v = q[p.id] || [1, 1, 1]; p.depto = p.enD ? v[0] : 0; p.pasillo = p.enP ? v[1] : 0; p.terraza = p.enT ? v[2] : 0; });
+  Object.assign(C.obra, {nombre:'Obra Bellavista, La Florida', tipo:'edificio', desde:1, hasta:20, saltados:[], subt:2, deptos:6, pasillo:true, techo:true, terraza:true, hayDif:true,
+    dif:[
+      {piso:3, tipo:'terraza', deps:[1, 2]},
+      {piso:10, tipo:'medida', partida:'es', n:52, toc:true},
+      {piso:15, tipo:'otra', txt:'sin vano de bodega'},
+      {piso:20, tipo:'deptos', n:4, toc:true}
+    ].map(d => Object.assign({n:6, deps:[], partida:'', txt:'', toc:false}, d))});
+  C.equipo = {asistencia:true, trabajadores:true, finiquitos:true, anexos:true};
+  pinta();
+}
+// ===== Panel de la sección (se arma con lo configurado) =====
+const LS_AV = 'moldeAvanceV3', EST_TXT = {p:'Pendiente', e:'En proceso', t:'Terminado'}, SIG = {p:'e', e:'t', t:'p'};
+function leerAv(){ try{ return JSON.parse(localStorage.getItem(LS_AV)) || {}; }catch(e){ return {}; } }
+function guardaAv(a){ try{ localStorage.setItem(LS_AV, JSON.stringify(a)); }catch(e){} }
+function armaGrupos(cfg){
+  const o = cfg.obra, ps = cfg.partidas, dif = o.dif || [];
+  const cant = (piso, p) => { const d = dif.find(x => x.tipo === 'medida' && x.piso === piso && x.partida === p.id); return d ? d.n : p.depto; };
+  const chipsD = (piso, conTer) => {
+    const l = ps.filter(p => cant(piso, p) > 0).map(p => ({id:p.id, nombre:p.nombre, u:p.unidad, q:cant(piso, p)}));
+    if(conTer) ps.filter(p => p.terraza > 0).forEach(p => l.push({id:p.id + '.t', nombre:p.nombre + ' · terraza', u:p.unidad, q:p.terraza}));
+    return l;
+  };
+  const chipsP = () => ps.filter(p => p.pasillo > 0).map(p => ({id:p.id + '.c', nombre:p.nombre, u:p.unidad, q:p.pasillo}));
+  const g = [];
+  if(o.tipo !== 'edificio'){
+    const items = []; for(let c = 1; c <= o.deptos; c++) items.push({id:'c' + c, nombre:'Casa ' + c, chips:chipsD(null, false)});
+    g.push({id:'casas', nombre:'Casas', items}); return g;
+  }
+  for(let i = o.subt; i >= 1; i--) g.push({id:'S' + i, nombre:'Subterráneo -' + i, items:[{id:'com', nombre:'Áreas comunes', chips:chipsP()}]});
+  const hasta = o.hasta, desde = o.desde, saltados = o.saltados || [];
+  for(let n = desde; n <= hasta; n++){
+    if(saltados.includes(n)) continue;
+    const dd1 = dif.find(x => x.piso === n && x.tipo === 'deptos');
+    const nd = dd1 ? dd1.n : o.deptos;
+    const sinTer = []; dif.filter(x => x.piso === n && x.tipo === 'terraza').forEach(x => x.deps.forEach(k => sinTer.push(k)));
+    const items = [];
+    for(let k = 1; k <= nd; k++) items.push({id:'d' + k, nombre:'Depto ' + (n * 100 + k), chips:chipsD(n, o.terraza && !sinTer.includes(k))});
+    if(o.pasillo) items.push({id:'com', nombre:'Pasillo y áreas comunes', chips:chipsP()});
+    const notas = dif.filter(x => x.piso === n && x.tipo === 'otra').map(x => x.txt).join(' · ');
+    g.push({id:'P' + n, nombre:'Piso ' + n, items, nota:notas});
+  }
+  if(o.techo) g.push({id:'AZ', nombre:'Azotea', items:[{id:'com', nombre:'Azotea', chips:chipsP()}]});
+  return g;
+}
+function abrirPanel(cfg){
+  const box = $('#panelSec'), av = leerAv(), grupos = armaGrupos(cfg);
+  $('.inst').hidden = true; box.hidden = false; box.textContent = '';
+  const cab = el('div','pan-cab'), t = el('div','t');
+  t.append(el('h2', null, 'Panel de ' + cfg.nombre), el('p', null, cfg.obra.nombre));
+  const ed = el('button','btn chico','Editar molde'), rs = el('button','btn chico','Reiniciar avance');
+  ed.onclick = () => { box.hidden = true; $('.inst').hidden = false; $('#sig').disabled = false; paso = 0; pinta(); };
+  let sure = 0;
+  rs.onclick = () => { if(!sure){ sure = 1; rs.textContent = '¿Seguro? Toca otra vez'; setTimeout(() => { sure = 0; rs.textContent = 'Reiniciar avance'; }, 3000); return; } guardaAv({}); abrirPanel(cfg); };
+  cab.append(t, ed, rs); box.append(cab);
+  let total = 0, hechas = 0, proc = 0; const met = {};
+  grupos.forEach(gr => gr.items.forEach(it => it.chips.forEach(c => {
+    const k = gr.id + '|' + it.id + '|' + c.id, e = (av[k] && av[k].e) || 'p', nom = c.nombre.replace(' · terraza','');
+    total++; if(e === 't') hechas++; if(e === 'e') proc++;
+    const m = met[nom] = met[nom] || {u:c.u, tot:0, ok:0}; m.tot += c.q; if(e === 't') m.ok += c.q;
+  })));
+  const kp = el('div','kpis');
+  [[total ? Math.round(hechas / total * 100) + '%' : '0%', 'avance de la sección'], [hechas, 'partidas terminadas'], [proc, 'en proceso'], [total - hechas - proc, 'pendientes']].forEach(([a, b]) => { const k = el('div','kpi'); k.append(el('b', null, a), el('span', null, b)); kp.append(k); });
+  box.append(kp);
+  const mt = el('div','met'); mt.append(el('b', null, 'Metraje: '));
+  Object.keys(met).forEach(n => mt.append(el('span','pil', n + ': ' + Math.round(met[n].ok * 100) / 100 + ' de ' + Math.round(met[n].tot * 100) / 100 + ' ' + met[n].u)));
+  box.append(mt);
+  const abiertos = window.__abiertos || (window.__abiertos = new Set());
+  grupos.forEach(gr => {
+    const d = el('details','piso'); d.open = abiertos.has(gr.id);
+    d.addEventListener('toggle', () => { d.open ? abiertos.add(gr.id) : abiertos.delete(gr.id); });
+    let t2 = 0, h2 = 0; gr.items.forEach(it => it.chips.forEach(c => { t2++; if(((av[gr.id + '|' + it.id + '|' + c.id] || {}).e) === 't') h2++; }));
+    const sm = el('summary', null, gr.nombre); sm.append(el('span', null, h2 + ' de ' + t2 + ' terminadas')); d.append(sm);
+    if(gr.nota) d.append(el('div','nota-piso', gr.nota));
+    gr.items.forEach(it => {
+      const row = el('div','dep'); row.append(el('b', null, it.nombre));
+      const ch = el('div','pchips');
+      it.chips.forEach(c => {
+        const k = gr.id + '|' + it.id + '|' + c.id, e = (av[k] && av[k].e) || 'p';
+        const b = el('button','pc ' + e, c.nombre + ' · ' + c.q + ' ' + c.u); b.type = 'button'; b.title = EST_TXT[e];
+        b.onclick = () => { const a = leerAv(), cur = (a[k] && a[k].e) || 'p'; a[k] = {e:SIG[cur], ts:Date.now()}; guardaAv(a); abrirPanel(cfg); };
+        ch.append(b);
+      });
+      if(!it.chips.length) ch.append(el('span','nota','Sin partidas aquí'));
+      row.append(ch); d.append(row);
+    });
+    box.append(d);
+  });
+  const eq = el('div','met'); eq.append(el('b', null, 'Herramientas del encargado: '));
+  const e = cfg.equipo || {}; const nombres = {asistencia:'Asistencia', trabajadores:'Trabajadores', finiquitos:'Finiquitos', anexos:'Anexos'};
+  Object.keys(nombres).filter(k => e[k]).forEach(k => eq.append(el('span','pil', nombres[k])));
+  eq.append(el('p','nota','Por ahora el molde arma el tablero de avance; las herramientas marcadas se conectan en el siguiente paso.'));
+  box.append(eq);
+  window.scrollTo({top:0});
+}
 // borrar aviso al escribir
 $('#cont').addEventListener('input', () => { $('#err').textContent = ''; });
+{ const ej = el('button','btn chico ej','Rellenar para prueba'); ej.type = 'button'; ej.onclick = rellenar; $('#lado').append(ej); }
 pinta();
 // ===== Volver al menú =====
 $('#irMenuA').addEventListener('click', e => {
