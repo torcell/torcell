@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||!Array.isArray(h.secciones)||h.secciones.indexOf('admin')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <link rel="stylesheet" href="carga.css?v=1">
-<!-- molde.html v0.6.1 -->
+<!-- molde.html v0.6.2 -->
 <style>
 /* ===== Colores ===== */
 :root{--fondo:#eef1f5;--panel:#fff;--tinta:#1b2433;--suave:#5d6b80;--linea:#d5dbe4;--azul:#1f3b63;--azul2:#2d5590;--listo:#2f9e5b}
@@ -93,6 +93,18 @@ td select{min-width:64px}
 .lado .ej{margin:14px 18px 0;min-width:0;width:calc(100% - 36px);background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
 .lado .ej:hover{background:rgba(255,255,255,.15)}
 @media (max-width:640px){.lado .ej{flex:0 0 auto;width:auto;margin:0 12px}}
+/* ===== Vista torre ===== */
+.torre{background:var(--panel);border:1px solid var(--linea);padding:12px 14px;margin-bottom:12px;overflow-x:auto}
+.tr{display:flex;align-items:center;gap:10px;margin-bottom:4px;min-width:max-content}
+.tn{flex:0 0 120px;font-size:13px;font-weight:600;text-align:right}
+.tcaj{display:flex;gap:4px}
+.tb{width:44px;height:34px;border:1px solid var(--linea);background:#f3f5f8;color:var(--tinta);font-size:12px;cursor:pointer;padding:0;transition:transform .08s}
+.tb:active{transform:scale(.94)}
+.tb.e{background:#fbefd9;border-color:#d9a441}
+.tb.t{background:#e2f3e7;border-color:var(--listo)}
+.tb.com{width:auto;padding:0 8px;border-style:dashed}
+.tleyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--suave);margin-bottom:10px}
+.tleyenda i{display:inline-block;width:12px;height:12px;border:1px solid var(--linea);vertical-align:-2px;margin-right:4px}
 /* ===== Panel creado ===== */
 .pan{max-width:980px;margin:16px auto 8px;padding:0 4px}
 .pan-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--azul);color:#fff;padding:14px 18px}
@@ -142,7 +154,7 @@ td select{min-width:64px}
 
 <script>
 // ===== Versión =====
-const VER = '0.6.1';
+const VER = '0.6.2';
 
 // ===== Secciones =====
 const SECC = {
@@ -488,7 +500,7 @@ function armaGrupos(cfg){
   return g;
 }
 function abrirPanel(cfg){
-  const box = $('#panelSec'), av = leerAv(), grupos = armaGrupos(cfg);
+  const box = $('#panelSec'), av = leerAv(), grupos = armaGrupos(cfg), torre = window.__vista === 'torre';
   $('.inst').hidden = true; box.hidden = false; box.textContent = '';
   const cab = el('div','pan-cab'), t = el('div','t');
   t.append(el('h2', null, 'Panel de ' + cfg.nombre), el('p', null, cfg.obra.nombre));
@@ -496,7 +508,9 @@ function abrirPanel(cfg){
   ed.onclick = () => { box.hidden = true; $('.inst').hidden = false; $('#sig').disabled = false; paso = 0; pinta(); };
   let sure = 0;
   rs.onclick = () => { if(!sure){ sure = 1; rs.textContent = '¿Seguro? Toca otra vez'; setTimeout(() => { sure = 0; rs.textContent = 'Reiniciar avance'; }, 3000); return; } guardaAv({}); abrirPanel(cfg); };
-  cab.append(t, ed, rs); box.append(cab);
+  const vb = el('button','btn chico', torre ? 'Ver como lista' : 'Ver como torre');
+  vb.onclick = () => { window.__vista = torre ? 'lista' : 'torre'; abrirPanel(cfg); };
+  cab.append(t, vb, ed, rs); box.append(cab);
   let total = 0, hechas = 0, proc = 0; const met = {};
   grupos.forEach(gr => gr.items.forEach(it => it.chips.forEach(c => {
     const k = gr.id + '|' + it.id + '|' + c.id, e = (av[k] && av[k].e) || 'p', nom = c.nombre.replace(' · terraza','');
@@ -509,8 +523,28 @@ function abrirPanel(cfg){
   const mt = el('div','met'); mt.append(el('b', null, 'Metraje: '));
   Object.keys(met).forEach(n => mt.append(el('span','pil', n + ': ' + Math.round(met[n].ok * 100) / 100 + ' de ' + Math.round(met[n].tot * 100) / 100 + ' ' + met[n].u)));
   box.append(mt);
+  if(torre){
+    const tw = el('div','torre'), lg = el('div','tleyenda');
+    [['','Pendiente'], ['e','En proceso'], ['t','Terminado']].forEach(([c, n]) => { const x = el('span'); const i = el('i'); i.className = 'tb ' + c; x.append(i, n); lg.append(x); });
+    lg.append(el('span', null, 'Toca un cuadro para ver ese piso en detalle'));
+    tw.append(lg);
+    grupos.slice().reverse().forEach(gr => {
+      const row = el('div','tr'); row.append(el('div','tn', gr.nombre));
+      const cj = el('div','tcaj');
+      gr.items.forEach(it => {
+        let h = 0; it.chips.forEach(c => { const e = (av[gr.id + '|' + it.id + '|' + c.id] || {}).e; if(e === 't') h++; });
+        const n = it.chips.length, est = !n ? '' : h === n ? 't' : h > 0 || it.chips.some(c => (av[gr.id + '|' + it.id + '|' + c.id] || {}).e === 'e') ? 'e' : '';
+        const esD = /^d\d+$/.test(it.id), txt = esD ? String(it.nombre).slice(-2) : it.id === 'com' ? 'Com.' : it.nombre.replace('Casa ', '');
+        const b = el('button','tb' + (est ? ' ' + est : '') + (esD ? '' : ' com'), txt); b.type = 'button'; b.title = it.nombre + ' · ' + h + ' de ' + n + ' terminadas';
+        b.onclick = () => { window.__vista = 'lista'; (window.__abiertos || (window.__abiertos = new Set())).add(gr.id); abrirPanel(cfg); const d = [...document.querySelectorAll('details.piso')].find(x => x.querySelector('summary').childNodes[0].textContent === gr.nombre); if(d) d.scrollIntoView({block:'start'}); };
+        cj.append(b);
+      });
+      row.append(cj); tw.append(row);
+    });
+    box.append(tw);
+  }
   const abiertos = window.__abiertos || (window.__abiertos = new Set());
-  grupos.forEach(gr => {
+  (torre ? [] : grupos).forEach(gr => {
     const d = el('details','piso'); d.open = abiertos.has(gr.id);
     d.addEventListener('toggle', () => { d.open ? abiertos.add(gr.id) : abiertos.delete(gr.id); });
     let t2 = 0, h2 = 0; gr.items.forEach(it => it.chips.forEach(c => { t2++; if(((av[gr.id + '|' + it.id + '|' + c.id] || {}).e) === 't') h2++; }));
