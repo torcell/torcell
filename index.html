@@ -568,6 +568,7 @@
         <p class="lg-quien" id="lgQuien"></p>
         <p class="lg-msg" id="lgMsgElegir" aria-live="polite"></p>
         <div class="lg-dest">
+          <button type="button" data-dest="molde"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 9v12"/></svg></span><span>Molde de secciones<small>Arma una sección nueva paso a paso</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="panel"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Panel de Cerámica y Frague<small>Avance y pagos de cerámica y frague</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="calidad"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M7.5 12.5l3 3 6-7"/></svg></span><span>Control de calidad<small>Revisión de cerámica y frague</small><small class="enc">Encargado: Silvia Gonzalez</small></span></button>
           <button type="button" data-dest="avance"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg></span><span>Dashboard de avance<small>Resumen del avance de la obra</small><small class="enc">Encargado: A. Sandoval</small></span></button>
@@ -585,13 +586,15 @@
 <script>
 const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
-const PAGINAS = {panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', bodega: 'bodega.html', admin: 'admin.html'};
-const SECC_BASE = {1: ['panel', 'calidad', 'avance', 'terreno', 'oficina', 'bodega', 'admin'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance'], 7: ['bodega']};
+const PAGINAS = {molde: 'molde.html', panel: 'panel.html', calidad: 'calidad.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', bodega: 'bodega.html', admin: 'admin.html'};
+const SECC_BASE = {1: ['molde', 'panel', 'calidad', 'avance', 'terreno', 'oficina', 'bodega', 'admin'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance'], 7: ['bodega']};
 const DESTINOS = SECC_BASE;
-const NOM_SECC = {admin: 'Panel de Admin', panel: 'Panel de Cerámica y Frague', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica', bodega: 'Bodega'};
-const TXT_DEST = {admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…', bodega: 'Entrando a Bodega…'};
+const NOM_SECC = {molde: 'Molde de secciones', admin: 'Panel de Admin', panel: 'Panel de Cerámica y Frague', calidad: 'Control de calidad', avance: 'Dashboard de avance', terreno: 'Jefe de Terreno', oficina: 'Oficina Técnica', bodega: 'Bodega'};
+const TXT_DEST = {molde: 'Abriendo el Molde de secciones…', admin: 'Abriendo el Panel de Admin…', panel: 'Entrando al Panel de Cerámica y Frague…', calidad: 'Entrando a Calidad…', avance: 'Abriendo el dashboard…', oficina: 'Entrando a Oficina Técnica…', terreno: 'Entrando a Jefe de Terreno…', bodega: 'Entrando a Bodega…'};
 const CARGOS_CALIDAD = {1: 'Admin', 4: 'Jefe de Terreno', 5: 'Calidad'};
 const CLAVES_OT = ['oficinaToken', 'oficinaNombre', 'terrenoToken', 'terrenoNombre', 'bodegaToken', 'bodegaNombre'];
+// molde: lo ve quien entra a Admin, no necesita permiso propio
+const accede = (l, d) => l.indexOf(d === 'molde' ? 'admin' : d) !== -1;
 const lg = id => document.getElementById(id);
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k, v){ try{ if(v === undefined) return localStorage.getItem(k); if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} return null; }
@@ -684,7 +687,7 @@ function precargar(dest){
 }
 let saliendo = false;
 // ===== carga al entrar a una sección: se abre acá mismo (sin esperar a que llegue la otra página) y la sección sigue desde ahí =====
-const TIT_CARGA = {panel: 'Cargando Panel de Cerámica y Frague', calidad: 'Cargando panel de Calidad', bodega: 'Cargando Bodega', avance: 'Cargando dashboard de avance', terreno: 'Cargando panel de Jefe de Terreno', oficina: 'Cargando panel de Oficina Técnica', admin: 'Cargando Panel de Admin'};
+const TIT_CARGA = {molde: 'Cargando Molde de secciones', panel: 'Cargando Panel de Cerámica y Frague', calidad: 'Cargando panel de Calidad', bodega: 'Cargando Bodega', avance: 'Cargando dashboard de avance', terreno: 'Cargando panel de Jefe de Terreno', oficina: 'Cargando panel de Oficina Técnica', admin: 'Cargando Panel de Admin'};
 const HTML_CARGA = '<div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">%TIT%</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div>';
 async function irA(dest){
   if(saliendo) return; saliendo = true;
@@ -796,8 +799,8 @@ function mensajeElegir(t, mal){ const m = lg('lgMsgElegir'); m.textContent = t |
 function mostrarOpciones(lista){
   const pref = ls('destinoPreferido');
   document.querySelectorAll('.lg-dest button').forEach(b => {
-    const bloq = lista.indexOf(b.dataset.dest) === -1;
-    if(b.dataset.dest === 'admin'){ b.hidden = bloq; if(bloq) return; }
+    const bloq = !accede(lista, b.dataset.dest);
+    if(b.dataset.dest === 'admin' || b.dataset.dest === 'molde'){ b.hidden = bloq; if(bloq) return; }
     b.classList.toggle('lock', bloq); b.setAttribute('aria-disabled', bloq ? 'true' : 'false');
     b.classList.toggle('pref', !bloq && b.dataset.dest === pref);
   });
@@ -810,7 +813,7 @@ function elegir(res, recordar, aviso){
   datosElegir = {res, recordar};
   if(res.encargados) aplicarEncargados(res.encargados);
   pantalla('lgElegir');
-  if(PAGINAS[pref] && (res.secciones || []).indexOf(pref) !== -1) precargar(pref);
+  if(PAGINAS[pref] && accede(res.secciones || [], pref)) precargar(pref);
 }
 async function refrescarAcceso(){
   if(!datosElegir || !datosElegir.res.token) return;
@@ -858,7 +861,7 @@ async function intentarPin(){
   document.querySelectorAll('.lg-dest button').forEach(b => b.addEventListener('click', () => {
     const dest = b.dataset.dest;
     if(!datosElegir) return;
-    if((datosElegir.res.secciones || []).indexOf(dest) === -1){ mensajeElegir('No tienes acceso a «' + NOM_SECC[dest] + '». Si lo necesitas, pídele autorización al administrador.', true); return; }
+    if(!accede(datosElegir.res.secciones || [], dest)){ mensajeElegir('No tienes acceso a «' + NOM_SECC[dest] + '». Si lo necesitas, pídele autorización al administrador.', true); return; }
     guardar(datosElegir.res, datosElegir.recordar, dest);
     b.classList.add('marcado'); b.setAttribute('aria-pressed','true');
     document.querySelectorAll('.lg-dest button').forEach(x => { if(x !== b) x.style.pointerEvents = 'none'; });
@@ -913,7 +916,7 @@ function iniciarGoogle(){
       const resHub = {token: hub.token, nombre: hub.nombre, rol: hub.rol, secciones: lista};
       const pref = ls('destinoPreferido');
       if(!params.get('menu')){
-        const directo = lista.length === 1 ? lista[0] : (pref && lista.indexOf(pref) !== -1 ? pref : '');
+        const directo = lista.length === 1 ? lista[0] : (pref && accede(lista, pref) ? pref : '');
         if(directo){ guardar(resHub, hub.recordar, directo); irA(directo); return; }
       }
       history.replaceState(null, '', location.pathname);
@@ -950,4 +953,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.6 · 27-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.7 · 30-10-2026 ==== -->

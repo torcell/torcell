@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Molde de secciones · Obra Bellavista</title>
+<meta name="robots" content="noindex">
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||!Array.isArray(h.secciones)||h.secciones.indexOf('admin')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
+<link rel="stylesheet" href="carga.css?v=1">
+<!-- molde.html v0.5.2 -->
+<style>
+/* ===== Colores ===== */
+:root{--fondo:#eef1f5;--panel:#fff;--tinta:#1b2433;--suave:#5d6b80;--linea:#d5dbe4;--azul:#1f3b63;--azul2:#2d5590;--listo:#2f9e5b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);font:15px/1.4 system-ui,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;border-radius:0}
+
+/* ===== Marco del instalador ===== */
+.inst{max-width:720px;margin:24px auto;background:var(--panel);box-shadow:0 2px 14px rgba(20,35,60,.1);display:grid;grid-template-columns:200px 1fr;min-height:480px}
+.lado{background:var(--azul);color:#fff;padding:18px 0}
+.lado h1{font-size:16px;margin:0 18px 14px;font-weight:600}
+.paso{padding:8px 18px;font-size:14px;opacity:.6;border-left:3px solid transparent}
+.paso.act{opacity:1;border-left-color:#fff;background:rgba(255,255,255,.08)}
+.paso.ok{opacity:.9}
+.paso.ok::after{content:" ✓"}
+.der{display:flex;flex-direction:column;min-width:0}
+.cont{padding:20px 22px;flex:1;transition:opacity .15s}
+.cont h2{margin:0 0 4px;font-size:18px}
+.cont p.ayuda{margin:0 0 16px;color:var(--suave);font-size:13px}
+.pie{display:flex;justify-content:space-between;gap:6px;padding:12px 22px;border-top:1px solid var(--linea)}
+.btn{height:36px;min-width:110px;padding:0 14px;border:1px solid var(--azul);background:#fff;color:var(--azul);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,transform .08s}
+.btn:hover{background:#e8eef7}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--azul);color:#fff}
+.btn.pri:hover{background:var(--azul2)}
+.btn[disabled]{opacity:.4;cursor:default}
+.btn.chico{height:34px;min-width:0;padding:0 12px;font-size:13px}
+.err{flex:1;align-self:center;text-align:center;color:#c0392b;font-size:13px}
+
+/* ===== Campos ===== */
+.campo{display:grid;gap:4px;margin-bottom:12px;font-size:13px;color:var(--suave)}
+.campo input,.campo select{min-width:0;width:100%;height:34px;border:1px solid var(--linea);padding:0 8px;color:var(--tinta);background:#fff}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opc{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.opc label{border:1px solid var(--linea);padding:12px;cursor:pointer;display:flex;gap:8px;align-items:center;transition:border-color .15s}
+.opc label:has(input:checked){border-color:var(--azul);background:#eef3fa}
+.opc label.no{opacity:.45;cursor:default}
+.chk{display:flex;gap:8px;align-items:center;padding:6px 0;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--suave);font-size:12px;padding:4px}
+td{padding:4px;border-top:1px solid var(--linea)}
+td input,td select{height:30px;width:100%;border:1px solid var(--linea);padding:0 6px}
+td input[type=checkbox]{width:auto;height:auto}
+td select{min-width:64px}
+.nota{font-size:12px;color:var(--suave)}
+.pil{display:inline-block;border-radius:999px;background:#eef3fa;padding:2px 10px;font-size:12px;margin:2px}
+.res div{padding:6px 0;border-bottom:1px solid var(--linea)}
+/* ===== Diferencias por piso ===== */
+.difs.abre{animation:abreV .18s ease;transform-origin:top}
+@keyframes abreV{from{opacity:0;transform:scaleY(.94)}to{opacity:1;transform:none}}
+.dif{border:1px solid var(--linea);background:#f7f9fc;padding:10px;margin-bottom:8px;font-size:13px}
+.dif .top{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:6px;align-items:center}
+.dif .top > *{min-width:0}
+.dif select,.dif input{height:34px;border:1px solid var(--linea);padding:0 8px;background:#fff;width:100%;color:var(--tinta)}
+.dif .val{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--suave)}
+.dif .val input[type=number]{width:90px}
+.dif .val select{flex:1;min-width:140px;width:auto}
+.dif .val .rot{flex-basis:100%}
+.chip{width:40px;height:34px;border:1px solid var(--linea);background:#fff;color:var(--tinta);cursor:pointer;transition:background .15s,transform .08s}
+.chip:active{transform:scale(.94)}
+.chip.on{background:var(--azul);border-color:var(--azul);color:#fff}
+.temb{animation:temb .25s}
+@keyframes temb{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+/* ===== Celular ===== */
+@media (max-width:640px){
+  .inst{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;margin:0;min-height:100vh}
+  .lado{display:flex;overflow-x:auto;padding:10px 0;align-items:center}
+  .lado h1{display:none}
+  .paso{flex:0 0 auto;border-left:0;border-bottom:3px solid transparent;padding:6px 12px}
+  .paso.act{border-bottom-color:#fff}
+  .dif .top{grid-template-columns:minmax(0,1fr) auto}
+  .dif .top .tipo{grid-column:1/-1;order:3}
+}
+#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
+.volver{max-width:720px;margin:16px auto -8px}
+.volver .btn{text-decoration:none}
+.btn-marcado{background:#2f6f8f !important;color:#fff !important;border-color:#2f6f8f !important;pointer-events:none}
+.ver{max-width:720px;margin:8px auto 24px;text-align:right;font-size:12px;color:var(--suave)}
+@media (max-width:640px){.volver{margin:8px 8px 0}.ver{margin:8px 8px 16px}}
+</style>
+</head>
+<body>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Molde de secciones</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+<script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
+<script src="carga.js?v=4"></script>
+<script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
+<div class="volver"><a class="btn chico" id="irMenuA" href="index.html?menu=1">← Cambiar de sección</a></div>
+<div class="inst">
+  <div class="lado" id="lado"><h1>Molde de secciones</h1></div>
+  <div class="der">
+    <div class="cont" id="cont"></div>
+    <div class="pie">
+      <button class="btn" id="atras">Atrás</button>
+      <span class="err" id="err"></span>
+      <button class="btn pri" id="sig">Siguiente</button>
+    </div>
+  </div>
+</div>
+<div class="ver" id="verTxt"></div>
+
+<script>
+// ===== Versión =====
+const VER = '0.5.2';
+
+// ===== Secciones =====
+const SECC = {
+  canteria:{nombre:'Cantería', partidas:[
+    // en: d=dpto p=pasillo t=terraza
+    {id:'vp', nombre:'Vanos puerta', unidad:'ml', en:'dpt'},
+    {id:'vv', nombre:'Vanos ventana', unidad:'ml', en:'d'},
+    {id:'ar', nombre:'Aristas y esquinas', unidad:'ml', en:'dpt'},
+    {id:'mc', nombre:'Encuentro muro-cielo', unidad:'ml', en:'dp'},
+    {id:'es', nombre:'Estuco', unidad:'m²', en:'dpt'}
+  ]},
+  ceramica:{nombre:'Cerámica y Frague', pronto:true},
+  pintura:{nombre:'Pintura', pronto:true},
+  puertas:{nombre:'Puertas', pronto:true}
+};
+const UNI = ['ml','m²','un','m³','gl'];
+const PASOS = ['Sección','Obra','Instalaciones','Unidades','Equipo','Resumen'];
+
+// ===== Estado =====
+// parten en 0, se llenan en paso 4
+function partidasTipo(k){
+  return SECC[k].partidas.map(p => ({id:p.id, nombre:p.nombre, unidad:p.unidad, depto:0, pasillo:0, terraza:0,
+    enD:p.en.includes('d'), enP:p.en.includes('p'), enT:p.en.includes('t'), activa:true}));
+}
+function leer(){ try{ return JSON.parse(localStorage.getItem('moldeConfigV3')); }catch(e){ return null; } }
+let C = leer() || {
+  seccion:'canteria', nombre:'Cantería',
+  obra:{nombre:'Obra Bellavista, La Florida', tipo:'edificio', desde:0, hasta:0, saltados:[], subt:0, deptos:0, pasillo:false, terraza:false, techo:false, hayDif:false, dif:[]},
+  partidas:partidasTipo('canteria'),
+  equipo:{asistencia:true, trabajadores:true, finiquitos:true, anexos:true}
+};
+// completar lo guardado
+C.obra.dif = (C.obra.dif || []).map(d => Object.assign({n:C.obra.deptos, deps:[], partida:'', txt:'', toc:true}, d));
+C.partidas.forEach(p => { if(p.enD == null){ p.enD = p.depto > 0; p.enP = p.pasillo > 0; p.enT = p.terraza > 0; } if(p.activa == null) p.activa = true; });
+if(C.obra.hayDif == null) C.obra.hayDif = C.obra.dif.length > 0;
+let paso = 0;
+
+// ===== Utiles =====
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if(c) e.className = c; if(x != null) e.textContent = x; return e; };
+const limpia = (s, m) => String(s == null ? '' : s).replace(/[<>"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0, m || 60);
+const ent = (v, min, max) => { const n = parseInt(v, 10); return isFinite(n) ? Math.max(min, Math.min(max, n)) : min; };
+const num = v => { const n = parseFloat(String(v).replace(',','.')); return isFinite(n) && n >= 0 ? Math.round(n*100)/100 : 0; };
+function campo(txt, inp){ const l = el('label','campo', txt); l.append(inp); return l; }
+function input(tipo, val, fn, extra){ const i = el('input'); i.type = tipo; i.value = val; Object.assign(i, extra || {}); i.oninput = () => fn(i.value); if(tipo === 'number') i.onfocus = () => i.select(); return i; }
+function check(txt, val, fn){ const l = el('label','chk'); const i = el('input'); i.type = 'checkbox'; i.checked = val; i.onchange = () => fn(i.checked); l.append(i, txt); return l; }
+// ===== Diferencias por piso =====
+const TIPOS = [['deptos','Cantidad de dptos'],['terraza','Terrazas'],['medida','Medida distinta'],['otra','Otra cosa']];
+function pisosObra(){ const o = C.obra, l = []; for(let p = o.desde; p <= o.hasta; p++) if(!(o.saltados || []).includes(p)) l.push(p); return l; }
+function nuevaDif(){ return {piso:pisosObra()[0] || 1, tipo:'deptos', n:C.obra.deptos, deps:[], partida:'', txt:'', toc:false}; }
+function nDepsPiso(p){ const d = C.obra.dif.find(x => x.piso === p && x.tipo === 'deptos'); return d ? d.n : C.obra.deptos; }
+const dd = d => String(d).padStart(2,'0');
+function pintaDif(anim){
+  const box = $('#difs'), o = C.obra; if(!box) return;
+  box.textContent = ''; box.className = 'difs' + (anim ? ' abre' : '');
+  if(!o.hayDif) return;
+  if(!pisosObra().length){ box.append(el('p','nota','Primero pon desde qué piso y hasta qué piso.')); return; }
+  o.dif.forEach((d, i) => {
+    if(d.tipo === 'terraza' && !o.terraza) d.tipo = 'deptos';
+    const f = el('div','dif'), top = el('div','top');
+    const sp = el('select');
+    pisosObra().forEach(p => { const op = el('option', null, 'Piso ' + p); op.value = p; sp.append(op); });
+    sp.value = d.piso; sp.onchange = () => { d.piso = +sp.value; pintaDif(); };
+    const st = el('select','tipo');
+    TIPOS.filter(t => t[0] !== 'terraza' || o.terraza).forEach(([k, x]) => { const op = el('option', null, x); op.value = k; st.append(op); });
+    st.value = d.tipo; st.onchange = () => { d.tipo = st.value; d.toc = false; pintaDif(); };
+    const q = el('button','btn chico','Quitar'); q.onclick = () => { o.dif.splice(i, 1); pintaDif(); };
+    top.append(sp, st, q); f.append(top);
+    const v = el('div','val');
+    if(d.tipo === 'deptos'){
+      if(!d.toc) d.n = o.deptos;
+      v.append('Dptos en este piso', input('number', d.n, x => { d.n = ent(x, 0, 20); d.toc = true; }, {min:0, max:20}), 'normal: ' + o.deptos);
+    } else if(d.tipo === 'terraza'){
+      const n = nDepsPiso(d.piso); d.deps = d.deps.filter(x => x <= n);
+      v.append(el('span','rot','Toca los dptos que NO tienen terraza'));
+      for(let k = 1; k <= n; k++){
+        const c = el('button','chip' + (d.deps.includes(k) ? ' on' : ''), dd(k));
+        c.onclick = () => { d.deps = d.deps.includes(k) ? d.deps.filter(x => x !== k) : d.deps.concat(k).sort((a, b) => a - b); c.classList.toggle('on'); };
+        v.append(c);
+      }
+    } else if(d.tipo === 'medida'){
+      const ps = C.partidas.filter(p => p.activa !== false);
+      if(!ps.some(p => p.id === d.partida)) d.partida = ps[0] ? ps[0].id : '';
+      const s2 = el('select'); ps.forEach(p => { const op = el('option', null, p.nombre); op.value = p.id; s2.append(op); });
+      s2.value = d.partida;
+      const pa = ps.find(x => x.id === d.partida);
+      if(!d.toc) d.n = pa ? pa.depto : 0;
+      s2.onchange = () => { d.partida = s2.value; d.toc = false; pintaDif(); };
+      v.append(s2, input('number', d.n, x => { d.n = num(x); d.toc = true; }, {min:0, step:'0.5'}),
+        el('span', null, pa ? pa.unidad + ' por dpto' + (pa.depto ? ' (normal ' + pa.depto + ')' : '') : ''));
+    } else {
+      const t = input('text', d.txt, x => d.txt = limpia(x, 80), {maxLength:80, placeholder:'Qué cambia (ej. sin vano de bodega)'});
+      t.style.flex = '1'; v.append(t);
+    }
+    f.append(v); box.append(f);
+  });
+  const add = el('button','btn chico','Agregar otra diferencia');
+  add.onclick = () => { o.dif.push(nuevaDif()); pintaDif(); };
+  box.append(add);
+}
+function textoDif(d){
+  const o = C.obra;
+  if(d.tipo === 'deptos') return 'Piso ' + d.piso + ': ' + d.n + ' dptos';
+  if(d.tipo === 'terraza') return 'Piso ' + d.piso + ': sin terraza ' + (d.deps.map(dd).join(', ') || '-');
+  if(d.tipo === 'medida'){ const p = C.partidas.find(x => x.id === d.partida); return 'Piso ' + d.piso + ': ' + (p ? p.nombre + ' ' + d.n + ' ' + p.unidad : ''); }
+  return 'Piso ' + d.piso + ': ' + d.txt;
+}
+
+function titulo(t, a){ const f = document.createDocumentFragment(); f.append(el('h2', null, t), el('p','ayuda', a)); return f; }
+
+// ===== Pasos =====
+const VISTAS = [
+  // 1 sección
+  b => {
+    b.append(titulo('¿Qué sección vas a armar?', 'Según la sección cambian las preguntas siguientes.'));
+    const o = el('div','opc');
+    Object.keys(SECC).forEach(k => {
+      const s = SECC[k], l = el('label', s.pronto ? 'no' : '');
+      const r = el('input'); r.type = 'radio'; r.name = 'sec'; r.checked = C.seccion === k; r.disabled = !!s.pronto;
+      r.onchange = () => { C.seccion = k; C.nombre = s.nombre; C.partidas = partidasTipo(k); };
+      l.append(r, s.nombre + (s.pronto ? ' (pronto)' : ''));
+      o.append(l);
+    });
+    b.append(o);
+  },
+  // 2 obra
+  b => {
+    const o = C.obra; o.dif = o.dif || [];
+    b.append(titulo('La obra', 'Pisos, subterráneos y departamentos por piso.'));
+    b.append(campo('Nombre de la obra', input('text', o.nombre, v => o.nombre = limpia(v, 60), {maxLength:60})));
+    const tp = el('select'); ['edificio','casas'].forEach(x => { const op = el('option', null, x === 'edificio' ? 'Edificio' : 'Casas'); op.value = x; tp.append(op); });
+    tp.value = o.tipo; tp.onchange = () => { o.tipo = tp.value; pinta(); };
+    b.append(campo('Tipo', tp));
+    if(o.tipo === 'edificio'){
+      const t = el('div','tres');
+      t.append(campo('Desde piso', input('number', o.desde, v => { o.desde = ent(v, 0, 99); pintaDif(); })));
+      t.append(campo('Hasta piso', input('number', o.hasta, v => { o.hasta = ent(v, 0, 99); pintaDif(); })));
+      t.append(campo('Subterráneos', input('number', o.subt, v => o.subt = ent(v, 0, 9))));
+      b.append(t);
+      b.append(campo('Pisos que no lleva (separados por coma)', input('text', (o.saltados || []).join(', '), v => { o.saltados = v.split(',').map(x => parseInt(x, 10)).filter(isFinite); pintaDif(); }, {placeholder:'ej. 13'})));
+      b.append(campo('Departamentos por piso', input('number', o.deptos, v => { o.deptos = ent(v, 0, 20); pintaDif(); })));
+      b.append(check('Lleva pasillo / áreas comunes por piso', o.pasillo, v => o.pasillo = v));
+      b.append(check('Lleva azotea', !!o.techo, v => o.techo = v));
+      b.append(check('Los dptos llevan terraza', !!o.terraza, v => { o.terraza = v; pintaDif(); }));
+      b.append(check('Hay pisos diferentes (menos dptos, menos terrazas, otra medida...)', !!o.hayDif, v => {
+        o.hayDif = v; if(v && !o.dif.length) o.dif.push(nuevaDif()); pintaDif(v);
+      }));
+      const box = el('div','difs'); box.id = 'difs'; b.append(box); pintaDif();
+    } else {
+      b.append(campo('Cantidad de casas', input('number', o.deptos, v => o.deptos = ent(v, 0, 200))));
+      b.append(el('p','nota','Las casas se muestran como una sola fila por ahora.'));
+    }
+  },
+  // 3 instalaciones
+  b => {
+    b.append(titulo('¿Dónde va cada partida?', 'Marca las partidas de ' + C.nombre + ' y si van en depto, pasillo o ambos.'));
+    const ter = !!C.obra.terraza;
+    const t = el('table'); const h = el('tr'); ['','Partida','Depto','Pasillo'].concat(ter ? ['Terraza'] : []).forEach(x => h.append(el('th', null, x))); t.append(h);
+    C.partidas.forEach(p => {
+      const r = el('tr');
+      const c0 = el('td'); const a = el('input'); a.type = 'checkbox'; a.checked = p.activa !== false; a.onchange = () => p.activa = a.checked; c0.append(a);
+      const c1 = el('td'); c1.append(input('text', p.nombre, v => p.nombre = limpia(v, 40), {maxLength:40}));
+      const c2 = el('td'); const d = el('input'); d.type = 'checkbox'; d.checked = p.enD; d.onchange = () => p.enD = d.checked; c2.append(d);
+      const c3 = el('td'); const q = el('input'); q.type = 'checkbox'; q.checked = p.enP; q.onchange = () => p.enP = q.checked; c3.append(q);
+      r.append(c0, c1, c2, c3);
+      if(ter){ const c4 = el('td'); const z = el('input'); z.type = 'checkbox'; z.checked = p.enT; z.onchange = () => p.enT = z.checked; c4.append(z); r.append(c4); }
+      t.append(r);
+    });
+    b.append(t);
+    const add = el('button','btn','Agregar partida'); add.style.marginTop = '10px';
+    add.onclick = () => { C.partidas.push({id:'p' + Date.now().toString(36), nombre:'Nueva partida', unidad:'ml', depto:0, pasillo:0, terraza:0, enD:true, enP:false, enT:false, activa:true}); pinta(); };
+    b.append(add);
+  },
+  // 4 unidades
+  b => {
+    const ter = !!C.obra.terraza;
+    b.append(titulo('Unidad y cantidad', 'Con qué se mide cada partida y cuánto lleva un depto tipo, un pasillo' + (ter ? ' y una terraza (se suma al depto que la tiene).' : '.')));
+    const t = el('table'); const h = el('tr'); ['Partida','Unidad','Por depto','Por pasillo'].concat(ter ? ['Por terraza'] : []).forEach(x => h.append(el('th', null, x))); t.append(h);
+    C.partidas.filter(p => p.activa !== false).forEach(p => {
+      const r = el('tr'); r.append(el('td', null, p.nombre));
+      const s = el('select'); UNI.forEach(u => s.append(el('option', null, u))); s.value = p.unidad; s.onchange = () => p.unidad = s.value;
+      const c1 = el('td'); c1.append(s);
+      const c2 = el('td'); c2.append(input('number', p.depto, v => p.depto = num(v), {disabled:!p.enD, step:'0.5', min:0}));
+      const c3 = el('td'); c3.append(input('number', p.pasillo, v => p.pasillo = num(v), {disabled:!p.enP || !(C.obra.pasillo || C.obra.techo), step:'0.5', min:0}));
+      r.append(c1, c2, c3);
+      if(ter){ const c4 = el('td'); c4.append(input('number', p.terraza || 0, v => p.terraza = num(v), {disabled:!p.enT, step:'0.5', min:0})); r.append(c4); }
+      t.append(r);
+    });
+    b.append(t);
+    b.append(el('p','nota','Las unidades de cantería y estuco son las habituales; confírmalas con el presupuesto de la obra.'));
+  },
+  // 5 equipo
+  b => {
+    const e = C.equipo;
+    b.append(titulo('Equipo', 'Qué herramientas tendrá el encargado de la sección.'));
+    b.append(check('Asistencia diaria', e.asistencia, v => e.asistencia = v));
+    b.append(check('Trabajadores (alta y baja con fecha y hora)', e.trabajadores, v => e.trabajadores = v));
+    b.append(check('Finiquitos', e.finiquitos, v => e.finiquitos = v));
+    b.append(check('Anexos de contrato', e.anexos, v => e.anexos = v));
+  },
+  // 6 resumen
+  b => {
+    const o = C.obra;
+    b.append(titulo('Resumen', 'Revisa y guarda. El panel de la sección se arma con esto.'));
+    const r = el('div','res');
+    const fila = (a, x) => { const d = el('div'); d.append(el('b', null, a + ': '), x); r.append(d); };
+    fila('Sección', C.nombre);
+    fila('Obra', o.nombre + ' - ' + (o.tipo === 'edificio' ? 'pisos ' + o.desde + ' a ' + o.hasta + ((o.saltados || []).length ? ' (sin ' + o.saltados.join(', ') + ')' : '') + ', ' + o.subt + ' subterráneos, ' + o.deptos + ' deptos por piso' + (o.pasillo ? ', con pasillo' : '') : o.deptos + ' casas'));
+    const d = el('div'); d.append(el('b', null, 'Partidas: '));
+    C.partidas.filter(p => p.activa !== false).forEach(p => d.append(el('span','pil', p.nombre + ' (' + p.unidad + ')')));
+    r.append(d);
+    if(o.tipo === 'edificio'){
+      fila('Azotea', o.techo ? 'sí' : 'no');
+      fila('Terraza en dptos', o.terraza ? 'sí' : 'no');
+      const dv = el('div'); dv.append(el('b', null, 'Pisos diferentes: '));
+      if(o.hayDif && o.dif.length) o.dif.forEach(d => dv.append(el('span','pil', textoDif(d)))); else dv.append('ninguno');
+      r.append(dv);
+    }
+    const e = C.equipo; fila('Equipo', ['asistencia','trabajadores','finiquitos','anexos'].filter(k => e[k]).join(', ') || 'ninguno');
+    b.append(r);
+  }
+];
+
+// ===== Validar =====
+function valida(){
+  const o = C.obra;
+  if(paso === 1){
+    if(!o.nombre) return 'Falta el nombre de la obra';
+    if(o.tipo === 'casas' && o.deptos < 1) return 'Falta la cantidad de casas';
+    if(o.tipo === 'edificio' && o.desde < 1) return 'Falta desde qué piso';
+    if(o.tipo === 'edificio' && o.hasta < o.desde) return 'El piso final es menor que el inicial';
+    if(o.tipo === 'edificio' && o.deptos < 1) return 'Faltan los dptos por piso';
+    if(o.tipo === 'edificio' && o.hayDif){
+      const ps = pisosObra(), vistos = {};
+      for(const d of o.dif){
+        if(!ps.includes(d.piso)) return 'El piso ' + d.piso + ' no está en la obra';
+        if(d.tipo === 'otra' && !d.txt) return 'Piso ' + d.piso + ': escribe qué cambia';
+        if(d.tipo === 'medida' && !d.partida) return 'Piso ' + d.piso + ': elige la partida';
+        if(d.tipo === 'deptos' && d.n < 1) return 'Piso ' + d.piso + ': pon cuántos dptos tiene';
+        const k = d.piso + d.tipo + (d.tipo === 'medida' ? d.partida : d.tipo === 'otra' ? d.txt : '');
+        if(vistos[k]) return 'Piso ' + d.piso + ' tiene la misma diferencia repetida';
+        vistos[k] = 1;
+      }
+    }
+  }
+  if(paso === 2 && !C.partidas.some(p => p.activa !== false)) return 'Marca al menos una partida';
+  if(paso === 3){
+    const o = C.obra, pas = o.pasillo || o.techo;
+    for(const p of C.partidas.filter(x => x.activa !== false)){
+      if(p.enD && !(p.depto > 0)) return p.nombre + ': falta la cantidad por depto';
+      if(p.enP && pas && !(p.pasillo > 0)) return p.nombre + ': falta la cantidad por pasillo';
+      if(p.enT && o.terraza && !(p.terraza > 0)) return p.nombre + ': falta la cantidad por terraza';
+    }
+  }
+  return '';
+}
+
+// ===== Pintar =====
+function pinta(){
+  const l = $('#lado'); l.querySelectorAll('.paso').forEach(x => x.remove());
+  PASOS.forEach((p, i) => l.append(el('div','paso' + (i === paso ? ' act' : i < paso ? ' ok' : ''), (i + 1) + '. ' + p)));
+  // cel: mover al paso actual
+  const ac = l.querySelector('.act'); if(ac && l.scrollWidth > l.clientWidth) l.scrollTo({left:ac.offsetLeft - 12, behavior:'smooth'});
+  const c = $('#cont'); c.style.opacity = 0;
+  setTimeout(() => { c.textContent = ''; VISTAS[paso](c); c.style.opacity = 1; }, 120);
+  $('#err').textContent = '';
+  $('#atras').disabled = paso === 0;
+  $('#sig').textContent = paso === PASOS.length - 1 ? 'Guardar' : 'Siguiente';
+}
+$('#atras').onclick = () => { if(paso > 0){ paso--; pinta(); } };
+$('#sig').onclick = () => {
+  const er = valida();
+  $('#err').textContent = er;
+  if(er){ const b = $('#sig'); b.classList.add('temb'); setTimeout(() => b.classList.remove('temb'), 260); return; }
+  if(paso < PASOS.length - 1){ paso++; pinta(); return; }
+  const out = JSON.parse(JSON.stringify(C));
+  const ob = out.obra;
+  if(ob.tipo !== 'edificio') ob.techo = false;
+  out.partidas = out.partidas.filter(p => p.activa !== false).map(p => ({id:p.id, nombre:p.nombre, unidad:p.unidad, depto:p.enD ? p.depto : 0, pasillo:p.enP && (ob.pasillo || ob.techo) ? p.pasillo : 0, terraza:p.enT && ob.terraza ? p.terraza : 0}));
+  // limpiar difs
+  ob.dif = ob.tipo === 'edificio' && ob.hayDif ? ob.dif.filter(d => d.tipo !== 'terraza' || ob.terraza).map(d =>
+    d.tipo === 'deptos' ? {piso:d.piso, tipo:'deptos', n:d.n} :
+    d.tipo === 'terraza' ? {piso:d.piso, tipo:'terraza', deps:d.deps} :
+    d.tipo === 'medida' ? {piso:d.piso, tipo:'medida', partida:d.partida, n:d.n} :
+    {piso:d.piso, tipo:'otra', txt:d.txt}) : [];
+  out.version = VER; out.guardado = new Date().toISOString();
+  try{ localStorage.setItem('moldeConfigV3', JSON.stringify(out)); }catch(e){}
+  const c = $('#cont'); c.textContent = '';
+  c.append(titulo('Listo', 'Configuración guardada. Abre el panel de ' + C.nombre + ' en este mismo navegador.'));
+  const a = el('a','btn pri','Abrir panel'); a.href = 'canteria_prueba.html'; a.style.textDecoration = 'none';
+  c.append(a);
+  $('#sig').disabled = true;
+};
+// borrar aviso al escribir
+$('#cont').addEventListener('input', () => { $('#err').textContent = ''; });
+pinta();
+// ===== Volver al menú =====
+$('#irMenuA').addEventListener('click', e => {
+  e.preventDefault(); const b = e.currentTarget; if(b.classList.contains('btn-marcado')) return;
+  b.classList.add('btn-marcado');
+  if(window.CargaPagina && CargaPagina.salir) CargaPagina.salir('index.html?menu=1', 'Volviendo al menú…', Promise.resolve()); else location.href = 'index.html?menu=1';
+});
+$('#verTxt').textContent = 'Versión ' + VER;
+if(window.CargaPagina && !window.__gateErr) CargaPagina.fin();
+</script>
+</body>
+</html>
