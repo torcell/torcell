@@ -346,6 +346,7 @@
   .stats-tabs .frag-chip{margin:0 0 0 auto;align-self:center;font-size:12px;color:var(--sub);}
   .stat-card .sub2 b{font-weight:700;}
   .stat-card .sub2.fuera,.stat-card .sub2.fuera b{color:#e8710a;}
+  .stat-card .sub2.dentro,.stat-card .sub2.dentro b{color:var(--entregado);}
   .cierre-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;padding:0;}
   .cierre-box .cat-m{padding:13px 15px;}
   .cierre-box .cat-m + .cat-m{border-top:0;border-left:1px dashed var(--border);}
@@ -353,6 +354,8 @@
   .cierre-box .cat-m .cnt{text-transform:none;letter-spacing:0;}
   .cierre-box .cat-m.fuera .l,.cierre-box .cat-m.fuera .l .cnt,.cierre-box .cat-m.fuera .sub2{color:#e8710a;}
   .cierre-box .cat-m.fuera .n{color:#e8710a;}
+  .cierre-box .cat-m:not(.fuera) .l,.cierre-box .cat-m:not(.fuera) .l .cnt,.cierre-box .cat-m:not(.fuera) .sub2,.cierre-box .cat-m:not(.fuera) .sub2 b{color:var(--entregado);}
+  .cierre-box .cat-m.fuera .sub2 b{color:#e8710a;}
   .cierre-box .cat-m .n{font-size:20px;}
   .cat-card{padding:0;}
   .cat-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 15px 8px;border-bottom:1px solid var(--border);font-size:13px;text-transform:uppercase;letter-spacing:.6px;}
@@ -1922,7 +1925,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.25';
+const APP_VERSION = '0.73.26';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3350,9 +3353,9 @@ function renderStats(){
   const refLinea = rf => esC ? `<div class="sub2">REF ${money(rf)}</div>` : '';
   const refMargen = (t, rf) => esC ? `<div class="sub2">REF ${money(rf)}</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
   const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refMargen(r.ter, r.refTer)}${conFra(fr ? fr.ter : 0, r.ter)}</div>`;
-  const seccion = (cls, rotulo, v, n, rf) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}</div>`;
-  const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo)}</div>` : '';
-  const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div><div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div>${conFra(fr ? fr.pag : 0, r.pag)}</div>`;
+  const seccion = (cls, rotulo, v, n, rf, vFra) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}${conFra(vFra, v)}</div>`;
+  const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro, fr ? fr.dentro : 0)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo, fr ? fr.nuevo : 0)}</div>` : '';
+  const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2 dentro">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div>${fr ? `<div class="sub2 dentro">+ Frague <b>${money(fr.pagDentro)}</b> · Total <b>${money(r.pagDentro + fr.pagDentro)}</b></div>` : ''}<div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>${fr ? `<div class="sub2 fuera">+ Frague <b>${money(fr.pagFuera)}</b> · Total <b>${money(r.pagFuera + fr.pagFuera)}</b></div>` : ''}` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div>${conFra(fr ? fr.pag : 0, r.pag)}</div>`;
   const retCard = (isAdmin && r.nRet > 0) ? `<div class="stat-card money-card st-retenido"><div class="n c-retenido">${money(r.ret)}</div><div class="l">Retenido <span class="cnt">(${r.nRet})</span></div>${refLinea(r.refRet)}<button type="button" class="btn small ret-det" data-ret-det>Detalles</button></div>` : '';
   const tabs = `<div class="stats-tabs"><span class="stats-rotulo">Resumen de</span>${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button><button type="button" class="frag-chip" style="margin-left:10px;" data-res-pago title="Cerámica y frague juntos">💰 resumen de pago</button>' : ''}</div>`;
   statsEl.innerHTML = tabs + `<div class="stats-grid${retCard && !separadas ? ' con-ret' : ''}">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard + retCard : ''}</div>`;
@@ -3360,7 +3363,7 @@ function renderStats(){
 }
 
 function calcFrague(){
-  const nuevoB = () => ({dentro: 0, nuevo: 0, ter: 0, pag: 0, total: 0, m2: 0, ref: 0});
+  const nuevoB = () => ({dentro: 0, nuevo: 0, pagDentro: 0, pagFuera: 0, ter: 0, pag: 0, total: 0, m2: 0, ref: 0});
   const r = {cer: nuevoB(), fra: nuevoB()};
   ALL_CELLS.forEach(c => {
     const st = getState(c.id);
@@ -3371,7 +3374,7 @@ function calcFrague(){
     const p = m2 * rate1For(c.categoria, st.trabajador);
     const e = resolveEstado(st);
     b.total += p; b.m2 += m2;
-    if(e === 'pagado') b.pag += p;
+    if(e === 'pagado'){ b.pag += p; if(!!cierreQuincena && (st.pagadoTs || st.terminadoTs || 0) > cierreQuincena) b.pagFuera += p; else b.pagDentro += p; }
     if(e === 'entregado'){
       b.ter += p;
       if(!!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena) b.nuevo += p; else b.dentro += p;
@@ -8001,4 +8004,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.25 · 30-10-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.26 · 30-10-2026 ==== -->
