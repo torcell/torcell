@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><title>PRUEBA · Generador de documentos · v7-html.12</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Generador de documentos · v7-html.12 · 2026-10-31 ===== */
+/* ===== colores ===== */
+:root{--fondo:#0d1b24;--caja:#16262f;--campo:#112029;--linea:#3b5666;--texto:#f2f6f8;--suave:#9fb3bd;--ac:#6ec6e8;--ac2:#1f5a78;--err:#e8707f}
+[data-c=dorado]{--ac:#e0b45a;--ac2:#6b5320}[data-c=esmeralda]{--ac:#5fd3a0;--ac2:#1f6a4c}
+[data-c=carmesi]{--ac:#e8707f;--ac2:#7a2433}[data-c=violeta]{--ac:#b49cf0;--ac2:#4a3a86}[data-c=plata]{--ac:#cfd8dd;--ac2:#4a5a63}
+*{box-sizing:border-box;border-radius:0}
+body{margin:0;background:var(--fondo);color:var(--texto);font:14px/1.4 'Noto Sans','Inter','Segoe UI',sans-serif;padding:20px}
+/* ===== marco ===== */
+.app{max-width:920px;margin:0 auto;border:1px solid var(--linea);background:var(--caja);display:grid;grid-template-columns:180px 1fr}
+nav{border-right:1px solid var(--linea);padding:14px 0;background:var(--campo)}
+nav a{display:block;padding:11px 22px;color:var(--suave);border-left:3px solid transparent;cursor:pointer;transition:.15s}
+nav a:hover{color:var(--texto)}nav a.on{color:var(--texto);border-color:var(--ac);background:var(--caja);font-weight:600}
+nav hr{border:0;border-top:1px solid var(--linea);margin:14px 0}
+.cuerpo{padding:26px 32px}
+.vista{display:none}.vista.on{display:block}
+h1{font-size:17px;margin:0 0 4px}.sub{color:var(--suave);margin:0 0 22px;font-size:13px}
+/* ===== formulario ===== */
+.sec{display:flex;align-items:center;gap:12px;color:var(--ac);font-weight:700;font-size:12px;letter-spacing:.1em;margin:22px 0 14px}
+.sec.p{margin-top:0}.sec:after{content:"";flex:1;height:1px;background:var(--linea)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}.full{grid-column:1/-1}
+label{display:block;font-size:12px;color:var(--suave);margin-bottom:5px}
+input,select,.btn{height:40px}
+input,select{width:100%;background:var(--campo);border:1px solid var(--linea);color:var(--texto);padding:0 12px;font:inherit;outline:0}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+input[readonly]{color:var(--suave)}input.mal,select.mal{border-color:var(--err)}
+.fila{display:flex;gap:8px;align-items:center}.fila>*{min-width:0}.fila>b{flex:none;color:var(--ac)}
+.btn{background:transparent;border:1px solid var(--linea);color:var(--texto);padding:0 16px;font:inherit;cursor:pointer;transition:.15s;flex:none}
+.btn:hover{border-color:var(--ac);color:var(--ac)}.btn:active{transform:scale(.98)}
+.btn.ok:hover{background:var(--ac);color:var(--fondo)}.btn.ok{background:var(--ac2);border-color:var(--ac);color:var(--texto);font-weight:700;letter-spacing:.04em;height:46px;width:100%}
+.hint{font-size:12px;color:var(--suave);margin-top:5px}
+#msg{margin-top:-4px;font-size:13px;min-height:18px}
+.colores{display:flex;gap:8px;margin:0 0 6px}.colores button{width:24px;height:24px;border:1px solid var(--linea);cursor:pointer;padding:0}
+
+/* ===== cabecera de vista y botón temporal ===== */
+.cab{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.btn.temp{height:32px;font-size:12px;border-style:dashed;color:var(--suave);padding:0 12px}
+/* ===== combo (campo escribible con lista) ===== */
+.sel input.cmb{padding-right:40px}
+.sel .cmb-fl{position:absolute;right:1px;top:1px;width:34px;height:38px;border:0;background:transparent;cursor:pointer;padding:0}
+.sel .cmb-fl:after{content:"";position:absolute;left:11px;top:16px;border:5px solid transparent;border-top-color:var(--ac)}
+.sel.abierto .cmb-fl:after{top:9px;transform:rotate(180deg)}
+.sel .cmb-fl:hover{background:var(--ac2)}
+/* ===== obras ===== */
+.badge{display:inline-block;border-radius:999px!important;padding:1px 10px;font-size:11px;font-weight:600;border:1px solid var(--linea)}
+.badge.act{color:var(--ac);border-color:var(--ac)}.badge.fin{color:var(--suave)}
+.tr.trO{grid-template-columns:2fr 1.6fr 1.2fr 1fr}
+.sw{display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none}
+.sw input{appearance:none;width:52px;height:26px;padding:0;border:1px solid var(--linea);background:var(--campo);position:relative;cursor:pointer;flex:none;transition:.15s}
+.sw input:after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;background:var(--suave);transition:.15s}
+.sw input:checked{background:var(--ac2);border-color:var(--ac)}.sw input:checked:after{left:29px;background:var(--texto)}
+/* ===== historial ===== */
+.tabla{border:1px solid var(--linea);background:var(--campo)}
+.tr{display:grid;grid-template-columns:2.2fr 1.2fr 1fr 1.8fr .9fr;gap:10px;padding:10px 14px;align-items:center;border-top:1px solid var(--linea);cursor:pointer;transition:background .1s}
+.tr.th{border-top:0;cursor:default;color:var(--suave);font-size:12px;font-weight:600;background:var(--caja)}
+.tr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr:not(.th):hover{background:rgba(110,198,232,.08)}.tr.elegida{background:var(--ac2)}
+.vacio{padding:22px;text-align:center;color:var(--suave)}
+.mal2:hover{border-color:var(--err);color:var(--err)}
+/* ===== acciones y ventana de casillas ===== */
+.acciones{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn.ok.gris{background:transparent;border-color:var(--linea)}.btn.ok.gris:hover{background:var(--ac2);color:var(--texto);border-color:var(--ac)}
+.velo{position:fixed;inset:0;background:rgba(5,12,17,.72);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.velo.on{display:flex}
+.ven.ancha{max-width:640px;max-height:96vh;overflow:auto}
+.ven{background:var(--caja);border:1px solid var(--linea);width:100%;max-width:440px;padding:26px 30px;transform-origin:top;animation:abrir .18s ease-out}
+@keyframes abrir{from{transform:scaleY(.92);opacity:0}to{transform:none;opacity:1}}
+.ven h3{margin:0 0 4px;font-size:16px}.ven .sub{margin-bottom:6px}
+.chk{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer}
+.chk input{appearance:none;width:18px;height:18px;padding:0;border:1px solid var(--linea);background:var(--campo);cursor:pointer;position:relative;flex:none}
+.chk input:checked{background:var(--ac2);border-color:var(--ac)}
+.chk input:checked:after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid var(--texto);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.pie{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}.pie .btn{width:100%;height:42px}
+/* ===== lista desplegable propia: sin barra lateral, con flechas arriba y abajo ===== */
+select.nat{display:none}
+.sel{position:relative;display:block;width:100%}
+.sel-btn{width:100%;height:40px;background:var(--campo);border:1px solid var(--linea);color:var(--texto);padding:0 28px 0 10px;font:inherit;text-align:left;cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:0}
+.sel-btn{transition:.15s}.sel-btn:hover{border-color:var(--ac)}.sel-btn:active{transform:scale(.98)}
+.sel-btn:after{content:"";position:absolute;right:9px;top:16px;border:5px solid transparent;border-top-color:var(--ac)}
+.sel.abierto .sel-btn:after{top:9px;transform:rotate(180deg)}
+.sel-btn:focus,.sel.abierto .sel-btn{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+.sel.mal .sel-btn{border-color:var(--err)}
+.sel-lista{display:none;position:absolute;left:0;min-width:100%;width:max-content;top:calc(100% + 2px);z-index:20;background:var(--campo);border:1px solid var(--ac);box-shadow:0 8px 20px rgba(0,0,0,.45)}
+.sel-lista.arriba{top:auto;bottom:calc(100% + 2px)}
+.sel.abierto .sel-lista{display:block}
+.sel-items{max-height:288px;overflow:hidden;touch-action:none;user-select:none}
+.sel-it{height:36px;line-height:36px;padding:0 12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sel-it{transition:background .1s}.sel-it:hover,.sel-it.res{background:var(--ac2)}.sel-it.on{color:var(--ac);font-weight:600}
+.sel-flecha{display:none;position:absolute;left:0;right:0;height:30px;background:var(--campo);cursor:pointer;z-index:2;user-select:none;touch-action:none}
+.sel-flecha:after{content:"";position:absolute;left:50%;top:8px;margin-left:-6px;border:6px solid transparent}
+.sel-flecha.up{top:0;border-bottom:1px solid var(--linea)}.sel-flecha.up:after{border-bottom-color:var(--ac);border-top-width:0;top:9px}
+.sel-flecha.dn{bottom:0;border-top:1px solid var(--linea)}.sel-flecha.dn:after{border-top-color:var(--ac);border-bottom-width:0;top:11px}
+.sel-flecha:hover{background:var(--ac2)}.sel-flecha:active{background:var(--ac)}
+</style></head><body>
+<div class="app">
+ <nav>
+  <a class="on" data-v="nuevo">Nuevo trabajador</a><a data-v="anexos">Anexos</a><a data-v="obra">Empresas y obras</a><a data-v="hist">Trabajadores</a><a data-v="fini">Finiquitos</a>
+  <hr><a data-v="emp">Empresa</a><a data-v="apa">Apariencia</a>
+ </nav>
+ <div class="cuerpo">
+  <!-- ===== nuevo trabajador ===== -->
+  <section class="vista on" id="v-nuevo">
+   <div class="cab"><div><h1>Generador de documentos de contratación</h1><p class="sub">Contrato · EPP · Reglamento Interno · Derecho a Saber</p></div><button type="button" class="btn temp" data-rel="trab" title="Botón temporal de prueba">Rellenar de prueba</button></div>
+   <form id="f" autocomplete="off" novalidate>
+   <div class="sec p">DATOS PERSONALES</div><div class="g">
+    <div class="full"><label>Nombre completo *</label><input name="nombre"></div>
+    <div><label>RUT *</label><input name="rut" placeholder="12.345.678-5"></div>
+    <div><label>Fecha de nacimiento * (dd/mm/aaaa)</label><input name="nacimiento" placeholder="15/06/1981"></div>
+    <div><label>Nacionalidad *</label><select name="nacionalidad"><option>CHILENA</option><option>HAITIANA</option><option>VENEZOLANA</option><option>PERUANA</option><option>COLOMBIANA</option><option>BOLIVIANA</option></select></div>
+    <div><label>Estado civil *</label><select name="civil"><option>SOLTERO</option><option>CASADO</option><option>DIVORCIADO</option><option>VIUDO</option></select></div>
+    <div class="full"><label>Domicilio *</label><div class="fila"><input id="calle" style="flex:3"><b>#</b><input id="num" style="flex:1" inputmode="numeric"><b>,</b><input id="comuna" style="flex:3" placeholder="Comuna"></div><div class="hint" id="vistaDom">En el contrato: calle #número, comuna</div></div>
+    <div class="full"><label>Correo electrónico *</label><div class="fila"><input id="cUser" style="flex:4"><b>@</b>
+      <select id="cProv" style="flex:3"><option selected>gmail</option><option>hotmail</option><option>outlook</option><option>yahoo</option></select><b>.</b>
+      <select id="cSuf" style="flex:1.3"><option selected>com</option><option>cl</option><option>net</option><option>org</option></select></div></div>
+   </div>
+   <div class="sec">CONTRATO</div><div class="g">
+    <div><label>Obra *</label><select name="obra"><option>La Florida – Bellavista #7122</option></select></div>
+    <div><label>Rol / Cargo *</label><select name="rol"><option>CERAMISTA</option><option>FRAGUADOR</option></select></div>
+    <div><label>Sueldo mínimo ($) *</label><div class="fila"><input id="sueldo" value="553.553" readonly style="flex:1"><button type="button" class="btn" id="bSueldo">Cambiar sueldo</button></div></div>
+    <div><label>Fecha de ingreso *</label><div class="fila"><select id="dia" style="flex:none;width:76px"></select>de<select id="mes" style="flex:1" data-corto="1"></select>de<input id="anio" readonly style="flex:none;width:88px"></div></div>
+   </div>
+   <div class="sec">DESTINO</div><div class="g"><div class="full"><label>Carpeta donde guardar *</label><div class="fila"><input id="carpeta" style="flex:1"><button type="button" class="btn">Elegir…</button></div></div>
+    <div class="full acciones" style="grid-template-columns:1fr 1fr 1fr"><button type="button" class="btn ok" id="bGuardar">GUARDAR</button><button type="button" class="btn ok" data-acc="descargar" data-tipo="trab">DESCARGAR DOCUMENTOS</button><button type="button" class="btn ok gris" data-acc="imprimir" data-tipo="trab">IMPRIMIR</button></div><div class="full" id="msg"></div></div>
+   </form>
+  </section>
+  <!-- ===== anexos ===== -->
+  <section class="vista" id="v-anexos">
+   <div class="cab"><div><h1>Anexo de contrato</h1><p class="sub">Cambio de lugar de trabajo y jornada</p></div><button type="button" class="btn temp" data-rel="anexo" title="Botón temporal de prueba">Rellenar de prueba</button></div>
+   <form id="fa" autocomplete="off" novalidate>
+   <div class="sec p">TRABAJADOR</div><div class="g">
+    <div class="full"><button type="button" class="btn" id="aElegir">Seleccionar trabajador registrado</button></div>
+    <div class="full"><label>Nombre completo *</label><input id="a_nombre"></div>
+    <div><label>RUT *</label><input id="a_rut" placeholder="12.345.678-5"></div>
+    <div><label>Cargo *</label><select id="a_cargo"><option>Maestro Ceramista</option><option>Maestro Fraguador</option></select></div>
+    <div class="full"><label>Funciones específicas *</label><input id="a_func" placeholder="Si lo dejas vacío se usa el cargo"></div>
+   </div>
+   <div class="sec">FECHAS</div><div class="g">
+    <div><label>Fecha del anexo *</label><div class="fila" id="a_f1"></div></div>
+    <div><label>Labores desde *</label><div class="fila" id="a_f2"></div></div>
+   </div>
+   <div class="sec">NUEVO LUGAR DE TRABAJO</div><div class="g">
+    <div class="full"><label>Establecimiento / obra *</label><input id="a_obra" placeholder="Cerro Apoquindo Cuatro SA"></div>
+    <div><label>Provincia *</label><input id="a_prov"></div><div><label>Comuna *</label><input id="a_comuna"></div>
+    <div class="full"><label>Calle y detalle *</label><input id="a_calle" placeholder="Ruta F-30-E Condominio Marbella Edificio Grao"></div>
+   </div>
+   <div class="sec">JORNADA</div><div class="g">
+    <div class="full"><label>Jornada semanal *</label><input id="a_jor" value="lunes a martes de 8:00 a 18:00 horas y miércoles a viernes de 8:00 a 17:00 horas, con una hora de colación"></div>
+   </div>
+   <div class="sec">DESTINO</div><div class="g"><div class="full acciones"><button type="button" class="btn ok" data-acc="descargar" data-tipo="anexo">DESCARGAR ANEXO</button><button type="button" class="btn ok gris" data-acc="imprimir" data-tipo="anexo">IMPRIMIR</button></div><div class="full" id="msgA"></div></div>
+   </form>
+  </section>
+  <section class="vista" id="v-obra">
+   <div class="cab"><div><h1>Empresas y obras</h1><p class="sub">Las obras activas salen en las listas; las terminadas se ocultan.</p></div><button type="button" class="btn" id="oNueva">Nueva obra</button></div>
+   <div class="tabla"><div class="tr th trO"><span>Obra</span><span>Empresa</span><span>Comuna</span><span>Estado</span></div><div id="oLista"></div></div>
+   <div class="sec" id="oTit">NUEVA OBRA</div>
+   <div class="g">
+    <div class="full"><label>Nombre de la obra *</label><input id="o_nombre"></div>
+    <div class="full"><label>Empresa / mandante</label><input id="o_emp"></div>
+    <div class="full"><label>Dirección *</label><input id="o_dir"></div>
+    <div><label>Comuna *</label><input id="o_com"></div><div><label>Provincia *</label><input id="o_prov"></div>
+    <div class="full"><label>Jornada de trabajo</label><input id="o_jor" placeholder="lunes a viernes de 8:00 a 18:00 horas"></div>
+    <div class="full"><label>Tarea a realizar</label><input id="o_tarea" placeholder="INSTALACION DE CERAMICA"></div>
+    <div class="full"><label class="sw"><input type="checkbox" id="o_fin"><span id="o_finT"></span></label></div>
+    <div class="full acciones"><button type="button" class="btn ok" id="oGuardar">Guardar</button><button type="button" class="btn" id="oElim" style="height:46px">Eliminar</button></div>
+    <div class="full" id="oMsg"></div>
+   </div>
+  </section>
+  <section class="vista" id="v-hist">
+   <div class="cab"><div><h1>Trabajadores</h1><p class="sub">Trabajadores registrados</p></div><button type="button" class="btn" id="hCrear">Crear trabajador</button></div>
+   <div class="tabla"><div class="tr th"><span>Nombre</span><span>RUT</span><span>Rol</span><span>Obra</span><span>Ingreso</span></div><div id="hLista"></div></div>
+   <div class="fila" style="margin-top:14px;justify-content:flex-start"><button type="button" class="btn" id="hCargar">Cargar en el formulario</button><button type="button" class="btn" id="hAnexo">Hacer anexo</button><button type="button" class="btn" id="hDesc">Descargar</button><button type="button" class="btn" id="hImp">Imprimir</button><button type="button" class="btn mal2" id="hQuitar">Quitar</button></div>
+   <div class="hint" id="hMsg">Doble clic en una fila = cargar en el formulario. Descargar e Imprimir usan la fila elegida.</div>
+  </section>
+  <section class="vista" id="v-fini"><h1>Finiquitos</h1><p class="sub">Pendiente de conectar.</p></section>
+  <section class="vista" id="v-emp"><h1>Empresa</h1><p class="sub">Pendiente de conectar.</p></section>
+  <section class="vista" id="v-apa"><h1>Apariencia</h1><p class="sub">Color del diseño.</p><div class="colores" id="col"></div></section>
+ </div>
+</div>
+<div class="velo" id="velo2">
+ <div class="ven ancha" id="vCrear" role="dialog" aria-modal="true" style="display:none">
+  <h3>Crear trabajador</h3><p class="sub">Para sumar al historial a los que ya tienes.</p>
+  <div class="g" style="margin-top:14px">
+   <div><label>Nombre completo *</label><input id="c_nombre"></div><div><label>RUT *</label><input id="c_rut"></div>
+   <div><label>Fecha de nacimiento * (dd/mm/aaaa)</label><input id="c_nac"></div><div><label>Nacionalidad *</label><select id="c_nacion"><option>CHILENA</option><option>HAITIANA</option><option>VENEZOLANA</option><option>PERUANA</option><option>COLOMBIANA</option><option>BOLIVIANA</option></select></div>
+   <div><label>Estado civil *</label><select id="c_civil"><option>SOLTERO</option><option>CASADO</option><option>DIVORCIADO</option><option>VIUDO</option></select></div><div><label>Rol / Cargo *</label><select id="c_rol"><option>CERAMISTA</option><option>FRAGUADOR</option></select></div>
+   <div class="full"><label>Domicilio *</label><div class="fila"><input id="c_calle" style="flex:3"><b>#</b><input id="c_num" style="flex:1" inputmode="numeric"><b>,</b><input id="c_comuna" style="flex:3" placeholder="Comuna"></div></div>
+   <div class="full"><label>Correo electrónico *</label><div class="fila"><input id="c_user" style="flex:4"><b>@</b><select id="c_prov" style="flex:3"><option selected>gmail</option><option>hotmail</option><option>outlook</option><option>yahoo</option></select><b>.</b><select id="c_suf" style="flex:1.3"><option selected>com</option><option>cl</option><option>net</option><option>org</option></select></div></div>
+   <div><label>Obra *</label><select id="c_obra"><option>La Florida – Bellavista #7122</option></select></div><div><label>Fecha de ingreso *</label><div class="fila" id="c_ing"></div></div>
+  </div>
+  <div id="cMsg" class="hint" style="min-height:18px;margin-top:10px"></div>
+  <div class="pie"><button type="button" class="btn ok" id="cOk" style="height:42px">Guardar y cerrar</button><button type="button" class="btn" id="cNo">Cancelar</button></div>
+ </div>
+ <div class="ven ancha" id="vElegir" role="dialog" aria-modal="true" style="display:none">
+  <h3>Seleccionar trabajador</h3><p class="sub">Elige uno de los registrados.</p>
+  <input id="e_buscar" placeholder="Buscar por nombre o RUT" style="margin:12px 0">
+  <div class="tabla"><div id="e_lista" style="max-height:300px;overflow:auto"></div></div>
+  <div class="pie" style="grid-template-columns:1fr"><button type="button" class="btn" id="eNo">Cancelar</button></div>
+ </div>
+</div>
+<div class="velo" id="velo"><div class="ven" role="dialog" aria-modal="true">
+ <h3 id="vTit"></h3><p class="sub">Marca lo que quieres incluir.</p>
+ <div class="sec" style="margin-top:12px">DOCUMENTOS DEL TRABAJADOR</div><div id="vDocs"></div>
+ <div class="sec" id="vFijosT">DOCUMENTOS FIJOS (NO SE RELLENAN)</div><div id="vFijos"></div>
+ <div id="vImp"><div class="sec">IMPRESORA</div><select id="impresora"><option>Impresora predeterminada</option></select>
+  <div class="hint">En la web la impresora la elige el navegador; en el programa se lista la del equipo.</div></div>
+ <div class="pie"><button type="button" class="btn ok" id="vOk" style="height:42px"></button><button type="button" class="btn" id="vNo">Cancelar</button></div>
+</div></div>
+<script>
+// ===== helpers =====
+const $=id=>document.getElementById(id);
+// los textos nunca llevan código: se quitan < > " ' ` \ { } antes de usarlos
+const limpio=t=>String(t).replace(/[<>"'`\\{}]/g,'').trim();
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// ===== menú lateral =====
+document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{
+  document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x===a));
+  document.querySelectorAll('.vista').forEach(v=>v.classList.toggle('on',v.id==='v-'+a.dataset.v));
+});
+
+// ===== fecha de ingreso: cerrado muestra el número, la lista muestra "Septiembre (9)" =====
+const hoy=new Date(),mes=$('mes'),dia=$('dia');
+for(let i=1;i<=31;i++)dia.add(new Option(i,i));
+MESES.forEach((m,i)=>mes.add(new Option(m+' ('+(i+1)+')',i+1)));
+dia.value=hoy.getDate();mes.value=hoy.getMonth()+1;$('anio').value=hoy.getFullYear();
+
+
+// ===== listas desplegables =====
+// sin barra: flechas arriba/abajo solo si hay más hacia ese lado; mantener apretado mueve la lista,
+// también se puede arrastrar o usar la rueda
+function motor(w,o){
+  const pop=document.createElement('div');pop.className='sel-lista';
+  pop.innerHTML='<div class="sel-flecha up"></div><div class="sel-items"></div><div class="sel-flecha dn"></div>';
+  w.appendChild(pop);
+  const box=pop.querySelector('.sel-items'),up=pop.querySelector('.up'),dn=pop.querySelector('.dn');
+  let res=-1,raf=0,dir=0,vel=0,arr=null,movio=false;
+  const hay=()=>({a:box.scrollTop>1,b:box.scrollTop+box.clientHeight<box.scrollHeight-1});
+  const flechas=()=>{const h=hay();up.style.display=h.a?'block':'none';dn.style.display=h.b?'block':'none'};
+  const marcar=()=>{const s=o.sel();[...box.children].forEach((d,i)=>{d.classList.toggle('on',i===s);d.classList.toggle('res',i===res)})};
+  const armar=()=>{box.innerHTML='';o.items().forEach((t,i)=>{const d=document.createElement('div');d.className='sel-it';d.textContent=t;d.dataset.i=i;box.appendChild(d)});marcar()};
+  function ver(i){const d=box.children[i];if(!d)return;
+    if(d.offsetTop<box.scrollTop+30)box.scrollTop=Math.max(0,d.offsetTop-30);
+    else if(d.offsetTop+d.offsetHeight>box.scrollTop+box.clientHeight-30)box.scrollTop=d.offsetTop+d.offsetHeight-box.clientHeight+30;flechas()}
+  const abierto=()=>w.classList.contains('abierto');
+  function abrir(){armar();res=o.sel();w.classList.add('abierto');
+    const r=w.getBoundingClientRect();pop.classList.toggle('arriba',innerHeight-r.bottom<300&&r.top>innerHeight-r.bottom);
+    box.scrollTop=0;ver(res);marcar();flechas()}
+  function parar(){dir=0;cancelAnimationFrame(raf)}
+  function cerrar(){w.classList.remove('abierto');parar()}
+  function paso(){if(!dir)return;vel=Math.min(vel+.4,24);box.scrollTop+=dir*vel;flechas();
+    const h=hay();if((dir<0&&!h.a)||(dir>0&&!h.b)){parar();return}raf=requestAnimationFrame(paso)}
+  function ir(d){dir=d;vel=5;cancelAnimationFrame(raf);raf=requestAnimationFrame(paso)}
+  [[up,-1],[dn,1]].forEach(([f,sg])=>{
+    f.addEventListener('pointerdown',e=>{e.preventDefault();try{f.setPointerCapture(e.pointerId)}catch(x){}box.scrollTop+=sg*36;flechas();ir(sg)});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>f.addEventListener(ev,parar));
+  });
+  addEventListener('pointerup',parar);
+  box.addEventListener('wheel',e=>{e.preventDefault();box.scrollTop+=e.deltaY;flechas()},{passive:false});
+  box.addEventListener('pointerdown',e=>{arr={y:e.clientY,s:box.scrollTop,id:e.pointerId};movio=false});
+  box.addEventListener('pointermove',e=>{if(!arr||e.pointerId!==arr.id)return;const dy=e.clientY-arr.y;
+    if(!movio&&Math.abs(dy)>5){movio=true;try{box.setPointerCapture(e.pointerId)}catch(x){}}
+    if(movio){box.scrollTop=arr.s-dy;flechas()}});
+  ['pointerup','pointercancel'].forEach(ev=>box.addEventListener(ev,()=>{arr=null}));
+  box.addEventListener('click',e=>{if(movio){movio=false;return}const d=e.target.closest('.sel-it');if(d){o.pick(+d.dataset.i);cerrar()}});
+  box.addEventListener('mousemove',e=>{const d=e.target.closest('.sel-it');if(d){res=+d.dataset.i;marcar()}});
+  addEventListener('pointerdown',e=>{if(!w.contains(e.target))cerrar()});
+  // teclado: flechas, enter, escape
+  function tecla(e,cerradoMover){
+    const n=o.items().length;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const p=e.key==='ArrowDown'?1:-1;
+      if(abierto()){res=Math.min(n-1,Math.max(0,res+p));marcar();ver(res)}else if(cerradoMover)cerradoMover(p);else abrir()}
+    else if(e.key==='Enter'&&abierto()){e.preventDefault();if(res>=0)o.pick(res);cerrar()}
+    else if(e.key==='Escape')cerrar();
+    else return false;return true}
+  return{abrir,cerrar,abierto,tecla,irA:i=>{res=i;marcar();ver(i)}};
+}
+function lista(sel){
+  sel.classList.add('nat');
+  const w=document.createElement('div');w.className='sel';w.style.cssText=sel.style.cssText;
+  w.innerHTML='<button type="button" class="sel-btn"></button>';
+  sel.parentNode.insertBefore(w,sel);w.appendChild(sel);
+  const btn=w.querySelector('.sel-btn');let buscar='',tb=0;
+  const texto=o=>sel.dataset.corto?o.value:o.text;
+  const pintar=()=>{const o=sel.options[sel.selectedIndex];btn.textContent=o?texto(o):''};
+  function elegir(i){if(i<0||i>=sel.options.length)return;const c=sel.selectedIndex!==i;sel.selectedIndex=i;pintar();if(c)sel.dispatchEvent(new Event('change',{bubbles:true}))}
+  const m=motor(w,{items:()=>[...sel.options].map(o=>o.text),sel:()=>sel.selectedIndex,pick:elegir});
+  btn.onclick=()=>m.abierto()?m.cerrar():m.abrir();
+  btn.addEventListener('keydown',e=>{
+    if(e.key===' '){e.preventDefault();m.abierto()?m.cerrar():m.abrir();return}
+    if(m.tecla(e,p=>elegir(Math.min(sel.options.length-1,Math.max(0,sel.selectedIndex+p)))))return;
+    if(e.key.length===1){clearTimeout(tb);buscar+=e.key.toLowerCase();tb=setTimeout(()=>buscar='',700);
+      const i=[...sel.options].findIndex(o=>o.text.toLowerCase().startsWith(buscar));if(i>=0){if(m.abierto())m.irA(i);else elegir(i)}}});
+  sel.refrescar=pintar;
+  const vd=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+  Object.defineProperty(sel,'value',{get(){return vd.get.call(sel)},set(v){vd.set.call(sel,v);pintar()}});
+  pintar();
+}
+// campo que se escribe y además tiene lista (ej. establecimiento / obra)
+function combo(inp,items,alElegir){
+  const w=document.createElement('div');w.className='sel';
+  inp.parentNode.insertBefore(w,inp);w.appendChild(inp);inp.classList.add('cmb');
+  const fl=document.createElement('button');fl.type='button';fl.className='cmb-fl';fl.setAttribute('aria-label','Ver lista');w.appendChild(fl);
+  const m=motor(w,{items,sel:()=>items().indexOf(inp.value),pick:i=>{inp.value=items()[i];inp.dispatchEvent(new Event('input'));alElegir&&alElegir(i)}});
+  fl.onclick=()=>m.abierto()?m.cerrar():m.abrir();
+  inp.addEventListener('keydown',e=>{m.tecla(e)});
+  return m;
+}
+document.querySelectorAll('select').forEach(lista);
+
+// ===== domicilio =====
+const soloNum=e=>e.target.value=e.target.value.replace(/\D/g,'');
+$('num').oninput=soloNum;
+['calle','comuna'].forEach(i=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[#,<>"'`\\{}]/g,''));
+function dom(){const c=limpio($('calle').value),n=$('num').value,k=limpio($('comuna').value);return c&&n&&k?`${c} #${n}, ${k}`:''}
+['calle','num','comuna'].forEach(i=>$(i).addEventListener('input',()=>{$('vistaDom').textContent='En el contrato: '+(dom()||'calle #número, comuna')}));
+
+// ===== correo: se acepta pegar uno completo =====
+$('cUser').addEventListener('paste',e=>{
+  const t=(e.clipboardData.getData('text')||'').trim(),m=t.match(/^([^@\s]+)@([^.\s]+)\.(.+)$/);
+  if(!m)return;e.preventDefault();$('cUser').value=m[1].replace(/[^\w.+-]/g,'');
+  const p=m[2].toLowerCase();if(![...$('cProv').options].some(o=>o.text===p))$('cProv').add(new Option(p));$('cProv').value=p;$('cProv').refrescar();
+  const s=m[3].toLowerCase();if(![...$('cSuf').options].some(o=>o.text===s))$('cSuf').add(new Option(s));$('cSuf').value=s;$('cSuf').refrescar();
+});
+$('cUser').oninput=e=>e.target.value=e.target.value.replace(/[^\w.+-]/g,'');
+
+// ===== sueldo fijo / manual =====
+let manual=false;const SUELDO='553.553';
+$('bSueldo').onclick=()=>{manual=!manual;const s=$('sueldo');s.readOnly=!manual;
+  if(manual){s.focus();s.select()}else s.value=SUELDO;
+  $('bSueldo').textContent=manual?'Restaurar '+SUELDO:'Cambiar sueldo'};
+$('sueldo').oninput=e=>e.target.value=e.target.value.replace(/[^\d.]/g,'');
+
+// ===== RUT =====
+function dvRut(n){let s=0,m=2;for(let i=n.length-1;i>=0;i--){s+=n[i]*m;m=m===7?2:m+1}const r=11-s%11;return r===11?'0':r===10?'K':String(r)}
+function rutOk(t){const x=t.replace(/[.\-\s]/g,'').toUpperCase();return /^\d{7,8}[\dK]$/.test(x)&&dvRut(x.slice(0,-1))===x.slice(-1)}
+function rutFmt(t){const x=t.replace(/[.\-\s]/g,'').toUpperCase();return x.slice(0,-1).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'-'+x.slice(-1)}
+document.querySelector('[name=rut]').onblur=e=>{if(rutOk(e.target.value))e.target.value=rutFmt(e.target.value)};
+
+// ===== descargar / imprimir =====
+// aquí se conecta con tu servidor: window.alDescargar(datos, sel) y window.alImprimir(datos, sel, impresora)
+const DOCS=[['contrato','Contrato de Trabajo'],['epp','Entrega de EPP'],['reglamento','Reglamento Interno'],['derecho','Derecho a Saber']];
+const FIJOS=[['irl','IRL Israel Sepúlveda']];
+const velo=$('velo');let accion='',datosForm=null,soloGuardar=false;
+function casillas(el,lista){el.innerHTML='';lista.forEach(([k,t])=>{const l=document.createElement('label');l.className='chk';
+  l.innerHTML='<input type="checkbox" checked>';const sp=document.createElement('span');sp.textContent=t;l.appendChild(sp);l.firstChild.dataset.k=k;el.appendChild(l)})}
+function juntar(){const g=el=>[...el.querySelectorAll('input:checked')].map(i=>i.dataset.k);return{docs:g($('vDocs')),fijos:g($('vFijos'))}}
+function leer(){
+  const f=$('f'),d={};['nombre','rut','nacimiento','nacionalidad','civil','obra','rol'].forEach(k=>d[k]=limpio(f.elements[k].value));
+  d.domicilio=dom();d.correo=limpio($('cUser').value)+'@'+$('cProv').value+'.'+$('cSuf').value;
+  d.sueldo=limpio($('sueldo').value);d.ingreso=`${dia.value}/${mes.value}/${$('anio').value}`;d.carpeta=limpio($('carpeta').value);
+  const falta=[];document.querySelectorAll('.mal').forEach(x=>x.classList.remove('mal'));
+  const marca=(el,t)=>{(el.closest('.sel')||el).classList.add('mal');falta.push(t)};
+  if(!d.nombre)marca(f.elements.nombre,'nombre');
+  if(!rutOk(d.rut))marca(f.elements.rut,'RUT válido');
+  if(!/^\d{2}\/\d{2}\/\d{4}$/.test(d.nacimiento))marca(f.elements.nacimiento,'fecha de nacimiento');
+  if(!d.domicilio)marca($('calle'),'domicilio');
+  if(!limpio($('cUser').value))marca($('cUser'),'correo');
+  if(accion==='descargar'&&!d.carpeta&&!desdeHist&&!soloGuardar)marca($('carpeta'),'carpeta');
+  const m=$(desdeHist?'hMsg':'msg');
+  if(falta.length){m.style.color='var(--err)';m.textContent='Falta: '+falta.join(', ');return null}
+  d.rut=rutFmt(d.rut);m.textContent='';return d;
+}
+const DOCS_ANEXO=[['anexo','Anexo de contrato (cambio de lugar y jornada)']];
+let tipo='trab',desdeHist=false;
+function abrirDialogo(acc,tp){
+  accion=acc;tipo=tp;
+  datosForm=tipo==='anexo'?leerAnexo():leer();if(!datosForm)return;
+  const nom=tipo==='anexo'?'anexo':'documentos';
+  $('vTit').textContent=(accion==='imprimir'?'Imprimir ':'Descargar ')+nom;
+  $('vOk').textContent=accion==='imprimir'?'Imprimir':'Descargar';
+  $('vImp').style.display=accion==='imprimir'?'block':'none';
+  casillas($('vDocs'),tipo==='anexo'?DOCS_ANEXO:DOCS);casillas($('vFijos'),tipo==='anexo'?[]:FIJOS);
+  $('vFijosT').style.display=$('vFijos').style.display=tipo==='anexo'?'none':'block';
+  velo.classList.add('on');
+}
+document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{desdeHist=false;abrirDialogo(b.dataset.acc,b.dataset.tipo||'trab')});
+$('f').onsubmit=e=>e.preventDefault();
+const cerrarVen=()=>velo.classList.remove('on');
+$('vNo').onclick=cerrarVen;velo.onmousedown=e=>{if(e.target===velo)cerrarVen()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarVen()});
+$('vOk').onclick=()=>{const s=juntar(),m=$(tipo==='anexo'?'msgA':desdeHist?'hMsg':'msg');s.tipo=tipo;
+  if(!s.docs.length&&!s.fijos.length){m.style.color='var(--err)';m.textContent='Marca al menos un documento.';cerrarVen();return}
+  cerrarVen();if(tipo==='trab')registrarDeForm();m.style.color='var(--ac)';m.textContent=accion==='imprimir'?'Enviando a imprimir…':'Datos listos.';
+  if(accion==='imprimir'){if(typeof window.alImprimir==='function')window.alImprimir(datosForm,s,$('impresora').value)}
+  else if(typeof window.alDescargar==='function')window.alDescargar(datosForm,s)};
+
+
+// ===== anexos =====
+const EMPLEADOR={nombre:'Israel Sepúlveda Seguel',rut:'9.677.616-0'};
+const FECHAS={};
+function montarFecha(id,anioIni){
+  const c=$(id);c.innerHTML='<select style="flex:none;width:76px"></select>de<select style="flex:1" data-corto="1"></select>de<select style="flex:none;width:96px"></select>';
+  const [d,m,a]=c.querySelectorAll('select');
+  for(let i=1;i<=31;i++)d.add(new Option(i,i));
+  MESES.forEach((n,i)=>m.add(new Option(n+' ('+(i+1)+')',i+1)));
+  for(let y=hoy.getFullYear()-1;y<=hoy.getFullYear()+1;y++)a.add(new Option(y,y));
+  d.value=hoy.getDate();m.value=hoy.getMonth()+1;a.value=hoy.getFullYear();
+  [d,m,a].forEach(lista);FECHAS[id]=[d,m,a];
+}
+montarFecha('a_f1');montarFecha('a_f2');
+const fechaDe=id=>{const[d,m,a]=FECHAS[id];return{n:`${d.value}/${m.value}/${a.value}`,largo:`${d.value} de ${MESES[m.value-1]} de ${a.value}`}};
+['a_nombre','a_func','a_obra','a_prov','a_comuna','a_calle','a_jor'].forEach(i=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[<>"'`\\{}]/g,''));
+$('a_rut').onblur=e=>{if(rutOk(e.target.value))e.target.value=rutFmt(e.target.value)};
+function leerAnexo(){
+  const v=i=>limpio($(i).value),d={tipo:'anexo',empleador:EMPLEADOR,
+    nombre:v('a_nombre'),rut:v('a_rut'),cargo:$('a_cargo').value,funciones:v('a_func'),
+    fechaAnexo:fechaDe('a_f1'),fechaDesde:fechaDe('a_f2'),establecimiento:v('a_obra'),
+    provincia:v('a_prov'),comuna:v('a_comuna'),calle:v('a_calle'),jornada:v('a_jor')};
+  if(!d.funciones)d.funciones=d.cargo;
+  document.querySelectorAll('#fa .mal').forEach(x=>x.classList.remove('mal'));
+  const falta=[],marca=(el,t)=>{(el.closest('.sel')||el).classList.add('mal');falta.push(t)};
+  [['a_nombre','nombre'],['a_obra','establecimiento'],['a_prov','provincia'],['a_comuna','comuna'],['a_calle','calle'],['a_jor','jornada']].forEach(([i,t])=>{if(!v(i))marca($(i),t)});
+  if(!rutOk(d.rut))marca($('a_rut'),'RUT válido');
+  const m=$('msgA');
+  if(falta.length){m.style.color='var(--err)';m.textContent='Falta: '+falta.join(', ');return null}
+  d.rut=rutFmt(d.rut);m.textContent='';return d;
+}
+
+// ===== relleno de prueba (botón temporal: borrar el botón y este bloque) =====
+const azar=a=>a[Math.floor(Math.random()*a.length)];
+function rutAzar(){let n=String(10000000+Math.floor(Math.random()*15000000));return rutFmt(n+dvRut(n))}
+function poner(i,v){const e=$(i);e.value=v;e.dispatchEvent(new Event('input'))}
+function setSel(sel,v){sel.value=v}
+const NOMBRES=['Edgardo Pérez Jiménez','Marcelo Rojas Soto','Jean Baptiste Louis','Carlos Muñoz Vega','Wilson Pierre Joseph','Luis Fuentes Araya'];
+const OBRAS_PRUEBA=[['Cerro Apoquindo Cuatro SA','Valparaíso','Puchuncaví','Ruta F-30-E Condominio Marbella Edificio Grao'],['Edificio Los Aromos','Santiago','Providencia','Av. Providencia 1234'],['Condominio Bellavista','Santiago','La Florida','Bellavista 7122']];
+document.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.rel==='anexo'){
+    const o=azar(OBRAS_PRUEBA),c=azar(['Maestro Ceramista','Maestro Fraguador']);
+    poner('a_nombre',azar(NOMBRES));poner('a_rut',rutAzar());setSel($('a_cargo'),c);poner('a_func',c);
+    poner('a_obra',o[0]);poner('a_prov',o[1]);poner('a_comuna',o[2]);poner('a_calle',o[3]);
+  }else{
+    const f=$('f');f.elements.nombre.value=azar(NOMBRES);f.elements.rut.value=rutAzar();
+    f.elements.nacimiento.value=`${String(1+Math.floor(Math.random()*28)).padStart(2,'0')}/${String(1+Math.floor(Math.random()*12)).padStart(2,'0')}/${1970+Math.floor(Math.random()*30)}`;
+    setSel(f.elements.nacionalidad,azar(['CHILENA','HAITIANA','VENEZOLANA','PERUANA']));setSel(f.elements.civil,azar(['SOLTERO','CASADO']));
+    poner('calle',azar(['Félix Osegueda','Los Alerces','Av. Central']));poner('num',String(100+Math.floor(Math.random()*9000)));poner('comuna',azar(['Pedro Aguirre Cerda','La Florida','Maipú']));
+    poner('cUser',azar(['juan','pedro','marcelo'])+Math.floor(Math.random()*900+100));setSel($('cProv'),azar(['gmail','hotmail','outlook']));
+    setSel(f.elements.rol,azar(['CERAMISTA','FRAGUADOR']));poner('carpeta','C:\\Contratos\\Prueba');
+  }
+});
+
+// ===== trabajadores registrados =====
+// se guardan en este navegador; para conectarlos a tu servidor usa window.alGuardarTrabajadores(lista)
+const CLAVE='gen_trabajadores';let TRAB=[];
+try{TRAB=JSON.parse(localStorage.getItem(CLAVE)||'[]')}catch(e){TRAB=[]}
+if(!Array.isArray(TRAB))TRAB=[];
+function guardarTrab(){try{localStorage.setItem(CLAVE,JSON.stringify(TRAB))}catch(e){}
+  if(typeof window.alGuardarTrabajadores==='function')window.alGuardarTrabajadores(TRAB)}
+function agregarTrab(t){
+  if(TRAB.some(x=>x.rut===t.rut&&x.ingreso===t.ingreso))return false;
+  t.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);TRAB.push(t);guardarTrab();pintarHist();return true}
+const CARGO_ANEXO={CERAMISTA:'Maestro Ceramista',FRAGUADOR:'Maestro Fraguador'};
+let selId=null;
+function pintarHist(){
+  const L=$('hLista');L.innerHTML='';
+  if(!TRAB.length){L.innerHTML='<div class="vacio">Todavía no hay trabajadores. Usa «Crear trabajador».</div>';return}
+  [...TRAB].reverse().forEach(t=>{const r=document.createElement('div');r.className='tr'+(t.id===selId?' elegida':'');
+    [t.nombre,t.rut,t.rol,t.obra,t.ingreso].forEach(v=>{const sp=document.createElement('span');sp.textContent=v;r.appendChild(sp)});
+    r.onclick=()=>{selId=t.id;pintarHist()};r.ondblclick=()=>cargarEnForm(t);L.appendChild(r)})}
+const elegido=()=>TRAB.find(t=>t.id===selId);
+function cargarEnForm(t,quedarse){
+  const f=$('f');f.elements.nombre.value=t.nombre;f.elements.rut.value=t.rut;f.elements.nacimiento.value=t.nacimiento;
+  f.elements.nacionalidad.value=t.nacionalidad;f.elements.civil.value=t.civil;f.elements.rol.value=t.rol;
+  poner('calle',t.calle);poner('num',t.num);poner('comuna',t.comuna);poner('cUser',t.user);$('cProv').value=t.prov;$('cSuf').value=t.suf;
+  if(![...f.elements.obra.options].some(o=>o.text===t.obra))f.elements.obra.add(new Option(t.obra));f.elements.obra.value=t.obra;
+  if(!quedarse)irA('nuevo')}
+function irA(v){document.querySelector('nav a[data-v='+v+']').click()}
+$('hCargar').onclick=()=>{const t=elegido();if(!t){$('hMsg').textContent='Elige primero una fila.';return}cargarEnForm(t)};
+$('hAnexo').onclick=()=>{const t=elegido();if(!t){$('hMsg').textContent='Elige primero una fila.';return}pasarAAnexo(t);irA('anexos')};
+function desdeFila(acc){const t=elegido();if(!t){$('hMsg').textContent='Elige primero una fila.';return}
+  cargarEnForm(t,true);desdeHist=true;abrirDialogo(acc,'trab')}
+$('hDesc').onclick=()=>desdeFila('descargar');$('hImp').onclick=()=>desdeFila('imprimir');
+$('hQuitar').onclick=()=>{const t=elegido();if(!t){$('hMsg').textContent='Elige primero una fila.';return}
+  TRAB=TRAB.filter(x=>x.id!==t.id);selId=null;guardarTrab();pintarHist();$('hMsg').textContent='Quitado del historial.'};
+function pasarAAnexo(t){poner('a_nombre',t.nombre);poner('a_rut',t.rut);const c=CARGO_ANEXO[t.rol]||t.rol;
+  if(![...$('a_cargo').options].some(o=>o.text===c))$('a_cargo').add(new Option(c));$('a_cargo').value=c;poner('a_func',c);$('a_cargo').refrescar&&$('a_cargo').refrescar()}
+
+// ===== ventanas: crear y elegir =====
+const velo2=$('velo2');
+function abrirV2(id){['vCrear','vElegir'].forEach(i=>$(i).style.display=i===id?'block':'none');velo2.classList.add('on')}
+function cerrarV2(){velo2.classList.remove('on')}
+$('cNo').onclick=$('eNo').onclick=cerrarV2;velo2.onmousedown=e=>{if(e.target===velo2)cerrarV2()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarV2()});
+montarFecha('c_ing');
+['c_nombre','c_nac','c_calle','c_comuna'].forEach(i=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[#,<>"'`\\{}]/g,''));
+$('c_num').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'');
+$('c_user').oninput=e=>e.target.value=e.target.value.replace(/[^\w.+-]/g,'');
+$('c_rut').onblur=e=>{if(rutOk(e.target.value))e.target.value=rutFmt(e.target.value)};
+$('hCrear').onclick=()=>{
+  ['c_nombre','c_rut','c_nac','c_calle','c_num','c_comuna','c_user'].forEach(i=>{$(i).value='';$(i).classList.remove('mal')});
+  $('cMsg').textContent='';abrirV2('vCrear')};
+$('cOk').onclick=()=>{
+  const v=i=>limpio($(i).value),falta=[],m=$('cMsg');
+  ['c_nombre','c_nac','c_calle','c_num','c_comuna','c_user'].forEach(i=>{const bad=!v(i);$(i).classList.toggle('mal',bad);if(bad)falta.push(i)});
+  const rutBad=!rutOk($('c_rut').value);$('c_rut').classList.toggle('mal',rutBad);if(rutBad)falta.push('rut');
+  const nacBad=!/^\d{2}\/\d{2}\/\d{4}$/.test(v('c_nac'));$('c_nac').classList.toggle('mal',nacBad);if(nacBad&&!falta.includes('c_nac'))falta.push('c_nac');
+  if(falta.length){m.style.color='var(--err)';m.textContent='Revisa los campos marcados (RUT válido y fecha dd/mm/aaaa).';return}
+  const t={nombre:v('c_nombre').toUpperCase(),rut:rutFmt($('c_rut').value),nacimiento:v('c_nac'),nacionalidad:$('c_nacion').value,civil:$('c_civil').value,
+    rol:$('c_rol').value,calle:v('c_calle'),num:$('c_num').value,comuna:v('c_comuna'),user:v('c_user'),prov:$('c_prov').value,suf:$('c_suf').value,
+    obra:$('c_obra').value,ingreso:fechaDe('c_ing').n,creado:new Date().toLocaleString('es-CL')};
+  if(!agregarTrab(t)){m.style.color='var(--err)';m.textContent='Ya existe ese RUT con esa fecha de ingreso.';return}
+  cerrarV2();$('hMsg').style.color='var(--ac)';$('hMsg').textContent='Trabajador creado.'};
+// elegir para el anexo
+function pintarElegir(){
+  const q=$('e_buscar').value.toLowerCase(),L=$('e_lista');L.innerHTML='';
+  const r=TRAB.filter(t=>(t.nombre+' '+t.rut).toLowerCase().includes(q));
+  if(!r.length){L.innerHTML='<div class="vacio">'+(TRAB.length?'Sin resultados.':'No hay trabajadores registrados. Créalos en Trabajadores.')+'</div>';return}
+  r.reverse().forEach(t=>{const d=document.createElement('div');d.className='tr';d.style.gridTemplateColumns='2fr 1.2fr 1fr';
+    [t.nombre,t.rut,t.rol].forEach(x=>{const sp=document.createElement('span');sp.textContent=x;d.appendChild(sp)});
+    d.onclick=()=>{pasarAAnexo(t);cerrarV2()};L.appendChild(d)})}
+$('aElegir').onclick=()=>{$('e_buscar').value='';pintarElegir();abrirV2('vElegir')};
+$('e_buscar').oninput=pintarElegir;
+// los que se generan desde «Nuevo trabajador» también quedan registrados
+$('bGuardar').onclick=()=>{
+  desdeHist=false;soloGuardar=true;accion='guardar';const d=leer();soloGuardar=false;if(!d)return;
+  const m=$('msg');
+  if(registrarDeForm()===false){m.style.color='var(--err)';m.textContent='Ya está guardado ese RUT con esa fecha de ingreso.';return}
+  m.style.color='var(--ac)';m.textContent='Guardado en Trabajadores.';
+  ['nombre','rut','nacimiento'].forEach(k=>$('f').elements[k].value='');$('calle').value='';$('num').value='';$('cUser').value=''};
+function registrarDeForm(){const f=$('f');
+  return agregarTrab({nombre:limpio(f.elements.nombre.value).toUpperCase(),rut:rutFmt(f.elements.rut.value),nacimiento:limpio(f.elements.nacimiento.value),
+    nacionalidad:f.elements.nacionalidad.value,civil:f.elements.civil.value,rol:f.elements.rol.value,calle:limpio($('calle').value),num:$('num').value,
+    comuna:limpio($('comuna').value),user:limpio($('cUser').value),prov:$('cProv').value,suf:$('cSuf').value,obra:f.elements.obra.value,
+    ingreso:`${dia.value}/${mes.value}/${$('anio').value}`,creado:new Date().toLocaleString('es-CL')})}
+
+// ===== obras registradas =====
+// se guardan en este navegador; para tu servidor: window.alGuardarObras(lista)
+const CO='gen_obras';let OBRAS=[];
+try{OBRAS=JSON.parse(localStorage.getItem(CO)||'[]')}catch(e){OBRAS=[]}
+if(!Array.isArray(OBRAS)||!OBRAS.length)OBRAS=[
+  {id:'o1',nombre:'La Florida – Bellavista #7122',empresa:'',direccion:'Bellavista #7122',comuna:'La Florida',provincia:'Santiago',jornada:'',tarea:'INSTALACION DE CERAMICA',estado:'activa'},
+  {id:'o2',nombre:'Cerro Apoquindo Cuatro SA',empresa:'Cerro Apoquindo Cuatro SA',direccion:'Ruta F-30-E Condominio Marbella Edificio Grao',comuna:'Puchuncaví',provincia:'Valparaíso',jornada:'',tarea:'INSTALACION DE CERAMICA',estado:'activa'}];
+const activas=()=>OBRAS.filter(o=>o.estado!=='terminada');
+function guardarObras(){try{localStorage.setItem(CO,JSON.stringify(OBRAS))}catch(e){}
+  if(typeof window.alGuardarObras==='function')window.alGuardarObras(OBRAS)}
+function llenarObras(){
+  const nombres=activas().map(o=>o.nombre);
+  [$('c_obra'),$('f').elements.obra].forEach(el=>{const v=el.value;el.innerHTML='';nombres.forEach(n=>el.add(new Option(n)));if(nombres.includes(v))el.value=v;el.refrescar()});
+}
+combo($('a_obra'),()=>activas().map(o=>o.nombre),i=>{const o=activas()[i];
+  poner('a_prov',o.provincia);poner('a_comuna',o.comuna);poner('a_calle',o.direccion);if(o.jornada)poner('a_jor',o.jornada)});
+// ----- pestaña Empresas y obras -----
+let oSel=null,oConf=0;
+const oFinTxt=()=>{$('o_finT').textContent=$('o_fin').checked?'Cerámica terminada — la obra ya no sale en las listas':'Obra activa — aún estamos trabajando ahí'};
+$('o_fin').onchange=oFinTxt;
+['o_nombre','o_emp','o_dir','o_com','o_prov','o_jor','o_tarea'].forEach(i=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[<>"'`\\{}]/g,''));
+function pintarObras(){
+  const L=$('oLista');L.innerHTML='';
+  OBRAS.forEach(o=>{const r=document.createElement('div');r.className='tr trO'+(o.id===oSel?' elegida':'');
+    [o.nombre,o.empresa||'—',o.comuna].forEach(v=>{const sp=document.createElement('span');sp.textContent=v;r.appendChild(sp)});
+    const e=document.createElement('span'),bd=document.createElement('span');bd.className='badge '+(o.estado==='terminada'?'fin':'act');
+    bd.textContent=o.estado==='terminada'?'Terminada':'Activa';e.appendChild(bd);r.appendChild(e);
+    r.onclick=()=>cargarObra(o);L.appendChild(r)})}
+function cargarObra(o){oSel=o?o.id:null;
+  const v=o||{nombre:'',empresa:'',direccion:'',comuna:'',provincia:'',jornada:'',tarea:'',estado:'activa'};
+  $('o_nombre').value=v.nombre;$('o_emp').value=v.empresa;$('o_dir').value=v.direccion;$('o_com').value=v.comuna;$('o_prov').value=v.provincia;
+  $('o_jor').value=v.jornada;$('o_tarea').value=v.tarea;$('o_fin').checked=v.estado==='terminada';oFinTxt();
+  $('oTit').textContent=o?'EDITAR OBRA':'NUEVA OBRA';$('oMsg').textContent='';$('oElim').textContent='Eliminar';oConf=0;
+  document.querySelectorAll('#v-obra .mal').forEach(x=>x.classList.remove('mal'));pintarObras()}
+$('oNueva').onclick=()=>cargarObra(null);
+$('oGuardar').onclick=()=>{
+  const v=i=>limpio($(i).value),m=$('oMsg');let falta=0;
+  [['o_nombre'],['o_dir'],['o_com'],['o_prov']].forEach(([i])=>{const bad=!v(i);$(i).classList.toggle('mal',bad);if(bad)falta++});
+  if(falta){m.style.color='var(--err)';m.textContent='Faltan los campos marcados.';return}
+  const d={nombre:v('o_nombre'),empresa:v('o_emp'),direccion:v('o_dir'),comuna:v('o_com'),provincia:v('o_prov'),jornada:v('o_jor'),tarea:v('o_tarea'),estado:$('o_fin').checked?'terminada':'activa'};
+  if(OBRAS.some(o=>o.nombre.toLowerCase()===d.nombre.toLowerCase()&&o.id!==oSel)){m.style.color='var(--err)';m.textContent='Ya hay una obra con ese nombre.';return}
+  if(oSel){Object.assign(OBRAS.find(o=>o.id===oSel),d)}else{d.id='o'+Date.now().toString(36);OBRAS.push(d);oSel=d.id}
+  guardarObras();llenarObras();pintarObras();$('oTit').textContent='EDITAR OBRA';m.style.color='var(--ac)';m.textContent='Guardado.'};
+$('oElim').onclick=()=>{
+  if(!oSel){$('oMsg').style.color='var(--err)';$('oMsg').textContent='Elige primero una obra de la lista.';return}
+  if(OBRAS.length<2){$('oMsg').style.color='var(--err)';$('oMsg').textContent='Tiene que quedar al menos una obra.';return}
+  if(!oConf){oConf=1;$('oElim').textContent='¿Seguro? Confirmar';setTimeout(()=>{oConf=0;$('oElim').textContent='Eliminar'},3000);return}
+  OBRAS=OBRAS.filter(o=>o.id!==oSel);guardarObras();llenarObras();cargarObra(null);$('oMsg').style.color='var(--ac)';$('oMsg').textContent='Obra eliminada.'};
+llenarObras();cargarObra(null);
+pintarHist();
+
+// ===== colores =====
+[['azul','#6ec6e8'],['dorado','#e0b45a'],['esmeralda','#5fd3a0'],['carmesi','#e8707f'],['violeta','#b49cf0'],['plata','#cfd8dd']].forEach(([n,h])=>{
+  const b=document.createElement('button');b.title=n;b.style.background=h;b.onclick=()=>{document.documentElement.dataset.c=n;try{localStorage.setItem('gen_color',n)}catch(e){}};$('col').appendChild(b)});
+try{const c=localStorage.getItem('gen_color');if(c)document.documentElement.dataset.c=c}catch(e){}
+</script></body></html>
+<!-- ==== VERSION: Generador de documentos · v7-html.12 · 31-10-2026 ==== -->
