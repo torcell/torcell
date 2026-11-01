@@ -37,7 +37,7 @@ nav.lado button:hover{color:#fff;background:rgba(255,255,255,.04);}
 nav.lado button.on{color:#fff;border-left-color:var(--accent);background:rgba(79,143,214,.12);}
 nav.lado button small{display:block;font-size:11px;opacity:.8;margin-top:1px;}
 main{padding:18px;min-width:0;}
-.gen-fr{display:block;width:100%;height:calc(100vh - 150px);min-height:560px;border:0;background:#0d1b24;opacity:0;transition:opacity .25s ease;}
+.gen-fr{display:block;width:100%;height:600px;overflow:hidden;border:0;background:#0d1b24;opacity:0;transition:opacity .25s ease;}
 .gen-fr.listo{opacity:1;}
 main h2{margin:0 0 4px;font-size:17px;}
 .nota{color:var(--sub);font-size:12.5px;margin:0 0 14px;}
@@ -502,9 +502,27 @@ function vistaVentanas(){
 }
 // ===== Generador de documentos =====
 // va en un marco aparte para que no se mezclen sus estilos con los del panel
+// el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
 function vistaGenerador(){
-  main.innerHTML = '<iframe class="gen-fr" id="genFr" title="Generador de documentos" src="generador_documentos.html"></iframe>';
-  const f = $('genFr'); f.addEventListener('load', () => f.classList.add('listo'));
+  main.innerHTML = '<iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=712"></iframe>';
+  const f = $('genFr');
+  f.addEventListener('load', () => {
+    const d = f.contentDocument; if(!d) return;
+    // las ventanas del generador se abren donde está mirando el usuario
+    const st = d.createElement('style');
+    st.textContent = 'html{overflow:hidden}.velo{align-items:flex-start !important}.velo .ven{margin-top:var(--vy,0px);max-height:var(--vh,90vh) !important;overflow:auto}';
+    d.head.appendChild(st);
+    const alto = () => { f.style.height = Math.ceil(d.body.getBoundingClientRect().height) + 'px'; };
+    const pos = () => {
+      if(!f.isConnected){ removeEventListener('scroll', pos); removeEventListener('resize', pos); return; }
+      d.documentElement.style.setProperty('--vy', Math.max(0, -f.getBoundingClientRect().top) + 20 + 'px');
+      d.documentElement.style.setProperty('--vh', Math.max(300, innerHeight - 40) + 'px');
+    };
+    alto(); pos();
+    new ResizeObserver(alto).observe(d.body);
+    addEventListener('scroll', pos, {passive:true}); addEventListener('resize', pos);
+    f.classList.add('listo');
+  });
 }
 async function ir(t){
   tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
@@ -546,7 +564,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.17';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.19';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.17 · 31-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.19 · 31-10-2026 ==== -->
