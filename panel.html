@@ -2078,7 +2078,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.33';
+const APP_VERSION = '0.73.34';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4090,7 +4090,7 @@ function pintarVentana(){
       <div class="vt-sec"><div class="vt-sec-title">Observación</div>
         <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '✎ Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
     </div>
-    <div class="vt-foot"><button type="button" class="btn primary" data-vt="cerrar">Cerrar</button></div>`;
+    <div class="vt-foot"><button type="button" class="btn" data-vt="cerrar">Cerrar</button>${isAdmin ? '<button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}</div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
 }
 document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
@@ -4109,6 +4109,18 @@ document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   const b = e.target.closest('[data-vt]'); if(!b) return;
   const accion = b.getAttribute('data-vt');
   if(accion === 'cerrar'){ cerrarVentana(); return; }
+  if(accion === 'guardarcerrar'){
+    // ===== confirma el cambio pendiente (si hay), guarda y cierra =====
+    if(ventanaDestino !== null){
+      const destino = ventanaDestino, antes = estadoNumero(getState(id));
+      ventanaDestino = null;
+      confirmarEstadoAdmin(id, destino);
+      if(estadoNumero(getState(id)) === antes && destino !== antes){ pintarVentana(); return; }   // quedó bloqueado, se avisó
+    }
+    cerrarVentana();
+    if(dirtyCellIds.size > 0 || settingsDirty) saveNow();
+    return;
+  }
   if(accion === 'cancelar'){ ventanaDestino = null; pintarVentana(); return; }
   if(accion === 'confirmar'){
     const destino = ventanaDestino;
@@ -8211,4 +8223,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.33 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.34 · 01-11-2026 ==== -->
