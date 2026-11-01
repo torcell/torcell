@@ -37,6 +37,14 @@ nav.lado button:hover{color:#fff;background:rgba(255,255,255,.04);}
 nav.lado button.on{color:#fff;border-left-color:var(--accent);background:rgba(79,143,214,.12);}
 nav.lado button small{display:block;font-size:11px;opacity:.8;margin-top:1px;}
 main{padding:18px;min-width:0;}
+.sg-al{border-left:4px solid var(--sub);padding:6px 10px;margin:0 0 8px;background:var(--soft);}
+.sg-al.alta{border-left-color:var(--bad);}.sg-al.media{border-left-color:var(--warn);}
+.sg-al .cab{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;}.sg-al small{color:var(--sub);}
+.sg-lista{max-height:340px;overflow-y:auto;overscroll-behavior:contain;}
+.vel{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:14px;}
+.vel .ven{background:var(--panel);border:1px solid var(--strong);max-width:440px;width:100%;padding:18px;animation:abreV .18s ease;transform-origin:top;}
+@keyframes abreV{from{opacity:0;transform:scaleY(.94);}to{opacity:1;transform:none;}}
+.vel .acc2{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
 .gen-fr{display:block;width:100%;height:600px;overflow:hidden;border:0;background:#0d1b24;opacity:0;transition:opacity .25s ease;}
 .gen-fr.listo{opacity:1;}
 main h2{margin:0 0 4px;font-size:17px;}
@@ -87,6 +95,8 @@ main h2{margin:0 0 4px;font-size:17px;}
 .rd-d small{display:block;font-size:11px;color:var(--sub);}.rd-d b{display:block;font-size:14px;}.rd-d span{font-size:12px;color:var(--sub);}
 .rd-tit{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin:12px 0 6px;}
 .rd-f{display:grid;grid-template-columns:minmax(220px,2.2fr) minmax(150px,1.4fr) 80px 90px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--border);}
+.rd-mm b{color:var(--text);font-weight:600;}
+.rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
 .rd-b span{font-size:12px;}
@@ -163,6 +173,7 @@ main h2{margin:0 0 4px;font-size:17px;}
     <button type="button" data-t="permisos">Permisos<small>secciones y aparatos</small></button>
     <button type="button" data-t="encargados">Encargados<small>quién responde por cada página</small></button>
     <button type="button" data-t="rendimiento">Rendimiento<small>m² y actividad por trabajador</small></button>
+    <button type="button" data-t="seguridad">Seguridad<small>alertas y respaldos</small></button>
     <button type="button" data-t="ventanas">Ventanas<small>qué puede abrir cada uno</small></button>
     <button type="button" data-t="generador">Generador<small>documentos de contratación</small></button>
   </nav>
@@ -207,6 +218,10 @@ const BD = (function(){
   return async function(a, x){
     await dormir(120);
     if(a === 'rendimientoDatos') return rendDemo();
+    if(a === 'alertasListar') return {ok:true, correos:2, titulos:{baja_fuerte:'Bajada fuerte de datos en un guardado', guardado_bloqueado:'Se frenó un guardado que borraba datos', restauracion:'Se restauró un respaldo de los datos'}, alertas:[{f:'2026-10-31 19:40:12', t:'guardado_bloqueado', g:'alta', c:'Rafael', d:'Intentó guardar con 0 filas; antes había 1.240.', a:''},{f:'2026-10-31 11:02:45', t:'baja_fuerte', g:'media', c:'Ignacio', d:'Bajó de 1.240 a 980 filas terminadas.', a:''}]};
+    if(a === 'respaldosListar') return {ok:true, respaldos:(estado.resp = estado.resp || [{n:1,ts:Date.now()-3600000*3,motivo:'diario 7:00',filas:1240,terminadas:812},{n:2,ts:Date.now()-86400000,motivo:'diario 7:00',filas:1240,terminadas:790},{n:3,ts:Date.now()-86400000*2,motivo:'diario 7:00',filas:1240,terminadas:761}])};
+    if(a === 'respaldoAhora') return {ok:true};
+    if(a === 'respaldoRestaurar') return x.confirmar === true ? {ok:true} : {ok:false,error:'datos_invalidos'};
     if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados};
     if(a === 'seccionesListar') return {ok:true, usuarios:estado.usuarios.filter(u => u.rol !== 1)};
     if(a === 'seccionesGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.extra = x.extra; guardar(); return {ok:true, extra:u.extra}; }
@@ -277,7 +292,8 @@ function rendDemo(){
 function renderRendimiento(raiz, datos, esc){
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
   const hoy = rdHoy(), hoyLun = rdLunes(hoy);
-  let primera = hoy;
+  const INICIO_OBRA = '2026-05-29';   // semana 1 = la semana de esta fecha
+  let primera = hoy < INICIO_OBRA ? hoy : INICIO_OBRA;
   datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d < primera) primera = x.d; }); (t.asistencia || []).forEach(x => { if(x.d < primera) primera = x.d; }); });
   const lun0 = rdLunes(primera);
   const nSem = l => Math.round((rdFecha(l) - rdFecha(lun0)) / 604800000) + 1;
@@ -317,12 +333,12 @@ function renderRendimiento(raiz, datos, esc){
     const p = [];
     if(!r.conAsist) return 'asistencia sin registrar';
     p.push(r.F ? 'Tuvo ' + r.F + (r.F === 1 ? ' falta' : ' faltas') : 'Sin faltas');
-    if(r.sc.length) p.push(r.sc.length > 2 ? 'se fue antes por falta de cancha ' + r.sc.length + ' días' : 'se fue antes por falta de cancha ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
+    if(r.sc.length) p.push(r.sc.length > 2 ? 'retirado / sin cancha ' + r.sc.length + ' días' : 'retirado / sin cancha ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
     if(r.otros.length) p.push(r.otros.length > 2 ? 'salió antes ' + r.otros.length + ' días' : 'salió antes ' + r.otros.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
     return p.join(' · ');
   }
-  raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="rdVista"><option value="semana">Semana</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
-    + '<label id="rdSelW">Semana <select id="rdSem"></select></label><label id="rdSelM">Mes <select id="rdMes"></select></label>'
+  raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="rdVista"><option value="dia">Día</option><option value="semana" selected>Semana</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
+    + '<label id="rdSelD">Día <input type="date" id="rdDia" max="' + hoy + '"></label><label id="rdSelW">Semana <select id="rdSem"></select></label><label id="rdSelM">Mes <select id="rdMes"></select></label>'
     + '</div><div id="rdOutC"></div><div id="rdOutF"></div>';
   const $ = id => raiz.querySelector('#' + id);
   /* Cerámica y Frague se miden por separado: cada grupo tiene su propio promedio y ranking.
@@ -340,19 +356,29 @@ function renderRendimiento(raiz, datos, esc){
   const meses = []; { let a = new Date(primera.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z'); while(a <= z){ meses.push(rdIso(a).substring(0, 7)); a.setUTCMonth(a.getUTCMonth() + 1); } }
   $('rdMes').innerHTML = meses.slice().reverse().map(m => '<option value="' + m + '">' + RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4) + '</option>').join('');
   $('rdMes').value = hoy.substring(0, 7);
+  /* día por defecto: el último con trabajo o asistencia */
+  { let ult = ''; datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d <= hoy && x.d > ult) ult = x.d; }); (t.asistencia || []).forEach(x => { if(x.d <= hoy && x.d > ult) ult = x.d; }); }); $('rdDia').value = ult || hoy; }
+  /* promedio, máximo y mínimo de m² por día y por semana (solo días con m² > 0) */
+  function minmax(t, desde, hasta, cat){
+    const pd = {}, ps = {};
+    t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat) && x.m2 > 0){ pd[x.d] = (pd[x.d] || 0) + x.m2; const l = rdLunes(x.d); ps[l] = (ps[l] || 0) + x.m2; } });
+    const res = obj => { const k = Object.keys(obj); if(!k.length) return null; let mx = k[0], mn = k[0], sum = 0; k.forEach(c => { sum += obj[c]; if(obj[c] > obj[mx]) mx = c; if(obj[c] < obj[mn]) mn = c; }); return {n: k.length, prom: sum / k.length, max: obj[mx], maxK: mx, min: obj[mn], minK: mn}; };
+    return {dia: res(pd), sem: res(ps)};
+  }
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
   function pintar(){ pintarGrupo('Cerámica', 'Cerámica', $('rdOutC')); pintarGrupo('Frague', 'Frague', $('rdOutF')); }
   function pintarGrupo(cat, etq, out){
     const vista = $('rdVista').value, lista = listaGrupo(cat);
     if(!lista.length){ out.innerHTML = ''; return; }
-    $('rdSelW').style.display = vista === 'semana' ? '' : 'none'; $('rdSelM').style.display = vista === 'mes' ? '' : 'none';
+    $('rdSelD').style.display = vista === 'dia' ? '' : 'none'; $('rdSelW').style.display = vista === 'semana' ? '' : 'none'; $('rdSelM').style.display = vista === 'mes' ? '' : 'none';
     let desde, hasta, titulo, sub = '';
-    if(vista === 'semana'){ const l = $('rdSem').value, w = infoSem(l); desde = l; hasta = rdSuma(l, 6); titulo = 'Semana ' + w.n + ' · ' + w.rango + w.tag; sub = w.nota; }
+    if(vista === 'dia'){ const f = $('rdDia').value || hoy, d = rdFecha(f); desde = hasta = f; titulo = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][d.getUTCDay()] + ' ' + d.getUTCDate() + ' de ' + RD_MES[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); sub = d.getUTCDay() === 0 ? 'Los domingos no se registra asistencia.' : ''; }
+    else if(vista === 'semana'){ const l = $('rdSem').value, w = infoSem(l); desde = l; hasta = rdSuma(l, 6); titulo = 'Semana ' + w.n + ' · ' + w.rango + w.tag; sub = w.nota; }
     else if(vista === 'mes'){ const m = $('rdMes').value; desde = m + '-01'; hasta = m + '-31'; titulo = RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4); sub = 'Suma por la fecha real de cada día: las semanas que mezclan dos meses se reparten día a día.'; }
     else { desde = '0000-01-01'; hasta = '9999-12-31'; titulo = 'Total acumulado'; sub = 'Desde la semana ' + 1 + ' (' + fd(primera) + ') hasta hoy · ' + todasSem.length + ' semanas.'; }
     titulo = etq + ' · ' + titulo;
-    const filas = lista.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat)}));
+    const filas = lista.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
     if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ if(cat === 'Frague'){ out.innerHTML = ''; return; } out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
     const act = filas.filter(f => f.r.dias > 0);
     const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
@@ -361,6 +387,19 @@ function renderRendimiento(raiz, datos, esc){
     const conPct = filas.filter(f => f.pct != null).sort((a, b) => b.pct - a.pct);
     const conAs = filas.filter(f => f.r.asistPct != null).sort((a, b) => b.r.asistPct - a.r.asistPct || a.r.F - b.r.F);
     const maxM2 = Math.max(1, ...filas.map(f => f.r.m2));
+    const conMm = filas.filter(f => f.mm.dia);
+    const topD = conMm.length ? conMm.reduce((a, f) => f.mm.dia.max > a.mm.dia.max ? f : a) : null, botD = conMm.length ? conMm.reduce((a, f) => f.mm.dia.min < a.mm.dia.min ? f : a) : null;
+    const lineaMm = f => {
+      const d = f.mm.dia, w = f.mm.sem; if(!d) return '';
+      let h = '<small class="rd-mm">Por día: prom <b>' + fmt(d.prom) + '</b> · máx <b>' + fmt(d.max) + '</b> (' + fd(d.maxK) + ') · mín <b>' + fmt(d.min) + '</b> (' + fd(d.minK) + ')</small>';
+      if(vista !== 'dia' && vista !== 'semana' && w) h += '<small class="rd-mm">Por semana: prom <b>' + fmt(w.prom) + '</b> · máx <b>' + fmt(w.max) + '</b> (S' + infoSem(w.maxK).n + ') · mín <b>' + fmt(w.min) + '</b> (S' + infoSem(w.minK).n + ')</small>';
+      return h;
+    };
+    const lineaPot = f => {
+      const r = f.r; if(!r.conAsist || !r.dias || !r.m2) return '';
+      const pot = r.porDia * r.disp, perd = pot - r.m2;
+      return '<small class="rd-mm">Con asistencia completa (' + fmt(r.disp) + (r.disp === 1 ? ' día' : ' días') + '): ~<b>' + fmt(pot) + ' m²</b>' + (perd > 0.05 ? ' · se perdieron ~' + fmt(perd) + ' m² por faltas' : ' · sin pérdida por faltas') + '</small>';
+    };
     const sinAs = filas.filter(f => !f.r.conAsist && (f.r.m2 > 0)).length;
     const asEq = conAs.length ? conAs.reduce((a, f) => a + f.r.trab, 0) / Math.max(1e-9, conAs.reduce((a, f) => a + f.r.disp, 0)) * 100 : null;
     /* gráfico de m² por semana (últimas 12, o todas en Total hasta 30) */
@@ -381,13 +420,14 @@ function renderRendimiento(raiz, datos, esc){
     const ord = filas.slice().sort((a, b) => (b.pct == null ? -1 : b.pct) - (a.pct == null ? -1 : a.pct) || b.r.m2 - a.r.m2);
     out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '')
       + '<div class="rd-res"><div><b>' + fmt(totM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom) + ' m²</b><span>promedio por día trabajado (100%)</span></div><div><b>' + (asEq == null ? '—' : Math.round(asEq) + '%') + '</b><span>asistencia del equipo' + (asEq == null ? ' (sin registrar)' : '') + '</span></div></div>'
+      + (topD ? '<div class="rd-res"><div><b>' + fmt(topD.mm.dia.max) + ' m²</b><span>máximo en un día · ' + esc(topD.nombre) + ' (' + fd(topD.mm.dia.maxK) + ')</span></div><div><b>' + fmt(botD.mm.dia.min) + ' m²</b><span>mínimo en un día · ' + esc(botD.nombre) + ' (' + fd(botD.mm.dia.minK) + ')</span></div></div>' : '')
       + '<div class="rd-dest">'
       + (conPct.length ? '<div class="rd-d ok"><small>Más rinde</small><b>' + esc(conPct[0].nombre) + '</b><span>' + Math.round(conPct[0].pct) + '% del promedio</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(conPct[conPct.length - 1].nombre) + '</b><span>' + Math.round(conPct[conPct.length - 1].pct) + '% del promedio</span></div>' : '')
       + (conAs.length ? '<div class="rd-d ok"><small>Mejor asistencia</small><b>' + esc(conAs[0].nombre) + '</b><span>' + Math.round(conAs[0].r.asistPct) + '% · ' + conAs[0].r.F + (conAs[0].r.F === 1 ? ' falta' : ' faltas') + '</span></div><div class="rd-d bad"><small>Peor asistencia</small><b>' + esc(conAs[conAs.length - 1].nombre) + '</b><span>' + Math.round(conAs[conAs.length - 1].r.asistPct) + '% · ' + conAs[conAs.length - 1].r.F + (conAs[conAs.length - 1].r.F === 1 ? ' falta' : ' faltas') + '</span></div>' : '<div class="rd-d"><small>Asistencia</small><b>Sin registrar</b><span>Usa el botón Asistencia del panel</span></div>')
       + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
         const r = f.r, p = f.pct;
         const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
-        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small></div>'
+        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + lineaMm(f) + lineaPot(f) + '</div>'
           + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span>' + (p == null ? 'sin días para comparar' : '<b style="color:' + color(p) + '">' + Math.round(p) + '%</b> del promedio por día') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
           + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
@@ -396,7 +436,7 @@ function renderRendimiento(raiz, datos, esc){
       + '<div class="rd-nota"><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</div>';
   }
   raiz.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
-  ['rdVista', 'rdSem', 'rdMes'].forEach(id => $(id).addEventListener('change', pintar));
+  ['rdVista', 'rdDia', 'rdSem', 'rdMes'].forEach(id => $(id).addEventListener('change', pintar));
   pintar();
 }
 
@@ -500,6 +540,43 @@ async function vistaRendimiento(){
 function vistaVentanas(){
   main.innerHTML = '<h2>Ventanas</h2><p class="nota">Aquí se decidirá qué ventanas y botones puede ver y abrir cada persona dentro de cada página.</p><div class="proximo">Próximamente. Falta definir la lista de ventanas de cada página que se pueden encender o apagar.</div>';
 }
+// ===== Seguridad: alertas y respaldos =====
+const fmtH = ms => new Date(ms).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+async function vistaSeguridad(){
+  main.innerHTML = '<h2>Seguridad</h2><p class="nota">Aquí ves los movimientos fuera de lo normal y puedes volver atrás con un respaldo. Se guarda un respaldo todos los días entre las 7:00 y las 8:00.</p>'
+    + '<div class="tarjeta"><b>Alertas</b><div id="sgAl" style="margin-top:10px;">Cargando…</div></div>'
+    + '<div class="tarjeta"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><b style="flex:1;">Respaldos</b><button class="btn" id="sgAhora" type="button">Hacer respaldo ahora</button></div><div id="sgRe" style="margin-top:10px;">Cargando…</div></div>';
+  const [al, re] = await Promise.all([api('alertasListar'), api('respaldosListar')]);
+  const eAl = $('sgAl'), eRe = $('sgRe'); if(!eAl) return;
+  if(!al || !al.ok) eAl.textContent = 'No se pudieron cargar las alertas.';
+  else {
+    const T = al.titulos || {};
+    eAl.innerHTML = '<div class="nota" style="margin-top:0;">Se avisa por correo a ' + (al.correos || 0) + ' dirección(es). Se muestran las últimas 120.</div><div class="sg-lista">'
+      + (al.alertas.length ? al.alertas.map(x => '<div class="sg-al ' + esc(x.g) + '"><div class="cab"><b>' + esc(T[x.t] || x.t) + '</b><small style="text-transform:uppercase;">' + esc(x.g) + '</small><small style="margin-left:auto;">' + esc(x.f) + '</small></div><div>' + (x.c ? '<b>' + esc(x.c) + ':</b> ' : '') + esc(x.d) + '</div></div>').join('') : '<div class="nota">Todo tranquilo: no hay alertas.</div>') + '</div>';
+  }
+  pintaRespaldos(re);
+  $('sgAhora').addEventListener('click', async () => { const j = await accion('respaldoAhora'); if(j){ toast(j.ok ? 'Respaldo guardado.' : 'No se guardó: no hay datos que respaldar.', !j.ok); pintaRespaldos(await api('respaldosListar')); } });
+}
+function pintaRespaldos(re){
+  const e = $('sgRe'); if(!e) return;
+  if(!re || !re.ok){ e.textContent = 'No se pudieron cargar los respaldos.'; return; }
+  if(!re.respaldos.length){ e.innerHTML = '<div class="nota" style="margin-top:0;">Todavía no hay respaldos.</div>'; return; }
+  e.innerHTML = '<div class="sg-lista">' + re.respaldos.map(r => '<div class="fila"><div class="quien2"><b>' + esc(fmtH(r.ts)) + '</b><small>' + esc(r.motivo) + (r.filas != null ? ' · ' + r.filas + ' filas · ' + r.terminadas + ' terminadas' : '') + '</small></div><button class="btn bad" data-n="' + r.n + '" type="button">Restaurar</button></div>').join('') + '</div>';
+  e.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => confirmaRestaurar(re.respaldos.find(r => r.n === Number(b.dataset.n)))));
+}
+function confirmaRestaurar(r){
+  const v = document.createElement('div'); v.className = 'vel';
+  v.innerHTML = '<div class="ven" role="dialog" aria-modal="true"><h3 style="margin:0 0 6px;">Restaurar respaldo</h3><p class="nota" style="margin:0;">Los datos vuelven a como estaban el <b style="color:var(--text);">' + esc(fmtH(r.ts)) + '</b>, y lo que se hizo después se pierde. Antes de restaurar se guarda un respaldo de como están ahora.</p><div class="acc2"><button class="btn" id="rsNo" type="button">Cancelar</button><button class="btn bad" id="rsSi" type="button">Restaurar</button></div></div>';
+  document.body.appendChild(v);
+  const cerrar = () => v.remove();
+  v.addEventListener('click', e => { if(e.target === v) cerrar(); });
+  $('rsNo').addEventListener('click', cerrar);
+  $('rsSi').addEventListener('click', async e => {
+    e.currentTarget.disabled = true;
+    const j = await accion('respaldoRestaurar', {n: r.n, confirmar: true}); cerrar();
+    if(j){ toast('Datos restaurados.'); pintaRespaldos(await api('respaldosListar')); }
+  });
+}
 // ===== Generador de documentos =====
 // va en un marco aparte para que no se mezclen sus estilos con los del panel
 // el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
@@ -526,7 +603,7 @@ function vistaGenerador(){
 }
 async function ir(t){
   tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'generador') vistaGenerador(); else vistaVentanas();
+  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'generador') vistaGenerador(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
 }
 $('lado').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if(b) ir(b.dataset.t); });
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
@@ -564,7 +641,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.19';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.22';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.19 · 31-10-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.22 · 31-10-2026 ==== -->
