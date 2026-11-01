@@ -1397,6 +1397,31 @@
 .avl.alerta  { --av: #e9c46a; }
 .avl.error   { --av: #e8707f; }
 
+/* ===== indicador "Guardando… / Cargando…" con el mismo estilo del aviso lateral ===== */
+.avl-carga {
+  --av: #74d1e0;
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  z-index: 9998; display: none; align-items: center; justify-content: center; gap: 12px;
+  min-width: 220px; max-width: min(440px, calc(100vw - 32px));
+  padding: 12px 20px 14px; text-align: center;
+  background: rgba(22, 32, 40, .96); color: #f2f6f8;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  font: 500 14px/22px "Noto Sans", "Segoe UI", system-ui, sans-serif;
+  animation: lateral-abre .32s cubic-bezier(.2,.7,.2,1) both;
+}
+.avl-carga::before, .avl-carga::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+}
+.avl-carga::before { top: -1px; }
+.avl-carga::after { bottom: -1px; }
+.avl-spin {
+  width: 16px; height: 16px; flex: 0 0 auto; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.18); border-top-color: var(--av);
+  animation: girar .7s linear infinite;
+}
+
 /* ===== contenedor (arriba al centro) ===== */
 .avls {
   position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px));
@@ -1807,8 +1832,8 @@
 
 <button id="scrollTopBtn" title="Subir" style="position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);font-size:16px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;z-index:69;">⬆</button>
 <button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:70px;right:26px;width:36px;height:36px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:15px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;z-index:70;">💾</button>
-<div id="cargandoToast" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--panel);color:var(--text);border:1px solid var(--border-strong);padding:9px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;align-items:center;gap:9px;z-index:95;">
-  <span class="spinner" style="width:13px;height:13px;border:2px solid var(--border-strong);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:girar .7s linear infinite;"></span>
+<div id="cargandoToast" class="avl-carga">
+  <span class="avl-spin"></span>
   <span id="cargandoTexto">Cargando…</span>
 </div>
 
@@ -2053,7 +2078,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.31';
+const APP_VERSION = '0.73.33';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2498,11 +2523,15 @@ function rebuildWorkerList(){
   });
 }
 
+let avanceRemoto = 0, remotoAvance = {};
 async function mergeRemoteBeforeSave(){
   if(!DB_URL) return;
   const remote = await dbLoad();
+  avanceRemoto = 0; remotoAvance = {};
   if(!remote) return false;   // no se pudo leer la base: quien llama no debe hacer un guardado completo
   if(!remote.items || !Object.keys(remote.items).length) return true;
+  Object.keys(remote.items).forEach(id => { const it = remote.items[id]; if(it && (it.terminado || it.pagado)) remotoAvance[id] = true; });
+  avanceRemoto = Object.keys(remotoAvance).length;
 
   Object.keys(remote.items).forEach(id => {
     if(!dirtyCellIds.has(id) && cellById[id]){ state[id] = remote.items[id]; baseRec[id] = recordForCell(cellById[id]); }
@@ -2819,6 +2848,17 @@ async function dbLoad(){
     return null;
   }
 }
+// ===== nombre legible de una partida a partir de su id =====
+function nombrePartidaId(id){
+  const c = cellById[id];
+  if(!c) return id;
+  return (c.dpto === 'Pasillo' ? 'Pasillo' : 'Dpto ' + c.dpto) + ' · ' + (AREA_LABEL[c.area] || c.area) + ' (' + c.piso + ')';
+}
+function listaPartidas(ids, max){
+  max = max || 8;
+  const t = ids.slice(0, max).map(nombrePartidaId).join('; ');
+  return t + (ids.length > max ? '; y ' + (ids.length - max) + ' más' : '');
+}
 function recordForCell(c, stIn){
   const st = stIn || getState(c.id);
   return { id:c.id, categoria:c.categoria, piso:c.piso, dpto:c.dpto, area:c.area,
@@ -2882,8 +2922,13 @@ async function dbSave(dirtyIds){
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
     if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Ingresa tu PIN de nuevo para poder seguir guardando.'; sesionVencida(); throw new Error('sin sesion'); }
-    if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = 'El servidor frenó el guardado porque iba a borrar la mayoría de las partidas. No se guardó nada: recarga la página y revisa tus datos.'; throw new Error('reduccion'); }
-    if(json && json.error === 'perdida_sospechosa'){ dbErrorReason = 'El servidor frenó el guardado porque iba a borrar partidas ya terminadas o pagadas. No se guardó nada: recarga la página y revisa tus datos antes de volver a guardar.'; throw new Error('perdida'); }
+    if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = `El servidor frenó el guardado: este envío traía solo ${json.enviadas ?? '?'} partidas y la base de datos tiene ${json.existentes ?? '?'}. No se guardó nada: recarga la página y revisa tus datos.`; throw new Error('reduccion'); }
+    if(json && json.error === 'perdida_sospechosa'){
+      const pl = Array.isArray(json.perdidas) ? json.perdidas : [];
+      dbErrorReason = `El servidor frenó el guardado: en la base de datos hay ${json.hoy ?? '?'} partidas terminadas/pagadas y este envío traía solo ${json.nuevo ?? '?'} (se perdían ${json.totalPerdidas ?? pl.length}${json.sinEnviar ? ', ' + json.sinEnviar + ' ni venían en el envío' : ''}; el envío traía ${json.enviadas ?? '?'} partidas).` + (pl.length ? ' Partidas afectadas: ' + listaPartidas(pl, 6) + '.' : '') + ' No se guardó nada.';
+      console.error('perdida_sospechosa', json);
+      throw new Error('perdida');
+    }
     if(json && json.error === 'muy_grande'){ dbErrorReason = 'El servidor rechazó el guardado porque los datos son demasiado grandes.'; throw new Error('muy grande'); }
     if(!json || json.ok !== true){ dbErrorReason = 'El servidor contestó, pero no confirmó el guardado (revisa el código del Apps Script).'; throw new Error('respuesta no ok'); }
     dbStatus = 'online'; dbLastOkTs = Date.now(); updateDbBadge();
@@ -3046,6 +3091,14 @@ async function doSaveCycle(){
       return {localOk:false, dbOk:false};
     }
   }
+  if(guardadoCompleto && DB_URL && avanceRemoto >= 5){
+    const avanceLocal = ALL_CELLS.filter(c => { const st = state[c.id]; return st && (st.terminado || st.pagado); }).length;
+    if(avanceLocal < avanceRemoto * 0.8){
+      const remotas = Object.keys(cellById).filter(id => { const st = state[id]; return !(st && (st.terminado || st.pagado)) && remotoAvance[id]; });
+      avisoToast(`Guardado cancelado antes de enviar: la base de datos tiene ${avanceRemoto} partidas terminadas/pagadas y tu pantalla solo ${avanceLocal}. Faltan: ${listaPartidas(remotas, 6)}. Recarga la página.`, 'error', {dur: 12000});
+      return {localOk:false, dbOk:false, cancelado:true};
+    }
+  }
   const payload = {items:state, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
@@ -3067,7 +3120,7 @@ async function doSaveCycle(){
   }
   render();
   if(localOk && (!DB_URL || dbOk)) mostrarGuardadoToast();
-  else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error');
+  else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error', {dur: 14000});
   else if(!localOk) avisoToast('No se pudo guardar en este navegador. Descarga un respaldo para no perder los cambios.', 'error');
   return {localOk, dbOk};
   } finally { ocultarCargando(); if(!pendientesEnCola) bloquearGuardado(false); }
@@ -3121,7 +3174,7 @@ function resumenCambiosPendientes(){
 function pedirGuardar(){
   if(!isAdmin || guardandoAhora) return;
   const r = resumenCambiosPendientes();
-  if(!r.celdas.length && !r.secciones.length){ saveNow(); return; }
+  if(!r.celdas.length && !r.secciones.length){ avisoLateral('No hay cambios por guardar', 'info', {dur: 2500}); return; }
   const cuerpo = (r.celdas.length ? `<p class="cp-intro">${r.celdas.length} partida${r.celdas.length === 1 ? '' : 's'} con cambios desde el último guardado:</p><div class="cp-lista">${r.celdas.join('')}</div>` : '')
     + (r.secciones.length ? `<p class="cp-intro">También se guardarán cambios en: <b>${r.secciones.map(esc).join(', ')}</b>.</p>` : '');
   openInputModal('Cambios por guardar', cuerpo, () => { saveNow(); }, 'Guardar');
@@ -5850,7 +5903,7 @@ document.getElementById('asistBtn').addEventListener('click', abrirAsistencia);
 
 
 let avisoToastTimer = null;
-function avisoToast(texto, tipo){ avisoLateral(texto, tipo); }
+function avisoToast(texto, tipo, op){ avisoLateral(texto, tipo, op); }
 function tienePeticionMia(celdaId, tipo){ return misPeticiones.some(p => p.celda === celdaId && p.tipo === tipo); }
 function peticionBtnHtml(cell, st){
   if(!workerSession) return '';
@@ -8158,4 +8211,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.31 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.33 · 01-11-2026 ==== -->
