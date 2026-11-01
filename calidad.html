@@ -163,10 +163,6 @@ body.bloq{overflow:hidden;}
 .pill{font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--border);color:var(--sub);}
 .pill.quien{display:flex;flex-direction:column;gap:1px;border-radius:12px;padding:3px 10px;}.pill.quien i{font-style:normal;font-weight:500;font-size:10.5px;opacity:.85;}
 .pill.ok{background:rgba(67,160,71,.16);border-color:transparent;color:var(--ok);}
-#aviso{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,16px);max-width:min(92vw,420px);background:#3a2323;color:#fff;border:1px solid #c0392b;padding:10px 14px;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;}
-#aviso.on{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
-#aviso{display:flex;align-items:flex-start;gap:12px;}
-#aviso button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;width:26px;height:26px;padding:0;font-size:14px;line-height:1;flex:0 0 auto;}
 .infobar{width:calc(100% - 32px);max-width:828px;margin:12px auto 0;padding:9px 12px;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--accent);font-size:12.5px;line-height:1.5;color:var(--text);}
 .infobar.warn{border-left-color:var(--warn);background:linear-gradient(rgba(217,154,0,.14),rgba(217,154,0,.14)),var(--panel);}
 .infobar.bad{border-left-color:var(--bad);background:linear-gradient(rgba(192,57,43,.12),rgba(192,57,43,.12)),var(--panel);}
@@ -412,7 +408,135 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .cluster .btn,.cluster .cs-btn,.cluster .btn-menu{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;height:34px !important;min-height:34px !important;width:170px !important;min-width:0 !important;margin:0 !important;padding:0 10px !important;font-size:12px !important;line-height:1.2;text-align:center;white-space:nowrap;}
   .cluster .cs-btn{gap:6px;}
   .cluster .conectado{box-sizing:border-box;display:inline-flex;align-items:center;height:34px;}
+
+/* ===== Aviso lateral · v1 ===== */
+/* se abre del centro hacia los lados y se cierra igual */
+
+/* ===== colores por tipo ===== */
+.avl         { --av: #74d1e0; }   /* info */
+.avl.exito   { --av: #5fd6a4; }
+.avl.alerta  { --av: #e9c46a; }
+.avl.error   { --av: #e8707f; }
+
+/* ===== contenedor (arriba al centro) ===== */
+.avls {
+  position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px));
+  transform: translateX(-50%); z-index: 9999;
+  width: min(440px, calc(100vw - 32px));
+  display: grid; gap: 10px; pointer-events: none;
+}
+
+/* ===== aviso ===== */
+.avl {
+  position: relative; pointer-events: auto;
+  display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 12px;   /* el relleno de 26px iguala a la X: lo del medio queda centrado */
+  padding: 12px 12px 14px 16px;
+  background: rgba(22, 32, 40, .96); color: #f2f6f8;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  font: 500 14px/1.4 "Noto Sans", "Segoe UI", system-ui, sans-serif;
+}
+/* líneas de arriba y abajo que se apagan hacia los lados */
+.avl::before, .avl::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+}
+.avl::before { top: -1px; }
+.avl::after  { bottom: -1px; }
+
+.avl .icono { width: 22px; height: 22px; display: grid; place-items: center; color: var(--av); }
+.avl .icono svg { width: 20px; height: 20px; }
+.avl .cont { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; text-align: center; }
+.avl .icono { flex: 0 0 auto; }
+.avl .texto { min-width: 0; overflow-wrap: anywhere; line-height: 22px; }
+.avl .cerrar {
+  width: 26px; height: 26px; display: grid; place-items: center;
+  background: transparent; color: #9fb3bd; border: 1px solid rgba(255,255,255,.15); border-radius: 0; cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+.avl .cerrar:hover { color: #fff; border-color: var(--av); }
+.avl .cerrar:focus-visible { outline: 2px solid var(--av); outline-offset: 2px; }
+.avl .cerrar svg { width: 12px; height: 12px; }
+
+/* barrita de tiempo: se achica hacia el centro */
+.avl .tiempo {
+  position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
+  background: linear-gradient(to right, transparent, var(--av) 20%, var(--av) 80%, transparent);
+  opacity: .55; transform-origin: center;
+  animation: aviso-tiempo var(--dur, 4s) linear forwards;
+}
+.avl:hover .tiempo { animation-play-state: paused; }
+@keyframes aviso-tiempo { to { transform: scaleX(0); } }
+
+/* contenido aparece después de abrir */
+.avl > :not(.tiempo) { animation: aviso-contenido .25s ease .18s both; }
+@keyframes aviso-contenido { from { opacity: 0; } to { opacity: 1; } }
+
+/* ===== abre / cierra ===== */
+.avl        { animation: lateral-abre .32s cubic-bezier(.2,.7,.2,1) both; }
+.avl.sale   { animation: lateral-cierra .26s ease-in both; }
+@keyframes lateral-abre   { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
+@keyframes lateral-cierra { from { clip-path: inset(0 0 0 0); opacity: 1; } to { clip-path: inset(0 50% 0 50%); opacity: .4; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .avl, .avl > * { animation-duration: .01s !important; }
+}
+
 </style>
+<script>
+// ===== Aviso lateral · v1 =====
+// uso: avisoLateral('Guardado', 'exito') · tipos: info / exito / alerta / error ('ok' = exito, sin tipo = lo deduce del texto)
+// el texto va con textContent, no se ejecuta nada que venga escrito
+(() => {
+  const iconos = {
+    info:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+    exito:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    alerta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>',
+    error:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>'
+  };
+  const equis = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  const MAX = 4;   // si hay más, se cierra el más viejo
+
+  // ===== contenedor =====
+  const caja = () => {
+    let c = document.querySelector('.avls');
+    if (!c) { c = document.createElement('div'); c.className = 'avls'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); document.body.appendChild(c); }
+    return c;
+  };
+  // ===== tipo según el texto, para los avisos que no lo traen =====
+  const deducir = t => /^(listo|guardad|cierre guardado|prueba enviada|copiad)/i.test(t) ? 'exito' : /^(no se pudo|no se encontr|error|sin conexi)/i.test(t) ? 'error' : 'info';
+
+  // ===== crear aviso =====
+  window.avisoLateral = (texto, tipo, op = {}) => {
+    texto = String(texto == null ? '' : texto);
+    if (tipo === 'ok') tipo = 'exito';
+    if (!iconos[tipo]) tipo = deducir(texto);
+    const dur = op.dur || Math.min(12000, Math.max(tipo === 'error' ? 6000 : 4000, texto.length * 70));
+    const caj = caja();
+    const vivos = [...caj.querySelectorAll('.avl:not(.sale)')];
+    if (vivos.some(v => v.dataset.k === tipo + '|' + texto)) return () => {};   // el mismo aviso ya está en pantalla
+    if (vivos.length >= MAX) vivos[0].classList.add('sale');
+
+    const el = document.createElement('div');
+    el.className = 'avl ' + tipo;
+    el.dataset.k = tipo + '|' + texto;
+    el.style.setProperty('--dur', dur + 'ms');
+    el.innerHTML = '<span class="relleno" aria-hidden="true"></span><span class="cont"><span class="icono" aria-hidden="true">' + iconos[tipo] + '</span><span class="texto"></span></span><button class="cerrar" type="button" aria-label="Cerrar">' + equis + '</button><span class="tiempo" aria-hidden="true"></span>';
+    el.querySelector('.texto').textContent = texto;   // sin html
+
+    const cerrar = () => {
+      if (el.classList.contains('sale')) return;
+      el.classList.add('sale');
+      el.addEventListener('animationend', e => { if (e.target === el) el.remove(); });
+    };
+    el.addEventListener('animationend', e => { if (e.target === el && el.classList.contains('sale')) el.remove(); });
+    el.querySelector('.cerrar').addEventListener('click', cerrar);
+    el.querySelector('.tiempo').addEventListener('animationend', cerrar);
+    caj.appendChild(el);
+    return cerrar;
+  };
+})();
+</script>
 </head>
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Calidad</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
@@ -508,7 +632,6 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     </div>
   </div>
 </div>
-<div id="aviso" role="alert"><span id="avisoTxt"></span><button type="button" id="avisoX" aria-label="Cerrar aviso">✕</button></div>
 <div id="velOp">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="oTit">
     <h2 id="oTit">Editar opciones de observación</h2>
@@ -564,7 +687,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.36.18';
+const CAL_VERSION = '1.36.19';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -977,11 +1100,7 @@ function cerrarModal(){
 }
 
 let enVuelo = 0;
-function aviso(texto){
-  const a = $('aviso');
-  $('avisoTxt').textContent = texto;
-  a.classList.add('on');
-}
+function aviso(texto){ avisoLateral(texto, 'error'); }
 
 // ---- Fotos por departamento (se guardan en Google Sheets, hoja calidad_fotos) ----
 const FOTO_LADO = 1280, MINI_LADO = 220, FOTOS_MAX = 12, FOTO_MAX_CHARS = 700000;
@@ -1585,7 +1704,6 @@ $('salir').addEventListener('click', () => {
 });
 $('lista').addEventListener('click', e => { if(e.target.closest('#reintentar')) cargarInicial(); });
 $('refrescar').addEventListener('click', () => cargar());
-$('avisoX').addEventListener('click', () => $('aviso').classList.remove('on'));
 $('infoBar').addEventListener('click', e => { if(e.target.closest('#infoReintentar')) cargarInicial(); });
 $('filtro').addEventListener('change', () => { pisoPendiente = false; guardarLocal('calidadFiltroPiso', $('filtro').value || null); pintar(); });
 $('filtroEstado').addEventListener('change', () => { guardarLocal('calidadFiltroEstado', $('filtroEstado').value || null); pintar(); });
