@@ -1346,7 +1346,7 @@
 .rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
-.rd-b span{font-size:12px;}
+.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-nota{font-size:12.5px;margin:6px 0 4px;}.rd-nota summary{cursor:pointer;font-weight:600;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
@@ -1392,33 +1392,33 @@
 /* se abre del centro hacia los lados y se cierra igual */
 
 /* ===== colores por tipo ===== */
-.avl         { --av: #74d1e0; }   /* info */
-.avl.exito   { --av: #5fd6a4; }
-.avl.alerta  { --av: #e9c46a; }
-.avl.error   { --av: #e8707f; }
+.avl         { --av: #2fa3b8; }   /* info */
+.avl.exito   { --av: #34a874; }
+.avl.alerta  { --av: #d99a1c; }
+.avl.error   { --av: #d6455a; }
 
 /* ===== indicador "Guardando… / Cargando…" con el mismo estilo del aviso lateral ===== */
 .avl-carga {
-  --av: #74d1e0;
+  --av: #2fa3b8;
   position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   z-index: 9998; display: none; align-items: center; justify-content: center; gap: 12px;
   min-width: 220px; max-width: min(440px, calc(100vw - 32px));
   padding: 12px 20px 14px; text-align: center;
-  background: rgba(22, 32, 40, .96); color: #f2f6f8;
-  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  background: var(--panel, #fff); color: var(--text, #2c302c);
+  border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
   font: 500 14px/22px "Noto Sans", "Segoe UI", system-ui, sans-serif;
   animation: lateral-abre .32s cubic-bezier(.2,.7,.2,1) both;
 }
 .avl-carga::before, .avl-carga::after {
   content: ""; position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+  background: linear-gradient(to right, transparent, var(--av) 30%, var(--av) 50%, var(--av) 70%, transparent);
 }
 .avl-carga::before { top: -1px; }
 .avl-carga::after { bottom: -1px; }
 .avl-spin {
   width: 16px; height: 16px; flex: 0 0 auto; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.18); border-top-color: var(--av);
+  border: 2px solid var(--border-strong, #b9bdb3); border-top-color: var(--av);
   animation: girar .7s linear infinite;
 }
 
@@ -1435,15 +1435,15 @@
   position: relative; pointer-events: auto;
   display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 12px;   /* el relleno de 26px iguala a la X: lo del medio queda centrado */
   padding: 12px 12px 14px 16px;
-  background: rgba(22, 32, 40, .96); color: #f2f6f8;
-  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  background: var(--panel, #fff); color: var(--text, #2c302c);
+  border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
   font: 500 14px/1.4 "Noto Sans", "Segoe UI", system-ui, sans-serif;
 }
 /* líneas de arriba y abajo que se apagan hacia los lados */
 .avl::before, .avl::after {
   content: ""; position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+  background: linear-gradient(to right, transparent, var(--av) 30%, var(--av) 50%, var(--av) 70%, transparent);
 }
 .avl::before { top: -1px; }
 .avl::after  { bottom: -1px; }
@@ -1455,10 +1455,10 @@
 .avl .texto { min-width: 0; overflow-wrap: anywhere; line-height: 22px; }
 .avl .cerrar {
   width: 26px; height: 26px; display: grid; place-items: center;
-  background: transparent; color: #9fb3bd; border: 1px solid rgba(255,255,255,.15); border-radius: 0; cursor: pointer;
+  background: transparent; color: var(--sub, #6c716a); border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0; cursor: pointer;
   transition: color .2s, border-color .2s;
 }
-.avl .cerrar:hover { color: #fff; border-color: var(--av); }
+.avl .cerrar:hover { color: var(--text, #2c302c); border-color: var(--av); }
 .avl .cerrar:focus-visible { outline: 2px solid var(--av); outline-offset: 2px; }
 .avl .cerrar svg { width: 12px; height: 12px; }
 
@@ -1466,7 +1466,7 @@
 .avl .tiempo {
   position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
   background: linear-gradient(to right, transparent, var(--av) 20%, var(--av) 80%, transparent);
-  opacity: .55; transform-origin: center;
+  opacity: .7; transform-origin: center;
   animation: aviso-tiempo var(--dur, 4s) linear forwards;
 }
 .avl:hover .tiempo { animation-play-state: paused; }
@@ -2078,7 +2078,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.34';
+const APP_VERSION = '0.73.39';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5204,7 +5204,7 @@ function pbCantTxt(m, uni){
 }
 function actualizarPedirFila(){
   const f = document.getElementById('pedirFila'); if(!f) return;
-  f.hidden = activeCategoria !== 'Cerámica' || esInvitado();
+  f.hidden = esInvitado();   // visible en todas las pestañas (Cerámica, Frague…)
 }
 async function pbApi(accion, extra){
   if(!DB_URL){ // copia de prueba
@@ -5563,6 +5563,7 @@ function renderRendimiento(raiz, datos, esc){
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
   const hoy = rdHoy(), hoyLun = rdLunes(hoy);
   const INICIO_OBRA = '2026-05-29';   // semana 1 = la semana de esta fecha
+  const FIN_OFICIAL = '2027-01-01';   // término oficial de la obra
   let primera = hoy < INICIO_OBRA ? hoy : INICIO_OBRA;
   datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d < primera) primera = x.d; }); (t.asistencia || []).forEach(x => { if(x.d < primera) primera = x.d; }); });
   const lun0 = rdLunes(primera);
@@ -5637,6 +5638,151 @@ function renderRendimiento(raiz, datos, esc){
   }
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
+  // ===== Proyección: curva S + recta, por día / semana / mes (el historial de la proyección se recalcula con los datos de cada fecha) =====
+  const pyEstado = {v: 'dia'};
+  const PY_MS = 864e5;
+  function pyDatos(cat){
+    const diario = {};
+    datos.trabajadores.forEach(t => t.dias.forEach(x => { if(x.cat === cat && x.m2 > 0 && x.d <= hoy) diario[x.d] = (diario[x.d] || 0) + x.m2; }));
+    let K = 0, hecho = 0;
+    ALL_CELLS.forEach(c => { if(c.categoria !== cat) return; const st = getState(c.id), m = Number(st.m2); if(!(m > 0)) return; K += m; if(st.terminado || st.pagado) hecho += m; });
+    const ks = Object.keys(diario).sort(); if(!ks.length || !(K > 0)) return null;
+    const ini = ks[0] < INICIO_OBRA ? ks[0] : INICIO_OBRA, n = Math.round((rdFecha(hoy) - rdFecha(ini)) / PY_MS) + 1, cum = [];
+    let a = 0; for(let i = 0; i < n; i++){ a += diario[rdSuma(ini, i)] || 0; cum.push(a); }
+    const base = Math.max(0, hecho - a);   // lo terminado sin fecha se cuenta como avance previo
+    for(let i = 0; i < n; i++) cum[i] += base;
+    if(cum[n - 1] >= K) return null;
+    return {diario, K, ini, n, cum};
+  }
+  function pyAjuste(P, hasta){
+    const pts = []; for(let i = 0; i <= hasta; i++){ const p = P.cum[i] / P.K; if(p > 0.005 && p < 0.995) pts.push([i, Math.log(p / (1 - p)), Math.exp((i - hasta) / 45)]); }
+    if(pts.length < 7) return null;
+    let sw = 0, sx = 0, sy = 0, sxx = 0, sxy = 0; pts.forEach(q => { sw += q[2]; sx += q[2] * q[0]; sy += q[2] * q[1]; sxx += q[2] * q[0] * q[0]; sxy += q[2] * q[0] * q[1]; });
+    const den = sw * sxx - sx * sx; if(den <= 0) return null;
+    const r = (sw * sxy - sx * sy) / den, a = (sy - r * sx) / sw; if(!(r > 0)) return null;
+    return {r, t0: -a / r, K: P.K};
+  }
+  const pyC = (f, i) => f.K / (1 + Math.exp(-f.r * (i - f.t0)));
+  const pyT98 = f => { const t = f.t0 + Math.log(49) / f.r; return t < 4000 ? t : null; };
+  function pyRecta(P, hasta){ const a = Math.max(0, hasta - 27), v = (P.cum[hasta] - P.cum[a]) / Math.max(1, hasta - a); return v > 0 ? v : null; }
+  const pyFecha = (P, i) => rdSuma(P.ini, Math.round(i));
+  const pyFd = d => { const x = rdFecha(d); return x.getUTCDate() + ' ' + RD_MC[x.getUTCMonth()] + ' ' + String(x.getUTCFullYear()).slice(2); };
+  function pyGraf(series, o){
+    const W = 900, H = 230, L = o.fy ? 78 : 46, R = 14, T = 14, B = 26;
+    const X = x => L + (x - o.x0) / Math.max(1e-9, o.x1 - o.x0) * (W - L - R), Y = y => T + (1 - (y - o.y0) / Math.max(1e-9, o.y1 - o.y0)) * (H - T - B);
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="py-svg" role="img" aria-label="' + esc(o.tit || '') + '">';
+    for(let k = 0; k <= 4; k++){ const y = o.y0 + (o.y1 - o.y0) * k / 4; s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y) + '" y2="' + Y(y) + '" stroke="var(--border)" stroke-width="1"/><text x="' + (L - 6) + '" y="' + (Y(y) + 3) + '" font-size="10" text-anchor="end" fill="var(--sub)">' + (o.fy ? o.fy(y) : fmt(y)) + '</text>'; }
+    (o.ticks || []).forEach(t => { s += '<text x="' + X(t[0]) + '" y="' + (H - 8) + '" font-size="10" text-anchor="middle" fill="var(--sub)">' + esc(t[1]) + '</text>'; });
+    if(o.hoyX != null && o.hoyX >= o.x0 && o.hoyX <= o.x1) s += '<line x1="' + X(o.hoyX) + '" x2="' + X(o.hoyX) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--sub)" stroke-dasharray="3 3"/><text x="' + (X(o.hoyX) + 4) + '" y="' + (T + 9) + '" font-size="10" fill="var(--sub)">hoy</text>';
+    if(o.finX != null && o.finX >= o.x0 && o.finX <= o.x1) s += '<line x1="' + X(o.finX) + '" x2="' + X(o.finX) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ok,#43a047)" stroke-width="1.5"/><text x="' + (X(o.finX) - 4) + '" y="' + (T + 20) + '" font-size="10" text-anchor="end" fill="var(--ok,#43a047)">término oficial</text>';
+    if(o.meta != null && o.meta <= o.y1) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(o.meta) + '" y2="' + Y(o.meta) + '" stroke="var(--ok,#43a047)" stroke-dasharray="6 4"/><text x="' + (W - R) + '" y="' + (Y(o.meta) - 4) + '" font-size="10" text-anchor="end" fill="var(--ok,#43a047)">total de la obra ' + fmt(o.meta) + ' m²</text>';
+    series.forEach(q => {
+      if(!q.pts.length) return;
+      s += '<polyline fill="none" stroke="' + q.c + '" stroke-width="' + (q.w || 2) + '"' + (q.d ? ' stroke-dasharray="' + q.d + '"' : '') + ' points="' + q.pts.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' ') + '"/>';
+      if(q.dots) q.pts.forEach(p => { s += '<circle cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '" r="3" fill="' + q.c + '"><title>' + esc(p[2] || '') + '</title></circle>'; });
+    });
+    return s + '</svg>';
+  }
+  const pyDifTxt = d => { const n = Math.round((rdFecha(d) - rdFecha(FIN_OFICIAL)) / PY_MS); return n === 0 ? 'justo en la fecha oficial' : Math.abs(n) + (Math.abs(n) === 1 ? ' día ' : ' días ') + (n > 0 ? 'después' : 'antes') + ' del oficial'; };
+  function pyHtml(cat){
+    const P = pyDatos(cat); if(!P) return '';
+    const hasta = P.n - 1, f = pyAjuste(P, hasta), rec = pyRecta(P, hasta);
+    const ult = Object.keys(P.diario).sort().slice(-10), pd = ult.length ? ult.reduce((a, d) => a + P.diario[d], 0) / ult.length : 0;
+    const lun = rdLunes(hoy); let lleva = 0, rest = 0;
+    for(let k = 0; k <= 4; k++){ const d = rdSuma(lun, k); if(d <= hoy) lleva += P.diario[d] || 0; else rest++; }
+    lleva += (P.diario[rdSuma(lun, 5)] && rdSuma(lun, 5) <= hoy) ? P.diario[rdSuma(lun, 5)] : 0;
+    const cierre = lleva + rest * pd;
+    const idxF = d => Math.round((rdFecha(d) - rdFecha(P.ini)) / PY_MS), finI = idxF(FIN_OFICIAL);
+    const L0 = i => 1 / (1 + Math.exp(-Math.log(49) * (i - finI / 2) / (finI / 2)));
+    const plan = i => P.K * (L0(Math.max(0, Math.min(finI, i))) - L0(0)) / (L0(finI) - L0(0));
+    const debe = plan(hasta), lleva2 = P.cum[hasta], dif = lleva2 - debe;
+    let habiles = 0; for(let d = rdSuma(hoy, 1); d <= FIN_OFICIAL; d = rdSuma(d, 1)){ const w = rdFecha(d).getUTCDay(); if(w >= 1 && w <= 5) habiles++; }
+    const necesario = habiles ? (P.K - lleva2) / habiles : 0;
+    const finS = f && pyT98(f) != null ? pyFecha(P, Math.max(hasta, pyT98(f))) : null;
+    const finR = rec ? rdSuma(hoy, Math.ceil((P.K - P.cum[hasta]) / rec)) : null;
+    const kpi = (b, s) => '<div><b>' + b + '</b><span>' + s + '</span></div>';
+    let h = '<div class="rd-tit">Proyección · ' + esc(cat) + '</div><div class="rd-res">'
+      + kpi(fmt(P.cum[hasta]) + ' de ' + fmt(P.K) + ' m²', 'avance de la obra (faltan ' + fmt(P.K - P.cum[hasta]) + ' m²)')
+      + kpi('~' + fmt(pd) + ' m²', 'estimación por día (últimos ' + ult.length + ' días con trabajo)')
+      + kpi(rest ? '~' + fmt(cierre) + ' m²' : fmt(lleva) + ' m²', rest ? 'cierre estimado del viernes (lleva ' + fmt(lleva) + ' m²)' : 'cerró la semana')
+      + '</div><div class="rd-res">'
+      + kpi(pyFd(FIN_OFICIAL), 'término oficial (inicio ' + pyFd(INICIO_OBRA) + ')')
+      + kpi(finS ? pyFd(finS) : '—', 'término esperado · curva S' + (finS ? ' (' + pyDifTxt(finS) + ')' : ' (faltan datos)'))
+      + kpi(finR ? pyFd(finR) : '—', 'término esperado · ritmo actual' + (finR ? ' (' + pyDifTxt(finR) + ')' : '')) + '</div><div class="rd-res">'
+      + kpi('~' + fmt(debe) + ' m²', 'debería llevar hoy según el plan oficial · lleva ' + fmt(lleva2) + ' m² (' + (dif >= 0 ? 'adelantado ' : 'atrasado ') + fmt(Math.abs(dif)) + ' m²)')
+      + kpi('~' + fmt(necesario) + ' m²', 'por día hábil para terminar el ' + pyFd(FIN_OFICIAL) + ' (hoy rinde ~' + fmt(pd) + ')') + '</div>';
+    const tabs = [['dia', 'Días'], ['semana', 'Semanas'], ['quincena', 'Quincenas'], ['mes', 'Meses']];
+    h += '<div class="py-tabs" role="tablist">' + tabs.map(t => '<button type="button" role="tab" class="py-tab' + (pyEstado.v === t[0] ? ' on' : '') + '" data-py="' + t[0] + '" aria-selected="' + (pyEstado.v === t[0]) + '">' + t[1] + '</button>').join('') + '</div>';
+    const v = pyEstado.v, S_C = 'var(--accent)', P_C = 'var(--warn,#d99a00)', R_C = 'var(--sub)';
+    const cum = i => P.cum[Math.min(hasta, Math.max(0, i))];
+    const projS = i => f ? Math.min(P.K, cum(hasta) + Math.max(0, pyC(f, i) - pyC(f, hasta))) : null;
+    const projR = i => rec ? Math.min(P.K, cum(hasta) + rec * (i - hasta)) : null;
+    /* puntos de la gráfica principal según la pestaña */
+    let real = [], ps = [], pr = [], ticks = [], x0, x1, dots = false, histCortes = [], etq;
+    if(v === 'dia'){
+      x0 = Math.max(0, hasta - 45); x1 = hasta + 30; dots = false; etq = 'Acumulado de m² por día';
+      for(let i = x0; i <= hasta; i++) real.push([i, cum(i)]);
+      for(let i = hasta; i <= x1; i++){ const a = projS(i), b = projR(i); if(a != null) ps.push([i, a]); if(b != null) pr.push([i, b]); }
+      for(let i = x0; i <= x1; i += 7) ticks.push([i, pyFd(pyFecha(P, i)).slice(0, -3)]);
+      for(let i = Math.max(10, hasta - 19); i <= hasta; i++) histCortes.push([i, pyFd(pyFecha(P, i)).slice(0, -3)]);
+    } else if(v === 'semana'){
+      etq = 'Acumulado de m² por semana'; dots = true;
+      const sems = []; for(let l = rdLunes(P.ini); l <= hoyLun; l = rdSuma(l, 7)) sems.push(l);
+      const idx = d => Math.round((rdFecha(d) - rdFecha(P.ini)) / PY_MS);
+      sems.forEach(l => { const i = Math.min(hasta, Math.max(0, idx(rdSuma(l, 6)))); real.push([i, cum(i), 'Semana ' + nSem(l) + ': ' + fmt(cum(i)) + ' m² acumulados']); });
+      const finW = Math.min(52, 8 + Math.ceil(Math.max(0, ((finS ? idx(finS) : hasta + 60) - hasta)) / 7));
+      for(let k = 0; k <= finW; k++){ const i = hasta + k * 7, a = projS(i), b = projR(i); if(a != null) ps.push([i, a, 'S+' + k + ': ~' + fmt(a) + ' m²']); if(b != null) pr.push([i, b, 'S+' + k + ': ~' + fmt(b) + ' m²']); }
+      x0 = real.length ? real[0][0] : 0; x1 = hasta + finW * 7;
+      const paso = Math.max(1, Math.ceil(46 / (7 * 840 / Math.max(1, x1 - x0))));
+      sems.forEach((l, k) => { if((sems.length - 1 - k) % paso === 0) ticks.push([Math.min(hasta, idx(rdSuma(l, 6))), 'S' + nSem(l)]); });
+      sems.slice(-16).forEach(l => { const i = Math.min(hasta, idx(rdSuma(l, 6))); if(i >= 10) histCortes.push([i, 'S' + nSem(l)]); });
+    } else if(v === 'quincena'){
+      etq = 'Acumulado de m² por quincena'; dots = true;
+      const idx = d => Math.round((rdFecha(d) - rdFecha(P.ini)) / PY_MS);
+      const qs = [];   // cada quincena: 1–15 y 16–fin de mes
+      { let a = new Date(P.ini.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z');
+        while(a <= z){ const m = rdIso(a).substring(0, 7), fin = new Date(a); fin.setUTCMonth(fin.getUTCMonth() + 1); fin.setUTCDate(0);
+          qs.push({d: m + '-15', n: 'Q1 ' + RD_MC[a.getUTCMonth()]}); qs.push({d: rdIso(fin), n: 'Q2 ' + RD_MC[a.getUTCMonth()]}); a.setUTCMonth(a.getUTCMonth() + 1); } }
+      const hechas = qs.filter(q => idx(q.d) >= 0);
+      const lista = hechas.filter(q => q.d <= hoy);
+      if(!lista.length || lista[lista.length - 1].d < hoy){ const sig = hechas.find(q => q.d > hoy); if(sig) lista.push({d: hoy, n: ''}); }
+      lista.forEach(q => { const i = Math.min(hasta, Math.max(0, idx(q.d))); real.push([i, cum(i), (q.n || 'hoy') + ': ' + fmt(cum(i)) + ' m² acumulados']); });
+      const finQ = Math.min(24, 3 + Math.ceil(Math.max(0, ((finS ? idx(finS) : hasta + 90) - hasta)) / 15));
+      for(let k = 0; k <= finQ; k++){ const i = hasta + k * 15, a = projS(i), b = projR(i); if(a != null) ps.push([i, a, '+' + k + ' quincena: ~' + fmt(a) + ' m²']); if(b != null) pr.push([i, b, '+' + k + ' quincena: ~' + fmt(b) + ' m²']); }
+      x0 = real.length ? real[0][0] : 0; x1 = hasta + finQ * 15;
+      { const paso = Math.max(1, Math.ceil(real.length / 8)); real.forEach((p, k) => { if((real.length - 1 - k) % paso === 0 && lista[k].n) ticks.push([p[0], lista[k].n]); }); }
+      lista.slice(-10).forEach(q => { const i = Math.min(hasta, idx(q.d)); if(i >= 10) histCortes.push([i, q.n]); });
+    } else {
+      etq = 'Acumulado de m² por mes'; dots = true;
+      const idx = d => Math.round((rdFecha(d) - rdFecha(P.ini)) / PY_MS);
+      const ms = []; { let a = new Date(P.ini.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z'); while(a <= z){ ms.push(rdIso(a).substring(0, 7)); a.setUTCMonth(a.getUTCMonth() + 1); } }
+      const finDe = m => { const d = new Date(m + '-01T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + 1); d.setUTCDate(0); return Math.min(hasta, Math.max(0, idx(rdIso(d)))); };
+      ms.forEach(m => { const i = finDe(m); real.push([i, cum(i), RD_MES[Number(m.substring(5)) - 1] + ': ' + fmt(cum(i)) + ' m² acumulados']); });
+      const finM = Math.min(18, 3 + Math.ceil(Math.max(0, ((finS ? idx(finS) : hasta + 120) - hasta)) / 30));
+      for(let k = 0; k <= finM; k++){ const i = hasta + k * 30, a = projS(i), b = projR(i); if(a != null) ps.push([i, a, '+' + k + ' mes: ~' + fmt(a) + ' m²']); if(b != null) pr.push([i, b, '+' + k + ' mes: ~' + fmt(b) + ' m²']); }
+      x0 = real.length ? real[0][0] : 0; x1 = hasta + finM * 30;
+      real.forEach((p, k) => ticks.push([p[0], RD_MC[Number(ms[k].substring(5)) - 1]]));
+      ms.slice(-8).forEach(m => { const i = finDe(m); if(i >= 10) histCortes.push([i, RD_MC[Number(m.substring(5)) - 1]]); });
+    }
+    // el plan oficial se muestrea en los mismos puntos y llega hasta el término oficial
+    const xsPlan = Array.from(new Set(real.map(p => p[0]).concat(ps.map(p => p[0]), pr.map(p => p[0]), [Math.max(x0, 0)]))).sort((a, b) => a - b);
+    if(v !== 'dia' && finI > x1) x1 = finI + 3;
+    const pl = xsPlan.filter(x => x >= x0 && x <= x1).map(x => [x, plan(x), 'Plan oficial: ~' + fmt(plan(x)) + ' m²']);
+    if(v !== 'dia'){ const ult = pl.length ? pl[pl.length - 1][0] : x0; for(let x = ult + (v === 'semana' ? 7 : v === 'quincena' ? 15 : 30); x < finI; x += (v === 'semana' ? 7 : v === 'quincena' ? 15 : 30)) pl.push([x, plan(x), 'Plan oficial: ~' + fmt(plan(x)) + ' m²']); if(pl.length && pl[pl.length - 1][0] < finI) pl.push([finI, P.K, 'Plan oficial: término']); }
+    const ymax = Math.max(1, ...real.map(p => p[1]), ...ps.map(p => p[1]), ...pr.map(p => p[1]), ...pl.map(p => p[1])), ymin = Math.min(...real.map(p => p[1]), ...pl.map(p => p[1]));
+    h += '<div class="py-sub">' + etq + ' · línea sólida = real · naranja punteada = curva S · gris = ritmo actual · verde = plan oficial</div>'
+      + pyGraf([{pts: pl, c: 'var(--ok,#43a047)', w: 1.6, d: '10 4'}, {pts: real, c: S_C, w: 2.4, dots}, {pts: ps, c: P_C, d: '6 4', dots}, {pts: pr, c: R_C, d: '2 4', dots}], {x0, x1, finX: finI, y0: v === 'dia' ? Math.floor(ymin) : 0, y1: ymax * 1.05, hoyX: hasta, meta: ymax >= P.K * 0.97 ? P.K : null, ticks, tit: etq});
+    /* cómo fue cambiando la proyección (se recalcula con los datos que había en cada fecha) */
+    const hs = histCortes.map(c => { const g = pyAjuste(P, c[0]); const t = g ? pyT98(g) : null; return t == null ? null : [c[0], Math.max(c[0], t), c[1]]; }).filter(Boolean);
+    h += '<div class="py-sub">Cómo ha ido cambiando la proyección de término (curva S) ' + (v === 'dia' ? 'día a día' : v === 'semana' ? 'semana a semana' : v === 'quincena' ? 'quincena a quincena' : 'mes a mes') + '</div>';
+    if(hs.length >= 2){
+      const lo = Math.min(...hs.map(p => p[1])), hi = Math.max(...hs.map(p => p[1])), pad = Math.max(3, (hi - lo) * 0.15);
+      h += pyGraf([{pts: hs.map(p => [p[0], p[1], p[2] + ': terminaba el ' + pyFd(pyFecha(P, p[1]))]), c: P_C, w: 2.2, dots: true}], {x0: hs[0][0], x1: hs[hs.length - 1][0] + 1e-6, y0: lo - pad, y1: hi + pad, ticks: hs.map(p => [p[0], p[2]]), fy: y => pyFd(pyFecha(P, y)), tit: 'Cambio de la proyección'});
+      const a = hs[hs.length - 2][1], b = hs[hs.length - 1][1], dd = Math.round(b - a);
+      h += '<div class="py-nota">Antes se estimaba terminar el <b>' + pyFd(pyFecha(P, a)) + '</b>; ahora el <b>' + pyFd(pyFecha(P, b)) + '</b> (' + (dd === 0 ? 'sin cambio' : (dd > 0 ? 'se atrasa ' : 'se adelanta ') + Math.abs(dd) + (Math.abs(dd) === 1 ? ' día' : ' días')) + '). Término oficial: <b>' + pyFd(FIN_OFICIAL) + '</b>.</div>';
+    } else h += '<div class="rd-vacio">Todavía no hay datos suficientes para comparar proyecciones.</div>';
+    return h + '<details class="rd-nota"><summary>Cómo se calcula la proyección</summary>Curva S: se ajusta una curva logística al avance acumulado, con el total de m² de la obra como tope, dándole más peso a lo reciente; el término es cuando llega al 98 %. Recta: sigue el ritmo de las últimas 4 semanas. Cierre del viernes: lo que lleva la semana más los días que faltan por la estimación por día. La estimación por día es el promedio de los últimos 10 días con trabajo.</details>';
+  }
   function pintar(){ pintarGrupo('Cerámica', 'Cerámica', $('rdOutC')); pintarGrupo('Frague', 'Frague', $('rdOutF')); }
   function pintarGrupo(cat, etq, out){
     const vista = $('rdVista').value, lista = listaGrupo(cat);
@@ -5689,22 +5835,24 @@ function renderRendimiento(raiz, datos, esc){
     };
     const ord = filas.slice().sort((a, b) => (b.pct == null ? -1 : b.pct) - (a.pct == null ? -1 : a.pct) || b.r.m2 - a.r.m2);
     out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '')
-      + '<div class="rd-res"><div><b>' + fmt(totM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom) + ' m²</b><span>promedio por día trabajado (100%)</span></div><div><b>' + (asEq == null ? '—' : Math.round(asEq) + '%') + '</b><span>asistencia del equipo' + (asEq == null ? ' (sin registrar)' : '') + '</span></div></div>'
+      + '<div class="rd-res"><div><b>' + fmt(totM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom) + ' m²</b><span>promedio por día trabajado</span></div><div><b>' + (asEq == null ? '—' : Math.round(asEq) + '%') + '</b><span>asistencia del equipo' + (asEq == null ? ' (sin registrar)' : '') + '</span></div></div>'
       + (topD ? '<div class="rd-res"><div><b>' + fmt(topD.mm.dia.max) + ' m²</b><span>máximo en un día · ' + esc(topD.nombre) + ' (' + fd(topD.mm.dia.maxK) + ')</span></div><div><b>' + fmt(botD.mm.dia.min) + ' m²</b><span>mínimo en un día · ' + esc(botD.nombre) + ' (' + fd(botD.mm.dia.minK) + ')</span></div></div>' : '')
       + '<div class="rd-dest">'
-      + (conPct.length ? '<div class="rd-d ok"><small>Más rinde</small><b>' + esc(conPct[0].nombre) + '</b><span>' + Math.round(conPct[0].pct) + '% del promedio</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(conPct[conPct.length - 1].nombre) + '</b><span>' + Math.round(conPct[conPct.length - 1].pct) + '% del promedio</span></div>' : '')
+      + (conPct.length ? '<div class="rd-d ok"><small>Más rinde</small><b>' + esc(conPct[0].nombre) + '</b><span>' + fmt(conPct[0].r.porDia) + ' m² por día</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(conPct[conPct.length - 1].nombre) + '</b><span>' + fmt(conPct[conPct.length - 1].r.porDia) + ' m² por día</span></div>' : '')
       + (conAs.length ? '<div class="rd-d ok"><small>Mejor asistencia</small><b>' + esc(conAs[0].nombre) + '</b><span>' + Math.round(conAs[0].r.asistPct) + '% · ' + conAs[0].r.F + (conAs[0].r.F === 1 ? ' falta' : ' faltas') + '</span></div><div class="rd-d bad"><small>Peor asistencia</small><b>' + esc(conAs[conAs.length - 1].nombre) + '</b><span>' + Math.round(conAs[conAs.length - 1].r.asistPct) + '% · ' + conAs[conAs.length - 1].r.F + (conAs[conAs.length - 1].r.F === 1 ? ' falta' : ' faltas') + '</span></div>' : '<div class="rd-d"><small>Asistencia</small><b>Sin registrar</b><span>Usa el botón Asistencia del panel</span></div>')
       + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
         const r = f.r, p = f.pct;
         const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
         return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + lineaMm(f) + lineaPot(f) + '</div>'
-          + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span>' + (p == null ? 'sin días para comparar' : '<b style="color:' + color(p) + '">' + Math.round(p) + '%</b> del promedio por día') + '</span></div>'
+          + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' : 'sin días para estimar') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
           + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
       }).join('') + '</div>'
       + '<div class="rd-tit">m² por semana del equipo</div><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;max-width:900px;height:auto;">' + barras + '</svg>'
-      + '<div class="rd-nota"><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</div>';
+      + pyHtml(cat)
+      + '<details class="rd-nota"><summary>Cómo se calcula el % (oculto en las barras; sale al pasar el cursor)</summary><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</details>';
   }
+  raiz.addEventListener('click', e => { const t = e.target.closest('.py-tab'); if(t){ pyEstado.v = t.getAttribute('data-py'); pintar(); } });
   raiz.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
   ['rdVista', 'rdDia', 'rdSem', 'rdMes'].forEach(id => $(id).addEventListener('change', pintar));
   pintar();
@@ -8223,4 +8371,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.34 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.39 · 01-11-2026 ==== -->
