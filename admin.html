@@ -96,7 +96,7 @@ main h2{margin:0 0 4px;font-size:17px;}
 .rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
-.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.rd-nota summary{cursor:pointer;font-weight:600;}
+.rd-dud{color:#c98a00;}.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.rd-nota summary{cursor:pointer;font-weight:600;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
@@ -419,6 +419,17 @@ function renderRendimiento(raiz, datos, esc){
   const INICIO_OBRA = '2026-05-29';   // semana 1 = la semana de esta fecha
   let primera = hoy < INICIO_OBRA ? hoy : INICIO_OBRA;
   datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d < primera) primera = x.d; }); (t.asistencia || []).forEach(x => { if(x.d < primera) primera = x.d; }); });
+  // ===== días con muchos terminados juntos sin revisar: no son datos garantizados, se usa el promedio del equipo =====
+  // los que ya venían con partida de un día antes (nc) cuentan como corroborados: dos partidas abiertas a la vez es normal
+  const DUDOSO_MIN = 6;
+  datos.trabajadores.forEach(t => { const ok = t.revisadas || []; t.dias.forEach(x => { x.dud = (x.n || 0) - (x.nc || 0) >= DUDOSO_MIN && ok.indexOf(x.d) === -1; }); });
+  const promEscCache = {};
+  function promEsc(cat, lunes){
+    const k = cat + '|' + lunes; if(promEscCache[k] !== undefined) return promEscCache[k];
+    let s = 0, n = 0;
+    datos.trabajadores.forEach(t => { if(t.activo === false) return; t.dias.forEach(x => { if(!x.dud && x.cat === cat && x.m2 > 0 && rdLunes(x.d) === lunes){ s += x.m2; n++; } }); });
+    return promEscCache[k] = n ? s / n : 0;
+  }
   const lun0 = rdLunes(primera);
   const nSem = l => Math.round((rdFecha(l) - rdFecha(lun0)) / 604800000) + 1;
   const todasSem = []; for(let l = lun0; l <= hoyLun; l = rdSuma(l, 7)) todasSem.push(l);
@@ -438,8 +449,10 @@ function renderRendimiento(raiz, datos, esc){
   /* estadística de un trabajador en un rango de fechas */
   function stat(t, desde, hasta, cat){
     if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin; // ===== solo cuenta entre su inicio y su finiquito =====
-    const r = {m2: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
-    t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat)){ r.m2 += x.m2; r.n += x.n; r.act[x.d] = 1; } });
+    const r = {dud: 0, sinInfo: false, m2: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
+    t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat)){
+      if(x.dud){ r.dud++; if(desde === hasta){ r.sinInfo = true; return; } r.m2 += promEsc(x.cat, rdLunes(x.d)); r.act[x.d] = 1; return; }
+      r.m2 += x.m2; r.n += x.n; r.act[x.d] = 1; } });
     (t.asistencia || []).forEach(x => {
       if(x.d < desde || x.d > hasta) return;
       r.reg++; if(rdFecha(x.d).getUTCDay() === 6) r.sab++;
@@ -487,7 +500,7 @@ function renderRendimiento(raiz, datos, esc){
   function minmax(t, desde, hasta, cat){
     if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin;
     const pd = {}, ps = {};
-    t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat) && x.m2 > 0){ pd[x.d] = (pd[x.d] || 0) + x.m2; const l = rdLunes(x.d); ps[l] = (ps[l] || 0) + x.m2; } });
+    t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat) && x.m2 > 0 && !x.dud){ pd[x.d] = (pd[x.d] || 0) + x.m2; const l = rdLunes(x.d); ps[l] = (ps[l] || 0) + x.m2; } });
     const res = obj => { const k = Object.keys(obj); if(!k.length) return null; let mx = k[0], mn = k[0], sum = 0; k.forEach(c => { sum += obj[c]; if(obj[c] > obj[mx]) mx = c; if(obj[c] < obj[mn]) mn = c; }); return {n: k.length, prom: sum / k.length, max: obj[mx], maxK: mx, min: obj[mn], minK: mn}; };
     return {dia: res(pd), sem: res(ps)};
   }
@@ -506,10 +519,10 @@ function renderRendimiento(raiz, datos, esc){
     titulo = etq + ' · ' + titulo;
     const filas = lista.filter(t => !(t.inicio && t.inicio > hasta) && !(t.fin && t.fin < desde)).map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
     if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ if(cat === 'Frague'){ out.innerHTML = ''; return; } out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
-    const act = filas.filter(f => f.r.dias > 0);
+    const act = filas.filter(f => f.r.dias > 0 && !f.r.sinInfo);
     const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
     const prom = totDias ? act.reduce((a, f) => a + f.r.m2, 0) / totDias : 0;
-    filas.forEach(f => { f.pct = prom && f.r.dias ? f.r.porDia / prom * 100 : null; });
+    filas.forEach(f => { f.pct = prom && f.r.dias && !f.r.sinInfo ? f.r.porDia / prom * 100 : null; });
     const conPct = filas.filter(f => f.pct != null).sort((a, b) => b.pct - a.pct);
     const conAs = filas.filter(f => f.r.asistPct != null).sort((a, b) => b.r.asistPct - a.r.asistPct || a.r.F - b.r.F);
     const maxM2 = Math.max(1, ...filas.map(f => f.r.m2));
@@ -552,9 +565,9 @@ function renderRendimiento(raiz, datos, esc){
       + (conAs.length ? '<div class="rd-d ok"><small>Mejor asistencia</small><b>' + esc(conAs[0].nombre) + '</b><span>' + Math.round(conAs[0].r.asistPct) + '% · ' + conAs[0].r.F + (conAs[0].r.F === 1 ? ' falta' : ' faltas') + '</span></div><div class="rd-d bad"><small>Peor asistencia</small><b>' + esc(conAs[conAs.length - 1].nombre) + '</b><span>' + Math.round(conAs[conAs.length - 1].r.asistPct) + '% · ' + conAs[conAs.length - 1].r.F + (conAs[conAs.length - 1].r.F === 1 ? ' falta' : ' faltas') + '</span></div>' : '<div class="rd-d"><small>Asistencia</small><b>Sin registrar</b><span>Usa el botón Asistencia del panel</span></div>')
       + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
         const r = f.r, p = f.pct;
-        const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
-        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + lineaMm(f) + lineaPot(f) + '</div>'
-          + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' + (p == null ? '' : (() => { const dif = Math.round(p - 100), t = Math.abs(dif) < 3 ? 'eq' : dif > 0 ? 'up' : 'down'; return ' <span class="rd-dif ' + t + '" title="' + (t === 'eq' ? 'Rinde casi igual al promedio del equipo: no mueve el término de la proyección.' : dif > 0 ? 'Rinde ' + dif + '% sobre el promedio del equipo (m² por día trabajado): con este ritmo termina antes en la proyección.' : 'Rinde ' + Math.abs(dif) + '% bajo el promedio del equipo (m² por día trabajado): con este ritmo termina después en la proyección.') + '">' + (t === 'eq' ? '≈ promedio' : (dif > 0 ? '+' : '−') + Math.abs(dif) + ' %') + '</span>'; })()) : 'sin días para estimar') + '</span></div>'
+        const frase = '<b>' + esc(f.nombre) + ': ' + (r.sinInfo ? 'sin dato' : fmt(r.m2) + ' m²') + '</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
+        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias && !r.sinInfo ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + (r.sinInfo ? '<small class="rd-dud">Sin información garantizada: se marcaron muchos terminados juntos este día y las fechas no están revisadas.</small>' : r.dud ? '<small class="rd-dud">' + r.dud + (r.dud === 1 ? ' día' : ' días') + ' con terminados juntos sin revisar: ahí se usó el promedio del equipo.</small>' : '') + lineaMm(f) + lineaPot(f) + '</div>'
+          + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + (r.sinInfo ? 'sin dato' : fmt(r.m2) + ' m²') + '</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.sinInfo ? 'sin información garantizada' : r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' + (p == null ? '' : (() => { const dif = Math.round(p - 100), t = Math.abs(dif) < 3 ? 'eq' : dif > 0 ? 'up' : 'down'; return ' <span class="rd-dif ' + t + '" title="' + (t === 'eq' ? 'Rinde casi igual al promedio del equipo: no mueve el término de la proyección.' : dif > 0 ? 'Rinde ' + dif + '% sobre el promedio del equipo (m² por día trabajado): con este ritmo termina antes en la proyección.' : 'Rinde ' + Math.abs(dif) + '% bajo el promedio del equipo (m² por día trabajado): con este ritmo termina después en la proyección.') + '">' + (t === 'eq' ? '≈ promedio' : (dif > 0 ? '+' : '−') + Math.abs(dif) + ' %') + '</span>'; })()) : 'sin días para estimar') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
           + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
       }).join('') + '</div>'
@@ -767,7 +780,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.27';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.29';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.27 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.29 · 01-11-2026 ==== -->
