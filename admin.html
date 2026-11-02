@@ -96,7 +96,7 @@ main h2{margin:0 0 4px;font-size:17px;}
 .rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
-.rd-b span{font-size:12px;}
+.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.rd-nota summary{cursor:pointer;font-weight:600;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
@@ -155,10 +155,10 @@ main h2{margin:0 0 4px;font-size:17px;}
 /* se abre del centro hacia los lados y se cierra igual */
 
 /* ===== colores por tipo ===== */
-.avl         { --av: #74d1e0; }   /* info */
-.avl.exito   { --av: #5fd6a4; }
-.avl.alerta  { --av: #e9c46a; }
-.avl.error   { --av: #e8707f; }
+.avl         { --av: #2fa3b8; }   /* info */
+.avl.exito   { --av: #34a874; }
+.avl.alerta  { --av: #d99a1c; }
+.avl.error   { --av: #d6455a; }
 
 /* ===== contenedor (arriba al centro) ===== */
 .avls {
@@ -173,15 +173,15 @@ main h2{margin:0 0 4px;font-size:17px;}
   position: relative; pointer-events: auto;
   display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 12px;   /* el relleno de 26px iguala a la X: lo del medio queda centrado */
   padding: 12px 12px 14px 16px;
-  background: rgba(22, 32, 40, .96); color: #f2f6f8;
-  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  background: var(--panel, #fff); color: var(--text, #2c302c);
+  border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
   font: 500 14px/1.4 "Noto Sans", "Segoe UI", system-ui, sans-serif;
 }
 /* líneas de arriba y abajo que se apagan hacia los lados */
 .avl::before, .avl::after {
   content: ""; position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+  background: linear-gradient(to right, transparent, var(--av) 30%, var(--av) 50%, var(--av) 70%, transparent);
 }
 .avl::before { top: -1px; }
 .avl::after  { bottom: -1px; }
@@ -193,10 +193,10 @@ main h2{margin:0 0 4px;font-size:17px;}
 .avl .texto { min-width: 0; overflow-wrap: anywhere; line-height: 22px; }
 .avl .cerrar {
   width: 26px; height: 26px; display: grid; place-items: center;
-  background: transparent; color: #9fb3bd; border: 1px solid rgba(255,255,255,.15); border-radius: 0; cursor: pointer;
+  background: transparent; color: var(--sub, #6c716a); border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0; cursor: pointer;
   transition: color .2s, border-color .2s;
 }
-.avl .cerrar:hover { color: #fff; border-color: var(--av); }
+.avl .cerrar:hover { color: var(--text, #2c302c); border-color: var(--av); }
 .avl .cerrar:focus-visible { outline: 2px solid var(--av); outline-offset: 2px; }
 .avl .cerrar svg { width: 12px; height: 12px; }
 
@@ -204,7 +204,7 @@ main h2{margin:0 0 4px;font-size:17px;}
 .avl .tiempo {
   position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
   background: linear-gradient(to right, transparent, var(--av) 20%, var(--av) 80%, transparent);
-  opacity: .55; transform-origin: center;
+  opacity: .7; transform-origin: center;
   animation: aviso-tiempo var(--dur, 4s) linear forwards;
 }
 .avl:hover .tiempo { animation-play-state: paused; }
@@ -543,21 +543,21 @@ function renderRendimiento(raiz, datos, esc){
     };
     const ord = filas.slice().sort((a, b) => (b.pct == null ? -1 : b.pct) - (a.pct == null ? -1 : a.pct) || b.r.m2 - a.r.m2);
     out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '')
-      + '<div class="rd-res"><div><b>' + fmt(totM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom) + ' m²</b><span>promedio por día trabajado (100%)</span></div><div><b>' + (asEq == null ? '—' : Math.round(asEq) + '%') + '</b><span>asistencia del equipo' + (asEq == null ? ' (sin registrar)' : '') + '</span></div></div>'
+      + '<div class="rd-res"><div><b>' + fmt(totM2) + ' m²</b><span>del equipo en el período</span></div><div><b>' + fmt(prom) + ' m²</b><span>promedio por día trabajado</span></div><div><b>' + (asEq == null ? '—' : Math.round(asEq) + '%') + '</b><span>asistencia del equipo' + (asEq == null ? ' (sin registrar)' : '') + '</span></div></div>'
       + (topD ? '<div class="rd-res"><div><b>' + fmt(topD.mm.dia.max) + ' m²</b><span>máximo en un día · ' + esc(topD.nombre) + ' (' + fd(topD.mm.dia.maxK) + ')</span></div><div><b>' + fmt(botD.mm.dia.min) + ' m²</b><span>mínimo en un día · ' + esc(botD.nombre) + ' (' + fd(botD.mm.dia.minK) + ')</span></div></div>' : '')
       + '<div class="rd-dest">'
-      + (conPct.length ? '<div class="rd-d ok"><small>Más rinde</small><b>' + esc(conPct[0].nombre) + '</b><span>' + Math.round(conPct[0].pct) + '% del promedio</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(conPct[conPct.length - 1].nombre) + '</b><span>' + Math.round(conPct[conPct.length - 1].pct) + '% del promedio</span></div>' : '')
+      + (conPct.length ? '<div class="rd-d ok"><small>Más rinde</small><b>' + esc(conPct[0].nombre) + '</b><span>' + fmt(conPct[0].r.porDia) + ' m² por día</span></div><div class="rd-d bad"><small>Menos rinde</small><b>' + esc(conPct[conPct.length - 1].nombre) + '</b><span>' + fmt(conPct[conPct.length - 1].r.porDia) + ' m² por día</span></div>' : '')
       + (conAs.length ? '<div class="rd-d ok"><small>Mejor asistencia</small><b>' + esc(conAs[0].nombre) + '</b><span>' + Math.round(conAs[0].r.asistPct) + '% · ' + conAs[0].r.F + (conAs[0].r.F === 1 ? ' falta' : ' faltas') + '</span></div><div class="rd-d bad"><small>Peor asistencia</small><b>' + esc(conAs[conAs.length - 1].nombre) + '</b><span>' + Math.round(conAs[conAs.length - 1].r.asistPct) + '% · ' + conAs[conAs.length - 1].r.F + (conAs[conAs.length - 1].r.F === 1 ? ' falta' : ' faltas') + '</span></div>' : '<div class="rd-d"><small>Asistencia</small><b>Sin registrar</b><span>Usa el botón Asistencia del panel</span></div>')
       + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
         const r = f.r, p = f.pct;
         const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
         return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + lineaMm(f) + lineaPot(f) + '</div>'
-          + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span>' + (p == null ? 'sin días para comparar' : '<b style="color:' + color(p) + '">' + Math.round(p) + '%</b> del promedio por día') + '</span></div>'
+          + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' + (p == null ? '' : (() => { const dif = Math.round(p - 100), t = Math.abs(dif) < 3 ? 'eq' : dif > 0 ? 'up' : 'down'; return ' <span class="rd-dif ' + t + '" title="' + (t === 'eq' ? 'Rinde casi igual al promedio del equipo: no mueve el término de la proyección.' : dif > 0 ? 'Rinde ' + dif + '% sobre el promedio del equipo (m² por día trabajado): con este ritmo termina antes en la proyección.' : 'Rinde ' + Math.abs(dif) + '% bajo el promedio del equipo (m² por día trabajado): con este ritmo termina después en la proyección.') + '">' + (t === 'eq' ? '≈ promedio' : (dif > 0 ? '+' : '−') + Math.abs(dif) + ' %') + '</span>'; })()) : 'sin días para estimar') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
           + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
       }).join('') + '</div>'
       + '<div class="rd-tit">m² por semana del equipo</div><svg viewBox="0 0 ' + W + ' ' + Hh + '" style="width:100%;max-width:900px;height:auto;">' + barras + '</svg>'
-      + '<div class="rd-nota"><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</div>';
+      + '<details class="rd-nota"><summary>Cómo se calcula el % (oculto en las barras; sale al pasar el cursor)</summary><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</details>';
   }
   raiz.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
   ['rdVista', 'rdDia', 'rdSem', 'rdMes'].forEach(id => $(id).addEventListener('change', pintar));
@@ -765,7 +765,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.23';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.26';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.23 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.26 · 01-11-2026 ==== -->

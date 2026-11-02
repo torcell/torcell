@@ -1344,7 +1344,7 @@
 .rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
-.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-nota{font-size:12.5px;margin:6px 0 4px;}.rd-nota summary{cursor:pointer;font-weight:600;}
+.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-nota{font-size:12.5px;margin:6px 0 4px;}.rd-nota summary{cursor:pointer;font-weight:600;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
@@ -2076,7 +2076,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.40';
+const APP_VERSION = '0.73.41';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5842,7 +5842,7 @@ function renderRendimiento(raiz, datos, esc){
         const r = f.r, p = f.pct;
         const frase = '<b>' + esc(f.nombre) + ': ' + fmt(r.m2) + ' m²</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
         return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + lineaMm(f) + lineaPot(f) + '</div>'
-          + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' : 'sin días para estimar') + '</span></div>'
+          + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' + (p == null ? '' : (() => { const dif = Math.round(p - 100), t = Math.abs(dif) < 3 ? 'eq' : dif > 0 ? 'up' : 'down'; return ' <span class="rd-dif ' + t + '" title="' + (t === 'eq' ? 'Rinde casi igual al promedio del equipo: no mueve el término de la proyección.' : dif > 0 ? 'Rinde ' + dif + '% sobre el promedio del equipo (m² por día trabajado): con este ritmo termina antes en la proyección.' : 'Rinde ' + Math.abs(dif) + '% bajo el promedio del equipo (m² por día trabajado): con este ritmo termina después en la proyección.') + '">' + (t === 'eq' ? '≈ promedio' : (dif > 0 ? '+' : '−') + Math.abs(dif) + ' %') + '</span>'; })()) : 'sin días para estimar') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
           + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
       }).join('') + '</div>'
@@ -8369,4 +8369,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.40 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.41 · 01-11-2026 ==== -->
