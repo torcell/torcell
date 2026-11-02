@@ -420,9 +420,10 @@ function renderRendimiento(raiz, datos, esc){
   let primera = hoy < INICIO_OBRA ? hoy : INICIO_OBRA;
   datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d < primera) primera = x.d; }); (t.asistencia || []).forEach(x => { if(x.d < primera) primera = x.d; }); });
   // ===== días con muchos terminados juntos sin revisar: no son datos garantizados, se usa el promedio del equipo =====
+  // Frague no se revisa: el fraguador termina muchos dptos por día
   // los que ya venían con partida de un día antes (nc) cuentan como corroborados: dos partidas abiertas a la vez es normal
   const DUDOSO_MIN = 6;
-  datos.trabajadores.forEach(t => { const ok = t.revisadas || []; t.dias.forEach(x => { x.dud = (x.n || 0) - (x.nc || 0) >= DUDOSO_MIN && ok.indexOf(x.d) === -1; }); });
+  datos.trabajadores.forEach(t => { const ok = t.revisadas || []; t.dias.forEach(x => { x.dud = x.cat !== 'Frague' && (x.n || 0) - (x.nc || 0) >= DUDOSO_MIN && ok.indexOf(x.d) === -1; }); });
   const promEscCache = {};
   function promEsc(cat, lunes){
     const k = cat + '|' + lunes; if(promEscCache[k] !== undefined) return promEscCache[k];
@@ -780,7 +781,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.29';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.30';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.29 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.30 · 01-11-2026 ==== -->

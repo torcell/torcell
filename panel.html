@@ -2092,7 +2092,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.47';
+const APP_VERSION = '0.73.48';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4767,6 +4767,7 @@ const diaLocalDe = ts => { const d = new Date(ts); return d.getFullYear() + '-' 
 function gruposFechasJuntas(){
   const desde = Date.now() - FECHAS_JUNTAS_DIAS * 86400000, por = {};
   ALL_CELLS.forEach(c => {
+    if(c.categoria === 'Frague') return; // el fraguador termina muchos por día, no se revisa
     const st = getState(c.id);
     if(!st.terminado || !st.terminadoTs || !st.trabajador || st.terminadoTs < desde) return;
     const dia = diaLocalDe(st.terminadoTs);
@@ -4839,6 +4840,7 @@ function calcularSeguimiento(){
   const hoy = hoyISO();
   activos.forEach(w => {
     const ws = workerStatus[w] || {};
+    if(ws.especialidad === 'fraguador') return; // Frague no tiene partida, no aplica demora ni frenado
     if((ws.inicio && ws.inicio > hoy) || (ws.fin && ws.fin < hoy)) return;
     const mias = ALL_CELLS.filter(c => getState(c.id).trabajador === w);
     const dur = {};
@@ -5746,9 +5748,10 @@ function renderRendimiento(raiz, datos, esc){
   let primera = hoy < INICIO_OBRA ? hoy : INICIO_OBRA;
   datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d < primera) primera = x.d; }); (t.asistencia || []).forEach(x => { if(x.d < primera) primera = x.d; }); });
   // ===== días con muchos terminados juntos sin revisar: no son datos garantizados, se usa el promedio del equipo =====
+  // Frague no se revisa: el fraguador termina muchos dptos por día
   // los que ya venían con partida de un día antes (nc) cuentan como corroborados: dos partidas abiertas a la vez es normal
   const DUDOSO_MIN = 6;
-  datos.trabajadores.forEach(t => { const ok = t.revisadas || []; t.dias.forEach(x => { x.dud = (x.n || 0) - (x.nc || 0) >= DUDOSO_MIN && ok.indexOf(x.d) === -1; }); });
+  datos.trabajadores.forEach(t => { const ok = t.revisadas || []; t.dias.forEach(x => { x.dud = x.cat !== 'Frague' && (x.n || 0) - (x.nc || 0) >= DUDOSO_MIN && ok.indexOf(x.d) === -1; }); });
   const promEscCache = {};
   function promEsc(cat, lunes){
     const k = cat + '|' + lunes; if(promEscCache[k] !== undefined) return promEscCache[k];
@@ -8566,4 +8569,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.47 · 02-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.48 · 02-11-2026 ==== -->
