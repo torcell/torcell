@@ -437,6 +437,7 @@ function renderRendimiento(raiz, datos, esc){
   const nombreSem = l => { const w = infoSem(l); return 'Semana ' + w.n + ' · ' + w.rango + w.tag; };
   /* estadística de un trabajador en un rango de fechas */
   function stat(t, desde, hasta, cat){
+    if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin; // ===== solo cuenta entre su inicio y su finiquito =====
     const r = {m2: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
     t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat)){ r.m2 += x.m2; r.n += x.n; r.act[x.d] = 1; } });
     (t.asistencia || []).forEach(x => {
@@ -484,6 +485,7 @@ function renderRendimiento(raiz, datos, esc){
   { let ult = ''; datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d <= hoy && x.d > ult) ult = x.d; }); (t.asistencia || []).forEach(x => { if(x.d <= hoy && x.d > ult) ult = x.d; }); }); $('rdDia').value = ult || hoy; }
   /* promedio, máximo y mínimo de m² por día y por semana (solo días con m² > 0) */
   function minmax(t, desde, hasta, cat){
+    if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin;
     const pd = {}, ps = {};
     t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat) && x.m2 > 0){ pd[x.d] = (pd[x.d] || 0) + x.m2; const l = rdLunes(x.d); ps[l] = (ps[l] || 0) + x.m2; } });
     const res = obj => { const k = Object.keys(obj); if(!k.length) return null; let mx = k[0], mn = k[0], sum = 0; k.forEach(c => { sum += obj[c]; if(obj[c] > obj[mx]) mx = c; if(obj[c] < obj[mn]) mn = c; }); return {n: k.length, prom: sum / k.length, max: obj[mx], maxK: mx, min: obj[mn], minK: mn}; };
@@ -502,7 +504,7 @@ function renderRendimiento(raiz, datos, esc){
     else if(vista === 'mes'){ const m = $('rdMes').value; desde = m + '-01'; hasta = m + '-31'; titulo = RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4); sub = 'Suma por la fecha real de cada día: las semanas que mezclan dos meses se reparten día a día.'; }
     else { desde = '0000-01-01'; hasta = '9999-12-31'; titulo = 'Total acumulado'; sub = 'Desde la semana ' + 1 + ' (' + fd(primera) + ') hasta hoy · ' + todasSem.length + ' semanas.'; }
     titulo = etq + ' · ' + titulo;
-    const filas = lista.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
+    const filas = lista.filter(t => !(t.inicio && t.inicio > hasta) && !(t.fin && t.fin < desde)).map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
     if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ if(cat === 'Frague'){ out.innerHTML = ''; return; } out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
     const act = filas.filter(f => f.r.dias > 0);
     const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
@@ -765,7 +767,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.26';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.27';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.26 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.27 · 01-11-2026 ==== -->

@@ -1484,6 +1484,22 @@
   .avl, .avl > * { animation-duration: .01s !important; }
 }
 .avls{top:calc(60px + env(safe-area-inset-top,0px));}   /* debajo de "Cargando…" */
+
+/* ===== Aviso de terminados juntos (fechas por revisar) ===== */
+#avisosSeg{position:fixed;left:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:340px;}
+.aviso-seg{padding:10px 12px;background:var(--panel,#fff);color:var(--text,#2c302c);border:1px solid #d99a1c;border-left:4px solid #d99a1c;font-size:13px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+#avisosSeg [hidden]{display:none;}
+#avisosSeg .af-bt{display:flex;gap:8px;margin-top:8px;}
+#avisosSeg button{font:inherit;font-size:12.5px;padding:5px 12px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;border-radius:0;}
+#avisosSeg button.af-ok{background:#d99a1c;border-color:#d99a1c;color:#1b1b1b;font-weight:700;}
+.ff-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border,rgba(128,150,170,.35));font-size:13px;}
+.ff-fila small{display:block;color:var(--sub);font-size:11.5px;}
+.ff-fila input[type=date]{font:inherit;padding:3px 6px;border-radius:0;}
+.ff-fila.cambio input[type=date]{outline:2px solid #d99a1c;}
+.sg-tit{margin:12px 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--sub);}
+.sg-fila{padding:5px 0;border-bottom:1px solid var(--border,rgba(128,150,170,.35));font-size:13px;}
+.sg-fila small{display:block;color:var(--sub);font-size:11.5px;}
+.ff-ok{margin-top:10px;font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;border-radius:0;}
 </style>
 <script>
 // ===== Aviso lateral · v1 =====
@@ -2076,7 +2092,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.41';
+const APP_VERSION = '0.73.45';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2869,11 +2885,17 @@ function buildRecords(){
   return ALL_CELLS.map(recordForCell);
 }
 
+function logSeguroDb(l){
+  if(!Array.isArray(l)) return [];
+  return l.filter(e => e && (e.t === 'd' || e.t === 'f')).slice(-40).map(e => e.t === 'd'
+    ? {t: 'd', id: String(e.id || '').slice(0, 60), ini: +e.ini || 0, dias: +e.dias || 0, max: +e.max || 0, ts: +e.ts || 0}
+    : {t: 'f', desde: +e.desde || 0, hasta: e.hasta ? +e.hasta : null, dias: +e.dias || 0});
+}
 function sanitizedWorkerStatusForDb(){
   const clean = {};
   Object.keys(workerStatus).forEach(w => {
     const ws = workerStatus[w] || {};
-    clean[w] = { estado: ws.estado, especialidad: ws.especialidad, afp: ws.afp || '' };
+    clean[w] = { estado: ws.estado, especialidad: ws.especialidad, afp: ws.afp || '', inicio: ws.inicio || '', fin: ws.fin || '', log: logSeguroDb(ws.log), fechasOk: (Array.isArray(ws.fechasOk) ? ws.fechasOk.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).slice(-60) : []) };
   });
   return clean;
 }
@@ -3388,6 +3410,9 @@ function openWorkerDatosModal(worker){
       <option value="" ${!ws.afp || ws.afp==='No especificada' ? 'selected' : ''}>Elegir AFP</option>
       ${AFP_OPTIONS.map(a => `<option value="${esc(a)}" ${ws.afp===a?'selected':''}>${esc(a)}</option>`).join('')}
     </select></div>
+    <div class="rate-row"><label>Inicio de trabajo</label><input type="date" id="datosInicio" style="width:220px;" value="${esc(ws.inicio||'')}"></div>
+    <div class="rate-row"><label>Último día / finiquito</label><input type="date" id="datosFin" style="width:220px;" value="${esc(ws.fin||'')}"></div>
+    <p style="margin:2px 0 8px;font-size:11px;color:var(--sub);">Fuera de estas fechas no cuenta en el rendimiento ni en los promedios. Vacío = sin límite.</p>
     <div class="rate-row"><label>RUT</label><input type="text" id="datosRut" style="width:220px;" value="${esc(ws.rut||'')}"></div>
     <div class="rate-row"><label>Teléfono</label><input type="text" id="datosTelefono" style="width:220px;" value="${esc(ws.telefono||'')}"></div>
     <div class="rate-row"><label>Correo</label><input type="text" id="datosCorreo" style="width:220px;" value="${esc(ws.correo||'')}"></div>
@@ -3408,6 +3433,9 @@ function openWorkerDatosModal(worker){
   openInputModal(`Datos de ${worker}`, bodyHtml, () => {
     workerStatus[worker] = workerStatus[worker] || defaultWorkerEntry(worker);
     workerStatus[worker].afp = document.getElementById('datosAfp').value;
+    const fechaOk = v => /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '';
+    workerStatus[worker].inicio = fechaOk(document.getElementById('datosInicio').value);
+    workerStatus[worker].fin = fechaOk(document.getElementById('datosFin').value);
     workerStatus[worker].rut = document.getElementById('datosRut').value.trim();
     workerStatus[worker].telefono = document.getElementById('datosTelefono').value.trim();
     workerStatus[worker].correo = document.getElementById('datosCorreo').value.trim();
@@ -4470,7 +4498,7 @@ function openInputModal(title, bodyHtml, onConfirm, confirmLabel){
   inputModalConfirm.textContent = confirmLabel || 'Guardar';
   inputOverlay.classList.add('show');
 }
-function closeInputModal(){ closeOverlayAnimated(inputOverlay); inputConfirmHandler = null; inputModalCancel.style.display = ''; }
+function closeInputModal(){ if(inputModalCancel.dataset.orig){ inputModalCancel.textContent = inputModalCancel.dataset.orig; delete inputModalCancel.dataset.orig; } closeOverlayAnimated(inputOverlay); inputConfirmHandler = null; inputModalCancel.style.display = ''; }
 inputModalCancel.addEventListener('click', closeInputModal);
 inputModalConfirm.addEventListener('click', () => { if(inputConfirmHandler && inputConfirmHandler() === 'mantener') return; closeInputModal(); });
 
@@ -4733,6 +4761,157 @@ function matOp(clave, valor){
   else { matOpsPend.del.add(clave); matOpsPend.set.delete(clave); }
 }
 /* Al marcar un área como terminada, su material queda con check (piso → piso, muro baño → muro baño, etc.) */
+// ===== Terminados juntos: revisar fechas =====
+const FECHAS_JUNTAS_MIN = 6, FECHAS_JUNTAS_DIAS = 45;
+const diaLocalDe = ts => { const d = new Date(ts); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); };
+function gruposFechasJuntas(){
+  const desde = Date.now() - FECHAS_JUNTAS_DIAS * 86400000, por = {};
+  ALL_CELLS.forEach(c => {
+    const st = getState(c.id);
+    if(!st.terminado || !st.terminadoTs || !st.trabajador || st.terminadoTs < desde) return;
+    const dia = diaLocalDe(st.terminadoTs), k = st.trabajador + '|' + dia;
+    (por[k] = por[k] || {w: st.trabajador, dia, ids: []}).ids.push(c.id);
+  });
+  return Object.values(por).filter(g => g.ids.length >= FECHAS_JUNTAS_MIN && !(((workerStatus[g.w] || {}).fechasOk || []).indexOf(g.dia) !== -1))
+    .sort((a, b) => a.dia < b.dia ? 1 : -1);
+}
+function marcarFechasRevisadas(g){
+  workerStatus[g.w] = workerStatus[g.w] || defaultWorkerEntry(g.w);
+  const l = (workerStatus[g.w].fechasOk || []).filter(x => x !== g.dia); l.push(g.dia);
+  workerStatus[g.w].fechasOk = l.slice(-60);
+  markSettingsDirty(); scheduleSave();
+}
+let avisoFechasTimer = null;
+function programarAvisoFechas(){ clearTimeout(avisoFechasTimer); avisoFechasTimer = setTimeout(() => { actualizarAvisoFechas(); actualizarSeguimiento(); }, 400); }
+function actualizarAvisoFechas(){
+  let box = document.getElementById('avisoFechas');
+  const gr = isAdmin ? gruposFechasJuntas() : [];
+  let sn = 0; try{ sn = +localStorage.getItem('avisoFechasHasta') || 0; }catch(err){}
+  if(!gr.length || Date.now() < sn){ if(box) box.hidden = true; return; }
+  if(!box){
+    box = document.createElement('div'); box.id = 'avisoFechas'; box.className = 'aviso-seg'; box.setAttribute('role', 'status');
+    box.innerHTML = '<div class="af-tx"></div><div class="af-bt"><button type="button" class="af-ok">Revisar</button><button type="button" class="af-mas">Más tarde</button></div>';
+    contenedorSeg().appendChild(box);
+    box.querySelector('.af-ok').addEventListener('click', () => abrirRevisionFechas());
+    box.querySelector('.af-mas').addEventListener('click', () => { try{ localStorage.setItem('avisoFechasHasta', String(Date.now() + 3600000)); }catch(err){} box.hidden = true; });
+  }
+  const g = gr[0];
+  box.querySelector('.af-tx').innerHTML = '<b>' + esc(g.w) + '</b>: ' + g.ids.length + ' terminados el ' + esc(fechaCorta(new Date(g.dia + 'T12:00:00').getTime())) + '. ¿Las fechas están correctas?' + (gr.length > 1 ? '<br><small>Hay ' + gr.length + ' revisiones pendientes.</small>' : '');
+  box.hidden = false;
+}
+function abrirRevisionFechas(){
+  const gr = gruposFechasJuntas(); if(!gr.length){ actualizarAvisoFechas(); return; }
+  const g = gr[0], hoy = hoyISO();
+  const filas = g.ids.map(id => { const c = cellById[id], st = getState(id);
+    return '<div class="ff-fila"><div>' + esc(liqLabelForCell(c)) + ' · ' + esc(c.categoria) + ' · ' + esc(AREA_LABEL[c.area] || c.area) + '<small>' + (st.m2 != null ? esc(String(st.m2)) + ' m²' : 'sin m²') + '</small></div><input type="date" data-fid="' + esc(id) + '" value="' + esc(g.dia) + '" max="' + hoy + '"></div>'; }).join('');
+  const body = '<p style="margin:0 0 8px;font-size:13px;">Agregaste muchos terminados de <b>' + esc(g.w) + '</b> el <b>' + esc(fechaCorta(new Date(g.dia + 'T12:00:00').getTime())) + '</b> (' + g.ids.length + ' partidas). ¿Las fechas están correctas? Cambia la de cada una si terminó otro día.</p>'
+    + '<div id="ffLista" style="max-height:50vh;overflow:auto;">' + filas + '</div><button type="button" class="ff-ok" id="ffBien">Las fechas están bien</button>';
+  inputModalCancel.dataset.orig = inputModalCancel.dataset.orig || inputModalCancel.textContent;
+  inputModalCancel.textContent = 'Más tarde';
+  openInputModal('Revisar fechas de terminados', body, () => {
+    document.querySelectorAll('#ffLista input[data-fid]').forEach(inp => {
+      const nuevo = inp.value; if(!/^\d{4}-\d{2}-\d{2}$/.test(nuevo) || nuevo === g.dia || nuevo > hoy) return;
+      const id = inp.getAttribute('data-fid'), st = getState(id), p = nuevo.split('-');
+      st.terminadoTs = new Date(+p[0], +p[1] - 1, +p[2], 12, 0, 0).getTime();
+      if(st.partidaTs && st.partidaTs > st.terminadoTs) st.partidaTs = st.terminadoTs;
+      markCellDirty(id);
+    });
+    marcarFechasRevisadas(g); scheduleSave(); render();
+    setTimeout(() => { programarAvisoFechas(); }, 300);
+  }, 'Guardar y cerrar');
+  document.getElementById('ffLista').addEventListener('change', e => { const r = e.target.closest('.ff-fila'); if(r) r.classList.toggle('cambio', e.target.value !== g.dia); });
+  document.getElementById('ffBien').addEventListener('click', () => { marcarFechasRevisadas(g); closeInputModal(); programarAvisoFechas(); });
+}
+setInterval(() => { if(isAdmin){ actualizarAvisoFechas(); actualizarSeguimiento(); } }, 300000);
+// ===== Seguimiento: partidas demoradas y trabajadores frenados =====
+const SEG_MIN_MUESTRAS = 3, SEG_MAX_LOG = 40, SEG_DIAS_VIGENTE = 21;
+function contenedorSeg(){ let c = document.getElementById('avisosSeg'); if(!c){ c = document.createElement('div'); c.id = 'avisosSeg'; document.body.appendChild(c); } return c; }
+// días contados con el día de inicio y el de término, sin domingos
+function diasHabiles(a, b){
+  const d = new Date(a), f = new Date(b); d.setHours(12, 0, 0, 0); f.setHours(12, 0, 0, 0);
+  let n = 0, tope = 0; while(d <= f && tope++ < 400){ if(d.getDay() !== 0) n++; d.setDate(d.getDate() + 1); } return n;
+}
+function calcularSeguimiento(){
+  const ahora = Date.now(), res = {demoras: [], frenados: []};
+  let activos = []; try{ activos = activeWorkers(); }catch(err){}
+  const hoy = hoyISO();
+  activos.forEach(w => {
+    const ws = workerStatus[w] || {};
+    if((ws.inicio && ws.inicio > hoy) || (ws.fin && ws.fin < hoy)) return;
+    const mias = ALL_CELLS.filter(c => getState(c.id).trabajador === w);
+    const dur = {};
+    mias.forEach(c => { const st = getState(c.id);
+      if(st.terminado && st.partidaTs && st.terminadoTs && st.terminadoTs >= st.partidaTs){
+        const k = c.categoria + '|' + c.area, n = diasHabiles(st.partidaTs, st.terminadoTs);
+        (dur[k] = dur[k] || {n: 0, max: 0}); dur[k].n++; if(n > dur[k].max) dur[k].max = n; } });
+    let enCurso = 0, ultimo = 0;
+    mias.forEach(c => { const st = getState(c.id);
+      if(st.partida && !st.terminado && st.partidaTs){
+        enCurso++;
+        const d = dur[c.categoria + '|' + c.area], dias = diasHabiles(st.partidaTs, ahora);
+        if(d && d.n >= SEG_MIN_MUESTRAS && dias > d.max && st.partidaTs > ahora - SEG_DIAS_VIGENTE * 86400000) res.demoras.push({w, id: c.id, ini: st.partidaTs, dias, max: d.max});
+      }
+      if(st.terminado && st.terminadoTs && st.terminadoTs > ultimo) ultimo = st.terminadoTs; });
+    if(!enCurso && ultimo && ahora - ultimo < 30 * 86400000 && new Date().getDay() !== 0){
+      const dias = diasHabiles(ultimo, ahora) - 1;
+      if(dias >= 1) res.frenados.push({w, desde: ultimo, dias});
+    }
+  });
+  return res;
+}
+// guarda en el log del trabajador (workerStatus[w].log): d = demora, f = frenado (desde = hora exacta del último terminado, hasta = hora de la partida nueva; solo datos para sin cancha, no se muestra)
+function registrarSeguimiento(seg){
+  if(!isAdmin) return;
+  const antes = JSON.stringify(Object.keys(workerStatus).map(w => (workerStatus[w] || {}).log || []));
+  const logDe = w => { workerStatus[w] = workerStatus[w] || defaultWorkerEntry(w); return workerStatus[w].log = workerStatus[w].log || []; };
+  seg.demoras.forEach(x => { const l = logDe(x.w), e = l.find(y => y.t === 'd' && y.id === x.id && y.ini === x.ini);
+    if(!e) l.push({t: 'd', id: x.id, ini: x.ini, dias: x.dias, max: x.max, ts: Date.now()}); else if(x.dias > e.dias) e.dias = x.dias; });
+  seg.frenados.forEach(x => { const l = logDe(x.w), e = l.find(y => y.t === 'f' && !y.hasta && y.desde === x.desde);
+    if(!e) l.push({t: 'f', desde: x.desde, hasta: null, dias: x.dias}); else e.dias = x.dias; });
+  // cerrar frenados que ya terminaron (empezó una partida nueva)
+  Object.keys(workerStatus).forEach(w => { const l = (workerStatus[w] || {}).log; if(!l) return;
+    l.forEach((e, i) => { if(e.t !== 'f' || e.hasta || seg.frenados.some(x => x.w === w && x.desde === e.desde)) return;
+      let sig = 0; ALL_CELLS.forEach(c => { const st = getState(c.id); if(st.trabajador === w && st.partidaTs && st.partidaTs > e.desde && (!sig || st.partidaTs < sig)) sig = st.partidaTs; });
+      if(sig){ e.hasta = sig; e.dias = Math.max(0, diasHabiles(e.desde, sig) - 2); } else l[i] = null; });
+    workerStatus[w].log = l.filter(Boolean).slice(-SEG_MAX_LOG); });
+  const despues = JSON.stringify(Object.keys(workerStatus).map(w => (workerStatus[w] || {}).log || []));
+  if(antes !== despues){ markSettingsDirty(); scheduleSave(); }
+}
+const fCorta = ts => { const d = new Date(ts); return pad2(d.getDate()) + '-' + pad2(d.getMonth() + 1); };
+function actualizarSeguimiento(){
+  let box = document.getElementById('avisoDemoras');
+  if(!isAdmin){ if(box) box.hidden = true; return; }
+  const seg = calcularSeguimiento(); registrarSeguimiento(seg);
+  let sn = 0; try{ sn = +localStorage.getItem('avisoSegHasta') || 0; }catch(err){}
+  const n = seg.demoras.length; // los frenados solo se guardan en el log, no avisan
+  if(!n || Date.now() < sn){ if(box) box.hidden = true; return; }
+  if(!box){
+    box = document.createElement('div'); box.id = 'avisoDemoras'; box.className = 'aviso-seg'; box.setAttribute('role', 'status');
+    box.innerHTML = '<div class="af-tx"></div><div class="af-bt"><button type="button" class="af-ok">Ver detalle</button><button type="button" class="af-mas">Más tarde</button></div>';
+    contenedorSeg().appendChild(box);
+    box.querySelector('.af-ok').addEventListener('click', () => abrirSeguimiento());
+    box.querySelector('.af-mas').addEventListener('click', () => { try{ localStorage.setItem('avisoSegHasta', String(Date.now() + 3600000)); }catch(err){} box.hidden = true; });
+  }
+  const l = [];
+  seg.demoras.slice(0, 2).forEach(x => l.push('<b>' + esc(x.w) + '</b> lleva ' + x.dias + ' días en ' + esc(liqLabelForCell(cellById[x.id])) + ' ' + esc(AREA_LABEL[cellById[x.id].area] || '') + ' (su máximo: ' + x.max + ').'));
+  if(n > l.length) l.push('<small>Y ' + (n - l.length) + ' más.</small>');
+  box.querySelector('.af-tx').innerHTML = l.join('<br>');
+  box.hidden = false;
+}
+function abrirSeguimiento(){
+  const seg = calcularSeguimiento();
+  const fila = (t, sub) => '<div class="sg-fila">' + t + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+  let h = '<div class="sg-tit">Demoradas ahora</div>' + (seg.demoras.map(x => { const c = cellById[x.id]; return fila('<b>' + esc(x.w) + '</b> · ' + esc(liqLabelForCell(c)) + ' · ' + esc(c.categoria) + ' · ' + esc(AREA_LABEL[c.area] || c.area), 'desde el ' + fCorta(x.ini) + ' · ' + x.dias + ' días (su máximo: ' + x.max + ')'); }).join('') || fila('Ninguna'));
+  const reg = []; Object.keys(workerStatus).forEach(w => ((workerStatus[w] || {}).log || []).forEach(e => { if(e.t === 'd') reg.push({w, e}); }));
+  reg.sort((a, b) => (b.e.ts || b.e.desde || 0) - (a.e.ts || a.e.desde || 0));
+  h += '<div class="sg-tit">Registro (últimos ' + Math.min(reg.length, 30) + ')</div>' + (reg.slice(0, 30).map(r => { const e = r.e;
+    if(e.t === 'd'){ const c = cellById[e.id]; return fila('<b>' + esc(r.w) + '</b> · demora ' + (c ? esc(liqLabelForCell(c)) + ' ' + esc(AREA_LABEL[c.area] || '') : ''), fCorta(e.ini) + ' · ' + e.dias + ' días (máximo: ' + e.max + ')'); }
+    return fila('<b>' + esc(r.w) + '</b> · frenado' + (e.hasta ? '' : ' (sigue)'), 'desde el ' + fCorta(e.desde) + (e.hasta ? ' hasta el ' + fCorta(e.hasta) : '') + ' · ' + e.dias + (e.dias === 1 ? ' día' : ' días') + ' sin partida'); }).join('') || fila('Sin registros todavía'));
+  openInputModal('Seguimiento de trabajadores', '<div style="max-height:62vh;overflow:auto;">' + h + '</div>', () => {}, 'Cerrar');
+  inputModalCancel.style.display = 'none';
+}
+
+
 function matCheckTerminado(id){
   const c = cellById[id];
   if(!c || !MAT_DE_AREA[c.area]) return;
@@ -5582,6 +5761,7 @@ function renderRendimiento(raiz, datos, esc){
   const nombreSem = l => { const w = infoSem(l); return 'Semana ' + w.n + ' · ' + w.rango + w.tag; };
   /* estadística de un trabajador en un rango de fechas */
   function stat(t, desde, hasta, cat){
+    if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin; // ===== solo cuenta entre su inicio y su finiquito =====
     const r = {m2: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
     t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat)){ r.m2 += x.m2; r.n += x.n; r.act[x.d] = 1; } });
     (t.asistencia || []).forEach(x => {
@@ -5629,6 +5809,7 @@ function renderRendimiento(raiz, datos, esc){
   { let ult = ''; datos.trabajadores.forEach(t => { t.dias.forEach(x => { if(x.d <= hoy && x.d > ult) ult = x.d; }); (t.asistencia || []).forEach(x => { if(x.d <= hoy && x.d > ult) ult = x.d; }); }); $('rdDia').value = ult || hoy; }
   /* promedio, máximo y mínimo de m² por día y por semana (solo días con m² > 0) */
   function minmax(t, desde, hasta, cat){
+    if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin;
     const pd = {}, ps = {};
     t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat) && x.m2 > 0){ pd[x.d] = (pd[x.d] || 0) + x.m2; const l = rdLunes(x.d); ps[l] = (ps[l] || 0) + x.m2; } });
     const res = obj => { const k = Object.keys(obj); if(!k.length) return null; let mx = k[0], mn = k[0], sum = 0; k.forEach(c => { sum += obj[c]; if(obj[c] > obj[mx]) mx = c; if(obj[c] < obj[mn]) mn = c; }); return {n: k.length, prom: sum / k.length, max: obj[mx], maxK: mx, min: obj[mn], minK: mn}; };
@@ -5792,7 +5973,7 @@ function renderRendimiento(raiz, datos, esc){
     else if(vista === 'mes'){ const m = $('rdMes').value; desde = m + '-01'; hasta = m + '-31'; titulo = RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4); sub = 'Suma por la fecha real de cada día: las semanas que mezclan dos meses se reparten día a día.'; }
     else { desde = '0000-01-01'; hasta = '9999-12-31'; titulo = 'Total acumulado'; sub = 'Desde la semana ' + 1 + ' (' + fd(primera) + ') hasta hoy · ' + todasSem.length + ' semanas.'; }
     titulo = etq + ' · ' + titulo;
-    const filas = lista.map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
+    const filas = lista.filter(t => !(t.inicio && t.inicio > hasta) && !(t.fin && t.fin < desde)).map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
     if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ if(cat === 'Frague'){ out.innerHTML = ''; return; } out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
     const act = filas.filter(f => f.r.dias > 0);
     const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
@@ -6747,6 +6928,7 @@ document.getElementById('content').addEventListener('change', (e) => {
 window.matchMedia('(max-width:700px)').addEventListener('change', () => { if(typeof render === 'function' && document.getElementById('content').children.length) render(); });
 function render(){
   matNivelesCache = null;
+  programarAvisoFechas();
   if(vistaPisos === 'mov') poblarFiltroPiso();
   actualizarEspaciado();
   const contentEl = document.getElementById('content');
@@ -8369,4 +8551,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.41 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.45 · 02-11-2026 ==== -->
