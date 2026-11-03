@@ -297,6 +297,7 @@ main h2{margin:0 0 4px;font-size:17px;}
     <button type="button" data-t="usuarios" class="on">Usuarios<small>crear, renombrar, bloquear</small></button>
     <button type="button" data-t="permisos">Permisos<small>secciones y aparatos</small></button>
     <button type="button" data-t="encargados">Encargados<small>quién responde por cada página</small></button>
+    <button type="button" data-t="visual">Visual<small>botones y temas que se ven</small></button>
     <button type="button" data-t="rendimiento">Rendimiento<small>m² y actividad por trabajador</small></button>
     <button type="button" data-t="seguridad">Seguridad<small>alertas y respaldos</small></button>
     <button type="button" data-t="ventanas">Ventanas<small>qué puede abrir cada uno</small></button>
@@ -346,7 +347,8 @@ const BD = (function(){
     if(a === 'respaldosListar') return {ok:true, respaldos:(estado.resp = estado.resp || [{n:1,ts:Date.now()-3600000*3,motivo:'diario 7:00',filas:1240,terminadas:812},{n:2,ts:Date.now()-86400000,motivo:'diario 7:00',filas:1240,terminadas:790},{n:3,ts:Date.now()-86400000*2,motivo:'diario 7:00',filas:1240,terminadas:761}])};
     if(a === 'respaldoAhora') return {ok:true};
     if(a === 'respaldoRestaurar') return x.confirmar === true ? {ok:true} : {ok:false,error:'datos_invalidos'};
-    if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados};
+    if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados, ajustes:estado.ajustes || {halloween:false}};
+    if(a === 'adminAjustesGuardar'){ estado.ajustes = {halloween:x.ajustes.halloween === true}; guardar(); return {ok:true, ajustes:estado.ajustes}; }
     if(a === 'seccionesListar') return {ok:true, usuarios:estado.usuarios.filter(u => u.rol !== 1)};
     if(a === 'seccionesGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.extra = x.extra; guardar(); return {ok:true, extra:u.extra}; }
     if(a === 'dispositivoDobleGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.doble = !!x.doble; guardar(); return {ok:true, doble:u.doble}; }
@@ -671,6 +673,16 @@ function vistaEncargados(){
     const j = await accion('adminEncargadosGuardar', {encargados:enc}); if(j){ datos.encargados = j.encargados; toast('Encargados guardados.'); await dormir(700); location.href = 'index.html?menu=1'; }
   });
 }
+function vistaVisual(){
+  const a = datos.ajustes || {halloween:false};
+  main.innerHTML = '<h2>Visual</h2><p class="nota">Botones y temas que ven los demás. Lo que dejes apagado no aparece.</p><div class="tarjeta">'
+    + '<div class="fila"><label class="quien2" for="vHal"><b>Botón Halloween en Calidad</b><small style="display:block;color:var(--sub);">Si está apagado, el botón no aparece y el tema queda desactivado.</small></label><input type="checkbox" id="vHal"' + (a.halloween ? ' checked' : '') + '></div>'
+    + '<div style="margin-top:12px;"><button class="btn primary" id="vG" type="button">Guardar y cerrar</button> <button class="btn" id="vC" type="button">Cerrar sin guardar</button></div></div>';
+  $('vC').addEventListener('click', () => { location.href = 'index.html?menu=1'; });
+  $('vG').addEventListener('click', async () => {
+    const j = await accion('adminAjustesGuardar', {ajustes:{halloween:$('vHal').checked}}); if(j){ datos.ajustes = j.ajustes; toast('Guardado.'); await dormir(700); location.href = 'index.html?menu=1'; }
+  });
+}
 async function vistaRendimiento(){
   main.innerHTML = '<h2>Rendimiento por trabajador</h2><p class="nota">Cuánto rinde cada trabajador por semana, por mes y en total, con m², fechas y asistencia.</p><div class="tarjeta" id="rdCuerpo">Cargando…</div>';
   const j = await api('rendimientoDatos');
@@ -743,7 +755,7 @@ function vistaGenerador(){
 }
 async function ir(t){
   tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'generador') vistaGenerador(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
+  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'visual') vistaVisual(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'generador') vistaGenerador(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
 }
 $('lado').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if(b) ir(b.dataset.t); });
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
@@ -754,7 +766,7 @@ async function iniciar(){
   const j = await api('adminUsuarios');
   if(!j || !j.ok){ main.innerHTML = '<div class="tarjeta">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div>'; if(window.CargaPagina) await CargaPagina.fin(); return; }
   if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
-  datos = {usuarios:j.usuarios, encargados:j.encargados};
+  datos = {usuarios:j.usuarios, encargados:j.encargados, ajustes:j.ajustes || {halloween:false}};
   await ir('usuarios');
   if(window.CargaPagina) await CargaPagina.fin();
 }
@@ -781,7 +793,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.32';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.33';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.32 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.33 · 01-11-2026 ==== -->

@@ -51,7 +51,7 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
 .toolbar select,.toolbar .btn{width:100%;min-width:0;min-height:40px;}
 .toolbar select{padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
-@media (max-width:520px){.toolbar .grp{flex:1 1 calc(50% - 10px);}.cluster{width:100%;}.cluster .btn{flex:0 0 auto;}}
+@media (max-width:520px){.toolbar .grp{flex:1 1 calc(50% - 10px);}}
 main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;background:color-mix(in srgb,var(--bg) 86%,transparent);border:1px solid var(--border);box-shadow:0 10px 40px rgba(0,0,0,.28);}
 .msg{font-size:12.5px;color:rgba(255,255,255,.82);margin:0 0 12px;}
 .resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
@@ -408,15 +408,27 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .cluster .btn,.cluster .cs-btn,.cluster .btn-menu{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;height:34px !important;min-height:34px !important;width:170px !important;min-width:0 !important;margin:0 !important;padding:0 10px !important;font-size:12px !important;line-height:1.2;text-align:center;white-space:nowrap;}
   .cluster .cs-btn{gap:6px;}
   .cluster .conectado{box-sizing:border-box;display:inline-flex;align-items:center;height:34px;}
+  .cluster .btn[hidden]{display:none !important;}
+  /* ===== celular: botones de 2 en 2, mismo ancho y alto ===== */
+  @media (max-width:520px){
+    .cluster{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch;}
+    .cluster::before{display:none;}
+    .cluster .conectado,.cluster #verCal{grid-column:1 / -1;width:auto;justify-content:flex-start;}
+    .cluster #verCal{height:auto;padding:0 !important;}
+    .cluster .btn,.cluster .cs-btn{width:100% !important;}
+    .cluster #irPanel{order:98;margin-left:0 !important;}
+    .cluster #salir{order:99;}
+    .cluster #verFotos:not([hidden]) ~ #halloween{grid-column:span 2;}
+  }
 
 /* ===== Aviso lateral · v1 ===== */
 /* se abre del centro hacia los lados y se cierra igual */
 
 /* ===== colores por tipo ===== */
-.avl         { --av: #74d1e0; }   /* info */
-.avl.exito   { --av: #5fd6a4; }
-.avl.alerta  { --av: #e9c46a; }
-.avl.error   { --av: #e8707f; }
+.avl         { --av: #2fa3b8; }   /* info */
+.avl.exito   { --av: #34a874; }
+.avl.alerta  { --av: #d99a1c; }
+.avl.error   { --av: #d6455a; }
 
 /* ===== contenedor (arriba al centro) ===== */
 .avls {
@@ -431,15 +443,15 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   position: relative; pointer-events: auto;
   display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 12px;   /* el relleno de 26px iguala a la X: lo del medio queda centrado */
   padding: 12px 12px 14px 16px;
-  background: rgba(22, 32, 40, .96); color: #f2f6f8;
-  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  background: var(--panel, #fff); color: var(--text, #2c302c);
+  border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
   font: 500 14px/1.4 "Noto Sans", "Segoe UI", system-ui, sans-serif;
 }
 /* líneas de arriba y abajo que se apagan hacia los lados */
 .avl::before, .avl::after {
   content: ""; position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+  background: linear-gradient(to right, transparent, var(--av) 30%, var(--av) 50%, var(--av) 70%, transparent);
 }
 .avl::before { top: -1px; }
 .avl::after  { bottom: -1px; }
@@ -451,10 +463,10 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .avl .texto { min-width: 0; overflow-wrap: anywhere; line-height: 22px; }
 .avl .cerrar {
   width: 26px; height: 26px; display: grid; place-items: center;
-  background: transparent; color: #9fb3bd; border: 1px solid rgba(255,255,255,.15); border-radius: 0; cursor: pointer;
+  background: transparent; color: var(--sub, #6c716a); border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0; cursor: pointer;
   transition: color .2s, border-color .2s;
 }
-.avl .cerrar:hover { color: #fff; border-color: var(--av); }
+.avl .cerrar:hover { color: var(--text, #2c302c); border-color: var(--av); }
 .avl .cerrar:focus-visible { outline: 2px solid var(--av); outline-offset: 2px; }
 .avl .cerrar svg { width: 12px; height: 12px; }
 
@@ -462,7 +474,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .avl .tiempo {
   position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
   background: linear-gradient(to right, transparent, var(--av) 20%, var(--av) 80%, transparent);
-  opacity: .55; transform-origin: center;
+  opacity: .7; transform-origin: center;
   animation: aviso-tiempo var(--dur, 4s) linear forwards;
 }
 .avl:hover .tiempo { animation-play-state: paused; }
@@ -471,6 +483,18 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 /* contenido aparece después de abrir */
 .avl > :not(.tiempo) { animation: aviso-contenido .25s ease .18s both; }
 @keyframes aviso-contenido { from { opacity: 0; } to { opacity: 1; } }
+
+/* ===== aviso fijo (sin tiempo, con botón Entendido) ===== */
+.avl.fijo { grid-template-columns: 26px 1fr auto; }
+.avl.fijo .cont { justify-content: flex-start; text-align: left; }
+.avl.fijo .entendido {
+  align-self: center; padding: 6px 12px; background: transparent; color: var(--text, #2c302c);
+  border: 1px solid var(--av); border-radius: 0; cursor: pointer; font: 600 13px/1.2 inherit; font-family: inherit;
+  transition: background .2s, color .2s;
+}
+.avl.fijo .entendido:hover { background: var(--av); color: #fff; }
+.avl.fijo .entendido:disabled { opacity: .5; cursor: default; }
+.avl.fijo .entendido:focus-visible { outline: 2px solid var(--av); outline-offset: 2px; }
 
 /* ===== abre / cierra ===== */
 .avl        { animation: lateral-abre .32s cubic-bezier(.2,.7,.2,1) both; }
@@ -515,7 +539,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     const caj = caja();
     const vivos = [...caj.querySelectorAll('.avl:not(.sale)')];
     if (vivos.some(v => v.dataset.k === tipo + '|' + texto)) return () => {};   // el mismo aviso ya está en pantalla
-    if (vivos.length >= MAX) vivos[0].classList.add('sale');
+    const sueltos = vivos.filter(v => !v.dataset.fijo);   // los fijos no se cierran solos
+    if (vivos.length >= MAX && sueltos.length) sueltos[0].classList.add('sale');
 
     const el = document.createElement('div');
     el.className = 'avl ' + tipo;
@@ -534,6 +559,30 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     el.querySelector('.tiempo').addEventListener('animationend', cerrar);
     caj.appendChild(el);
     return cerrar;
+  };
+
+  // ===== aviso fijo: se queda hasta que se aprieta Entendido =====
+  // alAceptar() devuelve true si se pudo guardar; si no, el aviso sigue ahí
+  window.avisoFijo = (clave, texto, alAceptar) => {
+    texto = String(texto == null ? '' : texto);
+    const caj = caja();
+    if (caj.querySelector('.avl.fijo[data-k="' + CSS.escape('fijo|' + clave) + '"]')) return;
+    const el = document.createElement('div');
+    el.className = 'avl alerta fijo';
+    el.dataset.k = 'fijo|' + clave;
+    el.dataset.fijo = '1';
+    el.innerHTML = '<span class="relleno" aria-hidden="true"></span><span class="cont"><span class="icono" aria-hidden="true">' + iconos.alerta + '</span><span class="texto"></span></span><button type="button" class="entendido">Entendido</button>';
+    el.querySelector('.texto').textContent = texto;
+    const bt = el.querySelector('.entendido');
+    bt.addEventListener('click', async () => {
+      bt.disabled = true;
+      let ok = false;
+      try { ok = await alAceptar(); } catch (e) { ok = false; }
+      if (!ok) { bt.disabled = false; window.avisoLateral('No se pudo guardar. Intenta de nuevo.', 'error'); return; }
+      el.classList.add('sale');
+      el.addEventListener('animationend', e => { if (e.target === el) el.remove(); });
+    });
+    caj.appendChild(el);
   };
 })();
 </script>
@@ -565,7 +614,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <button class="btn" id="verRegistro" type="button">Registro</button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
     <button class="btn" id="tema" type="button" aria-label="Cambiar tema">Tema: Obra</button>
-    <button class="btn" id="halloween" type="button" aria-pressed="true" title="Encender o apagar el tema de Halloween">🎃 Halloween</button>
+    <button class="btn" id="halloween" type="button" hidden aria-pressed="true" title="Encender o apagar el tema de Halloween">🎃 Halloween</button>
     <button class="btn" id="salir" type="button">Cerrar sesión</button>
   </div>
 </header>
@@ -687,7 +736,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.36.19';
+const CAL_VERSION = '1.37.3';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -803,7 +852,7 @@ function cerrarSesion(msg){
 }
 
 function pintarQuien(){
-  $('quien').textContent = (cargo ? (cargo === 'Admin' && /^ismael\b/i.test(nombre || '') ? 'Developer' : cargo) + ' - ' : '') + nombre;
+  $('quien').textContent = (cargo ? (cargo === 'Admin' && /^ismael\b/i.test(nombre || '') ? 'Dev' : cargo) + ' - ' : '') + nombre;
   ajustarFotosUI();
 }
 
@@ -1619,6 +1668,8 @@ async function cargar(inicial){
       cargado = true;
       cargando = false;
       pintar();
+      avisosCorregido(j.avisos);
+      if(j.ajustes && typeof j.ajustes === 'object'){ const ok = j.ajustes.halloween === true; if(ok !== halloweenOk){ halloweenOk = ok; guardarLocal('calidadHalloweenOk', ok ? '1' : null); if(ok) halloween = leerLocal('calidadHalloween') === '1'; aplicarHalloween(); } }
       infoDeCarga(j);
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
       return 'ok';
@@ -1639,6 +1690,15 @@ async function cargar(inicial){
     infoDeError(errorCarga);
     return 'fallo';
   }finally{ cargando = false; $('refrescar').disabled = false; }
+}
+
+// ===== avisos de departamentos que se dejaron en Corregido (llegan solo a Calidad) =====
+function avisosCorregido(lista){
+  if(!Array.isArray(lista)) return;
+  lista.slice(0, 8).forEach(a => {
+    if(!a || typeof a.id !== 'string' || !/^[\w-]{1,40}$/.test(a.id) || typeof a.texto !== 'string') return;
+    avisoFijo('cor-' + a.id, a.texto.slice(0, 400), async () => { const r = await llamar('calidadAvisoVisto', {ids: [a.id]}); return !!(r && r.ok); });
+  });
 }
 
 async function cargarInicial(){
@@ -1684,8 +1744,12 @@ $('tema').addEventListener('click', () => {
 });
 aplicarTema();
 // Halloween: apagado por defecto (el tema por defecto es Obra); el botón lo enciende y lo apaga (queda guardado en este aparato).
-let halloween = leerLocal('calidadHalloween') === '1';
+// el botón solo existe si el Admin lo deja activo (Panel de Admin → Visual); se recuerda el último valor para que no parpadee
+let halloweenOk = leerLocal('calidadHalloweenOk') === '1';
+let halloween = halloweenOk && leerLocal('calidadHalloween') === '1';
 function aplicarHalloween(){
+  if(!halloweenOk) halloween = false;
+  $('halloween').hidden = !halloweenOk;
   document.documentElement.classList.toggle('halloween', halloween);
   $('halloween').classList.toggle('on', halloween);
   $('halloween').setAttribute('aria-pressed', halloween ? 'true' : 'false');
@@ -1969,4 +2033,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.36.18 · 30-10-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.37.3 · 30-10-2026 ==== -->
