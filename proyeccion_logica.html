@@ -7,7 +7,7 @@
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||!Array.isArray(h.secciones)||false){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <link rel="stylesheet" href="carga.css?v=1">
 <title>Proyección Lógica · Obra Bellavista</title>
-<!-- Proyección Lógica v0.3.5 -->
+<!-- Proyección Lógica v0.3.7 -->
 <style>
 /* ===== Base ===== */
 *{box-sizing:border-box}
@@ -41,7 +41,7 @@ button.borrar:hover{background:#fbeceb}
 .botonera button{min-width:190px}
 
 
-/* ===== Cambiar de sección: botón igual en todas las páginas (valores de «Selectores de opciones», azul) ===== */
+/* ===== Botón Cambiar de sección ===== */
 .cs-btn{
   --caja-fondo:rgba(33,52,64,.88); --caja-linea:rgba(214,226,232,.8); --sel-borde:rgba(240,250,252,.95); --sel-claro:#74d1e0; --sel-brillo:rgba(90,200,225,.25);
   --m:transparent 0%, rgba(0,0,0,.12) 5%, rgba(0,0,0,.27) 10%, rgba(0,0,0,.42) 15%, rgba(0,0,0,.56) 20%, rgba(0,0,0,.69) 25%, rgba(0,0,0,.80) 30%, rgba(0,0,0,.89) 35%, rgba(0,0,0,.95) 40%, rgba(0,0,0,.99) 45%, #000 50%, rgba(0,0,0,.99) 55%, rgba(0,0,0,.95) 60%, rgba(0,0,0,.89) 65%, rgba(0,0,0,.80) 70%, rgba(0,0,0,.69) 75%, rgba(0,0,0,.56) 80%, rgba(0,0,0,.42) 85%, rgba(0,0,0,.27) 90%, rgba(0,0,0,.12) 95%, transparent 100%;
@@ -172,7 +172,7 @@ td.num,th.num{text-align:right}
   <h1>PROYECCIÓN LÓGICA</h1>
   <p class="small" style="margin:0">Planificación, control de avance y proyección de término y costos.</p>
  </div>
- <span class="ver" id="verTxt">v0.3.5</span>
+ <span class="ver" id="verTxt">v0.3.7</span>
 </header>
 
 <!-- ===== 1. Datos generales ===== -->
@@ -286,7 +286,7 @@ td.num,th.num{text-align:right}
  <input type="file" id="archivo" accept=".json,application/json" hidden>
 </div>
 
-<p class="small" style="text-align:center">Proyección Lógica v0.3.5</p>
+<p class="small" style="text-align:center">Proyección Lógica v0.3.7</p>
 </div>
 
 <!-- ===== Aviso y ventana ===== -->
@@ -305,7 +305,7 @@ td.num,th.num{text-align:right}
 
 <script>
 'use strict';
-const VERSION="0.3.5";
+const VERSION="0.3.7";
 const $=id=>document.getElementById(id);
 
 // ===== Limpieza de textos (nada de código) =====
@@ -348,6 +348,12 @@ function finTras(ini,dias){ // último día de trabajo de una partida
  let n=siguienteHabil(ini),c=1;
  while(c<dias){n++;if(trabaja(n))c++}
  return n;
+}
+// fracción del tramo a..b que ya pasó en el día n, contando solo los días de trabajo
+function frac(a,b,n){
+ const d=habilesEntre(a,b);
+ if(d<=0)return n>=b?1:0;
+ return Math.min(1,habilesEntre(a,Math.min(n,b))/d);
 }
 function habilesEntre(a,b){ // de a hasta b, ambos incluidos
  let c=0;for(let n=a;n<=b;n++)if(trabaja(n))c++;return c;
@@ -557,12 +563,27 @@ function svgEl(tag,at){
  const e=document.createElementNS("http://www.w3.org/2000/svg",tag);
  Object.entries(at).forEach(([k,v])=>e.setAttribute(k,v));return e;
 }
+// línea entre a y b: un punto por día de trabajo (los días sin trabajo no se dibujan)
+function trazo(a,b,f,X,Y){
+ const dias=[a];
+ for(let n=a+1;n<b;n++)if(trabaja(n))dias.push(n);
+ dias.push(b);
+ const paso=Math.max(1,Math.ceil(dias.length/300));
+ let d="";
+ dias.forEach((m,k)=>{if(k%paso&&k<dias.length-1)return;d+=(d?"L":"M")+X(m).toFixed(1)+" "+Y(f(m)).toFixed(1)});
+ return d;
+}
 function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn){
  const s=$("curva");s.textContent="";
  const W=900,H=320,L=48,R=16,T=14,B=40;
  const fin=Math.max(finPlan,corte,ofi??0,est??0);
  const span=Math.max(1,fin-ini);
- const X=n=>L+(n-ini)/span*(W-L-R);
+ // el eje cuenta solo días de trabajo: sábado y domingo no ocupan lugar si no se trabajan
+ const off=trabaja(ini)?1:0;
+ const Wd=n=>n<ini?0:Math.max(0,habilesEntre(ini,n)-off);
+ const Wtot=Math.max(1,Wd(fin));
+ const diaDe=w=>{let n=ini;while(n<fin&&Wd(n)<w)n++;return n};
+ const X=n=>L+Wd(Math.min(n,fin))/Wtot*(W-L-R);
  const Y=p=>T+(100-p)/100*(H-T-B);
 
  // grilla
@@ -572,16 +593,13 @@ function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn){
  }
  const marcas=5;
  for(let i=0;i<=marcas;i++){
-  const n=Math.round(ini+span*i/marcas);
+  const n=diaDe(Math.round(Wtot*i/marcas));
   const t=svgEl("text",{x:X(n),y:H-14,"text-anchor":i===0?"start":i===marcas?"end":"middle","font-size":11,fill:"#667"});
   t.textContent=fecha(n);s.appendChild(t);
  }
 
  // programado
- const paso=Math.max(1,Math.ceil(span/300));
- let d="";
- for(let n=ini;n<=finPlan+paso;n+=paso){const m=Math.min(n,finPlan);d+=(d?"L":"M")+X(m).toFixed(1)+" "+Y(planEn(m)).toFixed(1)}
- s.appendChild(svgEl("path",{d,fill:"none",stroke:"#174a78","stroke-width":2.5}));
+ s.appendChild(svgEl("path",{d:trazo(ini,finPlan,planEn,X,Y),fill:"none",stroke:"#174a78","stroke-width":2.5}));
 
  // término oficial
  if(ofi!==null){
@@ -590,16 +608,16 @@ function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn){
 
  // proyección
  if(est!==null&&est>corte){
-  s.appendChild(svgEl("line",{x1:X(corte),y1:Y(real),x2:X(est),y2:Y(100),stroke:"#c98a12","stroke-width":2,"stroke-dasharray":"6 4"}));
+  s.appendChild(svgEl("path",{d:trazo(corte,est,n=>real+(100-real)*frac(corte+1,est,n),X,Y),fill:"none",stroke:"#c98a12","stroke-width":2,"stroke-dasharray":"6 4"}));
  }
 
  // requerido para llegar al término oficial
  if(ofi!==null&&ofi>corte&&real<100){
-  s.appendChild(svgEl("line",{x1:X(corte),y1:Y(real),x2:X(ofi),y2:Y(100),stroke:"#7b4fa0","stroke-width":2,"stroke-dasharray":"2 4","stroke-linecap":"round"}));
+  s.appendChild(svgEl("path",{d:trazo(corte,ofi,n=>real+(100-real)*frac(corte+1,ofi,n),X,Y),fill:"none",stroke:"#7b4fa0","stroke-width":2,"stroke-dasharray":"2 4","stroke-linecap":"round"}));
  }
 
  // real
- s.appendChild(svgEl("line",{x1:X(ini),y1:Y(0),x2:X(corte),y2:Y(real),stroke:"#238653","stroke-width":2,opacity:.5}));
+ s.appendChild(svgEl("path",{d:trazo(ini,corte,n=>real*frac(ini,corte,n),X,Y),fill:"none",stroke:"#238653","stroke-width":2,opacity:.5}));
  s.appendChild(svgEl("circle",{cx:X(corte),cy:Y(real),r:5,fill:"#238653"}));
 
  // capa del cursor
@@ -607,7 +625,7 @@ function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn){
  g.appendChild(svgEl("line",{id:"cursorL",y1:T,y2:H-B,stroke:"#263445","stroke-width":1,"stroke-dasharray":"3 3"}));
  ["#174a78","#238653","#c98a12","#7b4fa0"].forEach((c,i)=>g.appendChild(svgEl("polygon",{id:"rombo"+i,fill:c,stroke:"#fff","stroke-width":1.5})));
  s.appendChild(g);
- curva={ini,finPlan,corte,ofi,est,real,planEn,span,L,R,T,B,W,H,X,Y,acts:ultimo?ultimo.acts:[]};
+ curva={ini,finPlan,corte,ofi,est,real,planEn,span,Wtot,diaDe,L,R,T,B,W,H,X,Y,acts:ultimo?ultimo.acts:[]};
 }
 
 // ===== Curva: cursor =====
@@ -619,9 +637,9 @@ function rombo(el,x,y,ok){
 function valoresEn(n){
  const c=curva,v={};
  if(n<=c.finPlan)v.plan=c.planEn(n);
- if(n<=c.corte)v.real=c.corte>c.ini?c.real*(n-c.ini)/(c.corte-c.ini):c.real;
- else if(c.est!==null&&n<=c.est)v.proy=c.real+(100-c.real)*(n-c.corte)/(c.est-c.corte);
- if(c.ofi!==null&&c.ofi>c.corte&&c.real<100&&n>c.corte&&n<=c.ofi)v.req=c.real+(100-c.real)*(n-c.corte)/(c.ofi-c.corte);
+ if(n<=c.corte)v.real=c.real*frac(c.ini,c.corte,n);
+ else if(c.est!==null&&n<=c.est)v.proy=c.real+(100-c.real)*frac(c.corte+1,c.est,n);
+ if(c.ofi!==null&&c.ofi>c.corte&&c.real<100&&n>c.corte&&n<=c.ofi)v.req=c.real+(100-c.real)*frac(c.corte+1,c.ofi,n);
  return v;
 }
 function moverCursor(ev){
@@ -631,7 +649,7 @@ function moverCursor(ev){
  const p=pt.matrixTransform(s.getScreenCTM().inverse());
  const c=curva,ancho=c.W-c.L-c.R;
  if(p.x<c.L-10||p.x>c.W-c.R+10){ocultarCursor();return}
- const n=Math.round(c.ini+Math.min(1,Math.max(0,(p.x-c.L)/ancho))*c.span);
+ const n=c.diaDe(Math.round(Math.min(1,Math.max(0,(p.x-c.L)/ancho))*c.Wtot));
  const x=c.X(n),v=valoresEn(n);
  $("cursorL").setAttribute("x1",x);$("cursorL").setAttribute("x2",x);
  rombo($("rombo0"),x,c.Y(v.plan??0),v.plan!==undefined);
