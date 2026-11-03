@@ -333,7 +333,7 @@ const BD = (function(){
       {fila:5,nombre:'Rafael',cargo:'Trabajador',rol:3,bloqueo:{permanente:false,hasta:Date.now()+3*86400000,motivo:'Vacaciones'},base:['panel'],extra:[],doble:false},
       {fila:6,nombre:'Ignacio',cargo:'Supervisor',rol:2,bloqueo:null,base:['panel'],extra:[],doble:false},
       {fila:7,nombre:'Ismael S.',cargo:'Admin',rol:1,bloqueo:null,base:['panel','calidad','avance','terreno','oficina','bodega','admin'],extra:[],doble:false}],
-    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzalez',avance:'A. Sandoval',terreno:'A. Sandoval',oficina:'Edwin Carroz',bodega:'Jefe de Bodega',admin:'Ismael S.'}};
+    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzalez',avance:'Alejandro Sandoval',terreno:'Alejandro Sandoval',oficina:'Edwin Carroz',bodega:'Jefe de Bodega',admin:'Ismael S.'}};
   const guardar = () => { try{ localStorage.setItem('pruebaAdminHtml', JSON.stringify(estado)); }catch(e){} };
   const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica',7:'Jefe de Bodega'};
   const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance'],7:['bodega']};
@@ -749,7 +749,7 @@ $('lado').addEventListener('click', e => { const b = e.target.closest('button[da
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $('irMenu').addEventListener('click', e => irMenuCarga(e.currentTarget));
 async function iniciar(){
-  $('quien').textContent = DEMO ? 'Modo prueba · datos de ejemplo' : ((H && /^ismael\b/i.test(H.nombre || '') ? 'Developer' : 'Admin') + (H && H.nombre ? ' · ' + H.nombre : ''));
+  $('quien').textContent = DEMO ? 'Modo prueba · datos de ejemplo' : ((H && /^ismael\b/i.test(H.nombre || '') ? 'Dev' : 'Admin') + (H && H.nombre ? ' · ' + H.nombre : ''));
   if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('datos');
   const j = await api('adminUsuarios');
   if(!j || !j.ok){ main.innerHTML = '<div class="tarjeta">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div>'; if(window.CargaPagina) await CargaPagina.fin(); return; }
@@ -781,7 +781,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.30';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.32';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.30 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.32 · 01-11-2026 ==== -->

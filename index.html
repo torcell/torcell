@@ -571,8 +571,8 @@
           <button type="button" data-dest="molde"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 9v12"/></svg></span><span>Molde de secciones<small>Arma una sección nueva paso a paso</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="panel"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Panel de Cerámica y Frague<small>Avance y pagos de cerámica y frague</small><small class="enc">Encargado: Ismael S.</small></span></button>
           <button type="button" data-dest="calidad"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M7.5 12.5l3 3 6-7"/></svg></span><span>Control de calidad<small>Revisión de cerámica y frague</small><small class="enc">Encargado: Silvia Gonzalez</small></span></button>
-          <button type="button" data-dest="avance"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg></span><span>Dashboard de avance<small>Resumen del avance de la obra</small><small class="enc">Encargado: A. Sandoval</small></span></button>
-          <button type="button" data-dest="terreno"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17"/><path d="M9 4h6v3H9zM8.5 12h7M8.5 16h5"/></svg></span><span>Jefe de Terreno<small>Programación, personal y seguridad</small><small class="enc">Encargado: A. Sandoval</small></span></button>
+          <button type="button" data-dest="avance"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></svg></span><span>Dashboard de avance<small>Resumen del avance de la obra</small><small class="enc">Encargado: Alejandro Sandoval</small></span></button>
+          <button type="button" data-dest="terreno"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17"/><path d="M9 4h6v3H9zM8.5 12h7M8.5 16h5"/></svg></span><span>Jefe de Terreno<small>Programación, personal y seguridad</small><small class="enc">Encargado: Alejandro Sandoval</small></span></button>
           <button type="button" data-dest="oficina"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg></span><span>Oficina Técnica<small>Pagos y documentos</small><small class="enc">Encargado: Edwin Carroz</small></span></button>
           <button type="button" data-dest="bodega"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5v11H3z"/><path d="M8 20v-7h8v7M8 16.5h8"/></svg></span><span>Bodega<small>Materiales, recepción y salidas con QR</small><small class="enc">Encargado: Jefe de Bodega</small></span></button>
           <button type="button" data-dest="admin"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span><span>Panel de Admin<small>Usuarios, permisos y rendimiento</small><small class="enc">Encargado: Ismael S.</small></span></button>
@@ -769,7 +769,7 @@ function animAlto(v, a, b, ms){
 }
 async function bienvenida(res, bloqueo){
   const nom = limpioNombre(res.nombre || '') || (bloqueo ? 'Usuario' : 'Admin');
-  lg('lgV3s').textContent = saludoDe(nom); lg('lgV3n').textContent = nom; lg('lgV3c').textContent = (res.rol === 1 ? (/^ismael\b/i.test(nom) ? 'Developer' : 'Admin') : CARGO_TXT[res.rol]) || 'Usuario';
+  lg('lgV3s').textContent = saludoDe(nom); lg('lgV3n').textContent = nom; lg('lgV3c').textContent = (res.rol === 1 ? (/^ismael\b/i.test(nom) ? 'Dev' : 'Admin') : CARGO_TXT[res.rol]) || 'Usuario';
   const v = lg('lgV3'), inn = lg('lgV3in');
   v.classList.remove('ver', 'err', 'errver'); inn.classList.remove('tiembla'); v.style.height = '0px';
   pantalla('lgHecho');
@@ -955,4 +955,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.9 · 30-10-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.11 · 30-10-2026 ==== -->

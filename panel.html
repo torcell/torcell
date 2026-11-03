@@ -1499,6 +1499,9 @@
 .sg-tit{margin:12px 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--sub);}
 .sg-fila{padding:5px 0;border-bottom:1px solid var(--border,rgba(128,150,170,.35));font-size:13px;}
 .sg-fila small{display:block;color:var(--sub);font-size:11.5px;}
+.sg-acc{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 8px;border-bottom:1px solid var(--border,rgba(128,150,170,.35));}
+.sg-acc .sg-mot{flex:1 1 100%;min-width:0;padding:6px 8px;font-size:13px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:0;}
+.sg-acc .sg-b{flex:1 1 0;border-radius:0;font-size:12px;padding:6px 8px;}
 .ff-ok{margin-top:10px;font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;border-radius:0;}
 </style>
 <script>
@@ -2092,7 +2095,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.48';
+const APP_VERSION = '0.73.50';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2361,7 +2364,7 @@ function applyRoleUI(){
   const badge = document.getElementById('roleBadge');
   const loggedIn = isAdmin || isSupervisor || isJefe || workerSession || esInvitado();
   let label = '', cls = 'guest';
-  if(isAdmin){ label = 'Conectado como: ' + (/^ismael\b/i.test(String(sessionName || '')) ? 'Developer' : 'Admin') + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
+  if(isAdmin){ label = 'Conectado como: ' + (/^ismael\b/i.test(String(sessionName || '')) ? 'Dev' : 'Admin') + (sessionName ? ' - ' + sessionName : ''); cls = 'admin'; }
   else if(isSupervisor){ label = 'Conectado como: Supervisor' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(isJefe){ label = 'Conectado como: Jefe de Terreno' + (sessionName ? ' - ' + sessionName : ''); cls = 'supervisor'; }
   else if(workerSession){
@@ -2888,7 +2891,7 @@ function buildRecords(){
 function logSeguroDb(l){
   if(!Array.isArray(l)) return [];
   return l.filter(e => e && (e.t === 'd' || e.t === 'f')).slice(-40).map(e => e.t === 'd'
-    ? {t: 'd', id: String(e.id || '').slice(0, 60), ini: +e.ini || 0, dias: +e.dias || 0, max: +e.max || 0, ts: +e.ts || 0}
+    ? {t: 'd', id: String(e.id || '').slice(0, 60), ini: +e.ini || 0, dias: +e.dias || 0, max: +e.max || 0, ts: +e.ts || 0, x: e.x ? 1 : 0, m: String(e.m || '').replace(/[<>]/g, '').slice(0, 120)}
     : {t: 'f', desde: +e.desde || 0, hasta: e.hasta ? +e.hasta : null, dias: +e.dias || 0});
 }
 function sanitizedWorkerStatusForDb(){
@@ -4853,7 +4856,8 @@ function calcularSeguimiento(){
       if(st.partida && !st.terminado && st.partidaTs){
         enCurso++;
         const d = dur[c.categoria + '|' + c.area], dias = diasHabiles(st.partidaTs, ahora);
-        if(d && d.n >= SEG_MIN_MUESTRAS && dias > d.max && st.partidaTs > ahora - SEG_DIAS_VIGENTE * 86400000) res.demoras.push({w, id: c.id, ini: st.partidaTs, dias, max: d.max});
+        const resuelta = ((ws.log || []).find(y => y.t === 'd' && y.id === c.id && y.ini === st.partidaTs) || {});
+        if(!resuelta.x && !resuelta.m && d && d.n >= SEG_MIN_MUESTRAS && dias > d.max && st.partidaTs > ahora - SEG_DIAS_VIGENTE * 86400000) res.demoras.push({w, id: c.id, ini: st.partidaTs, dias, max: d.max});
       }
       if(st.terminado && st.terminadoTs && st.terminadoTs > ultimo) ultimo = st.terminadoTs; });
     if(!enCurso && ultimo && ahora - ultimo < 30 * 86400000 && new Date().getDay() !== 0){
@@ -4902,16 +4906,32 @@ function actualizarSeguimiento(){
   box.querySelector('.af-tx').innerHTML = l.join('<br>');
   box.hidden = false;
 }
+// ===== Demoras: sacar el aviso o dejar el motivo =====
+function resolverDemora(w, id, ini, motivo){
+  if(!isAdmin) return;
+  workerStatus[w] = workerStatus[w] || defaultWorkerEntry(w);
+  const l = workerStatus[w].log = workerStatus[w].log || [];
+  let e = l.find(y => y.t === 'd' && y.id === id && y.ini === ini);
+  if(!e){ e = {t: 'd', id, ini, dias: 0, max: 0, ts: Date.now()}; l.push(e); }
+  if(motivo) e.m = motivo; else e.x = 1;
+  markSettingsDirty(); scheduleSave();
+  closeInputModal(); actualizarSeguimiento(); abrirSeguimiento();
+}
 function abrirSeguimiento(){
   const seg = calcularSeguimiento();
   const fila = (t, sub) => '<div class="sg-fila">' + t + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
-  let h = '<div class="sg-tit">Demoradas ahora</div>' + (seg.demoras.map(x => { const c = cellById[x.id]; return fila('<b>' + esc(x.w) + '</b> · ' + esc(liqLabelForCell(c)) + ' · ' + esc(c.categoria) + ' · ' + esc(AREA_LABEL[c.area] || c.area), 'desde el ' + fCorta(x.ini) + ' · ' + x.dias + ' días (su máximo: ' + x.max + ')'); }).join('') || fila('Ninguna'));
+  let h = '<div class="sg-tit">Demoradas ahora</div>' + (seg.demoras.map(x => { const c = cellById[x.id]; return fila('<b>' + esc(x.w) + '</b> · ' + esc(liqLabelForCell(c)) + ' · ' + esc(c.categoria) + ' · ' + esc(AREA_LABEL[c.area] || c.area), 'desde el ' + fCorta(x.ini) + ' · ' + x.dias + ' días (su máximo: ' + x.max + ')') + '<div class="sg-acc" data-w="' + esc(x.w) + '" data-id="' + esc(x.id) + '" data-ini="' + x.ini + '"><input type="text" class="sg-mot" maxlength="80" placeholder="Por qué pasa (opcional)"><button type="button" class="btn sg-b" data-sg="motivo">Guardar motivo</button><button type="button" class="btn sg-b" data-sg="sacar">Sacar aviso</button></div>'; }).join('') || fila('Ninguna'));
   const reg = []; Object.keys(workerStatus).forEach(w => ((workerStatus[w] || {}).log || []).forEach(e => { if(e.t === 'd') reg.push({w, e}); }));
   reg.sort((a, b) => (b.e.ts || b.e.desde || 0) - (a.e.ts || a.e.desde || 0));
   h += '<div class="sg-tit">Registro (últimos ' + Math.min(reg.length, 30) + ')</div>' + (reg.slice(0, 30).map(r => { const e = r.e;
-    if(e.t === 'd'){ const c = cellById[e.id]; return fila('<b>' + esc(r.w) + '</b> · demora ' + (c ? esc(liqLabelForCell(c)) + ' ' + esc(AREA_LABEL[c.area] || '') : ''), fCorta(e.ini) + ' · ' + e.dias + ' días (máximo: ' + e.max + ')'); }
+    if(e.t === 'd'){ const c = cellById[e.id]; return fila('<b>' + esc(r.w) + '</b> · demora ' + (c ? esc(liqLabelForCell(c)) + ' ' + esc(AREA_LABEL[c.area] || '') : ''), fCorta(e.ini) + ' · ' + e.dias + ' días (máximo: ' + e.max + ')' + (e.m ? ' · motivo: ' + esc(e.m) : e.x ? ' · aviso sacado' : '')); }
     return fila('<b>' + esc(r.w) + '</b> · frenado' + (e.hasta ? '' : ' (sigue)'), 'desde el ' + fCorta(e.desde) + (e.hasta ? ' hasta el ' + fCorta(e.hasta) : '') + ' · ' + e.dias + (e.dias === 1 ? ' día' : ' días') + ' sin partida'); }).join('') || fila('Sin registros todavía'));
   openInputModal('Seguimiento de trabajadores', '<div style="max-height:62vh;overflow:auto;">' + h + '</div>', () => {}, 'Cerrar');
+  inputModalBody.querySelectorAll('.sg-acc').forEach(bx => bx.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-sg]'); if(!b) return;
+    const w = bx.dataset.w, id = bx.dataset.id, ini = +bx.dataset.ini, mot = bx.querySelector('.sg-mot').value.replace(/[<>]/g, '').trim().slice(0, 80);
+    resolverDemora(w, id, ini, b.dataset.sg === 'motivo' ? mot : '');
+  }));
   inputModalCancel.style.display = 'none';
 }
 
@@ -5398,7 +5418,7 @@ async function pbApi(accion, extra){
   try{ return await llamarDb(accion, extra) || {ok:false, error:'red'}; }catch(e){ return {ok:false, error:'red'}; }
 }
 // ===== quién pide: la sesión abierta (nombre y cargo) =====
-function pbCargoSesion(){ return isAdmin ? (/^ismael\b/i.test(String(sessionName || '')) ? 'Developer' : 'Admin') : isSupervisor ? 'Capataz' : isJefe ? 'Jefe de obra' : 'Trabajador'; }
+function pbCargoSesion(){ return isAdmin ? (/^ismael\b/i.test(String(sessionName || '')) ? 'Dev' : 'Admin') : isSupervisor ? 'Capataz' : isJefe ? 'Jefe de obra' : 'Trabajador'; }
 function pbQuienTxt(){ return sessionName ? sessionName + ' (' + pbCargoSesion() + ')' : pbCargoSesion(); }
 function pbPintarLista(){
   pbEl('pbLista').innerHTML = pbItems.map((i, k) => {
@@ -5578,7 +5598,7 @@ const ADM_DEMO = {
     {fila: 6, nombre: 'Ignacio', cargo: 'Supervisor', rol: 2, bloqueo: null},
     {fila: 7, nombre: 'Ismael S.', cargo: 'Admin', rol: 1, bloqueo: null}
   ],
-  encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzalez', avance: 'A. Sandoval', terreno: 'A. Sandoval', oficina: 'Edwin Carroz', bodega: 'Jefe de Bodega', admin: 'Ismael S.'}
+  encargados: {panel: 'Ismael S.', calidad: 'Silvia Gonzalez', avance: 'Alejandro Sandoval', terreno: 'Alejandro Sandoval', oficina: 'Edwin Carroz', bodega: 'Jefe de Bodega', admin: 'Ismael S.'}
 };
 async function abrirAdministracion(){
   const demo = !DB_URL;
@@ -8569,4 +8589,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.48 · 02-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.50 · 02-11-2026 ==== -->
