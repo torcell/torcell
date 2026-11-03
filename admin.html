@@ -39,7 +39,7 @@ nav.lado button small{display:block;font-size:11px;opacity:.8;margin-top:1px;}
 main{padding:18px;min-width:0;}
 .sg-al{border-left:4px solid var(--sub);padding:6px 10px;margin:0 0 8px;background:var(--soft);}
 .sg-al.alta{border-left-color:var(--bad);}.sg-al.media{border-left-color:var(--warn);}
-.sg-al .cab{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;}.sg-al small{color:var(--sub);}
+.sg-al .cab{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;}.sg-al small{color:var(--sub);}.sg-via{border:1px solid var(--sub);padding:0 5px;font-size:11px;}
 .sg-lista{max-height:340px;overflow-y:auto;overscroll-behavior:contain;}
 .vel{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:14px;}
 .vel .ven{background:var(--panel);border:1px solid var(--strong);max-width:440px;width:100%;padding:18px;animation:abreV .18s ease;transform-origin:top;}
@@ -702,9 +702,9 @@ async function vistaSeguridad(){
   const eAl = $('sgAl'), eRe = $('sgRe'); if(!eAl) return;
   if(!al || !al.ok) eAl.textContent = 'No se pudieron cargar las alertas.';
   else {
-    const T = al.titulos || {};
-    eAl.innerHTML = '<div class="nota" style="margin-top:0;">Se avisa por correo a ' + (al.correos || 0) + ' dirección(es). Se muestran las últimas 120.</div><div class="sg-lista">'
-      + (al.alertas.length ? al.alertas.map(x => '<div class="sg-al ' + esc(x.g) + '"><div class="cab"><b>' + esc(T[x.t] || x.t) + '</b><small style="text-transform:uppercase;">' + esc(x.g) + '</small><small style="margin-left:auto;">' + esc(x.f) + '</small></div><div>' + (x.c ? '<b>' + esc(x.c) + ':</b> ' : '') + esc(x.d) + '</div></div>').join('') : '<div class="nota">Todo tranquilo: no hay alertas.</div>') + '</div>';
+    const T = al.titulos || {}, CR = al.criticas || [];
+    eAl.innerHTML = '<div class="nota" style="margin-top:0;">Al correo (' + (al.correos || 0) + ' dirección) solo llegan las críticas; las demás las ves aquí, y si una se repite mucho llega un solo correo resumen. Se muestran las últimas 120.</div><div class="sg-lista">'
+      + (al.alertas.length ? al.alertas.map(x => '<div class="sg-al ' + esc(x.g) + '"><div class="cab"><b>' + esc(T[x.t] || x.t) + '</b><small style="text-transform:uppercase;">' + esc(x.g) + '</small><small class="sg-via">' + (CR.indexOf(x.t) !== -1 ? '✉ Por correo' : 'Solo panel') + '</small><small style="margin-left:auto;">' + esc(x.f) + '</small></div><div>' + (x.c ? '<b>' + esc(x.c) + ':</b> ' : '') + esc(x.d) + '</div></div>').join('') : '<div class="nota">Todo tranquilo: no hay alertas.</div>') + '</div>';
   }
   pintaRespaldos(re);
   $('sgAhora').addEventListener('click', async () => { const j = await accion('respaldoAhora'); if(j){ toast(j.ok ? 'Respaldo guardado.' : 'No se guardó: no hay datos que respaldar.', !j.ok); pintaRespaldos(await api('respaldosListar')); } });
@@ -793,7 +793,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.33';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.34';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.33 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.34 · 03-11-2026 ==== -->
