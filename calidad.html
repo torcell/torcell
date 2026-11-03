@@ -206,6 +206,21 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .fth.sub::after{content:'Subiendo…';position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;background:rgba(0,0,0,.65);color:#fff;padding:2px 0;}
 .fbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .modal.fv{max-width:560px;}
+.modal.fv.edit{max-width:760px;}
+.fved{display:none;flex-direction:column;gap:10px;}
+.modal.edit .fved{display:flex;}
+.modal.edit .fvimg,.modal.edit #fvInfo,.modal.edit #fvAcc{display:none;}
+.fved-h{font-weight:700;font-size:14px;}
+.fved-bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;}
+.fved-g{display:flex;gap:6px;flex-wrap:wrap;}
+.fved-g .btn.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);}
+.fved-sw{width:34px;height:34px;min-height:34px;padding:0;border:2px solid var(--strong);}
+.fved-sw.on{outline:2px solid var(--accent);outline-offset:1px;}
+.fved-lienzo{background:#000;display:flex;justify-content:center;}
+#edCanvas{display:block;max-width:100%;max-height:54vh;touch-action:none;cursor:crosshair;}
+#edTexto{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:9px 10px;font-size:16px;min-height:40px;width:100%;box-sizing:border-box;}
+#edTexto[hidden]{display:none;}
+#edOmitir{grid-column:1/-1;}
 .fvimg{background:#000;display:flex;align-items:center;justify-content:center;min-height:160px;}
 .fvimg img{display:block;width:100%;max-height:62vh;object-fit:contain;}
 .ebarra{height:8px;background:var(--soft);border:1px solid var(--border);}
@@ -665,8 +680,37 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="sub" id="fvInfo" style="margin-top:0;"></div>
     <div class="acciones" id="fvAcc">
       <button class="btn" id="fvDescargar" type="button">⬇ Descargar</button>
+      <button class="btn" id="fvEditar" type="button">✏ Editar</button>
       <button class="btn" id="fvBorrar" type="button">Borrar foto</button>
       <button class="btn primary" id="fvCerrar" type="button">Cerrar</button>
+    </div>
+    <div class="fved" id="fvEd">
+      <div class="fved-h" id="edTit">Editar foto</div>
+      <div class="fved-bar">
+        <div class="fved-g" id="edHerr">
+          <button type="button" class="btn small on" data-h="lapiz">✏ Lápiz</button>
+          <button type="button" class="btn small" data-h="circulo">◯ Círculo</button>
+          <button type="button" class="btn small" data-h="flecha">➚ Flecha</button>
+          <button type="button" class="btn small" data-h="texto">Aa Texto</button>
+        </div>
+        <div class="fved-g" id="edCol">
+          <button type="button" class="btn fved-sw on" data-c="rojo" style="background:#e0262a" aria-label="Rojo"></button>
+          <button type="button" class="btn fved-sw" data-c="amarillo" style="background:#ffd500" aria-label="Amarillo"></button>
+          <button type="button" class="btn fved-sw" data-c="azul" style="background:#1e7be0" aria-label="Azul"></button>
+          <button type="button" class="btn fved-sw" data-c="blanco" style="background:#fff" aria-label="Blanco"></button>
+        </div>
+        <div class="fved-g">
+          <button type="button" class="btn small" id="edDeshacer">↶ Deshacer</button>
+          <button type="button" class="btn small" id="edLimpiar">Limpiar</button>
+        </div>
+      </div>
+      <input type="text" id="edTexto" maxlength="40" placeholder="Escribe el texto y toca la foto donde va" autocomplete="off" hidden>
+      <div class="fved-lienzo"><canvas id="edCanvas"></canvas></div>
+      <div class="acciones" id="edAcc">
+        <button class="btn" id="edCancelar" type="button">Cancelar</button>
+        <button class="btn primary" id="edGuardar" type="button">Guardar y cerrar</button>
+        <button class="btn" id="edOmitir" type="button">Subir sin editar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -736,7 +780,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.37.3';
+const CAL_VERSION = '1.37.4';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1222,17 +1266,17 @@ async function abrirFotos(d){
   pintar();
 }
 const MSG_FOTO = {limite: 'Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.', demasiadas: 'Demasiados envíos seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', foto_invalida: 'Esa foto no se pudo guardar. Prueba con otra.', clave_invalida: 'Ese departamento no se reconoce.'};
-function anadirFotos(files){
+function anadirFotos(files, rep){
   if(!actual || !fotosOk || soloLectura()) return;
-  const base = claveBase(actual), zona = scope;
+  const base = claveBase(actual), zona = rep ? rep.z : scope;
   const lista = Array.from(files || []).filter(f => !f.type || /^image\//.test(f.type));
   if(!lista.length) return;
   const arr = fotosDe[base] = fotosDe[base] || [];
   const libres = FOTOS_MAX - arr.length;
-  if(libres <= 0){ aviso('Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.'); return; }
+  if(libres <= 0 && !rep){ aviso('Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.'); return; }
   if(lista.length > libres){ aviso('Solo caben ' + libres + ' foto' + (libres === 1 ? '' : 's') + ' más en este departamento.'); lista.length = libres; }
   lista.forEach(file => {
-    const ent = {estado: 'sub', m: '', z: zona, ts: Date.now(), u: miEtiqueta()};
+    const ent = {estado: 'sub', m: '', z: zona, ts: Date.now(), u: miEtiqueta(), rep: rep ? rep.id : ''};
     arr.push(ent);
     cadenaFotosPendiente++; cadenaFotos = cadenaFotos.then(() => subirUna(base, zona, file, ent)).catch(() => {}).then(() => { cadenaFotosPendiente--; });
   });
@@ -1254,6 +1298,18 @@ async function subirUna(base, zona, file, ent){
       fotosCount[base] = (fotosCount[base] || 0) + 1;
       if(actual && claveBase(actual) === base) pintarFotos();
       pintar();
+      if(ent.rep){
+        try{
+          const r = await llamar('calidadFotoBorrar', {ids: [ent.rep]}, false, 40000);
+          if(r && r.ok && r.borradas){
+            const k = arr.findIndex(x => x.id === ent.rep);
+            if(k >= 0) arr.splice(k, 1);
+            fotosCount[base] = Math.max(0, (fotosCount[base] || 1) - 1);
+          }else aviso('La foto editada se guardó, pero la original sigue ahí. Bórrala a mano.');
+        }catch(e){ aviso('La foto editada se guardó, pero la original sigue ahí. Bórrala a mano.'); }
+        if(actual && claveBase(actual) === base) pintarFotos();
+        pintar();
+      }
       marcarObservadoPorFoto(base, zona);
       return;
     }
@@ -1279,6 +1335,7 @@ async function verFoto(i){
   $('fvInfo').textContent = [dptoTxt(base), NOMBRE_SCOPE[f.z] || '', fechaFoto(f.ts), f.u].filter(Boolean).join(' · ');
   const puede = !soloLectura() && (esAdminCal() || f.u === miEtiqueta());
   $('fvBorrar').hidden = !puede;
+  $('fvEditar').hidden = !puede;
   $('fvAcc').classList.toggle('uno', !puede);
   $('velFoto').classList.add('on');
   try{
@@ -1292,7 +1349,7 @@ function cerrarFoto(){
   const v = $('velFoto');
   if(!v.classList.contains('on') || v.classList.contains('out')) return;
   v.classList.add('out');
-  setTimeout(() => { v.classList.remove('on', 'out'); $('fvImg').innerHTML = ''; fvReset(); fotoVista = null; }, 140);
+  setTimeout(() => { v.classList.remove('on', 'out'); $('fvImg').innerHTML = ''; v.querySelector('.modal').classList.remove('edit'); ed = null; fvReset(); fotoVista = null; }, 140);
 }
 async function borrarFotoVista(){
   if(!fotoVista || soloLectura()) return;
@@ -1317,6 +1374,155 @@ async function borrarFotoVista(){
     fvReset();
     aviso(j && j.ok ? 'No tienes permiso para borrar esa foto.' : 'No se pudo borrar la foto. Intenta de nuevo.');
   }catch(e){ fvReset(); aviso('No se pudo borrar la foto. Revisa tu internet.'); }
+}
+
+// ===== Editor de fotos =====
+const ED_COL = {rojo: '#e0262a', amarillo: '#ffd500', azul: '#1e7be0', blanco: '#ffffff'};
+let ed = null;
+function edTrazo(ctx, t, lw){
+  ctx.strokeStyle = ctx.fillStyle = ED_COL[t.c] || ED_COL.rojo;
+  ctx.lineWidth = lw; ctx.lineCap = ctx.lineJoin = 'round';
+  if(t.k === 'lapiz'){
+    ctx.beginPath(); ctx.moveTo(t.p[0][0], t.p[0][1]);
+    t.p.slice(1).forEach(q => ctx.lineTo(q[0], q[1]));
+    if(t.p.length === 1) ctx.lineTo(t.p[0][0] + .01, t.p[0][1]);
+    ctx.stroke();
+  }else if(t.k === 'circulo'){
+    ctx.beginPath(); ctx.ellipse((t.a[0] + t.b[0]) / 2, (t.a[1] + t.b[1]) / 2, Math.max(1, Math.abs(t.b[0] - t.a[0]) / 2), Math.max(1, Math.abs(t.b[1] - t.a[1]) / 2), 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }else if(t.k === 'flecha'){
+    const ang = Math.atan2(t.b[1] - t.a[1], t.b[0] - t.a[0]), cab = lw * 4.5;
+    ctx.beginPath(); ctx.moveTo(t.a[0], t.a[1]); ctx.lineTo(t.b[0], t.b[1]); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(t.b[0], t.b[1]);
+    ctx.lineTo(t.b[0] - cab * Math.cos(ang - .45), t.b[1] - cab * Math.sin(ang - .45));
+    ctx.moveTo(t.b[0], t.b[1]);
+    ctx.lineTo(t.b[0] - cab * Math.cos(ang + .45), t.b[1] - cab * Math.sin(ang + .45));
+    ctx.stroke();
+  }else if(t.k === 'texto'){
+    ctx.font = '700 ' + Math.round(lw * 4.5) + 'px sans-serif'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = lw * .5; ctx.strokeStyle = '#000'; ctx.strokeText(t.t, t.a[0], t.a[1]);
+    ctx.fillText(t.t, t.a[0], t.a[1]);
+  }
+}
+function edPintar(){
+  if(!ed) return;
+  const c = $('edCanvas'), ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(ed.src, 0, 0, c.width, c.height);
+  const lw = Math.max(4, Math.round(c.width / 90));
+  ed.trazos.forEach(t => edTrazo(ctx, t, lw));
+  if(ed.tmp) edTrazo(ctx, ed.tmp, lw);
+}
+function edPunto(e){
+  const c = $('edCanvas'), r = c.getBoundingClientRect();
+  return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height];
+}
+function edAbrir(src, opc){
+  const c = $('edCanvas'), w0 = src.width, h0 = src.height, esc = Math.min(1, FOTO_LADO / Math.max(w0, h0));
+  c.width = Math.max(1, Math.round(w0 * esc)); c.height = Math.max(1, Math.round(h0 * esc));
+  ed = {src, opc, trazos: [], tmp: null, h: 'lapiz', c: 'rojo'};
+  $('edTit').textContent = opc.titulo || 'Editar foto';
+  $('edOmitir').hidden = !opc.nueva;
+  $('edTexto').value = ''; $('edTexto').hidden = true;
+  $('edHerr').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.h === 'lapiz'));
+  $('edCol').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.c === 'rojo'));
+  const v = $('velFoto');
+  v.querySelector('.modal').classList.add('edit');
+  v.classList.remove('out'); v.classList.add('on');
+  edPintar();
+}
+function edTerminar(){
+  const ant = ed; ed = null;
+  return ant;
+}
+(function(){
+  const c = $('edCanvas');
+  c.addEventListener('pointerdown', e => {
+    if(!ed) return;
+    e.preventDefault();
+    const q = edPunto(e);
+    if(ed.h === 'texto'){
+      const t = $('edTexto').value.replace(/[<>]/g, '').trim().substring(0, 40);
+      if(!t){ $('edTexto').focus(); return; }
+      ed.trazos.push({k: 'texto', c: ed.c, a: q, t}); edPintar(); return;
+    }
+    try{ c.setPointerCapture(e.pointerId); }catch(x){}
+    ed.tmp = ed.h === 'lapiz' ? {k: 'lapiz', c: ed.c, p: [q]} : {k: ed.h, c: ed.c, a: q, b: q};
+    edPintar();
+  });
+  c.addEventListener('pointermove', e => {
+    if(!ed || !ed.tmp) return;
+    const q = edPunto(e);
+    if(ed.tmp.k === 'lapiz') ed.tmp.p.push(q); else ed.tmp.b = q;
+    edPintar();
+  });
+  const fin = () => {
+    if(!ed || !ed.tmp) return;
+    const t = ed.tmp; ed.tmp = null;
+    const ok = t.k === 'lapiz' || Math.hypot(t.b[0] - t.a[0], t.b[1] - t.a[1]) > 6;
+    if(ok) ed.trazos.push(t);
+    edPintar();
+  };
+  c.addEventListener('pointerup', fin);
+  c.addEventListener('pointercancel', fin);
+  $('edHerr').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b || !ed) return;
+    ed.h = b.dataset.h;
+    $('edHerr').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    $('edTexto').hidden = ed.h !== 'texto';
+    if(ed.h === 'texto') $('edTexto').focus();
+  });
+  $('edCol').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b || !ed) return;
+    ed.c = b.dataset.c;
+    $('edCol').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  });
+  $('edDeshacer').addEventListener('click', () => { if(ed){ ed.trazos.pop(); edPintar(); } });
+  $('edLimpiar').addEventListener('click', () => { if(ed){ ed.trazos = []; edPintar(); } });
+  $('edCancelar').addEventListener('click', () => { if(!ed) return; const o = edTerminar().opc; o.alCancelar && o.alCancelar(); });
+  $('edOmitir').addEventListener('click', () => { if(!ed) return; const o = edTerminar().opc; o.alOmitir && o.alOmitir(); });
+  $('edGuardar').addEventListener('click', () => {
+    if(!ed) return;
+    $('edCanvas').toBlob(b => {
+      const o = edTerminar().opc;
+      if(!b){ aviso('No se pudo guardar la edición.'); o.alCancelar && o.alCancelar(); return; }
+      o.alAceptar && o.alAceptar(b);
+    }, 'image/jpeg', .9);
+  });
+})();
+// fotos nuevas: pasan una por una por el editor antes de subirse
+function colaEditor(files){
+  if(!actual || !fotosOk || soloLectura()) return;
+  const lista = Array.from(files || []).filter(f => !f.type || /^image\//.test(f.type));
+  if(!lista.length) return;
+  const libres = FOTOS_MAX - (fotosDe[claveBase(actual)] || []).length;
+  if(libres <= 0){ aviso('Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.'); return; }
+  if(lista.length > libres){ aviso('Solo caben ' + libres + ' foto' + (libres === 1 ? '' : 's') + ' más en este departamento.'); lista.length = libres; }
+  let i = 0;
+  const sig = () => {
+    if(i >= lista.length){ cerrarFoto(); return; }
+    const file = lista[i++], n = i;
+    bitmapDe(file).then(src => edAbrir(src, {
+      titulo: 'Foto ' + n + ' de ' + lista.length, nueva: true,
+      alAceptar: b => { anadirFotos([b]); sig(); },
+      alOmitir: () => { anadirFotos([file]); sig(); },
+      alCancelar: sig
+    })).catch(() => { aviso('No se pudo leer esa foto.'); sig(); });
+  };
+  sig();
+}
+// foto ya guardada: se edita y reemplaza a la original
+function editarGuardada(){
+  if(!fotoVista || soloLectura()) return;
+  if(!fotoVista.full){ aviso('La foto aún no carga. Espera un momento.'); return; }
+  const {base, f} = fotoVista, im = new Image();
+  im.onload = () => edAbrir(im, {
+    titulo: 'Editar foto · ' + dptoTxt(base), nueva: false,
+    alAceptar: b => { cerrarFoto(); anadirFotos([b], {id: f.id, z: f.z}); },
+    alCancelar: () => $('velFoto').querySelector('.modal').classList.remove('edit')
+  });
+  im.onerror = () => aviso('No se pudo abrir la foto.');
+  im.src = 'data:image/jpeg;base64,' + fotoVista.full;
 }
 
 // ---- Exportar todas las fotos a un ZIP (solo Admin) y liberar espacio ----
@@ -1829,10 +2035,11 @@ $('mElegir').addEventListener('click', () => { listaAbierta = !listaAbierta; pin
 $('mCancel').addEventListener('click', cerrarModal);
 $('fTomar').addEventListener('click', () => $('fCam').click());
 $('fGaleria').addEventListener('click', () => $('fGal').click());
-['fCam', 'fGal'].forEach(id => $(id).addEventListener('change', e => { anadirFotos(e.target.files); e.target.value = ''; }));
+['fCam', 'fGal'].forEach(id => $(id).addEventListener('change', e => { colaEditor(e.target.files); e.target.value = ''; }));
 $('mFotosGrid').addEventListener('click', e => { const b = e.target.closest('.fth'); if(b && !b.classList.contains('sub')) verFoto(Number(b.dataset.i)); });
 $('fvCerrar').addEventListener('click', cerrarFoto);
 $('fvBorrar').addEventListener('click', borrarFotoVista);
+$('fvEditar').addEventListener('click', editarGuardada);
 $('fvDescargar').addEventListener('click', () => {
   if(!fotoVista) return;
   const {base, f, full} = fotoVista, b64 = full || f.m;
@@ -2033,4 +2240,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.37.3 · 30-10-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.37.4 · 03-11-2026 ==== -->
