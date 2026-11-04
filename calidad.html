@@ -427,6 +427,10 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .cluster::before{content:"";order:97;flex-basis:100%;height:0;}
   .cluster #irPanel{order:98;margin-left:auto !important;}
   .cluster #salir{order:99;}
+  /* ===== Orden en escritorio: fila 1 cuenta y versión, fila 2 acciones, fila 3 sección y sesión ===== */
+  .cluster::after{content:"";order:2;flex-basis:100%;height:0;}
+  .cluster #verCal,.cluster .conectado{order:1;}
+  .cluster .btn:not(#salir){order:3;}
   /* ===== botones de la barra: misma altura, centrados y mismo ancho ===== */
   .cluster{align-items:center;}
   .cluster .btn,.cluster .cs-btn,.cluster .btn-menu{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;height:34px !important;min-height:34px !important;width:170px !important;min-width:0 !important;margin:0 !important;padding:0 10px !important;font-size:12px !important;line-height:1.2;text-align:center;white-space:nowrap;}
@@ -436,7 +440,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   /* ===== celular: botones de 2 en 2, mismo ancho y alto ===== */
   @media (max-width:520px){
     .cluster{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch;}
-    .cluster::before{display:none;}
+    .cluster::before,.cluster::after{display:none;}
     .cluster .conectado,.cluster #verCal{grid-column:1 / -1;width:auto;justify-content:flex-start;}
     .cluster #verCal{height:auto;padding:0 !important;}
     .cluster .btn,.cluster .cs-btn{width:100% !important;}
@@ -799,7 +803,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.37.5';
+const CAL_VERSION = '1.37.6';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2245,4 +2249,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.37.5 · 03-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.37.6 · 03-11-2026 ==== -->
