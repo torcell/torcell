@@ -10,7 +10,7 @@
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('bodega')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <title>Bodega · Obra Bellavista</title>
-<link rel="stylesheet" href="carga.css?v=1">
+<link rel="stylesheet" href="carga.css?v=3">
 <script id="temasComun">(function(){var K='obraTemaComun',L=[["claro", "Claro"], ["oscuro", "Oscuro"], ["obra", "Obra"]],D='sistema';
 function ok(v){for(var i=0;i<L.length;i++)if(L[i][0]===v)return true;return false;}
 function pon(t){document.documentElement.setAttribute('data-tema',t);}
@@ -334,7 +334,7 @@ body.lectura .edita{display:none !important;}
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Bodega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=4"></script>
+<script src="carga.js?v=7"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div class="wrap">
   <header class="top">
@@ -562,7 +562,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   if(!tok){ try{ sessionStorage.setItem('progresoObraAvisoGate',''); }catch(e){} salirConError('index.html?s=1','nosesion'); setTimeout(function(){ location.replace('index.html?s=1'); },12000); return; }
   window.__bodCfg={K:K,N:N,URL:URL_DB,tok:tok};
   window.__bodAcceso=fetch(URL_DB,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'miAcceso',token:tok,seccion:'bodega',dispositivo:(function(){try{return localStorage.getItem('progresoObraDisp')||'';}catch(e){return '';}})(),})}).then(function(r){return r.json();}).then(function(j){
-    if(j&&j.error==='sin_sesion'){ try{ localStorage.removeItem(K); localStorage.removeItem(N); sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} salirConError('index.html?s=1','sesion'); }
+    if(j&&j.error==='sin_sesion'){ try{ localStorage.removeItem(K); localStorage.removeItem(N); sessionStorage.setItem('progresoObraAvisoGate','Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} salirConError('index.html?s=1','caduco'); }
     else if(j&&j.ok&&j.secciones&&j.secciones.indexOf('bodega')===-1){ try{ sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.'); }catch(e){} salirConError('index.html?menu=1','permiso'); }
     return j;
   }).catch(function(){ return null; });
@@ -711,7 +711,7 @@ async function api(action, extra){
     const j = await res.json();
     if(j && j.error === 'sin_sesion'){
       try{ localStorage.removeItem(cfg.K); localStorage.removeItem(cfg.N); sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){}
-      if(window.salirConError) salirConError('index.html?s=1', 'sesion');
+      if(window.salirConError) salirConError('index.html?s=1', 'caduco');
       return {ok:false, error:'sin_sesion'};
     }
     return j || {ok:false, error:'red'};
@@ -1507,7 +1507,7 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.19';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.20';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.4.19 · 03-11-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.20 · 04-11-2026 ==== -->

@@ -14,7 +14,7 @@
 <meta name="theme-color" content="#f2f3f1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14181a" media="(prefers-color-scheme: dark)">
 <title>Calidad · Obra Bellavista</title>
-<link rel="stylesheet" href="carga.css?v=1">
+<link rel="stylesheet" href="carga.css?v=3">
 <script id="temasComun">(function(){var K='obraTemaComun',L=[["claro", "Claro"], ["oscuro", "Oscuro"], ["obra", "Obra"]],D='obra';
 function ok(v){for(var i=0;i<L.length;i++)if(L[i][0]===v)return true;return false;}
 function pon(t){document.documentElement.setAttribute('data-tema',t);}
@@ -629,7 +629,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Calidad</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=4"></script>
+<script src="carga.js?v=7"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
@@ -803,7 +803,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.37.6';
+const CAL_VERSION = '1.37.7';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -916,7 +916,7 @@ function cerrarSesion(msg){
   token = ''; nombre = ''; cargo = '';
   guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadCargo', null);
   try{ sessionStorage.setItem('progresoObraAvisoGate', msg || ''); }catch(e){}
-  salirConError('index.html?s=1', msg ? 'sesion' : 'nosesion');
+  salirConError('index.html?s=1', msg ? 'caduco' : 'nosesion');
 }
 
 function pintarQuien(){
@@ -2249,4 +2249,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.37.6 · 03-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.37.7 · 04-11-2026 ==== -->
