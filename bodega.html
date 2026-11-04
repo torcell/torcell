@@ -10,8 +10,17 @@
 <meta name="robots" content="noindex">
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('bodega')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <title>Bodega · Obra Bellavista</title>
-<script>try{var t=localStorage.getItem('ofTema');if(t==='claro'||t==='oscuro')document.documentElement.setAttribute('data-tema',t);}catch(e){}</script>
 <link rel="stylesheet" href="carga.css?v=1">
+<script id="temasComun">(function(){var K='obraTemaComun',L=[["claro", "Claro"], ["oscuro", "Oscuro"], ["obra", "Obra"]],D='sistema';
+function ok(v){for(var i=0;i<L.length;i++)if(L[i][0]===v)return true;return false;}
+function pon(t){document.documentElement.setAttribute('data-tema',t);}
+var t='';try{t=localStorage.getItem(K)||'';}catch(e){}
+if(!ok(t))t=D==='sistema'?(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro'):D;
+pon(t);
+document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('temaComun');if(!b)return;
+function pinta(){for(var i=0;i<L.length;i++)if(L[i][0]===t)b.textContent='Tema: '+L[i][1];}
+pinta();b.addEventListener('click',function(){var i=0;for(;i<L.length;i++)if(L[i][0]===t)break;t=L[(i+1)%L.length][0];pon(t);try{localStorage.setItem(K,t);}catch(e){}pinta();});});
+})();</script>
 <style>
 
 /* Mismos colores y esquinas rectas que el panel de cerámica y Calidad */
@@ -145,7 +154,7 @@ body.lectura .edita{display:none !important;}
     --m:transparent 0%, rgba(0,0,0,.12) 5%, rgba(0,0,0,.27) 10%, rgba(0,0,0,.42) 15%, rgba(0,0,0,.56) 20%, rgba(0,0,0,.69) 25%, rgba(0,0,0,.80) 30%, rgba(0,0,0,.89) 35%, rgba(0,0,0,.95) 40%, rgba(0,0,0,.99) 45%, #000 50%, rgba(0,0,0,.99) 55%, rgba(0,0,0,.95) 60%, rgba(0,0,0,.89) 65%, rgba(0,0,0,.80) 70%, rgba(0,0,0,.69) 75%, rgba(0,0,0,.56) 80%, rgba(0,0,0,.42) 85%, rgba(0,0,0,.27) 90%, rgba(0,0,0,.12) 95%, transparent 100%;
     position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:200px;min-width:0;padding:.42em 18px;
     border-radius:0;cursor:pointer;font-weight:600;font-size:12px;line-height:1.25;font-family:inherit;color:#f2f6f8;text-shadow:0 1px 2px rgba(0,0,0,.7);
-    background:var(--caja-fondo);border:2px solid var(--caja-linea);box-shadow:0 10px 40px rgba(0,0,0,.45);
+    background:var(--caja-fondo);border:2px solid var(--caja-linea);box-shadow:none;
     transition:background .3s ease,border-color .3s ease,text-shadow .2s ease;}
   .cs-btn span,.cs-btn svg{position:relative;z-index:1;}
   .cs-btn svg{color:#9aa5a8;flex:none;}
@@ -173,10 +182,10 @@ body.lectura .edita{display:none !important;}
 /* se abre del centro hacia los lados y se cierra igual */
 
 /* ===== colores por tipo ===== */
-.avl         { --av: #74d1e0; }   /* info */
-.avl.exito   { --av: #5fd6a4; }
-.avl.alerta  { --av: #e9c46a; }
-.avl.error   { --av: #e8707f; }
+.avl         { --av: #2fa3b8; }   /* info */
+.avl.exito   { --av: #34a874; }
+.avl.alerta  { --av: #d99a1c; }
+.avl.error   { --av: #d6455a; }
 
 /* ===== contenedor (arriba al centro) ===== */
 .avls {
@@ -191,15 +200,15 @@ body.lectura .edita{display:none !important;}
   position: relative; pointer-events: auto;
   display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 12px;   /* el relleno de 26px iguala a la X: lo del medio queda centrado */
   padding: 12px 12px 14px 16px;
-  background: rgba(22, 32, 40, .96); color: #f2f6f8;
-  border: 1px solid rgba(255,255,255,.08); border-radius: 0;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  background: var(--panel, #fff); color: var(--text, #2c302c);
+  border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
   font: 500 14px/1.4 "Noto Sans", "Segoe UI", system-ui, sans-serif;
 }
 /* líneas de arriba y abajo que se apagan hacia los lados */
 .avl::before, .avl::after {
   content: ""; position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(to right, transparent, var(--av) 30%, #fff 50%, var(--av) 70%, transparent);
+  background: linear-gradient(to right, transparent, var(--av) 30%, var(--av) 50%, var(--av) 70%, transparent);
 }
 .avl::before { top: -1px; }
 .avl::after  { bottom: -1px; }
@@ -211,10 +220,10 @@ body.lectura .edita{display:none !important;}
 .avl .texto { min-width: 0; overflow-wrap: anywhere; line-height: 22px; }
 .avl .cerrar {
   width: 26px; height: 26px; display: grid; place-items: center;
-  background: transparent; color: #9fb3bd; border: 1px solid rgba(255,255,255,.15); border-radius: 0; cursor: pointer;
+  background: transparent; color: var(--sub, #6c716a); border: 1px solid var(--border-strong, var(--strong, #b9bdb3)); border-radius: 0; cursor: pointer;
   transition: color .2s, border-color .2s;
 }
-.avl .cerrar:hover { color: #fff; border-color: var(--av); }
+.avl .cerrar:hover { color: var(--text, #2c302c); border-color: var(--av); }
 .avl .cerrar:focus-visible { outline: 2px solid var(--av); outline-offset: 2px; }
 .avl .cerrar svg { width: 12px; height: 12px; }
 
@@ -222,7 +231,7 @@ body.lectura .edita{display:none !important;}
 .avl .tiempo {
   position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
   background: linear-gradient(to right, transparent, var(--av) 20%, var(--av) 80%, transparent);
-  opacity: .55; transform-origin: center;
+  opacity: .7; transform-origin: center;
   animation: aviso-tiempo var(--dur, 4s) linear forwards;
 }
 .avl:hover .tiempo { animation-play-state: paused; }
@@ -242,6 +251,18 @@ body.lectura .edita{display:none !important;}
   .avl, .avl > * { animation-duration: .01s !important; }
 }
 
+
+/* ===== celular: todo simétrico, mismas medidas y centrado ===== */
+@media (max-width:640px){
+  .cluster{display:flex;flex-wrap:wrap;gap:8px;width:100%;}
+  .cluster > *{flex:1 1 calc(33.333% - 8px);min-width:0;display:inline-flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;min-height:36px;box-sizing:border-box;}
+  nav.tabs{grid-auto-rows:1fr;}
+  nav.tabs button{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:5px;min-height:48px;text-align:center;line-height:1.15;white-space:normal;}
+  nav.tabs button .pill{padding:0 6px;font-size:11px;line-height:16px;flex:0 0 auto;}
+  .modo button{display:flex;align-items:center;justify-content:center;text-align:center;min-height:48px;padding:6px 4px;font-size:12.5px;line-height:1.15;}
+  .escaner input{flex:1 1 100%;}
+  .escaner .btn{flex:1 1 calc(50% - 4px);min-width:0;display:inline-flex;align-items:center;justify-content:center;}
+}
 </style>
 <script>
 // ===== Aviso lateral · v1 =====
@@ -297,6 +318,17 @@ body.lectura .edita{display:none !important;}
   };
 })();
 </script>
+<style id="temasComunCss">
+/* ===== Temas comunes: Claro, Oscuro, Obra ===== */
+:root{--c-bg:#f2f3f1;--c-panel:#fff;--c-soft:#f8f9f7;--c-border:#d7dad3;--c-strong:#b9bdb3;--c-text:#2c302c;--c-sub:#6c716a;--c-accent:#2f6f8f;--c-accent2:#7a3fa0;--c-ok:#2e8b3a;--c-warn:#f07c00;--c-bad:#c0392b;--c-okb:#e2f3e7;--c-warnb:#fbefd9;--c-badb:#fbe3e1;--c-head:#0f2f3b;}
+:root[data-tema="claro"]{color-scheme:light;}
+:root[data-tema="oscuro"]{color-scheme:dark;--c-bg:#14181a;--c-panel:#1d2326;--c-soft:#232a2d;--c-border:#333c40;--c-strong:#46525a;--c-text:#e6eaea;--c-sub:#9aa5a8;--c-accent:#4f8fd6;--c-ok:#4fb85b;--c-warn:#ff9a1f;--c-bad:#e5604f;--c-okb:#1d3a27;--c-warnb:#3d2e12;--c-badb:#43201d;--c-head:#1d2326;}
+:root[data-tema="obra"]{color-scheme:dark;--c-bg:#0b2b36;--c-panel:#10384a;--c-soft:#0d3242;--c-border:#24505f;--c-strong:#3d6d7e;--c-text:#eef4f6;--c-sub:#a3bcc6;--c-accent:#4f8fd6;--c-accent2:#2f6f8f;--c-ok:#43b97f;--c-warn:#f0a23a;--c-bad:#ef6a5e;--c-okb:#143f33;--c-warnb:#3d3416;--c-badb:#4a2523;--c-head:#0b2b36;}
+.cs-btn{box-shadow:none !important;}
+:root[data-tema="claro"],:root[data-tema="oscuro"],:root[data-tema="obra"]{--bg:var(--c-bg);--panel:var(--c-panel);--soft:var(--c-soft);--border:var(--c-border);--strong:var(--c-strong);--text:var(--c-text);--sub:var(--c-sub);--ok:var(--c-ok);--warn:var(--c-warn);--bad:var(--c-bad);--accent:var(--c-accent);--accent2:var(--c-accent2);}
+:root[data-tema="obra"] .brand-logo.lt,:root[data-tema="obra"] .foot-logo.lt{display:none;}
+:root[data-tema="obra"] .brand-logo.dk,:root[data-tema="obra"] .foot-logo.dk{display:block;}
+</style>
 </head>
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Bodega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
@@ -311,7 +343,7 @@ body.lectura .edita{display:none !important;}
       <button class="btn small" id="leerQR" type="button">📷 Leer QR</button>
       <button class="btn small" id="refrescar" type="button">↻ Actualizar</button>
       <button class="cs-btn" id="irMenuA" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg><span>Cambiar de sección</span></button>
-      <button class="btn small" id="tema" type="button">Tema: Auto</button>
+      <button class="btn small" id="temaComun" type="button">Tema</button>
       <button class="btn small" id="salir" type="button">Cerrar sesión</button>
     </div>
   </header>
@@ -720,7 +752,7 @@ function fijarRol(j){
   document.body.classList.toggle('lectura', !puede); $('soloLect').hidden = puede;
   const lab = {admin:'Admin', bodega:'Jefe de Bodega', jefe:'Jefe de Terreno', supervisor:'Supervisor'}[j.rol];
   let nom0 = j.nombre || ''; try{ nom0 = nom0 || localStorage.getItem(cfg.N) || ''; }catch(e){}
-  if(nom0 && lab) $('quien').textContent = nom0 + ' · ' + (j.rol === 'admin' && /^ismael\b/i.test(nom0) ? 'Developer' : lab);
+  if(nom0 && lab) $('quien').textContent = nom0 + ' · ' + (j.rol === 'admin' && /^ismael\b/i.test(nom0) ? 'Dev' : lab);
   if(!puede && !$('v-mov').hidden) irTab('ped');
 }
 
@@ -1437,16 +1469,6 @@ async function camara(){
 }
 $('camBtn').addEventListener('click', camara);
 
-const temas = ['auto', 'claro', 'oscuro']; let ti = 0;
-function aplicarTema(){
-  const t = temas[ti];
-  if(t === 'auto') document.documentElement.removeAttribute('data-tema'); else document.documentElement.setAttribute('data-tema', t);
-  $('tema').textContent = 'Tema: ' + t[0].toUpperCase() + t.slice(1);
-  try{ if(t === 'auto') localStorage.removeItem('ofTema'); else localStorage.setItem('ofTema', t); }catch(e){}
-}
-try{ const g = localStorage.getItem('ofTema'); if(g === 'claro' || g === 'oscuro') ti = temas.indexOf(g); }catch(e){}
-$('tema').addEventListener('click', () => { ti = (ti + 1) % 3; aplicarTema(); });
-aplicarTema();
 document.addEventListener('keydown', e => { if(e.key === 'Escape'){ qrParar(); ['veloConf', 'veloQR', 'veloRes', 'veloMat', 'veloPer', 'veloDev', 'veloSin', 'veloPed', 'veloEnt'].forEach(i => $(i).classList.remove('on')); } });
 
 selCats(); ajustarModo(); pintarCarro(); pintarTodo();
@@ -1485,7 +1507,7 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.15';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.19';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.4.15 · 01-11-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.19 · 03-11-2026 ==== -->
