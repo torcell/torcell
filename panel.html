@@ -2097,7 +2097,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.53';
+const APP_VERSION = '0.73.54';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2227,6 +2227,7 @@ let cierreAnterior = null;
 
 let historialM2 = [];
 let recordatoriosHechos = {};
+let alertasInvitadoListas = false; // el invitado ve las alertas solo cuando el servidor se las entregó
 const MAT_TIPOS = [['piso','Piso'],['muroBano','Muro Baño'],['muroCocina','Muro Cocina'],['pasillo','Pasillo']];
 const MAT_DE_AREA = {'Piso':'piso','Muro Baños':'muroBano','Muro Cocina':'muroCocina','Pasillos':'pasillo'};
 const MAT_CAMPOS = [['ancho','Ancho (cm)'],['largo','Largo (cm)'],['porCaja','Piezas por caja'],['kgSaco','kg por saco'],['consumo','Consumo (kg/m²)'],['merma','Merma %']];
@@ -2582,7 +2583,7 @@ async function mergeRemoteBeforeSave(){
     if(typeof remote.espaciadoDptos === 'boolean') espaciadoDptos = remote.espaciadoDptos;
     if(remote.calidad && typeof remote.calidad === 'object') CAL_REV = remote.calidad;
     if(remote.temaPrincipal && typeof remote.temaPrincipal === 'object'){ temaPrincipal = remote.temaPrincipal; aplicarTemaPrincipal(); }
-    if(isAdmin && Array.isArray(remote.objetivos) && !seccionesSucias.has('objetivos') && !seccionesTodas) OBJETIVOS = remote.objetivos.filter(o => o && typeof o.id === 'string');
+    if((isAdmin || esInvitado()) && Array.isArray(remote.objetivos) && !seccionesSucias.has('objetivos') && !seccionesTodas) OBJETIVOS = remote.objetivos.filter(o => o && typeof o.id === 'string');
     if(remote.obsPorArea && typeof remote.obsPorArea === 'object'){
       Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(remote.obsPorArea[a])) OBS_POR_AREA[a] = remote.obsPorArea[a].filter(x => typeof x === 'string'); });
     }
@@ -2594,7 +2595,8 @@ async function mergeRemoteBeforeSave(){
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
   }
 
-  if(isAdmin && remote.recordatorios && remote.recordatorios.hechos) recordatoriosHechos = {...remote.recordatorios.hechos, ...recordatoriosHechos};
+  if(esInvitado() && remote.recordatorios && remote.recordatorios.hechos) alertasInvitadoListas = true;
+  if((isAdmin || esInvitado()) && remote.recordatorios && remote.recordatorios.hechos) recordatoriosHechos = {...remote.recordatorios.hechos, ...recordatoriosHechos};
   const antes = ALL_WORKERS.join('|');
   rebuildWorkerList();
   if(antes !== ALL_WORKERS.join('|')){
@@ -2998,8 +3000,11 @@ function applyLoadedPayload(parsed){
   if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
   if(isAdmin && parsed.ceramicas && typeof parsed.ceramicas === 'object') ceramicas = parsed.ceramicas;
   if(isAdmin && parsed.materiales) mezclarMateriales(parsed.materiales);
-  if(isAdmin && parsed.recordatorios && parsed.recordatorios.hechos) recordatoriosHechos = {...parsed.recordatorios.hechos, ...recordatoriosHechos};
-  if(isAdmin && Array.isArray(parsed.objetivos)) OBJETIVOS = parsed.objetivos.filter(o => o && typeof o.id === 'string');
+  if((isAdmin || esInvitado()) && parsed.recordatorios && parsed.recordatorios.hechos){
+    recordatoriosHechos = {...parsed.recordatorios.hechos, ...recordatoriosHechos};
+    if(esInvitado()) alertasInvitadoListas = true;
+  }
+  if((isAdmin || esInvitado()) && Array.isArray(parsed.objetivos)) OBJETIVOS = parsed.objetivos.filter(o => o && typeof o.id === 'string');
   cfgCargada = true;
   if(parsed.obsPorArea && typeof parsed.obsPorArea === 'object'){
     Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(parsed.obsPorArea[a])) OBS_POR_AREA[a] = parsed.obsPorArea[a].filter(x => typeof x === 'string'); });
@@ -3805,7 +3810,7 @@ function soloUltimoPisoFlechas(){
 document.addEventListener('click', (e) => {
   if(!esInvitado()) return;
   const t = e.target; if(!t.closest) return;
-  const OK = '[data-abrir], .tab, #catTabs, .areas-movil, .piso-flecha, .dz-tile, #btnOrdenPisos, #btnLimpiarFiltros, #toggleDark, #logoutBtn, #irMenuBtn, #scrollTopBtn, #ventanaOverlay, .toolbar select, .toolbar input, #temaSelector, #doradoBtn, #mvbarP, #mvbar, .stats-tab, .stat-card, .overlay .modal, .toast';
+  const OK = '[data-abrir], [data-obj-mas], [data-obj-hechos], .tab, #catTabs, .areas-movil, .piso-flecha, .dz-tile, #btnOrdenPisos, #btnLimpiarFiltros, #toggleDark, #logoutBtn, #irMenuBtn, #scrollTopBtn, #ventanaOverlay, .toolbar select, .toolbar input, #temaSelector, #doradoBtn, #mvbarP, #mvbar, .stats-tab, .stat-card, .overlay .modal, .toast';
   if(t.closest(OK)) return;
   if(t.closest('button, [role="button"], a[href], input[type="checkbox"], [data-matkey], [data-dzmat], [data-vt], [data-vtn]')){ e.stopPropagation(); e.preventDefault(); }
 }, true);
@@ -5154,17 +5159,18 @@ function chipNivel(tipo, nivel){ return `<span class="obj-chip ${nivel}"><i></i>
 function pintarObjetivos(){
   const bar = document.getElementById('objetivosBar');
   if(!bar) return;
-  if(!isAdmin){ bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  const soloVer = !isAdmin;
+  if(!isAdmin && !(esInvitado() && alertasInvitadoListas)){ bar.style.display = 'none'; bar.innerHTML = ''; return; }
   const pend = objetivosPendientes();
   const hechos = OBJETIVOS.filter(o => o.hecho);
   const visibles = objetivosVerTodos ? pend : pend.slice(0, 3);
-  const itemHtml = x => `<div class="obj-item ${x.e.clase}"><div class="obj-txt"><b>🎯 ${esc(x.o.titulo)}</b>${x.o.nota ? `<span class="obj-det">${esc(x.o.nota)}</span>` : ''}<div class="obj-meta"><span class="obj-cuando">${esc(x.e.txt)}</span><span>· ${esc(fechaLarga(x.o.fecha))}</span>${chipNivel('Prioridad', x.o.prioridad)}${chipNivel('Importancia', x.o.importancia)}</div></div><div class="obj-btns"><button type="button" class="btn small" data-obj-editar="${esc(x.o.id)}">✎ Editar</button><button type="button" class="btn small" data-obj-hecho="${esc(x.o.id)}">✓ Hecho</button></div></div>`;
+  const itemHtml = x => `<div class="obj-item ${x.e.clase}"><div class="obj-txt"><b>🎯 ${esc(x.o.titulo)}</b>${x.o.nota ? `<span class="obj-det">${esc(x.o.nota)}</span>` : ''}<div class="obj-meta"><span class="obj-cuando">${esc(x.e.txt)}</span><span>· ${esc(fechaLarga(x.o.fecha))}</span>${chipNivel('Prioridad', x.o.prioridad)}${chipNivel('Importancia', x.o.importancia)}</div></div>${soloVer ? '' : `<div class="obj-btns"><button type="button" class="btn small" data-obj-editar="${esc(x.o.id)}">✎ Editar</button><button type="button" class="btn small" data-obj-hecho="${esc(x.o.id)}">✓ Hecho</button></div>`}</div>`;
   bar.style.display = 'flex';
-  bar.innerHTML = `<div class="obj-head"><h3>🎯 Objetivos${pend.length ? ' (' + pend.length + ')' : ''}</h3><button type="button" class="btn small" id="objAgregar">+ Agregar objetivo</button></div>`
+  bar.innerHTML = `<div class="obj-head"><h3>🎯 Objetivos${pend.length ? ' (' + pend.length + ')' : ''}</h3>${soloVer ? '' : '<button type="button" class="btn small" id="objAgregar">+ Agregar objetivo</button>'}</div>`
     + visibles.map(itemHtml).join('')
     + (pend.length > 3 ? `<button type="button" class="btn small obj-mas" data-obj-mas="1">${objetivosVerTodos ? 'Ver menos' : 'Ver ' + (pend.length - 3) + ' más'}</button>` : '')
     + (hechos.length ? `<button type="button" class="btn small obj-mas" data-obj-hechos="1">${objetivosVerHechos ? 'Ocultar completados' : 'Completados (' + hechos.length + ')'}</button>` : '')
-    + (objetivosVerHechos && hechos.length ? `<div class="obj-hechos">${hechos.map(o => `<div class="obj-hecho-fila"><span>${esc(o.titulo)}</span><button type="button" class="btn small" data-obj-reabrir="${esc(o.id)}">Reabrir</button></div>`).join('')}</div>` : '');
+    + (objetivosVerHechos && hechos.length ? `<div class="obj-hechos">${hechos.map(o => `<div class="obj-hecho-fila"><span>${esc(o.titulo)}</span>${soloVer ? '' : `<button type="button" class="btn small" data-obj-reabrir="${esc(o.id)}">Reabrir</button>`}</div>`).join('')}</div>` : '');
 }
 function guardarObjetivos(){
   markSettingsDirty('objetivos');
@@ -5214,8 +5220,10 @@ function abrirObjetivoForm(id){
   setTimeout(() => { const t = document.getElementById('objTitulo'); if(t && !o) t.focus(); }, 60);
 }
 document.getElementById('objetivosBar').addEventListener('click', (e) => {
-  if(!isAdmin) return;
+  if(!isAdmin && !esInvitado()) return;
   const t = e.target.closest('button'); if(!t) return;
+  // el invitado solo puede ver más o ver completados
+  if(!isAdmin && !t.hasAttribute('data-obj-mas') && !t.hasAttribute('data-obj-hechos')) return;
   if(t.id === 'objAgregar'){ abrirObjetivoForm(null); return; }
   if(t.hasAttribute('data-obj-editar')){ abrirObjetivoForm(t.getAttribute('data-obj-editar')); return; }
   if(t.hasAttribute('data-obj-mas')){ objetivosVerTodos = !objetivosVerTodos; pintarObjetivos(); return; }
@@ -5228,11 +5236,12 @@ document.getElementById('objetivosBar').addEventListener('click', (e) => {
 function pintarRecordatorios(){
   const bar = document.getElementById('recordatoriosBar');
   if(!bar) return;
-  const lista = isAdmin ? recordatoriosActivos() : [];
+  const lista = (isAdmin || (esInvitado() && alertasInvitadoListas)) ? recordatoriosActivos() : [];
   bar.style.display = lista.length ? 'flex' : 'none';
-  bar.innerHTML = lista.map(r => `<div class="rec-item${r.atrasado ? ' atrasado' : ''}"><div class="rec-txt"><b>⏰ ${esc(r.titulo)}</b><span>${esc(r.detalle)}${r.atrasado ? ' · ATRASADO' : ''}</span></div><button type="button" class="btn small rec-hecho" data-rec="${esc(r.clave)}">Hecho</button></div>`).join('');
+  bar.innerHTML = lista.map(r => `<div class="rec-item${r.atrasado ? ' atrasado' : ''}"><div class="rec-txt"><b>⏰ ${esc(r.titulo)}</b><span>${esc(r.detalle)}${r.atrasado ? ' · ATRASADO' : ''}</span></div>${isAdmin ? `<button type="button" class="btn small rec-hecho" data-rec="${esc(r.clave)}">Hecho</button>` : ''}</div>`).join('');
 }
 document.getElementById('recordatoriosBar').addEventListener('click', (e) => {
+  if(!isAdmin) return;
   const b = e.target.closest('[data-rec]');
   if(b) pedirHechoRecordatorio(b.getAttribute('data-rec'));
 });
@@ -8600,4 +8609,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.53 · 05-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.54 · 05-11-2026 ==== -->
