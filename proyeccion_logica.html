@@ -7,7 +7,7 @@
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||!Array.isArray(h.secciones)||false){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <link rel="stylesheet" href="carga.css?v=3">
 <title>Proyección Lógica · Obra Bellavista</title>
-<!-- Proyección Lógica v0.3.8 -->
+<!-- Proyección Lógica v0.4.2 -->
 <script id="temasComun">(function(){var K='obraTemaComun',L=[["claro", "Claro"], ["oscuro", "Oscuro"], ["obra", "Obra"], ["azul-proy", "Azul Proyección"]],D='sistema';
 function ok(v){for(var i=0;i<L.length;i++)if(L[i][0]===v)return true;return false;}
 function pon(t){document.documentElement.setAttribute('data-tema',t);}
@@ -110,7 +110,7 @@ td.num,th.num{text-align:right}
 .progress div{height:100%;background:var(--ok);transition:width .4s ease}
 .progress .marca{position:absolute;top:-3px;width:2px;height:18px;background:var(--azul);transition:left .4s ease}
 
-/* ===== Curva S ===== */
+/* ===== Gráfico de proyección ===== */
 #curvaCaja{position:relative}
 #curva{width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair}
 #curvaInfo{position:absolute;top:0;left:0;width:280px;white-space:normal;background:var(--panel);border:1px solid var(--borde);box-shadow:0 4px 12px #0002;border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.5;pointer-events:none;opacity:0;transition:opacity .12s;z-index:5}
@@ -174,7 +174,7 @@ td.num,th.num{text-align:right}
 :root[data-tema="claro"],:root[data-tema="oscuro"],:root[data-tema="obra"]{--fondo:var(--c-bg);--txt:var(--c-text);--borde:var(--c-border);--suave:var(--c-soft);--azul:var(--c-accent);--azul2:var(--c-accent);--azul3:var(--c-accent);--panel:var(--c-panel);--sub:var(--c-sub);--ok:var(--c-ok);--mal:var(--c-bad);--alerta:var(--c-warn);}
 /* ===== Cabecera común ===== */
 :root[data-tema="claro"] body,:root[data-tema="oscuro"] body,:root[data-tema="obra"] body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
-:root[data-tema="claro"] h1,:root[data-tema="oscuro"] h1,:root[data-tema="obra"] h1{color:var(--text);}
+:root[data-tema="claro"] h1,:root[data-tema="oscuro"] h1,:root[data-tema="obra"] h1{color:var(--txt);}
 .logo.dk{display:none;}
 :root[data-tema="oscuro"] .logo.lt,:root[data-tema="obra"] .logo.lt{display:none;}
 :root[data-tema="oscuro"] .logo.dk,:root[data-tema="obra"] .logo.dk{display:block;}
@@ -183,9 +183,48 @@ td.num,th.num{text-align:right}
 .barra-top .btn-tema:hover{border-color:var(--azul2);}
 .barra-top .cs-btn{width:170px;height:34px;padding:0 10px;}
 #curva text{fill:var(--sub);}
+/* ===== Colores por tema: tablas, estados, barra, chips y gráfico ===== */
+:root[data-tema="claro"] th,:root[data-tema="oscuro"] th,:root[data-tema="obra"] th{background:var(--c-soft);color:var(--txt);}
+:root[data-tema="claro"] th,:root[data-tema="oscuro"] th,:root[data-tema="obra"] th,:root[data-tema="claro"] td,:root[data-tema="oscuro"] td,:root[data-tema="obra"] td{border-bottom-color:var(--borde);}
+:root[data-tema="claro"] .progress,:root[data-tema="oscuro"] .progress,:root[data-tema="obra"] .progress{background:var(--c-border);}
+:root[data-tema="claro"] .estado,:root[data-tema="oscuro"] .estado,:root[data-tema="obra"] .estado{background:var(--c-soft);color:var(--txt);}
+:root[data-tema="claro"] .estado.ok,:root[data-tema="oscuro"] .estado.ok,:root[data-tema="obra"] .estado.ok{background:var(--c-okb);color:var(--c-ok);}
+:root[data-tema="claro"] .estado.mal,:root[data-tema="oscuro"] .estado.mal,:root[data-tema="obra"] .estado.mal{background:var(--c-badb);color:var(--c-bad);}
+:root[data-tema="claro"] .estado.alerta,:root[data-tema="oscuro"] .estado.alerta,:root[data-tema="obra"] .estado.alerta{background:var(--c-warnb);color:var(--c-warn);}
+:root[data-tema="claro"] input.falta,:root[data-tema="oscuro"] input.falta,:root[data-tema="obra"] input.falta,:root[data-tema="claro"] .diasAuto.mal,:root[data-tema="oscuro"] .diasAuto.mal,:root[data-tema="obra"] .diasAuto.mal,:root[data-tema="claro"] button.borrar:hover,:root[data-tema="oscuro"] button.borrar:hover,:root[data-tema="obra"] button.borrar:hover{background:var(--c-badb);}
+:root[data-tema="claro"] .ayuda,:root[data-tema="oscuro"] .ayuda,:root[data-tema="obra"] .ayuda{background:var(--c-border);color:var(--txt);}
+:root[data-tema="claro"] .ayuda:focus,:root[data-tema="oscuro"] .ayuda:focus,:root[data-tema="obra"] .ayuda:focus{background:var(--azul3);color:#fff;}
+:root[data-tema="claro"] #curvaInfo,:root[data-tema="oscuro"] #curvaInfo,:root[data-tema="obra"] #curvaInfo{color:var(--txt);}
+:root[data-tema="claro"] #curvaInfo .dif,:root[data-tema="oscuro"] #curvaInfo .dif,:root[data-tema="obra"] #curvaInfo .dif{border-top-color:var(--borde);}
+@media (max-width:1100px){:root[data-tema="claro"] .apilar tr,:root[data-tema="oscuro"] .apilar tr,:root[data-tema="obra"] .apilar tr{background:var(--c-soft);border-color:var(--borde);}}
+:root[data-tema="oscuro"] #curva path[stroke="#174a78"],:root[data-tema="obra"] #curva path[stroke="#174a78"]{stroke:var(--c-accent);}
+:root[data-tema="oscuro"] #curva polygon[fill="#174a78"],:root[data-tema="obra"] #curva polygon[fill="#174a78"]{fill:var(--c-accent);}
+:root[data-tema="oscuro"] .leyenda span[style*="174a78"],:root[data-tema="obra"] .leyenda span[style*="174a78"]{--c:var(--c-accent);}
+:root[data-tema="oscuro"] #curvaInfo i[data-c="#174a78"],:root[data-tema="obra"] #curvaInfo i[data-c="#174a78"]{background:var(--c-accent) !important;}
+:root[data-tema="oscuro"] #curva path[stroke="#7b4fa0"],:root[data-tema="obra"] #curva path[stroke="#7b4fa0"]{stroke:#b48ad6;}
+:root[data-tema="oscuro"] #curva polygon[fill="#7b4fa0"],:root[data-tema="obra"] #curva polygon[fill="#7b4fa0"]{fill:#b48ad6;}
+:root[data-tema="oscuro"] .leyenda span[style*="7b4fa0"],:root[data-tema="obra"] .leyenda span[style*="7b4fa0"]{--c:#b48ad6;}
+:root[data-tema="oscuro"] #curvaInfo i[data-c="#7b4fa0"],:root[data-tema="obra"] #curvaInfo i[data-c="#7b4fa0"]{background:#b48ad6 !important;}
+:root[data-tema="oscuro"] #curva polygon,:root[data-tema="obra"] #curva polygon{stroke:var(--c-panel);}
 #curva line[stroke="#e3e8ef"]{stroke:var(--borde);}
 #curva line[stroke="#263445"]{stroke:var(--txt);}
+:root[data-tema="oscuro"] #curva circle[fill="#238653"],:root[data-tema="obra"] #curva circle[fill="#238653"]{fill:var(--c-ok);}
+:root[data-tema="oscuro"] #curva line[stroke="#238653"],:root[data-tema="obra"] #curva line[stroke="#238653"]{stroke:var(--c-ok);}
+:root[data-tema="oscuro"] #curva polygon[fill="#238653"],:root[data-tema="obra"] #curva polygon[fill="#238653"]{fill:var(--c-ok);}
+:root[data-tema="oscuro"] .leyenda span[style*="238653"],:root[data-tema="obra"] .leyenda span[style*="238653"]{--c:var(--c-ok);}
+:root[data-tema="oscuro"] #curvaInfo i[data-c="#238653"],:root[data-tema="obra"] #curvaInfo i[data-c="#238653"]{background:var(--c-ok) !important;}
 @media (max-width:600px){.barra-top .btn-tema{margin-left:0;width:100%;}.barra-top .cs-btn{width:100%;}}
+
+/* ===== Avance desde la base / prueba ===== */
+select.fuente{height:40px;font-size:13px}
+input.avance[readonly]{background:var(--suave);color:var(--txt);cursor:default}
+#baseEstado{margin:10px 0 0}
+#baseEstado.ok{color:var(--ok)}
+#baseEstado.mal{color:var(--mal)}
+#bannerPrueba{display:none;margin:0 0 14px;padding:10px 14px;border:2px solid var(--mal);background:#fbeceb;color:var(--mal);font-weight:bold;font-size:13px}
+body.prueba #bannerPrueba{display:block}
+.pisos{display:flex;gap:8px;align-items:center}
+.pisos span{font-size:13px;color:var(--sub)}
 </style>
 </head>
 
@@ -206,8 +245,10 @@ td.num,th.num{text-align:right}
   <h1>PROYECCIÓN LÓGICA</h1>
   <p class="small" style="margin:0">Planificación, control de avance y proyección de término y costos.</p>
  </div>
- <span class="ver" id="verTxt">v0.3.8</span>
+ <span class="ver" id="verTxt">v0.4.2</span>
 </header>
+
+<div id="bannerPrueba">DATOS DE PRUEBA: todo lo que se ve está inventado y no corresponde a la obra. No se puede guardar ni exportar.</div>
 
 <!-- ===== 1. Datos generales ===== -->
 <div class="card" id="datos">
@@ -218,6 +259,7 @@ td.num,th.num{text-align:right}
   <div><label for="oficial">Término oficial (contrato) <span class="ayuda" tabindex="0" data-t="Fecha de entrega comprometida. Se usa para ver si se llega a tiempo.">?</span></label><input type="date" id="oficial"></div>
   <div><label for="corte">Fecha de corte <span class="ayuda" tabindex="0" data-t="Día en que revisas la obra. Hasta esa fecha se compara lo real con lo planificado. Por defecto es hoy.">?</span></label><input type="date" id="corte"></div>
   <div><label for="presupuesto">Presupuesto total ($) <span class="ayuda" tabindex="0" data-t="Monto total disponible. Se compara con la suma de los costos de las actividades.">?</span></label><input type="number" id="presupuesto" min="0" step="1" placeholder="0"></div>
+  <div><label>Pisos que cuentan en el avance <span class="ayuda" tabindex="0" data-t="Pisos de la base que entran al porcentaje de cerámica y frague. Por ahora 2 a 22: el piso 23 y los subterráneos (-1, -2) llevan cerámica pero aún no tienen m².">?</span></label><div class="pisos"><input type="number" id="pisoDesde" value="2" min="-5" max="60" step="1" aria-label="Piso desde"><span>a</span><input type="number" id="pisoHasta" value="22" min="-5" max="60" step="1" aria-label="Piso hasta"></div></div>
   <div><label for="calendario">Días de trabajo <span class="ayuda" tabindex="0" data-t="Qué días cuentan como trabajados: todos, o solo días hábiles. Cambia los días de cada actividad.">?</span></label>
    <select id="calendario">
     <option value="corridos">Corridos (todos los días)</option>
@@ -239,14 +281,17 @@ td.num,th.num{text-align:right}
  <div class="table-wrap">
   <table id="tablaAct" class="apilar">
    <thead><tr>
-    <th>Actividad <span class="ayuda" tabindex="0" data-t="Sección del subcontrato (ej. Cerámica, Frague, Carpintería).">?</span></th><th>Inicio <span class="ayuda" tabindex="0" data-t="Día en que parte la actividad. Al agregar una nueva, parte el día hábil siguiente al término de la anterior.">?</span></th><th>Término <span class="ayuda" tabindex="0" data-t="Último día de la actividad (incluido).">?</span></th><th>Días <span class="ayuda" tabindex="0" data-t="Se calcula solo: días de trabajo entre inicio y término, según el calendario elegido.">?</span></th><th>Costo ($) <span class="ayuda" tabindex="0" data-t="Valor de la actividad. Opcional si se pondera por duración.">?</span></th><th>Avance real (%) <span class="ayuda" tabindex="0" data-t="Cuánto lleva hecho a la fecha de corte, de 0 a 100.">?</span></th><th></th>
+    <th>Actividad <span class="ayuda" tabindex="0" data-t="Sección del subcontrato (ej. Cerámica, Frague, Carpintería).">?</span></th><th>Inicio <span class="ayuda" tabindex="0" data-t="Día en que parte la actividad. Al agregar una nueva, parte el día hábil siguiente al término de la anterior.">?</span></th><th>Término <span class="ayuda" tabindex="0" data-t="Último día de la actividad (incluido).">?</span></th><th>Días <span class="ayuda" tabindex="0" data-t="Se calcula solo: días de trabajo entre inicio y término, según el calendario elegido.">?</span></th><th>Fuente del avance <span class="ayuda" tabindex="0" data-t="De dónde sale el avance real: de la base de datos (m² terminados sobre m² totales) o escrito a mano. Automático toma Cerámica o Frague según el nombre de la actividad.">?</span></th><th>Costo ($) <span class="ayuda" tabindex="0" data-t="Valor de la actividad. Opcional si se pondera por duración.">?</span></th><th>Avance real (%) <span class="ayuda" tabindex="0" data-t="Cuánto lleva hecho a la fecha de corte, de 0 a 100.">?</span></th><th></th>
    </tr></thead>
    <tbody id="actividades"></tbody>
   </table>
  </div>
+ <p class="small" id="baseEstado">Base de datos: sin consultar.</p>
  <div class="botonera">
   <button onclick="agregar()">+ Agregar actividad</button>
   <button onclick="calcular()">Calcular proyección</button>
+  <button class="sec" onclick="traerBase(true)">Traer avance de la base</button>
+  <button class="sec" id="btnPrueba" onclick="alternarPrueba()">Datos de prueba</button>
   <button class="sec" onclick="pedirLimpiar()">Limpiar todo</button>
  </div>
 </div>
@@ -261,7 +306,9 @@ td.num,th.num{text-align:right}
   <div class="metric">Avance planificado al corte<strong id="planificado">-</strong></div>
   <div class="metric">Avance real al corte<strong id="real">-</strong></div>
   <div class="metric" id="mDesv">Desviación de avance<strong id="desviacion">-</strong></div>
-  <div class="metric" id="mEst">Término estimado (ritmo real)<strong id="estimado">-</strong></div>
+  <div class="metric" id="mSV">Atraso o adelanto en días<strong id="sv">-</strong></div>
+  <div class="metric" id="mSPI">Índice de rendimiento de plazo (SPI t)<strong id="spi">-</strong></div>
+  <div class="metric" id="mEst">Término estimado (Earned Schedule)<strong id="estimado">-</strong></div>
   <div class="metric" id="mHolgura">Holgura vs término oficial<strong id="holgura">-</strong></div>
   <div class="metric">Avance requerido por día<strong id="requerido">-</strong></div>
   <div class="metric">Costo de actividades<strong id="costo">-</strong></div>
@@ -278,18 +325,19 @@ td.num,th.num{text-align:right}
  <span class="estado" id="estado">Sin información calculada.</span>
 </div>
 
-<!-- ===== 5. Curva S ===== -->
+<!-- ===== 5. Gráfico de proyección ===== -->
 <div class="card">
- <h3>5. Curva S</h3>
+ <h3>5. Gráfico de proyección</h3>
  <div id="curvaCaja">
-  <svg id="curva" viewBox="0 0 900 320" role="img" aria-label="Curva S de avance"></svg>
+  <svg id="curva" viewBox="0 0 900 320" role="img" aria-label="Gráfico de proyección de avance"></svg>
   <div id="curvaInfo"></div>
  </div>
  <div class="leyenda">
   <span style="--c:#174a78">Programado</span>
-  <span style="--c:#238653">Real (ritmo promedio al corte)</span>
-  <span style="--c:#c98a12">Proyección ritmo real</span>
+  <span style="--c:#238653">Real al día de corte</span>
+  <span style="--c:#c98a12">Proyección (Earned Schedule)</span>
   <span style="--c:#7b4fa0">Requerido para término oficial</span>
+  <span style="--c:#238653;opacity:.6">Atraso o adelanto (días)</span>
   <span style="--c:#c0392b">Término oficial</span>
  </div>
 </div>
@@ -320,7 +368,7 @@ td.num,th.num{text-align:right}
  <input type="file" id="archivo" accept=".json,application/json" hidden>
 </div>
 
-<p class="small" style="text-align:center">Proyección Lógica v0.3.8</p>
+<p class="small" style="text-align:center">Proyección Lógica v0.4.2</p>
 </div>
 
 <!-- ===== Aviso y ventana ===== -->
@@ -339,7 +387,7 @@ td.num,th.num{text-align:right}
 
 <script>
 'use strict';
-const VERSION="0.3.8";
+const VERSION="0.4.2";
 const $=id=>document.getElementById(id);
 
 // ===== Limpieza de textos (nada de código) =====
@@ -419,15 +467,14 @@ function campo(clase,tipo,valor,extra={}){
  Object.entries(extra).forEach(([k,v])=>i.setAttribute(k,v));
  return i;
 }
-function agregar(nombre="",fIni="",fFin="",costo="",avance=""){
+function agregar(nombre="",fIni="",fFin="",costo="",avance="",fuente="auto"){
  // si no trae fechas, parte al día siguiente de la última
  if(!fIni){
   const filas=[...document.querySelectorAll("#actividades tr")];
   const ult=filas.length?aDia(filas[filas.length-1].querySelector(".fini").value):null;
   const ultFin=filas.length?aDia(filas[filas.length-1].querySelector(".ffin").value):null;
   if(ultFin!==null)fIni=isoDia(siguienteHabil(ultFin+1));
-  else if(ult===null&&aDia($("inicio").value)!==null&&!filas.length)fIni=$("inicio").value;
- }
+}
  if(fIni==="-")fIni="";
  const tr=document.createElement("tr");
  tr.appendChild(celda(campo("nombre","text",limpio(nombre),{maxlength:"80",placeholder:"Ej: Cerámica"}),"Actividad",true));
@@ -435,6 +482,10 @@ function agregar(nombre="",fIni="",fFin="",costo="",avance=""){
  tr.appendChild(celda(campo("ffin","date",fFin),"Término"));
  const d=document.createElement("span");d.className="diasAuto";d.textContent="-";
  tr.appendChild(celda(d,"Días",true));
+ const sel=document.createElement("select");sel.className="fuente";sel.setAttribute("aria-label","Fuente del avance");
+ [["auto","Automático"],["C","Base: Cerámica"],["F","Base: Frague"],["m","A mano"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sel.appendChild(o)});
+ sel.value=["auto","C","F","m"].includes(fuente)?fuente:"auto";
+ tr.appendChild(celda(sel,"Fuente del avance"));
  tr.appendChild(celda(campo("costo","number",costo,{min:"0",step:"1",placeholder:"0"}),"Costo ($)"));
  tr.appendChild(celda(campo("avance","number",avance,{min:"0",max:"100",step:"0.1",placeholder:"0"}),"Avance real (%)"));
  const b=document.createElement("button");
@@ -442,10 +493,32 @@ function agregar(nombre="",fIni="",fFin="",costo="",avance=""){
  b.onclick=()=>tr.remove();
  tr.appendChild(celda(b,"",true));
  tr.querySelector(".avance").addEventListener("input",e=>e.target.classList.remove("falta"));
+ sel.addEventListener("change",()=>marcarFuente(tr));
+ tr.querySelector(".nombre").addEventListener("input",()=>marcarFuente(tr));
  tr.querySelectorAll(".fini,.ffin").forEach(i=>i.addEventListener("input",()=>{i.classList.remove("falta");diasFila(tr)}));
  $("actividades").appendChild(tr);
  diasFila(tr);
+ marcarFuente(tr);
 }
+// ===== Fuente del avance =====
+function sinTilde(t){return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+function fuenteDe(tr){
+ const v=tr.querySelector(".fuente").value;
+ if(v==="C"||v==="F")return v;
+ if(v==="m")return "m";
+ const n=sinTilde(tr.querySelector(".nombre").value);
+ if(n.includes("ceram"))return "C";
+ if(n.includes("fragu"))return "F";
+ return "m";
+}
+function marcarFuente(tr){
+ const f=fuenteDe(tr),a=tr.querySelector(".avance");
+ a.readOnly=f!=="m";
+ if(f==="m"){a.title="";return}
+ a.title="Viene de la base de datos";
+ if(BASE){const r=avanceBase(f);a.value=r.pct.toFixed(1)}else a.value="";
+}
+function marcarFuentes(){document.querySelectorAll("#actividades tr").forEach(marcarFuente)}
 // días de la fila según calendario
 function diasFila(tr){
  const a=aDia(tr.querySelector(".fini").value),b=aDia(tr.querySelector(".ffin").value);
@@ -469,9 +542,124 @@ function leerActividades(){
    ini,fin,
    dias:(ini!==null&&fin!==null&&fin>=ini)?habilesEntre(ini,fin):0,
    costo:num(f.querySelector(".costo").value,0),
-   avance:num(f.querySelector(".avance").value,0,100)
+   avance:num(f.querySelector(".avance").value,0,100),
+   fuente:fuenteDe(f),
+   fuenteSel:f.querySelector(".fuente").value
   };
  });
+}
+
+
+// ===== Base de datos: avance real de cerámica y frague =====
+const URL_BASE="https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
+let BASE=null; // {filas:[[C|F, piso, m2, terminado, fecha ms, en partida]], hasta, prueba}
+function tokenSesion(){
+ try{const t=sessionStorage.getItem("hubSesion")||localStorage.getItem("hubSesion");const h=t?JSON.parse(t):null;return h&&h.token?String(h.token):""}catch(e){return ""}
+}
+function estadoBase(txt,tipo=""){const e=$("baseEstado");e.textContent=txt;e.className="small "+tipo}
+async function traerBase(manual){
+ if(PRUEBA_ON){if(manual)aviso("Estás en datos de prueba. Sal de la prueba para leer la base.","error");return}
+ const tk=tokenSesion();
+ if(!tk){BASE=null;marcarFuentes();estadoBase("Sin sesión: el avance de cerámica y frague no se puede leer. Entra con tu cuenta o escríbelo a mano.","mal");return}
+ estadoBase("Leyendo la base de datos…");
+ const ctl=new AbortController(),tope=setTimeout(()=>ctl.abort(),30000);
+ try{
+  const r=await fetch(URL_BASE,{method:"POST",signal:ctl.signal,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"proyeccionAvance",token:tk})});
+  if(!r.ok)throw new Error("red");
+  const j=JSON.parse(await r.text());
+  if(j&&j.ok===true&&Array.isArray(j.filas)){
+   BASE={filas:j.filas.filter(f=>Array.isArray(f)&&f.length>=6).slice(0,5000),hasta:Number(j.hasta)||Date.now(),prueba:false};
+   marcarFuentes();
+   const h=new Date(BASE.hasta).toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"America/Santiago"});
+   estadoBase("Base de datos leída hoy a las "+h+" h","ok");
+   if(manual)aviso("Avance traído de la base.","ok");
+  }else if(j&&j.error==="sin_sesion"){BASE=null;marcarFuentes();estadoBase("La sesión venció. Vuelve a iniciar sesión.","mal")}
+  else{BASE=null;marcarFuentes();estadoBase("La base de datos todavía no entrega este dato (falta publicar la versión nueva del script).","mal")}
+ }catch(e){BASE=null;marcarFuentes();estadoBase("No se pudo conectar con la base de datos.","mal")}
+ finally{clearTimeout(tope)}
+}
+// % real = m² terminados / m² totales de los pisos que cuentan
+function avanceBase(cat){
+ const d=num($("pisoDesde").value,-5,60),h=num($("pisoHasta").value,-5,60);
+ let tot=0,ter=0,par=0,filas=0;
+ (BASE?BASE.filas:[]).forEach(f=>{
+  if(f[0]!==cat||f[1]<d||f[1]>h)return;
+  const m=Number(f[2])||0;tot+=m;filas++;
+  if(f[3]===1)ter+=m;else if(f[5]===1)par+=m;
+ });
+ return {pct:tot>0?ter/tot*100:0,tot,ter,par,filas};
+}
+$("pisoDesde").addEventListener("input",marcarFuentes);
+$("pisoHasta").addEventListener("input",marcarFuentes);
+
+// ===== Datos de prueba (lo único inventado de esta página) =====
+let PRUEBA_ON=false,RESPALDO=null;
+function filasInventadas(){
+ const f=[];
+ for(let p=2;p<=22;p++){
+  const hecho=p<=8?1:p<=14?0.6:0;
+  ["C","F"].forEach(c=>{
+   const total=330+(p%4)*10,t=c==="F"?hecho*0.9:hecho;
+   f.push([c,p,+(total*t).toFixed(2),1,0,0]);
+   f.push([c,p,+(total*(1-t)).toFixed(2),0,0,0]);
+  });
+ }
+ return f;
+}
+function alternarPrueba(){
+ if(!PRUEBA_ON){
+  RESPALDO={obra:$("obra").value,inicio:$("inicio").value,oficial:$("oficial").value,corte:$("corte").value,base:BASE,
+   filas:[...document.querySelectorAll("#actividades tr")].map(tr=>[tr.querySelector(".nombre").value,tr.querySelector(".fini").value,tr.querySelector(".ffin").value,tr.querySelector(".costo").value,tr.querySelector(".avance").value,tr.querySelector(".fuente").value])};
+  PRUEBA_ON=true;document.body.classList.add("prueba");$("btnPrueba").textContent="Salir de la prueba";
+  $("obra").value="Obra de ejemplo";$("inicio").value="2026-05-29";$("oficial").value="2027-01-01";
+  $("actividades").textContent="";
+  agregar("Cerámica","2026-06-22","2027-01-02","","","auto");
+  agregar("Frague","2026-07-20","2027-01-02","","","auto");
+  BASE={filas:filasInventadas(),hasta:Date.now(),prueba:true};
+  marcarFuentes();estadoBase("Datos de prueba: inventados, no son de la obra.","mal");
+  resetResultados();calcular();
+ }else{
+  PRUEBA_ON=false;document.body.classList.remove("prueba");$("btnPrueba").textContent="Datos de prueba";
+  const r=RESPALDO;RESPALDO=null;
+  $("obra").value=r.obra;$("inicio").value=r.inicio;$("oficial").value=r.oficial;$("corte").value=r.corte;
+  $("actividades").textContent="";
+  r.filas.forEach(a=>agregar(a[0],a[1]||"-",a[2],a[3],a[4],a[5]));
+  if(!r.filas.length)agregar();
+  refrescarDias();BASE=r.base;marcarFuentes();resetResultados();
+  estadoBase("Base de datos: sin consultar.");traerBase(false);
+ }
+}
+
+
+// ===== Earned Schedule (Lipke) =====
+// ES = C + (EV - PV_C) / (PV_C+1 - PV_C); SV(t) = ES - AT; SPI(t) = ES / AT; IEAC(t) = PD / SPI(t)
+// los tiempos van en días de trabajo contados desde el inicio del programa (primera actividad)
+function unidadDias(){return $("calendario").value==="corridos"?"días":"días hábiles"}
+function earnedSchedule(planEn,ini0,finPlan,corte,ev){
+ const dias=[];
+ for(let n=ini0;n<=finPlan;n++)if(trabaja(n))dias.push(n);
+ const PD=dias.length;
+ if(!PD)return null;
+ const pv=[0];dias.forEach(n=>pv.push(planEn(n)));
+ const AT=corte<ini0?0:habilesEntre(ini0,corte);
+ let C=0;
+ while(C<PD&&pv[C+1]<=ev+1e-9)C++;
+ let ES=PD;
+ if(C<PD){const a=pv[C],b=pv[C+1];ES=C+(b>a?Math.max(0,ev-a)/(b-a):0)}
+ const k=Math.ceil(ES-1e-9);
+ const esDia=ES<=0?ini0:dias[Math.min(PD,k)-1];
+ const SV=ES-AT,SPI=AT>0?ES/AT:null;
+ let est=null;
+ if(ev>=99.95)est=corte;
+ else if(SPI&&SPI>0){
+  const kEst=Math.ceil(PD/SPI-1e-9);
+  if(kEst<=Math.max(PD*20,3650)){
+   let n=ini0-1,c=0;
+   while(c<kEst){n++;if(trabaja(n))c++}
+   est=n;
+  }
+ }
+ return {PD,AT,ES,SV,SPI,est,esDia};
 }
 
 // ===== Cálculo =====
@@ -498,6 +686,15 @@ function calcular(){
   aviso("Revisa "+m.nombre+": "+motivo+(malas.length>1?" (y "+(malas.length-1)+" más)":""),"error");return;
  }
 
+ // avance real de las actividades que salen de la base
+ if(acts.some(a=>a.fuente!=="m")){
+  if(!BASE){aviso("Falta el avance de la base de datos: no hay conexión. Revisa el estado bajo la tabla o pon la fuente «A mano».","error");return}
+  const sinM2=acts.find(a=>a.fuente!=="m"&&avanceBase(a.fuente).filas===0);
+  if(sinM2){aviso("La base no tiene m² de "+(sinM2.fuente==="C"?"cerámica":"frague")+" en los pisos "+$("pisoDesde").value+" a "+$("pisoHasta").value+".","error");return}
+  marcarFuentes();
+  acts.forEach(a=>{if(a.fuente!=="m")a.avance=avanceBase(a.fuente).pct});
+ }
+
  const totalCosto=acts.reduce((s,a)=>s+a.costo,0);
  let modo=$("pondera").value;
  if(modo==="costo"&&totalCosto<=0){modo="dias";aviso("Sin costos ingresados: se pondera por duración.")}
@@ -521,12 +718,8 @@ function calcular(){
 
  // término estimado según ritmo real
  const transc=habilesEntre(ini,corte);
- let est=null;
- if(real>=99.95)est=corte;
- else if(real>0&&transc>0){
-  const ritmo=real/transc;
-  est=finTras(corte+1,Math.ceil((100-real)/ritmo));
- }
+ const es=earnedSchedule(planEn,Math.min(...acts.map(a=>a.ini)),finPlan,corte,real);
+ const est=es?es.est:null;
 
  // avance requerido para cumplir el término oficial
  let req="-";
@@ -543,7 +736,18 @@ function calcular(){
  $("real").textContent=real.toFixed(1)+"%";
  $("desviacion").textContent=(desv>0?"+":"")+desv.toFixed(1)+"%";
  $("mDesv").className="metric "+(desv>=0?"ok":"mal");
- $("estimado").textContent=est===null?"Sin avance real":fecha(est);
+ $("estimado").textContent=est===null?(real<=0?"Sin avance real":"Sin estimación"):fecha(est);
+ const un=unidadDias();
+ if(es&&es.AT>0){
+  const sv=es.SV;
+  $("sv").textContent=Math.abs(sv)<0.5?"Al día":Math.round(Math.abs(sv))+" "+un+(sv<0?" de atraso":" de adelanto");
+  $("mSV").className="metric "+(Math.abs(sv)<0.5||sv>0?"ok":"mal");
+  $("spi").textContent=es.SPI.toFixed(2).replace(".",",");
+  $("mSPI").className="metric "+(es.SPI>=1?"ok":"mal");
+ }else{
+  $("sv").textContent="Aún no parte el plan";$("mSV").className="metric";
+  $("spi").textContent="-";$("mSPI").className="metric";
+ }
 
  const fRef=est??finPlan;
  if(ofi!==null){
@@ -566,7 +770,7 @@ function calcular(){
 
  const e=$("estado");
  if(real>=99.95){e.textContent="Obra terminada.";e.className="estado ok"}
- else if(ofi!==null&&est!==null&&est>ofi){e.textContent="Al ritmo actual no se cumple el término oficial.";e.className="estado mal"}
+ else if(ofi!==null&&est!==null&&est>ofi){e.textContent="Con este rendimiento no se cumple el término oficial.";e.className="estado mal"}
  else if(desv>=0){e.textContent="Avance igual o superior al planificado.";e.className="estado ok"}
  else{e.textContent="Atraso respecto del avance planificado.";e.className="estado alerta"}
 
@@ -581,18 +785,18 @@ function calcular(){
  });
 
  ultimo={acts,obra:limpio($("obra").value)};
- dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn);
+ dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn,es);
 
  // sin avance real: marcar casillas
  document.querySelectorAll("#actividades .avance").forEach(i=>i.classList.remove("falta"));
  if(real<=0){
-  acts.forEach(a=>a.fila.querySelector(".avance").classList.add("falta"));
-  e.textContent="Falta el avance real: llena «Avance real (%)» de cada actividad.";e.className="estado mal";
-  aviso("Falta el avance real: llena la columna «Avance real (%)».","error");
+  acts.filter(a=>a.fuente==="m").forEach(a=>a.fila.querySelector(".avance").classList.add("falta"));
+  e.textContent="No hay avance real: llena «Avance real (%)» o revisa la base de datos.";e.className="estado mal";
+  aviso("No hay avance real que comparar.","error");
  }else aviso("Proyección calculada.","ok");
 }
 
-// ===== Curva S (SVG) =====
+// ===== Gráfico de proyección (SVG) =====
 function svgEl(tag,at){
  const e=document.createElementNS("http://www.w3.org/2000/svg",tag);
  Object.entries(at).forEach(([k,v])=>e.setAttribute(k,v));return e;
@@ -607,7 +811,7 @@ function trazo(a,b,f,X,Y){
  dias.forEach((m,k)=>{if(k%paso&&k<dias.length-1)return;d+=(d?"L":"M")+X(m).toFixed(1)+" "+Y(f(m)).toFixed(1)});
  return d;
 }
-function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn){
+function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn,es){
  const s=$("curva");s.textContent="";
  const W=900,H=320,L=48,R=16,T=14,B=40;
  const fin=Math.max(finPlan,corte,ofi??0,est??0);
@@ -650,16 +854,21 @@ function dibujarCurva(ini,finPlan,corte,ofi,est,real,planEn){
   s.appendChild(svgEl("path",{d:trazo(corte,ofi,n=>real+(100-real)*frac(corte+1,ofi,n),X,Y),fill:"none",stroke:"#7b4fa0","stroke-width":2,"stroke-dasharray":"2 4","stroke-linecap":"round"}));
  }
 
- // real
- s.appendChild(svgEl("path",{d:trazo(ini,corte,n=>real*frac(ini,corte,n),X,Y),fill:"none",stroke:"#238653","stroke-width":2,opacity:.5}));
+ // atraso o adelanto: de la fecha en que el programa tenía ese avance hasta el corte
+ if(es&&es.AT>0&&real>0&&es.esDia!==corte){
+  s.appendChild(svgEl("line",{x1:X(es.esDia),x2:X(corte),y1:Y(real),y2:Y(real),stroke:"#238653","stroke-width":1.5,"stroke-dasharray":"4 3",opacity:.6}));
+  s.appendChild(svgEl("circle",{cx:X(es.esDia),cy:Y(real),r:3,fill:"#238653",opacity:.6}));
+ }
+ // real: solo el punto del día de corte
  s.appendChild(svgEl("circle",{cx:X(corte),cy:Y(real),r:5,fill:"#238653"}));
+ if(PRUEBA_ON){const w=svgEl("text",{x:W/2,y:H/2,"text-anchor":"middle","font-size":38,"font-weight":"bold",fill:"#c0392b",opacity:.22});w.textContent="DATOS DE PRUEBA";s.appendChild(w)}
 
  // capa del cursor
  const g=svgEl("g",{id:"cursorG",opacity:0});
  g.appendChild(svgEl("line",{id:"cursorL",y1:T,y2:H-B,stroke:"#263445","stroke-width":1,"stroke-dasharray":"3 3"}));
  ["#174a78","#238653","#c98a12","#7b4fa0"].forEach((c,i)=>g.appendChild(svgEl("polygon",{id:"rombo"+i,fill:c,stroke:"#fff","stroke-width":1.5})));
  s.appendChild(g);
- curva={ini,finPlan,corte,ofi,est,real,planEn,span,Wtot,diaDe,L,R,T,B,W,H,X,Y,acts:ultimo?ultimo.acts:[]};
+ curva={ini,finPlan,corte,ofi,est,real,planEn,es,span,Wtot,diaDe,L,R,T,B,W,H,X,Y,acts:ultimo?ultimo.acts:[]};
 }
 
 // ===== Curva: cursor =====
@@ -671,8 +880,8 @@ function rombo(el,x,y,ok){
 function valoresEn(n){
  const c=curva,v={};
  if(n<=c.finPlan)v.plan=c.planEn(n);
- if(n<=c.corte)v.real=c.real*frac(c.ini,c.corte,n);
- else if(c.est!==null&&n<=c.est)v.proy=c.real+(100-c.real)*frac(c.corte+1,c.est,n);
+ if(n===c.corte)v.real=c.real;
+ else if(n>c.corte&&c.est!==null&&n<=c.est)v.proy=c.real+(100-c.real)*frac(c.corte+1,c.est,n);
  if(c.ofi!==null&&c.ofi>c.corte&&c.real<100&&n>c.corte&&n<=c.ofi)v.req=c.real+(100-c.real)*frac(c.corte+1,c.ofi,n);
  return v;
 }
@@ -694,8 +903,8 @@ function moverCursor(ev){
 
  // recuadro con frases
  const info=$("curvaInfo");info.textContent="";
- const pct=x=>x.toFixed(1).replace(".",",")+"%";
- const frase=(color,txt)=>{const d=document.createElement("p");if(color){const i=document.createElement("i");i.style.background=color;d.appendChild(i)}d.append(txt);info.appendChild(d)};
+ const pct=x=>x.toFixed(1).replace(".",",")+"%",pp=x=>x.toFixed(1).replace(".",",")+" puntos";
+ const frase=(color,txt)=>{const d=document.createElement("p");if(color){const i=document.createElement("i");i.style.background=color;i.dataset.c=color;d.appendChild(i)}d.append(txt);info.appendChild(d)};
  const t=document.createElement("b");
  t.textContent=fecha(n)+(n===c.corte?" · día de corte":"")+(n===c.ofi?" · término oficial":"");
  info.appendChild(t);
@@ -711,18 +920,25 @@ function moverCursor(ev){
   frase("#c0392b","No hay avance real: falta llenar «Avance real (%)» en las actividades.");
  }else if(v.real!==undefined){
   const d=v.real-plan;
-  const est=Math.abs(d)<0.5?"vas al día":d<0?"vas atrasado "+pct(-d):"vas adelantado "+pct(d);
-  if(n===c.corte)frase("#238653","Al día de corte se lleva "+pct(v.real)+": "+est+".");
-  else frase("#238653","Con el ritmo real promedio se llevaría "+pct(v.real)+": "+est+".");
+  const est=Math.abs(d)<0.5?"vas al día":d<0?"vas atrasado "+pp(-d):"vas adelantado "+pp(d);
+  frase("#238653","Al día de corte se lleva "+pct(v.real)+": "+est+" (programado "+pct(plan)+").");
+  const e=c.es;
+  if(e&&e.AT>0&&c.real>0){
+   const dd=Math.round(Math.abs(e.SV)),un=unidadDias();
+   if(Math.abs(e.SV)<0.5)frase("#238653","Va al día con el programa.");
+   else frase("#238653","El programa tenía este avance el "+fecha(e.esDia)+": "+dd+" "+un+(e.SV<0?" de atraso.":" de adelanto."));
+  }
+ }else if(n<c.corte){
+  frase("#238653","Sin dato real para este día: el avance real solo se mide al día de corte.");
  }else if(v.proy!==undefined){
   if(n===c.est)frase("#c98a12","Si se sigue al mismo ritmo, la obra termina este día.");
-  else frase("#c98a12","Si se sigue al mismo ritmo, se llegaría a "+pct(v.proy)+(v.plan!==undefined?" ("+pct(plan-v.proy)+" bajo lo programado).":"; falta "+pct(100-v.proy)+" para terminar."));
+  else frase("#c98a12","Si se sigue al mismo ritmo, se llegaría a "+pct(v.proy)+(v.plan!==undefined?" ("+pp(plan-v.proy)+" bajo lo programado).":"; falta "+pct(100-v.proy)+" para terminar."));
  }else if(c.est!==null&&n>c.est){
   frase("#c98a12","Al ritmo actual la obra ya estaría terminada (el "+fecha(c.est)+").");
  }
  if(v.req!==undefined&&c.real>0){
   const fal=v.req-(v.proy??0);
-  frase("#7b4fa0","Para terminar el "+fecha(c.ofi)+" habría que llevar "+pct(v.req)+(v.proy!==undefined&&fal>0.5?" ("+pct(fal)+" más que al ritmo actual).":"."));
+  frase("#7b4fa0","Para terminar el "+fecha(c.ofi)+" habría que llevar "+pct(v.req)+(v.proy!==undefined&&fal>0.5?" ("+pp(fal)+" más que al ritmo actual).":"."));
  }
  if(c.ofi!==null){
   if(n===c.ofi)frase("#c0392b","Este es el término oficial del contrato.");
@@ -754,8 +970,8 @@ function limpiar(){
  resetResultados();cerrarVentana();aviso("Molde limpio.");
 }
 function resetResultados(){
- ["duracion","termino","transcurridos","planificado","real","desviacion","estimado","holgura","requerido","costo","ejecutado","saldo"].forEach(id=>$(id).textContent="-");
- ["mDesv","mEst","mHolgura","mSaldo"].forEach(id=>$(id).className="metric");
+ ["duracion","termino","transcurridos","planificado","real","desviacion","sv","spi","estimado","holgura","requerido","costo","ejecutado","saldo"].forEach(id=>$(id).textContent="-");
+ ["mDesv","mSV","mSPI","mEst","mHolgura","mSaldo"].forEach(id=>$(id).className="metric");
  $("barra").style.width="0%";$("marcaPlan").style.left="0%";
  $("estado").textContent="Sin información calculada.";$("estado").className="estado";
  $("detalle").textContent="";$("curva").textContent="";ultimo=null;curva=null;ocultarCursor();
@@ -772,11 +988,13 @@ function nombreArchivo(){
  return (limpio($("obra").value)||"proyeccion").replace(/[^\wáéíóúñÁÉÍÓÚÑ-]+/g,"_").slice(0,50);
 }
 function guardarMolde(){
+ if(PRUEBA_ON){aviso("Con datos de prueba no se puede guardar.","error");return}
  const datos={
   tipo:"proyeccion_logica",version:VERSION,
   obra:limpio($("obra").value),inicio:$("inicio").value,oficial:$("oficial").value,corte:$("corte").value,
   presupuesto:num($("presupuesto").value,0),calendario:$("calendario").value,pondera:$("pondera").value,
-  actividades:leerActividades().map(({nombre,fIni,fFin,costo,avance})=>({nombre,inicio:fIni,termino:fFin,costo,avance}))
+  pisoDesde:num($("pisoDesde").value,-5,60),pisoHasta:num($("pisoHasta").value,-5,60),
+  actividades:leerActividades().map(({nombre,fIni,fFin,costo,avance,fuenteSel})=>({nombre,inicio:fIni,termino:fFin,costo,avance,fuente:fuenteSel}))
  };
  descargar(JSON.stringify(datos,null,1),nombreArchivo()+".json","application/json");
  aviso("Molde guardado.","ok");
@@ -784,6 +1002,7 @@ function guardarMolde(){
 $("archivo").addEventListener("change",ev=>{
  const f=ev.target.files[0];ev.target.value="";
  if(!f)return;
+ if(PRUEBA_ON){aviso("Sal de los datos de prueba antes de abrir un molde.","error");return}
  if(f.size>500000){aviso("Archivo demasiado grande.","error");return}
  const r=new FileReader();
  r.onload=()=>{
@@ -796,8 +1015,10 @@ $("archivo").addEventListener("change",ev=>{
   $("presupuesto").value=num(d.presupuesto,0)||"";
   $("calendario").value=["corridos","lv","ls"].includes(d.calendario)?d.calendario:"corridos";
   $("pondera").value=["dias","costo"].includes(d.pondera)?d.pondera:"dias";
+  if(Number.isFinite(Number(d.pisoDesde)))$("pisoDesde").value=num(d.pisoDesde,-5,60);
+  if(Number.isFinite(Number(d.pisoHasta)))$("pisoHasta").value=num(d.pisoHasta,-5,60);
   $("actividades").textContent="";
-  d.actividades.slice(0,300).forEach(a=>agregar(limpio(a?.nombre),fechaOk(a?.inicio)||"-",fechaOk(a?.termino),num(a?.costo,0),num(a?.avance,0,100)));
+  d.actividades.slice(0,300).forEach(a=>agregar(limpio(a?.nombre),fechaOk(a?.inicio)||"-",fechaOk(a?.termino),num(a?.costo,0),num(a?.avance,0,100),a?.fuente));
   refrescarDias();
   if(!d.actividades.length)agregar();
   resetResultados();
@@ -809,24 +1030,23 @@ $("archivo").addEventListener("change",ev=>{
 
 // ===== CSV =====
 function exportar(){
+ if(PRUEBA_ON){aviso("Con datos de prueba no se puede exportar.","error");return}
  if(!ultimo){aviso("Primero calcula la proyección.","error");return}
  const sep=";",q=t=>'"'+String(t).replace(/"/g,'""').replace(/^[=+\-@]/,"'$&")+'"';
- let csv=["Actividad","Inicio","Termino","Duracion","Costo","Avance real %"].join(sep)+"\n";
+ let csv=["Actividad","Inicio","Termino","Duracion","Costo","Avance real %","Fuente"].join(sep)+"\n";
  ultimo.acts.forEach(a=>{
-  csv+=[q(a.nombre),fecha(a.ini),fecha(a.fin),a.dias,Math.round(a.costo),a.avance.toFixed(1)].join(sep)+"\n";
+  csv+=[q(a.nombre),fecha(a.ini),fecha(a.fin),a.dias,Math.round(a.costo),a.avance.toFixed(1),a.fuente==="m"?"A mano":"Base de datos"].join(sep)+"\n";
  });
  descargar("﻿"+csv,nombreArchivo()+".csv","text/csv;charset=utf-8");
 }
 
 // ===== Inicio =====
 $("calendario").addEventListener("change",refrescarDias);
-// la primera actividad toma el inicio de la obra si está vacía
-$("inicio").addEventListener("change",()=>{
- const f=document.querySelector("#actividades tr .fini");
- if(f&&!f.value&&aDia($("inicio").value)!==null){f.value=$("inicio").value;diasFila(f.closest("tr"))}
-});
 $("corte").value=hoyISO();
-agregar();
+// fechas de la obra: inicio 29-05-2026, término oficial 01-01-2027; cerámica va del 29-05-2026 al 02-01-2027
+$("obra").value="Obra Bellavista, La Florida";$("inicio").value="2026-05-29";$("oficial").value="2027-01-01";
+agregar("Cerámica","2026-05-29","2027-01-02");
+traerBase(false);
 // ===== Volver al menú =====
 $("irMenu").addEventListener("click",e=>{
  const b=e.currentTarget;if(b.classList.contains("btn-marcado"))return;
