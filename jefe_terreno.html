@@ -438,8 +438,6 @@ document.getElementById('reset').addEventListener('click', () => {
     guardar(); dlg.hidden = true; pintar();
     const nueva = document.querySelector('#grid .card:last-child'); if(nueva) nueva.scrollIntoView({block: 'center'});
   });
-  dlg.addEventListener('click', e => { if(e.target === dlg) dlg.hidden = true; });
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') dlg.hidden = true; });
 })();
 
 pintar();
@@ -482,5 +480,14 @@ if(window.CargaPagina) CargaPagina.fin();
   });
   setInterval(function(){ document.querySelectorAll('main [contenteditable],main input,main select,main textarea').forEach(function(x){ if(x.getAttribute('contenteditable') !== null) x.setAttribute('contenteditable','false'); else x.disabled = true; }); }, 600);
 })();
+// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('#nuevoDlg:not([hidden])');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
 </script>
-<!-- ==== VERSION: Jefe de Terreno · v1.0.21 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Jefe de Terreno · v1.0.22 · 04-11-2026 ==== -->

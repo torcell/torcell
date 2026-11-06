@@ -7,7 +7,7 @@
 <script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||!Array.isArray(h.secciones)||false){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
 <link rel="stylesheet" href="carga.css?v=3">
 <title>Proyección Lógica · Obra Bellavista</title>
-<!-- Proyección Lógica v0.4.2 -->
+<!-- Proyección Lógica v0.4.3 -->
 <script id="temasComun">(function(){var K='obraTemaComun',L=[["claro", "Claro"], ["oscuro", "Oscuro"], ["obra", "Obra"], ["azul-proy", "Azul Proyección"]],D='sistema';
 function ok(v){for(var i=0;i<L.length;i++)if(L[i][0]===v)return true;return false;}
 function pon(t){document.documentElement.setAttribute('data-tema',t);}
@@ -245,7 +245,7 @@ body.prueba #bannerPrueba{display:block}
   <h1>PROYECCIÓN LÓGICA</h1>
   <p class="small" style="margin:0">Planificación, control de avance y proyección de término y costos.</p>
  </div>
- <span class="ver" id="verTxt">v0.4.2</span>
+ <span class="ver" id="verTxt">v0.4.3</span>
 </header>
 
 <div id="bannerPrueba">DATOS DE PRUEBA: todo lo que se ve está inventado y no corresponde a la obra. No se puede guardar ni exportar.</div>
@@ -368,7 +368,7 @@ body.prueba #bannerPrueba{display:block}
  <input type="file" id="archivo" accept=".json,application/json" hidden>
 </div>
 
-<p class="small" style="text-align:center">Proyección Lógica v0.4.2</p>
+<p class="small" style="text-align:center">Proyección Lógica v0.4.3</p>
 </div>
 
 <!-- ===== Aviso y ventana ===== -->
@@ -387,7 +387,7 @@ body.prueba #bannerPrueba{display:block}
 
 <script>
 'use strict';
-const VERSION="0.4.2";
+const VERSION="0.4.3";
 const $=id=>document.getElementById(id);
 
 // ===== Limpieza de textos (nada de código) =====
@@ -1055,6 +1055,15 @@ $("irMenu").addEventListener("click",e=>{
 });
 if(window.CargaPagina&&!window.__gateErr)CargaPagina.fin();
 
+// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('#fondoVentana.abierta');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
 </script>
 </body>
 </html>

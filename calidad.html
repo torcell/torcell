@@ -803,7 +803,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.37.7';
+const CAL_VERSION = '1.37.8';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2246,7 +2246,16 @@ document.addEventListener('visibilitychange', () => {
   }).catch(function(){}); }, 4000);
 }catch(e){} })();
 /* ===== fin aviso de sitio ===== */
+// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.37.7 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.37.8 · 04-11-2026 ==== -->

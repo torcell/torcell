@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.12</title>
+<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.13</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script>/* ===== solo admin: sin sesión de admin no se muestra nada ===== */
 (function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(!h||!h.token||h.rol!==1){document.documentElement.style.visibility='hidden';document.addEventListener('DOMContentLoaded',function(){document.body.textContent='Esta sección es solo para el administrador.';document.body.style.cssText='font:14px system-ui;padding:24px;color:#555';document.documentElement.style.visibility='visible';});window.__soloAdmin=true;}}catch(e){}})();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== Generador de documentos · v7-html.12 · 2026-10-31 ===== */
+/* ===== Generador de documentos · v7-html.13 · 2026-10-31 ===== */
 /* ===== colores ===== */
 :root{--fondo:#0d1b24;--caja:#16262f;--campo:#112029;--linea:#3b5666;--texto:#f2f6f8;--suave:#9fb3bd;--ac:#6ec6e8;--ac2:#1f5a78;--err:#e8707f}
 [data-c=dorado]{--ac:#e0b45a;--ac2:#6b5320}[data-c=esmeralda]{--ac:#5fd3a0;--ac2:#1f6a4c}
@@ -98,11 +98,14 @@ select.nat{display:none}
 .sel-flecha.up{top:0;border-bottom:1px solid var(--linea)}.sel-flecha.up:after{border-bottom-color:var(--ac);border-top-width:0;top:9px}
 .sel-flecha.dn{bottom:0;border-top:1px solid var(--linea)}.sel-flecha.dn:after{border-top-color:var(--ac);border-bottom-width:0;top:11px}
 .sel-flecha:hover{background:var(--ac2)}.sel-flecha:active{background:var(--ac)}
+.verTxt{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:11px;color:var(--suave);opacity:.8}
+nav{position:relative;min-height:100%}
 </style></head><body>
 <div class="app">
  <nav>
   <a class="on" data-v="nuevo">Nuevo trabajador</a><a data-v="anexos">Anexos</a><a data-v="obra">Empresas y obras</a><a data-v="hist">Trabajadores</a><a data-v="fini">Finiquitos</a>
   <hr><a data-v="emp">Empresa</a><a data-v="apa">Apariencia</a>
+  <div class="verTxt">v7-html.13</div>
  </nav>
  <div class="cuerpo">
   <!-- ===== nuevo trabajador ===== -->
@@ -383,8 +386,7 @@ function abrirDialogo(acc,tp){
 document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{desdeHist=false;abrirDialogo(b.dataset.acc,b.dataset.tipo||'trab')});
 $('f').onsubmit=e=>e.preventDefault();
 const cerrarVen=()=>velo.classList.remove('on');
-$('vNo').onclick=cerrarVen;velo.onmousedown=e=>{if(e.target===velo)cerrarVen()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarVen()});
+$('vNo').onclick=cerrarVen;
 $('vOk').onclick=()=>{const s=juntar(),m=$(tipo==='anexo'?'msgA':desdeHist?'hMsg':'msg');s.tipo=tipo;
   if(!s.docs.length&&!s.fijos.length){m.style.color='var(--err)';m.textContent='Marca al menos un documento.';cerrarVen();return}
   cerrarVen();if(tipo==='trab')registrarDeForm();m.style.color='var(--ac)';m.textContent=accion==='imprimir'?'Enviando a imprimir…':'Datos listos.';
@@ -485,8 +487,7 @@ function pasarAAnexo(t){poner('a_nombre',t.nombre);poner('a_rut',t.rut);const c=
 const velo2=$('velo2');
 function abrirV2(id){['vCrear','vElegir'].forEach(i=>$(i).style.display=i===id?'block':'none');velo2.classList.add('on')}
 function cerrarV2(){velo2.classList.remove('on')}
-$('cNo').onclick=$('eNo').onclick=cerrarV2;velo2.onmousedown=e=>{if(e.target===velo2)cerrarV2()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarV2()});
+$('cNo').onclick=$('eNo').onclick=cerrarV2;
 montarFecha('c_ing');
 ['c_nombre','c_nac','c_calle','c_comuna'].forEach(i=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[#,<>"'`\\{}]/g,''));
 $('c_num').oninput=e=>e.target.value=e.target.value.replace(/\D/g,'');
@@ -584,5 +585,14 @@ pintarHist();
 [['azul','#6ec6e8'],['dorado','#e0b45a'],['esmeralda','#5fd3a0'],['carmesi','#e8707f'],['violeta','#b49cf0'],['plata','#cfd8dd']].forEach(([n,h])=>{
   const b=document.createElement('button');b.title=n;b.style.background=h;b.onclick=()=>{document.documentElement.dataset.c=n;try{localStorage.setItem('gen_color',n)}catch(e){}};$('col').appendChild(b)});
 try{const c=localStorage.getItem('gen_color');if(c)document.documentElement.dataset.c=c}catch(e){}
+// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('.velo.on');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
 </script></body></html>
-<!-- ==== VERSION: Generador de documentos · v7-html.12 · 31-10-2026 ==== -->
+<!-- ==== VERSION: Generador de documentos · v7-html.13 · 31-10-2026 ==== -->

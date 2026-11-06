@@ -1002,7 +1002,16 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.39';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.40';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('.vel');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
+</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.39 · 05-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.40 · 05-11-2026 ==== -->

@@ -1469,7 +1469,6 @@ async function camara(){
 }
 $('camBtn').addEventListener('click', camara);
 
-document.addEventListener('keydown', e => { if(e.key === 'Escape'){ qrParar(); ['veloConf', 'veloQR', 'veloRes', 'veloMat', 'veloPer', 'veloDev', 'veloSin', 'veloPed', 'veloEnt'].forEach(i => $(i).classList.remove('on')); } });
 
 selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 (async function init(){
@@ -1507,7 +1506,16 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.20';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.20';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('.velo.on');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
+</script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.4.20 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.21 · 04-11-2026 ==== -->

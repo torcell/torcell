@@ -2390,7 +2390,6 @@ function abrirFicha(cod){
   $("overlay").hidden = false; $("mCerrar").focus();
 }
 $("mCerrar").addEventListener("click", () => { $("overlay").hidden = true; hideTip(); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("overlay").hidden) { $("overlay").hidden = true; hideTip(); } });
 
 // pestañas (recuerda la última abierta)
 const VISTAS = ["resumen", "edificio", "datos", "tareas", "tren", "proy", "bodega", "partidas", "listado", "supuestos", "glosario"];
@@ -2465,5 +2464,14 @@ iniciar();
   }).catch(function(){}); }, 4000);
 }catch(e){} })();
 /* ===== fin aviso de sitio ===== */
+// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+(function(){
+  const abierta = () => !!document.querySelector('#overlay:not([hidden])');
+  const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+  document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
+  let y0 = 0;
+  document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
+})();
 </script>
-<!-- ==== VERSION: Avance de obra · v1.0.23 · 03-11-2026 ==== -->
+<!-- ==== VERSION: Avance de obra · v1.0.24 · 03-11-2026 ==== -->
