@@ -332,6 +332,7 @@ header.top .cs-btn{height:34px;width:170px;padding:0 10px;}
     <button type="button" data-t="encargados">Encargados<small>quién responde por cada página</small></button>
     <button type="button" data-t="visual">Visual<small>botones y temas que se ven</small></button>
     <button type="button" data-t="rendimiento">Rendimiento<small>m² y actividad por trabajador</small></button>
+    <button type="button" data-t="rendimiento2">Rendimiento 2<small>reparto 50/50, quincena y meta</small></button>
     <button type="button" data-t="seguridad">Seguridad<small>alertas y respaldos</small></button>
     <button type="button" data-t="ventanas">Ventanas<small>qué puede abrir cada uno</small></button>
     <button type="button" data-t="generador">Generador<small>documentos de contratación</small></button>
@@ -376,6 +377,7 @@ const BD = (function(){
   return async function(a, x){
     await dormir(120);
     if(a === 'rendimientoDatos') return rendDemo();
+    if(a === 'rendimiento2Datos') return rendDemo2();
     if(a === 'alertasListar') return {ok:true, correos:2, titulos:{baja_fuerte:'Bajada fuerte de datos en un guardado', guardado_bloqueado:'Se frenó un guardado que borraba datos', restauracion:'Se restauró un respaldo de los datos'}, alertas:[{f:'2026-10-31 19:40:12', t:'guardado_bloqueado', g:'alta', c:'Rafael', d:'Intentó guardar con 0 filas; antes había 1.240.', a:''},{f:'2026-10-31 11:02:45', t:'baja_fuerte', g:'media', c:'Ignacio', d:'Bajó de 1.240 a 980 filas terminadas.', a:''}]};
     if(a === 'respaldosListar') return {ok:true, respaldos:(estado.resp = estado.resp || [{n:1,ts:Date.now()-3600000*3,motivo:'diario 7:00',filas:1240,terminadas:812},{n:2,ts:Date.now()-86400000,motivo:'diario 7:00',filas:1240,terminadas:790},{n:3,ts:Date.now()-86400000*2,motivo:'diario 7:00',filas:1240,terminadas:761}])};
     if(a === 'respaldoAhora') return {ok:true};
@@ -424,6 +426,173 @@ function rdFecha(s){ return new Date(s + 'T00:00:00Z'); }
 function rdSuma(s, n){ const d = rdFecha(s); d.setUTCDate(d.getUTCDate() + n); return rdIso(d); }
 function rdLunes(s){ const d = rdFecha(s); return rdSuma(s, -((d.getUTCDay() + 6) % 7)); }
 function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+/* ===== Rendimiento 2 v1 (compartido: panel y admin) · reparto 50/50, quincena por cierres, sin sábados ni feriados ===== */
+const R2_INICIO_OBRA = '2026-05-29';
+// feriados nacionales (el servidor manda su propia lista; esta es por si falta)
+const R2_FERIADOS = ['2026-06-29', '2026-07-16', '2026-09-18', '2026-09-19', '2026-10-12', '2026-10-31', '2026-11-01', '2026-12-08', '2026-12-25', '2027-01-01', '2027-03-26', '2027-03-27'];
+function r2Mediana(v){ if(!v.length) return null; v = v.slice().sort((a, b) => a - b); const m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; }
+function renderRendimiento2(raiz, datos, esc){
+  const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
+  const hoy = rdHoy();
+  const FER = {}; (datos.feriados && datos.feriados.length ? datos.feriados : R2_FERIADOS).forEach(f => { FER[f] = 1; });
+  const habil = d => { const w = rdFecha(d).getUTCDay(); return w >= 1 && w <= 5 && !FER[d]; };   // lunes a viernes, sin feriados
+  const fT = d => { const x = rdFecha(d); return x.getUTCDate() + ' ' + RD_MC[x.getUTCMonth()]; };
+  const rg = (a, b) => fT(a) + ' – ' + fT(b);
+  const trabs = datos.trabajadores || [], partidas = datos.partidas || [];
+  const CATS = ['Cerámica', 'Frague'];
+  // ===== grupo de cada trabajador =====
+  const grupo = {};
+  trabs.forEach(t => {
+    if(t.especialidad === 'fraguador') { grupo[t.nombre] = 'Frague'; return; }
+    if(t.especialidad === 'ceramista') { grupo[t.nombre] = 'Cerámica'; return; }
+    let c = 0, f = 0; partidas.forEach(p => { if(p.w === t.nombre){ if(p.cat === 'Frague') f += p.m2; else c += p.m2; } });
+    grupo[t.nombre] = f > c ? 'Frague' : 'Cerámica';
+  });
+  // ===== reparto 50/50: lo que empieza y termina el mismo día cuenta entero; lo demás, mitad al empezar y mitad al terminar =====
+  const cred = {}, ter = {};
+  const add = (o, w, x) => { (o[w] = o[w] || []).push(x); };
+  partidas.forEach(p => {
+    if(p.fin) add(ter, p.w, {cat: p.cat, d: p.fin, m2: p.m2});
+    if(p.fin && (!p.ini || p.ini === p.fin)) add(cred, p.w, {cat: p.cat, d: p.fin, m2: p.m2, mitad: false});
+    else {
+      add(cred, p.w, {cat: p.cat, d: p.ini, m2: p.m2 / 2, mitad: true, otro: p.fin || ''});
+      if(p.fin) add(cred, p.w, {cat: p.cat, d: p.fin, m2: p.m2 / 2, mitad: true, otro: p.ini});
+    }
+  });
+  // ===== períodos =====
+  function periodos(vista){
+    const L = [];
+    if(vista === 'semana'){
+      for(let l = rdLunes(R2_INICIO_OBRA); l <= hoy; l = rdSuma(l, 7)) L.push({id: l, a: l, b: rdSuma(l, 6), n: 'Semana ' + (L.length + 1) + ' · ' + rg(l, rdSuma(l, 6))});
+    } else if(vista === 'mes'){
+      let a = new Date(R2_INICIO_OBRA.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z');
+      while(a <= z){ const b = new Date(Date.UTC(a.getUTCFullYear(), a.getUTCMonth() + 1, 0)); L.push({id: rdIso(a), a: rdIso(a), b: rdIso(b), n: RD_MES[a.getUTCMonth()] + ' ' + a.getUTCFullYear()}); a.setUTCMonth(a.getUTCMonth() + 1); }
+    } else if(vista === 'quincena'){
+      let br = (datos.cierres || []).slice().sort().map(d => ({d, real: true}));
+      if(!br.length){ let v = hoy; while(rdFecha(v).getUTCDay() !== 5) v = rdSuma(v, -1); br = [{d: v, real: false}]; }
+      while(br[br.length - 1].d < hoy) br.push({d: rdSuma(br[br.length - 1].d, 14), real: false});
+      while(rdSuma(br[0].d, -13) > R2_INICIO_OBRA) br.unshift({d: rdSuma(br[0].d, -14), real: false});
+      br.forEach((x, i) => {
+        let a = i ? rdSuma(br[i - 1].d, 1) : rdSuma(x.d, -13); if(a < R2_INICIO_OBRA) a = R2_INICIO_OBRA;
+        L.push({id: x.d, a, b: x.d, real: x.real, n: 'Quincena ' + (i + 1) + ' · ' + rg(a, x.d) + (x.real ? ' · cierre registrado' : ' · cierre estimado')});
+      });
+    }
+    return L;
+  }
+  // ===== cálculo de un trabajador en un rango y categoría =====
+  function calcT(t, a, b, cat){
+    let da = a, db = b; if(t.inicio && t.inicio > da) da = t.inicio; if(t.fin && t.fin < db) db = t.fin;
+    const r = {m2: 0, cruza: 0, ter: 0, excl: 0, trab: 0, disp: 0, F: 0, reg: 0, dias: 0, porDia: null, asistPct: null};
+    if(da > db) return r;
+    (cred[t.nombre] || []).forEach(c => {
+      if(c.cat !== cat || c.d < da || c.d > db) return;
+      if(!habil(c.d)){ r.excl += c.m2; return; }
+      r.m2 += c.m2; if(c.mitad && (c.otro === '' || c.otro < a || c.otro > b)) r.cruza += c.m2;
+    });
+    (ter[t.nombre] || []).forEach(c => { if(c.cat === cat && c.d >= da && c.d <= db) r.ter += c.m2; });
+    if(grupo[t.nombre] === cat){
+      (t.asistencia || []).forEach(x => {
+        if(x.d < da || x.d > db || !habil(x.d)) return;
+        r.reg++;
+        if(x.e === 'F'){ r.F++; r.disp += 1; }
+        else if(x.e === 'P'){ r.trab += 1; r.disp += 1; }
+        else if(x.e === 'S'){ r.trab += x.fr; r.disp += x.m === 'sin cancha' ? x.fr : 1; }
+      });
+      if(r.reg) r.dias = r.trab;
+      else { const u = {}; (t.dias || []).forEach(x => { if(x.cat === cat && x.d >= da && x.d <= db && habil(x.d)) u[x.d] = 1; }); r.dias = Object.keys(u).length; }
+    }
+    r.porDia = r.dias ? r.m2 / r.dias : null;
+    r.asistPct = r.disp ? r.trab / r.disp * 100 : null;
+    return r;
+  }
+  const hayEnCat = (t, cat) => grupo[t.nombre] === cat || (cred[t.nombre] || []).some(c => c.cat === cat);
+  // ===== meta por día: la estimada sale de la mediana de semanas completas ya trabajadas =====
+  const metaEst = {};
+  CATS.forEach(cat => {
+    const v = [];
+    periodos('semana').forEach(w => { if(w.b >= hoy) return; trabs.forEach(t => { if(grupo[t.nombre] !== cat) return; const r = calcT(t, w.a, w.b, cat); if(r.dias >= 3 && r.m2 > 0) v.push(r.m2 / r.dias); }); });
+    metaEst[cat] = v.length >= 3 ? Math.round(r2Mediana(v) * 10) / 10 : null;
+  });
+  let metaUsr = {}; try{ metaUsr = JSON.parse(localStorage.getItem('rend2Meta') || '{}') || {}; }catch(e){}
+  const metaDe = cat => (Number(metaUsr[cat]) > 0 ? Number(metaUsr[cat]) : metaEst[cat]);
+  // ===== controles =====
+  raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="r2V"><option value="dia">Día</option><option value="semana">Semana</option><option value="quincena" selected>Quincena</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
+    + '<label id="r2SD">Día <input type="date" id="r2D" max="' + hoy + '"></label><label id="r2SP">Período <select id="r2P"></select></label></div><div id="r2Out"></div>';
+  const $ = id => raiz.querySelector('#' + id);
+  $('r2D').value = hoy;
+  function llenar(){
+    const v = $('r2V').value, L = periodos(v);
+    $('r2SD').style.display = v === 'dia' ? '' : 'none'; $('r2SP').style.display = (v === 'dia' || v === 'total') ? 'none' : '';
+    $('r2P').innerHTML = L.slice().reverse().map(p => '<option value="' + esc(p.id) + '">' + esc(p.n) + '</option>').join('');
+    const act = L.find(p => p.a <= hoy && hoy <= p.b); if(act) $('r2P').value = act.id;
+  }
+  function metaHtml(cat){
+    const e = metaEst[cat], u = Number(metaUsr[cat]) > 0 ? Number(metaUsr[cat]) : null;
+    return '<div class="rd-sub">Meta por día de ' + esc(cat) + ' (m² por persona): <input type="number" min="0" step="0.5" class="r2-meta" data-cat="' + esc(cat) + '" value="' + (u != null ? u : (e != null ? e : '')) + '" style="width:80px;"> '
+      + (u != null ? '<b>definida por ti</b> · <button type="button" class="rd-hbtn r2-reset" data-cat="' + esc(cat) + '" style="width:auto;display:inline-block;">usar la estimada' + (e != null ? ' (' + fmt(e) + ')' : '') + '</button>' : (e != null ? '<b>estimada</b> con la mediana de las semanas completas anteriores' : 'sin datos suficientes para estimarla: escribe una'))
+      + '</div>';
+  }
+  function pinta(){
+    const v = $('r2V').value; let a, b, titulo, sub = '';
+    if(v === 'dia'){ a = b = $('r2D').value || hoy; const d = rdFecha(a); titulo = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][d.getUTCDay()] + ' ' + fT(a); if(!habil(a)) sub = 'Sábado, domingo o feriado: no cuenta en el rendimiento.'; }
+    else if(v === 'total'){ a = R2_INICIO_OBRA; b = hoy; titulo = 'Total desde el inicio de la obra'; }
+    else { const p = periodos(v).find(x => x.id === $('r2P').value); if(!p){ $('r2Out').innerHTML = '<div class="rd-vacio">Sin períodos.</div>'; return; } a = p.a; b = p.b; titulo = p.n; if(v === 'quincena' && !p.real) sub = 'Este cierre no está registrado en el panel: se estimó cada 14 días (viernes). Si fue de 3 semanas, falta registrarlo con "Cerrar quincena/mes".'; }
+    let h = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '');
+    let hubo = false;
+    CATS.forEach(cat => {
+      const filas = trabs.filter(t => hayEnCat(t, cat)).map(t => ({t, r: calcT(t, a, b, cat)})).filter(f => f.r.m2 > 0 || f.r.dias > 0 || f.r.excl > 0);
+      if(!filas.length) return; hubo = true;
+      const meta = metaDe(cat);
+      filas.forEach(f => { f.meta = meta && f.r.dias ? meta * f.r.dias : null; f.cump = f.meta ? f.r.m2 / f.meta * 100 : null; });
+      const tm = filas.reduce((s, f) => s + f.r.m2, 0), td = filas.reduce((s, f) => s + f.r.dias, 0), tt = filas.reduce((s, f) => s + f.r.ter, 0), te = filas.reduce((s, f) => s + f.r.excl, 0);
+      const tmeta = filas.reduce((s, f) => s + (f.meta || 0), 0), tcm = filas.reduce((s, f) => s + (f.meta ? f.r.m2 : 0), 0);
+      const max = Math.max(1, ...filas.map(f => f.r.m2));
+      const col = p => p == null ? 'var(--sub)' : p >= 100 ? 'var(--ok,#43a047)' : p >= 80 ? 'var(--warn,#c98a00)' : 'var(--bad,#c0392b)';
+      h += '<div class="rd-tit">' + esc(cat) + '</div>' + metaHtml(cat)
+        + '<div class="rd-res"><div><b>' + fmt(tm) + ' m²</b><span>del equipo (reparto 50/50)</span></div><div><b>' + fmt(td) + '</b><span>días trabajados</span></div><div><b>' + (td ? fmt(tm / td) + ' m²' : '—') + '</b><span>por día trabajado</span></div><div><b>' + (tmeta ? Math.round(tcm / tmeta * 100) + '%' : '—') + '</b><span>de la meta' + (tmeta ? '' : ' (sin meta)') + '</span></div></div>'
+        + '<div class="rd-sub">Terminado en el período (como se paga): <b>' + fmt(tt) + ' m²</b>' + (te > 0.05 ? ' · hecho en sábado, domingo o feriado, fuera del rendimiento: <b>' + fmt(te) + ' m²</b>' : '') + '</div>'
+        + '<div class="rd-tabla">' + filas.slice().sort((x, y) => (y.cump == null ? -1 : y.cump) - (x.cump == null ? -1 : x.cump) || y.r.m2 - x.r.m2).map((f, i) => {
+          const r = f.r;
+          return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. <b>' + esc(f.t.nombre) + ': ' + fmt(r.m2) + ' m²</b></span><small>' + fmt(r.dias) + (r.reg ? (r.dias === 1 ? ' día trabajado' : ' días trabajados') : (r.dias === 1 ? ' día con actividad (sin asistencia)' : ' días con actividad (sin asistencia)')) + (r.porDia != null ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + (f.meta ? ' · meta del período ' + fmt(f.meta) + ' m²' : '') + '</small>'
+            + (r.cruza > 0.05 ? '<small class="rd-mm">Incluye <b>' + fmt(r.cruza) + ' m²</b> de partidas que cruzan el corte (media cuenta en cada lado).</small>' : '')
+            + (r.F ? '<small class="rd-mm">' + r.F + (r.F === 1 ? ' falta' : ' faltas') + '</small>' : '') + '</div>'
+            + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / max * 100) + '%;background:' + col(f.cump) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> contados</span></div>'
+            + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
+            + '<div class="rd-d2" style="color:' + col(f.cump) + '">' + (f.cump == null ? '—' : Math.round(f.cump) + '%') + '<small>de la meta</small></div></div></div>';
+        }).join('') + '</div>';
+    });
+    if(!hubo) h += '<div class="rd-vacio">Sin datos en este período.</div>';
+    h += '<details class="rd-nota"><summary>Cómo se calcula</summary><b>Reparto 50/50.</b> Una partida que empieza y termina el mismo día cuenta entera ese día. Una que dura más días cuenta la mitad de sus m² el día que empieza y la otra mitad el día que termina; si cruza el corte, cada mitad cae en su período. Una partida aún en curso ya cuenta su primera mitad. <b>Días trabajados:</b> los de la asistencia (presente = 1, se fue antes = la fracción trabajada). <b>No cuentan</b> sábados, domingos ni feriados: ni sus m² ni sus días, y nadie queda con falta. <b>Meta del período</b> = meta por día × días trabajados; el % es m² contados ÷ meta. <b>Quincena:</b> de sábado a viernes según los cierres registrados en el panel; el día del cierre pertenece a la quincena que cierra. El "terminado en el período" es lo que se paga (cuenta entero al terminar) y no se usa para el %.</details>';
+    $('r2Out').innerHTML = h;
+  }
+  raiz.addEventListener('change', e => {
+    const t = e.target;
+    if(t.id === 'r2V'){ llenar(); pinta(); }
+    else if(t.id === 'r2D' || t.id === 'r2P') pinta();
+    else if(t.classList && t.classList.contains('r2-meta')){
+      const n = parseFloat(String(t.value).replace(',', '.')); metaUsr[t.getAttribute('data-cat')] = n > 0 && n < 1000 ? Math.round(n * 10) / 10 : 0;
+      try{ localStorage.setItem('rend2Meta', JSON.stringify(metaUsr)); }catch(err){} pinta();
+    }
+  });
+  raiz.addEventListener('click', e => {
+    const b = e.target.closest('.r2-reset'); if(!b) return;
+    delete metaUsr[b.getAttribute('data-cat')]; try{ localStorage.setItem('rend2Meta', JSON.stringify(metaUsr)); }catch(err){} pinta();
+  });
+  llenar(); pinta();
+}
+// datos de ejemplo para la copia de prueba (parten de los de rendDemo)
+function rendDemo2(){
+  const b = rendDemo(), partidas = [];
+  b.trabajadores.forEach(t => t.dias.forEach(x => {
+    if(!(x.m2 > 0)) return;
+    const w = rdFecha(x.d).getUTCDay(), largo = x.t >= 2 && w !== 6;
+    const ini = largo ? rdSuma(x.d, w === 1 ? -3 : -1) : x.d;
+    partidas.push({w: t.nombre, cat: x.cat, m2: Math.round(x.m2 * (largo ? 1.8 : 1) * 10) / 10, ini, fin: x.d});
+  }));
+  let v = rdHoy(); while(rdFecha(v).getUTCDay() !== 5 || v > rdHoy()) v = rdSuma(v, -1);
+  const cierres = []; for(let k = 5; k >= 0; k--) cierres.push(rdSuma(v, -14 * k - (k === 2 ? 7 : 0)));
+  return Object.assign(b, {partidas, cierres, feriados: R2_FERIADOS});
+}
 function rendDemo(){
   const nombres = ['Rafael', 'Raymond', 'Luis', 'Pedro', 'Marcos', 'Iván'];
   const factor = [1.25, 1.1, 1, 0.85, 0.6, 0.35];
@@ -722,6 +891,12 @@ async function vistaRendimiento(){
   if(!j || !j.ok){ $('rdCuerpo').textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.'; return; }
   renderRendimiento($('rdCuerpo'), j, esc);
 }
+async function vistaRendimiento2(){
+  main.innerHTML = '<h2>Rendimiento 2</h2><p class="nota">Prueba del rendimiento real: reparte por la mitad las partidas que cruzan el corte, mide por quincena (con los cierres del panel) y compara con una meta por día. No cuenta sábados ni feriados.</p><div class="tarjeta" id="rdCuerpo">Cargando…</div>';
+  const j = await api('rendimiento2Datos');
+  if(!j || !j.ok){ $('rdCuerpo').textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 103 o más nueva.'; return; }
+  renderRendimiento2($('rdCuerpo'), j, esc);
+}
 function vistaVentanas(){
   main.innerHTML = '<h2>Ventanas</h2><p class="nota">Aquí se decidirá qué ventanas y botones puede ver y abrir cada persona dentro de cada página.</p><div class="proximo">Próximamente. Falta definir la lista de ventanas de cada página que se pueden encender o apagar.</div>';
 }
@@ -788,7 +963,7 @@ function vistaGenerador(){
 }
 async function ir(t){
   tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'visual') vistaVisual(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'generador') vistaGenerador(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
+  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'visual') vistaVisual(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'rendimiento2') await vistaRendimiento2(); else if(t === 'generador') vistaGenerador(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
 }
 $('lado').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if(b) ir(b.dataset.t); });
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
@@ -826,7 +1001,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.36';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.37';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}</script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.36 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.37 · 05-11-2026 ==== -->
