@@ -2097,7 +2097,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.56';
+const APP_VERSION = '0.73.58';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5519,6 +5519,7 @@ async function llamarDb(accion, extra){
 function cerrarDin(ov){
   if(!ov.isConnected || ov.classList.contains('ovCierra')) return;
   ov.classList.add('ovCierra');
+  syncScrollLock();
   setTimeout(() => ov.remove(), 200);
 }
 function autoAlto(caja, cont){
@@ -5557,7 +5558,6 @@ async function abrirPermisosSecciones(){
   document.body.appendChild(ov);
   autoAlto(ov.firstElementChild, ov.querySelector('#secCuerpo'));
   const cerrar = () => cerrarDin(ov);
-  ov.addEventListener('click', e => { if(e.target === ov) cerrar(); });
   ov.querySelector('#secCerrar').addEventListener('click', cerrar);
   let usuarios = null, demo = !DB_URL;
   if(demo){
@@ -5628,7 +5628,7 @@ async function abrirAdministracion(){
   document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#admCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
-  ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'admCerrar') cerrarDin(ov); });
+  ov.addEventListener('click', e => { if(e.target.id === 'admCerrar') cerrarDin(ov); });
   let datos;
   if(demo){ try{ datos = JSON.parse(localStorage.getItem('pruebaAdmin')); }catch(e){} if(!datos) datos = JSON.parse(JSON.stringify(ADM_DEMO)); }
   else {
@@ -5789,7 +5789,7 @@ function renderRendimiento2(raiz, datos, esc){
   function periodos(vista){
     const L = [];
     if(vista === 'semana'){
-      for(let l = rdLunes(R2_INICIO_OBRA); l <= hoy; l = rdSuma(l, 7)) L.push({id: l, a: l, b: rdSuma(l, 6), n: 'Semana ' + (L.length + 1) + ' · ' + rg(l, rdSuma(l, 6))});
+      for(let l = rdLunes(R2_INICIO_OBRA); l <= hoy; l = rdSuma(l, 7)) L.push({id: l, a: l, b: rdSuma(l, 6), n: 'Semana ' + (L.length + 1) + ' · ' + rg(l, rdSuma(l, 4))});
     } else if(vista === 'mes'){
       let a = new Date(R2_INICIO_OBRA.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z');
       while(a <= z){ const b = new Date(Date.UTC(a.getUTCFullYear(), a.getUTCMonth() + 1, 0)); L.push({id: rdIso(a), a: rdIso(a), b: rdIso(b), n: RD_MES[a.getUTCMonth()] + ' ' + a.getUTCFullYear()}); a.setUTCMonth(a.getUTCMonth() + 1); }
@@ -6266,7 +6266,7 @@ async function abrirRendimiento(){
   ov.className = 'ovDin';
   document.body.appendChild(ov);
   autoAlto(ov.firstElementChild, ov.querySelector('#rdCuerpo'));
-  ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'rdCerrar') cerrarDin(ov); });
+  ov.addEventListener('click', e => { if(e.target.id === 'rdCerrar') cerrarDin(ov); });
   const cuerpo = ov.querySelector('#rdCuerpo'), cache = {};
   async function ver(n){
     ov.querySelector('#rdT1').classList.toggle('primary', n === 1); ov.querySelector('#rdT2').classList.toggle('primary', n === 2);
@@ -6296,7 +6296,7 @@ async function abrirAlertas(){
   ov.className = 'ovDin';
   ov.style.overscrollBehavior = 'contain'; ov.style.touchAction = 'pan-y';
   document.body.appendChild(ov);
-  ov.addEventListener('click', e => { if(e.target === ov || e.target.id === 'alCerrar') cerrarDin(ov); });
+  ov.addEventListener('click', e => { if(e.target.id === 'alCerrar') cerrarDin(ov); });
   const cuerpo = ov.querySelector('#alCuerpo');
   if(demo){ cuerpo.textContent = 'En la copia de prueba no hay servidor, así que no hay alertas para mostrar.'; return; }
   const j = await llamarDb('alertasListar');
@@ -6466,7 +6466,6 @@ async function abrirAsistencia(){
     };
   }
   asUI = avisarGuardado;
-  ov.addEventListener('click', e => { if(e.target === ov && !cerrando) document.getElementById('asCuerpo') && cuerpo.querySelector('#asGuardar') && cuerpo.querySelector('#asGuardar').click(); });
   ir(fecha);
 }
 document.getElementById('asistBtn').addEventListener('click', abrirAsistencia);
@@ -8565,7 +8564,7 @@ window.addEventListener('scroll', updateFloatingSaveBtn);
 
 let scrollLocked = false, scrollLockY = 0;
 function syncScrollLock(){
-  const anyOpen = document.querySelector('.overlay.show') !== null;
+  const anyOpen = document.querySelector('.overlay.show, .ovDin:not(.ovCierra)') !== null;
   if(anyOpen && !scrollLocked){
     scrollLockY = window.scrollY;
     document.body.style.position = 'fixed';
@@ -8583,6 +8582,8 @@ function syncScrollLock(){
   }
 }
 const overlayObserver = new MutationObserver(syncScrollLock);
+// las ventanas creadas por código (ovDin) también bloquean el scroll de la página de atrás
+new MutationObserver(syncScrollLock).observe(document.body, {childList: true});
 document.querySelectorAll('.overlay').forEach(el => overlayObserver.observe(el, {attributes:true, attributeFilter:['class']}));
 
 let resizeTimer = null;
@@ -8782,4 +8783,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.56 · 05-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.58 · 05-11-2026 ==== -->
