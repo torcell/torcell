@@ -236,6 +236,33 @@ main h2{margin:0 0 4px;font-size:17px;}
 
 </style>
 <script>
+// ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
+(() => {
+  const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let foto = new Map();
+  const tomar = c => { foto = new Map(); [...c.children].forEach(h => foto.set(h, h.getBoundingClientRect().top)); };
+  const vigilar = c => {
+    if (c.__sube) return; c.__sube = 1; tomar(c);
+    new MutationObserver(ms => {
+      const quitado = ms.some(m => m.removedNodes.length);
+      if (quitado && !reducido && c.animate) {
+        [...c.children].forEach(h => {
+          const antes = foto.get(h); if (antes == null) return;
+          const d = antes - h.getBoundingClientRect().top;
+          if (Math.abs(d) > 1) h.animate([{ translate: '0 ' + d + 'px' }, { translate: '0 0' }], { duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)' });
+        });
+      }
+      tomar(c);
+    }).observe(c, { childList: true });
+    // al empezar a cerrarse uno, su lugar sigue ocupado: se guarda la posición de ese momento
+    new MutationObserver(() => tomar(c)).observe(c, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  };
+  const buscar = () => { const c = document.querySelector('.avls'); if (c) vigilar(c); };
+  new MutationObserver(buscar).observe(document.documentElement, { childList: true, subtree: true });
+  buscar();
+})();
+</script>
+<script>
 // ===== Aviso lateral · v1 =====
 // uso: avisoLateral('Guardado', 'exito') · tipos: info / exito / alerta / error ('ok' = exito, sin tipo = lo deduce del texto)
 // el texto va con textContent, no se ejecuta nada que venga escrito

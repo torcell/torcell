@@ -285,7 +285,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 /* Modo claro / oscuro / automático: fondo liso igual al panel de cerámica (solo el tema "obra" y Halloween conservan su fondo propio) */
 :root:not([data-tema="obra"]):not(.halloween), :root:not([data-tema="obra"]):not(.halloween) body{background:var(--bg);}
 :root:not([data-tema="obra"]):not(.halloween) body::before{display:none;}
-:root:not([data-tema="obra"]):not(.halloween) main{background:transparent;border-color:transparent;box-shadow:none;}
+:root:not([data-tema="obra"]):not(.halloween) main{background:color-mix(in srgb,var(--panel) 55%,var(--bg));border:1px solid var(--border);border-top:2px solid var(--text);box-shadow:none;}
+:root:not([data-tema="obra"]):not(.halloween) .toolbar{border-top:2px solid var(--text);}
 :root:not([data-tema="obra"]):not(.halloween) .titles h1{color:var(--text);}
 :root:not([data-tema="obra"]):not(.halloween) .titles p{color:var(--sub);}
 :root:not([data-tema="obra"]):not(.halloween) .brand-logo.lt{display:block !important;}
@@ -714,7 +715,36 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .pan.ok{background:conic-gradient(var(--ok) 100%,var(--ok) 0);}
 @media (max-width:520px){.pan{width:30px;height:30px;}.pan::before{inset:4px;}.pan span{font-size:8px;}}
 
+/* etiqueta Nuevo */
+.tnuevo{display:inline-block;font-style:normal;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1;padding:3px 6px;margin-left:7px;background:var(--accent);color:#fff;border-radius:999px;vertical-align:middle;pointer-events:none;}
+.on > .tnuevo,.on .tnuevo{background:#fff;color:#1d4f86;}
+
 #velProt [hidden]{display:none !important;}
+
+/* ===== Historial de cambios: queda fijo a la izquierda del cuadro principal ===== */
+.hist{display:none;}
+@media (min-width:900px){
+  body.hist-on:not(.hist-chico) .hist{display:flex;position:fixed;top:150px;left:var(--h-izq,8px);width:var(--h-w,220px);max-height:calc(100vh - 170px);z-index:30;flex-direction:column;background:var(--panel);border:1px solid var(--strong);box-shadow:0 6px 20px rgba(0,0,0,.25);animation:histEntra .26s ease both;}
+  .hist .hcab{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 8px;border-bottom:1px solid var(--border);}
+  .hist .hcab b{font-size:13px;display:flex;align-items:center;gap:5px;min-width:0;}
+  .hist .hcab b span{font-size:11px;color:var(--sub);font-weight:600;}
+  .hist .hatras{width:30px;height:30px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border:1px solid var(--strong);background:var(--soft);color:var(--text);font:inherit;font-size:16px;line-height:1;padding:0;cursor:pointer;}
+  .hist .hatras:hover:not(:disabled){border-color:var(--accent);}
+  .hist .hatras:active:not(:disabled){transform:scale(.94);}
+  .hist .hatras:disabled{opacity:.35;cursor:default;}
+  #hLista{overflow:auto;padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;}
+  .hit{border-left:3px solid var(--warn,#f0a23a);background:var(--soft);padding:7px 8px;font-size:12px;line-height:1.3;will-change:transform,opacity;backface-visibility:hidden;}
+  .hit.rev{border-left-color:var(--ok,#2e8b3a);}
+  .hit.rev > small,.hit.rev > div{opacity:.7;}
+  .hit small{display:block;color:var(--sub);font-size:11px;margin-bottom:2px;}
+  .hit em{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--ok,#2e8b3a);font-weight:700;}
+  .hit .hrev{margin-top:6px;width:100%;border:1px solid var(--strong);background:var(--panel);color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:6px 8px;min-height:30px;cursor:pointer;}
+  .hit .hrev:hover:not(:disabled){border-color:var(--accent);background:var(--soft);}
+  .hit .hrev:active:not(:disabled){transform:scale(.97);}
+  .hvacio{font-size:12px;color:var(--sub);padding:4px 0;}
+}
+@keyframes histEntra{from{opacity:0;transform:translateX(-14px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){.hist{animation:none !important;}}
 
 /* ===== cuadro Corregido (queda pegado abajo del lateral, siempre en el mismo lugar) ===== */
 .mcor{display:none;position:sticky;bottom:0;z-index:2;margin-top:10px;border:1px solid var(--strong);border-left:4px solid var(--c-ok,#2e8b3a);background:var(--panel);padding:12px;flex-direction:column;gap:8px;box-shadow:0 -6px 14px rgba(0,0,0,.14);}
@@ -729,6 +759,33 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .mcor .btn{width:100%;}
 #vel.lect .mcor{display:none !important;}
 </style>
+<script>
+// ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
+(() => {
+  const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let foto = new Map();
+  const tomar = c => { foto = new Map(); [...c.children].forEach(h => foto.set(h, h.getBoundingClientRect().top)); };
+  const vigilar = c => {
+    if (c.__sube) return; c.__sube = 1; tomar(c);
+    new MutationObserver(ms => {
+      const quitado = ms.some(m => m.removedNodes.length);
+      if (quitado && !reducido && c.animate) {
+        [...c.children].forEach(h => {
+          const antes = foto.get(h); if (antes == null) return;
+          const d = antes - h.getBoundingClientRect().top;
+          if (Math.abs(d) > 1) h.animate([{ translate: '0 ' + d + 'px' }, { translate: '0 0' }], { duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)' });
+        });
+      }
+      tomar(c);
+    }).observe(c, { childList: true });
+    // al empezar a cerrarse uno, su lugar sigue ocupado: se guarda la posición de ese momento
+    new MutationObserver(() => tomar(c)).observe(c, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  };
+  const buscar = () => { const c = document.querySelector('.avls'); if (c) vigilar(c); };
+  new MutationObserver(buscar).observe(document.documentElement, { childList: true, subtree: true });
+  buscar();
+})();
+</script>
 <script>
 // ===== Aviso lateral · v1 =====
 // uso: avisoLateral('Guardado', 'exito') · tipos: info / exito / alerta / error ('ok' = exito, sin tipo = lo deduce del texto)
@@ -825,6 +882,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
 <script src="carga.js?v=7"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
+<aside class="hist" id="hist" aria-label="Historial de cambios"><div class="hcab"><b>Historial <span id="hCuenta"></span><i class="tnuevo" data-desde="2026-11-08">Nuevo</i></b><button type="button" class="hatras" id="hAtras" title="Volver atrás: deshace el último Revisado" aria-label="Volver atrás" disabled>↶</button></div><div id="hLista"></div></aside>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
 <div id="esqueletos" aria-hidden="true"><div class="esqlado i"></div><div class="esqlado d"></div></div>
@@ -854,7 +912,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 <main>
   <div class="pestanas" id="vtabs" role="tablist" aria-label="Secciones de Calidad">
     <button type="button" class="on" data-v="dptos" aria-pressed="true"><span class="ptxt">Departamentos</span></button>
-    <button type="button" data-v="prot" aria-pressed="false"><span class="ptxt">Protocolos</span></button>
+    <button type="button" data-v="prot" aria-pressed="false"><span class="ptxt">Protocolos</span><i class="tnuevo" data-desde="2026-11-08">Nuevo</i></button>
   </div>
   <section id="vistaDptos">
 
@@ -1144,7 +1202,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
         <div class="obsfotos" id="mObsFotos"></div>
         <button class="btn" id="mElegir" type="button">＋ Elegir observaciones</button>
         <div class="obslista" id="mLista" hidden></div>
-        <div class="mcor" id="mCor"><h3>Lo que corregiste</h3><ul id="mCorLista"></ul><small id="mCorNota"></small><button class="btn primary" id="mCorConf" type="button">Confirmar a jefa de calidad</button></div>
+        <div class="mcor" id="mCor"><h3>Lo que corregiste<i class="tnuevo" data-desde="2026-11-08">Nuevo</i></h3><ul id="mCorLista"></ul><small id="mCorNota"></small><button class="btn primary" id="mCorConf" type="button">Confirmar a jefa de calidad</button></div>
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
@@ -1168,7 +1226,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.1';
+const CAL_VERSION = '1.38.8';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2308,6 +2366,7 @@ async function cargar(inicial){
       cargando = false;
       pintar();
       avisosCorregido(j.avisos);
+      if(window.histCargar) histCargar(j.hist); else window.__histPend = j.hist;
       if(j.ajustes && typeof j.ajustes === 'object'){ const ok = j.ajustes.halloween === true; if(ok !== halloweenOk){ halloweenOk = ok; guardarLocal('calidadHalloweenOk', ok ? '1' : null); if(ok) halloween = leerLocal('calidadHalloween') === '1'; aplicarHalloween(); } }
       infoDeCarga(j);
       $('sub').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
@@ -2336,7 +2395,7 @@ function avisosCorregido(lista){
   if(!Array.isArray(lista)) return;
   lista.slice(0, 8).forEach(a => {
     if(!a || typeof a.id !== 'string' || !/^[\w-]{1,40}$/.test(a.id) || typeof a.texto !== 'string') return;
-    avisoFijo('cor-' + a.id, a.texto.slice(0, 400), async () => { const r = await llamar('calidadAvisoVisto', {ids: [a.id]}); return !!(r && r.ok); });
+    avisoFijo('cor-' + a.id, a.texto.slice(0, 400), async () => { const r = await llamar('calidadAvisoVisto', {ids: [a.id]}); if(r && r.ok && window.histAgregar) histAgregar(a); return !!(r && r.ok); });
   });
 }
 
@@ -2639,6 +2698,15 @@ document.addEventListener('visibilitychange', () => {
 </script>
 <script>
 // ===== Protocolos: torre de checklists por sección, con revisiones R1, R2, R3, RF =====
+// ===== etiqueta "Nuevo": dura 7 días desde la fecha (data-desde, AAAA-MM-DD); pasado ese tiempo se saca sola =====
+// para marcar algo nuevo: <i class="tnuevo" data-desde="2026-11-08">Nuevo</i> y llamar a limpiarNuevos() si se pintó después
+window.limpiarNuevos = function(raiz){
+  (raiz || document).querySelectorAll('.tnuevo[data-desde]').forEach(e => {
+    const f = String(e.dataset.desde).split('-').map(Number);
+    const fin = new Date(f[0], (f[1] || 1) - 1, (f[2] || 1) + 7).getTime();
+    if(!f[0] || Date.now() >= fin) e.remove();
+  });
+};
 (function(){
   const $p = id => document.getElementById(id);
   // ---------- secciones y puntos de partida (valen para todos los departamentos) ----------
@@ -2694,7 +2762,8 @@ document.addEventListener('visibilitychange', () => {
   }
   function pintarFiltros(cal){
     const F = [['todos','Todos'], ...COD.map(c => [c, c]), ['100','100%'], ['atras','Más atrasados'], ['cero','Sin avance (0%)']];
-    $p('pFil').innerHTML = F.map(([k, n]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '" aria-pressed="' + (k === filtro) + '">' + n + (k === 'todos' ? '' : '<small>' + (k === 'atras' ? cal.rank.size : cal.filas.filter(x => cal.cumple(x, k)).length) + '</small>') + '</button>').join('');
+    $p('pFil').innerHTML = F.map(([k, n]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '" aria-pressed="' + (k === filtro) + '">' + n + (k === 'todos' ? '' : '<small>' + (k === 'atras' ? cal.rank.size : cal.filas.filter(x => cal.cumple(x, k)).length) + '</small>') + (k === 'atras' ? '<i class="tnuevo" data-desde="2026-11-08">Nuevo</i>' : '') + '</button>').join('');
+    limpiarNuevos($p('pFil'));
   }
   // % del piso (puntos hechos / puntos totales de sus departamentos) en un anillo a la derecha
   function anilloPiso(P, cal){
@@ -2891,6 +2960,103 @@ document.addEventListener('visibilitychange', () => {
     }
   }catch(e){}
 })();
+
+limpiarNuevos();
+</script>
+<script>
+// ===== Historial de cambios: avisos de Corregido ya confirmados con "Entendido"; cada uno se marca "Revisado" =====
+(function(){
+  const $h = id => document.getElementById(id);
+  let lista = [];
+  const pila = [];   // ids marcados como Revisado en esta sesión, para ir volviendo atrás
+  function ancho(){ return window.matchMedia('(min-width:900px)').matches; }
+  function colocar(){
+    const m = document.querySelector('main'); if(!m) return;
+    const izq = m.getBoundingClientRect().left;
+    const w = Math.min(220, Math.floor(izq - 20));
+    const root = document.documentElement.style;
+    root.setProperty('--h-w', w + 'px');
+    root.setProperty('--h-izq', Math.max(8, Math.floor(izq - 12 - w)) + 'px');
+    document.body.classList.toggle('hist-chico', w < 150);
+  }
+  const nodos = new Map();
+  const reducir = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // del más viejo al más nuevo; los revisados bajan al final (unos segundos después de marcarlos), también del más viejo al más nuevo
+  function orden(){ return lista.slice().sort((a, b) => ((a.rev && !a.espera) ? 1 : 0) - ((b.rev && !b.espera) ? 1 : 0) || a.ts - b.ts); }
+  // solo "cargo - nombre lo dejó como corregido" (sin el detalle de observaciones ni fotos); el lugar va junto a la fecha
+  function partes(t){
+    const m = String(t).match(/^(.*?): (.+?) lo dejó como Corregido\./);
+    return m ? {lugar: m[1], quien: m[2]} : {lugar: '', quien: ''};
+  }
+  function cuerpo(x){ const p = partes(x.texto); return '<small>' + esc(fechaHora(x.ts)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small><div>' + (p.quien ? esc(p.quien) + ' lo dejó como corregido.' : esc(String(x.texto).split(' Antes:')[0])) + '</div>' + (x.rev ? '<em>✓ Revisado ' + esc(fechaHora(x.rev)) + '</em>' : (soloLectura() ? '' : '<button type="button" class="hrev" data-id="' + esc(x.id) + '">Revisado</button>')); }
+  function pintar(){
+    const box = $h('hLista'); if(!box) return;
+    const antes = new Map(); nodos.forEach((n, id) => antes.set(id, n.getBoundingClientRect().top));
+    const ord = orden(), nuevos = [];
+    const vacio = box.querySelector('.hvacio');
+    if(!ord.length){ if(!vacio) box.innerHTML = '<div class="hvacio">Todavía no hay cambios confirmados.</div>'; nodos.clear(); }
+    else if(vacio) vacio.remove();
+    ord.forEach((x, i) => {
+      let n = nodos.get(x.id);
+      if(!n){ n = document.createElement('div'); n.dataset.id = x.id; nodos.set(x.id, n); nuevos.push(n); }
+      n.className = 'hit' + (x.rev ? ' rev' : '');
+      n.innerHTML = cuerpo(x);
+      if(box.children[i] !== n) box.insertBefore(n, box.children[i] || null);
+    });
+    if(!reducir()){
+      // los que cambian de lugar suben o bajan suave; los nuevos entran de derecha a izquierda
+      nodos.forEach((n, id) => {
+        if(nuevos.includes(n) || !antes.has(id)) return;
+        const d = antes.get(id) - n.getBoundingClientRect().top;
+        if(Math.abs(d) > 1) n.animate([{transform: 'translateY(' + d + 'px)'}, {transform: 'none'}], {duration: 300, easing: 'cubic-bezier(.2,.7,.2,1)'});
+      });
+      nuevos.forEach((n, k) => n.animate([{opacity: 0, transform: 'translateX(56px)'}, {opacity: 1, transform: 'none'}], {duration: 240, delay: Math.min(k, 6) * 45, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards'}));
+    }
+    const pend = lista.filter(x => !x.rev).length;
+    $h('hCuenta').textContent = pend ? String(pend) : '';
+    $h('hAtras').disabled = !pila.length;
+  }
+  function estado(){
+    const on = typeof cargado !== 'undefined' && cargado && ancho();
+    document.body.classList.toggle('hist-on', on);
+    if(on) colocar();
+  }
+  window.histCargar = function(l){
+    lista = Array.isArray(l) ? l.filter(x => x && typeof x.id === 'string' && typeof x.texto === 'string').map(x => ({id: x.id, ts: Number(x.ts) || 0, texto: x.texto.slice(0, 400), rev: Number(x.rev) || 0})) : [];
+    pintar(); estado();
+  };
+  window.histAgregar = function(a){
+    if(!a || typeof a.id !== 'string' || lista.some(x => x.id === a.id)) return;
+    lista.unshift({id: a.id, ts: Number(a.ts) || Date.now(), texto: String(a.texto || '').slice(0, 400), rev: 0});
+    pintar(); estado();
+  };
+  async function marcar(id, valor){
+    const x = lista.find(y => y.id === id); if(!x) return false;
+    const antes = x.rev;
+    clearTimeout(x.t); x.rev = valor ? Date.now() : 0; x.espera = !!valor; pintar();
+    if(valor) x.t = setTimeout(() => { x.espera = false; pintar(); }, 3000);
+    let ok = false;
+    try{ const r = await llamar('calidadAvisoRevisado', {id, revisado: !!valor}); ok = !!(r && r.ok); }catch(e){ ok = false; }
+    if(!ok){ clearTimeout(x.t); x.rev = antes; x.espera = false; pintar(); aviso('No se pudo guardar. Intenta de nuevo.'); }
+    return ok;
+  }
+  $h('hLista').addEventListener('click', async e => {
+    const b = e.target.closest('.hrev'); if(!b) return;
+    b.disabled = true;
+    const id = b.dataset.id;
+    if(await marcar(id, true)){ pila.push(id); pintar(); }
+  });
+  $h('hAtras').addEventListener('click', async () => {
+    if(!pila.length) return;
+    const id = pila[pila.length - 1];
+    $h('hAtras').disabled = true;
+    if(await marcar(id, false)) pila.pop();
+    pintar();
+  });
+  window.addEventListener('resize', estado);
+  setInterval(estado, 1500);
+  if(window.__histPend !== undefined) window.histCargar(window.__histPend);
+})();
 </script>
 <script>
 /* ===== aviso si esta página corre en otro sitio ===== */
@@ -2923,4 +3089,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.1 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.8 · 08-11-2026 ==== -->
