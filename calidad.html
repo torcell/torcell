@@ -534,6 +534,28 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .avl, .avl > * { animation-duration: .01s !important; }
 }
 
+
+/* ===== PC: fotos a la izquierda y observaciones a la derecha, salen por detrás de la ventana ===== */
+.ven{position:relative;width:100%;max-width:400px;--lado:clamp(220px,calc((100vw - 440px)/2),310px);}
+.ven > .modal{max-width:none;}
+.lado{display:none;}
+@media (min-width:900px){
+  .ven > .modal{min-height:min(520px,88vh);}
+  .lado{display:flex;position:absolute;top:0;bottom:0;width:var(--lado);z-index:1;background:var(--panel);border:1px solid var(--strong);flex-direction:column;visibility:hidden;opacity:0;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    transition:transform .32s cubic-bezier(.2,.7,.2,1),opacity .22s ease,visibility 0s linear .32s;}
+  .lado.izq{right:100%;margin-right:-1px;transform:translateX(calc(100% - 6px));}
+  .lado.der{left:100%;margin-left:-1px;transform:translateX(calc(-100% + 6px));}
+  .ven.abre .lado{visibility:visible;opacity:1;transform:none;transition:transform .32s cubic-bezier(.2,.7,.2,1),opacity .22s ease,visibility 0s;}
+  .ven.abre .lado.der{transition-delay:.04s;}
+  .lado:has(#mFotos[hidden]){display:none;}
+  .lado .cuerpo{padding:16px;overflow:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;}
+  .lado .fotos{border-top:0;padding-top:0;}
+  .lado .fgrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .lado .obswrap{margin-top:0;}
+  .lado .obsin{overflow:visible;}
+  .lado .obslista{max-height:none;}
+  #mObsToggle,#mElegir,.lado .obsfotos{display:none !important;}
+}
 </style>
 <script>
 // ===== Aviso lateral · v1 =====
@@ -764,6 +786,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <div id="vel" class="vel">
+  <div class="ven" id="ven">
+  <div class="lado izq" id="ladoFotos"><div class="cuerpo" id="cuerpoFotos"></div></div>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTit">
     <div class="mhead"><h2 id="mTit"></h2><span class="mquien" id="mQuien"></span></div>
     <div class="sub" id="mSub"></div>
@@ -801,9 +825,11 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <button class="btn primary" id="mGuardar" type="button">Guardar y cerrar</button>
     </div>
   </div>
+  <div class="lado der" id="ladoObs"><div class="cuerpo" id="cuerpoObs"></div></div>
+  </div>
 </div>
 <script>
-const CAL_VERSION = '1.37.8';
+const CAL_VERSION = '1.37.9';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1089,13 +1115,37 @@ function fechaHora(ts){
   return new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
 }
 
+// ===== PC: observaciones y fotos salen por detrás de la ventana (en celular siguen dentro) =====
+const mqPC = window.matchMedia('(min-width:900px)');
+const esPC = () => mqPC.matches;
+function ubicarPaneles(){
+  const mod = document.querySelector('#vel .modal');
+  if(esPC()){
+    $('cuerpoFotos').appendChild($('mFotos'));
+    $('cuerpoObs').appendChild($('mObs'));
+  }else{
+    mod.insertBefore($('mObs'), $('mErr'));
+    mod.insertBefore($('mFotos'), $('mErr'));
+  }
+}
+if(mqPC.addEventListener) mqPC.addEventListener('change', () => { ubicarPaneles(); if(actual) elegir(estadoSel); }); else mqPC.addListener(() => { ubicarPaneles(); if(actual) elegir(estadoSel); });
+ubicarPaneles();
+function paneles(e){
+  const ven = $('ven'), abrir = esPC() && conObs(e);
+  if(!abrir){ ven.classList.remove('abre'); return; }
+  // al abrir la ventana, los paneles salen con animación (un frame después de mostrarla)
+  if(!$('vel').classList.contains('on')) requestAnimationFrame(() => requestAnimationFrame(() => { if(conObs(estadoSel) && esPC()) ven.classList.add('abre'); }));
+  else ven.classList.add('abre');
+}
+
 function elegir(e){
   estadoSel = e;
   document.querySelectorAll('#mSeg button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
-  const abre = conObs(e) && obsAbierto;
-  $('mObs').classList.toggle('on', abre);
+  const abre = conObs(e) && obsAbierto && !esPC();
+  $('mObs').classList.toggle('on', abre || esPC());
+  paneles(e);
   const mod = document.querySelector('#vel .modal'); if(mod) mod.classList.toggle('obs-on', abre);
-  $('mObsToggle').hidden = !conObs(e);
+  $('mObsToggle').hidden = !conObs(e) || esPC();
   $('mObsToggle').textContent = obsAbierto ? '− Ocultar observaciones' : '＋ Detallar observaciones';
   $('mLista').querySelectorAll('input').forEach(x => { x.tabIndex = conObs(e) ? 0 : -1; });
   $('mEditar').tabIndex = conObs(e) ? 0 : -1;
@@ -1138,8 +1188,9 @@ function pintarResumenObs(){
   $('mObsFotos').innerHTML = '<span>📷 Fotos: ' + n + '</span>' + (n ? '<small>Con fotos queda con observación. Cuando se arregle, marca Corregido.</small>' : '<small>Sube fotos abajo o elige las observaciones</small>');
   const marcadas = $('mLista').querySelectorAll('input[type=checkbox]:checked').length;
   $('mElegir').textContent = listaAbierta ? '− Ocultar observaciones' : (marcadas ? '＋ Elegir observaciones (' + marcadas + ' marcadas)' : '＋ Elegir observaciones');
-  $('mLista').hidden = !listaAbierta;
-  $('mEditar').hidden = !listaAbierta;
+  const listaVisible = listaAbierta || esPC();
+  $('mLista').hidden = !listaVisible;
+  $('mEditar').hidden = !listaVisible;
 }
 function pintarLista(sel, mantener){
   sel = Object.assign({}, sel); delete sel['Con fotos'];
@@ -1213,7 +1264,7 @@ function cerrarModal(){
   const v = $('vel');
   if(!v.classList.contains('on') || v.classList.contains('out')) return;
   v.classList.add('out');
-  setTimeout(() => { v.classList.remove('on', 'out'); document.body.classList.remove('bloq'); actual = null; }, 140);
+  setTimeout(() => { v.classList.remove('on', 'out'); $('ven').classList.remove('abre'); document.body.classList.remove('bloq'); actual = null; }, 140);
 }
 
 let enVuelo = 0;
@@ -2258,4 +2309,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.37.8 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.37.9 · 07-11-2026 ==== -->
