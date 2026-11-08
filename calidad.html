@@ -1231,7 +1231,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.11';
+const CAL_VERSION = '1.38.13';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2975,6 +2975,7 @@ limpiarNuevos();
   let lista = [];
   const local = new Map();   // id -> {rev, t}: lo que se marcó en este aparato; una recarga lenta del servidor no lo pisa
   const tim = new Map();
+  let ocupado = false;   // mientras vuelve atrás, el botón queda deshabilitado
   const pila = [];   // ids marcados como Revisado en esta sesión, para ir volviendo atrás
   function ancho(){ return window.matchMedia('(min-width:900px)').matches; }
   function colocar(){
@@ -2989,7 +2990,11 @@ limpiarNuevos();
   const nodos = new Map();
   const reducir = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // del más viejo al más nuevo; los revisados bajan al final (unos segundos después de marcarlos), también del más viejo al más nuevo
-  function orden(){ return lista.slice().sort((a, b) => ((a.rev && !a.espera) ? 1 : 0) - ((b.rev && !b.espera) ? 1 : 0) || a.ts - b.ts); }
+  function orden(){
+    const fin = x => !!(x.rev && !x.espera);
+    // pendientes: del aviso más viejo al más nuevo; revisados: del que se revisó antes al que se revisó último (el recién revisado queda al final)
+    return lista.slice().sort((a, b) => (fin(a) ? 1 : 0) - (fin(b) ? 1 : 0) || (fin(a) ? a.rev - b.rev || a.ts - b.ts : a.ts - b.ts));
+  }
   // solo "cargo - nombre lo dejó como corregido" (sin el detalle de observaciones ni fotos); el lugar va junto a la fecha
   function partes(t){
     const m = String(t).match(/^(.*?): (.+?) lo dejó como Corregido\./);
@@ -3003,6 +3008,7 @@ limpiarNuevos();
     const vacio = box.querySelector('.hvacio');
     if(!ord.length){ if(!vacio) box.innerHTML = '<div class="hvacio">Todavía no hay cambios confirmados.</div>'; nodos.clear(); }
     else if(vacio) vacio.remove();
+    nodos.forEach((n, id) => { if(!ord.some(x => x.id === id)){ n.remove(); nodos.delete(id); } });
     ord.forEach((x, i) => {
       let n = nodos.get(x.id);
       if(!n){ n = document.createElement('div'); n.dataset.id = x.id; nodos.set(x.id, n); nuevos.push(n); }
@@ -3021,7 +3027,7 @@ limpiarNuevos();
     }
     const pend = lista.filter(x => !x.rev).length;
     $h('hCuenta').textContent = pend ? String(pend) : '';
-    $h('hAtras').disabled = !pila.length;
+    $h('hAtras').disabled = !pila.length || ocupado;
   }
   function estado(){
     const on = typeof cargado !== 'undefined' && cargado && ancho();
@@ -3057,14 +3063,15 @@ limpiarNuevos();
     const b = e.target.closest('.hrev'); if(!b) return;
     b.disabled = true;
     const id = b.dataset.id;
-    if(await marcar(id, true)){ pila.push(id); pintar(); }
+    pila.push(id); pintar();   // el botón de volver atrás se habilita al instante, sin esperar al servidor
+    if(!(await marcar(id, true))){ const k = pila.lastIndexOf(id); if(k >= 0) pila.splice(k, 1); pintar(); }
   });
   $h('hAtras').addEventListener('click', async () => {
-    if(!pila.length) return;
-    const id = pila[pila.length - 1];
-    $h('hAtras').disabled = true;
-    if(await marcar(id, false)) pila.pop();
-    pintar();
+    if(!pila.length || ocupado) return;
+    const id = pila.pop();
+    ocupado = true; pintar();
+    if(!(await marcar(id, false))) pila.push(id);
+    ocupado = false; pintar();
   });
   window.addEventListener('resize', estado);
   setInterval(estado, 1500);
@@ -3102,4 +3109,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.11 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.13 · 08-11-2026 ==== -->
