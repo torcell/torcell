@@ -2132,7 +2132,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.59';
+const APP_VERSION = '0.73.60';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3836,8 +3836,17 @@ function pisoVerCompleto(piso){
 }
 /* Las flechas ▲▼ solo van en el último piso que se ve: en los de arriba, el vecino ya está a la vista y el salto se veía como un tirón. */
 function soloUltimoPisoFlechas(){
-  const b = document.querySelectorAll('#content .floor-block');
-  b.forEach((f, i) => f.querySelectorAll('.piso-nav').forEach(n => { n.style.display = i === b.length - 1 ? '' : 'none'; }));
+  const b = [...document.querySelectorAll('#content .floor-block')];
+  const num = f => parseInt(String(f.dataset.piso).match(/-?\d+/), 10);
+  const nums = b.map(num).filter(n => !isNaN(n));
+  const max = Math.max(...nums), min = Math.min(...nums);
+  // ▲ solo en el piso más alto que se ve (ahí se abre el de arriba) y ▼ solo en el más bajo
+  b.forEach(f => f.querySelectorAll('.piso-nav').forEach(n => {
+    const [su, ba] = n.querySelectorAll('.piso-flecha');
+    if(su) su.style.display = num(f) === max ? '' : 'none';
+    if(ba) ba.style.display = num(f) === min ? '' : 'none';
+    n.style.display = num(f) === max || num(f) === min ? '' : 'none';
+  }));
 }
 (function(){ const c = document.getElementById('content'); if(c) new MutationObserver(soloUltimoPisoFlechas).observe(c, {childList:true, subtree:true}); soloUltimoPisoFlechas(); })();
 
@@ -3863,10 +3872,22 @@ document.addEventListener('click', (e) => {
     try{ localStorage.setItem('progresoObraPiso', dest); }catch(err){}
     render();
     pisoVerCompleto(dest);
-  } else {                            // todos los pisos: se agrega el vecino si no estaba y se lleva la vista hasta él
+  } else {                            // todos los pisos: se agrega el vecino si no estaba; el que ya estaba se mueve y el nuevo se abre de arriba hacia abajo
+    const quieto = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const antes = new Map([...document.querySelectorAll('#content .floor-block')].map(f => [f.dataset.piso, f.getBoundingClientRect().top]));
     if(vistaPisos === 'mov') pisosExtra.add(dest);
     render();
-    pisoVerCompleto(dest);
+    const nuevo = [...document.querySelectorAll('#content .floor-block')].find(f => f.dataset.piso === dest);
+    if(nuevo && !quieto && nuevo.animate && !antes.has(dest)){
+      document.querySelectorAll('#content .floor-block').forEach(f => {
+        if(!antes.has(f.dataset.piso)) return;
+        const d = antes.get(f.dataset.piso) - f.getBoundingClientRect().top;
+        if(Math.abs(d) > 1) f.animate([{transform: 'translateY(' + d + 'px)'}, {transform: 'none'}], {duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)'});
+      });
+      nuevo.animate([{clipPath: 'inset(0 0 100% 0)', opacity: 0}, {clipPath: 'inset(0 0 0 0)', opacity: 1}], {duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)'});
+    }
+    const r = nuevo && nuevo.getBoundingClientRect();
+    if(!r || r.top < 56 || r.bottom > window.innerHeight) pisoVerCompleto(dest);
   }
 }, true);
 function passesFilters(cell){
@@ -8818,4 +8839,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.59 · 05-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.60 · 08-11-2026 ==== -->

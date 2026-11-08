@@ -57,6 +57,7 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .conectado{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;padding:9px 14px;min-height:38px;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);padding:14px;margin-bottom:14px;}
 .toolbar .grp{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 150px;}
+.toolbar .ftit{flex:1 0 100%;font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text);margin-bottom:-2px;}
 .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
 .toolbar select,.toolbar .btn{width:100%;min-width:0;min-height:40px;}
 .toolbar select{padding:7px 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:14px;}
@@ -736,6 +737,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .hit{border-left:3px solid var(--warn,#f0a23a);background:var(--soft);padding:7px 8px;font-size:12px;line-height:1.3;will-change:transform,opacity;backface-visibility:hidden;}
   .hit.rev{border-left-color:var(--ok,#2e8b3a);}
   .hit.rev > small,.hit.rev > div{opacity:.7;}
+  .hit{position:relative;}
+  .hit.esp::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--ok,#2e8b3a);transform-origin:left;animation:histEsp 2s linear forwards;}
+  @keyframes histEsp{from{transform:scaleX(1);}to{transform:scaleX(0);}}
   .hit small{display:block;color:var(--sub);font-size:11px;margin-bottom:2px;}
   .hit em{display:flex;align-items:center;margin-top:6px;min-height:32px;font-style:normal;font-size:11px;color:var(--ok,#2e8b3a);font-weight:700;}
   .hit .hrev{margin-top:6px;width:100%;border:1px solid var(--strong);background:var(--panel);color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:6px 8px;min-height:32px;box-sizing:border-box;cursor:pointer;}
@@ -924,6 +928,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="res n"><b id="nNo">0</b><span>Sin terminar</span></div>
   </div>
   <div class="toolbar">
+    <div class="ftit">Filtros</div>
     <div class="grp"><label for="filtro">Piso</label><select id="filtro" aria-label="Filtrar por piso"></select></div>
     <div class="grp"><label for="filtroVista">Mostrar</label><select id="filtroVista" aria-label="Pisos a mostrar">
       <option value="mov">Pisos con avance</option>
@@ -1226,7 +1231,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.10';
+const CAL_VERSION = '1.38.11';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2968,6 +2973,8 @@ limpiarNuevos();
 (function(){
   const $h = id => document.getElementById(id);
   let lista = [];
+  const local = new Map();   // id -> {rev, t}: lo que se marcó en este aparato; una recarga lenta del servidor no lo pisa
+  const tim = new Map();
   const pila = [];   // ids marcados como Revisado en esta sesión, para ir volviendo atrás
   function ancho(){ return window.matchMedia('(min-width:900px)').matches; }
   function colocar(){
@@ -2999,7 +3006,7 @@ limpiarNuevos();
     ord.forEach((x, i) => {
       let n = nodos.get(x.id);
       if(!n){ n = document.createElement('div'); n.dataset.id = x.id; nodos.set(x.id, n); nuevos.push(n); }
-      n.className = 'hit' + (x.rev ? ' rev' : '');
+      n.className = 'hit' + (x.rev ? ' rev' : '') + (x.espera ? ' esp' : '');
       n.innerHTML = cuerpo(x);
       if(box.children[i] !== n) box.insertBefore(n, box.children[i] || null);
     });
@@ -3022,7 +3029,13 @@ limpiarNuevos();
     if(on) colocar();
   }
   window.histCargar = function(l){
-    lista = Array.isArray(l) ? l.filter(x => x && typeof x.id === 'string' && typeof x.texto === 'string').map(x => ({id: x.id, ts: Number(x.ts) || 0, texto: x.texto.slice(0, 400), rev: Number(x.rev) || 0})) : [];
+    const viejos = new Map(lista.map(x => [x.id, x]));
+    lista = Array.isArray(l) ? l.filter(x => x && typeof x.id === 'string' && typeof x.texto === 'string').map(x => {
+      const o = {id: x.id, ts: Number(x.ts) || 0, texto: x.texto.slice(0, 400), rev: Number(x.rev) || 0};
+      const m = local.get(o.id), v = viejos.get(o.id);
+      if(m && Date.now() - m.t < 60000){ o.rev = m.rev; if(v) o.espera = v.espera; }
+      return o;
+    }) : [];
     pintar(); estado();
   };
   window.histAgregar = function(a){
@@ -3033,11 +3046,11 @@ limpiarNuevos();
   async function marcar(id, valor){
     const x = lista.find(y => y.id === id); if(!x) return false;
     const antes = x.rev;
-    clearTimeout(x.t); x.rev = valor ? Date.now() : 0; x.espera = !!valor; pintar();
-    if(valor) x.t = setTimeout(() => { x.espera = false; pintar(); }, 3000);
+    clearTimeout(tim.get(id)); x.rev = valor ? Date.now() : 0; x.espera = !!valor; local.set(id, {rev: x.rev, t: Date.now()}); pintar();
+    if(valor) tim.set(id, setTimeout(() => { const y = lista.find(q => q.id === id); if(y) y.espera = false; pintar(); }, 2000));
     let ok = false;
     try{ const r = await llamar('calidadAvisoRevisado', {id, revisado: !!valor}); ok = !!(r && r.ok); }catch(e){ ok = false; }
-    if(!ok){ clearTimeout(x.t); x.rev = antes; x.espera = false; pintar(); aviso('No se pudo guardar. Intenta de nuevo.'); }
+    if(!ok){ clearTimeout(tim.get(id)); const y = lista.find(q => q.id === id) || x; y.rev = antes; y.espera = false; local.delete(id); pintar(); aviso('No se pudo guardar. Intenta de nuevo.'); }
     return ok;
   }
   $h('hLista').addEventListener('click', async e => {
@@ -3089,4 +3102,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.10 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.11 · 08-11-2026 ==== -->
