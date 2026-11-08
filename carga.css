@@ -1,4 +1,4 @@
-/* ===== carga.css 1.1.1 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
+/* ===== carga.css 1.1.2 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
    Va en el <head> de cada página para que la carga salga con estilo desde el primer cuadro. */
 /* ===== misma letra y mismo tamaño en todas las páginas: no hereda nada de la página ===== */
 #cargaGlobal,#cargaGlobal *{font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif !important;font-style:normal !important;font-variant:normal;font-stretch:normal;font-synthesis:none;text-transform:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -66,3 +66,6 @@
 #cargaGlobal .cgquieta .cgpista{opacity:1;animation:none;}
 @keyframes cgPistaEntra{from{opacity:0;}to{opacity:1;}}
 @media(prefers-reduced-motion:reduce){#cargaGlobal .cgrell{transition:none;}}
+
+/* ===== mientras la carga está puesta, la página de atrás no tiene barra de scroll ni espacio reservado para ella: así el ancho visible es el mismo en todas las páginas y el texto no se corre al pasar de una a otra ===== */
+html:has(#cargaGlobal:not([style*="none"])){overflow:hidden !important;scrollbar-gutter:auto !important;}
