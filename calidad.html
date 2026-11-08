@@ -737,10 +737,10 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .hit.rev{border-left-color:var(--ok,#2e8b3a);}
   .hit.rev > small,.hit.rev > div{opacity:.7;}
   .hit small{display:block;color:var(--sub);font-size:11px;margin-bottom:2px;}
-  .hit em{display:block;margin-top:4px;font-style:normal;font-size:11px;color:var(--ok,#2e8b3a);font-weight:700;}
-  .hit .hrev{margin-top:6px;width:100%;border:1px solid var(--strong);background:var(--panel);color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:6px 8px;min-height:30px;cursor:pointer;}
+  .hit em{display:flex;align-items:center;margin-top:6px;min-height:32px;font-style:normal;font-size:11px;color:var(--ok,#2e8b3a);font-weight:700;}
+  .hit .hrev{margin-top:6px;width:100%;border:1px solid var(--strong);background:var(--panel);color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:6px 8px;min-height:32px;box-sizing:border-box;cursor:pointer;}
   .hit .hrev:hover:not(:disabled){border-color:var(--accent);background:var(--soft);}
-  .hit .hrev:active:not(:disabled){transform:scale(.97);}
+  .hit .hrev:active:not(:disabled){background:var(--border);}
   .hvacio{font-size:12px;color:var(--sub);padding:4px 0;}
 }
 @keyframes histEntra{from{opacity:0;transform:translateX(-14px);}to{opacity:1;transform:none;}}
@@ -1226,7 +1226,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.8';
+const CAL_VERSION = '1.38.9';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2988,7 +2988,7 @@ limpiarNuevos();
     const m = String(t).match(/^(.*?): (.+?) lo dejó como Corregido\./);
     return m ? {lugar: m[1], quien: m[2]} : {lugar: '', quien: ''};
   }
-  function cuerpo(x){ const p = partes(x.texto); return '<small>' + esc(fechaHora(x.ts)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small><div>' + (p.quien ? esc(p.quien) + ' lo dejó como corregido.' : esc(String(x.texto).split(' Antes:')[0])) + '</div>' + (x.rev ? '<em>✓ Revisado ' + esc(fechaHora(x.rev)) + '</em>' : (soloLectura() ? '' : '<button type="button" class="hrev" data-id="' + esc(x.id) + '">Revisado</button>')); }
+  function cuerpo(x){ const p = partes(x.texto); return '<small>' + esc(fechaHora(x.ts)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small><div>' + (p.quien ? esc(p.quien) + ' lo dejó como corregido.' : esc(String(x.texto).split(' Antes:')[0])) + '</div>' + (x.rev ? '<em class="hpie">✓ Revisado ' + esc(fechaHora(x.rev)) + '</em>' : (soloLectura() ? '' : '<button type="button" class="hrev" data-id="' + esc(x.id) + '">Revisado</button>')); }
   function pintar(){
     const box = $h('hLista'); if(!box) return;
     const antes = new Map(); nodos.forEach((n, id) => antes.set(id, n.getBoundingClientRect().top));
@@ -3089,4 +3089,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.8 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.9 · 08-11-2026 ==== -->
