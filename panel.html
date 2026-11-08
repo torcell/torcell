@@ -622,6 +622,7 @@
   @keyframes pisoEntra{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
   .floor-block.piso-entra{animation:pisoEntra .18s ease-out;}
   .piso-nav{display:none;gap:4px;margin:0 0 0 10px;align-self:center;}
+  .tnuevo{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#2f6f8f;color:#fff;font:700 9px/1.4 inherit;font-style:normal;letter-spacing:.4px;text-transform:uppercase;vertical-align:middle;}
   .piso-flecha{font:inherit;font-size:12px;line-height:1;width:30px;height:30px;padding:0;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-radius:0;cursor:pointer;transition:background .12s ease,border-color .12s ease,transform .08s ease;}
   .piso-flecha:hover:not(:disabled){border-color:var(--accent);background:var(--panel-soft);}
   .piso-flecha:active:not(:disabled){transform:scale(.92);}
@@ -1746,6 +1747,7 @@
         <option value="pagado">Pagado</option>
       </select>
     </div>
+    <div class="grp"><label for="filterListos">Dptos listos <i class="tnuevo" data-hasta="2026-11-15">Nuevo</i></label><select id="filterListos"><option value="ocultar">Ocultar</option><option value="mostrar">Mostrar</option></select></div>
     <div class="grp"><label>Buscar Dpto</label><input type="text" id="search" placeholder="Ej: 502"></div>
     <div class="grp"><label>Orden de pisos</label><button class="btn small" id="btnOrdenPisos" aria-pressed="false"></button></div>
     <div class="grp"><label>&nbsp;</label><button class="btn small" id="btnLimpiarFiltros">✕ Limpiar filtros</button></div>
@@ -2132,7 +2134,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.60';
+const APP_VERSION = '0.73.62';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2517,6 +2519,17 @@ function msgFragueBloqueado(cell){
   return 'No se puede dar Partida al frague de' + nom + ' (' + (AREA_LABEL[cell.area] || cell.area) + '): primero su cerámica debe estar en Terminado.';
 }
 const ALL_FLOOR_NUMS = Array.from(new Set(FLOOR_BLOCKS.map(f => f.pisoNum))).sort((a,b)=>a-b);
+// ===== Dptos listos: con cerámica y frague (todas sus áreas) en Terminado o Pagado se ocultan; el selector "Dptos listos" los vuelve a mostrar =====
+let ocultarListos = true, listosOcultos = 0;
+try{ if(localStorage.getItem('progresoObraListosV1') === 'mostrar') ocultarListos = false; }catch(err){}
+const celdasDeDpto = {};
+ALL_CELLS.forEach(c => { const k = c.pisoNum + '|' + c.dpto; (celdasDeDpto[k] = celdasDeDpto[k] || []).push(c.id); });
+const listoDpto = (pisoNum, dpto) => {
+  const ids = celdasDeDpto[pisoNum + '|' + dpto];
+  return !!ids && ids.length > 0 && ids.every(id => { const e = resolveEstado(getState(id)); return e === 'entregado' || e === 'pagado'; });
+};
+document.getElementById('filterListos').value = ocultarListos ? 'ocultar' : 'mostrar';
+document.querySelectorAll('.tnuevo[data-hasta]').forEach(t => { if(Date.now() > new Date(t.dataset.hasta + 'T23:59:59').getTime()) t.remove(); });
 let ordenPisosDesc = true;
 try{ const o = localStorage.getItem('progresoObraOrdenPisosV2'); if(o) ordenPisosDesc = o === 'desc'; }catch(err){}
 const cmpPisos = (a, b) => ordenPisosDesc ? b - a : a - b;
@@ -3874,20 +3887,26 @@ document.addEventListener('click', (e) => {
     pisoVerCompleto(dest);
   } else {                            // todos los pisos: se agrega el vecino si no estaba; el que ya estaba se mueve y el nuevo se abre de arriba hacia abajo
     const quieto = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
-    const antes = new Map([...document.querySelectorAll('#content .floor-block')].map(f => [f.dataset.piso, f.getBoundingClientRect().top]));
+    const yaEstaba = [...document.querySelectorAll('#content .floor-block')].some(f => f.dataset.piso === dest);
+    const raiz = document.getElementById('content');
+    if(!yaEstaba && !quieto) raiz.style.overflowAnchor = 'none';   // la página no se corrige sola: el piso de abajo baja y el nuevo se abre
     if(vistaPisos === 'mov') pisosExtra.add(dest);
     render();
     const nuevo = [...document.querySelectorAll('#content .floor-block')].find(f => f.dataset.piso === dest);
-    if(nuevo && !quieto && nuevo.animate && !antes.has(dest)){
-      document.querySelectorAll('#content .floor-block').forEach(f => {
-        if(!antes.has(f.dataset.piso)) return;
-        const d = antes.get(f.dataset.piso) - f.getBoundingClientRect().top;
-        if(Math.abs(d) > 1) f.animate([{transform: 'translateY(' + d + 'px)'}, {transform: 'none'}], {duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)'});
-      });
-      nuevo.animate([{clipPath: 'inset(0 0 100% 0)', opacity: 0}, {clipPath: 'inset(0 0 0 0)', opacity: 1}], {duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)'});
-    }
-    const r = nuevo && nuevo.getBoundingClientRect();
-    if(!r || r.top < 56 || r.bottom > window.innerHeight) pisoVerCompleto(dest);
+    const verNuevo = () => { raiz.style.overflowAnchor = ''; const r = nuevo && nuevo.getBoundingClientRect(); if(!r || r.top < 56 || r.bottom > window.innerHeight) pisoVerCompleto(dest); };
+    if(nuevo && !yaEstaba && !quieto && nuevo.animate){
+      // se abre de arriba hacia abajo: el alto crece desde 0 y el piso que estaba baja a la par
+      const claves = ['height', 'paddingTop', 'paddingBottom', 'marginTop', 'marginBottom', 'borderTopWidth', 'borderBottomWidth'];
+      nuevo.style.cssText += ';overflow:hidden;opacity:0;height:0;padding-top:0;padding-bottom:0;margin-top:0;margin-bottom:0;border-top-width:0;border-bottom-width:0;';
+      requestAnimationFrame(() => requestAnimationFrame(() => {   // espera a que la página termine de acomodar el piso para medir su alto real
+        ['overflow', 'opacity', 'height', 'padding-top', 'padding-bottom', 'margin-top', 'margin-bottom', 'border-top-width', 'border-bottom-width'].forEach(k => nuevo.style.removeProperty(k));
+        const cs = getComputedStyle(nuevo), fin = {opacity: 1}, ini = {opacity: 0};
+        claves.forEach(k => { fin[k] = k === 'height' ? nuevo.getBoundingClientRect().height + 'px' : cs[k]; ini[k] = '0px'; });
+        nuevo.style.overflow = 'hidden';
+        const an = nuevo.animate([ini, fin], {duration: 340, easing: 'cubic-bezier(.2,.7,.2,1)'});
+        an.onfinish = an.oncancel = () => { nuevo.style.overflow = ''; verNuevo(); };
+      }));
+    } else verNuevo();
   }
 }, true);
 function passesFilters(cell){
@@ -4504,7 +4523,7 @@ function renderPasillosTable(){
   FLOOR_BLOCKS.forEach(fb => { if(fb.pasillo) byFloor[fb.pisoNum + '|' + fb.categoria] = fb.pasillo; });
   const cats = ['Cerámica','Frague'];
 
-  const rows = ALL_FLOOR_NUMS.slice().sort(cmpPisos).filter(n => cats.some(cat => byFloor[n+'|'+cat])).filter(n => vistaPisos !== 'mov' || cats.some(cat => celdaConAvance(byFloor[n+'|'+cat]))).filter(n => {
+  const rows = ALL_FLOOR_NUMS.slice().sort(cmpPisos).filter(n => cats.some(cat => byFloor[n+'|'+cat])).filter(n => vistaPisos !== 'mov' || cats.some(cat => celdaConAvance(byFloor[n+'|'+cat]))).filter(n => { if(ocultarListos && listoDpto(n, 'Pasillo')){ listosOcultos++; return false; } return true; }).filter(n => {
     if(!filtering) return true;
     return cats.some(cat => {
       const p = byFloor[n+'|'+cat];
@@ -7219,12 +7238,21 @@ function render(){
   actualizarEspaciado();
   const contentEl = document.getElementById('content');
   let html;
+  listosOcultos = 0;
   if(activeCategoria === 'Pasillos'){
     html = renderPasillosTable();
   } else {
     const blocks = FLOOR_BLOCKS.filter(f => f.categoria === activeCategoria).sort((a,b) => cmpPisos(a.pisoNum, b.pisoNum));
     const pisoFilterVal = document.getElementById('filterPiso').value;
-    const visibleBlocks = blocks.filter(b => (!pisoFilterVal || b.piso === pisoFilterVal) && (vistaPisos !== 'mov' || bloqueConAvance(b) || pisosExtra.has(b.piso)));
+    const bloquesVista = blocks.filter(b => (!pisoFilterVal || b.piso === pisoFilterVal) && (vistaPisos !== 'mov' || bloqueConAvance(b) || pisosExtra.has(b.piso)));
+    listosOcultos = 0;
+    const vistos = new Set();
+    const visibleBlocks = !ocultarListos ? bloquesVista : bloquesVista.map(b => {
+      const depts = b.depts.filter(d => { const l = listoDpto(b.pisoNum, d.dpto); if(l) vistos.add(b.pisoNum + '|' + d.dpto); return !l; });
+      const pas = b.pasillo && listoDpto(b.pisoNum, 'Pasillo') ? (vistos.add(b.pisoNum + '|Pasillo'), null) : b.pasillo;
+      return Object.assign({}, b, {depts: depts, pasillo: pas});
+    }).filter(b => b.depts.length || b.pasillo);
+    listosOcultos = vistos.size;
     const dz = ['A', 'B', 'C', 'D'].find(l => document.body.classList.contains('dz-' + l));
     html = visibleBlocks.map(dz === 'B' ? renderFloorCards : dz === 'C' ? renderFloorMapa : renderFloorTable).filter(Boolean).join('') ||
       '<p style="color:var(--sub);text-align:center;padding:40px 0;">No hay partidas que coincidan con el filtro.</p>';
@@ -7240,7 +7268,7 @@ function render(){
   const cellsForCount = activeCategoria === 'Pasillos'
     ? ALL_CELLS.filter(c => c.area === 'Pasillos' && passesFilters(c))
     : ALL_CELLS.filter(c => c.categoria === activeCategoria && c.area !== 'Pasillos' && passesFilters(c));
-  document.getElementById('resultCount').textContent = cellsForCount.length + ' partidas visibles';
+  document.getElementById('resultCount').textContent = cellsForCount.length + ' partidas visibles' + (ocultarListos && listosOcultos ? ' · ' + listosOcultos + ' listos ocultos' : '');
 
   renderStats();
   updateRetencionesIndicator();
@@ -7391,6 +7419,11 @@ document.getElementById('filterVista').addEventListener('change', (e) => {
   pisosExtra.clear();
   try{ localStorage.setItem('progresoObraVistaPisosV2', vistaPisos); }catch(err){}
   poblarFiltroPiso();
+  render();
+});
+document.getElementById('filterListos').addEventListener('change', (e) => {
+  ocultarListos = e.target.value !== 'mostrar';
+  try{ localStorage.setItem('progresoObraListosV1', ocultarListos ? 'ocultar' : 'mostrar'); }catch(err){}
   render();
 });
 let tBuscar = null;
@@ -8839,4 +8872,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.60 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.62 · 08-11-2026 ==== -->
