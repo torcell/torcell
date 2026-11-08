@@ -556,6 +556,150 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   .lado .obslista{max-height:none;}
   #mObsToggle,#mElegir,.lado .obsfotos{display:none !important;}
 }
+
+/* ===== Protocolos (guía informativa) ===== */
+#vtabs{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:14px;}
+.gu-intro{font-size:14px;line-height:1.5;color:var(--text);margin:0 0 14px;}
+.gu-det{border:1px solid var(--border);background:var(--panel);margin-bottom:10px;}
+.gu-det > summary{list-style:none;cursor:pointer;padding:13px 14px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:10px;border-left:4px solid var(--accent);}
+.gu-det > summary::-webkit-details-marker{display:none;}
+.gu-det > summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:400;color:var(--sub);line-height:1;}
+.gu-det[open] > summary::after{content:"\2212";}
+.gu-det > summary:hover{background:var(--soft);}
+.gu-cuerpo{padding:4px 14px 14px;font-size:14px;line-height:1.5;}
+.gu-cuerpo p{margin:8px 0;}
+.gu-cuerpo ul,.gu-cuerpo ol{margin:8px 0;padding-left:20px;}
+.gu-cuerpo li{margin:5px 0;}
+.gu-cods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0;}
+.gu-cod{border:1px solid var(--border);background:var(--soft);padding:10px 12px;}
+.gu-cod b{display:block;font-size:22px;letter-spacing:.5px;color:var(--accent);}
+.gu-cod span{font-size:13px;color:var(--text);line-height:1.35;}
+.gu-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0;}
+.gu-3 > div{border:1px solid var(--border);background:var(--soft);padding:10px 12px;}
+.gu-3 h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
+.gu-3 p{margin:0;font-size:13px;line-height:1.45;}
+.gu-aviso{border-left:4px solid var(--warn);background:var(--soft);padding:9px 12px;margin:10px 0;font-size:13.5px;line-height:1.45;}
+.gu-tabla{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+.gu-tabla th,.gu-tabla td{border:1px solid var(--border);padding:7px 9px;text-align:left;vertical-align:top;line-height:1.35;}
+.gu-tabla th{background:var(--soft);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--sub);}
+.gu-ciclo{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0;}
+.gu-ciclo span{border:1px solid var(--strong);background:var(--soft);padding:4px 10px;font-size:12.5px;font-weight:700;}
+.gu-ciclo i{font-style:normal;color:var(--sub);}
+@media (max-width:620px){
+  .gu-3{grid-template-columns:minmax(0,1fr);}
+  .gu-tabla,.gu-tabla tbody,.gu-tabla tr,.gu-tabla td{display:block;width:100%;}
+  .gu-tabla thead{display:none;}
+  .gu-tabla tr{border:1px solid var(--border);margin-bottom:8px;background:var(--soft);}
+  .gu-tabla td{border:0;border-bottom:1px solid var(--border);padding:6px 10px;}
+  .gu-tabla td:last-child{border-bottom:0;}
+  .gu-tabla td::before{content:attr(data-l);display:block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--sub);}
+}
+
+/* ===== Protocolos: torre de checklists ===== */
+#vtabs{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:14px;}
+.psec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:10px;}
+.psec button{border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:11px 6px;font-size:13px;font-weight:700;min-height:46px;margin:0 -1px -1px 0;transition:background .15s ease,color .15s ease;}
+.psec button:hover{border-color:var(--accent);position:relative;z-index:1;}
+.psec button.on{background:linear-gradient(90deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;position:relative;z-index:2;}
+@media (min-width:700px){.psec{grid-template-columns:repeat(6,minmax(0,1fr));}}
+.pfil{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.pfil button{border:1px solid var(--strong);background:var(--panel);color:var(--sub);padding:7px 10px;font-size:12px;font-weight:700;letter-spacing:.2px;min-height:34px;transition:transform .08s ease,border-color .12s ease,background .15s ease;}
+.pfil button:hover{border-color:var(--accent);color:var(--text);}
+.pfil button:active{transform:scale(.95);}
+.pfil button.on{background:linear-gradient(90deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;}
+.pfil button small{font-weight:600;opacity:.8;margin-left:4px;}
+.presu{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin:0 0 10px;font-size:13px;}
+.presu b{font-size:15px;}
+.pestado{border:1px solid var(--strong);background:var(--soft);padding:12px 14px;font-size:13.5px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;}
+.pestado[hidden]{display:none;}
+.ptorre{border:1px solid var(--strong);background:var(--panel);padding:0 0 6px;}
+.ptecho{height:12px;margin:0 0 8px;background:repeating-linear-gradient(135deg,var(--strong) 0 6px,var(--soft) 6px 12px);border-bottom:1px solid var(--strong);}
+.ppiso{display:grid;grid-template-columns:42px minmax(0,1fr);gap:4px;align-items:center;padding:0 8px;margin-bottom:4px;}
+.ppiso .pn{font-size:12px;font-weight:800;color:var(--sub);text-align:center;line-height:1.1;}
+.pus{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:4px;}
+.pcel{position:relative;border:1px solid var(--border);background:color-mix(in srgb,var(--sub) 16%,var(--panel));color:var(--text);min-height:48px;padding:5px 2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;transition:transform .1s ease,box-shadow .12s ease,border-color .15s ease,opacity .2s ease;}
+.pcel:hover{box-shadow:inset 0 0 0 1px var(--accent),inset 0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);border-color:var(--accent);}
+.pcel:active{transform:scale(.94);}
+.pcel b{font-size:12.5px;line-height:1.05;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pcel small{font-size:10.5px;color:var(--sub);line-height:1;}
+.pcel.par{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 18%,var(--panel));}
+.pcel.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 26%,var(--panel));}
+.pcel.ok small{color:var(--text);}
+.pcel .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--ok);}
+.pcel.par .bar{background:var(--warn);}
+.pcel .rv{position:absolute;top:2px;left:3px;font-size:8.5px;font-weight:800;color:var(--sub);letter-spacing:.03em;}
+.pcel .ob{position:absolute;top:2px;right:3px;font-size:9px;color:var(--accent);font-weight:800;}
+.pcel .rk{position:absolute;top:0;right:0;min-width:16px;padding:1px 4px;background:var(--bad);color:#fff;font-size:10px;font-weight:800;line-height:1.3;}
+.pcel.fuera{opacity:.2;}
+.pleyenda{display:flex;gap:12px;font-size:11.5px;color:var(--sub);flex-wrap:wrap;margin:8px 0 12px;}
+.pleyenda i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
+.pleyenda .l0{background:color-mix(in srgb,var(--sub) 30%,var(--panel));border:1px solid var(--border);}.pleyenda .l1{background:var(--warn);}.pleyenda .l2{background:var(--ok);}
+@media (max-width:520px){.ppiso{grid-template-columns:34px minmax(0,1fr);padding:0 5px;}.pus{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));}.pcel{min-height:44px;}.pcel b{font-size:11px;}.pcel small{font-size:9.5px;}}
+
+/* ventana del checklist: solo se cierra con sus botones */
+#velProt{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+#velProt::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.62);}
+#velProt.on{display:flex;animation:overlayIn .16s ease;}
+@keyframes pSube{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+#velProt .modal{position:relative;width:460px;max-width:100%;max-height:92vh;overflow:auto;display:flex;flex-direction:column;gap:12px;animation:pSube .2s ease;overscroll-behavior:contain;}
+.pmhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pmhead h2{margin:0;font-size:17px;}
+.prev-cod{font-size:11px;font-weight:800;letter-spacing:.06em;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;padding:3px 9px;}
+.psub{font-size:12.5px;color:var(--sub);margin-top:-6px;}
+.pprog{height:8px;background:color-mix(in srgb,var(--sub) 22%,var(--panel));border:1px solid var(--border);}
+.pprog i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s ease;}
+.plista{display:flex;flex-direction:column;border:1px solid var(--border);}
+.pit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--soft);}
+.pit:last-child{border-bottom:0;}
+.pit label{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer;font-size:14px;line-height:1.3;}
+.pit input[type=checkbox]{width:20px;height:20px;accent-color:var(--ok);flex:none;margin:0;}
+.pit.hecho label span{color:var(--sub);text-decoration:line-through;}
+.pit .nuevo{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--accent);color:#fff;padding:1px 6px;flex:none;}
+.pit .q,.pit .lap{flex:none;width:30px;height:30px;border:1px solid var(--strong);background:var(--panel);color:var(--sub);font-size:16px;line-height:1;transition:transform .08s ease,border-color .12s ease,color .12s ease;}
+.pit .q:hover{border-color:var(--bad);color:var(--bad);}
+.pit .lap{font-size:15px;}
+.pit .lap:hover{border-color:var(--accent);color:var(--accent);}
+.pit .lap.con{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel));}
+.pit .q:active,.pit .lap:active{transform:scale(.9);}
+.pit .obs-in{flex:1 0 100%;border:1px solid var(--accent);background:var(--panel);color:var(--text);padding:8px 10px;font-size:13.5px;min-height:38px;min-width:0;font-family:inherit;border-radius:0;}
+.pit .obs-in:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+.pit .obs-t,.pit .prev{flex:1 0 100%;font-size:12.5px;line-height:1.35;padding-left:30px;color:var(--sub);}
+.pit .obs-t{font-style:italic;color:var(--text);}
+.pit .prev{border-left:3px solid var(--warn);margin-left:30px;padding-left:8px;}
+.pvacio{padding:14px;text-align:center;color:var(--sub);font-size:13px;}
+.pagrega{display:grid;grid-template-columns:1fr auto;gap:8px;}
+.pagrega[hidden],.payuda[hidden],.ppasar[hidden]{display:none;}
+.pagrega input{border:1px solid var(--strong);background:var(--soft);color:var(--text);padding:9px 10px;font-size:14px;min-height:40px;min-width:0;font-family:inherit;border-radius:0;}
+.pagrega input:focus{outline:2px solid var(--accent);outline-offset:-1px;}
+.payuda{font-size:12px;color:var(--sub);line-height:1.35;margin-top:-6px;}
+.pmsg{min-height:16px;font-size:12.5px;}
+.pmsg.ok{color:var(--ok);}.pmsg.err{color:var(--bad);}
+.phist{border:1px solid var(--border);}
+.phist summary{cursor:pointer;padding:8px 10px;font-size:12.5px;color:var(--sub);}
+.phist .pit{background:transparent;}
+.phist .pit span.t{flex:1;font-size:13px;color:var(--sub);}
+.hrev{border-top:1px solid var(--border);padding:10px;font-size:13px;display:flex;flex-direction:column;gap:5px;}
+.hrev h4{margin:0 0 2px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.hrev .l{display:flex;gap:6px;line-height:1.35;}
+.hrev .l b{flex:none;width:16px;}
+.hrev .l .ok{color:var(--ok);}.hrev .l .no{color:var(--bad);}
+.hrev .l em{display:block;color:var(--sub);font-size:12px;}
+.ppasar{border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;}
+.pconf{border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--panel));padding:10px 12px;font-size:13px;line-height:1.4;display:flex;flex-direction:column;gap:8px;}
+.pconf[hidden]{display:none;}
+.pacc{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pacc[data-uno="1"]{grid-template-columns:1fr;}
+
+.patras{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;margin-bottom:10px;}
+.patras[hidden]{display:none;}
+.pat{display:flex;align-items:center;gap:8px;border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:7px 9px;font-size:12.5px;text-align:left;min-height:38px;transition:transform .08s ease,border-color .12s ease;}
+.pat:hover{border-color:var(--accent);}
+.pat:active{transform:scale(.97);}
+.pat b{flex:none;min-width:20px;padding:1px 5px;background:var(--bad);color:#fff;font-size:11px;text-align:center;}
+.pat span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pat small{flex:none;color:var(--sub);font-size:11px;}
+
+#velProt [hidden]{display:none !important;}
 </style>
 <script>
 // ===== Aviso lateral · v1 =====
@@ -680,7 +824,13 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 </header>
 <div class="infobar" id="infoBar" role="status" hidden></div>
 <main>
-  <p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
+  <div class="pestanas" id="vtabs" role="tablist" aria-label="Secciones de Calidad">
+    <button type="button" class="on" data-v="dptos" aria-pressed="true"><span class="ptxt">Departamentos</span></button>
+    <button type="button" data-v="prot" aria-pressed="false"><span class="ptxt">Protocolos</span></button>
+  </div>
+  <section id="vistaDptos">
+
+<p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
   <div class="resumen">
     <div class="res p"><b id="nPend">0</b><span>Por revisar</span></div>
     <div class="res r"><b id="nRev">0</b><span>Revisados</span></div>
@@ -709,7 +859,167 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <button type="button" data-sc="cocina" aria-pressed="false"><span class="ptxt">Muro cocina</span><i class="pcnt" hidden></i></button>
   </div>
   <div id="lista"></div>
+  </section>
+  <section id="vistaProt" hidden>
+    <div class="psec" id="pTabs" role="tablist" aria-label="Secciones"></div>
+    <div class="pfil" id="pFil" role="group" aria-label="Filtro"></div>
+    <div class="presu"><div id="pResu"></div><button type="button" class="btn small" id="pRefrescar">↻ Actualizar</button></div>
+    <div class="pestado" id="pEstado" hidden></div>
+    <div class="patras" id="pAtras" hidden></div>
+    <div class="ptorre" id="pTorreBox"><div class="ptecho"></div><div id="pTorre"></div></div>
+    <div class="pleyenda"><span><i class="l0"></i>sin avance</span><span><i class="l1"></i>en proceso</span><span><i class="l2"></i>completo</span></div>
+    <details class="gu-det pguia">
+      <summary>Guía de protocolos</summary>
+      <div class="gu-cuerpo">
+        <p class="gu-intro">Cómo se manejan los protocolos: qué significa cada código de revisión, cómo se mueve un protocolo y cómo se tratan las observaciones.</p>
+<details class="gu-det">
+      <summary>Códigos de revisión</summary>
+      <div class="gu-cuerpo">
+        <div class="gu-cods">
+          <div class="gu-cod"><b>R1</b><span>Primera revisión</span></div>
+          <div class="gu-cod"><b>R2</b><span>Segunda revisión</span></div>
+          <div class="gu-cod"><b>R3</b><span>Tercera revisión</span></div>
+          <div class="gu-cod"><b>RF</b><span>Revisión final para venta</span></div>
+        </div>
+        <p>R1, R2 y R3 son revisiones sucesivas del mismo protocolo. Cada una queda guardada y no reemplaza a la anterior.</p>
+        <p>RF es la revisión final antes de la venta. Solo se genera al final, cuando lo que se revisó ya está listo.</p>
+        <div class="gu-aviso">El código dice en qué revisión va el protocolo, no cómo le fue. R2 no significa ni aprobado ni rechazado: eso lo dice el resultado.</div>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Revisión, resultado y estado</summary>
+      <div class="gu-cuerpo">
+        <p>Son tres datos distintos y no se deben mezclar.</p>
+        <div class="gu-3">
+          <div><h4>Código de revisión</h4><p>R1, R2, R3, RF</p></div>
+          <div><h4>Resultado</h4><p>Pendiente, Aprobado, Observado, Rechazado</p></div>
+          <div><h4>Estado del flujo</h4><p>Borrador, Enviado, En revisión, Requiere corrección, Cerrado</p></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Paso a paso de un protocolo</summary>
+      <div class="gu-cuerpo">
+        <ol>
+          <li>Se crea el protocolo con un identificador único.</li>
+          <li>Se completan los datos, el checklist y las evidencias que pide.</li>
+          <li>Se envía a revisión, quedando registrado quién, cuándo y con qué código (R1, R2…).</li>
+          <li>Quien revisa registra el resultado y sus comentarios.</li>
+          <li>Si hay observaciones, se crean registros vinculados y se asigna un responsable a cada una.</li>
+          <li>Se registran las correcciones con su evidencia de respuesta.</li>
+          <li>Se emite una nueva revisión (R2, R3…) cuando corresponda.</li>
+          <li>Se cierra solo cuando se cumplen los criterios de cierre.</li>
+        </ol>
+        <div class="gu-aviso">Cerrar el protocolo no es lo mismo que terminar la actividad en terreno. El cierre sigue su propio procedimiento.</div>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Observaciones</summary>
+      <div class="gu-cuerpo">
+        <p>Cada hallazgo es una observación con vida propia.</p>
+        <div class="gu-ciclo"><span>Abierta</span><i>→</i><span>Corregida</span><i>→</i><span>Cerrada</span></div>
+        <p>Cada observación guarda:</p>
+        <ul>
+          <li>Identificador propio (por ejemplo OBS-001).</li>
+          <li>Descripción y requisito o criterio que no se cumplió.</li>
+          <li>Responsable, fecha de emisión y plazo.</li>
+          <li>Evidencia (fotos, documentos).</li>
+          <li>Acción correctiva y su verificación.</li>
+          <li>Estado de cierre.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Ejemplo</summary>
+      <div class="gu-cuerpo">
+        <p>Cerámica de piso, departamento 301.</p>
+        <table class="gu-tabla">
+          <thead><tr><th>Instancia</th><th>Resultado</th><th>Qué pasa</th><th>Registro</th></tr></thead>
+          <tbody>
+            <tr><td data-l="Instancia">R1</td><td data-l="Resultado">Observado</td><td data-l="Qué pasa">Se detectan cerámicas con diferencia de nivel.</td><td data-l="Registro">OBS-001 abierta</td></tr>
+            <tr><td data-l="Instancia">Corrección</td><td data-l="Resultado">Respuesta</td><td data-l="Qué pasa">El responsable corrige y sube la evidencia.</td><td data-l="Registro">Evidencia vinculada</td></tr>
+            <tr><td data-l="Instancia">R2</td><td data-l="Resultado">Aprobado</td><td data-l="Qué pasa">Se verifica la corrección y se aprueba.</td><td data-l="Registro">OBS-001 cerrada</td></tr>
+            <tr><td data-l="Instancia">RF</td><td data-l="Resultado">Pendiente</td><td data-l="Qué pasa">Revisión final para venta, al terminar todo el departamento.</td><td data-l="Registro">Se genera al final</td></tr>
+          </tbody>
+        </table>
+        <p>R1 y R2 son revisiones seguidas, no resultados. La observación tiene su propio ciclo.</p>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Qué datos tiene un protocolo</summary>
+      <div class="gu-cuerpo">
+        <ul>
+          <li>Actividad, obra, sector y especialidad.</li>
+          <li>Ubicación (piso, departamento).</li>
+          <li>Responsable de ejecución e inspector.</li>
+          <li>Fecha y criterios de aceptación.</li>
+          <li>Resultado, estado y evidencias.</li>
+          <li>Historial de revisiones y observaciones vinculadas.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Reglas de control</summary>
+      <div class="gu-cuerpo">
+        <ul>
+          <li>Una revisión nueva nunca borra ni modifica una anterior.</li>
+          <li>Todo cambio queda registrado con quién lo hizo y cuándo.</li>
+          <li>Crear, revisar, aprobar y administrar son permisos separados.</li>
+          <li>No se cierra un protocolo con observaciones obligatorias abiertas, salvo excepción autorizada.</li>
+          <li>Los documentos y evidencias se guardan con cada revisión.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="gu-det">
+      <summary>Indicadores</summary>
+      <div class="gu-cuerpo">
+        <ul>
+          <li>Protocolos emitidos, aprobados, observados y pendientes.</li>
+          <li>Observaciones abiertas y cerradas.</li>
+          <li>Porcentaje aprobado en la primera revisión (R1).</li>
+          <li>Tiempos de respuesta a las observaciones.</li>
+          <li>Distribución por especialidad o sector.</li>
+        </ul>
+      </div>
+    </details>
+      </div>
+    </details>
+  </section>
 </main>
+<div id="velProt">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pTit">
+    <div class="pmhead"><h2 id="pTit"></h2><span class="prev-cod" id="pRev">R1</span></div>
+    <div class="psub" id="pSub"></div>
+    <div class="pprog"><i id="pProg"></i></div>
+    <div class="plista" id="pLista"></div>
+    <div class="pagrega" id="pAgrega">
+      <input type="text" id="pNuevo" maxlength="80" placeholder="Nuevo punto del checklist" autocomplete="off">
+      <button type="button" class="btn" id="pAgregar">＋ Agregar</button>
+    </div>
+    <div class="payuda" id="pAyuda">Al agregar un punto se guarda en todos los departamentos de esta sección. Al quitarlo, solo se quita en este departamento.</div>
+    <div class="pmsg" id="pMsg"></div>
+    <details class="phist" id="pHist" hidden><summary id="pHistSum"></summary><div id="pHistC"></div></details>
+    <details class="phist" id="pQuitDet" hidden><summary id="pQuitSum"></summary><div id="pQuit"></div></details>
+    <div class="ppasar" id="pPasar">
+      <button type="button" class="btn" id="pPasarBtn"></button>
+      <div class="pconf" id="pConf" hidden>
+        <div id="pConfTxt"></div>
+        <div class="pacc"><button type="button" class="btn" id="pConfNo">Cancelar</button><button type="button" class="btn primary" id="pConfSi">Confirmar</button></div>
+      </div>
+    </div>
+    <div class="pacc" id="pAcc">
+      <button type="button" class="btn" id="pCancel">Cancelar</button>
+      <button type="button" class="btn primary" id="pGuardar">Guardar y cerrar</button>
+    </div>
+  </div>
+</div>
 <div id="velReg" class="vel">
   <div class="modal reg" role="dialog" aria-modal="true" aria-labelledby="rTit">
     <h2 id="rTit">Registro de modificaciones</h2>
@@ -829,7 +1139,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.37.9';
+const CAL_VERSION = '1.38.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2279,6 +2589,254 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 <script>
+// ===== Protocolos: torre de checklists por sección, con revisiones R1, R2, R3, RF =====
+(function(){
+  const $p = id => document.getElementById(id);
+  // ---------- secciones y puntos de partida (valen para todos los departamentos) ----------
+  const SECC = [
+    {k:'tab', n:'Tabiquería', pts:['Plomo y alineación de tabiques','Fijaciones sin tornillos salidos','Juntas y masillado','Vanos a escuadra','Limpieza']},
+    {k:'cer', n:'Cerámica y Frague', pts:['Sin palmetas sopladas','Sin palmetas picadas','Sin palmetas cabeceadas','Nivel y caída correctos','Frague completo y parejo']},
+    {k:'ven', n:'Ventanas', pts:['Abre y cierra bien','Sellos y silicona completos','Vidrios sin rayas ni quebraduras','Quincallería completa']},
+    {k:'pue', n:'Puertas', pts:['Abre y cierra bien','Holguras parejas','Bisagras y cerradura funcionando','Sin rayas ni golpes']},
+    {k:'ele', n:'Electricidad', pts:['Enchufes funcionando','Interruptores funcionando','Tapas bien instaladas','Tablero rotulado']},
+    {k:'gas', n:'Gasfitería', pts:['Sin filtraciones','Agua fría y caliente','Desagües fluyen','Griferías y sellos de artefactos']}
+  ];
+  const COD = ['R1','R2','R3','RF'];
+  const NOMCOD = {R1:'primera revisión', R2:'segunda revisión', R3:'tercera revisión', RF:'revisión final para venta'};
+  const ATRAS_N = 10;               // cuántos se marcan en "Más atrasados"
+  const porDefecto = k => SECC.find(s => s.k === k).pts.map((t, i) => ({id: k + (i + 1), t}));
+
+  // ---------- estado ----------
+  const PD = {cargado:false, cargando:false, error:'', plantilla:{}, deptos:{}};
+  let sec = SECC[0].k, filtro = 'todos', actual = null, dr = null, guardando = false;
+  const items = sk => (PD.plantilla[sk] && PD.plantilla[sk].length ? PD.plantilla[sk] : porDefecto(sk));
+  const claveDep = (d, sk) => d.p + '|' + d.d + '|' + sk;
+  const vacio = () => ({q:[], revs:[{cod:'R1', c:[], o:{}, snap:null, fecha:''}]});
+  const rec = (d, sk) => PD.deptos[claveDep(d, sk)] || vacio();
+  const cur = r => r.revs[r.revs.length - 1];
+  const hoy = () => new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'short'});
+  const esc2 = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const nomDep = d => d.d === 'Pasillo' ? 'Pasillo' : /^\d+$/.test(String(d.d)) ? 'Dpto ' + d.d : String(d.d);
+  const lectura = () => soloLectura();
+
+  // % de avance de un departamento en la revisión en curso
+  function avance(d, sk){
+    const r = rec(d, sk), c = cur(r), q = new Set(r.q), cs = new Set(c.c);
+    const vis = items(sk).filter(p => !q.has(p.id));
+    const h = vis.filter(p => cs.has(p.id)).length;
+    return {h, t: vis.length, cod: c.cod, ci: COD.indexOf(c.cod), obs: vis.filter(p => c.o && c.o[p.id]).length, pct: vis.length ? h / vis.length : 0};
+  }
+  const pisos = () => {
+    const g = new Map();
+    LAYOUT.forEach(d => { if(!g.has(d.p)) g.set(d.p, {n: d.n, p: d.p, ds: []}); g.get(d.p).ds.push(d); });
+    return [...g.values()].sort((a, b) => b.n - a.n);
+  };
+
+  // ---------- pestañas, filtros y torre ----------
+  function pintarTabs(){
+    $p('pTabs').innerHTML = SECC.map(s => '<button type="button" role="tab" data-k="' + s.k + '" aria-selected="' + (s.k === sec) + '" class="' + (s.k === sec ? 'on' : '') + '">' + s.n + '</button>').join('');
+  }
+  function calcular(){
+    const filas = LAYOUT.map(d => ({d, a: avance(d, sec)}));
+    const atras = filas.filter(x => x.a.pct < 1).sort((x, y) => x.a.ci - y.a.ci || x.a.pct - y.a.pct || x.d.n - y.d.n || String(x.d.d).localeCompare(String(y.d.d), 'es', {numeric:true}));
+    const rank = new Map(); atras.slice(0, ATRAS_N).forEach((x, i) => rank.set(claveDep(x.d, sec), i + 1));
+    const cumple = (x, f) => f === 'todos' ? true : COD.indexOf(f) !== -1 ? x.a.cod === f : f === '100' ? x.a.t > 0 && x.a.h === x.a.t : f === 'cero' ? x.a.h === 0 : f === 'atras' ? rank.has(claveDep(x.d, sec)) : true;
+    return {filas, rank, cumple};
+  }
+  function pintarFiltros(cal){
+    const F = [['todos','Todos'], ...COD.map(c => [c, c]), ['100','100%'], ['atras','Más atrasados'], ['cero','Sin avance (0%)']];
+    $p('pFil').innerHTML = F.map(([k, n]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '" aria-pressed="' + (k === filtro) + '">' + n + (k === 'todos' ? '' : '<small>' + (k === 'atras' ? cal.rank.size : cal.filas.filter(x => cal.cumple(x, k)).length) + '</small>') + '</button>').join('');
+  }
+  function pintarTorre(){
+    pintarTabs();
+    const cal = calcular();
+    pintarFiltros(cal);
+    let n = 0;
+    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso"><div class="pn">' + (P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
+      const a = cal.filas.find(x => x.d === d).a, k = claveDep(d, sec);
+      const ok = a.t > 0 && a.h === a.t, par = a.h > 0 && !ok, fuera = filtro !== 'todos' && !cal.cumple({d, a}, filtro);
+      if(!fuera) n++;
+      const et = d.d === 'Pasillo' ? 'Pas.' : String(d.d);
+      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob">✎' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b>' + esc2(et) + '</b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
+    }).join('') + '</div></div>').join('');
+    // lista de los más atrasados (en la torre pueden quedar lejos hacia abajo)
+    const lista = [...cal.rank.entries()].map(([k, r]) => ({r, x: cal.filas.find(f => claveDep(f.d, sec) === k)}));
+    $p('pAtras').hidden = filtro !== 'atras' || !lista.length;
+    $p('pAtras').innerHTML = lista.map(({r, x}) => '<button type="button" class="pat" data-p="' + esc2(x.d.p) + '" data-d="' + esc2(x.d.d) + '"><b>' + r + '</b><span>' + esc2(x.d.p + ' · ' + nomDep(x.d)) + '</span><small>' + x.a.cod + ' · ' + Math.round(x.a.pct * 100) + '%</small></button>').join('');
+    const nom = SECC.find(s => s.k === sec).n;
+    const completos = cal.filas.filter(x => x.a.t > 0 && x.a.h === x.a.t).length;
+    $p('pResu').innerHTML = '<b>' + nom + '</b> · ' + completos + ' de ' + cal.filas.length + ' completos' + (filtro !== 'todos' ? ' · mostrando ' + n : '');
+  }
+  $p('pTabs').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; sec = b.dataset.k; pintarTorre(); });
+  $p('pFil').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; filtro = b.dataset.f; pintarTorre(); });
+  $p('pAtras').addEventListener('click', e => { const b = e.target.closest('.pat'); if(b) abrir(b.dataset.p, b.dataset.d); });
+  $p('pTorre').addEventListener('click', e => { const b = e.target.closest('.pcel'); if(b) abrir(b.dataset.p, b.dataset.d); });
+  $p('pRefrescar').addEventListener('click', () => cargarProt());
+
+  // ---------- carga desde el servidor ----------
+  async function cargarProt(){
+    if(PD.cargando || !token) return;
+    PD.cargando = true; PD.error = ''; estado('Cargando protocolos…');
+    try{
+      const j = await llamar('calidadProtLeer');
+      if(j && j.ok){ PD.plantilla = j.plantilla || {}; PD.deptos = j.deptos || {}; PD.cargado = true; estado(''); }
+      else if(j && (j.error === 'sin_sesion' || j.error === 'sin_permiso' || j.error === 'dispositivo_ocupado')){ estado(''); }
+      else { PD.error = 'No se pudieron cargar los protocolos.'; estado(PD.error, true); }
+    }catch(e){ PD.error = 'No se pudieron cargar los protocolos.'; estado(PD.error, true); }
+    PD.cargando = false; pintarTorre();
+  }
+  function estado(t, reintentar){
+    const b = $p('pEstado'); b.hidden = !t;
+    b.innerHTML = t ? '<span>' + esc2(t) + '</span>' + (reintentar ? '<button type="button" class="btn small" id="pReint">Reintentar</button>' : '') : '';
+    const r = $p('pReint'); if(r) r.onclick = () => cargarProt();
+  }
+
+  // ---------- ventana del departamento (se trabaja en una copia; "Guardar y cerrar" la aplica) ----------
+  const buscarD = (p, dd) => LAYOUT.find(x => x.p === p && String(x.d) === String(dd));
+  function armar(){
+    const r = rec(actual.d, sec), c = cur(r);
+    dr = {items: items(sec).map(x => ({...x})), q: new Set(r.q), c: new Set(c.c), o: {...(c.o || {})}, nuevos: new Set(), edit: null, conf: false};
+  }
+  function abrir(p, dd){
+    const d = buscarD(p, dd); if(!d) return;
+    actual = {d}; armar();
+    $p('pTit').textContent = d.p + ' · ' + nomDep(d);
+    $p('pSub').textContent = 'Checklist de ' + SECC.find(s => s.k === sec).n;
+    $p('pNuevo').value = ''; msg('');
+    pintarVentana();
+    $p('velProt').classList.add('on'); document.body.classList.add('bloq');
+  }
+  function cerrar(){ $p('velProt').classList.remove('on'); document.body.classList.remove('bloq'); actual = dr = null; }
+  function msg(t, ok){ const m = $p('pMsg'); m.textContent = t; m.className = 'pmsg' + (t ? (ok ? ' ok' : ' err') : ''); }
+  function pintarVentana(){
+    const L = lectura(), r = rec(actual.d, sec), c = cur(r), ant = r.revs.length > 1 ? r.revs[r.revs.length - 2] : null;
+    const vis = dr.items.filter(i => !dr.q.has(i.id)), quit = dr.items.filter(i => dr.q.has(i.id));
+    const prevObs = id => { if(!ant || !ant.snap) return ''; const x = ant.snap.find(z => z.id === id); return x && x.obs ? x.obs : ''; };
+    $p('pRev').textContent = c.cod; $p('pRev').title = NOMCOD[c.cod];
+    $p('pLista').innerHTML = vis.length ? vis.map(i => {
+      const ob = dr.o[i.id] || '', pv = prevObs(i.id);
+      return '<div class="pit' + (dr.c.has(i.id) ? ' hecho' : '') + '" data-id="' + esc2(i.id) + '"><label><input type="checkbox"' + (dr.c.has(i.id) ? ' checked' : '') + (L ? ' disabled' : '') + '><span>' + esc2(i.t) + '</span></label>' + (dr.nuevos.has(i.id) ? '<span class="nuevo">nuevo</span>' : '') +
+        (L ? '' : '<button type="button" class="lap' + (ob ? ' con' : '') + '" title="Escribir observación" aria-label="Escribir observación">✎</button><button type="button" class="q" title="Quitar solo en este departamento" aria-label="Quitar">×</button>') +
+        (pv ? '<div class="prev">' + ant.cod + ': ' + esc2(pv) + '</div>' : '') +
+        (!L && dr.edit === i.id ? '<input type="text" class="obs-in" maxlength="200" placeholder="Escribe la observación" value="' + esc2(ob) + '">' : (ob ? '<div class="obs-t">' + esc2(ob) + '</div>' : '')) + '</div>';
+    }).join('') : '<div class="pvacio">No quedan puntos en este departamento.</div>';
+    const h = vis.filter(i => dr.c.has(i.id)).length;
+    $p('pProg').style.width = (vis.length ? Math.round(h / vis.length * 100) : 0) + '%';
+    $p('pAgrega').hidden = L; $p('pAyuda').hidden = L;
+    $p('pQuitDet').hidden = L || !quit.length;
+    $p('pQuitSum').textContent = 'Quitados en este departamento (' + quit.length + ')';
+    $p('pQuit').innerHTML = quit.map(i => '<div class="pit" data-id="' + esc2(i.id) + '"><span class="t">' + esc2(i.t) + '</span><button type="button" class="btn small" data-r="1">Restaurar</button></div>').join('');
+    // las revisiones cerradas quedan como registro y no se pueden cambiar
+    const cer = r.revs.slice(0, -1);
+    $p('pHist').hidden = !cer.length;
+    $p('pHistSum').textContent = 'Historial de revisiones (' + cer.length + ')';
+    $p('pHistC').innerHTML = cer.slice().reverse().map(x => '<div class="hrev"><h4><span class="prev-cod">' + esc2(x.cod) + '</span>' + esc2(x.fecha) + ' · ' + x.snap.filter(z => z.hecho).length + '/' + x.snap.length + ' puntos</h4>' + x.snap.map(z => '<div class="l"><b class="' + (z.hecho ? 'ok' : 'no') + '">' + (z.hecho ? '✓' : '✗') + '</b><div>' + esc2(z.t) + (z.obs ? '<em>' + esc2(z.obs) + '</em>' : '') + '</div></div>').join('') + '</div>').join('');
+    const sig = COD[COD.indexOf(c.cod) + 1];
+    $p('pPasar').hidden = L || !sig;
+    if(sig && !L){
+      $p('pPasarBtn').textContent = 'Pasar a ' + sig + ' (' + NOMCOD[sig] + ')'; $p('pPasarBtn').hidden = dr.conf; $p('pConf').hidden = !dr.conf;
+      $p('pConfTxt').textContent = c.cod + ' se cierra y queda guardada como registro con sus checks y observaciones. ' + sig + ' empieza sin marcas. También se guardan los cambios de esta ventana.';
+      $p('pConfSi').textContent = 'Pasar a ' + sig;
+    }
+    $p('pGuardar').hidden = L; $p('pCancel').textContent = L ? 'Cerrar' : 'Cancelar';
+    $p('pAcc').dataset.uno = L ? '1' : '';
+  }
+  const limpiar = t => String(t).replace(/[\u0000-\u001f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
+  const nuevoId = () => 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  $p('pLista').addEventListener('change', e => { if(lectura()) return; const f = e.target.closest('.pit'); if(!f) return; const id = f.dataset.id; e.target.checked ? dr.c.add(id) : dr.c.delete(id); pintarVentana(); });
+  $p('pLista').addEventListener('click', e => {
+    if(lectura()) return;
+    const l = e.target.closest('.lap');
+    if(l){ const id = l.closest('.pit').dataset.id; dr.edit = dr.edit === id ? null : id; pintarVentana(); const f = $p('pLista').querySelector('.obs-in'); if(f){ f.focus(); f.setSelectionRange(f.value.length, f.value.length); } return; }
+    const b = e.target.closest('.q'); if(!b) return; const id = b.closest('.pit').dataset.id;
+    if(dr.nuevos.has(id)){ dr.items = dr.items.filter(i => i.id !== id); dr.nuevos.delete(id); }   // un punto recién agregado se cancela entero
+    else { dr.q.add(id); dr.c.delete(id); delete dr.o[id]; }
+    msg(''); pintarVentana();
+  });
+  $p('pLista').addEventListener('input', e => { const f = e.target.closest('.obs-in'); if(!f) return; const id = f.closest('.pit').dataset.id; const t = limpiar(f.value); if(t) dr.o[id] = t; else delete dr.o[id]; f.closest('.pit').querySelector('.lap').classList.toggle('con', !!t); });
+  $p('pLista').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.closest('.obs-in')){ e.preventDefault(); dr.edit = null; pintarVentana(); } });
+  $p('pQuit').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if(!b) return; dr.q.delete(b.closest('.pit').dataset.id); pintarVentana(); });
+
+  // agregar: vale para todos los departamentos de la sección (se guarda al "Guardar y cerrar")
+  function agregar(){
+    const t = limpiar($p('pNuevo').value).slice(0, 80);
+    if(!t){ msg('Escribe el punto que quieres agregar.'); return; }
+    if(dr.items.some(i => i.t.toLowerCase() === t.toLowerCase())){ msg('Ese punto ya existe en la sección.'); return; }
+    if(dr.items.length >= 60){ msg('La sección ya tiene el máximo de puntos.'); return; }
+    const id = nuevoId(); dr.items.push({id, t}); dr.nuevos.add(id);
+    $p('pNuevo').value = ''; msg('Agregado. Se guardará en todos los departamentos al guardar.', true); pintarVentana();
+    const u = $p('pLista').lastElementChild; if(u && u.scrollIntoView) u.scrollIntoView({block:'nearest'});
+  }
+  $p('pAgregar').onclick = agregar;
+  $p('pNuevo').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); agregar(); } });
+
+  // ---------- guardar ----------
+  function armarEnvio(pasar){
+    const r = rec(actual.d, sec);
+    const revs = r.revs.map(x => ({cod: x.cod, c: [...x.c], o: {...(x.o || {})}, snap: x.snap, fecha: x.fecha}));
+    const c = revs[revs.length - 1];
+    c.c = [...dr.c]; c.o = {...dr.o};
+    if(pasar){
+      const vis = dr.items.filter(i => !dr.q.has(i.id));
+      c.snap = vis.map(i => ({id: i.id, t: i.t, hecho: dr.c.has(i.id), obs: dr.o[i.id] || ''}));
+      c.fecha = hoy();
+      revs.push({cod: COD[COD.indexOf(c.cod) + 1], c: [], o: {}, snap: null, fecha: ''});
+    }
+    return {sec, piso: actual.d.p, unidad: String(actual.d.d), items: dr.items.map(i => ({id: i.id, t: i.t})), estado: {q: [...dr.q], revs}, nonce: nuevoNonce(), ts: Date.now()};
+  }
+  const TXT_ERR = {protocolo_desactualizado: 'Otra persona cambió este departamento mientras lo editabas. Se actualizó la información; ábrelo de nuevo.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', repetida: 'Esa solicitud ya se envió.', solicitud_invalida: 'La hora de este aparato no coincide con la del servidor.'};
+  async function enviar(pasar){
+    if(guardando || lectura() || !actual) return;
+    guardando = true; ['pGuardar','pCancel','pPasarBtn','pConfSi','pConfNo'].forEach(i => { $p(i).disabled = true; });
+    const txt = $p('pGuardar').textContent; $p('pGuardar').textContent = 'Guardando…';
+    try{
+      const j = await llamar('calidadProtGuardar', armarEnvio(pasar), false, 30000);
+      if(j && j.ok){
+        PD.plantilla[j.sec] = j.plantilla; PD.deptos[j.clave] = j.dep;
+        if(pasar){ armar(); msg(COD[COD.indexOf(cur(rec(actual.d, sec)).cod) - 1] + ' quedó guardada como registro.', true); pintarVentana(); pintarTorre(); }
+        else { cerrar(); pintarTorre(); }
+      }else if(j && j.error === 'protocolo_desactualizado'){
+        aviso(TXT_ERR.protocolo_desactualizado); cerrar(); cargarProt();
+      }else if(j && j.error && TXT_ERR[j.error]) msg(TXT_ERR[j.error]);
+      else if(j && (j.error === 'sin_sesion' || j.error === 'sin_permiso')) { /* llamar ya avisó */ }
+      else msg('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
+    }catch(e){ msg('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); }
+    guardando = false; $p('pGuardar').textContent = txt; ['pGuardar','pCancel','pPasarBtn','pConfSi','pConfNo'].forEach(i => { $p(i).disabled = false; });
+  }
+  $p('pCancel').onclick = () => { if(!guardando) cerrar(); };
+  $p('pGuardar').onclick = () => enviar(false);
+  $p('pPasarBtn').onclick = () => { dr.conf = true; pintarVentana(); };
+  $p('pConfNo').onclick = () => { dr.conf = false; pintarVentana(); };
+  $p('pConfSi').onclick = () => enviar(true);
+
+  // ---------- la página de atrás no se mueve con la ventana abierta ----------
+  (function(){
+    const puede = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
+    const ab = () => $p('velProt').classList.contains('on');
+    document.addEventListener('wheel', e => { if(ab() && !puede(e.target, e.deltaY)) e.preventDefault(); }, {passive:false});
+    let y0 = 0;
+    document.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, {passive:true});
+    document.addEventListener('touchmove', e => { if(ab() && !puede(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive:false});
+  })();
+
+  // ---------- Departamentos / Protocolos ----------
+  function ponerVista(v){
+    document.querySelectorAll('#vtabs button').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    $p('vistaDptos').hidden = v !== 'dptos'; $p('vistaProt').hidden = v !== 'prot';
+    try{ guardarLocal(kUsr('calidadVista'), v === 'prot' ? 'prot' : null); }catch(e){}
+    if(v === 'prot'){ pintarTorre(); if(!PD.cargado && !PD.cargando) cargarProt(); }
+  }
+  $p('vtabs').addEventListener('click', e => { const b = e.target.closest('button'); if(b) ponerVista(b.dataset.v); });
+  try{
+    if(leerLocal(kUsr('calidadVista')) === 'prot'){
+      // se espera a que la página termine su primera carga
+      const t = setInterval(() => { try{ if(cargado){ clearInterval(t); ponerVista('prot'); } }catch(e){} }, 400);
+      setTimeout(() => clearInterval(t), 60000);
+    }
+  }catch(e){}
+})();
+</script>
+<script>
 /* ===== aviso si esta página corre en otro sitio ===== */
 (function(){ try{
   if(sessionStorage.getItem('avSitio')) return; sessionStorage.setItem('avSitio', '1');
@@ -2309,4 +2867,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.37.9 · 07-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.0 · 08-11-2026 ==== -->
