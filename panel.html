@@ -2134,7 +2134,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.63';
+const APP_VERSION = '0.73.64';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -8901,6 +8901,33 @@ setTimeout(function(){
 }catch(e){} })();
 /* ===== fin aviso de sitio ===== */
 </script>
+<style id="huecosCss">
+/* ===== hueco en construcción: va donde un botón queda solo en su fila ===== */
+.btn-vacio{min-height:38px;display:flex;align-items:center;justify-content:center;padding:6px 8px;border:1px dashed var(--border-strong,#b9bdb3);border-radius:0;cursor:not-allowed;user-select:none;background:repeating-linear-gradient(135deg,rgba(214,160,30,.30) 0 9px,transparent 9px 18px),var(--panel);}
+</style>
+<script id="huecosJs">
+// ===== si un botón queda solo en su fila, se le pone un hueco al lado =====
+(function(){
+  const vacio = () => { const v = document.createElement('div'); v.className = 'btn-vacio'; v.setAttribute('aria-hidden', 'true'); v.title = 'Botón en construcción'; return v; };
+  function rellenar(){
+    document.querySelectorAll('#tbGroups .tb-btns').forEach(caja => {
+      caja.querySelectorAll('.btn-vacio').forEach(x => x.remove());
+      if(caja.offsetParent === null) return;
+      const ancho = caja.getBoundingClientRect().width; let col = 0;
+      [...caja.children].forEach(b => {
+        if(b.offsetParent === null) return;
+        if(b.getBoundingClientRect().width > ancho * 0.6){ if(col){ caja.insertBefore(vacio(), b); col = 0; } }
+        else col = col ? 0 : 1;
+      });
+      if(col) caja.appendChild(vacio());
+    });
+  }
+  let t = null; const pedir = () => { clearTimeout(t); t = setTimeout(rellenar, 60); };
+  const cont = document.getElementById('tbGroups');
+  if(cont) new MutationObserver(pedir).observe(cont, {attributes: true, subtree: true, attributeFilter: ['style', 'hidden', 'class', 'disabled']});
+  window.addEventListener('resize', pedir); setTimeout(rellenar, 400); setTimeout(rellenar, 1500);
+})();
+</script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.63 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.64 · 08-11-2026 ==== -->
