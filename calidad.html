@@ -1233,7 +1233,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.15';
+const CAL_VERSION = '1.38.17';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1259,6 +1259,7 @@ const totalFotos = b => ((fotosDe[b] || []).length || fotosCount[b] || 0) + (Num
 const conObs = e => e === 'observado' || e === 'corregido';
 const fotosDe = {};
 const fotosEstado = {};
+const fotosFresca = {};   // cuándo se trajeron las fotos de cada dpto (si son recientes no se vuelven a pedir)
 let cadenaFotos = Promise.resolve();
 let cadenaFotosPendiente = 0;
 let cargando = false;
@@ -1750,7 +1751,11 @@ async function abrirFotos(d){
   const base = claveBase(d);
   if(!(fotosCount[base] || 0) && !(fotosDe[base] || []).length){ fotosDe[base] = []; pintarFotos(); return; }
   if(fotosEstado[base] === 'pidiendo') return;
-  fotosEstado[base] = 'pidiendo'; pintarFotos();
+  if(fotosFresca[base] && Date.now() - fotosFresca[base] < 20000){ pintarFotos(); return; }
+  await traerFotos(base, false);
+}
+async function traerFotos(base, silencioso){
+  fotosEstado[base] = 'pidiendo'; if(!silencioso) pintarFotos();
   try{
     const j = await llamar('calidadFotosListar', {clave: base}, false, 40000);
     if(j && j.ok && Array.isArray(j.fotos)){
@@ -1758,10 +1763,22 @@ async function abrirFotos(d){
       fotosDe[base] = j.fotos.map(f => Object.assign({estado: 'ok'}, f)).concat(pend);
       fotosCount[base] = j.fotos.length;
       fotosEstado[base] = '';
+      fotosFresca[base] = Date.now();
     }else{ fotosEstado[base] = 'error'; }
   }catch(e){ fotosEstado[base] = 'error'; }
   if(actual && claveBase(actual) === base) pintarFotos();
-  pintar();
+  if(!silencioso) pintar();   // al precargar no se vuelve a dibujar la lista (el mouse está encima)
+}
+let preOcupado = false;
+function precargarFotos(k){
+  if(!fotosOk) return;
+  const d = LAYOUT.find(x => clave(x) === k); if(!d) return;
+  const base = claveBase(d);
+  if(!(fotosCount[base] || 0) || fotosEstado[base] === 'pidiendo') return;
+  if(fotosFresca[base] && Date.now() - fotosFresca[base] < 20000) return;
+  if(preOcupado) return;   // una sola precarga a la vez, para no llenar de pedidos la base de datos
+  preOcupado = true;
+  traerFotos(base, true).finally(() => { preOcupado = false; });
 }
 const MSG_FOTO = {limite: 'Este departamento ya tiene ' + FOTOS_MAX + ' fotos. Borra una para subir otra.', demasiadas: 'Demasiados envíos seguidos. Espera un minuto.', solicitud_invalida: 'Revisa la hora de tu equipo e intenta de nuevo.', foto_invalida: 'Esa foto no se pudo guardar. Prueba con otra.', clave_invalida: 'Ese departamento no se reconoce.'};
 function anadirFotos(files, rep){
@@ -2495,6 +2512,15 @@ $('filtroVista').addEventListener('change', () => { guardarLocal(kUsr('calidadFi
   }
 })();
 $('lista').addEventListener('click', e => { const t = e.target.closest('.tile'); if(t) abrir(t.dataset.k); });
+// ===== precarga: mouse (queda 120 ms encima) o dedo (al tocar) =====
+let tPre = null, ultPre = null;
+$('lista').addEventListener('pointerover', e => {
+  const t = e.target.closest('.tile[data-k]'); if(!t || t === ultPre) return;
+  ultPre = t; clearTimeout(tPre);
+  tPre = setTimeout(() => precargarFotos(t.dataset.k), e.pointerType === 'mouse' ? 120 : 0);
+});
+$('lista').addEventListener('pointerdown', e => { const t = e.target.closest('.tile[data-k]'); if(t){ clearTimeout(tPre); precargarFotos(t.dataset.k); } });
+$('lista').addEventListener('pointerleave', () => { clearTimeout(tPre); ultPre = null; });
 document.querySelectorAll('#mSeg button').forEach(b => b.addEventListener('click', () => elegir(b.dataset.e)));
 $('verRegistro').addEventListener('click', abrirRegistro);
 $('regCerrar').addEventListener('click', cerrarRegistro);
@@ -3111,4 +3137,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.15 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.17 · 08-11-2026 ==== -->

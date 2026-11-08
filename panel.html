@@ -2134,7 +2134,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.62';
+const APP_VERSION = '0.73.63';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2530,6 +2530,29 @@ const listoDpto = (pisoNum, dpto) => {
 };
 document.getElementById('filterListos').value = ocultarListos ? 'ocultar' : 'mostrar';
 document.querySelectorAll('.tnuevo[data-hasta]').forEach(t => { if(Date.now() > new Date(t.dataset.hasta + 'T23:59:59').getTime()) t.remove(); });
+// ===== Pisos de a poco: se dibujan los primeros y, al bajar, los siguientes antes de que entren a la pantalla =====
+const PISOS_INICIO = 4, PISOS_LOTE = 2;
+let pisosRender = PISOS_INICIO, sigPisos = '', pisosCola = [], pisosFn = null, obsPisos = null;
+function vigilarCola(){
+  if(obsPisos){ obsPisos.disconnect(); obsPisos = null; }
+  const cola = document.getElementById('pisosCola'); if(!cola) return;
+  if(!('IntersectionObserver' in window)){ agregarPisos(true); return; }
+  obsPisos = new IntersectionObserver(es => { if(es.some(e => e.isIntersecting)) agregarPisos(); }, {rootMargin: '0px 0px 1100px 0px'});
+  obsPisos.observe(cola);
+}
+function agregarPisos(todos){
+  const cola = document.getElementById('pisosCola'); if(!cola || !pisosFn) return;
+  const lote = pisosCola.slice(pisosRender, todos ? undefined : pisosRender + PISOS_LOTE);
+  pisosRender += lote.length;
+  const h = lote.map(pisosFn).filter(Boolean).join('');
+  if(h) cola.insertAdjacentHTML('beforebegin', h);
+  if(pisosRender >= pisosCola.length){ cola.remove(); if(obsPisos){ obsPisos.disconnect(); obsPisos = null; } }
+  else if(obsPisos){ obsPisos.unobserve(cola); obsPisos.observe(cola); }   // vuelve a mirar si todavía queda cerca
+  equalizeRowNameHeights(); ajustarTamanoDpto(); ajustarNombresMovil(); igualarAltoCeldasTrabajador();
+}
+function asegurarPiso(piso){
+  while(document.getElementById('pisosCola') && ![...document.querySelectorAll('#content .floor-block')].some(f => f.dataset.piso === piso)) agregarPisos();
+}
 let ordenPisosDesc = true;
 try{ const o = localStorage.getItem('progresoObraOrdenPisosV2'); if(o) ordenPisosDesc = o === 'desc'; }catch(err){}
 const cmpPisos = (a, b) => ordenPisosDesc ? b - a : a - b;
@@ -3852,13 +3875,13 @@ function soloUltimoPisoFlechas(){
   const b = [...document.querySelectorAll('#content .floor-block')];
   const num = f => parseInt(String(f.dataset.piso).match(/-?\d+/), 10);
   const nums = b.map(num).filter(n => !isNaN(n));
-  const max = Math.max(...nums), min = Math.min(...nums);
+  const max = Math.max(...nums), min = Math.min(...nums), completo = !document.getElementById('pisosCola');
   // ▲ solo en el piso más alto que se ve (ahí se abre el de arriba) y ▼ solo en el más bajo
   b.forEach(f => f.querySelectorAll('.piso-nav').forEach(n => {
     const [su, ba] = n.querySelectorAll('.piso-flecha');
     if(su) su.style.display = num(f) === max ? '' : 'none';
-    if(ba) ba.style.display = num(f) === min ? '' : 'none';
-    n.style.display = num(f) === max || num(f) === min ? '' : 'none';
+    if(ba) ba.style.display = num(f) === min && completo ? '' : 'none';
+    n.style.display = num(f) === max || (num(f) === min && completo) ? '' : 'none';
   }));
 }
 (function(){ const c = document.getElementById('content'); if(c) new MutationObserver(soloUltimoPisoFlechas).observe(c, {childList:true, subtree:true}); soloUltimoPisoFlechas(); })();
@@ -3892,6 +3915,7 @@ document.addEventListener('click', (e) => {
     if(!yaEstaba && !quieto) raiz.style.overflowAnchor = 'none';   // la página no se corrige sola: el piso de abajo baja y el nuevo se abre
     if(vistaPisos === 'mov') pisosExtra.add(dest);
     render();
+    asegurarPiso(dest);
     const nuevo = [...document.querySelectorAll('#content .floor-block')].find(f => f.dataset.piso === dest);
     const verNuevo = () => { raiz.style.overflowAnchor = ''; const r = nuevo && nuevo.getBoundingClientRect(); if(!r || r.top < 56 || r.bottom > window.innerHeight) pisoVerCompleto(dest); };
     if(nuevo && !yaEstaba && !quieto && nuevo.animate){
@@ -7240,6 +7264,7 @@ function render(){
   let html;
   listosOcultos = 0;
   if(activeCategoria === 'Pasillos'){
+    pisosCola = [];
     html = renderPasillosTable();
   } else {
     const blocks = FLOOR_BLOCKS.filter(f => f.categoria === activeCategoria).sort((a,b) => cmpPisos(a.pisoNum, b.pisoNum));
@@ -7254,10 +7279,16 @@ function render(){
     }).filter(b => b.depts.length || b.pasillo);
     listosOcultos = vistos.size;
     const dz = ['A', 'B', 'C', 'D'].find(l => document.body.classList.contains('dz-' + l));
-    html = visibleBlocks.map(dz === 'B' ? renderFloorCards : dz === 'C' ? renderFloorMapa : renderFloorTable).filter(Boolean).join('') ||
+    // ===== los pisos se dibujan de a poco: siempre unos pisos más abajo de lo que se ve, así ya están listos cuando se llega =====
+    const rend = dz === 'B' ? renderFloorCards : dz === 'C' ? renderFloorMapa : renderFloorTable;
+    const sig = [activeCategoria, pisoFilterVal, vistaPisos, ocultarListos, ordenPisosDesc, document.getElementById('filterEstado').value, document.getElementById('filterTrabajador').value, document.getElementById('search').value, dz].join('|');
+    if(sig !== sigPisos){ sigPisos = sig; pisosRender = PISOS_INICIO; }
+    pisosCola = visibleBlocks; pisosFn = rend;
+    html = (visibleBlocks.slice(0, pisosRender).map(rend).filter(Boolean).join('') + (visibleBlocks.length > pisosRender ? '<div id="pisosCola" aria-hidden="true" style="height:1px"></div>' : '')) ||
       '<p style="color:var(--sub);text-align:center;padding:40px 0;">No hay partidas que coincidan con el filtro.</p>';
   }
   contentEl.innerHTML = barraAreasMovil() + html;
+  vigilarCola();
   actualizarAvisos();
   equalizeRowNameHeights();
   ajustarTamanoDpto();
@@ -8872,4 +8903,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.62 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.63 · 08-11-2026 ==== -->
