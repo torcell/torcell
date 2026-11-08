@@ -724,7 +724,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 /* ===== Historial de cambios: queda fijo a la izquierda del cuadro principal ===== */
 .hist{display:none;}
 @media (min-width:900px){
-  body.hist-on:not(.hist-chico) .hist{display:flex;position:fixed;top:150px;left:var(--h-izq,8px);width:var(--h-w,220px);max-height:calc(100vh - 170px);z-index:30;flex-direction:column;background:var(--panel);border:1px solid var(--strong);box-shadow:0 6px 20px rgba(0,0,0,.25);animation:histEntra .26s ease both;}
+  body.hist-on:not(.hist-chico) .hist{display:flex;position:fixed;top:150px;left:var(--h-izq,8px);width:var(--h-w,220px);max-height:calc(100vh - 170px);z-index:30;flex-direction:column;background:var(--panel);border:1px solid var(--strong);box-shadow:0 2px 10px rgba(0,0,0,.10);animation:histEntra .26s ease both;}
   .hist .hcab{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 8px;border-bottom:1px solid var(--border);}
   .hist .hcab b{font-size:13px;display:flex;align-items:center;gap:5px;min-width:0;}
   .hist .hcab b span{font-size:11px;color:var(--sub);font-weight:600;}
@@ -1226,7 +1226,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.9';
+const CAL_VERSION = '1.38.10';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2973,10 +2973,10 @@ limpiarNuevos();
   function colocar(){
     const m = document.querySelector('main'); if(!m) return;
     const izq = m.getBoundingClientRect().left;
-    const w = Math.min(220, Math.floor(izq - 20));
+    const w = Math.min(220, Math.floor(izq - 36));
     const root = document.documentElement.style;
     root.setProperty('--h-w', w + 'px');
-    root.setProperty('--h-izq', Math.max(8, Math.floor(izq - 12 - w)) + 'px');
+    root.setProperty('--h-izq', Math.max(8, Math.floor(izq - 28 - w)) + 'px');
     document.body.classList.toggle('hist-chico', w < 150);
   }
   const nodos = new Map();
@@ -3089,4 +3089,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.9 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.10 · 08-11-2026 ==== -->
