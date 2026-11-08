@@ -537,11 +537,11 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 
 /* ===== PC: fotos a la izquierda y observaciones a la derecha, salen por detrás de la ventana ===== */
 .ven{position:relative;width:100%;max-width:400px;--lado:clamp(220px,calc((100vw - 440px)/2),310px);}
-.ven > .modal{max-width:none;}
+.ven > .modal{max-width:none;z-index:3;}
 .lado{display:none;}
 @media (min-width:900px){
   .ven > .modal{min-height:min(520px,88vh);}
-  .lado{display:flex;position:absolute;top:0;bottom:0;width:var(--lado);z-index:1;background:var(--panel);border:1px solid var(--strong);flex-direction:column;visibility:hidden;opacity:0;box-shadow:0 6px 20px rgba(0,0,0,.25);
+  .lado{display:flex;position:absolute;top:3px;bottom:3px;width:var(--lado);z-index:1;background:var(--panel);border:1px solid var(--strong);flex-direction:column;visibility:hidden;opacity:0;box-shadow:0 6px 20px rgba(0,0,0,.25);
     transition:transform .32s cubic-bezier(.2,.7,.2,1),opacity .22s ease,visibility 0s linear .32s;}
   .lado.izq{right:100%;margin-right:-1px;transform:translateX(calc(100% - 6px));}
   .lado.der{left:100%;margin-left:-1px;transform:translateX(calc(-100% + 6px));}
