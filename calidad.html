@@ -614,10 +614,16 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .pestado[hidden]{display:none;}
 .ptorre{border:1px solid var(--strong);background:var(--panel);padding:0 0 6px;}
 .ptecho{height:12px;margin:0 0 8px;background:repeating-linear-gradient(135deg,var(--strong) 0 6px,var(--soft) 6px 12px);border-bottom:1px solid var(--strong);}
-.ppiso{display:grid;grid-template-columns:42px minmax(0,1fr);gap:4px;align-items:center;padding:0 8px;margin-bottom:4px;}
+.ppiso{display:grid;grid-template-columns:42px minmax(0,1fr) 44px;gap:4px;align-items:center;padding:0 8px;margin-bottom:4px;}
 .ppiso .pn{font-size:12px;font-weight:800;color:var(--sub);text-align:center;line-height:1.1;}
-.pus{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:4px;}
-.pcel{position:relative;border:1px solid var(--border);background:color-mix(in srgb,var(--sub) 16%,var(--panel));color:var(--text);min-height:48px;padding:5px 2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;transition:transform .1s ease,box-shadow .12s ease,border-color .15s ease,opacity .2s ease;}
+.pus{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;}
+/* pisos con partidas con nombre (Piso -1): cuadros más largos, todos del largo del más largo, sin llenar todo el ancho */
+.ppiso.esp .pus{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;grid-template-columns:none;justify-self:start;}
+.ppiso.esp .pcel{min-width:130px;padding-left:14px;padding-right:14px;}
+.ppiso.esp .pcel b{overflow:visible;text-overflow:clip;}
+.pcel .dc{display:none;}
+.pleyenda.arriba{justify-content:flex-end;margin:0 0 8px;}
+.pcel{position:relative;border:1px solid var(--border);background:color-mix(in srgb,var(--sub) 16%,var(--panel));color:var(--text);min-height:50px;padding:5px 2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;transition:transform .1s ease,box-shadow .12s ease,border-color .15s ease,opacity .2s ease;}
 .pcel:hover{box-shadow:inset 0 0 0 1px var(--accent),inset 0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);border-color:var(--accent);}
 .pcel:active{transform:scale(.94);}
 .pcel b{font-size:12.5px;line-height:1.05;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -634,7 +640,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .pleyenda{display:flex;gap:12px;font-size:11.5px;color:var(--sub);flex-wrap:wrap;margin:8px 0 12px;}
 .pleyenda i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;}
 .pleyenda .l0{background:color-mix(in srgb,var(--sub) 30%,var(--panel));border:1px solid var(--border);}.pleyenda .l1{background:var(--warn);}.pleyenda .l2{background:var(--ok);}
-@media (max-width:520px){.ppiso{grid-template-columns:34px minmax(0,1fr);padding:0 5px;}.pus{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));}.pcel{min-height:44px;}.pcel b{font-size:11px;}.pcel small{font-size:9.5px;}}
+/* PC: se muestra el número corto (01, 02…) como en la torre; celular: número completo y cuadros cuadrados */
+@media (min-width:521px){.pcel .dl{display:none;}.pcel .dc{display:inline;}.ppiso.esp .pcel .dl{display:inline;}.ppiso.esp .pcel .dc{display:none;}}
+@media (max-width:520px){.ppiso{grid-template-columns:30px minmax(0,1fr) 30px;padding:0 5px;}.pus{gap:3px;}.pcel{min-height:0;aspect-ratio:1;padding:8px 0 3px;gap:0;}.pcel b,.pcel small{flex:0 0 auto;}.pcel b{font-size:9.5px;line-height:1.2;overflow:visible;text-overflow:clip;}.pcel small{font-size:9px;}.pcel .rv{font-size:7px;top:1px;left:2px;}.ppiso.esp .pcel{aspect-ratio:auto;min-height:44px;min-width:110px;}}
 
 /* ventana del checklist: solo se cierra con sus botones */
 #velProt{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
@@ -699,7 +707,27 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .pat span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pat small{flex:none;color:var(--sub);font-size:11px;}
 
+/* anillo del % del piso, siempre en la esquina derecha del div */
+.pan{position:relative;width:42px;height:42px;border-radius:50%;background:conic-gradient(var(--warn) calc(var(--p) * 1%),color-mix(in srgb,var(--sub) 28%,var(--panel)) 0);display:flex;align-items:center;justify-content:center;justify-self:end;}
+.pan::before{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--panel);}
+.pan span{position:relative;font-size:10.5px;font-weight:800;line-height:1;}
+.pan.ok{background:conic-gradient(var(--ok) 100%,var(--ok) 0);}
+@media (max-width:520px){.pan{width:30px;height:30px;}.pan::before{inset:4px;}.pan span{font-size:8px;}}
+
 #velProt [hidden]{display:none !important;}
+
+/* ===== cuadro Corregido (queda pegado abajo del lateral, siempre en el mismo lugar) ===== */
+.mcor{display:none;position:sticky;bottom:0;z-index:2;margin-top:10px;border:1px solid var(--strong);border-left:4px solid var(--c-ok,#2e8b3a);background:var(--panel);padding:12px;flex-direction:column;gap:8px;box-shadow:0 -6px 14px rgba(0,0,0,.14);}
+.mcor.on{display:flex;}
+.mcor h3{margin:0;font-size:14px;font-weight:800;}
+.mcor ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:150px;overflow:auto;}
+.mcor li{font-size:13px;line-height:1.3;display:flex;gap:6px;}
+.mcor li::before{content:"\2713";color:var(--c-ok,#2e8b3a);font-weight:800;}
+.mcor li.q{color:var(--sub);text-decoration:line-through;}
+.mcor li.q::before{content:"\2212";color:var(--sub);}
+.mcor small{font-size:12px;color:var(--sub);line-height:1.3;}
+.mcor .btn{width:100%;}
+#vel.lect .mcor{display:none !important;}
 </style>
 <script>
 // ===== Aviso lateral · v1 =====
@@ -866,8 +894,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="presu"><div id="pResu"></div><button type="button" class="btn small" id="pRefrescar">↻ Actualizar</button></div>
     <div class="pestado" id="pEstado" hidden></div>
     <div class="patras" id="pAtras" hidden></div>
+    <div class="pleyenda arriba"><span><i class="l0"></i>sin avance</span><span><i class="l1"></i>en proceso</span><span><i class="l2"></i>completo</span></div>
     <div class="ptorre" id="pTorreBox"><div class="ptecho"></div><div id="pTorre"></div></div>
-    <div class="pleyenda"><span><i class="l0"></i>sin avance</span><span><i class="l1"></i>en proceso</span><span><i class="l2"></i>completo</span></div>
     <details class="gu-det pguia">
       <summary>Guía de protocolos</summary>
       <div class="gu-cuerpo">
@@ -1116,6 +1144,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
         <div class="obsfotos" id="mObsFotos"></div>
         <button class="btn" id="mElegir" type="button">＋ Elegir observaciones</button>
         <div class="obslista" id="mLista" hidden></div>
+        <div class="mcor" id="mCor"><h3>Lo que corregiste</h3><ul id="mCorLista"></ul><small id="mCorNota"></small><button class="btn primary" id="mCorConf" type="button">Confirmar a jefa de calidad</button></div>
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
@@ -1139,7 +1168,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.0';
+const CAL_VERSION = '1.38.1';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1461,6 +1490,7 @@ function elegir(e){
   $('mEditar').tabIndex = conObs(e) ? 0 : -1;
   $('mErr').textContent = '';
   ajustarSeg();
+  pintarCambios();
 }
 // Con fotos (guardadas o archivadas) el departamento no puede quedar "sin observaciones":
 // solo se puede dejar "Corregido" (las fotos se quedan) cuando ya tenía observaciones.
@@ -1493,6 +1523,22 @@ function nFotosActual(){
   const b = claveBase(actual);
   return totalFotos(b);
 }
+let baseObs = {};
+// cuadro de Corregido: lo que quedó marcado y lo que se quitó desde que abriste la ventana
+function pintarCambios(){
+  const box = $('mCor');
+  if(!box) return;
+  const on = estadoSel === 'corregido' && !soloLectura();
+  box.classList.toggle('on', on);
+  if(!on) return;
+  const sel = seleccion(), li = [];
+  Object.keys(sel).forEach(n => li.push('<li>' + esc(n) + ' ×' + sel[n] + '</li>'));
+  Object.keys(baseObs).forEach(n => { if(n !== 'Con fotos' && !sel[n]) li.push('<li class="q">' + esc(n) + ' (quitada)</li>'); });
+  const nf = nFotosActual();
+  if(nf) li.push('<li>Fotos del departamento: ' + nf + '</li>');
+  $('mCorLista').innerHTML = li.length ? li.join('') : '<li>Sin detalle de observaciones</li>';
+  $('mCorNota').textContent = 'Al confirmar se guarda como Corregido y le llega el aviso a Calidad.';
+}
 function pintarResumenObs(){
   const n = nFotosActual();
   $('mObsFotos').innerHTML = '<span>📷 Fotos: ' + n + '</span>' + (n ? '<small>Con fotos queda con observación. Cuando se arregle, marca Corregido.</small>' : '<small>Sube fotos abajo o elige las observaciones</small>');
@@ -1501,6 +1547,7 @@ function pintarResumenObs(){
   const listaVisible = listaAbierta || esPC();
   $('mLista').hidden = !listaVisible;
   $('mEditar').hidden = !listaVisible;
+  pintarCambios();
 }
 function pintarLista(sel, mantener){
   sel = Object.assign({}, sel); delete sel['Con fotos'];
@@ -1560,6 +1607,7 @@ function abrir(k){
   obsAbierto = false;
   const conFotos = nFotosActual() > 0;
   estadoSel = (conFotos && !conObs(r.e)) ? 'observado' : r.e === 'pendiente' ? '' : r.e;
+  baseObs = parseItems(r);
   pintarLista(parseItems(r));
   elegir(estadoSel);
   document.body.classList.add('bloq');
@@ -2445,6 +2493,7 @@ $('verFotos').addEventListener('click', abrirExportar);
 $('eCerrar').addEventListener('click', cerrarExportar);
 $('eAccion').addEventListener('click', accionExportar);
 $('mGuardar').addEventListener('click', guardarRevision);
+$('mCorConf').addEventListener('click', () => { if(estadoSel === 'corregido') guardarRevision(); });
 $('mObsToggle').addEventListener('click', () => { obsAbierto = !obsAbierto; elegir(estadoSel); });
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
@@ -2647,18 +2696,25 @@ document.addEventListener('visibilitychange', () => {
     const F = [['todos','Todos'], ...COD.map(c => [c, c]), ['100','100%'], ['atras','Más atrasados'], ['cero','Sin avance (0%)']];
     $p('pFil').innerHTML = F.map(([k, n]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '" aria-pressed="' + (k === filtro) + '">' + n + (k === 'todos' ? '' : '<small>' + (k === 'atras' ? cal.rank.size : cal.filas.filter(x => cal.cumple(x, k)).length) + '</small>') + '</button>').join('');
   }
+  // % del piso (puntos hechos / puntos totales de sus departamentos) en un anillo a la derecha
+  function anilloPiso(P, cal){
+    let h = 0, t = 0;
+    P.ds.forEach(d => { const x = cal.filas.find(f => f.d === d); if(x){ h += x.a.h; t += x.a.t; } });
+    const pct = t ? Math.round(h * 100 / t) : 0;
+    return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc2((P.n < 0 ? 'Piso ' + P.n : 'Piso ' + P.n) + ': ' + h + ' de ' + t + ' puntos') + '" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
+  }
   function pintarTorre(){
     pintarTabs();
     const cal = calcular();
     pintarFiltros(cal);
     let n = 0;
-    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso"><div class="pn">' + (P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
+    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + (P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
       const a = cal.filas.find(x => x.d === d).a, k = claveDep(d, sec);
       const ok = a.t > 0 && a.h === a.t, par = a.h > 0 && !ok, fuera = filtro !== 'todos' && !cal.cumple({d, a}, filtro);
       if(!fuera) n++;
       const et = d.d === 'Pasillo' ? 'Pas.' : String(d.d);
-      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob">✎' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b>' + esc2(et) + '</b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
-    }).join('') + '</div></div>').join('');
+      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob">✎' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
+    }).join('') + '</div>' + anilloPiso(P, cal) + '</div>').join('');
     // lista de los más atrasados (en la torre pueden quedar lejos hacia abajo)
     const lista = [...cal.rank.entries()].map(([k, r]) => ({r, x: cal.filas.find(f => claveDep(f.d, sec) === k)}));
     $p('pAtras').hidden = filtro !== 'atras' || !lista.length;
@@ -2867,4 +2923,4 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.0 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.1 · 08-11-2026 ==== -->
