@@ -94,7 +94,7 @@ main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;b
 @keyframes modalPopOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.96);}}
 .modal{position:relative;width:100%;max-width:400px;background:var(--panel);border:1px solid var(--strong);padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto;animation:modalPop .16s ease;}
 #vel.out .modal,#velReg.out .modal,#velOp.out .modal,#velFoto.out .modal,#velExp.out .modal{animation:modalPopOut .14s ease forwards;}
-body.bloq{overflow:hidden;}
+html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 .modal h2{margin:0;font-size:17px;}
 .mhead{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;}
 .mhead h2{min-width:0;}
@@ -1233,7 +1233,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.17';
+const CAL_VERSION = '1.38.18';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -3137,4 +3137,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.17 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.18 · 08-11-2026 ==== -->
