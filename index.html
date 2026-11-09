@@ -799,9 +799,15 @@ async function bloqueadoFlujo(res){
   pantalla('lgPin');
 }
 function mensajeElegir(t, mal){ const m = lg('lgMsgElegir'); m.textContent = t || ''; m.className = 'lg-msg' + (mal ? ' mal' : ''); }
+// secciones que el admin escondió en el inicio (llegan del servidor al entrar y al refrescar)
+let OCULTAS = [];
+try{ OCULTAS = JSON.parse(ls('ocultasInicio') || '[]'); if(!Array.isArray(OCULTAS)) OCULTAS = []; }catch(e){ OCULTAS = []; }
+function guardarOcultas(l){ if(!Array.isArray(l)) return; OCULTAS = l.filter(x => x !== 'admin'); ls('ocultasInicio', JSON.stringify(OCULTAS)); }
 function mostrarOpciones(lista){
   const pref = ls('destinoPreferido');
   document.querySelectorAll('.lg-dest button').forEach(b => {
+    if(b.dataset.dest !== 'admin' && OCULTAS.indexOf(b.dataset.dest) !== -1){ b.hidden = true; return; }
+    b.hidden = false;
     const bloq = !accede(lista, b.dataset.dest);
     if(b.dataset.dest === 'admin'){ b.hidden = bloq; if(bloq) return; }
     b.classList.toggle('lock', bloq); b.setAttribute('aria-disabled', bloq ? 'true' : 'false');
@@ -812,11 +818,12 @@ function mostrarOpciones(lista){
 function elegir(res, recordar, aviso){
   lg('lgQuien').textContent = 'Hola, ' + limpioNombre(res.nombre || 'Admin') + '. Elige a dónde ir.';
   mensajeElegir(aviso || '', !!aviso);
+  guardarOcultas(res.ocultas);
   const pref = mostrarOpciones(res.secciones || SECC_BASE[res.rol] || []);
   datosElegir = {res, recordar};
   if(res.encargados) aplicarEncargados(res.encargados);
   pantalla('lgElegir');
-  if(PAGINAS[pref] && accede(res.secciones || [], pref)) precargar(pref);
+  if(PAGINAS[pref] && accede(res.secciones || [], pref) && OCULTAS.indexOf(pref) === -1) precargar(pref);
 }
 async function refrescarAcceso(){
   if(!datosElegir || !datosElegir.res.token) return;
@@ -827,6 +834,7 @@ async function refrescarAcceso(){
     return;
   }
   if(r.encargados) aplicarEncargados(r.encargados);
+  guardarOcultas(r.ocultas);
   if(Array.isArray(r.secciones)){
     datosElegir.res.secciones = r.secciones;
     guardarHub({token: datosElegir.res.token, nombre: datosElegir.res.nombre, rol: datosElegir.res.rol, secciones: r.secciones, recordar: datosElegir.recordar});
@@ -956,4 +964,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.13 · 05-11-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.14 · 09-11-2026 ==== -->

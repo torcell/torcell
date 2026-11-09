@@ -904,12 +904,16 @@ function vistaEncargados(){
 }
 function vistaVisual(){
   const a = datos.ajustes || {halloween:false};
+  const oc = a.ocultas || [];
+  const SEC_OC = [['molde','Molde de secciones'],['proyeccion','Proyección Lógica'],['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina técnica'],['bodega','Bodega']];
   main.innerHTML = '<h2>Visual</h2><p class="nota">Botones y temas que ven los demás. Lo que dejes apagado no aparece.</p><div class="tarjeta">'
     + '<div class="fila"><label class="quien2" for="vHal"><b>Botón Halloween en Calidad</b><small style="display:block;color:var(--sub);">Si está apagado, el botón no aparece y el tema queda desactivado.</small></label><input type="checkbox" id="vHal"' + (a.halloween ? ' checked' : '') + '></div>'
+    + '<div class="fila" style="display:block;"><b>Esconder secciones en el inicio</b><small style="display:block;color:var(--sub);margin-bottom:6px;">Las que marques no aparecen en la pantalla de inicio para nadie. El Panel de Admin no se puede esconder.</small>'
+    + SEC_OC.map(s => '<div class="fila"><label class="quien2" for="vOc_' + s[0] + '">' + s[1] + '</label><input type="checkbox" class="vOc" data-s="' + s[0] + '" id="vOc_' + s[0] + '"' + (oc.indexOf(s[0]) !== -1 ? ' checked' : '') + '></div>').join('') + '</div>'
     + '<div style="margin-top:12px;"><button class="btn primary" id="vG" type="button">Guardar y cerrar</button> <button class="btn" id="vC" type="button">Cerrar sin guardar</button></div></div>';
   $('vC').addEventListener('click', () => { location.href = 'index.html?menu=1'; });
   $('vG').addEventListener('click', async () => {
-    const j = await accion('adminAjustesGuardar', {ajustes:{halloween:$('vHal').checked}}); if(j){ datos.ajustes = j.ajustes; toast('Guardado.'); await dormir(700); location.href = 'index.html?menu=1'; }
+    const j = await accion('adminAjustesGuardar', {ajustes:{halloween:$('vHal').checked, ocultas:[...document.querySelectorAll('.vOc:checked')].map(x => x.dataset.s)}}); if(j){ datos.ajustes = j.ajustes; toast('Guardado.'); await dormir(700); location.href = 'index.html?menu=1'; }
   });
 }
 async function vistaRendimiento(){
@@ -1031,7 +1035,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.42';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.43';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1043,4 +1047,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.42 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.43 · 09-11-2026 ==== -->
