@@ -969,13 +969,13 @@ function confirmaRestaurar(r){
 // va en un marco aparte para que no se mezclen sus estilos con los del panel
 // el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
 function vistaGenerador(){
-  main.innerHTML = '<iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=712"></iframe>';
+  main.innerHTML = '<iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=713"></iframe>';
   const f = $('genFr');
   f.addEventListener('load', () => {
     const d = f.contentDocument; if(!d) return;
     // las ventanas del generador se abren donde está mirando el usuario
     const st = d.createElement('style');
-    st.textContent = 'html{overflow:hidden}.velo{align-items:flex-start !important}.velo .ven{margin-top:var(--vy,0px);max-height:var(--vh,90vh) !important;overflow:auto}';
+    st.textContent = '@media(min-width:861px){.app{grid-template-columns:minmax(0,1fr) 180px !important}nav{order:2;border-right:0 !important;border-left:1px solid var(--linea)}nav a{border-left:0 !important;border-right:3px solid transparent}nav a.on{border-right-color:var(--ac)}}html{overflow:hidden}.velo{align-items:flex-start !important}.velo .ven{margin-top:var(--vy,0px);max-height:var(--vh,90vh) !important;overflow:auto}';
     d.head.appendChild(st);
     const alto = () => { f.style.height = Math.ceil(d.body.getBoundingClientRect().height) + 'px'; };
     const pos = () => {
@@ -1029,7 +1029,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.40';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.41';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1041,4 +1041,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.40 · 05-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.41 · 09-11-2026 ==== -->
