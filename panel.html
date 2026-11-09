@@ -739,6 +739,8 @@
   .rate-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
   .rate-row label{font-size:12.5px;color:var(--text);}
   .rate-row input{width:110px;}
+  .rate-row input[type=checkbox]{width:18px;height:18px;flex:none;}
+  .rate-row:has(input[type=checkbox]){flex-direction:row !important;align-items:center !important;gap:14px !important;}
   .modal-error{font-size:12px;color:#c0546f;min-height:16px;margin-top:6px;}
 
   .worker-panel{background:var(--panel);border:1px solid var(--border);padding:14px;margin-bottom:20px;display:none;}
@@ -1794,6 +1796,7 @@
     <p>Tarifas usadas para calcular los montos. Cerámica usa dos tarifas de referencia; Frague usa una sola.</p>
     <div class="rate-row"><label>Cerámica — tarifa base ($/m²)</label><input type="number" id="rateCerBase"></div>
     <div class="rate-row"><label>Cerámica — tarifa Rafael ($/m²)</label><input type="number" id="rateCerRafael"></div>
+    <div class="rate-row"><label for="rateOcultarRafael">Ocultar ese monto (se ve como la tarifa base, solo en pantalla)</label><input type="checkbox" id="rateOcultarRafael"></div>
     <div class="rate-row"><label>Cerámica — tarifa referencia ($/m²)</label><input type="number" id="rateCerAlt"></div>
     <div class="rate-row"><label>Frague — tarifa única ($/m²)</label><input type="number" id="rateFrague"></div>
     <div class="actions">
@@ -2135,7 +2138,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.68';
+const APP_VERSION = '0.73.69';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2464,6 +2467,8 @@ function rate1For(categoria, trabajador){
 }
 
 function rate1ForDisplay(categoria, trabajador){
+  // con el check de Precios y metrajes, Rafael se ve con la tarifa base (los cálculos siguen con la real)
+  if(RATES.ocultarRafael && categoria !== 'Frague' && trabajador === 'Rafael' && !(workerStatus[trabajador] && workerStatus[trabajador].tarifaPropia)) return RATES.cerBase;
   if(isAdmin) return rate1For(categoria, trabajador);
   if(workerSession && workerSession === trabajador){
     const ws = workerStatus[trabajador] || {};
@@ -3783,7 +3788,7 @@ function ptDetalle(o, verPlata){
   return `<div class="pt-det"><table>${filas.map(f => {
     const c = f.c, w = o.nombre;
     const lugar = `${esc(c.categoria)} · ${esc(c.piso)} · ${c.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + esc(c.dpto)} · ${esc(AREA_LABEL[c.area] || c.area)}`;
-    const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1For(c.categoria, w)) : '';
+    const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1ForDisplay(c.categoria, w)) : '';
     const estTxt = f.estado === 'entregado' ? (cierreQuincena ? (f.nuevo ? 'Terminado · fuera del cierre' : 'Terminado · dentro del cierre') : 'Terminado') : (cierreQuincena ? (f.pagFuera ? 'Pagado · fuera del cierre' : 'Pagado · dentro del cierre') : 'Pagado');
     const fuera = f.estado === 'entregado' ? f.nuevo : f.pagFuera;
     const btn = (isAdmin && cierreQuincena) ? `<br><button type="button" class="btn small pt-add-cierre" data-id="${esc(f.id)}" data-estado="${f.estado}" data-dir="${fuera ? 'dentro' : 'fuera'}">${fuera ? 'Agregar al cierre' : 'Sacar del cierre'}</button>` : '';
@@ -4625,6 +4630,7 @@ const ratesOverlay = document.getElementById('ratesOverlay');
 document.getElementById('ratesBtn').addEventListener('click', () => {
   document.getElementById('rateCerBase').value = RATES.cerBase;
   document.getElementById('rateCerRafael').value = RATES.cerRafael;
+  document.getElementById('rateOcultarRafael').checked = !!RATES.ocultarRafael;
   document.getElementById('rateCerAlt').value = RATES.cerAlt;
   document.getElementById('rateFrague').value = RATES.frague;
   ratesOverlay.classList.add('show');
@@ -4633,6 +4639,7 @@ document.getElementById('ratesCancel').addEventListener('click', () => closeOver
 document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.cerBase = parseFloat(document.getElementById('rateCerBase').value) || RATES.cerBase;
   RATES.cerRafael = parseFloat(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
+  RATES.ocultarRafael = document.getElementById('rateOcultarRafael').checked ? 1 : 0;
   RATES.cerAlt = parseFloat(document.getElementById('rateCerAlt').value) || RATES.cerAlt;
   RATES.frague = parseFloat(document.getElementById('rateFrague').value) || RATES.frague;
   markSettingsDirty();
@@ -8963,4 +8970,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.68 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.69 · 09-11-2026 ==== -->
