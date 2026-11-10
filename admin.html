@@ -55,6 +55,19 @@ main{padding:18px;min-width:0;}
 .vel .ven{background:var(--panel);border:1px solid var(--strong);max-width:440px;width:100%;padding:18px;animation:abreV .18s ease;transform-origin:top;}
 @keyframes abreV{from{opacity:0;transform:scaleY(.94);}to{opacity:1;transform:none;}}
 .vel .acc2{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.gen-bar{display:flex;justify-content:flex-end;margin:0 0 8px;}
+.gen-bar .btn{display:inline-flex;align-items:center;gap:8px;}
+.nuevo{background:var(--ac);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;letter-spacing:.3px;}
+.vel .ven.ancha{max-width:780px;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;}
+.er-it{border:1px solid var(--strong);padding:10px;margin:0 0 10px;}
+.er-it .cab{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px;}
+.er-it .cab small{color:var(--sub);}
+.er-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;}
+.er-g label{display:flex;flex-direction:column;font-size:11px;color:var(--sub);gap:3px;}
+.er-g input{padding:6px 8px;border:1px solid var(--strong);background:transparent;color:var(--text);border-radius:0;font:inherit;font-size:13px;min-width:0;}
+.er-g input.mal{border-color:var(--bad);}
+.er-msg{font-size:12.5px;min-height:16px;margin-top:6px;color:var(--bad);}
+.er-raw{font-size:12px;word-break:break-all;color:var(--sub);background:var(--soft);padding:6px 8px;}
 .gen-fr{display:block;width:100%;height:600px;overflow:hidden;border:0;background:#0d1b24;opacity:0;transition:opacity .25s ease;}
 .gen-fr.listo{opacity:1;}
 main h2{margin:0 0 4px;font-size:17px;}
@@ -416,6 +429,25 @@ const BD = (function(){
       guardar(); return {ok:true, nuevos:0, lista:estado.hist};
     }
     if(a === 'contratoGuardar'){ estado.hist = estado.hist || []; const t = x.t || {}; if(!t.rut || !t.nombre) return {ok:true, estado:'a_revision', enRevision:1}; if(estado.hist.some(h => h.rut === t.rut && h.ingreso === t.ingreso)) return {ok:true, estado:'ya_estaba', enRevision:0}; estado.hist.push(t); guardar(); return {ok:true, estado:'guardado', enRevision:0}; }
+    if(a === 'colaErroresListar'){
+      estado.errores = estado.errores || [
+        {fecha:'2026-11-10 17:12', origen:'Historial_contrato', registro:'Dev - Ismael S.', motivo:'Dato no válido (fecha de ingreso: 1/1/26)', dato:JSON.stringify({nombre:'EDGARDO PÉREZ JIMÉNEZ',rut:'23.577.356-2',nacimiento:'09/07/1979',nacionalidad:'PERUANA',civil:'SOLTERO',rol:'FRAGUADOR',calle:'Los Alerces',num:'7649',comuna:'La Florida',user:'marcelo456',prov:'gmail',suf:'com',obra:'La Florida – Bellavista #7122',ingreso:'1/1/26',creado:'01-11-2026',id:'mvxd2e8k6kij'})},
+        {fecha:'2026-11-10 17:30', origen:'Historial_contrato', registro:'Jefe de Terreno - Pedro', motivo:'Dato no válido (RUT)', dato:JSON.stringify({nombre:'MARIA EJEMPLO',rut:'12.345.678-9',nacimiento:'01/02/1990',nacionalidad:'CHILENA',civil:'CASADO',rol:'CERAMISTA',calle:'Calle 1',num:'10',comuna:'La Florida',user:'',prov:'',suf:'',obra:'Obra Bellavista',ingreso:'10/11/2026',creado:'10/11/2026',id:'e2'})}];
+      return {ok:true, errores:estado.errores.map((e, i) => ({n:i + 2, ...e})), total:estado.errores.length};
+    }
+    if(a === 'colaErroresResolver'){
+      const i = x.n - 2, e = (estado.errores || [])[i];
+      if(!e || e.motivo !== x.motivo || e.dato !== x.dato) return {ok:false, error:'cambio'};
+      let st = 'quitado';
+      if(x.accion === 'reenviar'){
+        const t = x.t || {};
+        if(!/^\d{1,2}-?\d{3}\.?\d{3}-[\dkK]$|^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/.test(t.rut || '') || t.rut === '12.345.678-9') return {ok:false, error:'dato_invalido', motivo:'Dato no válido (RUT)'};
+        if(!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(t.ingreso || '')) return {ok:false, error:'dato_invalido', motivo:'Dato no válido (fecha de ingreso: ' + String(t.ingreso || '').slice(0, 20) + ')'};
+        estado.hist = estado.hist || []; estado.hist.push(t); st = 'guardado';
+      }
+      estado.errores.splice(i, 1); guardar();
+      return {ok:true, estado:st, enRevision:estado.errores.length};
+    }
     if(a === 'contratoQuitar'){ estado.hist = (estado.hist || []).filter(h => !(h.rut === x.rut && h.ingreso === x.ingreso)); guardar(); return {ok:true}; }
     if(a === 'adminAjustesGuardar'){ estado.ajustes = {halloween:x.ajustes.halloween === true}; guardar(); return {ok:true, ajustes:estado.ajustes}; }
     if(a === 'seccionesListar') return {ok:true, usuarios:estado.usuarios.filter(u => u.rol !== 1)};
@@ -979,9 +1011,99 @@ function confirmaRestaurar(r){
 // ===== Generador de documentos =====
 // va en un marco aparte para que no se mezclen sus estilos con los del panel
 // el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
+// ===== Errores de guardado: ver cada dato de cola_errores y decidir (corregir y reenviar / eliminar) =====
+let errN = 0;
+function pintaErrN(n){ errN = n || 0; const e = $('genErrN'); if(e) e.textContent = errN ? '⚠ ' + errN : ''; }
+const ER_CAMPOS = [['nombre','Nombre'],['rut','RUT'],['ingreso','Fecha de ingreso'],['nacimiento','Nacimiento'],['nacionalidad','Nacionalidad'],['civil','Estado civil'],['rol','Cargo'],['calle','Calle'],['num','Número'],['comuna','Comuna'],['user','Correo (usuario)'],['prov','Dominio'],['suf','Final'],['obra','Obra']];
+async function abrirErrores(){
+  const v = document.createElement('div'); v.className = 'vel';
+  v.innerHTML = '<div class="ven ancha" role="dialog" aria-modal="true"><h3 style="margin:0 0 6px;">Errores de guardado</h3><p class="nota" style="margin:0 0 12px;">Datos que no pudieron entrar a la hoja. Corrige lo que esté mal y reenvía, o elimínalo si no sirve.</p><div id="erLista">Cargando…</div><div class="acc2"><button class="btn" id="erCerrar" type="button">Cerrar</button></div></div>';
+  document.body.appendChild(v);
+  // la página de atrás no se mueve mientras está abierta, y tocar fuera no la cierra
+  document.body.style.overflow = 'hidden';
+  const cerrar = () => { document.body.style.overflow = ''; v.remove(); };
+  v.querySelector('#erCerrar').addEventListener('click', cerrar);
+  const caja = v.querySelector('#erLista');
+  const cargar = async () => {
+    const j = await api('colaErroresListar');
+    if(!j || !j.ok){ caja.textContent = 'No se pudo cargar la lista.'; return; }
+    pintaErrN(j.total);
+    if(window.colaHist) window.colaHist.refrescar(j.total);
+    if(!j.errores.length){ caja.innerHTML = '<div class="nota" style="margin:0;">No hay errores pendientes.</div>'; return; }
+    caja.innerHTML = '';
+    j.errores.forEach(e => caja.appendChild(tarjetaError(e, cargar)));
+  };
+  cargar();
+}
+function tarjetaError(e, recargar){
+  let o = null; try{ o = JSON.parse(e.dato); }catch(x){ o = null; }
+  if(!o || typeof o !== 'object' || Array.isArray(o)) o = null;
+  const it = document.createElement('div'); it.className = 'er-it';
+  const cab = document.createElement('div'); cab.className = 'cab';
+  cab.innerHTML = '<b>' + esc(e.motivo) + '</b><small>' + esc(e.fecha) + ' · ' + esc(e.origen) + ' · lo registró ' + esc(e.registro) + '</small>';
+  it.appendChild(cab);
+  const campos = {};
+  const editable = o && e.origen === 'Historial_contrato';
+  if(editable){
+    const g = document.createElement('div'); g.className = 'er-g';
+    ER_CAMPOS.forEach(([k, et]) => {
+      const l = document.createElement('label'); l.textContent = et;
+      const i = document.createElement('input'); i.type = 'text'; i.maxLength = 120; i.value = o[k] == null ? '' : String(o[k]);
+      l.appendChild(i); g.appendChild(l); campos[k] = i;
+    });
+    it.appendChild(g);
+  }else{
+    const r = document.createElement('div'); r.className = 'er-raw'; r.textContent = e.dato; it.appendChild(r);
+  }
+  const msg = document.createElement('div'); msg.className = 'er-msg'; it.appendChild(msg);
+  const acc = document.createElement('div'); acc.className = 'acc2'; acc.style.marginTop = '8px';
+  const bEl = document.createElement('button'); bEl.type = 'button'; bEl.className = 'btn bad'; bEl.textContent = 'Eliminar';
+  acc.appendChild(bEl);
+  let bRe = null;
+  if(editable){ bRe = document.createElement('button'); bRe.type = 'button'; bRe.className = 'btn primary'; bRe.textContent = 'Corregir y reenviar'; acc.appendChild(bRe); }
+  it.appendChild(acc);
+  const base = {n: e.n, motivo: e.motivo, dato: e.dato};
+  const ERRS = {no_existe:'Esa fila ya no existe.', cambio:'La fila cambió en la hoja; se recarga la lista.', origen:'Este error no viene del historial de trabajadores.', columnas:'Las columnas de Historial_contrato cambiaron; no se puede reenviar.'};
+  const termina = async (j, texto) => {
+    toast(texto);
+    if(o && window.colaHist) window.colaHist.descartar(o);
+    if(window.colaHist) await window.colaHist.refrescar(j.enRevision);
+    pintaErrN(j.enRevision); recargar();
+  };
+  // eliminar pide una segunda confirmación en la misma tarjeta
+  let pidiendo = false;
+  bEl.addEventListener('click', async () => {
+    if(!pidiendo){ pidiendo = true; bEl.textContent = 'Confirmar: eliminar'; msg.style.color = 'var(--sub)'; msg.textContent = 'Se borra de cola_errores y no se vuelve a enviar desde este aparato.'; setTimeout(() => { if(pidiendo && bEl.isConnected){ pidiendo = false; bEl.textContent = 'Eliminar'; msg.textContent = ''; } }, 6000); return; }
+    bEl.disabled = true; if(bRe) bRe.disabled = true;
+    const j = await api('colaErroresResolver', {...base, accion:'quitar'});
+    if(j && j.ok) return termina(j, 'Error eliminado.');
+    bEl.disabled = false; if(bRe) bRe.disabled = false; pidiendo = false; bEl.textContent = 'Eliminar';
+    msg.style.color = 'var(--bad)'; msg.textContent = (j && ERRS[j.error]) || 'No se pudo eliminar.'; if(j && j.error === 'cambio') recargar();
+  });
+  if(bRe) bRe.addEventListener('click', async () => {
+    const t = {...o}; Object.keys(campos).forEach(k => { t[k] = campos[k].value.trim(); });
+    Object.values(campos).forEach(i => i.classList.remove('mal')); msg.textContent = '';
+    bRe.disabled = true; bEl.disabled = true;
+    const j = await api('colaErroresResolver', {...base, accion:'reenviar', t});
+    if(j && j.ok) return termina(j, j.estado === 'ya_estaba' ? 'Ya estaba en el historial; error quitado.' : 'Reenviado al historial.');
+    bRe.disabled = false; bEl.disabled = false;
+    msg.style.color = 'var(--bad)';
+    if(j && j.error === 'dato_invalido'){
+      msg.textContent = (j.motivo || 'Dato no válido') + '. Corrígelo y vuelve a reenviar.';
+      const m = String(j.motivo || '');
+      const k = /RUT/.test(m) ? 'rut' : /nombre/.test(m) ? 'nombre' : /fecha/.test(m) ? 'ingreso' : '';
+      if(k && campos[k]) campos[k].classList.add('mal');
+    }else{
+      msg.textContent = (j && ERRS[j.error]) || 'No se pudo reenviar.'; if(j && j.error === 'cambio') recargar();
+    }
+  });
+  return it;
+}
 function vistaGenerador(){
-  main.innerHTML = '<iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=714"></iframe>';
+  const nuevoVence = Date.now() < new Date(2026, 10, 18).getTime();
+  main.innerHTML = '<div class="gen-bar"><button class="btn" id="genErr" type="button">Errores de guardado <span id="genErrN"></span>' + (nuevoVence ? '<span class="nuevo">Nuevo</span>' : '') + '</button></div><iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=714"></iframe>';
   const f = $('genFr');
+  $('genErr').addEventListener('click', abrirErrores);
   f.addEventListener('load', () => {
     const d = f.contentDocument; if(!d) return;
     // las ventanas del generador se abren donde está mirando el usuario
@@ -1006,10 +1128,12 @@ function vistaGenerador(){
     const CK = 'colaGuardado_hist';
     const llave = t => t.rut + '|' + String(t.ingreso).replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (m, d, mm, y) => ('0' + d).slice(-2) + '/' + ('0' + mm).slice(-2) + '/' + y);
     let cola = []; try{ cola = JSON.parse(localStorage.getItem(CK) || '[]').filter(o => o && o.t && o.t.rut); }catch(e){ cola = []; }
+    let descartados = []; try{ descartados = JSON.parse(localStorage.getItem('colaDescartados_hist') || '[]'); }catch(e){ descartados = []; }
     const salvaCola = () => { try{ localStorage.setItem(CK, JSON.stringify(cola)); }catch(e){} };
     let conocidos = null, enRevision = 0, corriendo = false, espera = 0, reintento = null;
     const aviso = (txt, mal) => { const m = d.getElementById('hMsg'); if(m){ m.style.color = mal ? 'var(--err)' : 'var(--ac)'; m.textContent = txt; } };
     const estadoTxt = () => {
+      pintaErrN(enRevision);
       if(!navigator.onLine) return aviso('Sin conexión' + (cola.length ? ': ' + cola.length + ' en cola, se envían al volver.' : '.'), true);
       if(enRevision) return aviso('⚠ ' + enRevision + ' en revisión (hoja cola_errores).' + (cola.length ? ' ' + cola.length + ' en cola.' : ''), true);
       if(corriendo || cola.length) return aviso('Guardando… (' + cola.length + ' en cola)');
@@ -1046,7 +1170,7 @@ function vistaGenerador(){
     const encolar = t => {
       if(!t || !t.rut || !t.ingreso) return;
       const k = llave(t);
-      if((conocidos && conocidos.has(k)) || cola.some(o => llave(o.t) === k)) return;
+      if((conocidos && conocidos.has(k)) || descartados.includes(k) || cola.some(o => llave(o.t) === k)) return;
       cola.push({t}); salvaCola();
     };
     let quitando = Promise.resolve();
@@ -1055,6 +1179,11 @@ function vistaGenerador(){
     w.alQuitarTrabajador = t => {
       const k = llave(t); cola = cola.filter(o => llave(o.t) !== k); salvaCola(); conocidos && conocidos.delete(k);
       quitando = quitando.then(() => api('contratoQuitar', {rut:t.rut, ingreso:t.ingreso}));
+    };
+    // lo usa la ventana de errores: lo descartado no se vuelve a mandar, y se trae lo que ya quedó guardado
+    window.colaHist = {
+      descartar: t => { const k = llave(t); if(!descartados.includes(k)){ descartados.push(k); descartados = descartados.slice(-300); try{ localStorage.setItem('colaDescartados_hist', JSON.stringify(descartados)); }catch(e){} } cola = cola.filter(o => llave(o.t) !== k); salvaCola(); },
+      refrescar: async n => { if(typeof n === 'number') enRevision = n; try{ await traer(); }catch(e){} estadoTxt(); }
     };
     addEventListener('online', () => { espera = 0; procesar(); });
     addEventListener('offline', estadoTxt);
@@ -1106,7 +1235,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.46';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.47';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1118,4 +1247,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.46 · 10-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.47 · 10-11-2026 ==== -->
