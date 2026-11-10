@@ -931,6 +931,13 @@
   .liq-hist-entry .tag.pago{background:var(--pagado);color:#fff;}
   .liq-hist-entry .tag.retencion{background:#a97e00;color:#fff;}
 
+  #workerOverlay .modal{display:flex;flex-direction:column;max-height:88vh;}
+  #workerList{overflow-y:auto;flex:1 1 auto;min-height:0;margin:6px 0 10px;overscroll-behavior:contain;}
+  .wk-orden{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;padding:8px 0;border-top:1px solid var(--border);}
+  .wk-orden label{font-size:12.5px;color:var(--text);}
+  .wk-orden select{width:auto;min-width:170px;}
+  .wk-orden .wk-chk{display:flex;align-items:center;gap:6px;}
+  .worker-row .wname small{font-weight:400;color:var(--sub);font-size:11px;margin-left:4px;}
   #liqHistOverlay .modal{display:flex;flex-direction:column;max-height:88vh;}
   #lhLista{overflow-y:auto;flex:1 1 auto;min-height:0;margin:10px 0;overscroll-behavior:contain;}
   .lh-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
@@ -1719,19 +1726,6 @@
     </div>
   </nav>
 
-  <div class="worker-panel" id="workerPanel">
-    <h3>Trabajadores</h3>
-    <button class="btn small" id="histTodosBtn" style="margin-bottom:10px;">📜 Historial de trabajo de todos</button>
-    <label class="guest-price-toggle">
-      <input type="checkbox" id="allowGuestPricesChk"> Dejar que supervisores y trabajadores vean los precios base
-    </label>
-    <div class="add-worker-row">
-      <input type="text" id="newWorkerName" placeholder="Nombre del nuevo trabajador">
-      <button class="btn primary small" id="addWorkerBtn">Agregar</button>
-    </div>
-    <div class="add-worker-msg" id="addWorkerMsg"></div>
-    <div id="workerList"></div>
-  </div>
 
   <div class="stats" id="stats"></div>
   <div id="porTrabajador" class="pt" style="display:none;"></div>
@@ -1861,6 +1855,29 @@
       <button class="btn" id="liqConfigCancel">Cancelar</button>
       <button class="btn primary" id="liqConfigGenerar">Generar</button>
     </div>
+  </div>
+</div>
+
+<div class="overlay" id="workerOverlay">
+  <div class="modal" style="max-width:640px;">
+    <h3>Gestionar trabajadores</h3>
+    <button class="btn small" id="histTodosBtn" style="margin-bottom:10px;">📜 Historial de trabajo de todos</button>
+    <label class="guest-price-toggle">
+      <input type="checkbox" id="allowGuestPricesChk"> Dejar que supervisores y trabajadores vean los precios base
+    </label>
+    <div class="add-worker-row">
+      <input type="text" id="newWorkerName" placeholder="Nombre del nuevo trabajador">
+      <button class="btn primary small" id="addWorkerBtn">Agregar</button>
+    </div>
+    <div class="add-worker-msg" id="addWorkerMsg"></div>
+    <div class="wk-orden">
+      <label for="wkOrden">Ordenar <i class="tnuevo" data-hasta="2026-11-17">Nuevo</i></label>
+      <select id="wkOrden"><option value="alfa">Por orden alfabético</option><option value="inicio">Por fecha de inicio</option></select>
+      <label class="wk-chk"><input type="checkbox" id="wkInact"> Inactivos después de los activos</label>
+      <label class="wk-chk"><input type="checkbox" id="wkFin"> Finiquitados al final</label>
+    </div>
+    <div id="workerList"></div>
+    <div class="actions"><button class="btn primary" id="workerGuardarCerrar">Guardar y cerrar</button></div>
   </div>
 </div>
 
@@ -2138,7 +2155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.69';
+const APP_VERSION = '0.73.70';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3404,11 +3421,23 @@ function poblarResto(){
 function renderWorkerPanel(){
   document.getElementById('allowGuestPricesChk').checked = allowGuestPrices;
   const listEl = document.getElementById('workerList');
-  listEl.innerHTML = ALL_WORKERS.map(w => {
+  const rangoEst = w => { const e = (workerStatus[w] || defaultWorkerEntry(w)).estado; return (e === 'finiquitado' && wkOrden.fin) ? 2 : (e === 'inactivo' && wkOrden.inact) ? 1 : 0; };
+  const iniDe = w => { const i = (workerStatus[w] || {}).inicio; return /^\d{4}-\d{2}-\d{2}$/.test(i || '') ? i : ''; };
+  const ordenados = ALL_WORKERS.slice().sort((a, b) => {
+    const r = rangoEst(a) - rangoEst(b);
+    if(r) return r;
+    if(wkOrden.modo === 'inicio'){
+      const ia = iniDe(a), ib = iniDe(b);
+      if(ia !== ib){ if(!ia) return 1; if(!ib) return -1; return ia < ib ? -1 : 1; }
+    }
+    return a.localeCompare(b, 'es', {sensitivity:'base'});
+  });
+  listEl.innerHTML = ordenados.map(w => {
     const ws = workerStatus[w] || defaultWorkerEntry(w);
+    const ini = iniDe(w);
     return `
     <div class="worker-row">
-      <div class="wname">${esc(w)}<button class="rename-btn" data-worker="${esc(w)}" title="Renombrar">✎</button></div>
+      <div class="wname">${esc(w)}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}<button class="rename-btn" data-worker="${esc(w)}" title="Renombrar">✎</button></div>
       <div class="wcontrols">
         <select data-worker="${esc(w)}" data-field="especialidad">
           <option value="ceramista" ${ws.especialidad==='ceramista'?'selected':''}>Ceramista</option>
@@ -7493,10 +7522,30 @@ document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
   try{ localStorage.setItem('progresoObraPiso', ''); }catch(err){}
   render();
 });
-document.getElementById('toggleWorkerPanel').addEventListener('click', (e) => {
-  const nowShown = document.getElementById('workerPanel').classList.toggle('show');
-  e.target.classList.toggle('primary', nowShown);
+// ===== Ventana Gestionar trabajadores =====
+const workerOverlay = document.getElementById('workerOverlay');
+document.getElementById('toggleWorkerPanel').addEventListener('click', () => {
+  renderWorkerPanel();
+  workerOverlay.classList.add('show');
 });
+document.getElementById('workerGuardarCerrar').addEventListener('click', () => {
+  scheduleSave();
+  closeOverlayAnimated(workerOverlay);
+});
+// la rueda fuera de la lista no mueve la página de atrás
+workerOverlay.addEventListener('wheel', (e) => { if(!e.target.closest('#workerList')) e.preventDefault(); }, {passive:false});
+workerOverlay.addEventListener('touchmove', (e) => { if(!e.target.closest('#workerList')) e.preventDefault(); }, {passive:false});
+// orden de la lista (se acuerda en este navegador)
+const WK_ORDEN_KEY = 'progresoObraOrdenTrab';
+let wkOrden = {modo:'alfa', inact:true, fin:true};
+try{ const g = JSON.parse(localStorage.getItem(WK_ORDEN_KEY) || 'null'); if(g && typeof g === 'object') wkOrden = {modo: g.modo === 'inicio' ? 'inicio' : 'alfa', inact: g.inact !== false, fin: g.fin !== false}; }catch(e){}
+function guardarOrdenTrab(){ try{ localStorage.setItem(WK_ORDEN_KEY, JSON.stringify(wkOrden)); }catch(e){} }
+document.getElementById('wkOrden').value = wkOrden.modo;
+document.getElementById('wkInact').checked = wkOrden.inact;
+document.getElementById('wkFin').checked = wkOrden.fin;
+document.getElementById('wkOrden').addEventListener('change', e => { wkOrden.modo = e.target.value; guardarOrdenTrab(); renderWorkerPanel(); });
+document.getElementById('wkInact').addEventListener('change', e => { wkOrden.inact = e.target.checked; guardarOrdenTrab(); renderWorkerPanel(); });
+document.getElementById('wkFin').addEventListener('change', e => { wkOrden.fin = e.target.checked; guardarOrdenTrab(); renderWorkerPanel(); });
 function aplicarOcultarPrecios(oculto){
   document.body.classList.toggle('hide-prices', oculto);
   document.getElementById('togglePrices').textContent = oculto ? 'Mostrar precios' : 'Ocultar precios';
@@ -8970,4 +9019,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.69 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.70 · 09-11-2026 ==== -->
