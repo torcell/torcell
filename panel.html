@@ -2155,7 +2155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.70';
+const APP_VERSION = '0.73.71';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3418,6 +3418,31 @@ function poblarResto(){
   });
 }
 
+// ===== Renombrar trabajador (se hace desde Datos) =====
+function renombrarTrabajador(oldName, newName){
+  newName = String(newName || '').trim();
+  if(!newName || newName === oldName) return;
+  if(ALL_WORKERS.some(w => w.toLowerCase() === newName.toLowerCase() && w !== oldName)){
+    document.getElementById('addWorkerMsg').textContent = 'Ya existe un trabajador con ese nombre.';
+    return;
+  }
+  askConfirm(`¿Renombrar "${oldName}" a "${newName}"? Esto actualizará todas las partidas asignadas a ${oldName}.`, () => {
+    const idx = ALL_WORKERS.indexOf(oldName);
+    if(idx >= 0) ALL_WORKERS[idx] = newName;
+    workerStatus[newName] = workerStatus[oldName];
+    delete workerStatus[oldName];
+    const cIdx = customWorkers.indexOf(oldName);
+    if(cIdx >= 0) customWorkers[cIdx] = newName;
+    if(workerDocs[oldName]){ workerDocs[newName] = workerDocs[oldName]; delete workerDocs[oldName]; }
+    Object.keys(state).forEach(id => {
+      if(state[id].trabajador === oldName){ state[id].trabajador = newName; markCellDirty(id); }
+    });
+    markSettingsDirty();
+    scheduleSave();
+    populateFilters(); renderWorkerPanel(); render();
+  });
+}
+
 function renderWorkerPanel(){
   document.getElementById('allowGuestPricesChk').checked = allowGuestPrices;
   const listEl = document.getElementById('workerList');
@@ -3437,7 +3462,7 @@ function renderWorkerPanel(){
     const ini = iniDe(w);
     return `
     <div class="worker-row">
-      <div class="wname">${esc(w)}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}<button class="rename-btn" data-worker="${esc(w)}" title="Renombrar">✎</button></div>
+      <div class="wname">${esc(w)}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}</div>
       <div class="wcontrols">
         <select data-worker="${esc(w)}" data-field="especialidad">
           <option value="ceramista" ${ws.especialidad==='ceramista'?'selected':''}>Ceramista</option>
@@ -3461,35 +3486,6 @@ function renderWorkerPanel(){
       workerStatus[w][field] = e.target.value;
       markSettingsDirty();
       scheduleSave(); populateFilters(); render();
-    });
-  });
-  listEl.querySelectorAll('.rename-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const oldName = e.target.getAttribute('data-worker');
-      const bodyHtml = `<input type="text" id="renameInput" style="width:100%;" value="${esc(oldName)}">`;
-      openInputModal('Renombrar trabajador', bodyHtml, () => {
-        const newName = document.getElementById('renameInput').value.trim();
-        if(!newName || newName === oldName) return;
-        if(ALL_WORKERS.some(w => w.toLowerCase() === newName.toLowerCase() && w !== oldName)){
-          document.getElementById('addWorkerMsg').textContent = 'Ya existe un trabajador con ese nombre.';
-          return;
-        }
-        askConfirm(`¿Renombrar "${oldName}" a "${newName}"? Esto actualizará todas las partidas asignadas a ${oldName}.`, () => {
-          const idx = ALL_WORKERS.indexOf(oldName);
-          if(idx >= 0) ALL_WORKERS[idx] = newName;
-          workerStatus[newName] = workerStatus[oldName];
-          delete workerStatus[oldName];
-          const cIdx = customWorkers.indexOf(oldName);
-          if(cIdx >= 0) customWorkers[cIdx] = newName;
-          if(workerDocs[oldName]){ workerDocs[newName] = workerDocs[oldName]; delete workerDocs[oldName]; }
-          Object.keys(state).forEach(id => {
-            if(state[id].trabajador === oldName){ state[id].trabajador = newName; markCellDirty(id); }
-          });
-          markSettingsDirty();
-          scheduleSave();
-          populateFilters(); renderWorkerPanel(); render();
-        });
-      });
     });
   });
   listEl.querySelectorAll('[data-worker-datos]').forEach(btn => {
@@ -3531,6 +3527,7 @@ function renderWorkerDocsList(worker){
 function openWorkerDatosModal(worker){
   const ws = workerStatus[worker] || defaultWorkerEntry(worker);
   const bodyHtml = `
+    <div class="rate-row"><label>Nombre</label><input type="text" id="datosNombre" maxlength="60" style="width:220px;" value="${esc(worker)}"></div>
     <div class="rate-row"><label>AFP</label><select id="datosAfp" style="width:220px;">
       <option value="" ${!ws.afp || ws.afp==='No especificada' ? 'selected' : ''}>Elegir AFP</option>
       ${AFP_OPTIONS.map(a => `<option value="${esc(a)}" ${ws.afp===a?'selected':''}>${esc(a)}</option>`).join('')}
@@ -3571,6 +3568,7 @@ function openWorkerDatosModal(worker){
     workerStatus[worker].tarifaPropia = isNaN(tarifaVal) ? null : tarifaVal;
     markSettingsDirty();
     scheduleSave();
+    renombrarTrabajador(worker, document.getElementById('datosNombre').value);
   });
   renderWorkerDocsList(worker);
   document.getElementById('datosFileInput').addEventListener('change', async (e) => {
@@ -9019,4 +9017,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.70 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.71 · 09-11-2026 ==== -->
