@@ -1014,6 +1014,7 @@ function confirmaRestaurar(r){
 // ===== Errores de guardado: ver cada dato de cola_errores y decidir (corregir y reenviar / eliminar) =====
 let errN = 0;
 function pintaErrN(n){ errN = n || 0; const e = $('genErrN'); if(e) e.textContent = errN ? '⚠ ' + errN : ''; }
+const fecha2 = x => String(x == null ? '' : x).trim().replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (m, d, mm, y) => ('0' + d).slice(-2) + '/' + ('0' + mm).slice(-2) + '/' + y);
 const ER_CAMPOS = [['nombre','Nombre'],['rut','RUT'],['ingreso','Fecha de ingreso'],['nacimiento','Nacimiento'],['nacionalidad','Nacionalidad'],['civil','Estado civil'],['rol','Cargo'],['calle','Calle'],['num','Número'],['comuna','Comuna'],['user','Correo (usuario)'],['prov','Dominio'],['suf','Final'],['obra','Obra']];
 async function abrirErrores(){
   const v = document.createElement('div'); v.className = 'vel';
@@ -1048,7 +1049,7 @@ function tarjetaError(e, recargar){
     const g = document.createElement('div'); g.className = 'er-g';
     ER_CAMPOS.forEach(([k, et]) => {
       const l = document.createElement('label'); l.textContent = et;
-      const i = document.createElement('input'); i.type = 'text'; i.maxLength = 120; i.value = o[k] == null ? '' : String(o[k]);
+      const i = document.createElement('input'); i.type = 'text'; i.maxLength = 120; i.value = (k === 'ingreso' || k === 'nacimiento') ? fecha2(o[k]) : (o[k] == null ? '' : String(o[k]));
       l.appendChild(i); g.appendChild(l); campos[k] = i;
     });
     it.appendChild(g);
@@ -1081,7 +1082,7 @@ function tarjetaError(e, recargar){
     msg.style.color = 'var(--bad)'; msg.textContent = (j && ERRS[j.error]) || 'No se pudo eliminar.'; if(j && j.error === 'cambio') recargar();
   });
   if(bRe) bRe.addEventListener('click', async () => {
-    const t = {...o}; Object.keys(campos).forEach(k => { t[k] = campos[k].value.trim(); });
+    const t = {...o}; Object.keys(campos).forEach(k => { t[k] = (k === 'ingreso' || k === 'nacimiento') ? fecha2(campos[k].value) : campos[k].value.trim(); });
     Object.values(campos).forEach(i => i.classList.remove('mal')); msg.textContent = '';
     bRe.disabled = true; bEl.disabled = true;
     const j = await api('colaErroresResolver', {...base, accion:'reenviar', t});
@@ -1126,7 +1127,7 @@ function vistaGenerador(){
     // cada trabajador entra a la fila al instante y se manda de a uno; sale de la fila solo cuando la base de datos lo confirma
     const w = f.contentWindow;
     const CK = 'colaGuardado_hist';
-    const llave = t => t.rut + '|' + String(t.ingreso).replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (m, d, mm, y) => ('0' + d).slice(-2) + '/' + ('0' + mm).slice(-2) + '/' + y);
+    const llave = t => t.rut + '|' + fecha2(t.ingreso);
     let cola = []; try{ cola = JSON.parse(localStorage.getItem(CK) || '[]').filter(o => o && o.t && o.t.rut); }catch(e){ cola = []; }
     let descartados = []; try{ descartados = JSON.parse(localStorage.getItem('colaDescartados_hist') || '[]'); }catch(e){ descartados = []; }
     const salvaCola = () => { try{ localStorage.setItem(CK, JSON.stringify(cola)); }catch(e){} };
@@ -1235,7 +1236,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.47';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.48';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1247,4 +1248,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.47 · 10-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.48 · 10-11-2026 ==== -->

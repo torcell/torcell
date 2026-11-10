@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.29</title>
+<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.30</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== Generador de documentos · v7-html.29 · 2026-11-10 ===== */
+/* ===== Generador de documentos · v7-html.30 · 2026-11-10 ===== */
 /* ===== colores ===== */
 :root{--fondo:#0d1b24;--caja:#16262f;--campo:#112029;--linea:#3b5666;--texto:#f2f6f8;--suave:#9fb3bd;--ac:#6ec6e8;--ac2:#1f5a78;--err:#e8707f}
 [data-c=dorado]{--ac:#e0b45a;--ac2:#6b5320}[data-c=esmeralda]{--ac:#5fd3a0;--ac2:#1f6a4c}
@@ -171,7 +171,7 @@ body{padding:0}
  <nav>
   <a class="on" data-v="nuevo">Nuevo trabajador</a><a data-v="anexos">Anexos</a><a data-v="obra">Empresas y obras</a><a data-v="hist">Trabajadores</a><a data-v="fini">Finiquitos</a>
   <hr><a data-v="emp">Empresa</a><a data-v="apa">Apariencia</a>
-  <span class="ver">Versión v7-html.29</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
+  <span class="ver">Versión v7-html.30</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
  </nav>
  <div class="cuerpo">
   <!-- ===== nuevo trabajador ===== -->
@@ -294,7 +294,7 @@ body{padding:0}
  <div class="pie"><button type="button" class="btn ok" id="vOk" style="height:42px"></button><button type="button" class="btn" id="vNo">Cancelar</button></div>
 </div></div>
 <script>
-/* ===== generador.js · v7-html.29 · 2026-11-10 ===== */
+/* ===== generador.js · v7-html.30 · 2026-11-10 ===== */
 (function (root) {
 "use strict";
 var A = null;                       // fuentes, firma, derecho e irl (base64)
@@ -835,9 +835,13 @@ document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{
 });
 
 // ===== fecha de ingreso: cerrado muestra el número, la lista muestra "Septiembre (9)" =====
+// ===== fechas siempre con cero: 01/11/2026 (en lo que se ve, en lo que se guarda y en lo que se envía) =====
+const f2=n=>String(n).padStart(2,'0');
+const fechaNum=(d,m,a)=>f2(d)+'/'+f2(m)+'/'+a;
+const normFecha=x=>{const m=String(x==null?'':x).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?fechaNum(m[1],m[2],m[3]):String(x==null?'':x)};
 const hoy=new Date(),mes=$('mes'),dia=$('dia');
-for(let i=1;i<=31;i++)dia.add(new Option(i,i));
-MESES.forEach((m,i)=>mes.add(new Option(m+' ('+(i+1)+')',i+1)));
+for(let i=1;i<=31;i++)dia.add(new Option(f2(i),i));
+MESES.forEach((m,i)=>mes.add(new Option(m+' ('+f2(i+1)+')',i+1)));
 dia.value=hoy.getDate();mes.value=hoy.getMonth()+1;$('anio').value=hoy.getFullYear();
 
 
@@ -963,7 +967,7 @@ function juntar(){const g=el=>[...el.querySelectorAll('input:checked')].map(i=>i
 function leer(){
   const f=$('f'),d={};['nombre','rut','nacimiento','nacionalidad','civil','obra','rol'].forEach(k=>d[k]=limpio(f.elements[k].value));
   d.domicilio=dom();d.correo=limpio($('cUser').value)+'@'+$('cProv').value+'.'+$('cSuf').value;
-  d.sueldo=limpio($('sueldo').value);d.ingreso=`${dia.value}/${mes.value}/${$('anio').value}`;d.carpeta='';d.correoEmp=limpio($('correoEmp').value);
+  d.sueldo=limpio($('sueldo').value);d.ingreso=fechaNum(dia.value,mes.value,$('anio').value);d.carpeta='';d.correoEmp=limpio($('correoEmp').value);
   const falta=[];document.querySelectorAll('.mal').forEach(x=>x.classList.remove('mal'));
   const marca=(el,t)=>{(el.closest('.sel')||el).classList.add('mal');falta.push(t)};
   if(!d.nombre)marca(f.elements.nombre,'nombre');
@@ -1008,15 +1012,15 @@ const FECHAS={};
 function montarFecha(id){
   const c=$(id);c.innerHTML='<select style="flex:none;width:76px"></select>de<select style="flex:1" data-corto="1"></select>de<div class="fa"><input readonly><button type="button" class="calbtn" aria-label="Abrir calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></div>';
   const [d,m]=c.querySelectorAll('select'),a=c.querySelector('input'),b=c.querySelector('.calbtn');
-  for(let i=1;i<=31;i++)d.add(new Option(i,i));
-  MESES.forEach((n,i)=>m.add(new Option(n+' ('+(i+1)+')',i+1)));
+  for(let i=1;i<=31;i++)d.add(new Option(f2(i),i));
+  MESES.forEach((n,i)=>m.add(new Option(n+' ('+f2(i+1)+')',i+1)));
   d.value=hoy.getDate();m.value=hoy.getMonth()+1;a.value=hoy.getFullYear();
   [d,m].forEach(lista);FECHAS[id]=[d,m,a];
   b.onclick=a.onclick=()=>calAbrir(b,{sinFinde:true,get:()=>new Date(+a.value,m.value-1,+d.value),min:hoy.getFullYear()-1,max:hoy.getFullYear()+1,
     set:f=>{d.value=f.getDate();m.value=f.getMonth()+1;a.value=f.getFullYear()}});
 }
 montarFecha('a_f1');montarFecha('a_f2');
-const fechaDe=id=>{const[d,m,a]=FECHAS[id];return{n:`${d.value}/${m.value}/${a.value}`,largo:`${d.value} de ${MESES[m.value-1]} de ${a.value}`}};
+const fechaDe=id=>{const[d,m,a]=FECHAS[id];return{n:fechaNum(d.value,m.value,a.value),largo:`${d.value} de ${MESES[m.value-1]} de ${a.value}`}};
 ['a_nombre','a_func','a_obra','a_prov','a_comuna','a_calle','a_jor'].forEach(i=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[<>"'`\\{}]/g,''));
 $('a_rut').onblur=e=>{if(rutOk(e.target.value))e.target.value=rutFmt(e.target.value)};
 function leerAnexo(){
@@ -1041,6 +1045,9 @@ function poner(i,v){const e=$(i);e.value=v;e.dispatchEvent(new Event('input'))}
 const CLAVE='gen_trabajadores';let TRAB=[];
 try{TRAB=JSON.parse(localStorage.getItem(CLAVE)||'[]')}catch(e){TRAB=[]}
 if(!Array.isArray(TRAB))TRAB=[];
+// lo guardado antes con 1/11/2026 pasa a 01/11/2026
+TRAB.forEach(t=>{if(t&&typeof t==='object'){t.ingreso=normFecha(t.ingreso);t.nacimiento=normFecha(t.nacimiento)}});
+try{localStorage.setItem(CLAVE,JSON.stringify(TRAB))}catch(e){}
 function guardarTrab(){try{localStorage.setItem(CLAVE,JSON.stringify(TRAB))}catch(e){}
   if(typeof window.alGuardarTrabajadores==='function')window.alGuardarTrabajadores(TRAB)}
 function agregarTrab(t){
@@ -1054,6 +1061,7 @@ window.genMezclar=function(lista){
   let nuevos=0;
   lista.forEach(o=>{
     if(!o||typeof o!=='object'||!o.rut||!o.ingreso||!o.nombre)return;
+    o.ingreso=normFecha(o.ingreso);o.nacimiento=normFecha(o.nacimiento);
     if(TRAB.some(x=>x.rut===o.rut&&x.ingreso===o.ingreso))return;
     const t={};CAMPOS_T.forEach(k=>t[k]=limpio(o[k]==null?'':o[k]));
     t.id=String(o.id||'').replace(/[^a-zA-Z0-9]/g,'')||Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -1109,6 +1117,7 @@ $('hArch').onchange=e=>{
     L.forEach(o=>{
       if(!o||typeof o!=='object'){malos++;return}
       const t={};CAMPOS_T.forEach(k=>t[k]=limpio(o[k]==null?'':o[k]));
+      t.ingreso=normFecha(t.ingreso);t.nacimiento=normFecha(t.nacimiento);
       if(!t.nombre||!rutOk(t.rut)||!/^\d{2}\/\d{2}\/\d{4}$/.test(t.ingreso)){malos++;return}
       t.nombre=t.nombre.toUpperCase();t.rut=rutFmt(t.rut);
       if(TRAB.some(x=>x.rut===t.rut&&x.ingreso===t.ingreso)){rep++;return}
@@ -1164,7 +1173,7 @@ function registrarDeForm(){const f=$('f');
   return agregarTrab({nombre:limpio(f.elements.nombre.value).toUpperCase(),rut:rutFmt(f.elements.rut.value),nacimiento:limpio(f.elements.nacimiento.value),
     nacionalidad:f.elements.nacionalidad.value,civil:f.elements.civil.value,rol:f.elements.rol.value,calle:limpio($('calle').value),num:$('num').value,
     comuna:limpio($('comuna').value),user:limpio($('cUser').value),prov:$('cProv').value,suf:$('cSuf').value,obra:f.elements.obra.value,
-    ingreso:`${dia.value}/${mes.value}/${$('anio').value}`,creado:new Date().toLocaleString('es-CL')})}
+    ingreso:fechaNum(dia.value,mes.value,$('anio').value),creado:new Date().toLocaleString('es-CL')})}
 
 // ===== obras registradas =====
 // se guardan en el navegador (gancho: window.alGuardarObras)
@@ -1400,7 +1409,7 @@ function calPintar(){
     DSEM.forEach(s=>rej.appendChild(el('div','dsem',s)));
     const pri=(new Date(C.y,C.m,1).getDay()+6)%7,hoyD=new Date();
     for(let i=0;i<42;i++){
-      const f=new Date(C.y,C.m,1-pri+i),c=el('div','c',f.getDate(),()=>calElegir(f));
+      const f=new Date(C.y,C.m,1-pri+i),c=el('div','c',f2(f.getDate()),()=>calElegir(f));
       if(f.getMonth()!==C.m)c.classList.add('otro');
       if(f.getFullYear()<C.min||f.getFullYear()>C.max||(C.o.sinFinde&&(f.getDay()===0||f.getDay()===6)))c.classList.add('off');
       if(f.toDateString()===hoyD.toDateString())c.classList.add('hoy');
@@ -1412,11 +1421,11 @@ function calPintar(){
     const R=C.rv||(C.rv={a:C.y,m:C.m,d:(C.sel||C.o.inicio||new Date()).getDate()});
     const anios=[];for(let a=C.min;a<=C.max;a++)anios.push(a);
     const dmes=()=>new Date(R.a,R.m+1,0).getDate();
-    const dias=()=>Array.from({length:dmes()},(_,k)=>String(k+1));
+    const dias=()=>Array.from({length:dmes()},(_,k)=>f2(k+1));
     R.d=Math.min(R.d,dmes());
     const fila=el('div','ruedas'),cab=el('div','rucab');['Día','Mes','Año'].forEach(t=>cab.appendChild(el('span',null,t)));
     const cD=rueda(dias(),R.d-1,k=>{R.d=k+1}),
-          cM=rueda(MESES.map((n,k)=>n+' ('+(k+1)+')'),R.m,k=>{R.m=k;cD.poner(dias(),Math.min(R.d,dmes())-1);R.d=Math.min(R.d,dmes())}),
+          cM=rueda(MESES.map((n,k)=>n+' ('+f2(k+1)+')'),R.m,k=>{R.m=k;cD.poner(dias(),Math.min(R.d,dmes())-1);R.d=Math.min(R.d,dmes())}),
           cA=rueda(anios,Math.min(Math.max(R.a,C.min),C.max)-C.min,k=>{R.a=C.min+k;cD.poner(dias(),Math.min(R.d,dmes())-1);R.d=Math.min(R.d,dmes())});
     fila.appendChild(cD.el);fila.appendChild(cM.el);fila.appendChild(cA.el);
     calEl.appendChild(cab);calEl.appendChild(fila);
@@ -1425,7 +1434,7 @@ function calPintar(){
     pie.appendChild(el('button',null,'Cerrar',calCerrar));calEl.appendChild(pie);calPoner();return;
   }else if(C.vista==='mes'){
     tit=String(C.y);ant=()=>{C.y--};sig=()=>{C.y++};rej.classList.add('g3');
-    MESES.forEach((n,i)=>{const c=el('div','c mes',null,()=>{C.m=i;C.vista='dia';calPintar()});c.appendChild(el('span',null,n));c.appendChild(el('small',null,'('+(i+1)+')'));
+    MESES.forEach((n,i)=>{const c=el('div','c mes',null,()=>{C.m=i;C.vista='dia';calPintar()});c.appendChild(el('span',null,n));c.appendChild(el('small',null,'('+f2(i+1)+')'));
       if(C.sel&&C.sel.getFullYear()===C.y&&C.sel.getMonth()===i)c.classList.add('sel');rej.appendChild(c)});
   }else{
     const a0=Math.floor(C.y/12)*12;tit=a0+' – '+(a0+11);ant=()=>{C.y-=12};sig=()=>{C.y+=12};rej.classList.add('g3');
