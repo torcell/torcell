@@ -410,6 +410,13 @@ const BD = (function(){
     if(a === 'respaldoAhora') return {ok:true};
     if(a === 'respaldoRestaurar') return x.confirmar === true ? {ok:true} : {ok:false,error:'datos_invalidos'};
     if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados, ajustes:estado.ajustes || {halloween:false}};
+    if(a === 'contratoSync'){
+      estado.hist = estado.hist || [{id:'demo1',nombre:'ALEX EJEMPLO',rut:'12.345.678-5',nacimiento:'15/06/1990',nacionalidad:'CHILENA',civil:'SOLTERO',rol:'CERAMISTA',calle:'Calle de ejemplo',num:'123',comuna:'La Florida',user:'alex',prov:'gmail',suf:'com',obra:'Obra Bellavista',ingreso:'03/11/2026',creado:'03/11/2026'}];
+      (x.lote || []).forEach(o => { if(!estado.hist.some(h => h.rut === o.rut && h.ingreso === o.ingreso)) estado.hist.push(o); });
+      guardar(); return {ok:true, nuevos:0, lista:estado.hist};
+    }
+    if(a === 'contratoGuardar'){ estado.hist = estado.hist || []; const t = x.t || {}; if(!t.rut || !t.nombre) return {ok:true, estado:'a_revision', enRevision:1}; if(estado.hist.some(h => h.rut === t.rut && h.ingreso === t.ingreso)) return {ok:true, estado:'ya_estaba', enRevision:0}; estado.hist.push(t); guardar(); return {ok:true, estado:'guardado', enRevision:0}; }
+    if(a === 'contratoQuitar'){ estado.hist = (estado.hist || []).filter(h => !(h.rut === x.rut && h.ingreso === x.ingreso)); guardar(); return {ok:true}; }
     if(a === 'adminAjustesGuardar'){ estado.ajustes = {halloween:x.ajustes.halloween === true}; guardar(); return {ok:true, ajustes:estado.ajustes}; }
     if(a === 'seccionesListar') return {ok:true, usuarios:estado.usuarios.filter(u => u.rol !== 1)};
     if(a === 'seccionesGuardar'){ const u = estado.usuarios.find(v => v.nombre === x.nombre); u.extra = x.extra; guardar(); return {ok:true, extra:u.extra}; }
@@ -973,7 +980,7 @@ function confirmaRestaurar(r){
 // va en un marco aparte para que no se mezclen sus estilos con los del panel
 // el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
 function vistaGenerador(){
-  main.innerHTML = '<iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=713"></iframe>';
+  main.innerHTML = '<iframe class="gen-fr" id="genFr" scrolling="no" title="Generador de documentos" src="generador_documentos.html?v=714"></iframe>';
   const f = $('genFr');
   f.addEventListener('load', () => {
     const d = f.contentDocument; if(!d) return;
@@ -993,6 +1000,70 @@ function vistaGenerador(){
     new ResizeObserver(alto).observe(d.body);
     addEventListener('scroll', pos, {passive:true}); addEventListener('resize', pos);
     f.classList.add('listo');
+    // ===== historial de trabajadores: cola de guardado (fila por turnos) =====
+    // cada trabajador entra a la fila al instante y se manda de a uno; sale de la fila solo cuando la base de datos lo confirma
+    const w = f.contentWindow;
+    const CK = 'colaGuardado_hist';
+    const llave = t => t.rut + '|' + t.ingreso;
+    let cola = []; try{ cola = JSON.parse(localStorage.getItem(CK) || '[]').filter(o => o && o.t && o.t.rut); }catch(e){ cola = []; }
+    const salvaCola = () => { try{ localStorage.setItem(CK, JSON.stringify(cola)); }catch(e){} };
+    let conocidos = null, enRevision = 0, corriendo = false, espera = 0, reintento = null;
+    const aviso = (txt, mal) => { const m = d.getElementById('hMsg'); if(m){ m.style.color = mal ? 'var(--err)' : 'var(--ac)'; m.textContent = txt; } };
+    const estadoTxt = () => {
+      if(!navigator.onLine) return aviso('Sin conexión' + (cola.length ? ': ' + cola.length + ' en cola, se envían al volver.' : '.'), true);
+      if(enRevision) return aviso('⚠ ' + enRevision + ' en revisión (hoja cola_errores).' + (cola.length ? ' ' + cola.length + ' en cola.' : ''), true);
+      if(corriendo || cola.length) return aviso('Guardando… (' + cola.length + ' en cola)');
+      aviso('Guardado');
+    };
+    const traer = async () => {
+      const j = await api('contratoSync', {lote: []});
+      if(j && j.ok && Array.isArray(j.lista)){
+        conocidos = new Set(j.lista.map(llave));
+        if(typeof j.enRevision === 'number') enRevision = j.enRevision;
+        const n = w.genMezclar(j.lista);
+        return true;
+      }
+      return false;
+    };
+    const procesar = async () => {
+      if(corriendo) return; corriendo = true; clearTimeout(reintento);
+      try{
+        await quitando;
+        while(cola.length && navigator.onLine){
+          estadoTxt();
+          let j = null; try{ j = await api('contratoGuardar', {t: cola[0].t}); }catch(e){ j = null; }
+          if(j && j.ok){
+            conocidos && conocidos.add(llave(cola[0].t)); cola.shift(); salvaCola(); espera = 0;
+            if(typeof j.enRevision === 'number') enRevision = j.enRevision;
+          }else{
+            espera = Math.min(espera ? espera * 2 : 3000, 300000);
+            reintento = setTimeout(procesar, espera);
+            break;
+          }
+        }
+      }finally{ corriendo = false; estadoTxt(); }
+    };
+    const encolar = t => {
+      if(!t || !t.rut || !t.ingreso) return;
+      const k = llave(t);
+      if((conocidos && conocidos.has(k)) || cola.some(o => llave(o.t) === k)) return;
+      cola.push({t}); salvaCola();
+    };
+    let quitando = Promise.resolve();
+    const revisar = () => { if(!conocidos) return; (typeof w.genLista === 'function' ? w.genLista() : []).forEach(encolar); procesar(); };
+    w.alGuardarTrabajadores = () => { revisar(); };
+    w.alQuitarTrabajador = t => {
+      const k = llave(t); cola = cola.filter(o => llave(o.t) !== k); salvaCola(); conocidos && conocidos.delete(k);
+      quitando = quitando.then(() => api('contratoQuitar', {rut:t.rut, ingreso:t.ingreso}));
+    };
+    addEventListener('online', () => { espera = 0; procesar(); });
+    addEventListener('offline', estadoTxt);
+    (async () => {
+      aviso('Conectando con la base de datos…');
+      let ok = false; try{ ok = await traer(); }catch(e){ ok = false; }
+      if(!ok){ aviso('No se pudo conectar con la base de datos.', true); conocidos = new Set(); }
+      revisar(); estadoTxt();
+    })();
   });
 }
 async function ir(t){
@@ -1035,7 +1106,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.43';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.45';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1047,4 +1118,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.43 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.45 · 10-11-2026 ==== -->

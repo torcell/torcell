@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.28</title>
+<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.29</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== Generador de documentos · v7-html.28 · 2026-11-08 ===== */
+/* ===== Generador de documentos · v7-html.29 · 2026-11-10 ===== */
 /* ===== colores ===== */
 :root{--fondo:#0d1b24;--caja:#16262f;--campo:#112029;--linea:#3b5666;--texto:#f2f6f8;--suave:#9fb3bd;--ac:#6ec6e8;--ac2:#1f5a78;--err:#e8707f}
 [data-c=dorado]{--ac:#e0b45a;--ac2:#6b5320}[data-c=esmeralda]{--ac:#5fd3a0;--ac2:#1f6a4c}
@@ -171,7 +171,7 @@ body{padding:0}
  <nav>
   <a class="on" data-v="nuevo">Nuevo trabajador</a><a data-v="anexos">Anexos</a><a data-v="obra">Empresas y obras</a><a data-v="hist">Trabajadores</a><a data-v="fini">Finiquitos</a>
   <hr><a data-v="emp">Empresa</a><a data-v="apa">Apariencia</a>
-  <span class="ver">Versión v7-html.28</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
+  <span class="ver">Versión v7-html.29</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
  </nav>
  <div class="cuerpo">
   <!-- ===== nuevo trabajador ===== -->
@@ -294,7 +294,7 @@ body{padding:0}
  <div class="pie"><button type="button" class="btn ok" id="vOk" style="height:42px"></button><button type="button" class="btn" id="vNo">Cancelar</button></div>
 </div></div>
 <script>
-/* ===== generador.js · v7-html.28 · 2026-11-08 ===== */
+/* ===== generador.js · v7-html.29 · 2026-11-10 ===== */
 (function (root) {
 "use strict";
 var A = null;                       // fuentes, firma, derecho e irl (base64)
@@ -1046,6 +1046,20 @@ function guardarTrab(){try{localStorage.setItem(CLAVE,JSON.stringify(TRAB))}catc
 function agregarTrab(t){
   if(TRAB.some(x=>x.rut===t.rut&&x.ingreso===t.ingreso))return false;
   t.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);TRAB.push(t);guardarTrab();pintarHist();return true}
+// ===== sincronización (la hace el Panel de Admin; solo no hace nada) =====
+// genLista: lo que hay en este aparato. genMezclar: agrega lo que llegó de la base de datos
+window.genLista=()=>TRAB;
+window.genMezclar=function(lista){
+  if(!Array.isArray(lista))return 0;
+  let nuevos=0;
+  lista.forEach(o=>{
+    if(!o||typeof o!=='object'||!o.rut||!o.ingreso||!o.nombre)return;
+    if(TRAB.some(x=>x.rut===o.rut&&x.ingreso===o.ingreso))return;
+    const t={};CAMPOS_T.forEach(k=>t[k]=limpio(o[k]==null?'':o[k]));
+    t.id=String(o.id||'').replace(/[^a-zA-Z0-9]/g,'')||Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    TRAB.push(t);nuevos++});
+  if(nuevos){try{localStorage.setItem(CLAVE,JSON.stringify(TRAB))}catch(e){}pintarHist()}
+  return nuevos};
 const CARGO_ANEXO={CERAMISTA:'Maestro Ceramista',FRAGUADOR:'Maestro Fraguador'};
 let selId=null;
 function pintarHist(){
@@ -1068,6 +1082,7 @@ function desdeFila(acc){const t=elegido();if(!t){$('hMsg').textContent='Elige pr
   cargarEnForm(t,true);desdeHist=true;abrirDialogo(acc,'trab')}
 $('hDesc').onclick=()=>desdeFila('descargar');$('hImp').onclick=()=>desdeFila('imprimir');
 $('hQuitar').onclick=()=>{const t=elegido();if(!t){$('hMsg').textContent='Elige primero una fila.';return}
+  if(typeof window.alQuitarTrabajador==='function')window.alQuitarTrabajador(t);
   TRAB=TRAB.filter(x=>x.id!==t.id);selId=null;guardarTrab();pintarHist();$('hMsg').textContent='Quitado del historial.'};
 function pasarAAnexo(t){poner('a_nombre',t.nombre);poner('a_rut',t.rut);const c=CARGO_ANEXO[t.rol]||t.rol;
   if(![...$('a_cargo').options].some(o=>o.text===c))$('a_cargo').add(new Option(c));$('a_cargo').value=c;poner('a_func',c);$('a_cargo').refrescar&&$('a_cargo').refrescar()}
