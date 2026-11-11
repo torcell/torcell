@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.32</title>
+<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.33</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== Generador de documentos · v7-html.32 · 2026-11-10 ===== */
+/* ===== Generador de documentos · v7-html.33 · 2026-11-11 ===== */
 /* ===== colores ===== */
 :root{--fondo:#0d1b24;--caja:#16262f;--campo:#112029;--linea:#3b5666;--texto:#f2f6f8;--suave:#9fb3bd;--ac:#6ec6e8;--ac2:#1f5a78;--err:#e8707f}
 [data-c=dorado]{--ac:#e0b45a;--ac2:#6b5320}[data-c=esmeralda]{--ac:#5fd3a0;--ac2:#1f6a4c}
@@ -171,7 +171,7 @@ body{padding:0}
  <nav>
   <a class="on" data-v="nuevo">Nuevo trabajador</a><a data-v="anexos">Anexos</a><a data-v="obra">Empresas y obras</a><a data-v="hist">Trabajadores</a><a data-v="fini">Finiquitos</a>
   <hr><a data-v="emp">Empresa</a><a data-v="apa">Apariencia</a>
-  <span class="ver">Versión v7-html.32</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
+  <span class="ver">Versión v7-html.33</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
  </nav>
  <div class="cuerpo">
   <!-- ===== nuevo trabajador ===== -->
@@ -197,6 +197,7 @@ body{padding:0}
     <div class="full"><label>Correo de la empresa (sale en el contrato) *</label><input id="correoEmp" inputmode="email"><div class="hint">Queda guardado el último que uses. El de siempre se cambia en «Empresa».</div></div>
    </div>
    <div class="sec">DESTINO</div><div class="g"><input id="carpeta" type="hidden"><div class="full hint" id="hintDest">Los PDF se bajan en un ZIP con la carpeta del trabajador (si eliges un solo documento, baja el PDF solo).</div>
+   <div class="full"><label class="chk"><input type="checkbox" id="sepPdf"><span>Separar en un PDF por documento <span id="nuevoPdf" style="background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;margin-left:6px">Nuevo</span></span></label><div class="hint" style="margin:0">Sin marcar sale un solo PDF con todos los documentos (el contrato va dos veces).</div></div>
     <div class="full acciones" style="grid-template-columns:1fr 1fr 1fr"><button type="button" class="btn ok" id="bGuardar">GUARDAR</button><button type="button" class="btn ok" data-acc="descargar" data-tipo="trab">DESCARGAR DOCUMENTOS</button><button type="button" class="btn ok gris" data-acc="imprimir" data-tipo="trab">IMPRIMIR</button></div><div class="full" id="msg"></div></div>
    </form>
   </section>
@@ -294,7 +295,7 @@ body{padding:0}
  <div class="pie"><button type="button" class="btn ok" id="vOk" style="height:42px"></button><button type="button" class="btn" id="vNo">Cancelar</button></div>
 </div></div>
 <script>
-/* ===== generador.js · v7-html.32 · 2026-11-10 ===== */
+/* ===== generador.js · v7-html.33 · 2026-11-11 ===== */
 (function (root) {
 "use strict";
 var A = null;                       // fuentes, firma, derecho e irl (base64)
@@ -1241,6 +1242,7 @@ let EMPRESA=Object.assign({},EMP_DEF);
 try{const g=JSON.parse(localStorage.getItem(CE)||'null');if(g&&typeof g==='object')EMPRESA=Object.assign(EMPRESA,g)}catch(e){}
 if(new Date()>=new Date(2026,10,15)){$('nuevoHoja').style.display='none';$('nuevoTF').style.display='none';$('nuevoCal').style.display='none';$('nuevoImp').style.display='none';$('nuevoMov').style.display='none'}
 if(new Date()>=new Date(2026,10,18))$('nuevoCom').style.display='none';
+if(new Date()>=new Date(2026,10,18))$('nuevoPdf').style.display='none';
 function pintarEmpresa(){EMP_CAMPOS.forEach(([k,i])=>$(i).value=EMPRESA[k]||'');$('em_firma').checked=EMPRESA.incluir_firma_empleador!==false;$('em_hoja').value=EMPRESA.formato_hoja==='a4'?'a4':'carta'}
 EMP_CAMPOS.forEach(([k,i])=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[<>"'`\\{}]/g,''));
 $('emGuardar').onclick=()=>{const m=$('emMsg');let falta=0;
@@ -1279,7 +1281,13 @@ function armar(d,s){
     const dat=Gen.construirDatos({nombre:d.nombre,rut:d.rut,nacionalidad:d.nacionalidad,estado_civil:d.civil,fecha_nacimiento:d.nacimiento,
       domicilio:d.domicilio,correo:d.correo,rol:d.rol,sueldo_minimo:d.sueldo.replace(/\D/g,''),fecha_ingreso:d.ingreso,correo_empresa:d.correoEmp},cfg);
     const nom=seguro(dat.nombre);carpeta=nom+' - '+dat.rut;
-    ORDEN.forEach((k,i)=>{if(s.docs.includes(k))salida.push({ruta:(i+1)+' - '+ETQ[k]+' - '+nom+'.pdf',pdf:FGEN[k](dat,cfg,true)})});
+    ORDEN.forEach((k,i)=>{if(s.docs.includes(k))salida.push({ruta:(i+1)+' - '+ETQ[k]+' - '+nom+'.pdf',pdf:FGEN[k](dat,cfg,true),clave:k})});
+    if(!$('sepPdf').checked){
+      const gen=salida.filter(x=>x.pdf),hojas=[];
+      gen.forEach(x=>{hojas.push(x.pdf);if(x.clave==='contrato')hojas.push(x.pdf)});
+      if(gen.length>1||(gen.length===1&&gen[0].clave==='contrato')){
+        const t='Documentos de Contratación - '+nom;
+        salida.splice(0,gen.length,{ruta:t+'.pdf',junto:true,bytes:Gen.unir(hojas,{title:t,author:EMPRESA.empleador_nombre})})}}
     if(s.fijos.includes('irl'))salida.push({ruta:'IRL_ISRAEL_SEPULVEDA.pdf',bytes:Gen.irl()});
   }
   return{salida,carpeta};
@@ -1350,11 +1358,15 @@ function imprimirBytes(u8,sigue){
   document.body.appendChild(f)}
 window.alImprimir=(d,s)=>{try{
   if(tipo==='trab'){try{localStorage.setItem(CC,d.correoEmp)}catch(e){}}
-  const {salida}=armar(d,s),gen=salida.filter(x=>x.pdf),fijos=salida.filter(x=>x.bytes),m=msgDe();
+  const {salida}=armar(d,s),gen=salida.filter(x=>x.pdf),junto=salida.find(x=>x.junto),fijos=salida.filter(x=>x.bytes&&!x.junto),m=msgDe();
   const irl=()=>{if(fijos.length)imprimirBytes(fijos[0].bytes)};
-  if(gen.length)imprimirBytes(Gen.unir(gen.map(x=>x.pdf),{title:'Documentos',author:EMPRESA.empleador_nombre}),irl);else irl();
+  if(junto)imprimirBytes(junto.bytes,irl);else if(gen.length)imprimirBytes(Gen.unir(gen.map(x=>x.pdf),{title:'Documentos',author:EMPRESA.empleador_nombre}),irl);else irl();
   m.style.color='var(--ac)';m.textContent='Se abrió el diálogo de impresión del navegador.';
 }catch(e){falla(e)}};
+
+// ===== casilla de PDF separados =====
+try{$('sepPdf').checked=localStorage.getItem('gen_sep')==='1'}catch(e){}
+$('sepPdf').onchange=()=>{try{localStorage.setItem('gen_sep',$('sepPdf').checked?'1':'0')}catch(e){}};
 
 // ===== calendario =====
 const calEl=document.createElement('div');calEl.id='cal';calEl.tabIndex=-1;document.body.appendChild(calEl);
