@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.30</title>
+<html lang="es"><head><meta charset="utf-8"><title>Generador de documentos · v7-html.32</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== Generador de documentos · v7-html.30 · 2026-11-10 ===== */
+/* ===== Generador de documentos · v7-html.32 · 2026-11-10 ===== */
 /* ===== colores ===== */
 :root{--fondo:#0d1b24;--caja:#16262f;--campo:#112029;--linea:#3b5666;--texto:#f2f6f8;--suave:#9fb3bd;--ac:#6ec6e8;--ac2:#1f5a78;--err:#e8707f}
 [data-c=dorado]{--ac:#e0b45a;--ac2:#6b5320}[data-c=esmeralda]{--ac:#5fd3a0;--ac2:#1f6a4c}
@@ -171,7 +171,7 @@ body{padding:0}
  <nav>
   <a class="on" data-v="nuevo">Nuevo trabajador</a><a data-v="anexos">Anexos</a><a data-v="obra">Empresas y obras</a><a data-v="hist">Trabajadores</a><a data-v="fini">Finiquitos</a>
   <hr><a data-v="emp">Empresa</a><a data-v="apa">Apariencia</a>
-  <span class="ver">Versión v7-html.30</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
+  <span class="ver">Versión v7-html.32</span><span id="nuevoMov" style="display:block;margin:6px 22px 0;width:max-content;background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px">Nuevo: celular y tablet</span>
  </nav>
  <div class="cuerpo">
   <!-- ===== nuevo trabajador ===== -->
@@ -184,7 +184,7 @@ body{padding:0}
     <div><label>Fecha de nacimiento * (dd/mm/aaaa)</label><div class="fa fw"><input name="nacimiento" placeholder="15/06/1981"><button type="button" class="calbtn" id="calNac" aria-label="Abrir calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></div></div>
     <div><label>Nacionalidad *</label><select name="nacionalidad"><option>CHILENA</option><option>HAITIANA</option><option>VENEZOLANA</option><option>PERUANA</option><option>COLOMBIANA</option><option>BOLIVIANA</option></select></div>
     <div><label>Estado civil *</label><select name="civil"><option>SOLTERO</option><option>CASADO</option><option>DIVORCIADO</option><option>VIUDO</option></select></div>
-    <div class="full"><label>Domicilio * <span id="nuevoCom" style="background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;margin-left:6px">Nuevo: sugerencias de comuna</span></label><div class="fila"><input id="calle" style="flex:3"><b>#</b><input id="num" style="flex:1" inputmode="numeric"><b>,</b><input id="comuna" style="flex:3" placeholder="Comuna"></div><div class="hint" id="vistaDom">En el contrato: calle #número, comuna</div></div>
+    <div class="full"><label>Domicilio * <span id="nuevoCom" style="background:var(--ac);color:var(--fondo);font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;margin-left:6px">Nuevo: sugerencias</span></label><div class="fila"><input id="calle" style="flex:3"><b>#</b><input id="num" style="flex:1" inputmode="numeric"><b>,</b><input id="comuna" style="flex:3" placeholder="Comuna"></div><div class="hint" id="vistaDom">En el contrato: calle #número, comuna</div></div>
     <div class="full"><label>Correo electrónico *</label><div class="fila"><input id="cUser" style="flex:4"><b>@</b>
       <select id="cProv" style="flex:3"><option selected>gmail</option><option>hotmail</option><option>outlook</option><option>yahoo</option></select><b>.</b>
       <select id="cSuf" style="flex:1.3"><option selected>com</option><option>cl</option><option>net</option><option>org</option></select></div></div>
@@ -294,7 +294,7 @@ body{padding:0}
  <div class="pie"><button type="button" class="btn ok" id="vOk" style="height:42px"></button><button type="button" class="btn" id="vNo">Cancelar</button></div>
 </div></div>
 <script>
-/* ===== generador.js · v7-html.30 · 2026-11-10 ===== */
+/* ===== generador.js · v7-html.32 · 2026-11-10 ===== */
 (function (root) {
 "use strict";
 var A = null;                       // fuentes, firma, derecho e irl (base64)
@@ -1239,7 +1239,8 @@ const CE='gen_empresa',EMP_CAMPOS=[['empleador_nombre','em_nombre'],['empleador_
   ['empleador_rut','em_rut'],['empleador_domicilio','em_dom'],['empleador_correo','em_correo'],['empleador_cargo','em_cargo']];
 let EMPRESA=Object.assign({},EMP_DEF);
 try{const g=JSON.parse(localStorage.getItem(CE)||'null');if(g&&typeof g==='object')EMPRESA=Object.assign(EMPRESA,g)}catch(e){}
-if(new Date()>=new Date(2026,10,15)){$('nuevoHoja').style.display='none';$('nuevoTF').style.display='none';$('nuevoCom').style.display='none';$('nuevoCal').style.display='none';$('nuevoImp').style.display='none';$('nuevoMov').style.display='none'}
+if(new Date()>=new Date(2026,10,15)){$('nuevoHoja').style.display='none';$('nuevoTF').style.display='none';$('nuevoCal').style.display='none';$('nuevoImp').style.display='none';$('nuevoMov').style.display='none'}
+if(new Date()>=new Date(2026,10,18))$('nuevoCom').style.display='none';
 function pintarEmpresa(){EMP_CAMPOS.forEach(([k,i])=>$(i).value=EMPRESA[k]||'');$('em_firma').checked=EMPRESA.incluir_firma_empleador!==false;$('em_hoja').value=EMPRESA.formato_hoja==='a4'?'a4':'carta'}
 EMP_CAMPOS.forEach(([k,i])=>$(i).oninput=e=>e.target.value=e.target.value.replace(/[<>"'`\\{}]/g,''));
 $('emGuardar').onclick=()=>{const m=$('emMsg');let falta=0;
@@ -1461,33 +1462,58 @@ function calNac(btn,inp){
     pideAnio:true,inicio:new Date(1990,5,1),min:1930,max:hoy.getFullYear(),
     set:f=>{inp.value=String(f.getDate()).padStart(2,'0')+'/'+String(f.getMonth()+1).padStart(2,'0')+'/'+f.getFullYear();inp.dispatchEvent(new Event('input',{bubbles:true}));inp.classList.remove('mal')}})}
 calNac($('calNac'),$('f').elements.nacimiento);calNac($('calCNac'),$('c_nac'));
-// ===== sugerencias de comuna: salen abajo mientras se escribe =====
-const COMUNAS_RM=["Alhué", "Buin", "Calera de Tango", "Cerrillos", "Cerro Navia", "Colina", "Conchalí", "Curacaví", "El Bosque", "El Monte", "Estación Central", "Huechuraba", "Independencia", "Isla de Maipo", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Lampa", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "María Pinto", "Melipilla", "Ñuñoa", "Padre Hurtado", "Paine", "Pedro Aguirre Cerda", "Peñaflor", "Peñalolén", "Pirque", "Providencia", "Pudahuel", "Puente Alto", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Bernardo", "San Joaquín", "San José de Maipo", "San Miguel", "San Pedro", "San Ramón", "Santiago", "Talagante", "Tiltil", "Vitacura"];
+// ===== sugerencias: al escribir las primeras letras salen abajo las opciones de la base de datos =====
+// comunas y provincias de Chile (BCN: 56 provincias, 346 comunas) y lo que ya se guardó (trabajadores y obras)
+const PROV_COM={"Arica":["Arica","Camarones"],"Parinacota":["Putre","General Lagos"],"Iquique":["Iquique","Alto Hospicio"],"Tamarugal":["Pozo Almonte","Pica","Huara","Colchane","Camiña"],"Antofagasta":["Taltal","Sierra Gorda","Mejillones","Antofagasta"],"El Loa":["San Pedro de Atacama","Ollagüe","Calama"],"Tocopilla":["Tocopilla","María Elena"],"Chañaral":["Diego de Almagro","Chañaral"],"Copiapó":["Tierra Amarilla","Copiapó","Caldera"],"Huasco":["Vallenar","Huasco","Freirina","Alto del Carmen"],"Choapa":["Salamanca","Los Vilos","Illapel","Canela"],"Elqui":["Vicuña","Paiguano","La Serena","La Higuera","Coquimbo","Andacollo"],"Limarí":["Río Hurtado","Punitaqui","Ovalle","Monte Patria","Combarbalá"],"Isla de Pascua":["Isla de Pascua"],"Los Andes":["San Esteban","Rinconada","Los Andes","Calle Larga"],"Marga Marga":["Villa Alemana","Quilpué","Limache","Olmué"],"Petorca":["Zapallar","Petorca","Papudo","La Ligua","Cabildo"],"Quillota":["Quillota","Nogales","La Cruz","La Calera","Hijuelas"],"San Antonio":["Santo Domingo","San Antonio","El Tabo","El Quisco","Cartagena","Algarrobo"],"San Felipe":["Santa María","San Felipe","Putaendo","Panquehue","Llaillay","Catemu"],"Valparaíso":["Viña del Mar","Valparaíso","Quintero","Puchuncaví","Concón","Juan Fernández","Casablanca"],"Chacabuco":["Tiltil","Lampa","Colina"],"Cordillera":["San José de Maipo","Puente Alto","Pirque"],"Maipo":["San Bernardo","Paine","Calera de Tango","Buin"],"Melipilla":["San Pedro","Melipilla","María Pinto","Curacaví","Alhué"],"Santiago":["Vitacura","Santiago","San Ramón","San Miguel","San Joaquín","Renca","Recoleta","Quinta Normal","Quilicura","Pudahuel","Providencia","Peñalolén","Pedro Aguirre Cerda","Ñuñoa","Maipú","Macul","Lo Prado","Lo Espejo","Lo Barnechea","Las Condes","La Reina","La Pintana","La Granja","La Florida","La Cisterna","Independencia","Huechuraba","Estación Central","El Bosque","Conchalí","Cerro Navia","Cerrillos"],"Talagante":["Talagante","Peñaflor","Padre Hurtado","Isla de Maipo","El Monte"],"Cachapoal":["San Vicente","Requínoa","Rengo","Rancagua","Quinta de Tilcoco","Pichidegua","Peumo","Olivar","Mostazal","Malloa","Machalí","Las Cabras","Graneros","Doñihue","Coltauco","Coinco","Codegua"],"Cardenal Caro":["Pichilemu","Paredones","Navidad","Marchigüe","Litueche","La Estrella"],"Colchagua":["Santa Cruz","San Fernando","Pumanque","Placilla","Peralillo","Palmilla","Nancagua","Lolol","Chimbarongo","Chépica"],"Cauquenes":["Pelluhue","Chanco","Cauquenes"],"Curicó":["Vichuquén","Teno","Sagrada Familia","Romeral","Rauco","Molina","Licantén","Hualañé","Curicó"],"Linares":["Yerbas Buenas","Villa Alegre","San Javier","Retiro","Parral","Longaví","Linares","Colbún"],"Talca":["Talca","San Rafael","San Clemente","Río Claro","Pencahue","Pelarco","Maule","Empedrado","Curepto","Constitución"],"Diguillín":["Chillán Viejo","Chillán","Bulnes","El Carmen","Pemuco","Pinto","Quillón","San Ignacio","Yungay"],"Itata":["Cobquecura","Coelemu","Ninhue","Portezuelo","Quirihue","Ránquil","Treguaco"],"Punilla":["Coihueco","Ñiquén","San Carlos","San Fabián","San Nicolás"],"Arauco":["Tirúa","Los Álamos","Lebu","Curanilahue","Contulmo","Cañete","Arauco"],"Biobío":["Yumbel","Tucapel","Santa Bárbara","San Rosendo","Quilleco","Quilaco","Negrete","Nacimiento","Mulchén","Los Ángeles","Laja","Cabrero","Antuco","Alto Biobío"],"Concepción":["Tomé","Talcahuano","Santa Juana","San Pedro de la Paz","Penco","Lota","Hualqui","Hualpén","Florida","Coronel","Concepción","Chiguayante"],"Cautín":["Villarrica","Vilcún","Toltén","Teodoro Schmidt","Temuco","Saavedra","Pucón","Pitrufquén","Perquenco","Padre Las Casas","Nueva Imperial","Melipeuco","Loncoche","Lautaro","Gorbea","Galvarino","Freire","Curarrehue","Cunco","Cholchol","Carahue"],"Malleco":["Victoria","Traiguén","Renaico","Purén","Lumaco","Los Sauces","Lonquimay","Ercilla","Curacautín","Collipulli","Angol"],"Ranco":["Río Bueno","Lago Ranco","La Unión","Futrono"],"Valdivia":["Valdivia","Panguipulli","Paillaco","Mariquina","Máfil","Los Lagos","Lanco","Corral"],"Chiloé":["Quinchao","Quemchi","Quellón","Queilén","Puqueldón","Dalcahue","Curaco de Vélez","Chonchi","Castro","Ancud"],"Llanquihue":["Puerto Varas","Puerto Montt","Maullín","Los Muermos","Llanquihue","Frutillar","Fresia","Cochamó","Calbuco"],"Osorno":["San Pablo","San Juan de la Costa","Río Negro","Puyehue","Purranque","Puerto Octay","Osorno"],"Palena":["Palena","Hualaihué","Futaleufú","Chaitén"],"Aysén":["Guaitecas","Cisnes","Aysén"],"Capitán Prat":["Tortel","O'Higgins","Cochrane"],"Coyhaique":["Lago Verde","Coyhaique"],"General Carrera":["Río Ibáñez","Chile Chico"],"Antártica Chilena":["Cabo de Hornos","Antártica"],"Magallanes":["San Gregorio","Río Verde","Punta Arenas","Laguna Blanca"],"Tierra del Fuego":["Timaukel","Primavera","Porvenir"],"Última Esperanza":["Torres del Paine","Natales"]};
+const ES=(a,b)=>a.localeCompare(b,'es');
+const COMUNAS=Object.keys(PROV_COM).flatMap(k=>PROV_COM[k]).sort(ES);
+const PROVINCIAS=Object.keys(PROV_COM).sort(ES);
+const unicos=l=>[...new Set(l.map(x=>String(x||'').trim()).filter(Boolean))].sort(ES);
+const FUENTES=[
+  [['comuna','a_comuna','o_com','c_comuna'],()=>COMUNAS],
+  [['a_prov','o_prov'],()=>PROVINCIAS],
+  [['nombre','c_nombre','a_nombre'],()=>unicos(TRAB.map(t=>t.nombre))],
+  [['calle','c_calle','a_calle','o_dir'],()=>unicos(TRAB.map(t=>t.calle).concat(OBRAS.map(o=>o.direccion)))],
+  [['a_obra','o_nombre'],()=>unicos(OBRAS.map(o=>o.nombre))],
+  [['o_emp'],()=>unicos(OBRAS.map(o=>o.empresa))],
+  [['a_jor','o_jor'],()=>unicos(OBRAS.map(o=>o.jornada))],
+  [['o_tarea'],()=>unicos(OBRAS.map(o=>o.tarea))],
+  [['o_tareaF'],()=>unicos(OBRAS.map(o=>o.tareaF))],
+  [['a_func'],()=>unicos(['Maestro Ceramista','Maestro Fraguador'].concat(TRAB.map(t=>t.rol)))],
+  [['e_buscar'],()=>unicos(TRAB.map(t=>t.nombre).concat(TRAB.map(t=>t.rut)))]
+];
 (function(){
   const sg=document.createElement('div');sg.id='sugC';document.body.appendChild(sg);
-  const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  let inp=null,sel=-1,lis=[];
+  const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  let inp=null,fuente=null,sel=-1,lis=[];
   const cerrar=()=>{sg.style.display='none';inp=null;sel=-1};
   const marcar=()=>[...sg.children].forEach((d,i)=>d.classList.toggle('on',i===sel));
   function elegir(c){inp.value=c;inp.dispatchEvent(new Event('input',{bubbles:true}));cerrar()}
+  // primero las que empiezan con lo escrito; si hay pocas, las que tienen una palabra que empieza así (apellido, calle)
+  function buscar(q){
+    const todas=fuente(),a=[],b=[];
+    const qs=q.replace(/[.\-]/g,'');
+    todas.forEach(c=>{const n=norm(c);if(n===q)return;if(n.startsWith(q))a.push(c);else if(/^\d/.test(q)&&n.replace(/[.\-]/g,'').startsWith(qs))a.push(c);else if(q.length>=2&&n.split(/[\s,.-]+/).some(w=>w.startsWith(q)))b.push(c)});
+    return a.concat(b).slice(0,8)}
   function mostrar(){
-    const q=norm(inp.value.trim());lis=q?COMUNAS_RM.filter(c=>norm(c).startsWith(q)&&norm(c)!==q):[];
+    const q=norm(inp.value.trim());lis=q?buscar(q):[];
     if(!lis.length){cerrar();return}
     sg.innerHTML='';sel=-1;
     lis.forEach(c=>{const d=document.createElement('div'),n=inp.value.trim().length;
-      const b=document.createElement('b');b.textContent=c.slice(0,n);d.appendChild(b);d.appendChild(document.createTextNode(c.slice(n)));
+      if(norm(c).startsWith(q)){const b=document.createElement('b');b.textContent=c.slice(0,n);d.appendChild(b);d.appendChild(document.createTextNode(c.slice(n)))}
+      else d.textContent=c;
       d.onmousedown=e=>{e.preventDefault();elegir(c)};sg.appendChild(d)});
     const r=inp.getBoundingClientRect();sg.style.left=r.left+'px';sg.style.top=(r.bottom+2)+'px';sg.style.width=Math.max(r.width,200)+'px';sg.style.display='block'}
-  ['comuna','a_comuna','o_com','c_comuna'].forEach(id=>{const e=$(id);if(!e)return;e.setAttribute('autocomplete','off');
-    e.addEventListener('input',()=>{inp=e;mostrar()});
-    e.addEventListener('focus',()=>{if(e.value.trim()){inp=e;mostrar()}});
+  FUENTES.forEach(([ids,f])=>ids.forEach(id=>{const e=$(id)||document.querySelector('input[name='+id+']');if(!e)return;e.setAttribute('autocomplete','off');
+    e.addEventListener('input',()=>{inp=e;fuente=f;mostrar()});
+    e.addEventListener('focus',()=>{if(e.value.trim()){inp=e;fuente=f;mostrar()}});
     e.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==e)cerrar()},0));
     e.addEventListener('keydown',ev=>{if(sg.style.display!=='block'||inp!==e)return;
       if(ev.key==='ArrowDown'){ev.preventDefault();sel=(sel+1)%lis.length;marcar();sg.children[sel].scrollIntoView({block:'nearest'})}
       else if(ev.key==='ArrowUp'){ev.preventDefault();sel=(sel<=0?lis.length:sel)-1;marcar();sg.children[sel].scrollIntoView({block:'nearest'})}
       else if(ev.key==='Enter'&&sel>=0){ev.preventDefault();elegir(lis[sel])}
       else if(ev.key==='Tab'&&lis.length===1){elegir(lis[0])}
-      else if(ev.key==='Escape'){cerrar()}})});
+      else if(ev.key==='Escape'){cerrar()}})}));
   window.addEventListener('resize',cerrar);document.addEventListener('scroll',cerrar,true);
 })();
 </script></body></html>
