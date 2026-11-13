@@ -2155,7 +2155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.71';
+const APP_VERSION = '0.73.72';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2354,6 +2354,7 @@ function guardarM2DelPeriodo(desde, hasta){
 }
 const AFP_COTIZACION_OBLIGATORIA = 10;
 let allowGuestPrices = false;
+let pagadoLibre = false; // se habilita desde el Panel de Admin (Visual)
 let espaciadoDptos = true;
 let temaPrincipal = null;
 let ceramicas = null;
@@ -2674,6 +2675,7 @@ async function mergeRemoteBeforeSave(){
     if(remote.customWorkers && remote.customWorkers.length) customWorkers = remote.customWorkers;
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
+    if(typeof remote.pagadoLibre === 'boolean') pagadoLibre = remote.pagadoLibre;
     if(typeof remote.espaciadoDptos === 'boolean') espaciadoDptos = remote.espaciadoDptos;
     if(remote.calidad && typeof remote.calidad === 'object') CAL_REV = remote.calidad;
     if(remote.temaPrincipal && typeof remote.temaPrincipal === 'object'){ temaPrincipal = remote.temaPrincipal; aplicarTemaPrincipal(); }
@@ -3086,6 +3088,7 @@ function applyLoadedPayload(parsed){
   customWorkers = parsed.customWorkers || [];
   if(parsed.rates) RATES = {...RATES, ...parsed.rates};
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
+  if(typeof parsed.pagadoLibre === 'boolean') pagadoLibre = parsed.pagadoLibre;
   if(typeof parsed.espaciadoDptos === 'boolean') espaciadoDptos = parsed.espaciadoDptos;
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
@@ -3337,9 +3340,27 @@ function updateRateFootnote(){
 }
 
 let switchingCat = false;
+// ===== al cambiar de pestaña (Cerámica / Frague) se queda en el mismo piso =====
+function pisoEnPantalla(){
+  const bl = document.querySelectorAll('#content .floor-block[data-piso]');
+  for(const b of bl){ if(b.getBoundingClientRect().bottom > 140) return b.getAttribute('data-piso'); }
+  return null;
+}
+function irAlPisoCercano(piso){
+  if(!piso || !pisosCola || !pisosCola.length) return;
+  const num = parseInt((String(piso).match(/-?\d+/) || [''])[0], 10);
+  if(isNaN(num)) return;
+  let mejor = 0, dif = Infinity;
+  pisosCola.forEach((b, i) => { const d = Math.abs(b.pisoNum - num); if(d < dif){ dif = d; mejor = i; } });
+  if(mejor >= pisosRender){ pisosRender = mejor + PISOS_LOTE + 1; render(); }
+  if(pisosCola[mejor].pisoNum !== num) avisoToast('En ' + activeCategoria + ' no hay partidas por mostrar en el Piso ' + num + ' (sin avance o ya listas). Se muestra desde el Piso ' + pisosCola[mejor].pisoNum + '.');
+  const el = document.querySelector('#content .floor-block[data-piso="' + String(pisosCola[mejor].piso).replace(/"/g, '\\"') + '"]');
+  if(el) window.scrollTo({top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 130), behavior: 'instant'});
+}
 function switchCategoria(newCat){
   if(newCat === activeCategoria || switchingCat) return;
   switchingCat = true;
+  const pisoRef = pisoEnPantalla();
   const order = ['Cerámica', 'Frague', 'Pasillos'];
   const dir = order.indexOf(newCat) > order.indexOf(activeCategoria) ? 1 : -1;
   const contentEl = document.getElementById('content');
@@ -3352,6 +3373,7 @@ function switchCategoria(newCat){
     avisarSeccion();
     populateFilters();
     render();
+    irAlPisoCercano(pisoRef);
     contentEl.style.transition = 'none';
     contentEl.style.transform = `translateX(${dir * 30}px)`;
     requestAnimationFrame(() => {
@@ -4023,7 +4045,7 @@ function checksHtml(cell, st){
   const frg = esFrague(cell);
   const motFrg = frg && !st.terminado ? motivoBloqueoPartida(cell) : null;
   const terminadoDisabled = !puede('estados') || (frg ? !!motFrg : (!turboMode && !st.partida));
-  const pagadoDisabled = !isAdmin || (!turboMode && !st.terminado);
+  const pagadoDisabled = !isAdmin || !pagadoLibre || (!turboMode && !st.terminado);
   const motBloq = !st.partida ? motivoBloqueoPartida(cell) : null;
   const fragueBloq = !!motBloq;
   const partidaDisabled = !puede('estados') || (!turboMode && st.terminado) || fragueBloq;
@@ -4032,7 +4054,7 @@ function checksHtml(cell, st){
       <input type="checkbox" data-id="${cell.id}" data-flag="partida" ${st.partida?'checked':''} ${partidaDisabled?'disabled':''}> Partida
     </label>`;
   return `<div class="checks-row${frg ? ' sin-partida' : ''}" data-checksof="${cell.id}">
-    <label title="${st.pagadoTs ? fechaCortaHora(st.pagadoTs) : 'Sin fecha registrada'}" class="chk-pill pagado ${st.pagado?'on':''} ${pagadoDisabled?'disabled':''}">
+    <label title="${!pagadoLibre ? 'Pagado se marca desde las liquidaciones' : (st.pagadoTs ? fechaCortaHora(st.pagadoTs) : 'Sin fecha registrada')}" class="chk-pill pagado ${st.pagado?'on':''} ${pagadoDisabled?'disabled':''}">
       <input type="checkbox" data-id="${cell.id}" data-flag="pagado" ${st.pagado?'checked':''} ${pagadoDisabled?'disabled':''}> Pagado
     </label>
     <label title="${motFrg ? avisoCortoBloqueo(motFrg, cell) : (st.terminadoTs ? fechaCortaHora(st.terminadoTs) : 'Sin fecha registrada')}" class="chk-pill terminado ${st.terminado?'on':''} ${terminadoDisabled?'disabled':''}">
@@ -4071,6 +4093,7 @@ function fechaCortaMovil(ts){
 }
 function aplicarEstadoDestino(id, destino){
   const st = getState(id), actual = estadoNumero(st), ahora = Date.now();
+  if(!pagadoLibre && (destino === 3 || actual === 3) && destino !== actual){ avisoToast('Pagado solo se marca o se quita desde las liquidaciones.', 'error'); return; }
   if(esFrague(cellById[id]) && destino === 1) destino = 0; // Frague no tiene Partida: solo Terminado y Pagado
   if(destino > actual){
     for(let n = actual + 1; n <= destino; n++){
@@ -4085,6 +4108,8 @@ function aplicarEstadoDestino(id, destino){
     if(destino < 1){ st.partida = false; st.partidaTs = null; }
   }
 }
+// Pagado solo se mueve desde liquidaciones, salvo que Admin lo habilite
+function pagadoLibre_ok(n, actual){ return pagadoLibre || (n < 3 && actual < 3); }
 function filasEstadoAdminHtml(cell, st, destino){
   const actual = estadoNumero(st);
   const nombres = ['Partida', TERMINADO_LABEL[cell.area] || 'Terminado', 'Pagado'];
@@ -4096,7 +4121,7 @@ function filasEstadoAdminHtml(cell, st, destino){
   const bloqueoFrague = !!motivoPart;
   return (bloqueoFrague ? '<p class="est-aviso">' + avisoCortoBloqueo(motivoPart, cell) + '</p>' : '') + [1, 2, 3].filter(n => !(frg && n === 1)).map(n => {
     const activo = destino >= n, cambio = activo !== (actual >= n);
-    const habilitado = (destino >= n || turboMode || destino === n - 1 || (frg && n === 2 && destino < 2)) && !bloqueoFrague;
+    const habilitado = (destino >= n || turboMode || destino === n - 1 || (frg && n === 2 && destino < 2)) && !bloqueoFrague && pagadoLibre_ok(n, actual);
     let largo = '—', corto = '—';
     if(activo){
       const ts = cambio ? hoy : fechas[n - 1];
@@ -7408,6 +7433,7 @@ function alCambioContenido(e){
   const cell = cellById[id];
   const willBeOn = cb.checked;
   cb.checked = !willBeOn;
+  if(!pagadoLibre && (flag === 'pagado' || (!willBeOn && state[id].pagado && (flag === 'partida' || flag === 'terminado')))){ avisoToast('Pagado solo se marca o se quita desde las liquidaciones.', 'error'); return; }
   { const mot = (willBeOn && !state[id].partida) ? motivoBloqueoPartida(cell) : null; if(mot){ avisoToast(textoBloqueoPartida(mot, cell), 'error'); return; } }
   let cascadeNote = '';
   if(flag === 'partida' && !willBeOn && (state[id].terminado || state[id].pagado)) cascadeNote = ' Esto también quitará el estado Terminado y Pagado.';
@@ -9017,4 +9043,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.71 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.72 · 13-11-2026 ==== -->
