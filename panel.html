@@ -134,12 +134,12 @@
   .btn:hover{background:var(--panel-soft);}
 
   .btn, .tab, .chk-pill, .assign-btn, .m2-edit-btn, .nota-btn-single, .sbtn{transition:transform .08s ease;}
-  .btn:active, .tab:active, .chk-pill:active, .assign-btn:active, .m2-edit-btn:active, .nota-btn-single:active{transform:scale(.94);}
+  .btn:active, .tab:active, .chk-pill:not(.disabled):active, .assign-btn:active, .m2-edit-btn:active, .nota-btn-single:active{transform:scale(.94);}
   .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
   .btn.primary:hover{filter:brightness(1.08);}
-  .btn:not(:disabled):not(.bloq):hover, .tab:hover, .chk-pill:hover, .sbtn:hover, .banner-actualizar button:hover, .lg-teclas button:hover{box-shadow:inset 0 0 0 1px var(--accent), inset 0 0 16px color-mix(in srgb,var(--accent) 24%,transparent);border-color:var(--accent);}
+  .btn:not(:disabled):not(.bloq):hover, .tab:hover, .chk-pill:not(.disabled):hover, .sbtn:hover, .banner-actualizar button:hover, .lg-teclas button:hover{box-shadow:inset 0 0 0 1px var(--accent), inset 0 0 16px color-mix(in srgb,var(--accent) 24%,transparent);border-color:var(--accent);}
   .btn.primary:not(:disabled):hover, .tab.active:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,.75), inset 0 0 18px rgba(255,255,255,.24);border-color:transparent;}
-  .btn:not(:disabled):not(.bloq):active, .tab:active, .chk-pill:active, .sbtn:active{transform:scale(.94);box-shadow:none;}
+  .btn:not(:disabled):not(.bloq):active, .tab:active, .chk-pill:not(.disabled):active, .sbtn:active{transform:scale(.94);box-shadow:none;}
   #floatingSaveBtn, #scrollTopBtn{transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;}
   #floatingSaveBtn::after, #scrollTopBtn::after{content:"";position:absolute;top:-10px;right:-10px;bottom:-10px;left:-10px;border-radius:50%;}
   #floatingSaveBtn:not(:disabled):hover{filter:brightness(1.1);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent), 0 2px 10px rgba(0,0,0,.35) !important;}
@@ -2155,7 +2155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.72';
+const APP_VERSION = '0.73.73';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9043,4 +9043,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.72 · 13-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.73 · 13-11-2026 ==== -->
