@@ -2155,7 +2155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.73';
+const APP_VERSION = '0.73.74';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4225,10 +4225,10 @@ function pasosVentanaHtml(cell, st, destino){
   const bloqueado = !puede('estados') || (st.pagado && !isAdmin) || (actual === 0 && !!motivoBloqueoPartida(cell));
   return [1, 2, 3].filter(n => !(frg && n === 1)).map(n => {
     const activo = destino >= n, cambio = activo !== (actual >= n);
-    const habilitado = !bloqueado && (isAdmin || n < 3) && (destino >= n || turboMode || destino === n - 1 || (frg && n === 2 && destino < 2));
+    const habilitado = !bloqueado && pagadoLibre_ok(n, actual) && (isAdmin || n < 3) && (destino >= n || turboMode || destino === n - 1 || (frg && n === 2 && destino < 2));
     let fecha = '—';
     if(activo){ const ts = cambio ? Date.now() : fechas[n - 1]; fecha = ts ? fechaCorta(ts) : 'sin fecha'; }
-    return `<button type="button" class="vt-paso ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-vtn="${n}" ${habilitado ? '' : 'disabled'}><span class="vt-caja">${activo ? '✓' : ''}</span><span class="vt-nombre">${nombres[n - 1]}</span><span class="vt-fecha">${fecha}</span></button>`;
+    return `<button type="button" class="vt-paso ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-vtn="${n}" ${n === 3 && !pagadoLibre ? 'title="Pagado se marca desde las liquidaciones" ' : ''}${habilitado ? '' : 'disabled'}><span class="vt-caja">${activo ? '✓' : ''}</span><span class="vt-nombre">${nombres[n - 1]}</span><span class="vt-fecha">${fecha}</span></button>`;
   }).join('');
 }
 // ---- Calidad → Panel (solo lectura): revisiones hechas en la sección de Calidad ----
@@ -9043,4 +9043,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.73 · 13-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.74 · 13-11-2026 ==== -->
