@@ -1233,7 +1233,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.18';
+const CAL_VERSION = '1.38.19';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1344,6 +1344,7 @@ function irAlMenu(msg){
   salirConError('index.html?menu=1','permiso');
 }
 function cerrarSesion(msg){
+  fcVaciar();   // las fotos guardadas en este aparato se borran al salir
   token = ''; nombre = ''; cargo = '';
   guardarLocal('calidadToken', null); guardarLocal('calidadNombre', null); guardarLocal('calidadCargo', null);
   try{ sessionStorage.setItem('progresoObraAvisoGate', msg || ''); }catch(e){}
@@ -1751,7 +1752,7 @@ async function abrirFotos(d){
   const base = claveBase(d);
   if(!(fotosCount[base] || 0) && !(fotosDe[base] || []).length){ fotosDe[base] = []; pintarFotos(); return; }
   if(fotosEstado[base] === 'pidiendo') return;
-  if(fotosFresca[base] && Date.now() - fotosFresca[base] < 20000){ pintarFotos(); return; }
+  if(fotosFresca[base] && Date.now() - fotosFresca[base] < 20000){ pintarFotos(); precargarCompletas(base); return; }
   await traerFotos(base, false);
 }
 async function traerFotos(base, silencioso){
@@ -1766,7 +1767,7 @@ async function traerFotos(base, silencioso){
       fotosFresca[base] = Date.now();
     }else{ fotosEstado[base] = 'error'; }
   }catch(e){ fotosEstado[base] = 'error'; }
-  if(actual && claveBase(actual) === base) pintarFotos();
+  if(actual && claveBase(actual) === base){ pintarFotos(); if(fotosEstado[base] === '') precargarCompletas(base); }
   if(!silencioso) pintar();   // al precargar no se vuelve a dibujar la lista (el mouse está encima)
 }
 let preOcupado = false;
@@ -1833,6 +1834,78 @@ async function subirUna(base, zona, file, ent){
     quitar(e && e.message === 'tiempo' ? 'La foto tardó demasiado en subir. Puede que se haya guardado: vuelve a abrir el departamento para comprobarlo.' : 'No se pudo subir la foto. Revisa tu internet.');
   }
 }
+// ===== Fotos completas guardadas en el navegador (IndexedDB) =====
+// la foto nunca cambia con el mismo id; si se edita o se borra, se saca de aquí
+const FC_MAX = 200, fotoMem = {};
+let fcDb = null, fcToken = 0;
+function fcAbrir(){
+  return fcDb || (fcDb = new Promise(ok => {
+    try{
+      const r = indexedDB.open('calidad_fotos', 1);
+      r.onupgradeneeded = () => { r.result.createObjectStore('f'); r.result.createObjectStore('i'); };
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => ok(null); r.onblocked = () => ok(null);
+    }catch(e){ ok(null); }
+  }));
+}
+async function fcLeer(id){
+  if(fotoMem[id]) return fotoMem[id];
+  const db = await fcAbrir(); if(!db) return '';
+  return new Promise(ok => {
+    try{
+      const q = db.transaction('f').objectStore('f').get(id);
+      q.onsuccess = () => { if(q.result){ fotoMem[id] = q.result; ok(q.result); } else ok(''); };
+      q.onerror = () => ok('');
+    }catch(e){ ok(''); }
+  });
+}
+async function fcGuardar(id, b64){
+  fotoMem[id] = b64;
+  const db = await fcAbrir(); if(!db) return;
+  try{
+    const tx = db.transaction(['f', 'i'], 'readwrite');
+    tx.objectStore('f').put(b64, id); tx.objectStore('i').put(Date.now(), id);
+    tx.oncomplete = () => fcLimpiar(db);
+  }catch(e){}
+}
+function fcLimpiar(db){
+  try{
+    const q = db.transaction('i').objectStore('i').openCursor(), todo = [];
+    q.onsuccess = () => {
+      const c = q.result;
+      if(c){ todo.push({id: c.key, t: c.value}); c.continue(); return; }
+      if(todo.length <= FC_MAX) return;
+      todo.sort((a, b) => a.t - b.t);
+      const tx = db.transaction(['f', 'i'], 'readwrite');
+      todo.slice(0, todo.length - FC_MAX).forEach(x => { tx.objectStore('f').delete(x.id); tx.objectStore('i').delete(x.id); delete fotoMem[x.id]; });
+    };
+  }catch(e){}
+}
+async function fcQuitar(id){
+  delete fotoMem[id];
+  const db = await fcAbrir(); if(!db) return;
+  try{ const tx = db.transaction(['f', 'i'], 'readwrite'); tx.objectStore('f').delete(id); tx.objectStore('i').delete(id); }catch(e){}
+}
+async function fcVaciar(){
+  Object.keys(fotoMem).forEach(k => delete fotoMem[k]);
+  const db = await fcAbrir(); if(!db) return;
+  try{ const tx = db.transaction(['f', 'i'], 'readwrite'); tx.objectStore('f').clear(); tx.objectStore('i').clear(); }catch(e){}
+}
+// al abrir un departamento: baja las fotos completas de a 2 mientras se mira el resto
+async function precargarCompletas(base){
+  const mi = ++fcToken;
+  const ids = (fotosDe[base] || []).filter(f => f.estado === 'ok').map(f => f.id);
+  const faltan = [];
+  for(const id of ids){ if(!(await fcLeer(id))) faltan.push(id); }
+  for(let i = 0; i < faltan.length; i += 2){
+    if(mi !== fcToken || !actual || claveBase(actual) !== base) return;
+    const lote = faltan.slice(i, i + 2);
+    try{
+      const j = await llamar('calidadFotoVer', {ids: lote}, false, 60000);
+      if(j && j.ok && j.fotos) lote.forEach(id => { if(j.fotos[id]) fcGuardar(id, j.fotos[id]); });
+    }catch(e){ return; }
+  }
+}
 let fotoVista = null, fvTimer = 0;
 function fvReset(){
   clearTimeout(fvTimer);
@@ -1853,8 +1926,11 @@ async function verFoto(i){
   $('fvEditar').hidden = !puede;
   $('fvAcc').classList.toggle('uno', !puede);
   $('velFoto').classList.add('on');
+  const guardada = await fcLeer(f.id);
+  if(guardada && fotoVista && fotoVista.f === f){ fotoVista.full = guardada; $('fvImg').innerHTML = `<img alt="Foto del departamento" src="data:image/jpeg;base64,${guardada}">`; return; }
   try{
     const j = await llamar('calidadFotoVer', {ids: [f.id]}, false, 60000);
+    if(j && j.ok && j.fotos && j.fotos[f.id]) fcGuardar(f.id, j.fotos[f.id]);
     if(fotoVista && fotoVista.f === f && j && j.ok && j.fotos && j.fotos[f.id]) fotoVista.full = j.fotos[f.id];
     if(fotoVista && fotoVista.f === f && j && j.ok && j.fotos && j.fotos[f.id]) $('fvImg').innerHTML = `<img alt="Foto del departamento" src="data:image/jpeg;base64,${j.fotos[f.id]}">`;
     else if(fotoVista && fotoVista.f === f) $('fvInfo').textContent += ' · (no se pudo cargar la foto completa)';
@@ -1882,6 +1958,7 @@ async function borrarFotoVista(){
     if(j && j.ok && j.borradas){
       const arr = fotosDe[base] || [], i = arr.indexOf(f);
       if(i >= 0) arr.splice(i, 1);
+      fcQuitar(f.id);
       fotosCount[base] = Math.max(0, (fotosCount[base] || 1) - 1);
       cerrarFoto(); pintarFotos(); pintar();
       return;
@@ -2033,7 +2110,7 @@ function editarGuardada(){
   const {base, f} = fotoVista, im = new Image();
   im.onload = () => edAbrir(im, {
     titulo: 'Editar foto · ' + dptoTxt(base), nueva: false,
-    alAceptar: b => { cerrarFoto(); anadirFotos([b], {id: f.id, z: f.z}); },
+    alAceptar: b => { cerrarFoto(); fcQuitar(f.id); anadirFotos([b], {id: f.id, z: f.z}); },
     alCancelar: () => $('velFoto').querySelector('.modal').classList.remove('edit')
   });
   im.onerror = () => aviso('No se pudo abrir la foto.');
@@ -3137,4 +3214,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.18 · 08-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.19 · 13-11-2026 ==== -->
