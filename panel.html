@@ -416,6 +416,7 @@
   .aj-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 110px;gap:8px;margin-bottom:6px;}
   .aj-form > *{width:100% !important;min-width:0 !important;max-width:100% !important;box-sizing:border-box !important;}
   .aj-form input[type=text]{grid-column:1 / 3;}
+  .aj-form #ajPartida{grid-column:2 / 4;}
   .aj-form select,.aj-form input,.aj-form button{height:34px;box-sizing:border-box;min-width:0;width:100%;max-width:100%;}
   .aj-fila{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid var(--border);font-size:12.5px;}
   .aj-fila .aj-w{flex:0 0 120px;font-weight:700;min-width:0;}
@@ -2180,6 +2181,8 @@
       <select id="ajTrab"></select>
       <select id="ajTipo"><option value="resta">Descontar</option><option value="suma">Pagar extra</option></select>
       <input type="number" id="ajMonto" min="1" step="1" placeholder="Monto">
+      <select id="ajSec" title="Sección"></select>
+      <select id="ajPartida" title="Piso, muro o pasillo"></select>
       <input type="text" id="ajMotivo" maxlength="120" placeholder="Motivo (ej: adelanto, hombre día)">
       <button class="btn primary" id="ajAgregarBtn" type="button">Agregar</button>
     </div>
@@ -2215,7 +2218,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.90';
+const APP_VERSION = '0.73.91';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3839,11 +3842,41 @@ function pintarAjustes(){
     const estado = a.anulado ? 'Anulado' : (a.aplicado ? 'Aplicado el ' + fechaAj(a.aplicado) : 'Pendiente');
     const off = a.anulado || a.aplicado;
     return `<div class="aj-fila${off ? ' off' : ''}"><span class="aj-w" data-nomfull="${esc(a.w)}">${esc(a.w)}</span>
-      <span class="aj-m">${esc(a.motivo || '(sin motivo)')}<small>${fechaAj(a.ts)} · ${estado}</small></span>
+      <span class="aj-m">${esc(a.motivo || '(sin motivo)')}<small>${a.seccion ? esc(a.seccion) + ' · ' : ''}${a.ref && (a.motivo || '').indexOf(a.ref) === -1 ? esc(a.ref) + ' · ' : ''}${fechaAj(a.ts)} · ${estado}</small></span>
       <span class="aj-monto ${a.tipo}">${a.tipo === 'suma' ? '+' : '-'} ${moneyReal(a.monto)}</span>
       ${off ? '' : `<button class="btn small" type="button" data-aj-anular="${esc(a.id)}">Anular</button>`}</div>`;
   }).join('') || '<p style="font-size:13px;color:var(--sub);">Todavía no hay ajustes.</p>';
 }
+// ===== partidas de un trabajador (piso, muro o pasillo) para descontar; sirve para cualquier sección =====
+const ajLugar = c => c.piso + ' · ' + (c.dpto === 'Pasillo' ? 'Pasillo' : 'Dpto ' + c.dpto) + ' · ' + (AREA_LABEL[c.area] || c.area);
+function ajPartidasDe(w, sec){
+  return ALL_CELLS.filter(c => c.categoria === sec).map(c => ({c, st: getState(c.id)})).filter(x => x.st.trabajador === w && ['entregado','pagado'].indexOf(resolveEstado(x.st)) !== -1)
+    .sort((a, b) => (a.c.pisoNum || 0) - (b.c.pisoNum || 0) || String(a.c.dpto).localeCompare(String(b.c.dpto), 'es', {numeric: true}));
+}
+function ajSeccionesDe(w){ return uniq(ALL_CELLS.filter(c => getState(c.id).trabajador === w).map(c => c.categoria)); }
+function ajPintarSecciones(){
+  const w = document.getElementById('ajTrab').value, secs = ajSeccionesDe(w), sel = document.getElementById('ajSec');
+  sel.innerHTML = '<option value="">Sin sección</option>' + secs.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  if(secs.length === 1) sel.value = secs[0];
+  ajPintarPartidas();
+}
+function ajPintarPartidas(){
+  const w = document.getElementById('ajTrab').value, sec = document.getElementById('ajSec').value, sel = document.getElementById('ajPartida');
+  const lista = sec ? ajPartidasDe(w, sec) : [];
+  sel.innerHTML = '<option value="">' + (sec ? (lista.length ? 'Sin partida (monto libre)' : 'Sin partidas terminadas') : 'Piso, muro o pasillo (opcional)') + '</option>' +
+    lista.map(x => { const m2 = Number(x.st.m2) || 0; return `<option value="${esc(x.c.id)}">${esc(ajLugar(x.c))} · ${ptFm2(m2)} m²${resolveEstado(x.st) === 'pagado' ? ' · pagado' : ''}</option>`; }).join('');
+  sel.disabled = !sec || !lista.length;
+}
+function ajElegirPartida(){
+  const id = document.getElementById('ajPartida').value; if(!id) return;
+  const c = cellById[id], st = getState(id); if(!c) return;
+  const monto = Math.round((Number(st.m2) || 0) * rate1For(c.categoria, st.trabajador));
+  if(monto > 0) document.getElementById('ajMonto').value = monto;
+  const mo = document.getElementById('ajMotivo'); if(!mo.value.trim()) mo.value = ('Descuento ' + ajLugar(c)).slice(0, 120);
+}
+document.getElementById('ajTrab').addEventListener('change', ajPintarSecciones);
+document.getElementById('ajSec').addEventListener('change', ajPintarPartidas);
+document.getElementById('ajPartida').addEventListener('change', ajElegirPartida);
 function abrirAjustes(){
   if(!isAdmin) return;
   // ===== solo trabajadores con avance o pago; un finiquitado solo si todavía le queda algo por pagar =====
@@ -3855,6 +3888,7 @@ function abrirAjustes(){
   document.getElementById('ajTrab').innerHTML = nombres.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
   document.getElementById('ajError').textContent = '';
   document.getElementById('ajMonto').value = ''; document.getElementById('ajMotivo').value = '';
+  ajPintarSecciones();
   pintarAjustes();
   document.getElementById('ajOverlay').classList.add('show');
 }
@@ -3868,9 +3902,12 @@ document.getElementById('ajAgregarBtn').addEventListener('click', () => {
   if(!isFinite(monto) || monto <= 0){ err.textContent = 'Pon un monto mayor a 0.'; return; }
   if(!motivo){ err.textContent = 'Escribe el motivo.'; return; }
   err.textContent = '';
-  ajustesPago.push({id: 'aj' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), w, tipo, monto, motivo, ts: Date.now(), aplicado: 0, anulado: false});
+  const seccion = document.getElementById('ajSec').value, celdaId = document.getElementById('ajPartida').value, cel = celdaId ? cellById[celdaId] : null;
+  const ref = cel ? ajLugar(cel).slice(0, 120) : '';
+  ajustesPago.push({id: 'aj' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), w, tipo, monto, motivo, ts: Date.now(), aplicado: 0, anulado: false, seccion: seccion, celdaId: cel ? celdaId : '', ref: ref});
   markSettingsDirty('ajustesPago'); scheduleSave();
   document.getElementById('ajMonto').value = ''; document.getElementById('ajMotivo').value = '';
+  ajPintarPartidas();
   pintarAjustes();
 });
 document.getElementById('ajLista').addEventListener('click', (e) => {
@@ -8314,7 +8351,7 @@ function generarLiquidacionInterna(){
   const rowsConNota = rows.filter(r => r.nota);
 
   pendingLiqFinalize = function(incluirObs){
-    liqExtraDetails = pendientesDe(worker).map(a => ({desc: a.motivo + ' (ajuste)', monto: a.monto, tipo: a.tipo, destino: 'pago', ajusteId: a.id}));   // ajustes pendientes del trabajador
+    liqExtraDetails = pendientesDe(worker).map(a => ({desc: a.motivo + (a.ref && a.motivo.indexOf(a.ref) === -1 ? ' · ' + a.ref : '') + ' (ajuste)', monto: a.monto, tipo: a.tipo, destino: 'pago', ajusteId: a.id}));   // ajustes pendientes del trabajador
     liqRetSel = new Set();
     liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
       subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsBase: rows.map(r => Object.assign({}, r, {estadoOrig: r.estadoLabel})), rowsPagables, rowsPagadas, rowsRetenidas, excluidosPorCierre, excluidosLista,
@@ -9280,4 +9317,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.90 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.91 · 14-11-2026 ==== -->
