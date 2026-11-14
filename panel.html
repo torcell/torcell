@@ -403,6 +403,12 @@
   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px;}
   .toolbar .grp{display:flex;flex-direction:column;gap:4px;}
   .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
+  /* ===== armonía de la barra: etiquetas y controles con alto fijo, así nada se descuadra ===== */
+  .toolbar label{height:16px;display:flex;align-items:center;white-space:nowrap;}
+  .toolbar label .tnuevo{margin-left:6px;padding:0 6px;line-height:14px;}
+  .toolbar select, .toolbar input[type=text], .toolbar .btn, .toolbar .counter-pill{box-sizing:border-box;height:34px;}
+  .toolbar .btn{display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0;}
+  .toolbar .counter-pill{display:inline-flex;align-items:center;}
   select, input[type=text], input[type=number]{background:var(--panel);border:1px solid var(--border-strong);color:var(--text);padding:7px 9px;border-radius:var(--radius);font-size:13px;outline:none;min-width:140px;}
   select:focus, input:focus{border-color:var(--accent);}
   .tabs{display:inline-grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;border:1px solid var(--border-strong);width:75vw;max-width:100%;box-sizing:border-box;}
@@ -2155,7 +2161,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.75';
+const APP_VERSION = '0.73.77';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4249,23 +4255,34 @@ function calIco(cell){
   if(r.e === 'observado' || r.e === 'corregido') return '<span class="cal-ico obs" title="Calidad: ' + (r.e === 'corregido' ? 'corregido' : 'con observación') + '">' + (r.e === 'corregido' ? '↺' : '⚠') + '</span>';
   return '';
 }
-function calNombreCorto(u, base){
-  u = String(u || '').trim(); if(!u) return '';
-  if(u.indexOf(' - ') >= 0) u = u.slice(u.lastIndexOf(' - ') + 3).trim();   // quita el cargo ("Calidad - Silvia González")
-  if((base + u).length <= 40) return u;
-  const p = u.split(/\s+/);
-  return p.length < 2 ? u : p[0] + ' ' + p.slice(1).map(x => x.charAt(0).toUpperCase() + '.').join(' ');
+// ===== título de Calidad: nombre completo; si no cabe en el ancho del div, apellido a la inicial =====
+function calNombreLimpio(u){
+  u = String(u || '').trim();
+  return u.indexOf(' - ') >= 0 ? u.slice(u.lastIndexOf(' - ') + 3).trim() : u;
 }
+function calNombreCorto(u){
+  const p = calNombreLimpio(u).split(/\s+/);
+  return p.length < 2 ? p[0] : p[0] + ' ' + p.slice(1).map(x => x.charAt(0).toUpperCase() + '.').join(' ');
+}
+function ajustarTituloCal(){
+  document.querySelectorAll('.vt-sec-title[data-calnom]').forEach(el => {
+    const base = 'Observaciones de Calidad', nom = el.getAttribute('data-calnom');
+    el.textContent = base + ' - ' + nom;
+    if(el.scrollWidth > el.clientWidth + 1) el.textContent = base + ' - ' + calNombreCorto(nom);
+  });
+}
+window.addEventListener('resize', ajustarTituloCal);
 function calidadSecHtml(cell){
   const r = calidadDe(cell); if(!r) return '';
   const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Observación corregida', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
   const f = r.ts ? new Date(r.ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
   const det = r.d ? '<small style="display:block;white-space:normal">' + escVt(r.d) + '</small>' : '';
-  const base = 'Observaciones de Calidad';
-  const quien = calNombreCorto(r.u, base + ' - ');
-  const titulo = base + (quien ? ' - ' + quien : '');
+  const quien = calNombreLimpio(r.u);
   const fecha = f ? '<small style="display:block;white-space:normal">' + escVt(f) + '</small>' : '';
-  return `<div class="vt-sec"><div class="vt-sec-title">${escVt(titulo)}</div><div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div></div></div>`;
+  const tit = quien
+    ? '<div class="vt-sec-title" style="white-space:nowrap;overflow:hidden" data-calnom="' + escVt(quien) + '">Observaciones de Calidad - ' + escVt(quien) + '</div>'
+    : '<div class="vt-sec-title">Observaciones de Calidad</div>';
+  return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div></div></div>`;
 }
 function pintarVentana(){
   const id = ventanaId, cell = cellById[id];
@@ -4305,6 +4322,7 @@ function pintarVentana(){
     </div>
     <div class="vt-foot"><button type="button" class="btn" data-vt="cerrar">Cerrar</button>${isAdmin ? '<button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}</div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
+  ajustarTituloCal();
 }
 document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   if(e.target.id === 'ventanaOverlay') return;
@@ -9054,4 +9072,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.75 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.77 · 14-11-2026 ==== -->
