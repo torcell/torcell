@@ -338,7 +338,10 @@
   body.dark .stat-card .c-retenido{color:#d9a826;}
   .stat-card.st-retenido .cnt{text-transform:none;letter-spacing:0;}
   .stat-card.st-retenido .ret-det{margin-top:6px;align-self:flex-start;}
-  @media (min-width:1000px){.stats-grid.con-ret{grid-template-columns:minmax(190px,1.1fr) minmax(120px,.75fr) minmax(250px,1.5fr) minmax(130px,.85fr) minmax(130px,.8fr);}}
+  /* ===== grilla de resumen: la caja del cierre lleva más ancho que las demás ===== */
+  @media (min-width:1280px){.stats-grid.con-ret{grid-template-columns:minmax(170px,.95fr) minmax(150px,.8fr) minmax(440px,2.4fr) minmax(190px,1fr) minmax(150px,.8fr);}}
+  @media (min-width:1280px){.stats-grid:not(.con-ret) .cierre-box{grid-column:span 2;}}
+  @media (min-width:1000px) and (max-width:1279px){.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));}.stats-grid .cierre-box{grid-column:span 2;}}
   .stats-tabs{display:flex;align-items:stretch;gap:0;margin-bottom:10px;}
   .stats-tab{border:1px solid var(--border-strong);background:var(--panel);color:var(--sub);padding:7px 18px;font-size:12.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;border-radius:0;font-family:inherit;}
   .stats-tab + .stats-tab{border-left:0;}
@@ -347,8 +350,9 @@
   .stat-card .sub2 b{font-weight:700;}
   .stat-card .sub2.fuera,.stat-card .sub2.fuera b{color:#e8710a;}
   .stat-card .sub2.dentro,.stat-card .sub2.dentro b{color:var(--entregado);}
-  .cierre-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;padding:0;}
-  .cierre-box .cat-m{padding:13px 15px;}
+  .cierre-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(7,auto);gap:0;padding:0;}
+  /* subgrid: las filas de Dentro y Fuera quedan alineadas aunque una línea se parta en dos */
+  .cierre-box .cat-m{padding:13px 15px;min-width:0;grid-row:1 / span 7;display:grid;grid-template-rows:subgrid;align-content:start;}
   .cierre-box .cat-m + .cat-m{border-top:0;border-left:1px dashed var(--border);}
   .cierre-box .cat-m .l{margin:0 0 3px;white-space:nowrap;font-size:clamp(8px,2.7vw,11px);}
   .cierre-box .cat-m .cnt{text-transform:none;letter-spacing:0;}
@@ -2211,7 +2215,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.87';
+const APP_VERSION = '0.73.89';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3468,10 +3472,13 @@ const celdaCompleta = c => (c && !c.categoria && c.id) ? cellById[c.id] : c;   /
 const fragueHabilitada = c0 => { const c = celdaCompleta(c0); return !!c && c.categoria === 'Frague' && !!CERAMICA_DE[c.pisoNum + '|' + c.dpto + '|' + c.area] && !ceramicaPendienteDe(c); };
 const celdaFragueBloqueada = c => !!c && c.categoria === 'Frague' && !!ceramicaPendienteDe(c);
 const bloqueConAvance = fb => fb.depts.some(d => fb.areas.some(a => celdaConAvance(d.cells[a]) || fragueHabilitada(d.cells[a]))) || celdaConAvance(fb.pasillo) || fragueHabilitada(fb.pasillo);
+// ===== Pasillos: siempre se ve el piso de arriba de uno con avance =====
+const pasilloConAvanceN = n => FLOOR_BLOCKS.some(fb => fb.pisoNum === n && fb.pasillo && celdaConAvance(fb.pasillo));
+const pasilloVisibleN = n => { const i = ALL_FLOOR_NUMS.indexOf(n); return pasilloConAvanceN(n) || (i > 0 && pasilloConAvanceN(ALL_FLOOR_NUMS[i-1])); };
 function pisosConAvanceActual(){
   const out = new Set();
   FLOOR_BLOCKS.forEach(fb => {
-    if(activeCategoria === 'Pasillos'){ if(celdaConAvance(fb.pasillo)) out.add('Piso ' + fb.pisoNum); }
+    if(activeCategoria === 'Pasillos'){ if(fb.pasillo && pasilloVisibleN(fb.pisoNum)) out.add('Piso ' + fb.pisoNum); }
     else if(fb.categoria === activeCategoria && bloqueConAvance(fb)) out.add(fb.piso);
   });
   return out;
@@ -4827,7 +4834,7 @@ function renderPasillosTable(){
   FLOOR_BLOCKS.forEach(fb => { if(fb.pasillo) byFloor[fb.pisoNum + '|' + fb.categoria] = fb.pasillo; });
   const cats = ['Cerámica','Frague'];
 
-  const rows = ALL_FLOOR_NUMS.slice().sort(cmpPisos).filter(n => cats.some(cat => byFloor[n+'|'+cat])).filter(n => vistaPisos !== 'mov' || cats.some(cat => celdaConAvance(byFloor[n+'|'+cat]))).filter(n => { if(ocultarListos && listoDpto(n, 'Pasillo')){ listosOcultos++; return false; } return true; }).filter(n => {
+  const rows = ALL_FLOOR_NUMS.slice().sort(cmpPisos).filter(n => cats.some(cat => byFloor[n+'|'+cat])).filter(n => vistaPisos !== 'mov' || pasilloVisibleN(n)).filter(n => { if(ocultarListos && listoDpto(n, 'Pasillo')){ listosOcultos++; return false; } return true; }).filter(n => {
     if(!filtering) return true;
     return cats.some(cat => {
       const p = byFloor[n+'|'+cat];
@@ -9268,4 +9275,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.87 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.89 · 14-11-2026 ==== -->
