@@ -409,6 +409,17 @@
   .toolbar select, .toolbar input[type=text], .toolbar .btn, .toolbar .counter-pill{box-sizing:border-box;height:34px;}
   .toolbar .btn{display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0;}
   .toolbar .counter-pill{display:inline-flex;align-items:center;}
+  .aj-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 110px;gap:8px;margin-bottom:6px;}
+  .aj-form > *{width:100% !important;min-width:0 !important;max-width:100% !important;box-sizing:border-box !important;}
+  .aj-form input[type=text]{grid-column:1 / 3;}
+  .aj-form select,.aj-form input,.aj-form button{height:34px;box-sizing:border-box;min-width:0;width:100%;max-width:100%;}
+  .aj-fila{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .aj-fila .aj-w{flex:0 0 120px;font-weight:700;min-width:0;}
+  .aj-fila .aj-m{flex:1;min-width:0;}
+  .aj-fila .aj-m small{display:block;color:var(--sub);font-size:11px;}
+  .aj-fila.off{opacity:.55;}
+  .aj-monto{font-weight:800;white-space:nowrap;}
+  .aj-monto.suma{color:var(--entregado);} .aj-monto.resta{color:#c0546f;}
   .pr-fila{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;}
   .pr-fila:hover{background:var(--bg);}
   .pr-fila input{width:16px;height:16px;margin:0;flex:0 0 16px;}
@@ -1714,10 +1725,12 @@
         <button class="btn admin-only" id="ratesBtn">Precios y metrajes</button>
         <button class="btn admin-only" id="liqOpenBtn">📄 Generar liquidación</button>
         <button class="btn admin-only" id="liqHistBtn">🗂️ Historial de liquidaciones</button>
+        <button class="btn admin-only" data-abrir-aj type="button">💵 Ajustes de pago</button>
         <button class="btn admin-only" id="materialesBtn">🧱 Materiales</button>
         <button class="btn" id="pedirBodegaBtn" type="button">📦 Pedir material a Bodega</button>
         <button class="btn" id="trabBaseBtn" type="button">👷 BD de Trabajadores</button>
         <button class="btn admin-only" id="peticionesBtn">📥 Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
+        <button class="btn admin-only" data-abrir-pr type="button">🔒 Pagos completos retenidos</button>
         <button class="btn admin-only" id="cierreQuincenaBtn">🔒 Cerrar quincena/mes</button>
         <button class="btn admin-only" id="retencionesBtn" style="position:relative;display:none;">
           🔒 Retenciones pendientes
@@ -1866,6 +1879,11 @@
     <div id="liqHistoryBox" style="display:none;max-height:180px;overflow-y:auto;border:1px solid var(--border);padding:8px;margin-bottom:12px;background:var(--panel-soft);"></div>
     <div class="modal-error" id="liqConfigError"></div>
     <div class="actions">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-right:auto;">
+        <button class="btn" data-abrir-pr type="button">🔒 Pagos completos retenidos</button>
+        <button class="btn" data-abrir-aj type="button">💵 Ajustes de pago</button>
+        <button class="btn" id="liqCfgHistBtn" type="button">🗂️ Historial de liquidaciones</button>
+      </div>
       <button class="btn" id="liqConfigCancel">Cancelar</button>
       <button class="btn primary" id="liqConfigGenerar">Generar</button>
     </div>
@@ -2150,6 +2168,22 @@
   </div>
 </div>
 
+<div class="overlay" id="ajOverlay">
+  <div class="modal" style="max-width:560px;display:flex;flex-direction:column;max-height:88vh;">
+    <h3 style="margin-bottom:2px;">💵 Ajustes de pago <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></h3>
+    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Descuentos o pagos extra por trabajador, fuera de la liquidación. No se borran: si te equivocas, se anulan. Los pendientes entran solos en la próxima liquidación del trabajador.</p>
+    <div class="aj-form">
+      <select id="ajTrab"></select>
+      <select id="ajTipo"><option value="resta">Descontar</option><option value="suma">Pagar extra</option></select>
+      <input type="number" id="ajMonto" min="1" step="1" placeholder="Monto">
+      <input type="text" id="ajMotivo" maxlength="120" placeholder="Motivo (ej: adelanto, hombre día)">
+      <button class="btn primary" id="ajAgregarBtn" type="button">Agregar</button>
+    </div>
+    <div class="modal-error" id="ajError"></div>
+    <div id="ajLista" style="overflow-y:auto;flex:1;min-height:0;"></div>
+    <div class="actions"><button class="btn primary" id="ajCerrarBtn">Guardar y cerrar</button></div>
+  </div>
+</div>
 <div class="overlay" id="prOverlay">
   <div class="modal" style="max-width:520px;display:flex;flex-direction:column;max-height:88vh;">
     <h3 style="margin-bottom:2px;">🔒 Pagos completos retenidos</h3>
@@ -2177,7 +2211,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.84';
+const APP_VERSION = '0.73.87';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2634,6 +2668,8 @@ function markCellDirty(id){ dirtyCellIds.add(id); }
 const seccionesSucias = new Set();
 // ===== pagos completos retenidos: trabajadores cuyo Terminado queda fuera de toda suma y liquidación =====
 let pagosRetenidos = [];
+// ===== ajustes de pago por trabajador: descuentos o pagos extra que no se borran (solo se anulan) y entran en su próxima liquidación =====
+let ajustesPago = [];
 const trabRetenido = w => !!w && pagosRetenidos.indexOf(w) !== -1;
 const terminadoRetenido = st => !!st && trabRetenido(st.trabajador) && resolveEstado(st) === 'entregado';
 let seccionesTodas = false;
@@ -2710,6 +2746,7 @@ async function mergeRemoteBeforeSave(){
       Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(remote.obsPorArea[a])) OBS_POR_AREA[a] = remote.obsPorArea[a].filter(x => typeof x === 'string'); });
     }
     if(isAdmin && Array.isArray(remote.pagosRetenidos) && !seccionesSucias.has('pagosRetenidos') && !seccionesTodas) pagosRetenidos = remote.pagosRetenidos.filter(x => typeof x === 'string');
+    if(isAdmin && Array.isArray(remote.ajustesPago) && !seccionesSucias.has('ajustesPago') && !seccionesTodas) ajustesPago = remote.ajustesPago.filter(a => a && typeof a.w === 'string');
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
     if(remote.cierreAnterior !== undefined) cierreAnterior = remote.cierreAnterior;
     if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
@@ -3047,7 +3084,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { pagosRetenidos: isAdmin ? pagosRetenidos : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
+        config: { pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -3069,7 +3106,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, records, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -3131,6 +3168,7 @@ function applyLoadedPayload(parsed){
   }
   if((isAdmin || esInvitado()) && Array.isArray(parsed.objetivos)) OBJETIVOS = parsed.objetivos.filter(o => o && typeof o.id === 'string');
   if(isAdmin && Array.isArray(parsed.pagosRetenidos)) pagosRetenidos = parsed.pagosRetenidos.filter(x => typeof x === 'string');
+  if(isAdmin && Array.isArray(parsed.ajustesPago)) ajustesPago = parsed.ajustesPago.filter(a => a && typeof a.w === 'string');
   cfgCargada = true;
   if(parsed.obsPorArea && typeof parsed.obsPorArea === 'object'){
     Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(parsed.obsPorArea[a])) OBS_POR_AREA[a] = parsed.obsPorArea[a].filter(x => typeof x === 'string'); });
@@ -3264,7 +3302,7 @@ async function doSaveCycle(){
       return {localOk:false, dbOk:false, cancelado:true};
     }
   }
-  const payload = {items:state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
+  const payload = {items:state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -3316,7 +3354,7 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 // Ventana previa: muestra lo que cambió desde el último guardado y pide confirmar.
-const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', temaPrincipal:'Tema principal', ceramicas:'Cerámicas de la obra', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área', pagosRetenidos:'Pagos completos retenidos'};
+const NOMBRE_SECCION_CAMBIO = {espaciadoDptos:'Espaciado de departamentos', temaPrincipal:'Tema principal', ceramicas:'Cerámicas de la obra', materiales:'Materiales', recordatorios:'Recordatorios', objetivos:'Objetivos', obsPorArea:'Observaciones por área', pagosRetenidos:'Pagos completos retenidos', ajustesPago:'Ajustes de pago'};
 function resumenCambiosPendientes(){
   const bool = v => v ? 'Sí' : 'No';
   const fm2 = v => (v === null || v === undefined || v === '') ? '—' : String(v).replace('.', ',') + ' m²';
@@ -3693,9 +3731,9 @@ function statsDeCategoria(cat){
     r.total += p;
     if(st.retenido && !st.pagado){ r.nRet++; r.ret += p; r.refRet += ref; }
     if(e === 'pagado'){ r.pag += p; if(pagFuera) r.pagFuera += p; else r.pagDentro += p; }
-    if(e === 'entregado'){
+    if(e === 'entregado' && !retenida){   // lo retenido tiene su propia tarjeta: no entra en Terminado
       r.ter += p; r.refTer += ref;
-      if(!retenida){ if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; } }
+      if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; }
     }
   });
   return r;
@@ -3740,14 +3778,14 @@ function renderStats(){
   const separadas = preciosOcultos();
   // ===== frague junto al total (solo Admin, en la pestaña Cerámica) =====
   const fr = (isAdmin && esC) ? calcFrague().fra : null;
-  const conFra = (vFra, vCer) => fr ? `<div class="sub2 fra-linea">+ Frague <b>${money(vFra)}</b></div><div class="sub2">Total con frague <b>${money(vCer + vFra)}</b></div>` : '';
+  const conFra = (vFra, vCer, rf) => fr ? `<div class="sub2 fra-linea">+ Frague <b>${money(vFra)}</b></div><div class="sub2">Total con frague <b>${money(vCer + vFra)}</b></div>${rf !== undefined ? `<div class="sub2 ganancia">Margen real (− frague): ${money(rf - vCer - vFra)}</div>` : ''}` : '';
   const cards = separadas
     ? defsEst.map(([k, l]) => { const n = r.counts[k]||0, pct = r.counts ? Math.round(n / (Object.values(r.counts).reduce((x, y) => x + y, 0) || 1) * 100) : 0; return `<div class="stat-card st-${k}"><div class="n c-${k}">${n}</div><div class="l">${l}</div>${(k === 'pendiente' || k === 'pagado') ? `<div class="bar"><div style="width:${pct}%; background:var(--${k});"></div></div>` : ''}</div>`; }).join('')
     : `<div class="stat-card stat-combo">${defsEst.map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('')}</div>`;
   const refLinea = rf => esC ? `<div class="sub2">REF ${money(rf)}</div>` : '';
   const refMargen = (t, rf) => esC ? `<div class="sub2">REF ${money(rf)}</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
-  const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refMargen(r.ter, r.refTer)}${conFra(fr ? fr.ter : 0, r.ter)}</div>`;
-  const seccion = (cls, rotulo, v, n, rf, vFra) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}${conFra(vFra, v)}</div>`;
+  const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refMargen(r.ter, r.refTer)}${conFra(fr ? fr.ter : 0, r.ter, r.refTer)}</div>`;
+  const seccion = (cls, rotulo, v, n, rf, vFra) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}${conFra(vFra, v, rf)}</div>`;
   const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro, fr ? fr.dentro : 0)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo, fr ? fr.nuevo : 0)}</div>` : '';
   const pagadoCard = `<div class="stat-card money-card st-pagado"><div class="n c-pagado">${money(r.pag)}</div><div class="l">Pagado de ${money(r.total)}</div>${cierreQuincena ? `<div class="sub2 dentro">Dentro del cierre <b>${money(r.pagDentro)}</b> (${r.nPagDentro})</div>${fr ? `<div class="sub2 dentro">+ Frague <b>${money(fr.pagDentro)}</b> · Total <b>${money(r.pagDentro + fr.pagDentro)}</b></div>` : ''}<div class="sub2 fuera">Fuera del cierre <b>${money(r.pagFuera)}</b> (${r.nPagFuera})</div>${fr ? `<div class="sub2 fuera">+ Frague <b>${money(fr.pagFuera)}</b> · Total <b>${money(r.pagFuera + fr.pagFuera)}</b></div>` : ''}` : ''}<div class="bar"><div style="width:${r.total ? Math.round(r.pag / r.total * 100) : 0}%; background:var(--pagado);"></div></div>${conFra(fr ? fr.pag : 0, r.pag)}</div>`;
   const retCard = (isAdmin && r.nRet > 0) ? `<div class="stat-card money-card st-retenido"><div class="n c-retenido">${money(r.ret)}</div><div class="l">Retenido <span class="cnt">(${r.nRet})</span></div>${refLinea(r.refRet)}<button type="button" class="btn small ret-det" data-ret-det>Detalles</button></div>` : '';
@@ -3772,7 +3810,7 @@ function calcFrague(){
     const e = resolveEstado(st);
     b.total += p; b.m2 += m2;
     if(e === 'pagado'){ b.pag += p; if(!!cierreQuincena && (st.pagadoTs || st.terminadoTs || 0) > cierreQuincena) b.pagFuera += p; else b.pagDentro += p; }
-    if(e === 'entregado'){
+    if(e === 'entregado' && !st.retenido){   // lo retenido por partida tampoco suma
       b.ter += p;
       if(!!cierreQuincena && !!st.terminadoTs && st.terminadoTs > cierreQuincena) b.nuevo += p; else b.dentro += p;
       if(!esF) b.ref += m2 * RATES.cerAlt;
@@ -3782,6 +3820,56 @@ function calcFrague(){
 }
 const FRAG_SUB = 'El frague lo pagamos nosotros: no se cobra y no suma al total de cerámica. Incluye pisos, muros y pasillos.';
 // ===== ventana: cerámica y frague juntos =====
+
+
+// ===== Ajustes de pago =====
+const pendientesDe = w => ajustesPago.filter(a => a.w === w && !a.aplicado && !a.anulado);
+const fechaAj = ts => ts ? new Date(ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
+function pintarAjustes(){
+  const el = document.getElementById('ajLista');
+  const orden = ajustesPago.slice().sort((a, b) => ((a.aplicado || a.anulado ? 1 : 0) - (b.aplicado || b.anulado ? 1 : 0)) || (b.ts - a.ts));
+  el.innerHTML = orden.map(a => {
+    const estado = a.anulado ? 'Anulado' : (a.aplicado ? 'Aplicado el ' + fechaAj(a.aplicado) : 'Pendiente');
+    const off = a.anulado || a.aplicado;
+    return `<div class="aj-fila${off ? ' off' : ''}"><span class="aj-w" data-nomfull="${esc(a.w)}">${esc(a.w)}</span>
+      <span class="aj-m">${esc(a.motivo || '(sin motivo)')}<small>${fechaAj(a.ts)} · ${estado}</small></span>
+      <span class="aj-monto ${a.tipo}">${a.tipo === 'suma' ? '+' : '-'} ${moneyReal(a.monto)}</span>
+      ${off ? '' : `<button class="btn small" type="button" data-aj-anular="${esc(a.id)}">Anular</button>`}</div>`;
+  }).join('') || '<p style="font-size:13px;color:var(--sub);">Todavía no hay ajustes.</p>';
+}
+function abrirAjustes(){
+  if(!isAdmin) return;
+  const nombres = Array.from(new Set(ALL_WORKERS.concat(ajustesPago.map(a => a.w)))).sort((a, b) => a.localeCompare(b, 'es'));
+  document.getElementById('ajTrab').innerHTML = nombres.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
+  document.getElementById('ajError').textContent = '';
+  document.getElementById('ajMonto').value = ''; document.getElementById('ajMotivo').value = '';
+  pintarAjustes();
+  document.getElementById('ajOverlay').classList.add('show');
+}
+document.addEventListener('click', (e) => { if(e.target.closest('[data-abrir-aj]')) abrirAjustes(); });
+document.getElementById('ajAgregarBtn').addEventListener('click', () => {
+  const w = document.getElementById('ajTrab').value, tipo = document.getElementById('ajTipo').value;
+  const monto = Math.round(Number(document.getElementById('ajMonto').value));
+  const motivo = document.getElementById('ajMotivo').value.replace(/[<>]/g, '').trim().slice(0, 120);
+  const err = document.getElementById('ajError');
+  if(!w){ err.textContent = 'Elige un trabajador.'; return; }
+  if(!isFinite(monto) || monto <= 0){ err.textContent = 'Pon un monto mayor a 0.'; return; }
+  if(!motivo){ err.textContent = 'Escribe el motivo.'; return; }
+  err.textContent = '';
+  ajustesPago.push({id: 'aj' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), w, tipo, monto, motivo, ts: Date.now(), aplicado: 0, anulado: false});
+  markSettingsDirty('ajustesPago'); scheduleSave();
+  document.getElementById('ajMonto').value = ''; document.getElementById('ajMotivo').value = '';
+  pintarAjustes();
+});
+document.getElementById('ajLista').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-aj-anular]'); if(!b) return;
+  const a = ajustesPago.find(x => x.id === b.dataset.ajAnular); if(!a || a.aplicado) return;
+  askConfirm('¿Anular este ajuste de ' + a.w + ' (' + (a.tipo === 'suma' ? '+' : '-') + moneyReal(a.monto) + ')? Queda en la lista como anulado.', () => {
+    a.anulado = true; markSettingsDirty('ajustesPago'); scheduleSave(); pintarAjustes();
+  });
+});
+document.getElementById('ajCerrarBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('ajOverlay')));
+document.getElementById('liqCfgHistBtn').addEventListener('click', () => document.getElementById('liqHistBtn').click());
 
 // ===== Pagos completos retenidos: ventana para elegir los trabajadores =====
 function totalRetenidoDe(w){
@@ -3798,7 +3886,7 @@ function abrirPagosRetenidos(){
   const nombres = Array.from(new Set(ALL_WORKERS.concat(pagosRetenidos))).sort((a, b) => a.localeCompare(b, 'es'));
   document.getElementById('prLista').innerHTML = nombres.map(w => {
     const t = totalRetenidoDe(w);
-    return `<label class="pr-fila"><input type="checkbox" data-pr-w="${esc(w)}"${trabRetenido(w) ? ' checked' : ''}><span class="pr-nom">${esc(w)}</span><span class="pr-det">${t.n} terminada${t.n === 1 ? '' : 's'} · ${money(t.monto)}</span></label>`;
+    return `<label class="pr-fila"><input type="checkbox" data-pr-w="${esc(w)}"${trabRetenido(w) ? ' checked' : ''}><span class="pr-nom" data-nomfull="${esc(w)}">${esc(w)}</span><span class="pr-det">${t.n} terminada${t.n === 1 ? '' : 's'} · ${money(t.monto)}</span></label>`;
   }).join('') || '<p style="font-size:13px;color:var(--sub);">No hay trabajadores.</p>';
   document.getElementById('prOverlay').classList.add('show');
 }
@@ -3911,7 +3999,7 @@ function ptDatos(){
     const k = w + (esF ? '|F' : '|C');
     const o = por[k] || (por[k] = {key: k, nombre: w, frague: esF, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []});
     if(estado === 'proceso'){ o.partida++; return; }
-    if(estado === 'entregado' && trabRetenido(w)){ o.retenidas = (o.retenidas || 0) + 1; return; }   // pago completo retenido
+    if(estado === 'entregado' && (trabRetenido(w) || st.retenido)){ o.retenidas = (o.retenidas || 0) + 1; return; }   // pago completo retenido
     const b = estado === 'entregado' ? o.ent : o.pag;
     const m2 = Number(st.m2) || 0;
     const monto = m2 * rate1For(c.categoria, w);
@@ -7939,7 +8027,7 @@ document.getElementById('dbBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, workerStatus, customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas: isAdmin ? ceramicas : undefined, permisos: isAdmin ? permisosCargos : undefined, calidad: CAL_REV, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas: isAdmin ? ceramicas : undefined, permisos: isAdmin ? permisosCargos : undefined, calidad: CAL_REV, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -8214,7 +8302,7 @@ function generarLiquidacionInterna(){
   const rowsConNota = rows.filter(r => r.nota);
 
   pendingLiqFinalize = function(incluirObs){
-    liqExtraDetails = [];
+    liqExtraDetails = pendientesDe(worker).map(a => ({desc: a.motivo + ' (ajuste)', monto: a.monto, tipo: a.tipo, destino: 'pago', ajusteId: a.id}));   // ajustes pendientes del trabajador
     liqRetSel = new Set();
     liqCurrentMeta = { worker, fecha, fechaFmt, tipoPago, tipoPagoLabel, dias, afpTarifa, afpDescuento, afpPct, afpNombre,
       subtotal, totalFinal, totalYaPagado, totalRetenido, rows, rowsBase: rows.map(r => Object.assign({}, r, {estadoOrig: r.estadoLabel})), rowsPagables, rowsPagadas, rowsRetenidas, excluidosPorCierre, excluidosLista,
@@ -8652,6 +8740,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
       retainTotal += liqCurrentMeta.rows.find(r => r.id === id).precio;
       markCellDirty(id);
     });
+    detPago.concat(detRet).forEach(d => { const a = d.ajusteId && ajustesPago.find(x => x.id === d.ajusteId); if(a && !a.aplicado) a.aplicado = Date.now(); });
     if(payIds.length) liqRegisterHistory('pago', payIds, payTotal, detPago);
     if(retainIds.length) liqRegisterHistory('retencion', retainIds, retainTotal, detRet);
     markSettingsDirty();
@@ -9179,4 +9268,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.84 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.87 · 14-11-2026 ==== -->
