@@ -418,6 +418,12 @@
   .aj-form input[type=text]{grid-column:1 / 3;}
   .aj-form #ajPartida{grid-column:2 / 4;}
   .aj-form select,.aj-form input,.aj-form button{height:34px;box-sizing:border-box;min-width:0;width:100%;max-width:100%;}
+  .aj-form input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+  .aj-form input[type=number]::-webkit-outer-spin-button,.aj-form input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;margin:0;}
+  .hub-tit{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin:12px 0 6px;}
+  .hub-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .hub-btns #cierreQuincenaBtn,.hub-btns #retencionesBtn{grid-column:1 / -1;}
+  .hub-btns .btn{width:100%;min-height:40px;padding:7px 8px;justify-content:center;align-items:center;text-align:center;white-space:normal;line-height:1.2;}
   .aj-fila{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid var(--border);font-size:12.5px;}
   .aj-fila .aj-w{flex:0 0 120px;font-weight:700;min-width:0;}
   .aj-fila .aj-m{flex:1;min-width:0;}
@@ -1728,19 +1734,11 @@
       <div class="tb-btns">
         <button class="btn admin-only" id="toggleWorkerPanel">Gestionar trabajadores</button>
         <button class="btn admin-only" id="ratesBtn">Precios y metrajes</button>
-        <button class="btn admin-only" id="liqOpenBtn">📄 Generar liquidación</button>
-        <button class="btn admin-only" id="liqHistBtn">🗂️ Historial de liquidaciones</button>
-        <button class="btn admin-only" data-abrir-aj type="button">💵 Ajustes de pago</button>
+        <button class="btn admin-only" id="pagosHubBtn" type="button" style="position:relative;">💰 Pagos y liquidaciones<span id="pagosHubDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span></button>
         <button class="btn admin-only" id="materialesBtn">🧱 Materiales</button>
         <button class="btn" id="pedirBodegaBtn" type="button">📦 Pedir material a Bodega</button>
         <button class="btn" id="trabBaseBtn" type="button">👷 BD de Trabajadores</button>
         <button class="btn admin-only" id="peticionesBtn">📥 Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
-        <button class="btn admin-only" data-abrir-pr type="button">🔒 Pagos completos retenidos</button>
-        <button class="btn admin-only" id="cierreQuincenaBtn">🔒 Cerrar quincena/mes</button>
-        <button class="btn admin-only" id="retencionesBtn" style="position:relative;display:none;">
-          🔒 Retenciones pendientes
-          <span id="retencionesBadgeDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span>
-        </button>
       </div>
     </div>
     <div class="tb-group">
@@ -1794,6 +1792,31 @@
   <div class="footer-note" id="rateFootNote"></div>
 </div>
 
+<div class="overlay" id="pagosHubOverlay">
+  <div class="modal" style="max-width:520px;">
+    <h3 style="margin-bottom:2px;">💰 Pagos y liquidaciones <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></h3>
+    <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Todo lo de pagos en un solo lugar. Al abrir una opción, esta ventana se cierra.</p>
+    <div class="hub-tit">Liquidaciones</div>
+    <div class="hub-btns">
+      <button class="btn admin-only" id="liqOpenBtn">📄 Generar liquidación</button>
+      <button class="btn admin-only" id="liqHistBtn">🗂️ Historial de liquidaciones</button>
+    </div>
+    <div class="hub-tit">Fuera de la liquidación</div>
+    <div class="hub-btns">
+      <button class="btn admin-only" data-abrir-aj type="button">💵 Ajustes de pago</button>
+      <button class="btn admin-only" data-abrir-pr type="button">🔒 Pagos completos retenidos</button>
+      <button class="btn admin-only" id="retencionesBtn" style="position:relative;display:none;">
+          🔒 Retenciones pendientes
+          <span id="retencionesBadgeDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span>
+        </button>
+    </div>
+    <div class="hub-tit">Cierre</div>
+    <div class="hub-btns">
+      <button class="btn admin-only" id="cierreQuincenaBtn">🔒 Cerrar quincena/mes</button>
+    </div>
+    <div class="actions"><button class="btn primary" id="pagosHubCerrar" type="button">Cerrar</button></div>
+  </div>
+</div>
 <div class="overlay" id="overlay">
   <div class="modal">
     <h3>Confirmar cambio</h3>
@@ -2188,7 +2211,7 @@
     </div>
     <div class="modal-error" id="ajError"></div>
     <div id="ajLista" style="overflow-y:auto;flex:1;min-height:0;"></div>
-    <div class="actions"><button class="btn primary" id="ajCerrarBtn">Guardar y cerrar</button></div>
+    <div class="actions"><button class="btn" id="ajSinCambiosBtn" type="button">Cerrar sin cambios</button><button class="btn primary" id="ajCerrarBtn">Guardar y cerrar</button></div>
   </div>
 </div>
 <div class="overlay" id="prOverlay">
@@ -2218,7 +2241,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.91';
+const APP_VERSION = '0.73.92';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3832,6 +3855,13 @@ const FRAG_SUB = 'El frague lo pagamos nosotros: no se cobra y no suma al total 
 // ===== ventana: cerámica y frague juntos =====
 
 
+// ===== Pagos y liquidaciones: un solo botón en el panel =====
+(function(){
+  const ov = document.getElementById('pagosHubOverlay');
+  document.getElementById('pagosHubBtn').addEventListener('click', () => { if(isAdmin) ov.classList.add('show'); });
+  document.getElementById('pagosHubCerrar').addEventListener('click', () => closeOverlayAnimated(ov));
+  ov.querySelector('.hub-btns').parentNode.addEventListener('click', (e) => { if(e.target.closest('.hub-btns .btn')) closeOverlayAnimated(ov); });
+})();
 // ===== Ajustes de pago =====
 const pendientesDe = w => ajustesPago.filter(a => a.w === w && !a.aplicado && !a.anulado);
 const fechaAj = ts => ts ? new Date(ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
@@ -3877,8 +3907,10 @@ function ajElegirPartida(){
 document.getElementById('ajTrab').addEventListener('change', ajPintarSecciones);
 document.getElementById('ajSec').addEventListener('change', ajPintarPartidas);
 document.getElementById('ajPartida').addEventListener('change', ajElegirPartida);
+let ajSnap = '', ajSucioAntes = false;
 function abrirAjustes(){
   if(!isAdmin) return;
+  ajSnap = JSON.stringify(ajustesPago); ajSucioAntes = seccionesSucias.has('ajustesPago');
   // ===== solo trabajadores con avance o pago; un finiquitado solo si todavía le queda algo por pagar =====
   const act = {};
   ALL_CELLS.forEach(c => { const st = getState(c.id), w = st.trabajador; if(!w) return; const e = resolveEstado(st); if(e === 'proceso' || e === 'entregado' || e === 'pagado'){ const o = act[w] || (act[w] = {todo:false, porPagar:false}); o.todo = true; if(e !== 'pagado') o.porPagar = true; } });
@@ -3917,7 +3949,14 @@ document.getElementById('ajLista').addEventListener('click', (e) => {
     a.anulado = true; markSettingsDirty('ajustesPago'); scheduleSave(); pintarAjustes();
   });
 });
-document.getElementById('ajCerrarBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('ajOverlay')));
+document.getElementById('ajCerrarBtn').addEventListener('click', () => {
+  closeOverlayAnimated(document.getElementById('ajOverlay'));
+  if(JSON.stringify(ajustesPago) !== ajSnap) saveNow();   // si agregó o anuló algo, se guarda al tiro
+});
+document.getElementById('ajSinCambiosBtn').addEventListener('click', () => {
+  if(JSON.stringify(ajustesPago) !== ajSnap){ ajustesPago = JSON.parse(ajSnap); if(!ajSucioAntes) seccionesSucias.delete('ajustesPago'); }
+  closeOverlayAnimated(document.getElementById('ajOverlay'));
+});
 document.getElementById('liqCfgHistBtn').addEventListener('click', () => document.getElementById('liqHistBtn').click());
 
 // ===== Pagos completos retenidos: ventana para elegir los trabajadores =====
@@ -8958,6 +8997,8 @@ function updateRetencionesIndicator(){
   const btn = document.getElementById('retencionesBtn');
   const pending = getPendingRetentions();
   btn.style.display = (isAdmin && pending.length) ? 'inline-flex' : 'none';
+  const dot = document.getElementById('pagosHubDot');
+  if(dot){ dot.style.display = (isAdmin && pending.length) ? 'flex' : 'none'; dot.textContent = pending.length > 9 ? '9+' : String(pending.length); }
 }
 function renderRetencionesList(){
   const box = document.getElementById('retencionesList');
@@ -9317,4 +9358,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.91 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.92 · 14-11-2026 ==== -->
