@@ -908,6 +908,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <span class="conectado">Conectado como: <span id="quien">—</span></span>
     <span id="verCal" title="Versión de esta página" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);align-self:center;padding:0 4px;"></span>
     <button class="btn" id="verFotos" type="button" hidden>Fotos</button>
+    <button class="btn" id="expDatos" type="button" hidden title="Descargar un respaldo de las revisiones de Calidad">Exportar</button>
+    <button class="btn" id="impDatos" type="button" hidden title="Restaurar revisiones desde un respaldo">Importar</button>
+    <input type="file" id="impArch" accept="application/json,.json" hidden>
     <button class="cs-btn" id="irPanel" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg><span>Cambiar de sección</span></button>
     <button class="btn" id="verRegistro" type="button">Registro</button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
@@ -1236,7 +1239,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.20';
+const CAL_VERSION = '1.38.21';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1713,7 +1716,7 @@ const miEtiqueta = () => (cargo ? cargo + ' - ' : '') + nombre;
 const esAdminCal = () => cargo === 'Admin';
 // solo Admin y Calidad editan; el resto entra como invitado (solo mira)
 const soloLectura = () => !(cargo === 'Admin' || cargo === 'Calidad');
-function ajustarFotosUI(){ $('verFotos').hidden = !(fotosOk && esAdminCal()); $('irPanel').hidden = false; }
+function ajustarFotosUI(){ $('expDatos').hidden = $('impDatos').hidden = !esAdminCal(); $('verFotos').hidden = !(fotosOk && esAdminCal()); $('irPanel').hidden = false; }
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $('irPanel').addEventListener('click', e => irMenuCarga(e.currentTarget));
 function dptoTxt(base){ const q = base.split('|'); return q[0] + ' · ' + (q[1] === 'Pasillo' ? 'Pasillo' : 'Dpto ' + q[1]); }
@@ -2672,6 +2675,39 @@ $('fBajar').addEventListener('click', async () => {
   bajandoDpto = false; btn.disabled = false; btn.textContent = txt0;
 });
 $('verFotos').addEventListener('click', abrirExportar);
+// ===== Exportar / Importar revisiones de Calidad (respaldo JSON) =====
+$('expDatos').addEventListener('click', () => {
+  const datos = {tipo: 'calidad-respaldo', version: 1, exportadoEn: new Date().toISOString(), revisiones: revisiones, celdas: celdas};
+  const url = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 2)], {type: 'application/json'}));
+  const a = document.createElement('a'); a.href = url; a.download = 'calidad-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+$('impDatos').addEventListener('click', () => $('impArch').click());
+$('impArch').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = ''; if(!f || soloLectura()) return;
+  let d; try{ d = JSON.parse(await f.text()); }catch(err){ aviso('No se pudo leer el archivo.'); return; }
+  if(!d || d.tipo !== 'calidad-respaldo' || !d.revisiones){ aviso('Ese archivo no es un respaldo de Calidad.'); return; }
+  const cola = Object.keys(d.revisiones).filter(k => {
+    const r = d.revisiones[k], a = revisiones[k];
+    return r && r.e && (!a || a.e !== r.e || (a.d || '') !== (r.d || ''));
+  });
+  if(!cola.length){ avisoLateral('El respaldo no trae cambios respecto a lo actual.', 'ok'); return; }
+  if(!confirm('Se restaurarán ' + cola.length + ' revisión(es) del respaldo y se guardarán en la base de datos. ¿Continuar?')) return;
+  let ok = 0;
+  for(const k of cola){
+    const r = d.revisiones[k];
+    const items = (r.d ? String(r.d).split(', ') : []).map(x => { const m = /^(.*) ×(\d+)$/.exec(x); return m ? {t: m[1], c: +m[2]} : null; }).filter(Boolean);
+    try{
+      const j = await llamar('calidadGuardar', {clave: k, estado: r.e, items: conObs(r.e) ? items : [], nonce: nuevoNonce(), ts: Date.now()}, false, 30000);
+      if(!(j && j.ok)){ aviso('Se detuvo en ' + k + '. Restauradas: ' + ok + ' de ' + cola.length + '.'); break; }
+      ok++;
+    }catch(err){ aviso('Se detuvo por un error de conexión. Restauradas: ' + ok + ' de ' + cola.length + '.'); break; }
+    await new Promise(r2 => setTimeout(r2, 1300));
+  }
+  if(ok === cola.length) avisoLateral('Restauradas ' + ok + ' revisión(es).', 'ok');
+  cargar();
+});
+
 $('eCerrar').addEventListener('click', cerrarExportar);
 $('eAccion').addEventListener('click', accionExportar);
 $('mGuardar').addEventListener('click', guardarRevision);
@@ -3227,4 +3263,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.20 · 13-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.21 · 14-11-2026 ==== -->

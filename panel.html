@@ -2155,7 +2155,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.74';
+const APP_VERSION = '0.73.75';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3090,6 +3090,7 @@ function applyLoadedPayload(parsed){
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
   if(typeof parsed.pagadoLibre === 'boolean') pagadoLibre = parsed.pagadoLibre;
   if(typeof parsed.espaciadoDptos === 'boolean') espaciadoDptos = parsed.espaciadoDptos;
+  if(parsed.temaPrincipal && typeof parsed.temaPrincipal === 'object'){ temaPrincipal = parsed.temaPrincipal; if(typeof aplicarTemaPrincipal === 'function') aplicarTemaPrincipal(); }
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
@@ -4248,13 +4249,23 @@ function calIco(cell){
   if(r.e === 'observado' || r.e === 'corregido') return '<span class="cal-ico obs" title="Calidad: ' + (r.e === 'corregido' ? 'corregido' : 'con observación') + '">' + (r.e === 'corregido' ? '↺' : '⚠') + '</span>';
   return '';
 }
+function calNombreCorto(u, base){
+  u = String(u || '').trim(); if(!u) return '';
+  if(u.indexOf(' - ') >= 0) u = u.slice(u.lastIndexOf(' - ') + 3).trim();   // quita el cargo ("Calidad - Silvia González")
+  if((base + u).length <= 40) return u;
+  const p = u.split(/\s+/);
+  return p.length < 2 ? u : p[0] + ' ' + p.slice(1).map(x => x.charAt(0).toUpperCase() + '.').join(' ');
+}
 function calidadSecHtml(cell){
   const r = calidadDe(cell); if(!r) return '';
   const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Observación corregida', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
   const f = r.ts ? new Date(r.ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
   const det = r.d ? '<small style="display:block;white-space:normal">' + escVt(r.d) + '</small>' : '';
-  const quien = (r.u || f) ? '<small style="display:block;white-space:normal">' + escVt([r.u, f].filter(Boolean).join(' · ')) + '</small>' : '';
-  return `<div class="vt-sec"><div class="vt-sec-title">Calidad</div><div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${quien}</div></div></div>`;
+  const base = 'Observaciones de Calidad';
+  const quien = calNombreCorto(r.u, base + ' - ');
+  const titulo = base + (quien ? ' - ' + quien : '');
+  const fecha = f ? '<small style="display:block;white-space:normal">' + escVt(f) + '</small>' : '';
+  return `<div class="vt-sec"><div class="vt-sec-title">${escVt(titulo)}</div><div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div></div></div>`;
 }
 function pintarVentana(){
   const id = ventanaId, cell = cellById[id];
@@ -7804,7 +7815,7 @@ document.getElementById('dbBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, workerStatus, customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas: isAdmin ? ceramicas : undefined, permisos: isAdmin ? permisosCargos : undefined, calidad: CAL_REV, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -9043,4 +9054,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.74 · 13-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.75 · 14-11-2026 ==== -->
