@@ -590,9 +590,9 @@
   #inputOverlay{z-index:85;}
   .overlay.show{display:flex;}
   .modal{background:var(--panel);border:1px solid var(--border-strong);border-radius:0;max-width:420px;width:100%;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:modalPop .28s cubic-bezier(.22,.8,.3,1);max-height:92vh;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;}
-  /* Las ventanas se abren y se cierran en vertical, desde una línea al centro (solo se revela el contenido, no se estira) */
-  @keyframes modalPop{ from{opacity:0; clip-path:inset(50% -30px 50% -30px);} to{opacity:1; clip-path:inset(-30px -30px -30px -30px);} }
-  @keyframes modalPopOut{ from{opacity:1; clip-path:inset(-30px -30px -30px -30px);} to{opacity:0; clip-path:inset(50% -30px 50% -30px);} }
+  /* ===== Las ventanas se abren y se cierran con zoom suave desde el centro (80% → 100%) ===== */
+  @keyframes modalPop{ from{opacity:0; transform:scale(.8);} to{opacity:1; transform:scale(1);} }
+  @keyframes modalPopOut{ from{opacity:1; transform:scale(1);} to{opacity:0; transform:scale(.8);} }
   .modal.modalClosing{ animation:modalPopOut .2s cubic-bezier(.4,0,.6,1) forwards; }
   .ovDin{animation:overlayIn .16s ease;}
   .ovDin>div{animation:modalPop .28s cubic-bezier(.22,.8,.3,1);}
@@ -2164,7 +2164,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.82';
+const APP_VERSION = '0.73.83';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9099,4 +9099,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.82 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.83 · 14-11-2026 ==== -->
