@@ -2161,7 +2161,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.77';
+const APP_VERSION = '0.73.79';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4255,23 +4255,41 @@ function calIco(cell){
   if(r.e === 'observado' || r.e === 'corregido') return '<span class="cal-ico obs" title="Calidad: ' + (r.e === 'corregido' ? 'corregido' : 'con observación') + '">' + (r.e === 'corregido' ? '↺' : '⚠') + '</span>';
   return '';
 }
-// ===== título de Calidad: nombre completo; si no cabe en el ancho del div, apellido a la inicial =====
+// ===== nombres: completo si cabe en el div; si no, solo la inicial del primer apellido ("Silvia G.") =====
 function calNombreLimpio(u){
   u = String(u || '').trim();
   return u.indexOf(' - ') >= 0 ? u.slice(u.lastIndexOf(' - ') + 3).trim() : u;
 }
-function calNombreCorto(u){
-  const p = calNombreLimpio(u).split(/\s+/);
-  return p.length < 2 ? p[0] : p[0] + ' ' + p.slice(1).map(x => x.charAt(0).toUpperCase() + '.').join(' ');
+function nombreCorto(u){
+  const p = String(u || '').trim().split(/\s+/);
+  if(p.length < 2) return p[0] || '';
+  const ap = p.length >= 4 ? p[2] : p[1];   // con 4 palabras: nombre, 2º nombre, apellido, apellido
+  return p[0] + ' ' + ap.charAt(0).toUpperCase() + '.';
 }
-function ajustarTituloCal(){
-  document.querySelectorAll('.vt-sec-title[data-calnom]').forEach(el => {
-    const base = 'Observaciones de Calidad', nom = el.getAttribute('data-calnom');
-    el.textContent = base + ' - ' + nom;
-    if(el.scrollWidth > el.clientWidth + 1) el.textContent = base + ' - ' + calNombreCorto(nom);
+const calNombreCorto = nombreCorto;
+function _desborda(el){
+  return el.scrollWidth > el.clientWidth + 1;
+}
+function ajustarNombres(){
+  document.querySelectorAll('.worker-name:not(.unassigned), [data-nomfull]').forEach(el => {
+    if(el.dataset.nomfull === undefined) el.dataset.nomfull = el.dataset.calnom || el.textContent.trim();
+    const full = el.dataset.nomfull, pre = el.dataset.nompre || '';
+    if(!full || full === 'Sin asignar') return;
+    el.style.setProperty('white-space', 'nowrap', 'important'); el.style.overflow = 'hidden';   // gana a las reglas del celular que dejaban partir el nombre en 2 líneas
+    if(getComputedStyle(el).display === 'inline'){ el.style.display = 'inline-block'; el.style.maxWidth = '100%'; el.style.verticalAlign = 'bottom'; }
+    el.textContent = pre + full;
+    if(_desborda(el)) el.textContent = pre + nombreCorto(full);
   });
 }
-window.addEventListener('resize', ajustarTituloCal);
+// vuelve a ajustar cuando el panel se vuelve a dibujar o cambia el tamaño de la pantalla
+(function(){
+  let t = 0, obs = null;
+  const correr = () => { t = 0; if(obs) obs.disconnect(); try{ ajustarNombres(); }finally{ if(obs) obs.observe(document.body, {childList: true, subtree: true}); } };
+  const pedir = () => { if(!t) t = requestAnimationFrame(correr); };
+  obs = new MutationObserver(pedir);
+  obs.observe(document.body, {childList: true, subtree: true});
+  window.addEventListener('resize', pedir);
+})();
 function calidadSecHtml(cell){
   const r = calidadDe(cell); if(!r) return '';
   const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Observación corregida', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
@@ -4280,7 +4298,7 @@ function calidadSecHtml(cell){
   const quien = calNombreLimpio(r.u);
   const fecha = f ? '<small style="display:block;white-space:normal">' + escVt(f) + '</small>' : '';
   const tit = quien
-    ? '<div class="vt-sec-title" style="white-space:nowrap;overflow:hidden" data-calnom="' + escVt(quien) + '">Observaciones de Calidad - ' + escVt(quien) + '</div>'
+    ? '<div class="vt-sec-title" data-nompre="Observaciones de Calidad - " data-nomfull="' + escVt(quien) + '">Observaciones de Calidad - ' + escVt(quien) + '</div>'
     : '<div class="vt-sec-title">Observaciones de Calidad</div>';
   return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div></div></div>`;
 }
@@ -4309,7 +4327,7 @@ function pintarVentana(){
     </div>
     <div class="vt-body">
       <div class="vt-sec"><div class="vt-sec-title">Trabajador</div>
-        <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${botonesTrab}</div></div>
+        <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}"${hasWorker ? ' data-nomfull="' + escVt(st.trabajador) + '"' : ''}>${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${botonesTrab}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Estado</div>
         ${estadoNumero(st) === 0 && motivoBloqueoPartida(cell) ? '<p class="est-aviso" style="text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;">' + avisoCortoBloqueo(motivoBloqueoPartida(cell), cell) + '</p>' : ''}
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
@@ -4322,7 +4340,6 @@ function pintarVentana(){
     </div>
     <div class="vt-foot"><button type="button" class="btn" data-vt="cerrar">Cerrar</button>${isAdmin ? '<button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}</div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
-  ajustarTituloCal();
 }
 document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   if(e.target.id === 'ventanaOverlay') return;
@@ -9072,4 +9089,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.77 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.79 · 14-11-2026 ==== -->

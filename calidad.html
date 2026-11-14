@@ -1239,7 +1239,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.21';
+const CAL_VERSION = '1.38.22';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1389,6 +1389,32 @@ function dptoCorto(d){
 }
 const pisoNum = d => String(d.p).replace(/^Piso\s*/i, '');
 const nombreCorto = u => { const t = String(u || ''); const i = t.indexOf(' - '); return i === -1 ? t : t.substring(i + 3); };
+
+// ===== nombres: completo si cabe; si no, solo la inicial del primer apellido ("Silvia G.") =====
+function inicialApellido(u){
+  const p = String(u || '').trim().split(/\s+/);
+  if(p.length < 2) return p[0] || '';
+  return p[0] + ' ' + (p.length >= 4 ? p[2] : p[1]).charAt(0).toUpperCase() + '.';
+}
+function ajustarNombres(){
+  document.querySelectorAll('.pill.quien i, #mQuien').forEach(el => {
+    if(el.dataset.nomfull === undefined || el.dataset.nomtxt !== el.textContent) el.dataset.nomfull = el.textContent.trim();
+    const full = el.dataset.nomfull; if(!full) return;
+    el.style.setProperty('white-space', 'nowrap', 'important'); el.style.overflow = 'hidden'; el.style.maxWidth = '100%';
+    if(getComputedStyle(el).display === 'inline') el.style.display = 'inline-block';
+    el.textContent = full;
+    if(el.scrollWidth > el.clientWidth + 1) el.textContent = inicialApellido(full);
+    el.dataset.nomtxt = el.textContent;
+  });
+}
+(function(){
+  let t = 0, obs = null;
+  const correr = () => { t = 0; obs.disconnect(); try{ ajustarNombres(); }finally{ obs.observe(document.body, {childList: true, subtree: true}); } };
+  const pedir = () => { if(!t) t = requestAnimationFrame(correr); };
+  obs = new MutationObserver(pedir);
+  obs.observe(document.body, {childList: true, subtree: true});
+  window.addEventListener('resize', pedir);
+})();
 function revision(d, sc){
   const r = revisiones[clave(d, sc)];
   if(r) return r;
@@ -3263,4 +3289,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.21 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.22 · 14-11-2026 ==== -->
