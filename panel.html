@@ -409,6 +409,9 @@
   .toolbar select, .toolbar input[type=text], .toolbar .btn, .toolbar .counter-pill{box-sizing:border-box;height:34px;}
   .toolbar .btn{display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0;}
   .toolbar .counter-pill{display:inline-flex;align-items:center;}
+  /* ===== frague sin cerámica terminada: se ve pero no se puede abrir ===== */
+  .cell-bloq{opacity:.45;cursor:not-allowed !important;filter:grayscale(.5);}
+  .cell-bloq:hover,.cell-bloq:active{transform:none !important;box-shadow:none !important;}
   select, input[type=text], input[type=number]{background:var(--panel);border:1px solid var(--border-strong);color:var(--text);padding:7px 9px;border-radius:var(--radius);font-size:13px;outline:none;min-width:140px;}
   select:focus, input:focus{border-color:var(--accent);}
   .tabs{display:inline-grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0;border:1px solid var(--border-strong);width:75vw;max-width:100%;box-sizing:border-box;}
@@ -2161,7 +2164,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.79';
+const APP_VERSION = '0.73.82';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3379,6 +3382,8 @@ function switchCategoria(newCat){
     try{ localStorage.setItem('progresoObraCategoria', activeCategoria); }catch(err){}
     avisarSeccion();
     populateFilters();
+    // ===== en "Solo con avance" el piso donde estaba se fuerza a mostrarse en la otra pestaña, aunque ahí todavía no tenga avance =====
+    if(pisoRef && vistaPisos === 'mov' && FLOOR_BLOCKS.some(f => f.categoria === newCat && f.piso === pisoRef)) pisosExtra.add(pisoRef);
     render();
     irAlPisoCercano(pisoRef);
     contentEl.style.transition = 'none';
@@ -3401,7 +3406,11 @@ const pisosExtra = new Set();
 try{ if(localStorage.getItem('progresoObraVistaPisosV2') === 'todos') vistaPisos = 'todos'; }catch(err){}
 document.getElementById('filterVista').value = vistaPisos;
 const celdaConAvance = c => !!c && resolveEstado(getState(c.id)) !== 'pendiente';
-const bloqueConAvance = fb => fb.depts.some(d => fb.areas.some(a => celdaConAvance(d.cells[a]))) || celdaConAvance(fb.pasillo);
+// ===== en Frague un piso se ve apenas una de sus cerámicas está Terminada (sin cerámica no hay frague) =====
+const celdaCompleta = c => (c && !c.categoria && c.id) ? cellById[c.id] : c;   // en los bloques las celdas vienen resumidas
+const fragueHabilitada = c0 => { const c = celdaCompleta(c0); return !!c && c.categoria === 'Frague' && !!CERAMICA_DE[c.pisoNum + '|' + c.dpto + '|' + c.area] && !ceramicaPendienteDe(c); };
+const celdaFragueBloqueada = c => !!c && c.categoria === 'Frague' && !!ceramicaPendienteDe(c);
+const bloqueConAvance = fb => fb.depts.some(d => fb.areas.some(a => celdaConAvance(d.cells[a]) || fragueHabilitada(d.cells[a]))) || celdaConAvance(fb.pasillo) || fragueHabilitada(fb.pasillo);
 function pisosConAvanceActual(){
   const out = new Set();
   FLOOR_BLOCKS.forEach(fb => {
@@ -4204,7 +4213,7 @@ function etiquetaEstado(cell, estado){
 function cellVentanaHtml(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${escVt(st.nota)}">${escVt(st.nota)}</div></div>` : '';
-  return `<div class="cell-block cell-ventana" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
+  return `<div class="cell-block cell-ventana${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
     <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div></div>
     <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
     ${nota}
@@ -4566,7 +4575,7 @@ function dzCeldaTabla(cell, st){
   const dz = document.body.classList.contains('dz-A') || document.body.classList.contains('dz-D');
   if(!dz || !vistaVentana()) return cellHtml(cell);
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-ex" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
+  return `<div class="cell-block cell-ventana dz-ex${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
     <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</span></div>
     <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
   </div>`;
@@ -4575,7 +4584,7 @@ function dzCeldaTabla(cell, st){
 const dzSel = {};
 function dzFila(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-fila" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0" title="Abrir para ver y editar">${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
+  return `<div class="cell-block cell-ventana dz-fila${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
     <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(st.trabajador) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
     <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
   </div>`;
@@ -7430,7 +7439,7 @@ function abrirEditarM2(id){
 function alClickContenido(e){
   const t = e.target;
   let el;
-  if((el = t.closest('[data-abrir]'))){ abrirVentana(el.getAttribute('data-abrir')); return; }
+  if((el = t.closest('[data-abrir]'))){ if(el.classList.contains('cell-bloq')) return; abrirVentana(el.getAttribute('data-abrir')); return; }
   if((el = t.closest('td.dpto-col[data-matkey]'))){ abrirMateriales(el.getAttribute('data-matkey')); return; }
   if((el = t.closest('[data-dzmat]'))){ abrirMateriales(el.getAttribute('data-dzmat')); return; }
   if((el = t.closest('.assign-btn[data-id]'))){ if(puede('estados') || puede('asignar')) abrirAsignar(el.getAttribute('data-id')); return; }
@@ -7467,6 +7476,7 @@ contenidoRaiz.addEventListener('keydown', (e) => {
   const el = e.target.closest && e.target.closest('[data-abrir]');
   if(!el || e.target !== el) return;
   e.preventDefault();
+  if(el.classList.contains('cell-bloq')) return;
   abrirVentana(el.getAttribute('data-abrir'));
 });
 function alCambioContenido(e){
@@ -9089,4 +9099,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.79 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.82 · 14-11-2026 ==== -->
