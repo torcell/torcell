@@ -1210,7 +1210,8 @@ async function iniciar(){
   const j = await api('adminUsuarios');
   if(!j || !j.ok){ main.innerHTML = '<div class="tarjeta">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div>'; if(window.CargaPagina) await CargaPagina.fin(); return; }
   if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
-  datos = {usuarios:j.usuarios, encargados:j.encargados, ajustes:j.ajustes || {halloween:false}};
+  // ===== si el servidor manda la respuesta incompleta, no se cae =====
+  datos = {usuarios: Array.isArray(j.usuarios) ? j.usuarios : [], encargados: j.encargados || {}, ajustes: j.ajustes || {halloween:false}};
   await ir('usuarios');
   if(window.CargaPagina) await CargaPagina.fin();
 }
@@ -1237,7 +1238,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.49';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.50';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1249,4 +1250,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.49 · 13-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.50 · 14-11-2026 ==== -->

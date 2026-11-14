@@ -2241,7 +2241,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.92';
+const APP_VERSION = '0.73.93';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2875,7 +2875,14 @@ async function pingDb(){
   }
   updateDbBadge();
 }
-setInterval(pingDb, 40000);
+// ===== llamadas de fondo: solo con la pestaña a la vista; al volver se ponen al día =====
+let ultPing = Date.now(), ultPet = Date.now();
+setInterval(() => { if(document.hidden) return; ultPing = Date.now(); pingDb(); }, 40000);
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) return;
+  if(Date.now() - ultPing > 40000){ ultPing = Date.now(); pingDb(); }
+  if(Date.now() - ultPet > 60000 && typeof cargarMisPeticiones === 'function'){ ultPet = Date.now(); cargarMisPeticiones(); cargarPeticionesAdmin(); }
+});
 window.addEventListener('offline', () => { dbStatus = 'error'; dbErrorReason = 'Tu dispositivo se quedó sin internet.'; updateDbBadge(); });
 window.addEventListener('online', () => { pingDb(); });
 
@@ -7094,7 +7101,7 @@ document.getElementById('peticionesBtn').addEventListener('click', () => {
   cargarPeticionesAdmin();
 });
 document.getElementById('peticionesCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('peticionesOverlay')));
-setInterval(() => { cargarMisPeticiones(); cargarPeticionesAdmin(); }, 60000);
+setInterval(() => { if(document.hidden) return; ultPet = Date.now(); cargarMisPeticiones(); cargarPeticionesAdmin(); }, 60000);
 
 function fechaCorta(ts){ return new Date(ts).toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}); }
 function filasHistorialTrabajo(trab, cat){
@@ -9358,4 +9365,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.92 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.93 · 14-11-2026 ==== -->
