@@ -2215,7 +2215,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 
-const APP_VERSION = '0.73.89';
+const APP_VERSION = '0.73.90';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3846,7 +3846,12 @@ function pintarAjustes(){
 }
 function abrirAjustes(){
   if(!isAdmin) return;
-  const nombres = Array.from(new Set(ALL_WORKERS.concat(ajustesPago.map(a => a.w)))).sort((a, b) => a.localeCompare(b, 'es'));
+  // ===== solo trabajadores con avance o pago; un finiquitado solo si todavía le queda algo por pagar =====
+  const act = {};
+  ALL_CELLS.forEach(c => { const st = getState(c.id), w = st.trabajador; if(!w) return; const e = resolveEstado(st); if(e === 'proceso' || e === 'entregado' || e === 'pagado'){ const o = act[w] || (act[w] = {todo:false, porPagar:false}); o.todo = true; if(e !== 'pagado') o.porPagar = true; } });
+  const conAjustePend = new Set(ajustesPago.filter(a => !a.aplicado && !a.anulado).map(a => a.w));
+  const sirve = w => { const fin = (workerStatus[w] || {}).estado === 'finiquitado', o = act[w]; return conAjustePend.has(w) || (o && (fin ? o.porPagar : o.todo)); };
+  const nombres = ALL_WORKERS.filter(sirve).concat(Array.from(conAjustePend).filter(w => ALL_WORKERS.indexOf(w) === -1)).sort((a, b) => a.localeCompare(b, 'es'));
   document.getElementById('ajTrab').innerHTML = nombres.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
   document.getElementById('ajError').textContent = '';
   document.getElementById('ajMonto').value = ''; document.getElementById('ajMotivo').value = '';
@@ -9275,4 +9280,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.89 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.90 · 14-11-2026 ==== -->
