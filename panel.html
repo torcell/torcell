@@ -1926,8 +1926,7 @@
       <input type="checkbox" id="allowGuestPricesChk"> Dejar que supervisores y trabajadores vean los precios base
     </label>
     <div class="add-worker-row">
-      <input type="text" id="newWorkerName" placeholder="Nombre del nuevo trabajador">
-      <button class="btn primary small" id="addWorkerBtn">Agregar</button>
+      <button class="btn primary small" id="addWorkerBtn">+ Nuevo trabajador <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></button>
     </div>
     <div class="add-worker-msg" id="addWorkerMsg"></div>
     <div class="wk-orden">
@@ -2241,7 +2240,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.94';
+const APP_VERSION = '0.73.95';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2827,6 +2826,10 @@ function getState(id){
   }
   return s;
 }
+let ULT_DIA_TRAB = {}; // último día trabajado por persona (lo entrega la asistencia)
+const METODOS_ENTRADA = ['Contrato nuevo', 'Anexo de contrato', 'Reingreso', 'Traspaso desde otra obra'];
+const CARGOS = [['ceramista', 'Ceramista'], ['fraguador', 'Fraguador']];
+const fechaDMY = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v.split('-').reverse().join('/') : '';
 function defaultWorkerEntry(w){
   return DEFAULT_WORKER_STATUS[w] ? {...DEFAULT_WORKER_STATUS[w]} : {estado:'activo', especialidad:'ceramista'};
 }
@@ -3108,7 +3111,7 @@ function sanitizedWorkerStatusForDb(){
   const clean = {};
   Object.keys(workerStatus).forEach(w => {
     const ws = workerStatus[w] || {};
-    clean[w] = { estado: ws.estado, especialidad: ws.especialidad, afp: ws.afp || '', inicio: ws.inicio || '', fin: ws.fin || '', log: logSeguroDb(ws.log), fechasOk: (Array.isArray(ws.fechasOk) ? ws.fechasOk.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).slice(-60) : []) };
+    clean[w] = { estado: ws.estado, especialidad: ws.especialidad, afp: ws.afp || '', inicio: ws.inicio || '', fin: ws.fin || '', ingreso: METODOS_ENTRADA.indexOf(ws.ingreso) >= 0 ? ws.ingreso : '', log: logSeguroDb(ws.log), fechasOk: (Array.isArray(ws.fechasOk) ? ws.fechasOk.filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)).slice(-60) : []) };
   });
   return clean;
 }
@@ -3667,9 +3670,9 @@ function openWorkerDatosModal(worker){
       <option value="" ${!ws.afp || ws.afp==='No especificada' ? 'selected' : ''}>Elegir AFP</option>
       ${AFP_OPTIONS.map(a => `<option value="${esc(a)}" ${ws.afp===a?'selected':''}>${esc(a)}</option>`).join('')}
     </select></div>
-    <div class="rate-row"><label>Inicio de trabajo</label><input type="date" id="datosInicio" style="width:220px;" value="${esc(ws.inicio||'')}"></div>
-    <div class="rate-row"><label>Último día / finiquito</label><input type="date" id="datosFin" style="width:220px;" value="${esc(ws.fin||'')}"></div>
-    <p style="margin:2px 0 8px;font-size:11px;color:var(--sub);">Fuera de estas fechas no cuenta en el rendimiento ni en los promedios. Vacío = sin límite.</p>
+    ${controlesIngreso(ws)}
+    ${ultimoDiaHtml(worker)}
+    <p style="margin:2px 0 8px;font-size:11px;color:var(--sub);">Fuera de las fechas de ingreso y finiquito no cuenta en el rendimiento ni en los promedios. Vacío = sin límite.</p>
     <div class="rate-row"><label>RUT</label><input type="text" id="datosRut" style="width:220px;" value="${esc(ws.rut||'')}"></div>
     <div class="rate-row"><label>Teléfono</label><input type="text" id="datosTelefono" style="width:220px;" value="${esc(ws.telefono||'')}"></div>
     <div class="rate-row"><label>Correo</label><input type="text" id="datosCorreo" style="width:220px;" value="${esc(ws.correo||'')}"></div>
@@ -3690,9 +3693,11 @@ function openWorkerDatosModal(worker){
   openInputModal(`Datos de ${worker}`, bodyHtml, () => {
     workerStatus[worker] = workerStatus[worker] || defaultWorkerEntry(worker);
     workerStatus[worker].afp = document.getElementById('datosAfp').value;
-    const fechaOk = v => /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : '';
-    workerStatus[worker].inicio = fechaOk(document.getElementById('datosInicio').value);
-    workerStatus[worker].fin = fechaOk(document.getElementById('datosFin').value);
+    const dI = leerIngreso();
+    workerStatus[worker].especialidad = dI.especialidad;
+    workerStatus[worker].inicio = dI.inicio;
+    workerStatus[worker].fin = dI.fin;
+    workerStatus[worker].ingreso = dI.ingreso;
     workerStatus[worker].rut = document.getElementById('datosRut').value.trim();
     workerStatus[worker].telefono = document.getElementById('datosTelefono').value.trim();
     workerStatus[worker].correo = document.getElementById('datosCorreo').value.trim();
@@ -3722,20 +3727,49 @@ function openWorkerDatosModal(worker){
   });
 }
 
+// ===== Nuevo trabajador =====
+function controlesIngreso(ws){
+  return `
+    <div class="rate-row"><label>Cargo</label><select id="nwCargo" style="width:220px;">${CARGOS.map(c => `<option value="${c[0]}" ${ws.especialidad===c[0]?'selected':''}>${c[1]}</option>`).join('')}</select></div>
+    <div class="rate-row"><label>Fecha de ingreso (contrato)</label><input type="date" id="nwInicio" style="width:220px;" value="${esc(ws.inicio||'')}"></div>
+    <div class="rate-row"><label>Método de entrada</label><select id="nwMetodo" style="width:220px;"><option value="">Elegir</option>${METODOS_ENTRADA.map(m => `<option ${ws.ingreso===m?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
+    <div class="rate-row"><label>Fecha de finiquito</label><input type="date" id="nwFin" style="width:220px;" value="${esc(ws.fin||'')}"></div>`;
+}
+function ultimoDiaHtml(w){
+  const u = ULT_DIA_TRAB[w];
+  return `<div class="rate-row"><label>Último día trabajado</label><span style="width:220px;display:inline-block;font-weight:600;">${u ? fechaDMY(u) : 'Sin asistencia registrada'}</span></div>
+    <p style="margin:2px 0 8px;font-size:11px;color:var(--sub);">Lo entrega la asistencia, no se escribe a mano.</p>`;
+}
+function leerIngreso(){
+  const v = id => document.getElementById(id).value;
+  const ok = x => /^\d{4}-\d{2}-\d{2}$/.test(x) ? x : '';
+  return {especialidad: v('nwCargo') === 'fraguador' ? 'fraguador' : 'ceramista', inicio: ok(v('nwInicio')), fin: ok(v('nwFin')), ingreso: METODOS_ENTRADA.indexOf(v('nwMetodo')) >= 0 ? v('nwMetodo') : ''};
+}
 document.getElementById('addWorkerBtn').addEventListener('click', () => {
-  const input = document.getElementById('newWorkerName');
-  const msgEl = document.getElementById('addWorkerMsg');
-  const name = input.value.trim();
-  msgEl.textContent = '';
-  if(!name){ msgEl.textContent = 'Escribe un nombre.'; return; }
-  if(ALL_WORKERS.some(w => w.toLowerCase() === name.toLowerCase())){ msgEl.textContent = 'Ese trabajador ya existe.'; return; }
-  ALL_WORKERS.push(name);
-  workerStatus[name] = {estado:'activo', especialidad:'ceramista'};
-  customWorkers.push(name);
-  markSettingsDirty();
-  scheduleSave();
-  input.value = '';
-  populateFilters(); renderWorkerPanel(); render();
+  document.getElementById('addWorkerMsg').textContent = '';
+  const body = `
+    <div class="rate-row"><label>Nombre y apellido</label><input type="text" id="nwNombre" maxlength="60" style="width:220px;" placeholder="Ej: Juan Pérez" autocomplete="off"></div>
+    ${controlesIngreso({especialidad:'ceramista', inicio: rdHoy()})}
+    ${ultimoDiaHtml('')}
+    <p style="margin:2px 0 4px;font-size:11px;color:var(--sub);">Al guardar queda activo y aparece en Asistencia, donde puedes marcar los días que ya trabajó desde su ingreso.</p>
+    <div class="add-worker-msg" id="nwMsg" style="color:#c0546f;"></div>`;
+  openInputModal('Nuevo trabajador', body, () => {
+    const err = t => { document.getElementById('nwMsg').textContent = t; return 'mantener'; };
+    const name = document.getElementById('nwNombre').value.replace(/\s+/g, ' ').trim();
+    if(name.length < 3 || name.indexOf(' ') < 0) return err('Escribe nombre y apellido.');
+    if(/[<>"'`&\\]/.test(name)) return err('El nombre tiene caracteres no permitidos.');
+    if(ALL_WORKERS.some(w => w.toLowerCase() === name.toLowerCase())) return err('Ese trabajador ya existe.');
+    const d = leerIngreso();
+    if(!d.inicio) return err('Falta la fecha de ingreso.');
+    if(!d.ingreso) return err('Elige el método de entrada.');
+    if(d.fin && d.fin < d.inicio) return err('El finiquito no puede ser antes del ingreso.');
+    ALL_WORKERS.push(name);
+    workerStatus[name] = {estado: d.fin && d.fin < rdHoy() ? 'finiquitado' : 'activo', especialidad: d.especialidad, inicio: d.inicio, fin: d.fin, ingreso: d.ingreso};
+    customWorkers.push(name);
+    markSettingsDirty();
+    populateFilters(); renderWorkerPanel(); render();
+    saveNow(); // se guarda al tiro para que Asistencia lo vea
+  }, 'Guardar y cerrar');
 });
 document.getElementById('allowGuestPricesChk').addEventListener('change', (e) => {
   allowGuestPrices = e.target.checked;
@@ -6861,6 +6895,7 @@ async function abrirAsistencia(){
     if(demo) r = {ok: true, registros: JSON.parse(JSON.stringify(ASIST_DEMO[f] || {})), trabajadores: activeWorkers().length ? activeWorkers() : ALL_WORKERS.slice(0, 8)};
     else { try{ r = await llamarDb('asistenciaDia', {fecha: f}); }catch(err){ r = null; } }
     if(!r || !r.ok) return false;
+    if(r.ultimos) Object.assign(ULT_DIA_TRAB, r.ultimos);
     const nuevo = aEstado(r), ant = ASIST_CACHE[f];
     Object.keys(asCola.pend).forEach(k => { const p = asCola.pend[k]; if(p.fecha !== f) return; const n = p.it.trabajador; if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
     const cambio = !ant || JSON.stringify(ant.estado) !== JSON.stringify(nuevo.estado) || JSON.stringify(ant.lista) !== JSON.stringify(nuevo.lista);
@@ -9365,4 +9400,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.94 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.95 · 14-11-2026 ==== -->

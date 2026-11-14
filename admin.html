@@ -87,6 +87,13 @@ main h2{margin:0 0 4px;font-size:17px;}
 .fila-f{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 .fila-f input{flex:1;min-width:150px;}
 .pinbox{text-align:center;padding:18px 10px;}
+.lista-pins{width:100%;border-collapse:collapse;margin:10px 0 14px;}
+.lista-pins th,.lista-pins td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--strong);font-size:13.5px;}
+.lista-pins th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);}
+.lista-pins td.p{font-size:17px;font-weight:700;letter-spacing:3px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.ren-aviso{border:1px solid var(--bad);color:var(--bad);padding:8px 10px;font-size:12.5px;margin:0 0 12px;}
+.tnuevo-a{display:inline-block;border-radius:999px;background:var(--ok);color:#111;font-size:9px;font-weight:700;padding:1px 6px;margin-left:6px;vertical-align:1px;font-style:normal;}
+@media print{body *{visibility:hidden !important;} #listaPins,#listaPins *{visibility:visible !important;} #listaPins{position:absolute;left:0;top:0;width:100%;background:#fff;color:#000;border:0;} #listaPins .no-imp{display:none !important;} .lista-pins th,.lista-pins td{color:#000;border-color:#999;}}
 .pinbox .pin{font-size:38px;font-weight:700;letter-spacing:8px;margin:10px 0;font-variant-numeric:tabular-nums;}
 .matriz{width:100%;border-collapse:collapse;}
 .matriz th{font-size:11.5px;color:var(--sub);font-weight:600;padding:6px;text-align:center;}
@@ -391,7 +398,7 @@ const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de cal
 const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = SECC.filter(x => x[0] !== 'admin');
-const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.'};
+const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.',pin_incorrecto:'Ese no es tu PIN.',muchos_intentos:'Demasiados intentos. Espera 10 minutos.'};
 const fmt = ms => new Date(ms).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
 let tTimer = 0;
 function toast(t, err){ avisoLateral(t, err ? 'error' : 'exito'); }
@@ -422,7 +429,7 @@ const BD = (function(){
     if(a === 'respaldosListar') return {ok:true, respaldos:(estado.resp = estado.resp || [{n:1,ts:Date.now()-3600000*3,motivo:'diario 7:00',filas:1240,terminadas:812},{n:2,ts:Date.now()-86400000,motivo:'diario 7:00',filas:1240,terminadas:790},{n:3,ts:Date.now()-86400000*2,motivo:'diario 7:00',filas:1240,terminadas:761}])};
     if(a === 'respaldoAhora') return {ok:true};
     if(a === 'respaldoRestaurar') return x.confirmar === true ? {ok:true} : {ok:false,error:'datos_invalidos'};
-    if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados, ajustes:estado.ajustes || {halloween:false}};
+    if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados, ajustes:estado.ajustes || {halloween:false}, pinsRenovados:estado.pinsRenovados || 0};
     if(a === 'contratoSync'){
       estado.hist = estado.hist || [{id:'demo1',nombre:'ALEX EJEMPLO',rut:'12.345.678-5',nacimiento:'15/06/1990',nacionalidad:'CHILENA',civil:'SOLTERO',rol:'CERAMISTA',calle:'Calle de ejemplo',num:'123',comuna:'La Florida',user:'alex',prov:'gmail',suf:'com',obra:'Obra Bellavista',ingreso:'03/11/2026',creado:'03/11/2026'}];
       (x.lote || []).forEach(o => { if(!estado.hist.some(h => h.rut === o.rut && h.ingreso === o.ingreso)) estado.hist.push(o); });
@@ -460,6 +467,7 @@ const BD = (function(){
     if(a === 'adminCargo'){ const u = por(x.fila); u.rol = x.rol; u.cargo = CARGO[x.rol]; u.base = BASE[x.rol]; guardar(); return {ok:true,rol:x.rol,cargo:u.cargo}; }
     if(a === 'adminRenombrar'){ por(x.fila).nombre = x.nuevo; guardar(); return {ok:true,nombre:x.nuevo}; }
     if(a === 'adminPinNuevo') return {ok:true,pin:pin()};
+    if(a === 'adminRenovarPins'){ if(String(x.pin) !== '123456') return {ok:false,error:'pin_incorrecto'}; estado.pinsRenovados = Date.now(); guardar(); return {ok:true, ts:estado.pinsRenovados, lista:estado.usuarios.filter(u => u.rol !== 1).map(u => ({nombre:u.nombre, cargo:u.cargo, pin:pin()}))}; }
     if(a === 'adminBloquear'){ const b = {permanente:!!x.permanente,hasta:x.hasta||0,motivo:x.motivo||''}; por(x.fila).bloqueo = b; guardar(); return {ok:true,bloqueo:b}; }
     if(a === 'adminDesbloquear'){ por(x.fila).bloqueo = null; guardar(); return {ok:true}; }
     if(a === 'adminEncargadosGuardar'){ Object.assign(estado.encargados, x.encargados); guardar(); return {ok:true,encargados:estado.encargados}; }
@@ -858,6 +866,51 @@ function mostrarPin(nombre, pin, volver){
     + '<div style="font-size:12.5px;color:var(--sub);max-width:420px;margin:0 auto 14px;">Se muestra una sola vez; después queda protegido y nadie puede verlo. Entrégaselo en persona, sin enviarlo por mensaje.</div><button class="btn primary" id="pinOk" type="button">Listo, ya lo anoté</button></div>';
   $('pinOk').addEventListener('click', volver);
 }
+// ===== renovar todos los PIN (los Admin no cambian) =====
+const REN_DIAS = 30;
+function renAvisoHtml(){
+  const u = datos.pinsRenovados || 0, dias = u ? Math.floor((Date.now() - u) / 86400000) : -1;
+  if(u && dias < REN_DIAS) return '<p class="nota">Último cambio de todos los PIN: ' + fmt(u) + ' (hace ' + dias + (dias === 1 ? ' día' : ' días') + ').</p>';
+  return '<p class="ren-aviso">' + (u ? 'Los PIN se cambiaron por última vez el ' + fmt(u) + ' (hace ' + dias + ' días). Ya toca renovarlos.' : 'Los PIN todavía no se han renovado nunca. Toca hacerlo una vez al mes.') + '</p>';
+}
+function renPreparar(){
+  const rf = $('renF');
+  $('renB').addEventListener('click', () => {
+    rf.hidden = !rf.hidden; if(rf.hidden) return;
+    const n = datos.usuarios.filter(u => u.rol !== 1).length;
+    rf.innerHTML = '<div style="font-size:13px;margin-bottom:10px;"><b>Se cambiará el PIN de ' + n + (n === 1 ? ' persona' : ' personas') + '</b> (las cuentas de administración no cambian). Todos salen de sus aparatos de inmediato y no podrán entrar hasta que les entregues el PIN nuevo. La lista se muestra una sola vez.</div>'
+      + '<div class="fila-f"><input id="renP" type="password" inputmode="numeric" autocomplete="off" maxlength="40" placeholder="Escribe tu PIN para confirmar"><button class="btn primary" id="renG" type="button">Renovar ahora</button><button class="btn" id="renC" type="button">Cancelar</button></div>';
+    $('renP').focus();
+    $('renC').addEventListener('click', () => { rf.hidden = true; rf.innerHTML = ''; });
+    const ir = async () => {
+      const pin = $('renP').value.trim(); if(!pin){ toast('Escribe tu PIN.', true); return; }
+      $('renG').disabled = true;
+      const j = await accion('adminRenovarPins', {pin});
+      if(!j){ if($('renG')){ $('renG').disabled = false; $('renP').value = ''; $('renP').focus(); } return; }
+      datos.pinsRenovados = j.ts || Date.now();
+      mostrarListaPins(j.lista || []);
+    };
+    $('renG').addEventListener('click', ir);
+    $('renP').addEventListener('keydown', e => { if(e.key === 'Enter') ir(); });
+  });
+}
+function mostrarListaPins(lista){
+  const avisoSalir = e => { e.preventDefault(); e.returnValue = ''; };
+  window.addEventListener('beforeunload', avisoSalir);
+  main.innerHTML = '<div class="tarjeta" id="listaPins"><h2 style="margin-top:0;">PIN nuevos · ' + fmt(Date.now()) + '</h2>'
+    + '<p class="nota no-imp">Se muestran una sola vez: al cerrar esta lista nadie puede volver a verlos. Anótalos o imprímelos, y entrégalos en persona.</p>'
+    + (lista.length ? '<table class="lista-pins"><thead><tr><th>Nombre</th><th>Cargo</th><th>PIN nuevo</th></tr></thead><tbody>'
+      + lista.map(u => '<tr><td>' + esc(u.nombre) + '</td><td>' + esc(u.cargo) + '</td><td class="p">' + esc(u.pin) + '</td></tr>').join('') + '</tbody></table>' : '<p class="nota">No había cuentas para cambiar.</p>')
+    + '<div class="no-imp" style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" id="lpImp" type="button">Imprimir</button><button class="btn primary" id="lpOk" type="button">Listo, ya los anoté</button></div></div>';
+  $('lpImp').addEventListener('click', () => window.print());
+  let seguro = false;
+  $('lpOk').addEventListener('click', async () => {
+    if(!seguro){ seguro = true; $('lpOk').textContent = 'Confirmar: cerrar y no volver a verlos'; return; }
+    window.removeEventListener('beforeunload', avisoSalir);
+    const r = await api('adminUsuarios'); if(r && r.ok && Array.isArray(r.usuarios)) datos.usuarios = r.usuarios;
+    vistaUsuarios();
+  });
+}
 function vistaUsuarios(){
   datos.usuarios.sort(ORD_USU);
   const filas = datos.usuarios.map((u, i) => {
@@ -868,7 +921,9 @@ function vistaUsuarios(){
     return '<div class="fila"><div class="quien2"><b>' + esc(u.nombre || '(sin nombre)') + '</b><small>' + esc(u.cargo) + (b && b.motivo ? ' · ' + esc(b.motivo) : '') + '</small></div>' + est + '<div class="acc">' + acc + '</div><div class="extra" id="ex' + i + '" hidden></div></div>';
   }).join('');
   main.innerHTML = '<h2>Usuarios</h2><p class="nota">Al bloquear, renombrar o cambiar el PIN, la persona sale de inmediato de todos sus aparatos. Los PIN no se pueden ver: solo generar uno nuevo.</p>'
-    + '<div style="margin-bottom:12px;"><button class="btn primary" id="nuevoB" type="button">+ Crear usuario</button></div><div class="tarjeta" id="nuevoF" hidden></div><div class="tarjeta">' + filas + '</div>';
+    + renAvisoHtml()
+    + '<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><button class="btn primary" id="nuevoB" type="button">+ Crear usuario</button><button class="btn" id="renB" type="button">Renovar todos los PIN' + (Date.now() < new Date(2026, 10, 22).getTime() ? '<i class="tnuevo-a">Nuevo</i>' : '') + '</button></div><div class="tarjeta" id="nuevoF" hidden></div><div class="tarjeta" id="renF" hidden></div><div class="tarjeta">' + filas + '</div>';
+  renPreparar();
   const nf = $('nuevoF');
   $('nuevoB').addEventListener('click', () => {
     nf.hidden = !nf.hidden; if(nf.hidden) return;
@@ -1211,7 +1266,7 @@ async function iniciar(){
   if(!j || !j.ok){ main.innerHTML = '<div class="tarjeta">No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión 64 o más nueva.</div>'; if(window.CargaPagina) await CargaPagina.fin(); return; }
   if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
   // ===== si el servidor manda la respuesta incompleta, no se cae =====
-  datos = {usuarios: Array.isArray(j.usuarios) ? j.usuarios : [], encargados: j.encargados || {}, ajustes: j.ajustes || {halloween:false}};
+  datos = {usuarios: Array.isArray(j.usuarios) ? j.usuarios : [], encargados: j.encargados || {}, ajustes: j.ajustes || {halloween:false}, pinsRenovados: Number(j.pinsRenovados) || 0};
   await ir('usuarios');
   if(window.CargaPagina) await CargaPagina.fin();
 }
@@ -1238,7 +1293,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.50';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.51';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1250,4 +1305,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.50 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.51 · 14-11-2026 ==== -->
