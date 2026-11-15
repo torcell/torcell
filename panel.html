@@ -624,6 +624,7 @@
   @keyframes overlayIn{ from{opacity:0;} to{opacity:1;} }
   @keyframes girar{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   @keyframes overlayOut{ from{opacity:1;} to{opacity:0;} }
+  #prOverlay{z-index:60;}
   #overlay{z-index:90;}
   #inputOverlay{z-index:85;}
   .overlay.show{display:flex;}
@@ -2252,7 +2253,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.98';
+const APP_VERSION = '0.73.99';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9437,4 +9438,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.98 · 15-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.99 · 15-11-2026 ==== -->
