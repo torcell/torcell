@@ -243,7 +243,17 @@
   .mat-tabla tr.mat-resalta td{background:rgba(255,193,7,.22);}
   .mat-tabla .mat-m2{display:block;color:var(--sub);font-size:11px;}
   .mat-tabla .mat-falta{display:block;color:#c0546f;font-size:11px;}
-  .mat-tabla.mat-ajustes input{width:64px;text-align:center;padding:4px;}
+  .mat-tabla.mat-ajustes{table-layout:fixed;}
+  .mat-tabla.mat-ajustes input{width:100%;min-width:0;max-width:72px;box-sizing:border-box;text-align:center;padding:4px;}
+  .mat-tabla.mat-ajustes td.mat-nombre{width:84px;}
+  #materialesOverlay .mat-scroll{overflow-x:hidden;}
+  @media (max-width:700px){
+    .mat-tabla th,.mat-tabla td{padding:5px 3px;}
+    .mat-tabla td.mat-nombre{white-space:normal;}
+    .mat-tabla.mat-ajustes th{font-size:10px;}
+    .mat-tabla.mat-ajustes td.mat-nombre{width:62px;font-size:11px;white-space:normal;}
+    .mat-tabla.mat-ajustes input{padding:3px 1px;font-size:12px;}
+  }
   .mat-tabla input[type=checkbox]{width:20px;height:20px;cursor:pointer;}
   .mat-tabla label.mat-ok{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;}
   .mat-tabla td.mat-datos{height:1px;}
@@ -1843,11 +1853,11 @@
   <div class="modal">
     <h3>Precios y metrajes</h3>
     <p>Tarifas usadas para calcular los montos. Cerámica usa dos tarifas de referencia; Frague usa una sola.</p>
-    <div class="rate-row"><label>Cerámica — tarifa base ($/m²)</label><input type="number" id="rateCerBase"></div>
-    <div class="rate-row"><label>Cerámica — tarifa Rafael ($/m²)</label><input type="number" id="rateCerRafael"></div>
+    <div class="rate-row"><label>Cerámica — tarifa base ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerBase"></div>
+    <div class="rate-row"><label>Cerámica — tarifa Rafael ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerRafael"></div>
     <div class="rate-row"><label for="rateOcultarRafael">Ocultar ese monto (se ve como la tarifa base, solo en pantalla)</label><input type="checkbox" id="rateOcultarRafael"></div>
-    <div class="rate-row"><label>Cerámica — tarifa referencia ($/m²)</label><input type="number" id="rateCerAlt"></div>
-    <div class="rate-row"><label>Frague — tarifa única ($/m²)</label><input type="number" id="rateFrague"></div>
+    <div class="rate-row"><label>Cerámica — tarifa referencia ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerAlt"></div>
+    <div class="rate-row"><label>Frague — tarifa única ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateFrague"></div>
     <div class="actions">
       <button class="btn" id="ratesCancel">Cancelar</button>
       <button class="btn primary" id="ratesSave">Guardar</button>
@@ -1891,7 +1901,7 @@
           <option value="pct">% según su AFP registrada</option>
         </select>
       </div>
-      <div id="liqAfpFijoBox" class="rate-row"><label>AFP por día ($)</label><input type="number" id="liqAfpTarifa" style="width:220px;" value="6500"></div>
+      <div id="liqAfpFijoBox" class="rate-row"><label>AFP por día ($)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="liqAfpTarifa" style="width:220px;" value="6.500"></div>
       <div id="liqAfpPctBox" style="display:none;">
         <p id="liqAfpPctInfo" style="font-size:12px;color:var(--sub);margin:0 0 10px;"></p>
       </div>
@@ -2202,7 +2212,7 @@
     <div class="aj-form">
       <select id="ajTrab"></select>
       <select id="ajTipo"><option value="resta">Descontar</option><option value="suma">Pagar extra</option></select>
-      <input type="number" id="ajMonto" min="1" step="1" placeholder="Monto">
+      <input type="text" inputmode="decimal" autocomplete="off" data-dinero id="ajMonto" placeholder="Monto">
       <select id="ajSec" title="Sección"></select>
       <select id="ajPartida" title="Piso, muro o pasillo"></select>
       <input type="text" id="ajMotivo" maxlength="120" placeholder="Motivo (ej: adelanto, hombre día)">
@@ -2240,7 +2250,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.95';
+const APP_VERSION = '0.73.97';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3683,7 +3693,7 @@ function openWorkerDatosModal(worker){
 
     <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Precio que ve este trabajador si inicia sesión</p>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;"><input type="checkbox" id="datosVePrecioReal" ${ws.vePrecioReal?'checked':''}> Puede ver su precio real (si no, ve el precio base)</label>
-    <div class="rate-row"><label>Tarifa propia Cerámica ($/m², opcional)</label><input type="number" id="datosTarifaPropia" style="width:220px;" value="${esc(ws.tarifaPropia||'')}" placeholder="vacío = precio base"></div>
+    <div class="rate-row"><label>Tarifa propia Cerámica ($/m², opcional)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="datosTarifaPropia" style="width:220px;" value="${esc(milesTxt(ws.tarifaPropia||''))}" placeholder="vacío = precio base"></div>
 
     <p style="margin:14px 0 6px;font-size:12.5px;color:var(--text);">Archivos (foto carnet, contrato, etc.)</p>
     <div id="datosDocsList"></div>
@@ -3704,7 +3714,7 @@ function openWorkerDatosModal(worker){
     workerStatus[worker].nacionalidad = document.getElementById('datosNacionalidad').value.trim();
     workerStatus[worker].direccion = document.getElementById('datosDireccion').value.trim();
     workerStatus[worker].vePrecioReal = document.getElementById('datosVePrecioReal').checked;
-    const tarifaVal = parseFloat(document.getElementById('datosTarifaPropia').value);
+    const tarifaVal = numDinero(document.getElementById('datosTarifaPropia').value);
     workerStatus[worker].tarifaPropia = isNaN(tarifaVal) ? null : tarifaVal;
     markSettingsDirty();
     scheduleSave();
@@ -3942,7 +3952,7 @@ function ajElegirPartida(){
   const id = document.getElementById('ajPartida').value; if(!id) return;
   const c = cellById[id], st = getState(id); if(!c) return;
   const monto = Math.round((Number(st.m2) || 0) * rate1For(c.categoria, st.trabajador));
-  if(monto > 0) document.getElementById('ajMonto').value = monto;
+  if(monto > 0) document.getElementById('ajMonto').value = milesTxt(monto);
   const mo = document.getElementById('ajMotivo'); if(!mo.value.trim()) mo.value = ('Descuento ' + ajLugar(c)).slice(0, 120);
 }
 document.getElementById('ajTrab').addEventListener('change', ajPintarSecciones);
@@ -3968,7 +3978,7 @@ function abrirAjustes(){
 document.addEventListener('click', (e) => { if(e.target.closest('[data-abrir-aj]')) abrirAjustes(); });
 document.getElementById('ajAgregarBtn').addEventListener('click', () => {
   const w = document.getElementById('ajTrab').value, tipo = document.getElementById('ajTipo').value;
-  const monto = Math.round(Number(document.getElementById('ajMonto').value));
+  const monto = Math.round(numDinero(document.getElementById('ajMonto').value));
   const motivo = document.getElementById('ajMotivo').value.replace(/[<>]/g, '').trim().slice(0, 120);
   const err = document.getElementById('ajError');
   if(!w){ err.textContent = 'Elige un trabajador.'; return; }
@@ -5031,20 +5041,20 @@ inputModalConfirm.addEventListener('click', () => { if(inputConfirmHandler && in
 
 const ratesOverlay = document.getElementById('ratesOverlay');
 document.getElementById('ratesBtn').addEventListener('click', () => {
-  document.getElementById('rateCerBase').value = RATES.cerBase;
-  document.getElementById('rateCerRafael').value = RATES.cerRafael;
+  document.getElementById('rateCerBase').value = milesTxt(RATES.cerBase);
+  document.getElementById('rateCerRafael').value = milesTxt(RATES.cerRafael);
   document.getElementById('rateOcultarRafael').checked = !!RATES.ocultarRafael;
-  document.getElementById('rateCerAlt').value = RATES.cerAlt;
-  document.getElementById('rateFrague').value = RATES.frague;
+  document.getElementById('rateCerAlt').value = milesTxt(RATES.cerAlt);
+  document.getElementById('rateFrague').value = milesTxt(RATES.frague);
   ratesOverlay.classList.add('show');
 });
 document.getElementById('ratesCancel').addEventListener('click', () => closeOverlayAnimated(ratesOverlay));
 document.getElementById('ratesSave').addEventListener('click', () => {
-  RATES.cerBase = parseFloat(document.getElementById('rateCerBase').value) || RATES.cerBase;
-  RATES.cerRafael = parseFloat(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
+  RATES.cerBase = numDinero(document.getElementById('rateCerBase').value) || RATES.cerBase;
+  RATES.cerRafael = numDinero(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
   RATES.ocultarRafael = document.getElementById('rateOcultarRafael').checked ? 1 : 0;
-  RATES.cerAlt = parseFloat(document.getElementById('rateCerAlt').value) || RATES.cerAlt;
-  RATES.frague = parseFloat(document.getElementById('rateFrague').value) || RATES.frague;
+  RATES.cerAlt = numDinero(document.getElementById('rateCerAlt').value) || RATES.cerAlt;
+  RATES.frague = numDinero(document.getElementById('rateFrague').value) || RATES.frague;
   markSettingsDirty();
   scheduleSave(); updateRateFootnote(); render();
   closeOverlayAnimated(ratesOverlay);
@@ -7196,6 +7206,17 @@ let reporteCamposEditados = false;
 const ASUNTO_BASE = 'Avance de obra Bellavista, La Florida — {semana}';
 const MENSAJE_BASE = 'Hola, les comparto el avance de la obra Bellavista, La Florida correspondiente a la {semana}.\n\nAbajo va el detalle de los pisos que tuvieron movimiento: quién está trabajando en cada departamento y cómo va cada parte (piso, muro baño y muro cocina).\n\nSaludos.';
 let reporteVista = null;
+// ===== Dinero con punto de miles (100.000) =====
+const milesTxt = v => { let t = (typeof v === 'number' && isFinite(v)) ? String(v).replace('.', ',') : String(v == null ? '' : v); t = t.replace(/[^\d,]/g, ''); const i = t.indexOf(','); let ent = i < 0 ? t : t.slice(0, i), dec = i < 0 ? null : t.slice(i + 1).replace(/,/g, '').slice(0, 2); ent = ent.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); return dec === null ? ent : (ent || '0') + ',' + dec; };
+const numDinero = v => { const t = String(v == null ? '' : v).replace(/\./g, '').replace(',', '.'); return /^\d+(\.\d+)?$/.test(t) ? Number(t) : NaN; };
+document.addEventListener('input', e => {
+  const el = e.target; if(!el || !el.matches || !el.matches('input[data-dinero]')) return;
+  const pos = el.selectionStart == null ? el.value.length : el.selectionStart;
+  const n = el.value.slice(0, pos).replace(/[^\d,]/g, '').length;
+  el.value = milesTxt(el.value);
+  let c = 0, k = 0; for(; k < el.value.length && c < n; k++){ if(/[\d,]/.test(el.value[k])) c++; }
+  try{ el.setSelectionRange(k, k); }catch(err){}
+});
 const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[ch]));
 const DIAS_PROG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const ERRORES_REPORTE = {
@@ -8368,7 +8389,7 @@ function generarLiquidacionInterna(){
   const tipoPago = document.getElementById('liqTipoPago').value;
   const dias = parseInt(document.getElementById('liqDias').value) || 0;
   const afpMetodo = document.getElementById('liqAfpMetodo').value;
-  const afpTarifa = parseFloat(document.getElementById('liqAfpTarifa').value) || 0;
+  const afpTarifa = numDinero(document.getElementById('liqAfpTarifa').value) || 0;
   const afpNombre = (workerStatus[worker] || {}).afp || '';
   const afpPct = (afpMetodo === 'pct' && AFP_RATES[afpNombre] !== undefined) ? (AFP_COTIZACION_OBLIGATORIA + AFP_RATES[afpNombre]) : 0;
   const incTerminado = document.getElementById('liqIncTerminado').checked;
@@ -8612,7 +8633,7 @@ function liqRebuildDoc(){
   document.getElementById('liqAddDetailBtn').addEventListener('click', () => {
     const bodyHtml = `
       <div class="rate-row"><label>Descripción</label><input type="text" id="detDesc" style="width:220px;" placeholder="Ej: Adelanto, Hombre día"></div>
-      <div class="rate-row"><label>Monto</label><input type="number" id="detMonto" style="width:220px;" min="0"></div>
+      <div class="rate-row"><label>Monto</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="detMonto" style="width:220px;"></div>
       <div class="rate-row"><label>¿Se suma o se resta?</label>
         <select id="detTipo" style="width:220px;">
           <option value="resta">Restar (ej: adelanto)</option>
@@ -8627,7 +8648,7 @@ function liqRebuildDoc(){
       </div>`;
     openInputModal('Agregar detalle', bodyHtml, () => {
       const desc = document.getElementById('detDesc').value.trim();
-      const monto = parseFloat(document.getElementById('detMonto').value);
+      const monto = numDinero(document.getElementById('detMonto').value);
       const tipo = document.getElementById('detTipo').value;
       const destino = document.getElementById('detDestino').value;
       if(!desc || isNaN(monto) || monto <= 0) return;
@@ -9400,4 +9421,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.95 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.97 · 15-11-2026 ==== -->
