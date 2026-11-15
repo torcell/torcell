@@ -2253,7 +2253,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.99';
+const APP_VERSION = '0.73.100';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3613,7 +3613,7 @@ function renderWorkerPanel(){
     const ini = iniDe(w);
     return `
     <div class="worker-row">
-      <div class="wname">${esc(w)}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}</div>
+      <div class="wname">${esc(w)}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}${CONTRATO_PEND.has(w) ? '<small>Contrato · sin asistencia aún</small>' : ''}</div>
       <div class="wcontrols">
         <select data-worker="${esc(w)}" data-field="especialidad">
           <option value="ceramista" ${ws.especialidad==='ceramista'?'selected':''}>Ceramista</option>
@@ -3626,6 +3626,7 @@ function renderWorkerPanel(){
         </select>
         <button class="rename-btn" data-worker-datos="${esc(w)}" title="Ver/editar datos del trabajador">Datos</button>
         <button class="rename-btn" data-worker-historial="${esc(w)}" title="Ver historial de pagos">Historial</button>
+        ${CONTRATO_PEND.has(w) ? `<button class="rename-btn" data-worker-quitar="${esc(w)}" title="No llegó: quitarlo del panel">Quitar</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -3739,6 +3740,61 @@ function openWorkerDatosModal(worker){
     e.target.value = '';
   });
 }
+
+// ===== Contratos: el trabajador entra solo al firmar el contrato =====
+let CONTRATO_PEND = new Set(); // creados por contrato y todavía sin asistencia ni avance (se pueden quitar)
+function quitarTrabajadorLocal(n){
+  delete workerStatus[n];
+  const i = customWorkers.indexOf(n); if(i >= 0) customWorkers.splice(i, 1);
+  const j = ALL_WORKERS.indexOf(n); if(j >= 0) ALL_WORKERS.splice(j, 1);
+  CONTRATO_PEND.delete(n);
+}
+let sincContratosOcupado = false;
+async function sincronizarContratos(){
+  if(sincContratosOcupado || !DB_URL || !sessionToken || !(isAdmin || isJefe)) return;
+  sincContratosOcupado = true;
+  try{
+    const r = await llamarDb('contratosEstado');
+    if(!r || !r.ok) return;
+    const pend = (r.pendientes || []).filter(n => typeof n === 'string');
+    const quitados = (r.quitados || []).filter(n => typeof n === 'string');
+    let cambio = false; const nuevos = [];
+    quitados.forEach(n => { if(workerStatus[n]){ quitarTrabajadorLocal(n); cambio = true; } });
+    if(pend.some(n => ALL_WORKERS.indexOf(n) < 0)){
+      const rem = await dbLoad();
+      if(rem && rem.workerStatus){
+        Object.keys(rem.workerStatus).forEach(n => {
+          if(workerStatus[n] && ALL_WORKERS.indexOf(n) >= 0) return;
+          workerStatus[n] = rem.workerStatus[n]; nuevos.push(n);
+          if(ALL_WORKERS.indexOf(n) < 0) ALL_WORKERS.push(n);
+          if(customWorkers.indexOf(n) < 0) customWorkers.push(n);
+        });
+        cambio = cambio || nuevos.length > 0;
+      }
+    }
+    const ruts = r.ruts && typeof r.ruts === 'object' ? r.ruts : {};
+    Object.keys(ruts).forEach(n => { if(workerStatus[n] && !workerStatus[n].rut && typeof ruts[n] === 'string') workerStatus[n].rut = ruts[n].slice(0, 14); });
+    const antes = Array.from(CONTRATO_PEND).sort().join('|');
+    CONTRATO_PEND = new Set(pend.filter(n => workerStatus[n]));
+    if(antes !== Array.from(CONTRATO_PEND).sort().join('|')) cambio = true;
+    if(cambio){ populateFilters(); renderWorkerPanel(); render(); }
+    if(nuevos.length) avisoToast('Entró por contrato: ' + nuevos.join(', ') + '.', 'ok');
+    if(quitados.length) avisoToast('Se quitaron por no tener asistencia: ' + quitados.join(', ') + '.', 'alerta');
+  }catch(e){}
+  finally{ sincContratosOcupado = false; }
+}
+setTimeout(() => { if(!document.hidden) sincronizarContratos(); }, 7000); setTimeout(() => { if(!document.hidden) sincronizarContratos(); }, 25000);
+setInterval(() => { if(!document.hidden) sincronizarContratos(); }, 180000);
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-worker-quitar]'); if(!b) return;
+  const w = b.getAttribute('data-worker-quitar');
+  openInputModal('Quitar trabajador', `<p style="font-size:13px;margin:0 0 8px;"><b>${esc(w)}</b> se creó por contrato y todavía no tiene asistencia ni avance.</p><p style="font-size:12px;color:var(--sub);margin:0;">Se borra su ficha del panel. El contrato queda guardado en el generador. Si llega otro día, haz un contrato nuevo.</p>`, () => {
+    llamarDb('trabajadorQuitar', {nombre: w}).then(r => {
+      if(r && r.ok){ quitarTrabajadorLocal(w); populateFilters(); renderWorkerPanel(); render(); avisoToast(w + ' quitado del panel.', 'ok'); }
+      else avisoToast((r && r.error) || 'No se pudo quitar.', 'error');
+    });
+  }, 'Quitar');
+});
 
 // ===== Nuevo trabajador =====
 function controlesIngreso(ws){
@@ -7940,6 +7996,7 @@ document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
 // ===== Ventana Gestionar trabajadores =====
 const workerOverlay = document.getElementById('workerOverlay');
 document.getElementById('toggleWorkerPanel').addEventListener('click', () => {
+  sincronizarContratos();
   renderWorkerPanel();
   workerOverlay.classList.add('show');
 });
@@ -9438,4 +9495,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.99 · 15-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.100 · 15-11-2026 ==== -->
