@@ -441,6 +441,7 @@
   .aj-fila.off{opacity:.55;}
   .aj-monto{font-weight:800;white-space:nowrap;}
   .aj-monto.suma{color:var(--entregado);} .aj-monto.resta{color:#c0546f;}
+  .pr-fila[hidden]{display:none;}
   .pr-fila{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;}
   .pr-fila:hover{background:var(--bg);}
   .pr-fila input{width:16px;height:16px;margin:0;flex:0 0 16px;}
@@ -2227,6 +2228,7 @@
   <div class="modal" style="max-width:520px;display:flex;flex-direction:column;max-height:88vh;">
     <h3 style="margin-bottom:2px;">🔒 Pagos completos retenidos</h3>
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca a los trabajadores cuyo pago quieres dejar aparte. Todo su Terminado (lo de hoy y lo nuevo) queda fuera de las sumas, del resumen y de las liquidaciones hasta que lo liberes.</p>
+    <div style="margin:0 0 8px;"><button type="button" class="btn small" id="prVerTodosBtn"></button></div>
     <div id="prLista" style="overflow-y:auto;flex:1;min-height:0;"></div>
     <div class="actions"><button class="btn" id="prCancelBtn">Cancelar</button><button class="btn primary" id="prGuardarBtn">Guardar y cerrar</button></div>
   </div>
@@ -2250,7 +2252,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.97';
+const APP_VERSION = '0.73.98';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4023,12 +4025,26 @@ function totalRetenidoDe(w){
 function abrirPagosRetenidos(){
   if(!isAdmin) return;
   const nombres = Array.from(new Set(ALL_WORKERS.concat(pagosRetenidos))).sort((a, b) => a.localeCompare(b, 'es'));
-  document.getElementById('prLista').innerHTML = nombres.map(w => {
-    const t = totalRetenidoDe(w);
-    return `<label class="pr-fila"><input type="checkbox" data-pr-w="${esc(w)}"${trabRetenido(w) ? ' checked' : ''}><span class="pr-nom" data-nomfull="${esc(w)}">${esc(w)}</span><span class="pr-det">${t.n} terminada${t.n === 1 ? '' : 's'} · ${money(t.monto)}</span></label>`;
+  // ===== solo se ven los que tienen dinero o ya están retenidos; el resto queda oculto =====
+  const filas = nombres.map(w => ({w, t: totalRetenidoDe(w)}));
+  const visible = f => f.t.n > 0 || trabRetenido(f.w);
+  filas.sort((a, b) => (visible(b) - visible(a)) || a.w.localeCompare(b.w, 'es'));
+  document.getElementById('prLista').innerHTML = filas.map(f => {
+    const w = f.w, t = f.t;
+    return `<label class="pr-fila${visible(f) ? '' : ' pr-sin'}"${visible(f) ? '' : ' hidden'}><input type="checkbox" data-pr-w="${esc(w)}"${trabRetenido(w) ? ' checked' : ''}><span class="pr-nom" data-nomfull="${esc(w)}">${esc(w)}</span><span class="pr-det">${t.n} terminada${t.n === 1 ? '' : 's'} · ${money(t.monto)}</span></label>`;
   }).join('') || '<p style="font-size:13px;color:var(--sub);">No hay trabajadores.</p>';
+  prVerTodos(false);
   document.getElementById('prOverlay').classList.add('show');
 }
+function prVerTodos(ver){
+  const lista = document.getElementById('prLista'), btn = document.getElementById('prVerTodosBtn');
+  lista.dataset.todos = ver ? '1' : '';
+  lista.querySelectorAll('.pr-sin').forEach(l => { l.hidden = !ver; });
+  const n = lista.querySelectorAll('.pr-sin').length;
+  btn.hidden = n === 0;
+  btn.textContent = ver ? 'Ocultar los sin terminado' : 'Mostrar los sin terminado (' + n + ')';
+}
+document.getElementById('prVerTodosBtn').addEventListener('click', () => prVerTodos(!document.getElementById('prLista').dataset.todos));
 function cerrarPagosRetenidos(){ closeOverlayAnimated(document.getElementById('prOverlay')); }
 document.getElementById('prCancelBtn').addEventListener('click', cerrarPagosRetenidos);
 document.getElementById('prGuardarBtn').addEventListener('click', () => {
@@ -9421,4 +9437,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.97 · 15-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.98 · 15-11-2026 ==== -->
