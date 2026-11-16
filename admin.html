@@ -383,6 +383,7 @@ header.top .cs-btn{height:34px;width:170px;padding:0 10px;}
     <button type="button" data-t="seguridad">Seguridad<small>alertas y respaldos</small></button>
     <button type="button" data-t="ventanas">Ventanas<small>qué puede abrir cada uno</small></button>
     <button type="button" data-t="generador">Generador<small>documentos de contratación</small></button>
+    <button type="button" data-t="quitados">Quitados<i class="tnuevo-a" id="quNuevo">Nuevo</i><small>trabajadores quitados del panel</small></button>
   </nav>
   <main id="main"></main>
 </div>
@@ -398,7 +399,7 @@ const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de cal
 const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = SECC.filter(x => x[0] !== 'admin');
-const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.',pin_incorrecto:'Ese no es tu PIN.',muchos_intentos:'Demasiados intentos. Espera 10 minutos.'};
+const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.',pin_incorrecto:'Ese no es tu PIN.',muchos_intentos:'Demasiados intentos. Espera 10 minutos.',ya_existe:'Ya hay un trabajador con ese nombre en el panel.',ya_restaurado:'Ese ya fue restaurado.'};
 const fmt = ms => new Date(ms).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
 let tTimer = 0;
 function toast(t, err){ avisoLateral(t, err ? 'error' : 'exito'); }
@@ -429,6 +430,8 @@ const BD = (function(){
     if(a === 'respaldosListar') return {ok:true, respaldos:(estado.resp = estado.resp || [{n:1,ts:Date.now()-3600000*3,motivo:'diario 7:00',filas:1240,terminadas:812},{n:2,ts:Date.now()-86400000,motivo:'diario 7:00',filas:1240,terminadas:790},{n:3,ts:Date.now()-86400000*2,motivo:'diario 7:00',filas:1240,terminadas:761}])};
     if(a === 'respaldoAhora') return {ok:true};
     if(a === 'respaldoRestaurar') return x.confirmar === true ? {ok:true} : {ok:false,error:'datos_invalidos'};
+    if(a === 'quitadosListar'){ estado.qui = estado.qui || [{n:2,fecha:'2026-11-14 09:10',cuenta:'Dev',motivo:'Automático: sin asistencia',nombre:'Pedro Soto',restaurado:'',existe:false},{n:3,fecha:'2026-11-13 18:02',cuenta:'Dev',motivo:'Botón Quitar',nombre:'Luis Mora',restaurado:'',existe:false}]; return {ok:true, lista:estado.qui}; }
+    if(a === 'quitadoRestaurar'){ const q = (estado.qui || []).find(r => r.n === x.n); if(!q || q.restaurado) return {ok:false, error:'ya_restaurado'}; q.restaurado = '2026-11-15 21:00 · Dev'; return {ok:true}; }
     if(a === 'adminUsuarios') return {ok:true, usuarios:estado.usuarios, encargados:estado.encargados, ajustes:estado.ajustes || {halloween:false}, pinsRenovados:estado.pinsRenovados || 0};
     if(a === 'contratoSync'){
       estado.hist = estado.hist || [{id:'demo1',nombre:'ALEX EJEMPLO',rut:'12.345.678-5',nacimiento:'15/06/1990',nacionalidad:'CHILENA',civil:'SOLTERO',rol:'CERAMISTA',calle:'Calle de ejemplo',num:'123',comuna:'La Florida',user:'alex',prov:'gmail',suf:'com',obra:'Obra Bellavista',ingreso:'03/11/2026',creado:'03/11/2026'}];
@@ -1064,6 +1067,31 @@ function confirmaRestaurar(r){
     if(j){ toast('Datos restaurados.'); pintaRespaldos(await api('respaldosListar')); }
   });
 }
+// ===== Quitados: trabajadores que se quitaron del panel (a mano o solos) y se pueden restaurar =====
+const fechaQ = t => { const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}:\d{2}))?/); return m ? m[3] + '/' + m[2] + '/' + m[1] + (m[4] ? ' ' + m[4] : '') : String(t || ''); };
+async function vistaQuitados(){
+  main.innerHTML = '<h2>Quitados</h2><p class="nota">Trabajadores que salieron del panel porque se creó su contrato y no llegaron (a mano con "Quitar" o solos por no tener asistencia). Si fue un error, los restauras con su ficha y sus marcas de asistencia. Se muestran los últimos 200.</p><div class="tarjeta"><div id="quLista">Cargando…</div></div>';
+  const j = await api('quitadosListar');
+  const e = $('quLista'); if(!e) return;
+  if(!j || !j.ok){ e.textContent = 'No se pudo cargar el registro.'; return; }
+  if(!j.lista.length){ e.innerHTML = '<div class="nota" style="margin-top:0;">Todavía no se ha quitado a nadie.</div>'; return; }
+  e.innerHTML = '<div class="sg-lista" style="max-height:none;">' + j.lista.map(r => '<div class="fila"><div class="quien2"><b>' + esc(r.nombre) + '</b><small>' + esc(fechaQ(r.fecha)) + ' · ' + esc(r.motivo) + (r.cuenta ? ' · ' + esc(r.cuenta) : '') + (r.restaurado ? ' · restaurado ' + esc(fechaQ(r.restaurado)) : '') + '</small></div>'
+    + (r.restaurado ? '<small style="color:var(--ok);font-weight:700;">Restaurado</small>' : r.existe ? '<small style="color:var(--sub);">Ya está en el panel</small>' : '<button class="btn" type="button" data-qn="' + r.n + '">Restaurar</button>') + '</div>').join('') + '</div>';
+  e.querySelectorAll('[data-qn]').forEach(b => b.addEventListener('click', () => confirmaRestaurarQ(j.lista.find(r => r.n === Number(b.dataset.qn)))));
+}
+function confirmaRestaurarQ(r){
+  const v = document.createElement('div'); v.className = 'vel';
+  v.innerHTML = '<div class="ven" role="dialog" aria-modal="true"><h3 style="margin:0 0 6px;">Restaurar trabajador</h3><p class="nota" style="margin:0;"><b style="color:var(--text);">' + esc(r.nombre) + '</b> vuelve al panel con su ficha y sus marcas de asistencia, como estaban el ' + esc(fechaQ(r.fecha)) + '. No se vuelve a quitar solo.</p><div class="acc2"><button class="btn" id="quNo" type="button">Cancelar</button><button class="btn primary" id="quSi" type="button">Restaurar</button></div></div>';
+  document.body.appendChild(v);
+  document.body.style.overflow = 'hidden';
+  const cerrar = () => { document.body.style.overflow = ''; v.remove(); };
+  $('quNo').addEventListener('click', cerrar);
+  $('quSi').addEventListener('click', async e => {
+    e.currentTarget.disabled = true;
+    const j = await accion('quitadoRestaurar', {n: r.n, nombre: r.nombre}); cerrar();
+    if(j){ toast(r.nombre + ' restaurado.'); vistaQuitados(); }
+  });
+}
 // ===== Generador de documentos =====
 // va en un marco aparte para que no se mezclen sus estilos con los del panel
 // el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
@@ -1254,8 +1282,9 @@ function vistaGenerador(){
 }
 async function ir(t){
   tab = t; document.querySelectorAll('#lado button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'visual') vistaVisual(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'rendimiento2') await vistaRendimiento2(); else if(t === 'generador') vistaGenerador(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
+  if(t === 'usuarios') vistaUsuarios(); else if(t === 'permisos') await vistaPermisos(); else if(t === 'encargados') vistaEncargados(); else if(t === 'visual') vistaVisual(); else if(t === 'rendimiento') await vistaRendimiento(); else if(t === 'rendimiento2') await vistaRendimiento2(); else if(t === 'generador') vistaGenerador(); else if(t === 'quitados') await vistaQuitados(); else if(t === 'seguridad') await vistaSeguridad(); else vistaVentanas();
 }
+if(new Date() >= new Date(2026, 10, 22)){ const q = $('quNuevo'); if(q) q.remove(); }
 $('lado').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if(b) ir(b.dataset.t); });
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $('irMenu').addEventListener('click', e => irMenuCarga(e.currentTarget));
@@ -1293,7 +1322,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.51';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.52';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1305,4 +1334,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.51 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.52 · 15-11-2026 ==== -->

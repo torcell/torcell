@@ -1861,8 +1861,9 @@
     <div class="rate-row"><label>Cerámica — tarifa referencia ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerAlt"></div>
     <div class="rate-row"><label>Frague — tarifa única ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateFrague"></div>
     <div class="actions">
-      <button class="btn" id="ratesCancel">Cancelar</button>
-      <button class="btn primary" id="ratesSave">Guardar</button>
+      <button class="btn" id="ratesGuardar" type="button">Guardar</button>
+      <button class="btn primary" id="ratesSave">Guardar y cerrar</button>
+      <button class="btn" id="ratesCancel">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1948,7 +1949,7 @@
       <label class="wk-chk"><input type="checkbox" id="wkFin"> Finiquitados al final</label>
     </div>
     <div id="workerList"></div>
-    <div class="actions"><button class="btn primary" id="workerGuardarCerrar">Guardar y cerrar</button></div>
+    <div class="actions"><button class="btn" id="workerGuardarSolo" type="button">Guardar</button><button class="btn primary" id="workerGuardarCerrar">Guardar y cerrar</button><button class="btn" id="workerCerrarSin" type="button">Cerrar</button></div>
   </div>
 </div>
 
@@ -2009,7 +2010,7 @@
     <table class="pb-tabla" id="pbLista"></table>
     <label class="pb-f" for="pbNota">Nota (opcional)<input type="text" id="pbNota" maxlength="200"></label>
     <div class="modal-error" id="pbErr" role="alert"></div>
-    <div class="actions"><button class="btn" id="pbCan" type="button">Cancelar</button><button class="btn primary" id="pbOk" type="button">Guardar pedido y cerrar</button></div>
+    <div class="actions"><button class="btn primary" id="pbOk" type="button">Guardar pedido y cerrar</button><button class="btn" id="pbCan" type="button">Cerrar</button></div>
   </div>
 </div>
 
@@ -2099,8 +2100,9 @@
     <p style="margin:4px 0 0;font-size:11px;color:var(--sub);">Escribe <b>{semana}</b> y se cambia solo por "primera semana de octubre", "segunda semana de octubre"… Esto sale en los envíos automáticos, y es lo que aparece de partida cuando envías a mano (ahí lo puedes cambiar solo para ese envío).</p>
     <div class="modal-error" id="reporteDestError"></div>
     <div class="actions">
-      <button class="btn" id="reporteDestCancel">Cancelar</button>
-      <button class="btn primary" id="reporteDestGuardar">Guardar</button>
+      <button class="btn" id="reporteDestSolo" type="button">Guardar</button>
+      <button class="btn primary" id="reporteDestGuardar">Guardar y cerrar</button>
+      <button class="btn" id="reporteDestCancel">Cerrar</button>
     </div>
   </div>
 </div>
@@ -2131,7 +2133,7 @@
       </div>
       <table class="mat-tabla" id="matLista"></table>
     </div>
-    <div class="actions"><button class="btn primary" id="matCerrarBtn">Guardar y cerrar</button></div>
+    <div class="actions"><button class="btn" id="matGuardarSolo" type="button">Guardar</button><button class="btn primary" id="matCerrarBtn">Guardar y cerrar</button><button class="btn" id="matCerrarSin" type="button">Cerrar</button></div>
   </div>
 </div>
 
@@ -2173,7 +2175,7 @@
     <p style="margin:12px 0 0;font-size:11.5px;color:var(--sub);line-height:1.5;"><b>Siempre solo Admin</b> (necesitan datos de pagos y tarifas que los cargos no reciben): <span id="permisosSoloAdmin"></span>.</p>
     <p id="permisosMsg" style="min-height:16px;margin:10px 0 0;font-size:12px;color:#c0546f;"></p>
     <p style="margin:12px 0 0;font-size:12px;color:var(--sub);">Sesiones: cada aparato recordado dura 30 días (Admin), 14 (Supervisor/Jefe) o 7 (trabajadores). Si perdiste un celular o cambiaste PINs, cierra todas: todos tendrán que ingresar el PIN de nuevo (tu sesión se mantiene).</p>
-    <div class="actions"><button class="btn" id="permisosCerrarSesionesBtn" style="margin-right:auto;">Cerrar todas las sesiones</button><button class="btn" id="permisosCancelBtn">Cancelar</button><button class="btn primary" id="permisosGuardarBtn">Guardar</button></div>
+    <div class="actions"><button class="btn" id="permisosCerrarSesionesBtn" style="margin-right:auto;">Cerrar todas las sesiones</button><button class="btn" id="permisosGuardarSolo" type="button">Guardar</button><button class="btn primary" id="permisosGuardarBtn">Guardar y cerrar</button><button class="btn" id="permisosCancelBtn">Cerrar</button></div>
   </div>
 </div>
 
@@ -2222,7 +2224,7 @@
     </div>
     <div class="modal-error" id="ajError"></div>
     <div id="ajLista" style="overflow-y:auto;flex:1;min-height:0;"></div>
-    <div class="actions"><button class="btn" id="ajSinCambiosBtn" type="button">Cerrar sin cambios</button><button class="btn primary" id="ajCerrarBtn">Guardar y cerrar</button></div>
+    <div class="actions"><button class="btn" id="ajGuardarBtn" type="button">Guardar</button><button class="btn primary" id="ajCerrarBtn">Guardar y cerrar</button><button class="btn" id="ajSinCambiosBtn" type="button">Cerrar</button></div>
   </div>
 </div>
 <div class="overlay" id="prOverlay">
@@ -2231,7 +2233,7 @@
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca a los trabajadores cuyo pago quieres dejar aparte. Todo su Terminado (lo de hoy y lo nuevo) queda fuera de las sumas, del resumen y de las liquidaciones hasta que lo liberes.</p>
     <div style="margin:0 0 8px;"><button type="button" class="btn small" id="prVerTodosBtn"></button></div>
     <div id="prLista" style="overflow-y:auto;flex:1;min-height:0;"></div>
-    <div class="actions"><button class="btn" id="prCancelBtn">Cancelar</button><button class="btn primary" id="prGuardarBtn">Guardar y cerrar</button></div>
+    <div class="actions"><button class="btn" id="prGuardarSolo" type="button">Guardar</button><button class="btn primary" id="prGuardarBtn">Guardar y cerrar</button><button class="btn" id="prCancelBtn">Cerrar</button></div>
   </div>
 </div>
 <div class="overlay" id="statsOverlay">
@@ -2253,7 +2255,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.100';
+const APP_VERSION = '0.73.101';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3744,6 +3746,7 @@ function openWorkerDatosModal(worker){
 // ===== Contratos: el trabajador entra solo al firmar el contrato =====
 let CONTRATO_PEND = new Set(); // creados por contrato y todavía sin asistencia ni avance (se pueden quitar)
 function quitarTrabajadorLocal(n){
+  if(typeof wkQuitados !== 'undefined') wkQuitados.push(n);
   delete workerStatus[n];
   const i = customWorkers.indexOf(n); if(i >= 0) customWorkers.splice(i, 1);
   const j = ALL_WORKERS.indexOf(n); if(j >= 0) ALL_WORKERS.splice(j, 1);
@@ -4062,8 +4065,11 @@ document.getElementById('ajLista').addEventListener('click', (e) => {
 document.getElementById('ajCerrarBtn').addEventListener('click', () => {
   closeOverlayAnimated(document.getElementById('ajOverlay'));
   if(JSON.stringify(ajustesPago) !== ajSnap) saveNow();   // si agregó o anuló algo, se guarda al tiro
+  ajSnap = JSON.stringify(ajustesPago);
 });
+document.getElementById('ajGuardarBtn').addEventListener('click', () => guardarMantener(document.getElementById('ajOverlay'), 'ajCerrarBtn'));
 document.getElementById('ajSinCambiosBtn').addEventListener('click', () => {
+  document.getElementById('ajOverlay')._mantener = false;
   if(JSON.stringify(ajustesPago) !== ajSnap){ ajustesPago = JSON.parse(ajSnap); if(!ajSucioAntes) seccionesSucias.delete('ajustesPago'); }
   closeOverlayAnimated(document.getElementById('ajOverlay'));
 });
@@ -4103,7 +4109,8 @@ function prVerTodos(ver){
 }
 document.getElementById('prVerTodosBtn').addEventListener('click', () => prVerTodos(!document.getElementById('prLista').dataset.todos));
 function cerrarPagosRetenidos(){ closeOverlayAnimated(document.getElementById('prOverlay')); }
-document.getElementById('prCancelBtn').addEventListener('click', cerrarPagosRetenidos);
+document.getElementById('prCancelBtn').addEventListener('click', () => cerrarOv(document.getElementById('prOverlay')));
+document.getElementById('prGuardarSolo').addEventListener('click', () => guardarMantener(document.getElementById('prOverlay'), 'prGuardarBtn'));
 document.getElementById('prGuardarBtn').addEventListener('click', () => {
   const nuevos = [...document.querySelectorAll('#prLista input[data-pr-w]:checked')].map(i => i.dataset.prW);
   const igual = nuevos.length === pagosRetenidos.length && nuevos.every(w => pagosRetenidos.indexOf(w) !== -1);
@@ -4726,7 +4733,7 @@ function pintarVentana(){
       <div class="vt-sec"><div class="vt-sec-title">Observación</div>
         <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '✎ Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
     </div>
-    <div class="vt-foot"><button type="button" class="btn" data-vt="cerrar">Cerrar</button>${isAdmin ? '<button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}</div>`;
+    <div class="vt-foot">${isAdmin ? '<button type="button" class="btn" data-vt="guardar">Guardar</button><button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}<button type="button" class="btn" data-vt="cerrar">Cerrar</button></div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
 }
 document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
@@ -4745,7 +4752,7 @@ document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   const b = e.target.closest('[data-vt]'); if(!b) return;
   const accion = b.getAttribute('data-vt');
   if(accion === 'cerrar'){ cerrarVentana(); return; }
-  if(accion === 'guardarcerrar'){
+  if(accion === 'guardarcerrar' || accion === 'guardar'){
     // ===== confirma el cambio pendiente (si hay), guarda y cierra =====
     if(ventanaDestino !== null){
       const destino = ventanaDestino, antes = estadoNumero(getState(id));
@@ -4753,7 +4760,7 @@ document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
       confirmarEstadoAdmin(id, destino);
       if(estadoNumero(getState(id)) === antes && destino !== antes){ pintarVentana(); return; }   // quedó bloqueado, se avisó
     }
-    cerrarVentana();
+    if(accion === 'guardarcerrar') cerrarVentana(); else pintarVentana();
     if(dirtyCellIds.size > 0 || settingsDirty) saveNow();
     return;
   }
@@ -5080,7 +5087,11 @@ const modalCancel = document.getElementById('modalCancel');
 let pendingAction = null;
 function askConfirm(text, onConfirm){ modalText.textContent = text; pendingAction = onConfirm; overlay.classList.add('show'); }
 
+// ===== botones Guardar / Guardar y cerrar / Cerrar =====
+function cerrarOv(el){ el._mantener = false; closeOverlayAnimated(el); }
+function guardarMantener(el, btnId){ el._mantener = true; setTimeout(() => { el._mantener = false; }, 6000); document.getElementById(btnId).click(); }
 function closeOverlayAnimated(overlayEl){
+  if(overlayEl._mantener){ overlayEl._mantener = false; return; }
   const modal = overlayEl.querySelector('.modal');
   if(!modal){ overlayEl.classList.remove('show'); return; }
   modal.classList.add('modalClosing');
@@ -5121,7 +5132,8 @@ document.getElementById('ratesBtn').addEventListener('click', () => {
   document.getElementById('rateFrague').value = milesTxt(RATES.frague);
   ratesOverlay.classList.add('show');
 });
-document.getElementById('ratesCancel').addEventListener('click', () => closeOverlayAnimated(ratesOverlay));
+document.getElementById('ratesCancel').addEventListener('click', () => cerrarOv(ratesOverlay));
+document.getElementById('ratesGuardar').addEventListener('click', () => guardarMantener(ratesOverlay, 'ratesSave'));
 document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.cerBase = numDinero(document.getElementById('rateCerBase').value) || RATES.cerBase;
   RATES.cerRafael = numDinero(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
@@ -5563,7 +5575,9 @@ function matCambio(){
   matSucio = true;
   markSettingsDirty('materiales');
 }
+let matSnap = null, matSucioAntes = false;
 function abrirMateriales(key){
+  matSnap = JSON.stringify(MATERIALES); matSucioAntes = matSucio;
   if(!isAdmin) return;
   matFoco = key || null;
   mostrarMatVista('mat');
@@ -5579,6 +5593,15 @@ document.getElementById('matCerrarBtn').addEventListener('click', () => {
   closeOverlayAnimated(document.getElementById('materialesOverlay'));
   render();
   if(matSucio){ matSucio = false; enqueueSave(); }
+  matSnap = JSON.stringify(MATERIALES);
+});
+document.getElementById('matGuardarSolo').addEventListener('click', () => guardarMantener(document.getElementById('materialesOverlay'), 'matCerrarBtn'));
+document.getElementById('matCerrarSin').addEventListener('click', () => {
+  document.getElementById('materialesOverlay')._mantener = false;
+  if(matSnap && matSnap !== JSON.stringify(MATERIALES)){ MATERIALES = JSON.parse(matSnap); matNivelesCache = null; matSucio = matSucioAntes; if(!matSucioAntes) seccionesSucias.delete('materiales'); }
+  matFoco = null;
+  closeOverlayAnimated(document.getElementById('materialesOverlay'));
+  render();
 });
 /* ===== Pestaña «Cerámicas»: palmetas de la obra y a qué zona va cada una ===== */
 const CER_ZONAS = [['piso','Piso'],['muroBano','Muro baño'],['muroCocina','Muro cocina'],['pasillo','Pasillo']];
@@ -5975,7 +5998,8 @@ document.getElementById('permisosCerrarSesionesBtn').addEventListener('click', (
     avisoToast(j && j.ok ? 'Listo: se cerraron todas las sesiones de los demás aparatos.' : 'No se pudo cerrar las sesiones. Revisa la conexión y que el Apps Script esté en la versión ' + BACKEND_REQUERIDO + '.', j && j.ok ? 'ok' : 'error');
   });
 });
-document.getElementById('permisosCancelBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('permisosOverlay')));
+document.getElementById('permisosCancelBtn').addEventListener('click', () => cerrarOv(document.getElementById('permisosOverlay')));
+document.getElementById('permisosGuardarSolo').addEventListener('click', () => guardarMantener(document.getElementById('permisosOverlay'), 'permisosGuardarBtn'));
 document.getElementById('permisosGuardarBtn').addEventListener('click', async () => {
   const msg = document.getElementById('permisosMsg');
   const nuevo = permisosPorDefecto();
@@ -6324,13 +6348,15 @@ async function abrirAdministracion(){
   function verEncargados(){
     cuerpo.innerHTML = '<div style="color:var(--sub);margin-bottom:8px;">Este nombre aparece en cada botón del menú de inicio.</div>'
       + ADM_SECC.map(([k, n]) => '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><label style="width:170px;">' + n + '</label><input data-k="' + k + '" value="' + esc(datos.encargados[k] || '') + '" maxlength="60" style="flex:1;"></div>').join('')
-      + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn primary" id="admEG" type="button">Guardar y cerrar</button><button class="btn" id="admEC" type="button">Cerrar sin guardar</button></div>';
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" id="admEGS" type="button">Guardar</button><button class="btn primary" id="admEG" type="button">Guardar y cerrar</button><button class="btn" id="admEC" type="button">Cerrar</button></div>';
     cuerpo.querySelector('#admEC').addEventListener('click', () => cerrarDin(ov));
-    cuerpo.querySelector('#admEG').addEventListener('click', async () => {
+    const guardarEnc = async (cerrar) => {
       const enc = {}; cuerpo.querySelectorAll('input[data-k]').forEach(i => { enc[i.dataset.k] = i.value.trim(); });
       const j = await accion('adminEncargadosGuardar', {encargados: enc}); if(!j) return;
-      datos.encargados = demo ? {...datos.encargados, ...enc} : j.encargados; if(demo) guardarDemo(); avisoToast('Encargados guardados.', 'ok'); cerrarDin(ov);
-    });
+      datos.encargados = demo ? {...datos.encargados, ...enc} : j.encargados; if(demo) guardarDemo(); avisoToast('Encargados guardados.', 'ok'); if(cerrar) cerrarDin(ov);
+    };
+    cuerpo.querySelector('#admEG').addEventListener('click', () => guardarEnc(true));
+    cuerpo.querySelector('#admEGS').addEventListener('click', () => guardarEnc(false));
   }
   ov.querySelector('#admTU').addEventListener('click', verUsuarios);
   ov.querySelector('#admTE').addEventListener('click', verEncargados);
@@ -6909,6 +6935,8 @@ const ORD_USU = (a, b) => { const o = {1: 0, 2: 1, 4: 2, 6: 3, 5: 4, 3: 5}; retu
 const ASIST_DEMO = {};
 const ASIST_CACHE = {};   // fecha -> {estado, lista}
 const asCola = {pend: {}, corriendo: false, fallos: 0, parada: false};
+const ASIST_BUF = {};     // fecha -> {trabajador: item} marcas en espera, aún sin guardar
+function asNBuf(){ let n = 0; Object.keys(ASIST_BUF).forEach(f => { n += Object.keys(ASIST_BUF[f]).length; }); return n; }
 let asUI = null;          // función de la ventana abierta que repinta el aviso de guardado
 function asNPend(){ return Object.keys(asCola.pend).length; }
 function asEncolar(fecha, it){
@@ -6950,7 +6978,7 @@ async function asProcesar(){
   asCola.corriendo = false;
   if(asUI) asUI();
 }
-window.addEventListener('beforeunload', e => { if(asNPend()){ e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('beforeunload', e => { if(asNPend() || asNBuf()){ e.preventDefault(); e.returnValue = ''; } });
 
 async function abrirAsistencia(){
   const demo = !DB_URL;
@@ -6980,6 +7008,7 @@ async function abrirAsistencia(){
     if(!r || !r.ok) return false;
     if(r.ultimos) Object.assign(ULT_DIA_TRAB, r.ultimos);
     const nuevo = aEstado(r), ant = ASIST_CACHE[f];
+    Object.keys(ASIST_BUF[f] || {}).forEach(n => { if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
     Object.keys(asCola.pend).forEach(k => { const p = asCola.pend[k]; if(p.fecha !== f) return; const n = p.it.trabajador; if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
     const cambio = !ant || JSON.stringify(ant.estado) !== JSON.stringify(nuevo.estado) || JSON.stringify(ant.lista) !== JSON.stringify(nuevo.lista);
     if(cambio) ASIST_CACHE[f] = nuevo;
@@ -7002,11 +7031,12 @@ async function abrirAsistencia(){
   }
   function textoGuardado(){
     if(asNPend()) return asCola.fallos ? 'Sin conexión: se reintenta solo…' : 'Guardando…';
+    if(asNBuf()) return 'Hay ' + asNBuf() + ' cambio' + (asNBuf() === 1 ? '' : 's') + ' sin guardar';
     return 'Todo guardado ✓';
   }
   function avisarGuardado(){
     const m = cuerpo.querySelector('#asMsg'); if(!m) return;
-    m.textContent = textoGuardado(); m.style.color = asCola.fallos ? 'var(--bad,#c0392b)' : 'var(--sub)';
+    m.textContent = textoGuardado(); m.style.color = asCola.fallos ? 'var(--bad,#c0392b)' : (asNBuf() && !asNPend() ? 'var(--text)' : 'var(--sub)');
   }
   function pintar(){
     const d = dow(fecha), sab = d === 6;
@@ -7024,13 +7054,13 @@ async function abrirAsistencia(){
         return f + '</div>';
       }).join('') : '<div class="as-aviso">No hay trabajadores activos.</div>';
     }
-    h += '<div class="as-pie">' + (d === 0 ? '' : '<button class="btn" type="button" id="asTodos">Todos presentes</button>') + '<span class="as-msg" id="asMsg" style="color:var(--sub)">' + esc(textoGuardado()) + '</span><button class="btn primary" type="button" id="asGuardar">Guardar y cerrar</button></div>';
+    h += '<div class="as-pie">' + (d === 0 ? '' : '<button class="btn" type="button" id="asTodos">Todos presentes</button>') + '<span class="as-msg" id="asMsg" style="color:var(--sub)">' + esc(textoGuardado()) + '</span><button class="btn" type="button" id="asGuardarSolo">Guardar</button><button class="btn primary" type="button" id="asGuardar">Guardar y cerrar</button><button class="btn" type="button" id="asCerrar">Cerrar</button></div>';
     cuerpo.innerHTML = h;
     cuerpo.querySelector('#asAnt').onclick = () => ir(sumar(fecha, -1));
     cuerpo.querySelector('#asSig').onclick = () => ir(sumar(fecha, 1));
     cuerpo.querySelector('#asHoy').onclick = () => ir(rdHoy());
     cuerpo.querySelector('#asFecha').onchange = e => { if(e.target.value) ir(e.target.value); };
-    const guardarFila = n => { const x = estado[n] || {e: ''}; asEncolar(fecha, {trabajador: n, e: x.e || 'N', m: x.m || '', s: x.s || ''}); };
+    const guardarFila = n => { const x = estado[n] || {e: ''}; (ASIST_BUF[fecha] = ASIST_BUF[fecha] || {})[n] = {trabajador: n, e: x.e || 'N', m: x.m || '', s: x.s || ''}; avisarGuardado(); };
     const todos = cuerpo.querySelector('#asTodos');
     if(todos) todos.onclick = () => { lista.forEach(n => { if(!estado[n] || !estado[n].e){ estado[n] = {e: 'P', m: '', s: ''}; guardarFila(n); } }); pintar(); };
     cuerpo.querySelectorAll('.as-seg button').forEach(b => b.onclick = () => {
@@ -7050,15 +7080,28 @@ async function abrirAsistencia(){
         if(k === 't') pintar();
       });
     });
-    cuerpo.querySelector('#asGuardar').onclick = async () => {
-      const bt = cuerpo.querySelector('#asGuardar'); cerrando = true;
-      if(bt){ bt.disabled = true; bt.textContent = asNPend() ? 'Guardando…' : 'Listo'; }
-      let t0 = Date.now();
-      while(asNPend() && asCola.fallos < 2 && Date.now() - t0 < 20000) await new Promise(x => setTimeout(x, 120));
-      if(asNPend()) avisoToast('Quedó asistencia por guardar: se sigue intentando. No cierres la página.', 'error');
-      else avisoToast('Asistencia guardada.', 'ok');
-      cerrar();
+    cuerpo.querySelector('#asGuardarSolo').onclick = () => vaciar(false);
+    cuerpo.querySelector('#asGuardar').onclick = () => vaciar(true);
+    cuerpo.querySelector('#asCerrar').onclick = () => {
+      if(asNBuf() && !confirm('Hay marcas sin guardar. ¿Cerrar y descartarlas?')) return;
+      Object.keys(ASIST_BUF).forEach(f => { delete ASIST_CACHE[f]; delete ASIST_BUF[f]; });
+      cerrando = true; cerrar();
     };
+  }
+  // Pasa las marcas en espera a la cola de guardado y espera a que se vacíe.
+  async function vaciar(y_cerrar){
+    const b1 = cuerpo.querySelector('#asGuardarSolo'), b2 = cuerpo.querySelector('#asGuardar'), b3 = cuerpo.querySelector('#asCerrar');
+    [b1, b2, b3].forEach(b => { if(b) b.disabled = true; });
+    if(y_cerrar) cerrando = true;
+    Object.keys(ASIST_BUF).forEach(f => { Object.keys(ASIST_BUF[f]).forEach(n => asEncolar(f, ASIST_BUF[f][n])); delete ASIST_BUF[f]; });
+    avisarGuardado();
+    const t0 = Date.now();
+    while(asNPend() && asCola.fallos < 2 && Date.now() - t0 < 20000) await new Promise(x => setTimeout(x, 120));
+    if(asNPend()) avisoToast('Quedó asistencia por guardar: se sigue intentando. No cierres la página.', 'error');
+    else avisoToast('Asistencia guardada.', 'ok');
+    if(y_cerrar) return cerrar();
+    [b1, b2, b3].forEach(b => { if(b) b.disabled = false; });
+    avisarGuardado();
   }
   asUI = avisarGuardado;
   ir(fecha);
@@ -7486,7 +7529,8 @@ document.getElementById('reporteDestBtn').addEventListener('click', () => {
   document.getElementById('reporteDestError').textContent = '';
   document.getElementById('reporteDestOverlay').classList.add('show');
 });
-document.getElementById('reporteDestCancel').addEventListener('click', () => closeOverlayAnimated(document.getElementById('reporteDestOverlay')));
+document.getElementById('reporteDestCancel').addEventListener('click', () => cerrarOv(document.getElementById('reporteDestOverlay')));
+document.getElementById('reporteDestSolo').addEventListener('click', () => guardarMantener(document.getElementById('reporteDestOverlay'), 'reporteDestGuardar'));
 document.getElementById('reporteDestGuardar').addEventListener('click', async () => {
   const err = document.getElementById('reporteDestError');
   const lista = document.getElementById('reporteDestInput').value.split(/[\s,;]+/).filter(Boolean);
@@ -7995,13 +8039,29 @@ document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
 });
 // ===== Ventana Gestionar trabajadores =====
 const workerOverlay = document.getElementById('workerOverlay');
+let wkSnap = null, wkQuitados = [];
+function wkTomarSnap(){ wkSnap = JSON.stringify({ws: workerStatus, cw: customWorkers}); wkQuitados = []; }
 document.getElementById('toggleWorkerPanel').addEventListener('click', () => {
-  sincronizarContratos();
+  sincronizarContratos(); wkTomarSnap();
   renderWorkerPanel();
   workerOverlay.classList.add('show');
 });
 document.getElementById('workerGuardarCerrar').addEventListener('click', () => {
-  scheduleSave();
+  scheduleSave(); saveNow();
+  closeOverlayAnimated(workerOverlay);
+  wkTomarSnap();
+});
+document.getElementById('workerGuardarSolo').addEventListener('click', () => guardarMantener(workerOverlay, 'workerGuardarCerrar'));
+// Cerrar: deshace lo editado en la ventana (lo ya quitado no vuelve)
+document.getElementById('workerCerrarSin').addEventListener('click', () => {
+  workerOverlay._mantener = false;
+  if(wkSnap && wkSnap !== JSON.stringify({ws: workerStatus, cw: customWorkers})){
+    const o = JSON.parse(wkSnap);
+    Object.keys(workerStatus).forEach(k => delete workerStatus[k]); Object.assign(workerStatus, o.ws);
+    customWorkers.length = 0; o.cw.forEach(n => customWorkers.push(n));
+    wkQuitados.forEach(n => { delete workerStatus[n]; const i = customWorkers.indexOf(n); if(i >= 0) customWorkers.splice(i, 1); });
+    rebuildWorkerList(); render();
+  }
   closeOverlayAnimated(workerOverlay);
 });
 // la rueda fuera de la lista no mueve la página de atrás
@@ -9495,4 +9555,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.100 · 15-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.101 · 16-11-2026 ==== -->
