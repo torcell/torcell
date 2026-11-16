@@ -2252,7 +2252,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.106';
+const APP_VERSION = '0.73.108';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4032,7 +4032,7 @@ function abrirAjustes(){
   const act = {};
   ALL_CELLS.forEach(c => { const st = getState(c.id), w = st.trabajador; if(!w) return; const e = resolveEstado(st); if(e === 'proceso' || e === 'entregado' || e === 'pagado'){ const o = act[w] || (act[w] = {todo:false, porPagar:false}); o.todo = true; if(e !== 'pagado') o.porPagar = true; } });
   const conAjustePend = new Set(ajustesPago.filter(a => !a.aplicado && !a.anulado).map(a => a.w));
-  const sirve = w => { const fin = (workerStatus[w] || {}).estado === 'finiquitado', o = act[w]; return conAjustePend.has(w) || (o && (fin ? o.porPagar : o.todo)); };
+  const sirve = w => { const fin = (workerStatus[w] || {}).estado === 'finiquitado', o = act[w]; return conAjustePend.has(w) || (!fin && ((workerStatus[w] || {}).estado || "activo") === "activo") || (o && (fin ? o.porPagar : o.todo)); };
   const nombres = ALL_WORKERS.filter(sirve).concat(Array.from(conAjustePend).filter(w => ALL_WORKERS.indexOf(w) === -1)).sort((a, b) => a.localeCompare(b, 'es'));
   document.getElementById('ajTrab').innerHTML = nombres.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
   document.getElementById('ajError').textContent = '';
@@ -6998,8 +6998,11 @@ async function abrirAsistencia(){
   const sumar = (f, n) => rdSuma(f, n);
   const cerrar = () => { asUI = null; cerrarDin(ov); };
   let listaBase = [];
-  function aEstado(r){
-    const est = {}, lis = (r.trabajadores || []).slice();
+  // ===== solo sale desde su día de ingreso (o de contrato) hasta su finiquito =====
+  const vigente = (n, f) => { const w = workerStatus[n] || {}, ini = w.inicio || (/^\d{4}-\d{2}-\d{2}$/.test(w.contratoFecha || '') ? w.contratoFecha : ''); return !(ini && ini > f) && !(w.fin && w.fin < f); };
+  function aEstado(r, f){
+    f = f || r.fecha;
+    const est = {}, lis = (r.trabajadores || []).concat(customWorkers.filter(n => (workerStatus[n] || {}).estado === 'activo')).filter((n, i, v) => v.indexOf(n) === i && vigente(n, f));
     Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; est[n] = {e: x.e, m: x.m || '', s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lis.indexOf(n) === -1) lis.push(n); });
     return {estado: est, lista: lis};
   }
@@ -7010,7 +7013,7 @@ async function abrirAsistencia(){
     else { try{ r = await llamarDb('asistenciaDia', {fecha: f}); }catch(err){ r = null; } }
     if(!r || !r.ok) return false;
     if(r.ultimos) Object.assign(ULT_DIA_TRAB, r.ultimos);
-    const nuevo = aEstado(r), ant = ASIST_CACHE[f];
+    const nuevo = aEstado(r, f), ant = ASIST_CACHE[f];
     Object.keys(ASIST_BUF[f] || {}).forEach(n => { if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
     Object.keys(asCola.pend).forEach(k => { const p = asCola.pend[k]; if(p.fecha !== f) return; const n = p.it.trabajador; if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
     const cambio = !ant || JSON.stringify(ant.estado) !== JSON.stringify(nuevo.estado) || JSON.stringify(ant.lista) !== JSON.stringify(nuevo.lista);
@@ -7024,7 +7027,7 @@ async function abrirAsistencia(){
     fecha = f;
     const c = ASIST_CACHE[f];
     if(c){ estado = c.estado; lista = c.lista; }
-    else { estado = {}; lista = listaBase.slice(); ASIST_CACHE[f] = {estado, lista}; }
+    else { estado = {}; lista = listaBase.filter(n => vigente(n, f)); ASIST_CACHE[f] = {estado, lista}; }
     pintar();
     const cambio = await traer(f);
     if(fecha !== f || cerrando) return;
@@ -9558,4 +9561,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.106 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.108 · 16-11-2026 ==== -->
