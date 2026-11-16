@@ -1414,7 +1414,7 @@
 .rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
-.rd-dud{color:#c98a00;}.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-nota{font-size:12.5px;margin:6px 0 4px;}.rd-nota summary{cursor:pointer;font-weight:600;}
+.rd-dud{color:#c98a00;}.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-gw{overflow-x:auto;}@media(max-width:640px){.py-gw .py-svg{min-width:640px;}.rd-ctl~* .py-tabs{width:100%;}.py-tabs .py-tab{flex:1 1 auto;padding:9px 4px;font-size:11.5px;}}.py-fls{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin-bottom:8px;}.py-fl{border:1px solid var(--border);border-left:3px solid var(--sub);padding:7px 9px;min-width:0;}.py-fl.up{border-left-color:var(--ok,#43a047);}.py-fl.down{border-left-color:var(--bad,#c0392b);}.py-fl small{display:block;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.py-fl b{display:block;font-size:15px;line-height:1.3;}.py-fx{display:block;font-size:12.5px;font-weight:700;color:var(--sub);}.py-fl.up .py-fx{color:var(--ok,#43a047);}.py-fl.down .py-fx{color:var(--bad,#c0392b);}.py-mas{margin-bottom:8px;font-size:12px;}.py-mas summary{cursor:pointer;color:var(--sub);padding:6px 0;}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-nota{font-size:12.5px;margin:6px 0 4px;}.rd-nota summary{cursor:pointer;font-weight:600;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
 .rd-nota{margin-top:14px;font-size:12px;color:var(--sub);border:1px dashed var(--border-strong,var(--border));padding:9px 11px;}
@@ -2252,7 +2252,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.108';
+const APP_VERSION = '0.73.109';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -6632,7 +6632,7 @@ function renderRendimiento(raiz, datos, esc){
   }
   raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="rdVista"><option value="dia">Día</option><option value="semana" selected>Semana</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
     + '<label id="rdSelD">Día <input type="date" id="rdDia" max="' + hoy + '"></label><label id="rdSelW">Semana <select id="rdSem"></select></label><label id="rdSelM">Mes <select id="rdMes"></select></label>'
-    + '</div><div id="rdOutC"></div><div id="rdOutF"></div>';
+    + '<button class="btn" type="button" id="rdIrPy">Ver proyección ↓</button></div><div id="rdOutC"></div><div id="rdOutF"></div>';
   const $ = id => raiz.querySelector('#' + id);
   /* Cerámica y Frague se miden por separado: cada grupo tiene su propio promedio y ranking.
      La asistencia (no tiene categoría) se cuenta en el grupo donde la persona más trabajó. */
@@ -6662,7 +6662,7 @@ function renderRendimiento(raiz, datos, esc){
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
   // ===== Proyección: curva S + recta, por día / semana / mes (el historial de la proyección se recalcula con los datos de cada fecha) =====
-  const pyEstado = {v: 'dia'};
+  const pyEstado = {v: 'obra'};
   const PY_MS = 864e5;
   function pyDatos(cat){
     const diario = {};
@@ -6693,18 +6693,19 @@ function renderRendimiento(raiz, datos, esc){
   function pyGraf(series, o){
     const W = 900, H = 230, L = o.fy ? 78 : 46, R = 14, T = 14, B = 26;
     const X = x => L + (x - o.x0) / Math.max(1e-9, o.x1 - o.x0) * (W - L - R), Y = y => T + (1 - (y - o.y0) / Math.max(1e-9, o.y1 - o.y0)) * (H - T - B);
-    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="py-svg" role="img" aria-label="' + esc(o.tit || '') + '">';
+    let s = '<div class="py-gw"><svg viewBox="0 0 ' + W + ' ' + H + '" class="py-svg" role="img" aria-label="' + esc(o.tit || '') + '">';
     for(let k = 0; k <= 4; k++){ const y = o.y0 + (o.y1 - o.y0) * k / 4; s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(y) + '" y2="' + Y(y) + '" stroke="var(--border)" stroke-width="1"/><text x="' + (L - 6) + '" y="' + (Y(y) + 3) + '" font-size="10" text-anchor="end" fill="var(--sub)">' + (o.fy ? o.fy(y) : fmt(y)) + '</text>'; }
     (o.ticks || []).forEach(t => { s += '<text x="' + X(t[0]) + '" y="' + (H - 8) + '" font-size="10" text-anchor="middle" fill="var(--sub)">' + esc(t[1]) + '</text>'; });
     if(o.hoyX != null && o.hoyX >= o.x0 && o.hoyX <= o.x1) s += '<line x1="' + X(o.hoyX) + '" x2="' + X(o.hoyX) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--sub)" stroke-dasharray="3 3"/><text x="' + (X(o.hoyX) + 4) + '" y="' + (T + 9) + '" font-size="10" fill="var(--sub)">hoy</text>';
     if(o.finX != null && o.finX >= o.x0 && o.finX <= o.x1) s += '<line x1="' + X(o.finX) + '" x2="' + X(o.finX) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ok,#43a047)" stroke-width="1.5"/><text x="' + (X(o.finX) - 4) + '" y="' + (T + 20) + '" font-size="10" text-anchor="end" fill="var(--ok,#43a047)">término oficial</text>';
+    if(o.estX != null && o.estX >= o.x0 && o.estX <= o.x1) s += '<line x1="' + X(o.estX) + '" x2="' + X(o.estX) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--warn,#d99a00)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="' + (X(o.estX) - 4) + '" y="' + (T + 34) + '" font-size="10" text-anchor="end" fill="var(--text)">' + esc(o.estTxt || 'término esperado') + '</text>';
     if(o.meta != null && o.meta <= o.y1) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(o.meta) + '" y2="' + Y(o.meta) + '" stroke="var(--ok,#43a047)" stroke-dasharray="6 4"/><text x="' + (W - R) + '" y="' + (Y(o.meta) - 4) + '" font-size="10" text-anchor="end" fill="var(--ok,#43a047)">total de la obra ' + fmt(o.meta) + ' m²</text>';
     series.forEach(q => {
       if(!q.pts.length) return;
       s += '<polyline fill="none" stroke="' + q.c + '" stroke-width="' + (q.w || 2) + '"' + (q.d ? ' stroke-dasharray="' + q.d + '"' : '') + ' points="' + q.pts.map(p => X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1)).join(' ') + '"/>';
       if(q.dots) q.pts.forEach(p => { s += '<circle cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '" r="3" fill="' + q.c + '"><title>' + esc(p[2] || '') + '</title></circle>'; });
     });
-    return s + '</svg>';
+    return s + '</svg></div>';
   }
   const pyDifTxt = d => { const n = Math.round((rdFecha(d) - rdFecha(FIN_OFICIAL)) / PY_MS); return n === 0 ? 'justo en la fecha oficial' : Math.abs(n) + (Math.abs(n) === 1 ? ' día ' : ' días ') + (n > 0 ? 'después' : 'antes') + ' del oficial'; };
   function pyHtml(cat){
@@ -6724,7 +6725,7 @@ function renderRendimiento(raiz, datos, esc){
     const finS = f && pyT98(f) != null ? pyFecha(P, Math.max(hasta, pyT98(f))) : null;
     const finR = rec ? rdSuma(hoy, Math.ceil((P.K - P.cum[hasta]) / rec)) : null;
     const kpi = (b, s) => '<div><b>' + b + '</b><span>' + s + '</span></div>';
-    let h = '<div class="rd-tit">Proyección · ' + esc(cat) + '</div><div class="rd-res">'
+    let h = '<div class="rd-tit py-ancla">Proyección · ' + esc(cat) + '</div><div class="rd-res">'
       + kpi(fmt(P.cum[hasta]) + ' de ' + fmt(P.K) + ' m²', 'avance de la obra (faltan ' + fmt(P.K - P.cum[hasta]) + ' m²)')
       + kpi('~' + fmt(pd) + ' m²', 'estimación por día (últimos ' + ult.length + ' días con trabajo)')
       + kpi(rest ? '~' + fmt(cierre) + ' m²' : fmt(lleva) + ' m²', rest ? 'cierre estimado del viernes (lleva ' + fmt(lleva) + ' m²)' : 'cerró la semana')
@@ -6734,7 +6735,7 @@ function renderRendimiento(raiz, datos, esc){
       + kpi(finR ? pyFd(finR) : '—', 'término esperado · ritmo actual' + (finR ? ' (' + pyDifTxt(finR) + ')' : '')) + '</div><div class="rd-res">'
       + kpi('~' + fmt(debe) + ' m²', 'debería llevar hoy según el plan oficial · lleva ' + fmt(lleva2) + ' m² (' + (dif >= 0 ? 'adelantado ' : 'atrasado ') + fmt(Math.abs(dif)) + ' m²)')
       + kpi('~' + fmt(necesario) + ' m²', 'por día hábil para terminar el ' + pyFd(FIN_OFICIAL) + ' (hoy rinde ~' + fmt(pd) + ')') + '</div>';
-    const tabs = [['dia', 'Días'], ['semana', 'Semanas'], ['quincena', 'Quincenas'], ['mes', 'Meses']];
+    const tabs = [['obra', 'Obra'], ['dia', 'Días'], ['semana', 'Semanas'], ['quincena', 'Quincenas'], ['mes', 'Meses']];
     h += '<div class="py-tabs" role="tablist">' + tabs.map(t => '<button type="button" role="tab" class="py-tab' + (pyEstado.v === t[0] ? ' on' : '') + '" data-py="' + t[0] + '" aria-selected="' + (pyEstado.v === t[0]) + '">' + t[1] + '</button>').join('') + '</div>';
     const v = pyEstado.v, S_C = 'var(--accent)', P_C = 'var(--warn,#d99a00)', R_C = 'var(--sub)';
     const cum = i => P.cum[Math.min(hasta, Math.max(0, i))];
@@ -6742,7 +6743,20 @@ function renderRendimiento(raiz, datos, esc){
     const projR = i => rec ? Math.min(P.K, cum(hasta) + rec * (i - hasta)) : null;
     /* puntos de la gráfica principal según la pestaña */
     let real = [], ps = [], pr = [], ticks = [], x0, x1, dots = false, histCortes = [], etq;
-    if(v === 'dia'){
+    if(v === 'obra'){
+      // ===== desde el inicio de la obra hasta el término estimado =====
+      const iS = finS ? idxF(finS) : 0, iR = finR ? idxF(finR) : 0;
+      x0 = Math.max(0, idxF(INICIO_OBRA)); x1 = Math.min(hasta + 720, Math.max(finI, iS, iR, hasta + 14) + 7);
+      etq = 'Avance acumulado desde el inicio de la obra (' + pyFd(INICIO_OBRA) + ') hasta el término estimado';
+      for(let i = x0; i <= hasta; i++) real.push([i, cum(i)]);
+      for(let i = hasta; i <= x1; i += 3){ const a = projS(i), b = projR(i); if(a != null) ps.push([i, a]); if(b != null) pr.push([i, b]); }
+      { const ms = []; let a = new Date(pyFecha(P, x0).substring(0, 7) + '-01T00:00:00Z'); a.setUTCMonth(a.getUTCMonth() + 1);
+        while(idxF(rdIso(a)) <= x1){ ms.push(rdIso(a)); a.setUTCMonth(a.getUTCMonth() + 1); }
+        const paso = Math.max(1, Math.ceil(ms.length / 14));
+        ms.forEach((d, k) => { if(k % paso === 0) ticks.push([idxF(d), RD_MC[Number(d.substring(5, 7)) - 1] + (d.substring(5, 7) === '01' ? ' ' + d.substring(2, 4) : '')]); }); }
+      { const sems = []; for(let l = rdLunes(P.ini); l <= hoyLun; l = rdSuma(l, 7)) sems.push(l);
+        sems.slice(-16).forEach(l => { const i = Math.min(hasta, idxF(rdSuma(l, 6))); if(i < 10) return; const u = histCortes[histCortes.length - 1]; if(u && i - u[0] < 4) histCortes.pop(); histCortes.push([i, 'S' + nSem(l)]); }); }
+    } else if(v === 'dia'){
       x0 = Math.max(0, hasta - 45); x1 = hasta + 30; dots = false; etq = 'Acumulado de m² por día';
       for(let i = x0; i <= hasta; i++) real.push([i, cum(i)]);
       for(let i = hasta; i <= x1; i++){ const a = projS(i), b = projR(i); if(a != null) ps.push([i, a]); if(b != null) pr.push([i, b]); }
@@ -6794,10 +6808,11 @@ function renderRendimiento(raiz, datos, esc){
     if(v !== 'dia'){ const ult = pl.length ? pl[pl.length - 1][0] : x0; for(let x = ult + (v === 'semana' ? 7 : v === 'quincena' ? 15 : 30); x < finI; x += (v === 'semana' ? 7 : v === 'quincena' ? 15 : 30)) pl.push([x, plan(x), 'Plan oficial: ~' + fmt(plan(x)) + ' m²']); if(pl.length && pl[pl.length - 1][0] < finI) pl.push([finI, P.K, 'Plan oficial: término']); }
     const ymax = Math.max(1, ...real.map(p => p[1]), ...ps.map(p => p[1]), ...pr.map(p => p[1]), ...pl.map(p => p[1])), ymin = Math.min(...real.map(p => p[1]), ...pl.map(p => p[1]));
     h += '<div class="py-sub">' + etq + ' · línea sólida = real · naranja punteada = curva S · gris = ritmo actual · verde = plan oficial</div>'
-      + pyGraf([{pts: pl, c: 'var(--ok,#43a047)', w: 1.6, d: '10 4'}, {pts: real, c: S_C, w: 2.4, dots}, {pts: ps, c: P_C, d: '6 4', dots}, {pts: pr, c: R_C, d: '2 4', dots}], {x0, x1, finX: finI, y0: v === 'dia' ? Math.floor(ymin) : 0, y1: ymax * 1.05, hoyX: hasta, meta: ymax >= P.K * 0.97 ? P.K : null, ticks, tit: etq});
+      + pyGraf([{pts: pl, c: 'var(--ok,#43a047)', w: 1.6, d: '10 4'}, {pts: real, c: S_C, w: 2.4, dots}, {pts: ps, c: P_C, d: '6 4', dots}, {pts: pr, c: R_C, d: '2 4', dots}], {x0, x1, finX: finI, y0: v === 'dia' ? Math.floor(ymin) : 0, y1: ymax * 1.05, hoyX: hasta, estX: v === 'obra' && finS ? idxF(finS) : null, estTxt: finS ? 'término esperado ' + pyFd(finS) : '', meta: ymax >= P.K * 0.97 ? P.K : null, ticks, tit: etq})
+      + pyFlechas(P);
     /* cómo fue cambiando la proyección (se recalcula con los datos que había en cada fecha) */
     const hs = histCortes.map(c => { const g = pyAjuste(P, c[0]); const t = g ? pyT98(g) : null; return t == null ? null : [c[0], Math.max(c[0], t), c[1]]; }).filter(Boolean);
-    h += '<div class="py-sub">Cómo ha ido cambiando la proyección de término (curva S) ' + (v === 'dia' ? 'día a día' : v === 'semana' ? 'semana a semana' : v === 'quincena' ? 'quincena a quincena' : 'mes a mes') + '</div>';
+    h += '<div class="py-sub">Cómo ha ido cambiando la proyección de término (curva S) ' + (v === 'dia' ? 'día a día' : v === 'semana' || v === 'obra' ? 'semana a semana' : v === 'quincena' ? 'quincena a quincena' : 'mes a mes') + '</div>';
     if(hs.length >= 2){
       const lo = Math.min(...hs.map(p => p[1])), hi = Math.max(...hs.map(p => p[1])), pad = Math.max(3, (hi - lo) * 0.15);
       h += pyGraf([{pts: hs.map(p => [p[0], p[1], p[2] + ': terminaba el ' + pyFd(pyFecha(P, p[1]))]), c: P_C, w: 2.2, dots: true}], {x0: hs[0][0], x1: hs[hs.length - 1][0] + 1e-6, y0: lo - pad, y1: hi + pad, ticks: hs.map(p => [p[0], p[2]]), fy: y => pyFd(pyFecha(P, y)), tit: 'Cambio de la proyección'});
@@ -6805,6 +6820,31 @@ function renderRendimiento(raiz, datos, esc){
       h += '<div class="py-nota">Antes se estimaba terminar el <b>' + pyFd(pyFecha(P, a)) + '</b>; ahora el <b>' + pyFd(pyFecha(P, b)) + '</b> (' + (dd === 0 ? 'sin cambio' : (dd > 0 ? 'se atrasa ' : 'se adelanta ') + Math.abs(dd) + (Math.abs(dd) === 1 ? ' día' : ' días')) + '). Término oficial: <b>' + pyFd(FIN_OFICIAL) + '</b>.</div>';
     } else h += '<div class="rd-vacio">Todavía no hay datos suficientes para comparar proyecciones.</div>';
     return h + '<details class="rd-nota"><summary>Cómo se calcula la proyección</summary>Curva S: se ajusta una curva logística al avance acumulado, con el total de m² de la obra como tope, dándole más peso a lo reciente; el término es cuando llega al 98 %. Recta: sigue el ritmo de las últimas 4 semanas. Cierre del viernes: lo que lleva la semana más los días que faltan por la estimación por día. La estimación por día es el promedio de los últimos 10 días con trabajo.</details>';
+  }
+  // ===== flechas: si el rendimiento del equipo subió o bajó contra el día / la semana anterior =====
+  function pyDif(act, ant){
+    if(!(ant > 0)) return {c: 'eq', t: '— sin comparar'};
+    const p = Math.round((act - ant) / ant * 100);
+    return p === 0 ? {c: 'eq', t: '= igual'} : p > 0 ? {c: 'up', t: '▲ +' + p + '%'} : {c: 'down', t: '▼ ' + p + '%'};
+  }
+  const pyCel = (arriba, m2, d, pie) => '<div class="py-fl ' + d.c + '"><small>' + esc(arriba) + '</small><b>' + fmt(m2) + ' m²</b><span class="py-fx">' + d.t + '</span><small>' + esc(pie) + '</small></div>';
+  function pyFlechas(P){
+    const DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+    const sems = []; for(let l = rdLunes(P.ini < INICIO_OBRA ? P.ini : INICIO_OBRA); l <= hoyLun; l = rdSuma(l, 7)){ let m = 0, n = 0; for(let k = 0; k < 7; k++){ const x = P.diario[rdSuma(l, k)] || 0; if(x > 0){ m += x; n++; } } sems.push({l, m, n}); }
+    while(sems.length && !sems[0].m) sems.shift();
+    const enCurso = hoy < rdSuma(hoyLun, 4);
+    const celS = sems.map((w, k) => {
+      const ant = k ? sems[k - 1] : null, cur = enCurso && w.l === hoyLun, inf = infoSem(w.l);
+      const d = !ant ? {c: 'eq', t: '— primera'} : cur ? pyDif(w.n ? w.m / w.n : 0, ant.n ? ant.m / ant.n : 0) : pyDif(w.m, ant.m);
+      return pyCel('S' + inf.n + ' · ' + inf.rango, w.m, d, cur ? 'en curso · por día' : w.n + (w.n === 1 ? ' día' : ' días') + ' con trabajo');
+    }).reverse();
+    const ds = Object.keys(P.diario).filter(d => P.diario[d] > 0 && d <= hoy).sort();
+    const celD = ds.map((d, k) => { const x = rdFecha(d); return pyCel(DC[x.getUTCDay()] + ' ' + x.getUTCDate() + ' ' + RD_MC[x.getUTCMonth()], P.diario[d], k ? pyDif(P.diario[d], P.diario[ds[k - 1]]) : {c: 'eq', t: '— primero'}, d === hoy ? 'hoy' : 'S' + nSem(rdLunes(d))); }).reverse();
+    const bloque = (tit, cel, vis, cuantos) => !cel.length ? '' : '<div class="py-sub">' + tit + '</div><div class="py-fls">' + cel.slice(0, vis).join('') + '</div>'
+      + (cel.length > vis ? '<details class="py-mas"><summary>Ver ' + cuantos + ' (' + cel.length + ')</summary><div class="py-fls">' + cel.slice(vis).join('') + '</div></details>' : '');
+    const nuevo = Date.now() < new Date('2026-11-23T23:59:59').getTime() ? ' <i class="tnuevo">Nuevo</i>' : '';
+    return bloque('Rendimiento del equipo semana a semana · ▲ subió · ▼ bajó contra la semana anterior' + nuevo, celS, 8, 'todas las semanas')
+      + bloque('Rendimiento del equipo día a día · contra el día trabajado anterior', celD, 8, 'todos los días');
   }
   function pintar(){ pintarGrupo('Cerámica', 'Cerámica', $('rdOutC')); pintarGrupo('Frague', 'Frague', $('rdOutF')); }
   function pintarGrupo(cat, etq, out){
@@ -6878,6 +6918,7 @@ function renderRendimiento(raiz, datos, esc){
   raiz.addEventListener('click', e => { const t = e.target.closest('.py-tab'); if(t){ pyEstado.v = t.getAttribute('data-py'); pintar(); } });
   raiz.addEventListener('click', e => { const b = e.target.closest('.rd-hbtn'); if(!b) return; const p = b.closest('.rd-row').querySelector('.rd-hp'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true'); b.classList.toggle('on', !p.hidden); });
   ['rdVista', 'rdDia', 'rdSem', 'rdMes'].forEach(id => $(id).addEventListener('change', pintar));
+  $('rdIrPy').addEventListener('click', () => { const a = raiz.querySelector('.py-ancla'); if(a) a.scrollIntoView({behavior: 'smooth', block: 'start'}); });
   pintar();
 }
 
@@ -9561,4 +9602,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.108 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.109 · 16-11-2026 ==== -->
