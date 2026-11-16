@@ -1922,11 +1922,6 @@
     <div id="liqHistoryBox" style="display:none;max-height:180px;overflow-y:auto;border:1px solid var(--border);padding:8px;margin-bottom:12px;background:var(--panel-soft);"></div>
     <div class="modal-error" id="liqConfigError"></div>
     <div class="actions">
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-right:auto;">
-        <button class="btn" data-abrir-pr type="button">🔒 Pagos completos retenidos</button>
-        <button class="btn" data-abrir-aj type="button">💵 Ajustes de pago</button>
-        <button class="btn" id="liqCfgHistBtn" type="button">🗂️ Historial de liquidaciones</button>
-      </div>
       <button class="btn" id="liqConfigCancel">Cancelar</button>
       <button class="btn primary" id="liqConfigGenerar">Generar</button>
     </div>
@@ -2257,7 +2252,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.105';
+const APP_VERSION = '0.73.106';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4082,7 +4077,6 @@ document.getElementById('ajSinCambiosBtn').addEventListener('click', () => {
   if(JSON.stringify(ajustesPago) !== ajSnap){ ajustesPago = JSON.parse(ajSnap); if(!ajSucioAntes) seccionesSucias.delete('ajustesPago'); }
   closeOverlayAnimated(document.getElementById('ajOverlay'));
 });
-document.getElementById('liqCfgHistBtn').addEventListener('click', () => document.getElementById('liqHistBtn').click());
 
 // ===== Pagos completos retenidos: ventana para elegir los trabajadores =====
 function totalRetenidoDe(w){
@@ -9564,4 +9558,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.105 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.106 · 16-11-2026 ==== -->

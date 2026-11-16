@@ -1,4 +1,4 @@
-/* ===== carga.js 1.1.1 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.1.2 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
@@ -14,6 +14,9 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   var entrando = false;
   try{ entrando = sessionStorage.getItem('cargaEntrando') === '1'; sessionStorage.removeItem('cargaEntrando'); }catch(e){}
   if(entrando){ v.classList.remove('cgabre'); v.classList.add('cgquieta'); }
+  // ===== el menú dejó la barra en este %: se sigue desde ahí, sin volver a 0 =====
+  var desde = 0;
+  if(entrando){ try{ desde = Math.max(0, Math.min(40, parseFloat(sessionStorage.getItem('cargaDesde')) || 0)); sessionStorage.removeItem('cargaDesde'); }catch(e){} }
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
@@ -48,12 +51,20 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     var t = Math.max(0, performance.now() - st.t0);
     var obj = st.volver ? 0 : st.meta >= 100 ? 100 : st.err ? 90 * (1 - Math.exp(-t / 450)) : objetivoReal();
     if(st.volver){ if(!st.v0){ st.v0 = st.prog; st.vt = performance.now(); } st.prog = st.v0 * (1 - Math.min(1, (performance.now() - st.vt) / 5000)); }
+    else if(st.hold > 0) { /* quieta */ }
     else st.prog += Math.max(0, obj - st.prog) * (st.meta >= 100 ? 0.35 : 0.2);
     if(st.meta >= 100 && st.prog > 99.5) st.prog = 100;
     rell.style.transform = 'scaleX(' + (st.prog / 100) + ')';
     if(!est.classList.contains('cglisto')) est.textContent = Math.round(st.prog) + '%';
     if(st.meta < 100 && !st.err) ponerMsg(textoEstado(t));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
+  }
+  // la barra se queda en ese % hasta que el navegador pinta por primera vez (así lo primero que se ve es el mismo número); tope de 600 ms por si no avisa
+  if(desde){
+    st.prog = desde; st.hold = 1;
+    var soltar = function(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ st.hold = 0; }); }); };
+    try{ new PerformanceObserver(function(l){ if(l.getEntries().some(function(e){ return e.name === 'first-contentful-paint'; })) soltar(); }).observe({type: 'paint', buffered: true}); }catch(e){ soltar(); }
+    setTimeout(function(){ st.hold = 0; }, 600);
   }
   bucle();
   var abierta = terminadas(v);

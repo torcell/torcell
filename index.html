@@ -699,8 +699,16 @@ async function irA(dest){
   const d = document.createElement('div'); d.id = 'cargaGlobal'; d.setAttribute('role', 'status'); d.setAttribute('aria-live', 'polite');
   d.innerHTML = HTML_CARGA.replace('%TIT%', TIT_CARGA[dest] || 'Cargando…') + '</div>';
   document.body.insertBefore(d, document.body.firstChild);
+  // ===== mientras se abre la carga la barra sube hasta el 10 %; la sección sigue desde ahí =====
+  const DESDE = 10, t0 = performance.now(), rl = d.querySelector('#cgRell'), es = d.querySelector('#cgEst');
+  (function sube(){
+    const k = Math.min(1, (performance.now() - t0) / 560), p = DESDE * (1 - Math.pow(1 - k, 3));
+    if(rl) rl.style.transform = 'scaleX(' + (p / 100) + ')';
+    if(es) es.textContent = Math.round(p) + '%';
+    if(k < 1) requestAnimationFrame(sube);
+  })();
   await dormir(620);   // lo que tarda en abrirse la carga
-  try{ sessionStorage.setItem('cargaEntrando', '1'); }catch(e){}
+  try{ sessionStorage.setItem('cargaEntrando', '1'); sessionStorage.setItem('cargaDesde', String(DESDE)); }catch(e){}
   location.replace(PAGINAS[dest]);
 }
 // si vuelve con el botón atrás, la carga que quedó abierta se saca
@@ -964,4 +972,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.14 · 09-11-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.15 · 16-11-2026 ==== -->
