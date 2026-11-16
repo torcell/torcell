@@ -784,6 +784,8 @@
   .modal h3{margin:0 0 10px;font-size:15px;color:var(--text);}
   .modal p{margin:0 0 18px;font-size:13.5px;color:var(--sub);}
   .modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  /* footer de tres botones: mismo ancho y alto */
+  .modal .actions .btn:first-child:nth-last-child(3), .modal .actions .btn:first-child:nth-last-child(3) ~ .btn{flex:1 1 0;min-width:0;}
   .rate-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
   .rate-row label{font-size:12.5px;color:var(--text);}
   .rate-row input{width:110px;}
@@ -2255,7 +2257,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.101';
+const APP_VERSION = '0.73.104';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3777,6 +3779,13 @@ async function sincronizarContratos(){
     }
     const ruts = r.ruts && typeof r.ruts === 'object' ? r.ruts : {};
     Object.keys(ruts).forEach(n => { if(workerStatus[n] && !workerStatus[n].rut && typeof ruts[n] === 'string') workerStatus[n].rut = ruts[n].slice(0, 14); });
+    // ===== datos del contrato (solo si el campo está vacío; quedan en este equipo, no van a la config compartida) =====
+    const dc = r.datos && typeof r.datos === 'object' ? r.datos : {};
+    const LIM = {nacionalidad: 40, direccion: 120, correo: 80};
+    Object.keys(dc).forEach(n => {
+      const w = workerStatus[n], d = dc[n]; if(!w || !d || typeof d !== 'object') return;
+      Object.keys(LIM).forEach(k => { if(!w[k] && typeof d[k] === 'string' && d[k].trim()) w[k] = d[k].replace(/[<>]/g, '').trim().slice(0, LIM[k]); });
+    });
     const antes = Array.from(CONTRATO_PEND).sort().join('|');
     CONTRATO_PEND = new Set(pend.filter(n => workerStatus[n]));
     if(antes !== Array.from(CONTRATO_PEND).sort().join('|')) cambio = true;
@@ -9555,4 +9564,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.101 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.104 · 16-11-2026 ==== -->
