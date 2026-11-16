@@ -785,7 +785,7 @@
   .modal p{margin:0 0 18px;font-size:13.5px;color:var(--sub);}
   .modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
   /* footer de tres botones: mismo ancho y alto */
-  .modal .actions .btn:first-child:nth-last-child(3), .modal .actions .btn:first-child:nth-last-child(3) ~ .btn{flex:1 1 0;min-width:0;}
+  .modal .actions > .btn:first-child:nth-last-child(3), .modal .actions > .btn:first-child:nth-last-child(3) ~ .btn{flex:1 1 0;min-width:0;}
   .rate-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
   .rate-row label{font-size:12.5px;color:var(--text);}
   .rate-row input{width:110px;}
@@ -2257,7 +2257,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.104';
+const APP_VERSION = '0.73.105';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9564,4 +9564,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.104 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.105 · 16-11-2026 ==== -->
