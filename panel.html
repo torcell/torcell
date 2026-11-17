@@ -1418,6 +1418,12 @@
 .py-caja{border:1px solid var(--border);margin:12px 0 0;}
 .py-fc{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:7px 10px;border-top:1px solid var(--border);}
 .py-fc:first-child{border-top:0;}
+.py-mm{display:inline-flex;align-items:stretch;border:1px solid var(--border-strong,var(--border));}
+.py-b{width:36px;height:32px;border:0;background:var(--panel);color:var(--text);font-size:19px;font-weight:700;line-height:1;cursor:pointer;border-radius:0;font-family:inherit;}
+.py-b:hover:not(:disabled){background:var(--accent);color:#fff;}
+.py-b:disabled{opacity:.35;cursor:default;}
+.py-n{min-width:44px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;border-left:1px solid var(--border-strong,var(--border));border-right:1px solid var(--border-strong,var(--border));cursor:help;}
+.py-aviso{font-size:12px;color:var(--sub);min-height:32px;display:inline-flex;align-items:center;}
 .py-cap{flex:0 0 66px;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--sub);}
 .py-fc .py-tabs{margin:0;width:auto;}
 .py-cu{display:inline-block;width:10px;height:10px;}
@@ -2289,7 +2295,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.114';
+const APP_VERSION = '0.73.116';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -6706,7 +6712,7 @@ function renderRendimiento(raiz, datos, esc){
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
   // ===== Proyección de cerámica: recta según el ritmo real, con detalle al pasar el cursor =====
-  const pyEstado = {off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 28};
+  const pyEstado = {extra: 0, off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 28};
   const PY_MS = 864e5, PY_DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
   let pyM = null;
   const pyFd = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
@@ -6775,24 +6781,30 @@ function renderRendimiento(raiz, datos, esc){
     const ckA = filaCtl('Partidas', areas.map(a => '<label class="py-ck"><input type="checkbox" data-pya="' + esc(a) + '"' + (E.off[a] ? '' : ' checked') + '><span>' + esc(pyLab(a)) + '</span></label>').join(''));
     if(P.msg){ pyM = null; return cab + '<div class="py-caja">' + ckA + '</div><div class="rd-vacio">' + P.msg + '</div>'; }
     const hasta = P.n - 1, lleva = P.cum[hasta], falta = P.K - lleva;
-    const a0 = E.ritmo ? Math.max(0, hasta - E.ritmo) : 0, v = (lleva - P.cum[a0]) / Math.max(1, hasta - a0);
-    const finI = P.idx(FIN_OFICIAL), estI = v > 0 ? Math.min(hasta + 720, hasta + Math.ceil(falta / v)) : null, estD = estI != null ? rdSuma(P.ini, estI) : null;
-    const Q = pySemanas(P), tips = [], tip = h => ' data-pt="' + (tips.push(h) - 1) + '"';
+    const a0 = E.ritmo ? Math.max(0, hasta - E.ritmo) : 0, v0 = (lleva - P.cum[a0]) / Math.max(1, hasta - a0);
+    const Q = pySemanas(P);
+    // ===== rendimiento promedio de un ceramista: m² de los que tienen nombre ÷ semanas-trabajador del mismo período =====
+    let pm = 0, pn = 0; { const l0 = rdLunes(rdSuma(P.ini, a0));
+      Q.S.forEach(w => { if(w.cur || w.l < l0) return; Object.keys(P.porTrab).forEach(nm => { if(esPropio(nm)) return; let m = 0; for(let k = 0; k < 7; k++) m += P.porTrab[nm][rdSuma(w.l, k)] || 0; if(m > 0){ pm += m; pn++; } }); }); }
+    const pw = pn ? pm / pn : 0, add = E.extra * pw / 7, v = v0 + add;
+    const finI = P.idx(FIN_OFICIAL), fI = r => r > 0 ? Math.min(hasta + 720, hasta + Math.ceil(falta / r)) : null, estI = fI(v), estD = estI != null ? rdSuma(P.ini, estI) : null, est0 = fI(v0);
+    const tips = [], tip = h => ' data-pt="' + (tips.push(h) - 1) + '"';
     const ritTxt = E.ritmo === 28 ? 'últimas 4 semanas' : E.ritmo === 56 ? 'últimas 8 semanas' : 'toda la obra';
     const nec = finI > hasta ? falta / (finI - hasta) * 7 : null, dif = estI != null ? estI - finI : null;
     const kpi = (b, s, t) => '<div class="py-k"' + tip(t) + '><b>' + b + '</b><span>' + s + '</span></div>';
     let h = cab + '<div class="rd-res">'
       + kpi(fmt(lleva / P.K * 100) + ' %', 'avance · ' + fmt(lleva) + ' de ' + fmt(P.K) + ' m²', '<b>Avance de cerámica</b>Terminado: ' + fmt(lleva) + ' m²<br>Falta: ' + fmt(falta) + ' m²<br>Total de la obra: ' + fmt(P.K) + ' m²' + (P.base > 0 ? '<br>Sin fecha por día (antes del ' + pyFd(P.d0) + '): ' + fmt(P.base) + ' m²' : ''))
-      + kpi('~' + fmt(v * 7) + ' m²', 'por semana · ' + ritTxt, '<b>Ritmo real</b>' + fmt(v * 7) + ' m² por semana (' + fmt(v) + ' por día corrido), ' + ritTxt + '.' + (nec != null ? '<br>Para terminar el ' + pyFd(FIN_OFICIAL) + ' se necesitan ~' + fmt(nec) + ' m² por semana.' : ''))
-      + kpi(estD ? pyFd(estD) : '—', 'término estimado' + (dif == null ? '' : dif === 0 ? ' · justo en la fecha oficial' : ' · ' + Math.abs(dif) + (Math.abs(dif) === 1 ? ' día ' : ' días ') + (dif > 0 ? 'después' : 'antes') + ' del oficial'), '<b>Término estimado</b>Si se mantiene el ritmo de ' + ritTxt + ', los ' + fmt(falta) + ' m² que faltan se terminan el ' + (estD ? pyFd(estD) : '—') + '.<br>Término oficial: ' + pyFd(FIN_OFICIAL) + '.')
+      + kpi('~' + fmt(v * 7) + ' m²', 'por semana · ' + ritTxt + (E.extra ? ' · con +' + E.extra : ''), '<b>Ritmo' + (E.extra ? ' con ' + E.extra + (E.extra === 1 ? ' ceramista más' : ' ceramistas más') : ' real') + '</b>' + fmt(v * 7) + ' m² por semana (' + fmt(v) + ' por día corrido), ' + ritTxt + '.' + (E.extra ? '<br>Sin cambios: ' + fmt(v0 * 7) + ' m² por semana.' : '') + (nec != null ? '<br>Para terminar el ' + pyFd(FIN_OFICIAL) + ' se necesitan ~' + fmt(nec) + ' m² por semana.' : ''))
+      + kpi(estD ? pyFd(estD) : '—', 'término estimado' + (dif == null ? '' : dif === 0 ? ' · justo en la fecha oficial' : ' · ' + Math.abs(dif) + (Math.abs(dif) === 1 ? ' día ' : ' días ') + (dif > 0 ? 'después' : 'antes') + ' del oficial') + (E.extra && est0 != null && estI != null ? ' · se adelanta ' + (est0 - estI) + (est0 - estI === 1 ? ' día' : ' días') : ''), '<b>Término estimado</b>' + (E.extra && est0 != null ? 'Sin cambios: ' + pyFd(rdSuma(P.ini, est0)) + '.<br>' : '') + 'Si se mantiene el ritmo de ' + ritTxt + (E.extra ? ' y suman ' + E.extra + (E.extra === 1 ? ' ceramista' : ' ceramistas') + ' desde hoy' : '') + ', los ' + fmt(falta) + ' m² que faltan se terminan el ' + (estD ? pyFd(estD) : '—') + '.<br>Término oficial: ' + pyFd(FIN_OFICIAL) + '.')
       + '</div>';
     const ck = (k, t) => '<label class="py-ck"><input type="checkbox" data-pyk="' + k + '"' + (E[k] ? ' checked' : '') + '><span>' + t + '</span></label>';
     h += '<div class="py-caja">' + ckA
       + filaCtl('Ritmo', '<div class="py-tabs" role="group" aria-label="Ritmo para proyectar">' + [[28, '4 semanas'], [56, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-pyr="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div>')
-      + (E.vista === 'simple' ? filaCtl('Mostrar', ck('proy', 'Proyección') + ck('plan', 'Plan oficial') + ck('freno', 'Semanas con freno') + ck('barras', 'm² por semana')) : '') + '</div>';
+      + filaCtl('Sumar', '<div class="py-mm" role="group" aria-label="Ceramistas que se suman desde hoy"><button type="button" class="py-b" data-pyx="-1" aria-label="Quitar un ceramista"' + (E.extra <= 0 ? ' disabled' : '') + '>−</button><output class="py-n"' + tip('<b>Ceramistas que se suman desde hoy</b>Cada uno rinde en promedio ~' + fmt(pw) + ' m² por semana (' + fmt(pw / 5) + ' por día hábil), según lo que hicieron los ceramistas con nombre en ' + ritTxt + '. No cuenta el trabajo de No Asignado.') + '>' + E.extra + '</output><button type="button" class="py-b" data-pyx="1" aria-label="Sumar un ceramista"' + (!pw || E.extra >= 12 ? ' disabled' : '') + '>+</button></div><span class="py-aviso">' + (pw ? 'cada uno rinde ~' + fmt(pw) + ' m² por semana' + (E.extra ? ' · +' + fmt(add * 7) + ' m² por semana en total' : '') : 'sin datos para calcular el promedio') + '</span>')
+      + filaCtl('Mostrar', E.vista === 'simple' ? ck('proy', 'Proyección') + ck('plan', 'Plan oficial') + ck('freno', 'Semanas con freno') + ck('barras', 'm² por semana') : '<span class="py-aviso">Estos checks se usan en la vista Simple.</span>') + '</div>';
     h += '<div class="py-tabs py-vis" role="tablist">' + [['simple', 'Simple'], ['burnup', 'Burn-up'], ['s', 'Curva S'], ['abanico', 'Abanico'], ['vel', 'Velocidad']].map(t => '<button type="button" role="tab" class="py-tab' + (E.vista === t[0] ? ' on' : '') + '" data-pyv="' + t[0] + '" aria-selected="' + (E.vista === t[0]) + '">' + t[1] + '</button>').join('') + '</div>';
     let g = null, proyF = null, planF = null, fan = null;
-    if(E.vista !== 'simple'){ const A = pyAlt(P, Q, {hasta, lleva, finI, v, nec, tip}); h += A.h; g = A.g; proyF = A.proy || null; planF = A.plan || null; fan = A.fan || null; }
+    if(E.vista !== 'simple'){ const A = pyAlt(P, Q, {hasta, lleva, finI, v, nec, tip, add}); h += A.h; g = A.g; proyF = A.proy || null; planF = A.plan || null; fan = A.fan || null; }
     else {
     // ===== gráfico =====
     const Wd = 900, H = 290, L = 50, R = 16, T = 16, B = 26, x0 = 0, x1 = Math.max(finI, E.proy && estI != null ? estI : 0, hasta + 14) + 10, y1 = P.K * 1.06;
@@ -6857,7 +6869,7 @@ function renderRendimiento(raiz, datos, esc){
     if(m === 'abanico'){
       const ws = Q.S.filter(w => !w.cur && !w.parcial).slice(-12).map(w => w.m).sort((a, b) => a - b), n = ws.length;
       if(n >= 3){ const k = Math.max(1, Math.round(n / 4)), pr = a => a.reduce((x, y) => x + y, 0) / a.length, med = n % 2 ? ws[(n - 1) / 2] : (ws[n / 2 - 1] + ws[n / 2]) / 2;
-        fan = {pes: pr(ws.slice(0, k)) / 7, prob: med / 7, opt: pr(ws.slice(-k)) / 7, n, k, f: (v, i) => Math.min(K, lleva + v * (i - hasta))}; }
+        fan = {pes: pr(ws.slice(0, k)) / 7 + o.add, prob: med / 7 + o.add, opt: pr(ws.slice(-k)) / 7 + o.add, n, k, f: (v, i) => Math.min(K, lleva + v * (i - hasta))}; }
     }
     const fin = v => v > 0 ? Math.min(hasta + 720, hasta + Math.ceil((K - lleva) / v)) : null;
     const fdI = i => i != null && i < hasta + 720 ? pyFd(rdSuma(P.ini, i)) : 'sin fecha a la vista';
@@ -6916,6 +6928,14 @@ function renderRendimiento(raiz, datos, esc){
     else h += y != null ? 'Proyectado: ~' + fmt(y) + ' m² (' + Math.round(y / P.K * 100) + ' %)' : 'Sin proyección a la vista';
     if(M.plan && y != null){ const pl = M.plan(i), df = y - pl; h += '<br>Plan oficial: ' + fmt(pl) + ' m² · ' + (df >= 0 ? 'adelantado ' : 'atrasado ') + fmt(Math.abs(df)) + ' m²'; }
     pyTip(h, e.clientX, e.clientY);
+  }
+  // ===== al tocar checks o pestañas: la ventana no se mueve ni cambia de alto, y el scroll queda donde estaba =====
+  function pyQuieto(fn){
+    let box = raiz.parentElement; while(box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY)) box = box.parentElement;
+    const ancla = () => raiz.querySelector('.py-caja'), a0 = ancla(), top0 = a0 ? a0.getBoundingClientRect().top : 0, st = box ? box.scrollTop : 0;
+    raiz.style.minHeight = raiz.offsetHeight + 'px';
+    fn();
+    const a1 = ancla(); if(box){ box.scrollTop = st; if(a1 && a0) box.scrollTop = st + (a1.getBoundingClientRect().top - top0); }
   }
   function pyOcultar(){ pyTip(null); raiz.querySelectorAll('.py-cl,.py-cc').forEach(x => x.setAttribute('visibility', 'hidden')); }
   function pintar(){ pintarGrupo('Cerámica', 'Cerámica', $('rdOutC')); pintarGrupo('Frague', 'Frague', $('rdOutF'));
@@ -6988,8 +7008,8 @@ function renderRendimiento(raiz, datos, esc){
       + (cat === 'Cerámica' ? pyHtml() : '')
       + '<details class="rd-nota"><summary>Cómo se calcula el % (oculto en las barras; sale al pasar el cursor)</summary><b>Cómo leer el porcentaje.</b> <b>100%</b> = rindió igual que el promedio del equipo en m² por día trabajado. <b>130%</b> = 30% más que el promedio; <b>70%</b> = 30% menos. Se calcula por día trabajado, así quien faltó no sale perjudicado. Un día que se fueron por falta de cancha no cuenta como falta ni baja el porcentaje (solo se cuenta la parte del día que trabajaron). La <b>asistencia</b> es días trabajados ÷ días que correspondía trabajar. La semana va de lunes a viernes y el sábado solo si alguien fue. Si no hay asistencia registrada, se usan los días con actividad en el panel' + (sinAs ? ' (' + sinAs + ' trabajadores sin asistencia en este período)' : '') + '.</details>';
   }
-  raiz.addEventListener('click', e => { const t = e.target.closest('.py-tab'); if(t){ if(t.hasAttribute('data-pyv')) pyEstado.vista = t.getAttribute('data-pyv'); else pyEstado.ritmo = Number(t.getAttribute('data-pyr')); pyOcultar(); pintar(); } });
-  raiz.addEventListener('change', e => { const c = e.target.closest('input[data-pyk]'); if(c){ pyEstado[c.getAttribute('data-pyk')] = c.checked; pintar(); return; } const a = e.target.closest('input[data-pya]'); if(a){ pyEstado.off[a.getAttribute('data-pya')] = !a.checked; pyOcultar(); pintar(); } });
+  raiz.addEventListener('click', e => { const t = e.target.closest('.py-tab'); const x = e.target.closest('.py-b'); if(x){ pyEstado.extra = Math.max(0, Math.min(12, pyEstado.extra + Number(x.getAttribute('data-pyx')))); pyOcultar(); pyQuieto(pintar); return; } if(t){ if(t.hasAttribute('data-pyv')) pyEstado.vista = t.getAttribute('data-pyv'); else pyEstado.ritmo = Number(t.getAttribute('data-pyr')); pyOcultar(); pyQuieto(pintar); } });
+  raiz.addEventListener('change', e => { const c = e.target.closest('input[data-pyk]'); if(c){ pyEstado[c.getAttribute('data-pyk')] = c.checked; pyQuieto(pintar); return; } const a = e.target.closest('input[data-pya]'); if(a){ pyEstado.off[a.getAttribute('data-pya')] = !a.checked; pyOcultar(); pyQuieto(pintar); } });
   raiz.addEventListener('pointermove', e => { const g = e.target.closest('.py-svg'); if(g && !g.classList.contains('py-vel')) pyCursor(e, g); });
   raiz.addEventListener('pointerover', e => { const t = e.target.closest('[data-pt]'); if(t && pyM) pyTip(pyM.tips[Number(t.getAttribute('data-pt'))], e.clientX, e.clientY); });
   raiz.addEventListener('pointerout', e => { const a = e.target.closest('[data-pt],.py-svg'), b = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('[data-pt],.py-svg') : null; if(a && a !== b) pyOcultar(); });
@@ -9680,4 +9700,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.114 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.116 · 16-11-2026 ==== -->
