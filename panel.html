@@ -2289,7 +2289,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.113';
+const APP_VERSION = '0.73.114';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -6706,7 +6706,7 @@ function renderRendimiento(raiz, datos, esc){
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
   // ===== Proyección de cerámica: recta según el ritmo real, con detalle al pasar el cursor =====
-  const pyEstado = {off: {}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 28};
+  const pyEstado = {off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 28};
   const PY_MS = 864e5, PY_DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
   let pyM = null;
   const pyFd = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
@@ -6769,10 +6769,10 @@ function renderRendimiento(raiz, datos, esc){
     const P = pyDatos(); if(!P){ pyM = null; return ''; }
     const E = pyEstado, nuevo = Date.now() < new Date('2026-11-23T23:59:59').getTime() ? ' <i class="tnuevo">Nuevo</i>' : '';
     const areas = ['Piso', 'Muro Baños', 'Muro Cocina', 'Muro', 'Pasillos'].filter(a => P.areas.indexOf(a) >= 0).concat(P.areas.filter(a => ['Piso', 'Muro Baños', 'Muro Cocina', 'Muro', 'Pasillos'].indexOf(a) < 0));
-    const fuera = areas.filter(a => E.off[a]).map(a => AREA_LABEL[a] || a);
+    const pyLab = a => a === 'Muro' ? 'Piso -1' : (AREA_LABEL[a] || a), fuera = areas.filter(a => E.off[a]).map(pyLab);
     const cab = '<div class="rd-tit py-ancla">Proyección · Cerámica' + (fuera.length ? ' · sin ' + esc(fuera.join(', ')) : '') + nuevo + '</div>';
     const filaCtl = (cap, cont) => '<div class="py-fc"><span class="py-cap">' + cap + '</span><div class="py-cks">' + cont + '</div></div>';
-    const ckA = filaCtl('Partidas', areas.map(a => '<label class="py-ck"><input type="checkbox" data-pya="' + esc(a) + '"' + (E.off[a] ? '' : ' checked') + '><span>' + esc(AREA_LABEL[a] || a) + '</span></label>').join(''));
+    const ckA = filaCtl('Partidas', areas.map(a => '<label class="py-ck"><input type="checkbox" data-pya="' + esc(a) + '"' + (E.off[a] ? '' : ' checked') + '><span>' + esc(pyLab(a)) + '</span></label>').join(''));
     if(P.msg){ pyM = null; return cab + '<div class="py-caja">' + ckA + '</div><div class="rd-vacio">' + P.msg + '</div>'; }
     const hasta = P.n - 1, lleva = P.cum[hasta], falta = P.K - lleva;
     const a0 = E.ritmo ? Math.max(0, hasta - E.ritmo) : 0, v = (lleva - P.cum[a0]) / Math.max(1, hasta - a0);
@@ -9680,4 +9680,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.113 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.114 · 16-11-2026 ==== -->
