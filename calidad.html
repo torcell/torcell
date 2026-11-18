@@ -112,6 +112,8 @@ html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 .avlect{font-size:12px;color:var(--sub);border:1px solid var(--border);padding:6px 9px;line-height:1.35;}.avlect[hidden]{display:none;}
 .segnota{font-size:12px;color:var(--sub);line-height:1.35;margin-top:-6px;}.segnota[hidden],#mObsToggle[hidden]{display:none;}
 .seg button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.mcor-cab{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px 10px;}.mcor-cab h3{margin:0;}
+.mcor-esq{margin-left:auto;font-size:10.5px;line-height:1.25;color:var(--sub);border:1px dashed var(--strong);padding:3px 7px;text-align:right;}
 .tile{position:relative;}
 .tile.c{border-top-color:var(--accent);}
 .tile.c:not(.v)::before{content:"";position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 3px 0 color-mix(in srgb,var(--warn) 30%,transparent);animation:luzCor 2.6s ease-in-out infinite;pointer-events:none;}
@@ -772,6 +774,10 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   @keyframes histEsp{from{transform:scaleX(1);}to{transform:scaleX(0);}}
   .hit small{display:block;color:var(--sub);font-size:11px;margin-bottom:2px;}
   .hit em{display:flex;align-items:center;margin-top:6px;min-height:32px;font-style:normal;font-size:11px;color:var(--ok,#2e8b3a);font-weight:700;}
+  .hit .hbtns{display:flex;flex-direction:column;gap:10px;margin-top:8px;}.hit .hbtns:empty{display:none;}
+  .hit .hbtns button{margin-top:0 !important;}
+  .hit .hmas{width:100%;border:1px solid var(--border);background:transparent;color:var(--sub);font:inherit;font-size:12px;font-weight:600;padding:6px 8px;min-height:32px;box-sizing:border-box;cursor:pointer;}
+  .hit .hmas:hover{border-color:var(--accent);color:var(--text);}.hit .hmas:active{background:var(--border);}
   .hit .hrev{margin-top:6px;width:100%;border:1px solid var(--strong);background:var(--panel);color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:6px 8px;min-height:32px;box-sizing:border-box;cursor:pointer;}
   .hit .hrev:hover:not(:disabled){border-color:var(--accent);background:var(--soft);}
   .hit .hrev:active:not(:disabled){background:var(--border);}
@@ -1245,7 +1251,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
         <div class="obsfotos" id="mObsFotos"></div>
         <button class="btn" id="mElegir" type="button">＋ Elegir observaciones</button>
         <div class="obslista" id="mLista" hidden></div>
-        <div class="mcor" id="mCor"><h3>Lo que corregiste<i class="tnuevo" data-desde="2026-11-08">Nuevo</i></h3><ul id="mCorLista"></ul><small id="mCorNota"></small><button class="btn primary" id="mCorConf" type="button">Confirmar a jefa de calidad</button></div>
+        <div class="mcor" id="mCor"><div class="mcor-cab"><h3>Lo que corregiste<i class="tnuevo" data-desde="2026-11-08">Nuevo</i></h3><span class="mcor-esq">El subcontrato debe marcar Corregido</span></div><ul id="mCorLista"></ul><small id="mCorNota"></small><button class="btn primary" id="mCorConf" type="button">Confirmar a jefa de calidad</button></div>
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
@@ -1270,7 +1276,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.25';
+const CAL_VERSION = '1.38.26';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -3239,7 +3245,7 @@ limpiarNuevos();
     const m = String(t).match(/^(.*?): (.+?) lo dejó como Corregido\./);
     return m ? {lugar: m[1], quien: m[2]} : {lugar: '', quien: ''};
   }
-  function cuerpo(x){ const p = partes(x.texto); return '<small>' + esc(fechaHora(x.ts)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small><div>' + (p.quien ? esc(p.quien) + ' lo dejó como corregido.' : esc(String(x.texto).split(' Antes:')[0])) + '</div>' + (x.rev ? '<em class="hpie">✓ Revisado ' + esc(fechaHora(x.rev)) + '</em>' : (soloLectura() ? '' : '<button type="button" class="hrev" data-id="' + esc(x.id) + '">Revisado</button>')); }
+  function cuerpo(x){ const p = partes(x.texto); return '<small>' + esc(fechaHora(x.ts)) + (p.lugar ? ' · ' + esc(p.lugar) : '') + '</small><div>' + (p.quien ? esc(p.quien) + ' lo dejó como corregido.' : esc(String(x.texto).split(' Antes:')[0])) + '</div>' + (x.rev ? '<em class="hpie">✓ Revisado ' + esc(fechaHora(x.rev)) + '</em>' : '') + '<div class="hbtns">' + (p.lugar ? '<button type="button" class="hmas" data-lugar="' + esc(p.lugar) + '">Más detalles</button>' : '') + (!x.rev && !soloLectura() ? '<button type="button" class="hrev" data-id="' + esc(x.id) + '">Revisado</button>' : '') + '</div>'; }
   function pintar(){
     const box = $h('hLista'); if(!box) return;
     const antes = new Map(); nodos.forEach((n, id) => antes.set(id, n.getBoundingClientRect().top));
@@ -3298,6 +3304,18 @@ limpiarNuevos();
     if(!ok){ clearTimeout(tim.get(id)); const y = lista.find(q => q.id === id) || x; y.rev = antes; y.espera = false; local.delete(id); pintar(); aviso('No se pudo guardar. Intenta de nuevo.'); }
     return ok;
   }
+  // ===== Más detalles: abre el dpto en su pestaña (piso, muro baño o muro cocina) =====
+  $h('hLista').addEventListener('click', e => {
+    const m = e.target.closest('.hmas'); if(!m) return;
+    const q = String(m.dataset.lugar || '').split(' · ');
+    if(q.length < 3) return;
+    const sc = q[2] === 'Muro baño' ? 'muros' : q[2] === 'Muro cocina' ? 'cocina' : 'piso';
+    const dd = q[1] === 'Pasillo' ? 'Pasillo' : q[1].replace(/^Dpto /, '');
+    const d = LAYOUT.find(x => x.p === q[0] && x.d === dd);
+    if(!d) return;
+    if(scope !== sc){ const tb = document.querySelector('#pestanas button[data-sc="' + sc + '"]'); if(tb) tb.click(); }
+    abrir(clave(d, sc));
+  });
   $h('hLista').addEventListener('click', async e => {
     const b = e.target.closest('.hrev'); if(!b) return;
     b.disabled = true;
@@ -3348,4 +3366,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.25 · 17-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.26 · 18-11-2026 ==== -->
