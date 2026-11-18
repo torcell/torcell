@@ -824,8 +824,37 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .pe-meta{display:block;font-size:11px;color:var(--sub);margin-top:2px;}
 .pe-enc{font-size:12px;color:rgba(255,255,255,.8);}
 #velProt .modal{width:500px;max-width:100%;}
+.pus.casc{grid-template-columns:repeat(8,minmax(0,1fr)) 14px 14px;}
+.pasc{align-self:stretch;min-height:40px;pointer-events:none;user-select:none;border:1px solid var(--border);background:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--sub) 45%,transparent) 4px 7px);opacity:.7;}
+.pe-conf{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--sub);flex:none;}
+.pe-si,.pe-no{height:28px;padding:0 10px;border:1px solid var(--strong);background:var(--panel);color:var(--text);font-size:12px;font-weight:700;}
+.pe-si{border-color:var(--bad);color:var(--bad);}
+#pAgregar{width:46px;padding:0;font-size:18px;}
+.pamb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px;}
+.pamb button{min-height:34px;border:1px solid var(--strong);margin-left:-1px;background:var(--panel);color:var(--sub);font-size:12px;font-weight:700;padding:0 6px;transition:background .15s ease,color .15s ease;}
+.pamb button:first-child{margin-left:0;}
+.pamb button.on{background:var(--accent);border-color:var(--accent);color:#fff;position:relative;}
+.pamb[hidden],.pagrega[hidden]{display:none;}
+.cap-urg{display:inline-block;flex:none;background:var(--bad);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;line-height:1;padding:4px 8px;border-radius:999px;}
+.purg{margin:0 0 12px;border:1px solid var(--strong);background:var(--soft);}
+.purg-h{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);border-bottom:1px solid var(--border);}
+.purg-l{max-height:210px;overflow:auto;}
+.purg-it{display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:4px 8px;width:100%;text-align:left;padding:8px 10px;border:0;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;}
+.purg-it:last-child{border-bottom:0;}
+.purg-it:hover{background:color-mix(in srgb,var(--bad) 10%,transparent);}
+.purg-it b{font-size:12.5px;white-space:nowrap;}
+.purg-t{min-width:0;overflow-wrap:anywhere;color:var(--sub);}
+main{position:relative;}
+@media (min-width:1240px){
+  .purg{position:absolute;left:calc(100% + 12px);top:0;width:calc((100vw - 868px) / 2 - 36px);min-width:160px;max-width:300px;margin:0;}
+  .purg-l{max-height:calc(100vh - 140px);}
+  .purg-it{grid-template-columns:auto minmax(0,1fr);}
+  .purg-t{grid-column:1 / -1;}
+}
+.pe-del,.pe-conf{margin-left:auto;}
+
 .pcel.sinp small{opacity:.6;}
-@media (max-width:520px){.pe-it{flex-wrap:wrap;}.pe-it label{flex-basis:100%;}.pe-alta{flex:1;width:auto;}}
+@media (max-width:520px){.pe-it label{font-size:13px;}.pe-alta{width:92px;font-size:9.5px;letter-spacing:0;line-height:1.1;padding:0 4px;}.pe-it{padding:9px 8px;gap:6px;}.pe-it.auto .pe-del{margin-left:auto;}}
 </style>
 <style id="temasComunCss">
 /* ===== Temas comunes: Claro, Oscuro, Obra ===== */
@@ -854,7 +883,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
   <div class="cluster">
     <span class="conectado">Conectado como: <span id="quien">—</span></span>
-    <span id="verCal" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);align-self:center;padding:0 4px;">Versión 0.2.0</span>
+    <span id="verCal" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);align-self:center;padding:0 4px;">Versión 0.4.0</span>
     <button class="cs-btn" id="irPanel" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg><span>Cambiar de sección</span></button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
     <button class="btn" id="temaComun" type="button" aria-label="Cambiar tema">Tema</button>
@@ -863,10 +892,11 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 </header>
 <div class="infobar" id="infoBar" role="status" hidden></div>
 <main>
-  <div class="pe-nota">Registro para que no se pase nada: marca cada detalle cuando queda resuelto y pon <b>Importancia Alta</b> a lo urgente. La cerámica viene sola del Panel: <b>Partida (en proceso)</b>, <b>Terminado</b> y <b>Pagado</b> cuentan como 100%.</div>
+  <div class="pe-nota">Registro para que no se pase nada antes de meter ceramistas: marca cada detalle cuando queda resuelto y pon <b>Urgente</b> lo que no puede esperar. Los departamentos con cerámica en proceso o terminada ya van al 100%.</div>
+  <aside class="purg" id="pUrg" aria-label="Urgentes"><div class="purg-h">Urgentes <span class="cap-urg" id="pUrgN">0</span></div><div class="purg-l" id="pUrgL"></div></aside>
   <div class="pfil" id="pFil" role="group" aria-label="Filtro"></div>
   <div class="presu"><div id="pResu"></div><button type="button" class="btn small" id="pRefrescar">↻ Actualizar</button></div>
-  <div class="pleyenda arriba"><span><i class="l0"></i>sin avance</span><span><i class="l1"></i>parcial</span><span><i class="l2"></i>100%</span><span><i style="background:var(--bad)"></i>importancia alta pendiente</span></div>
+  <div class="pleyenda arriba"><span><i class="l0"></i>sin avance</span><span><i class="l1"></i>parcial</span><span><i class="l2"></i>100%</span><span><i style="background:var(--bad)"></i>urgente pendiente</span></div>
   <div class="ptorre"><div class="ptecho"></div><div id="pTorre"></div></div>
 </main>
 <div id="velProt">
@@ -874,13 +904,12 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="pmhead"><h2 id="pTit"></h2><span class="prev-cod" id="pPct">0%</span></div>
     <div class="psub" id="pSub">Revisión Pre-Entrega</div>
     <div class="pprog"><i id="pProg"></i></div>
-    <div class="pe-sec" id="pSecPanel">Cerámica · viene del Panel</div>
-    <div class="plista" id="pLista"></div>
-    <div class="pe-sec">Detalles pendientes <i class="tnuevo" data-desde="2026-11-18">Nuevo</i></div>
+    <div class="pe-sec">Detalles <i class="tnuevo" data-desde="2026-11-18">Nuevo</i></div>
     <div class="plista" id="pDet"></div>
+    <div class="pamb" id="pAmb" role="group" aria-label="A quién se le agrega el detalle"></div>
     <div class="pagrega" id="pAgrega">
-      <input type="text" id="pNuevo" maxlength="80" placeholder="Ej.: Falta trazo en baño" autocomplete="off">
-      <button type="button" class="btn" id="pAgregar">＋ Agregar</button>
+      <input type="text" id="pNuevo" maxlength="80" placeholder="Nuevo detalle" autocomplete="off">
+      <button type="button" class="btn" id="pAgregar" aria-label="Agregar detalle">＋</button>
     </div>
     <div class="pmsg" id="pMsg"></div>
     <div class="pacc" id="pAcc">
@@ -891,7 +920,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-// ===== Revisión Pre-Entrega · v0.2.0 · 18-11-2026 =====
+// ===== Revisión Pre-Entrega · v0.4.0 · 18-11-2026 =====
 
 // ===== etiqueta "Nuevo": dura 7 días desde la fecha (data-desde) =====
 window.limpiarNuevos = function(raiz){
@@ -917,16 +946,25 @@ const nomDep = d => d.d === 'Pasillo' ? 'Pasillo' : /^\d+$/.test(String(d.d)) ? 
 const claveDep = d => d.p + '|' + d.d;
 const nomPiso = P => P.p === 'Azotea' ? 'Az.' : P.n < 0 ? 'P' + P.n : String(P.n);
 // ===== estado =====
-// panel: id de partida -> 'pagado' | 'terminado' | 'partida' (en proceso) | ''   ·   DEP: 'piso|dpto' -> {items:[{id,t,ok,alta,ts,u}], ver}
-let PANEL = {}, DEP = {}, cargado = false;
-const NOM_EST = {pagado:'Pagado', terminado:'Terminado', partida:'En proceso', '':'Pendiente'};
+// PANEL: id de partida -> 'pagado' | 'terminado' | 'partida' | ''  (solo sirve para saber si la cerámica ya empezó)
+// PLANT: detalles comunes a todos los dptos [{id,t}]  ·  DEP: 'piso|dpto' -> {m:{id:{ok,alta,ts,u}}, ver}
+let PANEL = {}, PLANT = [], DEP = {}, cargado = false;
 const cumple100 = e => e === 'pagado' || e === 'terminado' || e === 'partida';
-const detalles = d => (DEP[claveDep(d)] && DEP[claveDep(d)].items) || [];
-function puntosPanel(d){ return d.cer.map(c => ({id: c[0], t: 'Cerámica · ' + (c[1] === 'Muro Baños' ? 'Muro baño' : c[1] === 'Muro Cocina' ? 'Muro cocina' : c[1]), est: PANEL[c[0]] || ''})); }
+const esDpto = d => /^\d+$/.test(String(d.d));
+// un dpto con cerámica en proceso, terminada o pagada ya está listo: todos sus detalles van marcados
+const auto = d => d.cer.some(c => cumple100(PANEL[c[0]]));
+const marcas = d => (DEP[claveDep(d)] && DEP[claveDep(d)].m) || {};
+// cada detalle tiene un ámbito e: 'todos' · 'u:04' (los dptos terminados en 04, en todos los pisos) · 'd:Piso 17|1704' (solo ese)
+const sufijo = d => String(d.d).slice(-2);
+const aplicaA = (i, d) => !i.e || i.e === 'todos' || (i.e.indexOf('u:') === 0 && i.e.slice(2) === sufijo(d)) || i.e === 'd:' + claveDep(d);
+const detDe = d => PLANT.filter(i => aplicaA(i, d));
+const txtAmbito = e => !e || e === 'todos' ? '' : e.indexOf('u:') === 0 ? 'Solo dptos ' + e.slice(2) : 'Solo este dpto';
 function avance(d){
-  const p = puntosPanel(d), x = detalles(d);
-  const h = p.filter(i => cumple100(i.est)).length + x.filter(i => i.ok).length, t = p.length + x.length;
-  return {h, t, pct: t ? h / t : 0, alta: x.filter(i => i.alta && !i.ok).length};
+  if(auto(d)){ const n = Math.max(1, detDe(d).length); return {h: n, t: n, pct: 1, alta: 0}; }
+  if(!esDpto(d)) return {h: 0, t: 0, pct: 0, alta: 0};
+  const m = marcas(d), L = detDe(d);
+  const h = L.filter(i => m[i.id] && m[i.id].ok).length, t = L.length;
+  return {h, t, pct: t ? h / t : 0, alta: L.filter(i => m[i.id] && m[i.id].alta && !m[i.id].ok).length};
 }
 const pisos = () => {
   const g = new Map();
@@ -935,83 +973,118 @@ const pisos = () => {
 };
 let filtro = 'todos', actual = null, dr = null, guardando = false;
 const esOk = a => a.t > 0 && a.h === a.t, esPar = a => a.h > 0 && a.h < a.t;
-const cuenta = f => DEPTOS.filter(d => { const a = avance(d); return f === '100' ? esOk(a) : f === 'parcial' ? esPar(a) : f === 'cero' ? a.h === 0 : f === 'alta' ? a.alta > 0 : true; }).length;
+const cuenta = f => DEPTOS.filter(d => { const a = avance(d); return f === '100' ? esOk(a) : f === 'parcial' ? esPar(a) : f === 'cero' ? (a.t > 0 && a.h === 0) : f === 'alta' ? a.alta > 0 : true; }).length;
 function pintarFiltros(){
-  const F = [['todos','Todos'], ['100','100%'], ['parcial','Parcial'], ['cero','Sin avance (0%)'], ['alta','Importancia alta']];
+  const F = [['todos','Todos'], ['100','100%'], ['parcial','Parcial'], ['cero','Sin avance (0%)'], ['alta','Urgente']];
   $p('pFil').innerHTML = F.map(([k, n]) => '<button type="button" data-f="' + k + '" class="' + (k === filtro ? 'on' : '') + '" aria-pressed="' + (k === filtro) + '">' + n + '<small>' + cuenta(k) + '</small></button>').join('');
 }
 function anilloPiso(P){
   let h = 0, t = 0; P.ds.forEach(d => { const a = avance(d); h += a.h; t += a.t; });
   const pct = t ? Math.round(h * 100 / t) : 0;
-  return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc2(P.p) + ': ' + h + ' de ' + t + ' puntos" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
+  return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc2(P.p) + ': ' + pct + '%" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
+}
+// los ascensores van en todos los pisos (menos azotea y P-2): solo se ven, no se pueden tocar
+const conAsc = P => P.p !== 'Azotea' && P.n !== -2;
+const ASC = '<span class="pasc" aria-hidden="true"></span><span class="pasc" aria-hidden="true"></span>';
+function pintarUrg(){
+  const L = [];
+  pisos().forEach(P => P.ds.forEach(d => { if(!esDpto(d) || auto(d)) return; const m = marcas(d); detDe(d).forEach(i => { if(m[i.id] && m[i.id].alta && !m[i.id].ok) L.push({d, t: i.t}); }); }));
+  $p('pUrgN').textContent = L.length;
+  $p('pUrgL').innerHTML = L.length ? L.map(x => '<button type="button" class="purg-it" data-p="' + esc2(x.d.p) + '" data-d="' + esc2(x.d.d) + '"><span class="cap-urg">Urgente</span><b>' + esc2(nomPiso({n: x.d.n, p: x.d.p}) + ' · ' + x.d.d) + '</b><span class="purg-t">' + esc2(x.t) + '</span></button>').join('') : '<div class="pe-vacio">Nada urgente por ahora.</div>';
 }
 function pintarTorre(){
-  pintarFiltros();
+  pintarFiltros(); pintarUrg();
   let n = 0;
-  $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + nomPiso(P) + '</div><div class="pus">' + P.ds.map(d => {
+  $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + nomPiso(P) + '</div><div class="pus' + (conAsc(P) ? ' casc' : '') + '">' + P.ds.map(d => {
     const a = avance(d), ok = esOk(a), par = esPar(a);
-    const fuera = filtro !== 'todos' && !(filtro === '100' ? ok : filtro === 'parcial' ? par : filtro === 'alta' ? a.alta > 0 : a.h === 0);
+    const fuera = filtro !== 'todos' && !(filtro === '100' ? ok : filtro === 'parcial' ? par : filtro === 'alta' ? a.alta > 0 : (a.t > 0 && a.h === 0));
     if(!fuera) n++;
     const et = d.d === 'Pasillo' ? 'Pas.' : String(d.d);
-    return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (a.t ? '' : ' sinp') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + (a.alta ? ', ' + a.alta + ' de importancia alta' : '') + '">' + (a.alta ? '<span class="rk" title="Importancia alta pendiente">' + a.alta + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + (a.t ? Math.round(a.pct * 100) + '%' : '—') + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
-  }).join('') + '</div>' + anilloPiso(P) + '</div>').join('');
+    return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (a.t ? '' : ' sinp') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + (a.t ? Math.round(a.pct * 100) + '%' : 'sin detalles') + (a.alta ? ', ' + a.alta + (a.alta === 1 ? ' urgente' : ' urgentes') : '') + '">' + (a.alta ? '<span class="rk" title="Urgente pendiente">' + a.alta + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + (a.t ? Math.round(a.pct * 100) + '%' : '—') + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
+  }).join('') + (conAsc(P) ? ASC : '') + '</div>' + anilloPiso(P) + '</div>').join('');
   $p('pResu').innerHTML = '<b>Revisión Pre-Entrega</b> · ' + cuenta('100') + ' de ' + DEPTOS.length + ' al 100%' + (filtro !== 'todos' ? ' · mostrando ' + n : '');
 }
 $p('pFil').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; filtro = b.dataset.f; pintarTorre(); });
 $p('pTorre').addEventListener('click', e => { const b = e.target.closest('.pcel'); if(b) abrir(b.dataset.p, b.dataset.d); });
+$p('pUrgL').addEventListener('click', e => { const b = e.target.closest('.purg-it'); if(b) abrir(b.dataset.p, b.dataset.d); });
 // ===== ventana del departamento (se trabaja en una copia; Guardar la aplica) =====
 const limpiar = t => String(t).replace(/[\u0000-\u001f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
-const nuevoId = () => 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const fechaCorta = ts => { if(!ts) return ''; const f = new Date(ts); return String(f.getDate()).padStart(2, '0') + '/' + String(f.getMonth() + 1).padStart(2, '0') + '/' + f.getFullYear(); };
 function msg(t, ok){ const m = $p('pMsg'); m.textContent = t; m.className = 'pmsg' + (t ? (ok ? ' ok' : ' err') : ''); }
+let porQuitar = '', ambito = 'todos';
 function abrir(p, dd){
   const d = DEPTOS.find(x => x.p === p && String(x.d) === String(dd)); if(!d) return;
-  const dep = DEP[claveDep(d)];
-  actual = d; dr = {items: detalles(d).map(x => ({...x})), ver: dep ? dep.ver : 0};
+  const dep = DEP[claveDep(d)], m = {};
+  Object.keys(marcas(d)).forEach(k => { m[k] = {...marcas(d)[k]}; });
+  actual = d; dr = {m, ver: dep ? dep.ver : 0}; porQuitar = ''; ambito = 'todos';
   $p('pNuevo').value = ''; msg('');
   pintarVentana();
   $p('velProt').classList.add('on'); document.body.classList.add('bloq');
 }
 function cerrar(){ $p('velProt').classList.remove('on'); document.body.classList.remove('bloq'); actual = dr = null; }
-function pintarVentana(){
-  const d = actual, pts = puntosPanel(d);
-  const h = pts.filter(x => cumple100(x.est)).length + dr.items.filter(x => x.ok).length, t = pts.length + dr.items.length, pct = t ? Math.round(h * 100 / t) : 0;
-  $p('pTit').textContent = d.p + ' · ' + nomDep(d);
-  $p('pPct').textContent = t ? pct + '%' : '—';
-  $p('pProg').style.width = pct + '%';
-  $p('pSecPanel').hidden = $p('pLista').hidden = !pts.length;
-  $p('pLista').innerHTML = pts.map(x => {
-    const ok = cumple100(x.est);
-    return '<div class="pe-it auto' + (ok ? ' hecho' : '') + '"><label><input type="checkbox"' + (ok ? ' checked' : '') + ' tabindex="-1" onclick="return false"><span>' + esc2(x.t) + '</span></label><span class="pe-est' + (x.est === 'partida' ? ' par' : ok ? ' ok' : '') + '">' + NOM_EST[x.est] + '</span></div>';
-  }).join('');
-  $p('pDet').innerHTML = dr.items.length ? dr.items.map(i =>
-    '<div class="pe-it' + (i.ok ? ' hecho' : '') + '" data-id="' + esc2(i.id) + '"><label><input type="checkbox"' + (i.ok ? ' checked' : '') + '><span>' + esc2(i.t) + (i.ok && i.ts ? '<small class="pe-meta">Resuelto ' + esc2(fechaCorta(i.ts)) + '</small>' : '') + '</span></label>' +
-    '<button type="button" class="pe-alta' + (i.alta ? ' on' : '') + '" data-a="1" aria-pressed="' + (i.alta ? 'true' : 'false') + '" title="Marcar como importancia alta">Importancia Alta</button>' +
-    '<button type="button" class="pe-del" data-q="1" title="Quitar este detalle" aria-label="Quitar este detalle">×</button></div>'
-  ).join('') : '<div class="pe-vacio">Sin detalles. Agrega lo que falta revisar o terminar en este departamento.</div>';
+function cabVentana(){
+  const d = actual, a = avanceVentana();
+  $p('pPct').textContent = a.t ? Math.round(a.pct * 100) + '%' : '—';
+  $p('pProg').style.width = Math.round(a.pct * 100) + '%';
 }
-$p('pDet').addEventListener('change', e => { const f = e.target.closest('.pe-it'); if(!f || !dr) return; const i = dr.items.find(x => x.id === f.dataset.id); if(!i) return; i.ok = e.target.checked; i.ts = i.ok ? Date.now() : null; f.classList.toggle('hecho', i.ok); refrescarCab(); });
+function avanceVentana(){
+  if(auto(actual)) return {pct: 1, t: 1};
+  const L = detDe(actual), h = L.filter(i => dr.m[i.id] && dr.m[i.id].ok).length, t = L.length;
+  return {pct: t ? h / t : 0, t};
+}
+function pintarAmbito(){
+  const d = actual;
+  const O = [['todos', 'Todos los dptos'], ['u:' + sufijo(d), 'Dptos ' + sufijo(d)], ['d:' + claveDep(d), 'Solo este (' + d.d + ')']];
+  $p('pAmb').innerHTML = O.map(([e, n]) => '<button type="button" data-e="' + esc2(e) + '" class="' + (e === ambito ? 'on' : '') + '" aria-pressed="' + (e === ambito) + '">' + esc2(n) + '</button>').join('');
+}
+$p('pAmb').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; ambito = b.dataset.e; pintarAmbito(); });
+function pintarVentana(){
+  const d = actual, lista = auto(d), dpto = esDpto(d);
+  $p('pTit').textContent = d.p + ' · ' + nomDep(d);
+  cabVentana();
+  $p('pSub').textContent = lista ? 'Cerámica en proceso o terminada: todos los detalles van marcados.' : 'Revisión Pre-Entrega';
+  $p('pAgrega').hidden = !dpto; $p('pAmb').hidden = !dpto; if(dpto) pintarAmbito();
+  $p('pAcc').classList.toggle('uno', false);
+  if(!dpto){ $p('pDet').innerHTML = '<div class="pe-vacio">Sin detalles por ahora.</div>'; return; }
+  $p('pDet').innerHTML = detDe(d).length ? detDe(d).map(i => {
+    const x = dr.m[i.id] || {}, ok = lista || !!x.ok;
+    const quitar = porQuitar === i.id;
+    return '<div class="pe-it' + (ok ? ' hecho' : '') + (lista ? ' auto' : '') + '" data-id="' + esc2(i.id) + '"><label><input type="checkbox"' + (ok ? ' checked' : '') + (lista ? ' tabindex="-1" onclick="return false"' : '') + '><span>' + esc2(i.t) + (txtAmbito(i.e) ? '<small class="pe-meta">' + esc2(txtAmbito(i.e)) + '</small>' : '') + (ok && !lista && x.ts ? '<small class="pe-meta">Resuelto ' + esc2(fechaCorta(x.ts)) + '</small>' : '') + '</span></label>' +
+      (lista ? '' : '<button type="button" class="pe-alta' + (x.alta ? ' on' : '') + '" data-a="1" aria-pressed="' + (x.alta ? 'true' : 'false') + '" title="Marcar como urgente">Urgente</button>') +
+      (quitar ? '<span class="pe-conf">¿Quitar este detalle? <button type="button" class="pe-si" data-qs="1">Sí</button><button type="button" class="pe-no" data-qn="1">No</button></span>' : '<button type="button" class="pe-del" data-q="1" title="Quitar este detalle" aria-label="Quitar este detalle">×</button>') + '</div>';
+  }).join('') : '<div class="pe-vacio">Sin detalles. Agrega lo que falta revisar en los departamentos.</div>';
+}
+$p('pDet').addEventListener('change', e => { const f = e.target.closest('.pe-it'); if(!f || !dr || auto(actual)) return; const id = f.dataset.id, x = dr.m[id] || (dr.m[id] = {ok: false, alta: false, ts: null, u: ''}); x.ok = e.target.checked; x.ts = x.ok ? Date.now() : null; f.classList.toggle('hecho', x.ok); const mt = f.querySelector('.pe-meta'); if(mt && !x.ok) mt.remove(); cabVentana(); });
 $p('pDet').addEventListener('click', e => {
   if(!dr) return;
   const f = e.target.closest('.pe-it'); if(!f) return;
-  const i = dr.items.find(x => x.id === f.dataset.id); if(!i) return;
-  if(e.target.closest('.pe-alta')){ i.alta = !i.alta; const b = e.target.closest('.pe-alta'); b.classList.toggle('on', i.alta); b.setAttribute('aria-pressed', i.alta ? 'true' : 'false'); msg(''); }
-  else if(e.target.closest('.pe-del')){ dr.items = dr.items.filter(x => x !== i); msg(''); pintarVentana(); }
+  const id = f.dataset.id;
+  if(e.target.closest('.pe-alta')){ const x = dr.m[id] || (dr.m[id] = {ok: false, alta: false, ts: null, u: ''}); x.alta = !x.alta; const b = e.target.closest('.pe-alta'); b.classList.toggle('on', x.alta); b.setAttribute('aria-pressed', x.alta ? 'true' : 'false'); msg(''); }
+  else if(e.target.closest('.pe-del')){ porQuitar = id; msg(''); pintarVentana(); }
+  else if(e.target.closest('.pe-no')){ porQuitar = ''; pintarVentana(); }
+  else if(e.target.closest('.pe-si')) quitarDetalle(id);
 });
-// al marcar un check solo se mueve el avance de arriba; la lista no se redibuja
-function refrescarCab(){
-  const pts = puntosPanel(actual), h = pts.filter(x => cumple100(x.est)).length + dr.items.filter(x => x.ok).length, t = pts.length + dr.items.length, pct = t ? Math.round(h * 100 / t) : 0;
-  $p('pPct').textContent = t ? pct + '%' : '—'; $p('pProg').style.width = pct + '%';
-  const f = $p('pDet').querySelectorAll('.pe-it'); f.forEach(x => { const i = dr.items.find(z => z.id === x.dataset.id); const s = x.querySelector('.pe-meta'); if(s && i && !i.ok) s.remove(); });
+async function quitarDetalle(id){
+  if(guardando) return; guardando = true;
+  try{
+    const j = await API.plantilla({op: 'del', id});
+    if(j && j.ok){ PLANT = j.plantilla; delete dr.m[id]; porQuitar = ''; pintarTorre(); pintarVentana(); msg('Quitado.', true); }
+    else msg(TXT_ERR[j && j.error] || 'No se pudo quitar. Inténtalo de nuevo.');
+  }catch(e){ msg('No se pudo quitar. Revisa tu conexión.'); }
+  guardando = false;
 }
-function agregar(){
+async function agregar(){
   const t = limpiar($p('pNuevo').value);
   if(!t){ msg('Escribe el detalle que quieres agregar.'); return; }
-  if(dr.items.some(i => i.t.toLowerCase() === t.toLowerCase())){ msg('Ese detalle ya está en la lista.'); return; }
-  if(dr.items.length >= 40){ msg('Este departamento ya tiene el máximo de detalles.'); return; }
-  dr.items.push({id: nuevoId(), t, ok: false, alta: false, ts: null, u: ''});
-  $p('pNuevo').value = ''; msg('Agregado. Se guarda al apretar Guardar.', true); pintarVentana();
-  const u = $p('pDet').lastElementChild; if(u && u.scrollIntoView) u.scrollIntoView({block:'nearest'});
+  if(PLANT.some(i => i.t.toLowerCase() === t.toLowerCase() && (i.e || 'todos') === ambito)){ msg('Ese detalle ya está en la lista.'); return; }
+  if(PLANT.length >= 40){ msg('Ya está el máximo de detalles.'); return; }
+  if(guardando) return; guardando = true; $p('pAgregar').disabled = true;
+  try{
+    const j = await API.plantilla({op: 'add', t, e: ambito});
+    if(j && j.ok){ PLANT = j.plantilla; $p('pNuevo').value = ''; pintarTorre(); pintarVentana(); msg(ambito === 'todos' ? 'Agregado a todos los departamentos.' : 'Agregado.', true); const u = $p('pDet').lastElementChild; if(u && u.scrollIntoView) u.scrollIntoView({block:'nearest'}); }
+    else msg(TXT_ERR[j && j.error] || 'No se pudo agregar. Inténtalo de nuevo.');
+  }catch(e){ msg('No se pudo agregar. Revisa tu conexión.'); }
+  guardando = false; $p('pAgregar').disabled = false;
 }
 $p('pAgregar').addEventListener('click', agregar);
 $p('pNuevo').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); agregar(); } });
@@ -1019,14 +1092,16 @@ $p('pNuevo').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.prevent
 const BTN = ['pGuardar','pGuardarSolo','pCancel','pAgregar'];
 async function guardar(mantener){
   if(guardando || !actual) return;
+  if(!esDpto(actual) || auto(actual)){ cerrar(); return; }
   guardando = true; BTN.forEach(i => { $p(i).disabled = true; });
   const txt = $p('pGuardar').textContent; $p('pGuardar').textContent = 'Guardando…';
   const d = actual;
+  const m = {}; detDe(d).forEach(i => { const x = dr.m[i.id]; if(x && (x.ok || x.alta)) m[i.id] = {ok: !!x.ok, alta: !!x.alta}; });
   try{
-    const j = await API.guardar(d.p, String(d.d), dr.items.map(i => ({id: i.id, t: i.t, ok: !!i.ok, alta: !!i.alta})), dr.ver);
+    const j = await API.guardar(d.p, String(d.d), m, dr.ver);
     if(j && j.ok){
       DEP[claveDep(d)] = j.dep; pintarTorre();
-      if(mantener){ dr.items = j.dep.items.map(x => ({...x})); dr.ver = j.dep.ver; pintarVentana(); msg('Guardado.', true); } else cerrar();
+      if(mantener){ const n = {}; Object.keys(j.dep.m || {}).forEach(k => { n[k] = {...j.dep.m[k]}; }); dr.m = n; dr.ver = j.dep.ver; pintarVentana(); msg('Guardado.', true); } else cerrar();
     }else if(j && j.error === 'desactualizado'){
       if(j.dep) DEP[claveDep(d)] = j.dep; pintarTorre(); cerrar(); aviso('Otra persona cambió este departamento mientras lo editabas. Se actualizó la información; ábrelo de nuevo.');
     }else if(j && (j.error === 'sin_sesion' || j.error === 'sin_permiso' || j.error === 'dispositivo_ocupado')){ /* llamar ya avisó */ }
@@ -1034,7 +1109,7 @@ async function guardar(mantener){
   }catch(e){ msg('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); }
   guardando = false; $p('pGuardar').textContent = txt; BTN.forEach(i => { $p(i).disabled = false; });
 }
-const TXT_ERR = {demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', repetida: 'Ese cambio ya se envió.', solicitud_invalida: 'No se pudo validar el cambio. Actualiza la página e inténtalo de nuevo.', pre_invalido: 'Hay un detalle con datos no válidos.'};
+const TXT_ERR = {demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', repetida: 'Ese cambio ya se envió.', solicitud_invalida: 'No se pudo validar el cambio. Actualiza la página e inténtalo de nuevo.', pre_invalido: 'Hay un dato no válido.'};
 $p('pGuardar').addEventListener('click', () => guardar(false));
 $p('pGuardarSolo').addEventListener('click', () => guardar(true));
 $p('pCancel').addEventListener('click', () => { if(!guardando) cerrar(); });
@@ -1047,7 +1122,7 @@ async function cargar(silencioso){
   cargando = true;
   try{
     const j = await API.cargar();
-    if(j && j.ok){ PANEL = j.panel || {}; DEP = j.deptos || {}; cargado = true; $p('infoBar').hidden = true; if(!actual) pintarTorre(); cargando = false; return 'ok'; }
+    if(j && j.ok){ PANEL = j.panel || {}; PLANT = j.plantilla || []; DEP = j.deptos || {}; cargado = true; $p('infoBar').hidden = true; if(!actual) pintarTorre(); cargando = false; return 'ok'; }
     cargando = false; return (j && (j.error === 'sin_sesion' || j.error === 'sin_permiso' || j.error === 'dispositivo_ocupado')) ? 'sesion' : 'fallo';
   }catch(e){ cargando = false; return 'fallo'; }
 }
@@ -1119,10 +1194,11 @@ function cerrarSesion(msg){
 const API = {
   cargar: async () => {
     const j = await llamar('preEntregaLeer');
-    if(j && j.ok){ if(j.encargado){ try{ document.getElementById('encargado').textContent = String(j.encargado).slice(0, 60); }catch(e){} } return {ok:true, panel: j.panel || {}, deptos: j.deptos || {}}; }
+    if(j && j.ok){ if(j.encargado){ try{ document.getElementById('encargado').textContent = String(j.encargado).slice(0, 60); }catch(e){} } return {ok:true, panel: j.panel || {}, plantilla: j.plantilla || [], deptos: j.deptos || {}}; }
     return j;
   },
-  guardar: (piso, unidad, items, ver) => llamar('preEntregaGuardar', {piso, unidad, items, ver, nonce: nuevoNonce(), ts: Date.now()}, false, 30000)
+  plantilla: b => llamar('preEntregaPlantilla', {op: b.op, t: b.t, e: b.e, id: b.id, nonce: nuevoNonce(), ts: Date.now()}, false, 30000),
+  guardar: (piso, unidad, m, ver) => llamar('preEntregaGuardar', {piso, unidad, m, ver, nonce: nuevoNonce(), ts: Date.now()}, false, 30000)
 };
 function pintarQuien(){ $p('quien').textContent = nombre; }
 function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
