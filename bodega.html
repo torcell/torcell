@@ -263,6 +263,14 @@ body.lectura .edita{display:none !important;}
   .escaner input{flex:1 1 100%;}
   .escaner .btn{flex:1 1 calc(50% - 4px);min-width:0;display:inline-flex;align-items:center;justify-content:center;}
 }
+
+/* ===== Iconos (conjunto Lápiz) ===== */
+.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;}
+.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");}
+.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
+.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
+.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
+.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -508,7 +516,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
     <label class="f" for="mMin">Stock mínimo (en envases)<input id="mMin" type="number" min="0" step="1"></label>
     <label class="chk" for="mRet" style="flex-basis:100%;"><input id="mRet" type="checkbox"> Es una herramienta que se presta y debe volver a bodega</label></div>
   <div class="err" id="mErr"></div>
-  <div class="acciones"><button class="btn" id="mSin" type="button" hidden>Dejar sin catalogar</button><button class="btn" id="mCan" type="button">Cancelar</button><button class="btn primary" id="mOk" type="button">Guardar y cerrar</button></div>
+  <div class="acciones"><button class="btn" id="mSin" type="button" hidden>Dejar sin catalogar</button><button class="btn" id="mGuardarSolo" type="button">Guardar</button><button class="btn primary" id="mOk" type="button">Guardar y cerrar</button><button class="btn" id="mCan" type="button">Cerrar</button></div>
 </div></div>
 
 <div class="velo" id="veloPer"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="perT">
@@ -518,7 +526,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
     <label class="f" for="pSub" id="lbPSub">Trabaja para<select id="pSub"></select></label>
     <label class="chk" for="pAct" style="flex-basis:100%;"><input id="pAct" type="checkbox" checked> Está activo en la obra</label></div>
   <div class="err" id="pErr"></div>
-  <div class="acciones"><button class="btn" id="pCan" type="button">Cancelar</button><button class="btn primary" id="pOk" type="button">Guardar y cerrar</button></div>
+  <div class="acciones"><button class="btn" id="pGuardarSolo" type="button">Guardar</button><button class="btn primary" id="pOk" type="button">Guardar y cerrar</button><button class="btn" id="pCan" type="button">Cerrar</button></div>
 </div></div>
 
 <div class="velo" id="veloSin"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="sinT">
@@ -922,7 +930,10 @@ $('mSin').addEventListener('click', () => {
   if(l) l.env = Math.min(9999, l.env + pendienteEnv); else carro.push({sin:true, codigo:c, env:pendienteEnv});
   pintarCarro(); aviso('Quedará en «Sin catalogar»: ' + c);
 });
+let mantener = false;
+$('mGuardarSolo').addEventListener('click', () => { mantener = true; $('mOk').click(); });
 $('mOk').addEventListener('click', async () => {
+  const mant = mantener; mantener = false;
   const nombre = limpio($('mNom').value, 80), cods = $('mCod').value.split(',').map(c => limpio(c, 60)).filter(Boolean);
   const por = Math.round(Number($('mPor').value)), min = Math.max(0, Math.round(Number($('mMin').value)) || 0), m2 = Math.max(0, Number($('mM2').value) || 0);
   if(!nombre){ $('mErr').textContent = 'Escribe el nombre del material.'; return; }
@@ -937,7 +948,8 @@ $('mOk').addEventListener('click', async () => {
   const r = await api('bodegaMaterial', {material:datos});
   b.disabled = false; b.textContent = 'Guardar y cerrar';
   if(!r.ok){ if(r.error !== 'sin_sesion') $('mErr').textContent = r.error === 'codigo_repetido' ? 'Un código ya pertenece a «' + (r.con || 'otro material') + '».' : msgError(r); return; }
-  $('veloMat').classList.remove('on'); aplicar(r);
+  if(!mant) $('veloMat').classList.remove('on'); aplicar(r);
+  if(mant) editando = D.materiales.find(m => m.codigos.some(c => c.toLowerCase() === cods[0].toLowerCase())) || editando;
   if(pendienteCod){ const c = pendienteCod; pendienteCod = null; agregarCodigo(c); }
   if(pendienteSin){
     const sid = pendienteSin; pendienteSin = null;
@@ -968,7 +980,9 @@ function abrirPersona(id){
 }
 $('pTipo').addEventListener('change', () => { $('lbPSub').hidden = $('pTipo').value !== 'trabajador'; });
 $('pCan').addEventListener('click', () => $('veloPer').classList.remove('on'));
+$('pGuardarSolo').addEventListener('click', () => { mantener = true; $('pOk').click(); });
 $('pOk').addEventListener('click', async () => {
+  const mant = mantener; mantener = false;
   const nombre = limpio($('pNom').value, 60); if(!nombre){ $('pErr').textContent = 'Escribe el nombre.'; return; }
   const tipo = $('pTipo').value, persona = {nombre, tipo, sub:tipo === 'trabajador' ? $('pSub').value : '', activo:$('pAct').checked};
   if(editPer) persona.id = editPer.id;
@@ -976,7 +990,8 @@ $('pOk').addEventListener('click', async () => {
   const r = await api('bodegaPersona', {persona});
   b.disabled = false; b.textContent = 'Guardar y cerrar';
   if(!r.ok){ if(r.error !== 'sin_sesion') $('pErr').textContent = msgError(r); return; }
-  $('veloPer').classList.remove('on'); aplicar(r); aviso('Guardado.');
+  if(!mant) $('veloPer').classList.remove('on'); aplicar(r); aviso('Guardado.');
+  if(mant) editPer = D.personas.find(x => x.nombre === nombre) || editPer;
 });
 $('nuevaPer').addEventListener('click', () => abrirPersona(null));
 $('tPer').addEventListener('click', e => { const b = e.target.closest('button[data-p]'); if(b) abrirPersona(b.dataset.p); });
@@ -1058,7 +1073,7 @@ function pintarPre(){
   const a = $('alertaV');
   if(venc.length){
     const res = venc.slice(0, 3).map(x => { const m = matDe(x.mid); return esc((m ? m.nombre : '?')) + ' (' + esc(nomPer(x.persona)) + ', ' + diasAtraso(x) + ' d)'; }).join(' · ');
-    a.innerHTML = '<b>⚠ ' + venc.length + (venc.length === 1 ? ' préstamo' : ' préstamos') + ' sin devolver fuera de plazo:</b> ' + res + (venc.length > 3 ? ' y ' + (venc.length - 3) + ' más' : '') + ' <button class="btn small" id="verVenc" type="button">Ver</button>'; a.hidden = false;
+    a.innerHTML = '<b><i class="ic ic-al"></i> ' + venc.length + (venc.length === 1 ? ' préstamo' : ' préstamos') + ' sin devolver fuera de plazo:</b> ' + res + (venc.length > 3 ? ' y ' + (venc.length - 3) + ' más' : '') + ' <button class="btn small" id="verVenc" type="button">Ver</button>'; a.hidden = false;
   } else a.hidden = true;
 }
 $('alertaV').addEventListener('click', e => { if(e.target.id === 'verVenc'){ filtro = ''; $('fPre').value = 'pend'; irTab('pre'); pintarChips(); pintarPre(); } });
@@ -1382,7 +1397,7 @@ async function qrCamara(){
   const v = $('qrVideo');
   try{
     qrStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    v.srcObject = qrStream; await v.play(); v.classList.add('on'); $('qrCam').textContent = '✖ Detener cámara';
+    v.srcObject = qrStream; await v.play(); v.classList.add('on'); $('qrCam').textContent = 'Detener cámara';
     let det = null;
     if('BarcodeDetector' in window){ try{ det = new BarcodeDetector({formats:['qr_code']}); }catch(e){} }
     let jq = null;
@@ -1488,7 +1503,7 @@ async function camara(){
   if(!('BarcodeDetector' in window) || !navigator.mediaDevices){ $('err').textContent = 'Este aparato o navegador no permite leer con la cámara. Usa la pistola o escribe el código.'; return; }
   try{
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    v.srcObject = stream; await v.play(); v.classList.add('on'); $('camBtn').textContent = '✖ Cerrar cámara';
+    v.srcObject = stream; await v.play(); v.classList.add('on'); $('camBtn').textContent = 'Cerrar cámara';
     const det = new BarcodeDetector({formats:['qr_code', 'ean_13', 'code_128', 'code_39']});
     let ultimo = '', t0 = 0;
     tim = setInterval(async () => { try{ const r = await det.detect(v); if(r.length){ const val = r[0].rawValue; if(val !== ultimo || Date.now() - t0 > 1800){ ultimo = val; t0 = Date.now(); agregarCodigo(val); } } }catch(e){} }, 250);
@@ -1533,7 +1548,7 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.20';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.4.23';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.velo.on');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1545,4 +1560,4 @@ selCats(); ajustarModo(); pintarCarro(); pintarTodo();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Bodega · v1.4.21 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Bodega · v1.4.23 · 18-11-2026 ==== -->

@@ -1101,7 +1101,7 @@ function confirmaRestaurarQ(r){
 // el marco crece con el contenido, así no lleva barra propia; el scroll es el de la página
 // ===== Errores de guardado: ver cada dato de cola_errores y decidir (corregir y reenviar / eliminar) =====
 let errN = 0;
-function pintaErrN(n){ errN = n || 0; const e = $('genErrN'); if(e) e.textContent = errN ? '⚠ ' + errN : ''; }
+function pintaErrN(n){ errN = n || 0; const e = $('genErrN'); if(e) e.textContent = errN ? 'Con error: ' + errN : ''; }
 const fecha2 = x => String(x == null ? '' : x).trim().replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (m, d, mm, y) => ('0' + d).slice(-2) + '/' + ('0' + mm).slice(-2) + '/' + y);
 const ER_CAMPOS = [['nombre','Nombre'],['rut','RUT'],['ingreso','Fecha de ingreso'],['nacimiento','Nacimiento'],['nacionalidad','Nacionalidad'],['civil','Estado civil'],['rol','Cargo'],['calle','Calle'],['num','Número'],['comuna','Comuna'],['user','Correo (usuario)'],['prov','Dominio'],['suf','Final'],['obra','Obra']];
 async function abrirErrores(){
@@ -1224,7 +1224,7 @@ function vistaGenerador(){
     const estadoTxt = () => {
       pintaErrN(enRevision);
       if(!navigator.onLine) return aviso('Sin conexión' + (cola.length ? ': ' + cola.length + ' en cola, se envían al volver.' : '.'), true);
-      if(enRevision) return aviso('⚠ ' + enRevision + ' en revisión (hoja cola_errores).' + (cola.length ? ' ' + cola.length + ' en cola.' : ''), true);
+      if(enRevision) return aviso(enRevision + ' en revisión (hoja cola_errores).' + (cola.length ? ' ' + cola.length + ' en cola.' : ''), true);
       if(corriendo || cola.length) return aviso('Guardando… (' + cola.length + ' en cola)');
       aviso('Guardado');
     };
@@ -1326,7 +1326,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.53';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.55';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1338,4 +1338,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.54 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.55 · 18-11-2026 ==== -->

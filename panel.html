@@ -1655,6 +1655,14 @@
 .sg-acc .sg-mot{flex:1 1 100%;min-width:0;padding:6px 8px;font-size:13px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:0;}
 .sg-acc .sg-b{flex:1 1 0;border-radius:0;font-size:12px;padding:6px 8px;}
 .ff-ok{margin-top:10px;font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;border-radius:0;}
+
+/* ===== Iconos (conjunto Lápiz) ===== */
+.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;}
+.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");}
+.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
+.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
+.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
+.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -2048,7 +2056,7 @@
   <div class="modal" style="max-width:760px;">
     <div id="liqModalBody"></div>
     <div class="actions" style="flex-wrap:wrap;">
-      <button class="btn primary" id="liqMarkPaidBtn">✅ Confirmar liquidación</button>
+      <button class="btn primary" id="liqMarkPaidBtn"><i class="ic ic-ok"></i> Confirmar liquidación</button>
       <button class="btn" id="liqImageBtn">📷 Guardar como imagen</button>
       <button class="btn" id="liqPrintBtn">🖨️ Imprimir / Guardar PDF</button>
       <button class="btn" id="liqCloseBtn">Cerrar</button>
@@ -2335,7 +2343,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.120';
+const APP_VERSION = '0.73.121';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3045,7 +3053,7 @@ function actualizarAlertaDispositivos(lista, avisar){
       const d0 = dispMultiples[0], mas = dispMultiples.length > 1 ? ' (y ' + (dispMultiples.length - 1) + ' cuenta(s) más)' : '';
       avisoToast(d0.bloqueo
         ? '⛔ ' + d0.cuenta + ' intentó entrar desde un 2.º ' + (NOMBRE_TIPO_DISP[d0.bloqueo.k] || 'aparato') + ' y se bloqueó' + mas + '. Míralo en "Inicios de sesión".'
-        : 'ℹ️ ' + d0.cuenta + ' ya usa ' + d0.dispositivos.length + ' aparatos' + mas + '. Míralo en "Inicios de sesión".', d0.bloqueo ? 'error' : 'ok');
+        : d0.cuenta + ' ya usa ' + d0.dispositivos.length + ' aparatos' + mas + '. Míralo en "Inicios de sesión".', d0.bloqueo ? 'error' : 'ok');
     }
   }
 }
@@ -3058,15 +3066,15 @@ function htmlSeccionesAparato(cuenta, x){
   const no = Object.keys(NOMBRE_SECC).filter(k => !por[k]);
   let h = `<div class="dt-sec-r"><b>Primera vez:</b> ${fechaHoraCambio(x.p)}</div><div class="dt-sec-r"><b>Último uso:</b> ${fechaHoraCambio(x.t)}</div>`;
   h += entro.length
-    ? entro.map(k => `<div class="dt-sec-r ok">✔ ${NOMBRE_SECC[k]}<small>primera vez ${fechaHoraCambio(por[k].p)} · último uso ${fechaHoraCambio(por[k].t)} · ${por[k].n} ${por[k].n === 1 ? 'entrada' : 'entradas'}</small></div>`).join('')
+    ? entro.map(k => `<div class="dt-sec-r ok"><i class="ic ic-ok"></i> ${NOMBRE_SECC[k]}<small>primera vez ${fechaHoraCambio(por[k].p)} · último uso ${fechaHoraCambio(por[k].t)} · ${por[k].n} ${por[k].n === 1 ? 'entrada' : 'entradas'}</small></div>`).join('')
     : '<div class="dt-sec-r no">Todavía no hay entradas a secciones registradas para este aparato.</div>';
   if(entro.length && no.length) h += `<div class="dt-sec-r no">No ha entrado a: ${no.map(k => NOMBRE_SECC[k]).join(', ')}</div>`;
   return h;
 }
 function htmlAvisoSecciones(){
-  if(seccAparatos.error) return '<div class="dt-roja">⚠ No se pudo leer el registro de entradas a secciones.</div>';
+  if(seccAparatos.error) return '<div class="dt-roja"><i class="ic ic-al"></i> No se pudo leer el registro de entradas a secciones.</div>';
   if(!seccAparatos.grande) return '';
-  return `<div class="dt-roja">⚠ El registro de entradas está muy grande (${seccAparatos.filas} filas, lectura de ${(seccAparatos.ms / 1000).toFixed(1)} s) y puede dejar lenta la página. Exporta una copia y libera espacio.<br><button type="button" class="btn small" id="seccExportarBtn">Exportar y liberar espacio</button></div>`;
+  return `<div class="dt-roja"><i class="ic ic-al"></i> El registro de entradas está muy grande (${seccAparatos.filas} filas, lectura de ${(seccAparatos.ms / 1000).toFixed(1)} s) y puede dejar lenta la página. Exporta una copia y libera espacio.<br><button type="button" class="btn small" id="seccExportarBtn">Exportar y liberar espacio</button></div>`;
 }
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-disp-sec]'); if(!b) return;
@@ -3119,7 +3127,7 @@ function pintarDispositivosMultiples(){
     const bl = d.bloqueo;
     const cab = bl
       ? `<b>⛔ ${esc(d.cuenta)}</b><span>Intento bloqueado: 2.º ${esc(NOMBRE_TIPO_DISP[bl.k] || 'aparato')} (${esc(bl.e || '?')}) · ${fechaHoraCambio(bl.t)}${bl.n > 1 ? ' · ' + bl.n + ' intentos' : ''}</span>`
-      : `<b>ℹ️ ${esc(d.cuenta)}</b><span>Ya usa ${d.dispositivos.length} aparatos (el máximo permitido)</span>`;
+      : `<b><i class="ic ic-in"></i> ${esc(d.cuenta)}</b><span>Ya usa ${d.dispositivos.length} aparatos (el máximo permitido)</span>`;
     const filas = d.dispositivos.map(x => `<div class="disp-fila"><div class="disp-info"><span>${esc(NOMBRE_TIPO_DISP[x.k] ? NOMBRE_TIPO_DISP[x.k][0].toUpperCase() + NOMBRE_TIPO_DISP[x.k].slice(1) : 'Aparato')} · ${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)}<br>último uso ${fechaHoraCambio(x.t)}</small></div><button type="button" class="btn small" data-disp-lib="${esc(x.id)}" data-cuenta="${esc(d.cuenta)}" data-nombre="${esc((NOMBRE_TIPO_DISP[x.k] || 'aparato') + ' ' + (x.e || ''))}">Liberar</button></div>`).join('');
     return `<div class="disp-item${bl ? '' : ' info'}"><div class="disp-cab">${cab}</div>${filas}
     <button type="button" class="btn small" data-disp-visto="${esc(d.cuenta)}">Entendido</button></div>`;
@@ -4625,7 +4633,7 @@ function filasEstadoAdminHtml(cell, st, destino){
       largo = ts ? fechaCorta(ts) : 'sin fecha';
       corto = ts ? fechaCortaMovil(ts) : 'sin fecha';
     }
-    return `<button type="button" class="est-fila ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-estn="${n}" ${habilitado ? '' : 'disabled'}><span class="est-caja">${activo ? '✓' : ''}</span><span class="est-nombre">${nombres[n - 1]}</span><span class="est-fecha"><span class="f-largo">${largo}</span><span class="f-corto">${corto}</span></span></button>`;
+    return `<button type="button" class="est-fila ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-estn="${n}" ${habilitado ? '' : 'disabled'}><span class="est-caja">${activo ? '<i class="ic ic-ok"></i>' : ''}</span><span class="est-nombre">${nombres[n - 1]}</span><span class="est-fecha"><span class="f-largo">${largo}</span><span class="f-corto">${corto}</span></span></button>`;
   }).join('');
 }
 function reversoAdminHtml(cell, st){
@@ -4678,9 +4686,9 @@ function abrirAsignar(id){
   document.getElementById('asignarSub').textContent = `Depto ${cell.dpto} · ${AREA_LABEL[cell.area] || cell.area} · ${cell.piso}`;
   let html = '';
   if(pisoCell && pw && pw !== actual) html += `<button type="button" class="asig-op piso" data-w="${esc(pw)}">Igual al Piso: ${esc(nomVis(pw))}</button>`;
-  html += activos.map(w => `<button type="button" class="asig-op${w === actual ? ' actual' : ''}" data-w="${esc(w)}">${w === actual ? '✓ ' : ''}${esc(w)}</button>`).join('');
-  html += `<button type="button" class="asig-op${esGuion(actual) ? ' actual' : ''}" data-w="${esc(esGuion(actual) ? actual : guion)}">${esGuion(actual) ? '✓ ' : ''}${NOM_PROPIO}</button>`;
-  if(actual && !esGuion(actual) && !activos.includes(actual)) html += `<button type="button" class="asig-op actual" data-w="${esc(actual)}">✓ ${esc(actual)}${esPropio(actual) ? '' : '<small>(inactivo o de otra especialidad)</small>'}</button>`;
+  html += activos.map(w => `<button type="button" class="asig-op${w === actual ? ' actual' : ''}" data-w="${esc(w)}">${w === actual ? '<i class="ic ic-ok"></i> ' : ''}${esc(w)}</button>`).join('');
+  html += `<button type="button" class="asig-op${esGuion(actual) ? ' actual' : ''}" data-w="${esc(esGuion(actual) ? actual : guion)}">${esGuion(actual) ? '<i class="ic ic-ok"></i> ' : ''}${NOM_PROPIO}</button>`;
+  if(actual && !esGuion(actual) && !activos.includes(actual)) html += `<button type="button" class="asig-op actual" data-w="${esc(actual)}"><i class="ic ic-ok"></i> ${esc(actual)}${esPropio(actual) ? '' : '<small>(inactivo o de otra especialidad)</small>'}</button>`;
   if(actual) html += '<button type="button" class="asig-op nadie" data-w="">Dejar sin asignar</button>';
   const grid = document.getElementById('asignarGrid');
   grid.innerHTML = html; grid.dataset.id = id;
@@ -4728,7 +4736,7 @@ function pasosVentanaHtml(cell, st, destino){
     const habilitado = !bloqueado && pagadoLibre_ok(n, actual) && (isAdmin || n < 3) && (destino >= n || turboMode || destino === n - 1 || (frg && n === 2 && destino < 2));
     let fecha = '—';
     if(activo){ const ts = cambio ? Date.now() : fechas[n - 1]; fecha = ts ? fechaCorta(ts) : 'sin fecha'; }
-    return `<button type="button" class="vt-paso ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-vtn="${n}" ${n === 3 && !pagadoLibre ? 'title="Pagado se marca desde las liquidaciones" ' : ''}${habilitado ? '' : 'disabled'}><span class="vt-caja">${activo ? '✓' : ''}</span><span class="vt-nombre">${nombres[n - 1]}</span><span class="vt-fecha">${fecha}</span></button>`;
+    return `<button type="button" class="vt-paso ${clases[n - 1]}${activo ? ' on' : ''}${cambio ? ' cambio' : ''}" data-vtn="${n}" ${n === 3 && !pagadoLibre ? 'title="Pagado se marca desde las liquidaciones" ' : ''}${habilitado ? '' : 'disabled'}><span class="vt-caja">${activo ? '<i class="ic ic-ok"></i>' : ''}</span><span class="vt-nombre">${nombres[n - 1]}</span><span class="vt-fecha">${fecha}</span></button>`;
   }).join('');
 }
 // ---- Calidad → Panel (solo lectura): revisiones hechas en la sección de Calidad ----
@@ -4744,10 +4752,10 @@ function calidadDe(cell){
 }
 function calIco(cell){
   const r = calidadDe(cell); if(!r) return '';
-  if(r.e === 'revisado') return '<span class="cal-ico ok" title="Calidad: revisado sin observaciones">✔</span>';
-  if(r.e === 'validado') return '<span class="cal-ico cor" title="Calidad: corregido y validado">✓✓</span>';
-  if(r.e === 'corregido') return '<span class="cal-ico cor" title="Calidad: corregido, falta validar">✓</span>';
-  if(r.e === 'observado') return '<span class="cal-ico obs" title="Calidad: con observación">⚠</span>';
+  if(r.e === 'revisado') return '<span class="cal-ico ok" title="Calidad: revisado sin observaciones"><i class="ic ic-ok"></i></span>';
+  if(r.e === 'validado') return '<span class="cal-ico cor" title="Calidad: corregido y validado"><i class="ic ic-ok"></i><i class="ic ic-ok"></i></span>';
+  if(r.e === 'corregido') return '<span class="cal-ico cor" title="Calidad: corregido, falta validar"><i class="ic ic-ok"></i></span>';
+  if(r.e === 'observado') return '<span class="cal-ico obs" title="Calidad: con observación"><i class="ic ic-al"></i></span>';
   return '';
 }
 // ===== nombres: completo si cabe en el div; si no, solo la inicial del primer apellido ("Silvia G.") =====
@@ -4795,7 +4803,7 @@ function calLateral(){
   const cell = ventanaId ? cellById[ventanaId] : null;
   const r = cell && calLadoOn(cell) ? calidadDe(cell) : null;
   if(!r){ box.classList.remove('on'); return; }
-  const est = {revisado: ['Sin observaciones', '#2e9e6a'], observado: ['Con observación', '#e0584a'], corregido: ['✓ Corregido, falta validar', '#4f8fd6'], validado: ['✓✓ Corregido y validado', '#4f8fd6'], pendiente: ['Por revisar', '#e08a1e']}[r.e] || [r.e, '#4f8fd6'];
+  const est = {revisado: ['Sin observaciones', '#2e9e6a'], observado: ['Con observación', '#e0584a'], corregido: ['Corregido, falta validar', '#4f8fd6'], validado: ['Corregido y validado', '#4f8fd6'], pendiente: ['Por revisar', '#e08a1e']}[r.e] || [r.e, '#4f8fd6'];
   const items = String(r.d || '').split(', ').map(x => x.match(/^(.+) ×(\d+)$/)).filter(Boolean);
   const quien = calNombreLimpio(r.u), f = CAL_FECHA(r.ts);
   const conLista = r.e === 'observado' || r.e === 'corregido' || r.e === 'validado';
@@ -5949,7 +5957,7 @@ function pintarObjetivos(){
   const pend = objetivosPendientes();
   const hechos = OBJETIVOS.filter(o => o.hecho);
   const visibles = objetivosVerTodos ? pend : pend.slice(0, 3);
-  const itemHtml = x => `<div class="obj-item ${x.e.clase}"><div class="obj-txt"><b>🎯 ${esc(x.o.titulo)}</b>${x.o.nota ? `<span class="obj-det">${esc(x.o.nota)}</span>` : ''}<div class="obj-meta"><span class="obj-cuando">${esc(x.e.txt)}</span><span>· ${esc(fechaLarga(x.o.fecha))}</span>${chipNivel('Importancia', x.o.importancia)}</div></div>${soloVer ? '' : `<div class="obj-btns"><button type="button" class="btn small" data-obj-editar="${esc(x.o.id)}">✎ Editar</button><button type="button" class="btn small" data-obj-hecho="${esc(x.o.id)}">✓ Hecho</button></div>`}</div>`;
+  const itemHtml = x => `<div class="obj-item ${x.e.clase}"><div class="obj-txt"><b>🎯 ${esc(x.o.titulo)}</b>${x.o.nota ? `<span class="obj-det">${esc(x.o.nota)}</span>` : ''}<div class="obj-meta"><span class="obj-cuando">${esc(x.e.txt)}</span><span>· ${esc(fechaLarga(x.o.fecha))}</span>${chipNivel('Importancia', x.o.importancia)}</div></div>${soloVer ? '' : `<div class="obj-btns"><button type="button" class="btn small" data-obj-editar="${esc(x.o.id)}">✎ Editar</button><button type="button" class="btn small" data-obj-hecho="${esc(x.o.id)}"><i class="ic ic-ok"></i> Hecho</button></div>`}</div>`;
   bar.style.display = 'flex';
   bar.innerHTML = `<div class="obj-head"><h3>🎯 Objetivos${pend.length ? ' (' + pend.length + ')' : ''}</h3>${soloVer ? '' : '<button type="button" class="btn small" id="objAgregar">+ Agregar objetivo</button>'}</div>`
     + visibles.map(itemHtml).join('')
@@ -7302,7 +7310,7 @@ async function abrirAsistencia(){
   function textoGuardado(){
     if(asNPend()) return asCola.fallos ? 'Sin conexión: se reintenta solo…' : 'Guardando…';
     if(asNBuf()) return 'Hay ' + asNBuf() + ' cambio' + (asNBuf() === 1 ? '' : 's') + ' sin guardar';
-    return 'Todo guardado ✓';
+    return 'Todo guardado';
   }
   function avisarGuardado(){
     const m = cuerpo.querySelector('#asMsg'); if(!m) return;
@@ -7466,7 +7474,7 @@ function renderHistorialPeticiones(el){
     const donde = cell ? `${liqLabelForCell(cell)} — ${AREA_LABEL[cell.area]||cell.area} (${cell.piso}, ${cell.categoria})` : p.celda;
     const ok = p.estado === 1;
     return `<div class="peticion-item">
-      <div>${ok ? '✅ Aceptada' : '❌ Rechazada'} · <b>${p.trabajador}</b> pidió <b>${nombreTipoPeticion(p.tipo, cell)}</b></div>
+      <div>${ok ? '<i class="ic ic-ok"></i> Aceptada' : '<i class="ic ic-no"></i> Rechazada'} · <b>${p.trabajador}</b> pidió <b>${nombreTipoPeticion(p.tipo, cell)}</b></div>
       <div class="sub">${donde}</div>
       <div class="sub">Pedida: ${p.fecha ? fechaCortaHora(p.fecha) : '—'} · Resuelta: ${p.resuelta ? fechaCortaHora(p.resuelta) : '—'}</div>
     </div>`;
@@ -7476,7 +7484,7 @@ function renderPeticiones(){
   const el = document.getElementById('peticionesLista');
   if(petTab === 'hist'){ renderHistorialPeticiones(el); return; }
   if(!peticionesPendientes.length){
-    el.innerHTML = '<div style="border:1px dashed var(--border-strong);padding:24px;text-align:center;color:var(--sub);">No hay peticiones esperando. ✅</div>';
+    el.innerHTML = '<div style="border:1px dashed var(--border-strong);padding:24px;text-align:center;color:var(--sub);">No hay peticiones esperando.</div>';
     return;
   }
   el.innerHTML = peticionesPendientes.map(p => {
@@ -7667,9 +7675,9 @@ function pintarReporte(cargando){
   pintarMensajePrevia();
   info.innerHTML = `<b>Se enviará a:</b> ${dest.length ? dest.map(esc).join(', ') : '<i>nadie todavía (usa "Envío y correos")</i>'}<br>${esc(textoProgramacion(reporteEstado.programacion))}` +
     (v ? `<br>${v.ultimo && !v.hayAnterior ? 'Todavía no hay un envío anterior guardado (se guarda desde el próximo envío): por ahora se muestra todo.' : (v.ultimo ? `Mostrando el último reporte enviado (lo que había nuevo desde el ${v.desde || 'inicio'}).` : (!v.desde ? 'Todavía no se ha enviado ningún reporte: se incluye todo.' : (v.todo ? `Mostrando todo, incluso lo ya informado el ${v.desde}.` : `Muestra los pisos con movimiento desde el reporte del ${v.desde}.`)))} (${v.pisos} piso(s) con movimiento, ${v.novedades} partida(s) nueva(s))` : '') +
-    (v && v.incompleta ? `<br><b>⚠ La hoja de datos tiene solo ${v.celdasEnHoja} de ${v.esperadas} departamentos: por eso un piso no puede salir completo y el envío está bloqueado. Pulsa "Completar hoja de datos".</b>` : '') +
-    (sinGuardar() ? '<br><b>⚠ Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '') +
-    (backendVersion && Number(backendVersion) < BACKEND_REQUERIDO ? `<br><b>⚠ Tu Apps Script publicado es la v${esc(backendVersion)} y este panel necesita la v${BACKEND_REQUERIDO}. Publica una "Nueva versión".</b>` : '');
+    (v && v.incompleta ? `<br><b><i class="ic ic-al"></i> La hoja de datos tiene solo ${v.celdasEnHoja} de ${v.esperadas} departamentos: por eso un piso no puede salir completo y el envío está bloqueado. Pulsa "Completar hoja de datos".</b>` : '') +
+    (sinGuardar() ? '<br><b><i class="ic ic-al"></i> Tienes cambios sin guardar: no aparecen en el reporte hasta que guardes.</b>' : '') +
+    (backendVersion && Number(backendVersion) < BACKEND_REQUERIDO ? `<br><b><i class="ic ic-al"></i> Tu Apps Script publicado es la v${esc(backendVersion)} y este panel necesita la v${BACKEND_REQUERIDO}. Publica una "Nueva versión".</b>` : '');
   const listo = !cargando && !!v;
   btn('reporteCompletarBtn').style.display = (v && v.incompleta) ? '' : 'none';
   btn('reporteDeshacerBtn').style.display = (v && v.hayAnterior) ? '' : 'none';
@@ -7898,10 +7906,10 @@ document.getElementById('diagnosticoBtn').addEventListener('click', () => {
   if(isAdmin && dispMultiples.length) dispMultiples.forEach(d => avisos.push({tipo: d.bloqueo ? 'alerta' : 'info', texto: d.bloqueo ? `${esc(d.cuenta)} intentó entrar desde un 2.º ${esc(NOMBRE_TIPO_DISP[d.bloqueo.k] || 'aparato')} (${esc(d.bloqueo.e || '?')}) y se bloqueó. Puede que comparta su acceso. Puedes liberar un cupo en "Inicios de sesión".` : `${esc(d.cuenta)} ya usa ${d.dispositivos.length} aparatos (${d.dispositivos.map(x => esc(x.e || 'Aparato')).join(', ')}), el máximo permitido.`}));
 
   const colorPorTipo = {alerta:'#c0546f', aviso:'#a97e00', info:'var(--sub)'};
-  const iconoPorTipo = {alerta:'⚠️', aviso:'📌', info:'ℹ️'};
+  const iconoPorTipo = {alerta:'<i class="ic ic-al"></i>', aviso:'<i class="ic ic-in"></i>', info:'<i class="ic ic-in"></i>'};
   document.getElementById('diagnosticoLista').innerHTML = avisos.length
     ? avisos.map(a => `<div style="border-left:3px solid ${colorPorTipo[a.tipo]};padding:8px 10px;margin-bottom:8px;background:var(--panel-soft);font-size:12.5px;">${iconoPorTipo[a.tipo]} ${a.texto}</div>`).join('')
-    : `<div class="empty" style="border:1px dashed var(--border-strong);padding:24px;text-align:center;color:var(--sub);">No encontré nada raro por ahora. ✅</div>`;
+    : `<div class="empty" style="border:1px dashed var(--border-strong);padding:24px;text-align:center;color:var(--sub);">No encontré nada raro por ahora.</div>`;
   document.getElementById('diagnosticoOverlay').classList.add('show');
 });
 document.getElementById('diagnosticoCloseBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('diagnosticoOverlay')));
@@ -8730,7 +8738,7 @@ function abrirConfigLiquidacion(){
   const warnEl = document.getElementById('liqSinAsignarWarn');
   if(sinAsignar.length){
     const ejemplos = sinAsignar.slice(0,5).map(c => `${c.dpto==='Pasillo'?'Pasillo':'Dpto '+c.dpto} (${c.piso})`).join(', ');
-    warnEl.innerHTML = `⚠️ Hay <b>${sinAsignar.length}</b> partida(s) Terminada(s) o Pagada(s) sin trabajador asignado — no van a aparecer en ninguna liquidación hasta que las asignes. Ej: ${ejemplos}${sinAsignar.length>5?'…':''}`;
+    warnEl.innerHTML = `<i class="ic ic-al"></i> Hay <b>${sinAsignar.length}</b> partida(s) Terminada(s) o Pagada(s) sin trabajador asignado — no van a aparecer en ninguna liquidación hasta que las asignes. Ej: ${ejemplos}${sinAsignar.length>5?'…':''}`;
     warnEl.style.display = 'block';
   } else {
     warnEl.style.display = 'none';
@@ -9825,4 +9833,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.120 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.121 · 18-11-2026 ==== -->

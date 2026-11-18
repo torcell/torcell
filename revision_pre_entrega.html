@@ -130,7 +130,7 @@ html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 .seg button{cursor:pointer;position:relative;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .08s ease,filter .18s ease;}
 .seg button:not(:disabled):not(.on):hover{border-color:var(--accent);z-index:1;background:color-mix(in srgb,var(--accent) 14%,var(--panel));box-shadow:inset 0 0 0 1px var(--accent),inset 0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);}
 .seg button.on{box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);}
-.seg button::before{content:"✓";margin-right:5px;font-weight:700;visibility:hidden;}
+.seg button::before{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");content:"";display:inline-block;width:1em;height:1em;vertical-align:-.15em;margin-right:5px;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;visibility:hidden;}
 .seg button.on::before{visibility:visible;}
 .seg button.on:not(:disabled):hover{filter:brightness(1.12);z-index:1;}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;z-index:2;}
@@ -855,6 +855,14 @@ main{position:relative;}
 
 .pcel.sinp small{opacity:.6;}
 @media (max-width:520px){.pe-it label{font-size:13px;}.pe-alta{width:70px;font-size:10px;letter-spacing:.02em;padding:0 2px;}.pe-it{padding:9px 8px;gap:6px;}.pe-it.auto .pe-del{margin-left:auto;}}
+
+/* ===== Iconos (conjunto Lápiz) ===== */
+.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;}
+.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");}
+.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
+.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
+.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
+.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
 </style>
 <style id="temasComunCss">
 /* ===== Temas comunes: Claro, Oscuro, Obra ===== */
@@ -883,7 +891,7 @@ main{position:relative;}
   </div>
   <div class="cluster">
     <span class="conectado">Conectado como: <span id="quien">—</span></span>
-    <span id="verCal" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);align-self:center;padding:0 4px;">Versión 0.4.1</span>
+    <span id="verCal" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);align-self:center;padding:0 4px;">Versión 0.4.2</span>
     <button class="cs-btn" id="irPanel" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg><span>Cambiar de sección</span></button>
     <button class="btn" id="refrescar" type="button">Actualizar</button>
     <button class="btn" id="temaComun" type="button" aria-label="Cambiar tema">Tema</button>
@@ -920,7 +928,7 @@ main{position:relative;}
   </div>
 </div>
 <script>
-// ===== Revisión Pre-Entrega · v0.4.1 · 18-11-2026 =====
+// ===== Revisión Pre-Entrega · v0.4.2 · 18-11-2026 =====
 
 // ===== etiqueta "Nuevo": dura 7 días desde la fecha (data-desde) =====
 window.limpiarNuevos = function(raiz){

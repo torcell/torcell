@@ -195,7 +195,7 @@ function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.class
   <section class="kpis" id="kpis"></section>
   <div class="nuevobar" id="nuevoBar" hidden><button class="btn" id="nuevoBtn" type="button">＋ Nuevo cuadro</button><span>Crea un cuadro y elige qué datos lleva: texto, montos, porcentajes, estados, fechas o checks.</span></div>
   <div class="grid" id="grid"></div>
-  <p class="pie">Jefe de Terreno: programación, personal, seguridad, restricciones y pedidos del día a día en la obra. · Versión 1.0.19</p>
+  <p class="pie">Jefe de Terreno: programación, personal, seguridad, restricciones y pedidos del día a día en la obra. · Versión 1.0.23</p>
 </main>
 <div class="dlg" id="nuevoDlg" hidden><div class="dlgc" role="dialog" aria-label="Nuevo cuadro">
   <h3>Nuevo cuadro</h3>
@@ -245,7 +245,7 @@ function pintarBoton(txt){
 window.addEventListener('beforeunload', e => { if(sucio){ e.preventDefault(); e.returnValue = ''; } });
 D = cargar();
 const ESTADOS = ['ok', 'warn', 'bad'];
-const TIPOS = [['txt', 'Texto'], ['num', 'Monto o número'], ['pct', 'Porcentaje %'], ['est', 'Estado (semáforo)'], ['fecha', 'Fecha'], ['chk', 'Check ✓']];
+const TIPOS = [['txt', 'Texto'], ['num', 'Monto o número'], ['pct', 'Porcentaje %'], ['est', 'Estado (semáforo)'], ['fecha', 'Fecha'], ['chk', 'Visto']];
 const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 const ST = id => D.defs.find(s => s.id === id);
 const ED = !!CFG.editor;
@@ -401,7 +401,7 @@ document.getElementById('reset').addEventListener('click', () => {
 (function(){
   if(!CFG.editor) return;
   const b = document.getElementById('guardarBtn'); b.hidden = false;
-  b.addEventListener('click', () => { confirmar(); pintarBoton('✓ Guardado'); setTimeout(() => pintarBoton(), 1800); });
+  b.addEventListener('click', () => { confirmar(); pintarBoton('Guardado'); setTimeout(() => pintarBoton(), 1800); });
 })();
 // ---- nuevo cuadro ----
 (function(){
@@ -490,4 +490,4 @@ if(window.CargaPagina) CargaPagina.fin();
   document.addEventListener('touchmove', e => { if(abierta() && !puedeMover(e.target, y0 - e.touches[0].clientY)) e.preventDefault(); }, {passive: false});
 })();
 </script>
-<!-- ==== VERSION: Jefe de Terreno · v1.0.22 · 04-11-2026 ==== -->
+<!-- ==== VERSION: Jefe de Terreno · v1.0.23 · 18-11-2026 ==== -->
