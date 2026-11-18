@@ -395,7 +395,7 @@ const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&am
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion'); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
-const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['bodega','Bodega'],['admin','Panel de Admin']];
+const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['preentrega','Revisión Pre-Entrega'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['bodega','Bodega'],['admin','Panel de Admin']];
 const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = SECC.filter(x => x[0] !== 'admin');
@@ -415,8 +415,8 @@ const BD = (function(){
       {fila:8,nombre:'Jefe de Bodega',cargo:'Jefe de Bodega',rol:7,bloqueo:null,base:['bodega'],extra:[],doble:false},
       {fila:5,nombre:'Rafael',cargo:'Trabajador',rol:3,bloqueo:{permanente:false,hasta:Date.now()+3*86400000,motivo:'Vacaciones'},base:['panel'],extra:[],doble:false},
       {fila:6,nombre:'Ignacio',cargo:'Supervisor',rol:2,bloqueo:null,base:['panel'],extra:[],doble:false},
-      {fila:7,nombre:'Ismael S.',cargo:'Admin',rol:1,bloqueo:null,base:['panel','calidad','avance','terreno','oficina','bodega','admin'],extra:[],doble:false}],
-    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzalez',avance:'Alejandro Sandoval',terreno:'Alejandro Sandoval',oficina:'Edwin Carroz',bodega:'Jefe de Bodega',admin:'Ismael S.'}};
+      {fila:7,nombre:'Ismael S.',cargo:'Admin',rol:1,bloqueo:null,base:['panel','calidad','preentrega','avance','terreno','oficina','bodega','admin'],extra:[],doble:false}],
+    encargados:{panel:'Ismael S.',calidad:'Silvia Gonzalez',preentrega:'Ismael S.',avance:'Alejandro Sandoval',terreno:'Alejandro Sandoval',oficina:'Edwin Carroz',bodega:'Jefe de Bodega',admin:'Ismael S.'}};
   const guardar = () => { try{ localStorage.setItem('pruebaAdminHtml', JSON.stringify(estado)); }catch(e){} };
   const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica',7:'Jefe de Bodega'};
   const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance'],7:['bodega']};
@@ -992,27 +992,31 @@ async function vistaPermisos(){
 function vistaEncargados(){
   main.innerHTML = '<h2>Encargados</h2><p class="nota">Este nombre aparece en cada botón del menú de inicio.</p><div class="tarjeta">'
     + SECC.map(([k, n]) => '<div class="fila"><label class="quien2" for="e_' + k + '"><b>' + n + '</b></label><input id="e_' + k + '" data-k="' + k + '" value="' + esc(datos.encargados[k] || '') + '" maxlength="60" style="flex:1;min-width:200px;"></div>').join('')
-    + '<div style="margin-top:12px;"><button class="btn primary" id="eG" type="button">Guardar y cerrar</button> <button class="btn" id="eC" type="button">Cerrar sin guardar</button></div></div>';
+    + '<div style="margin-top:12px;"><button class="btn" id="eGS" type="button">Guardar</button> <button class="btn primary" id="eG" type="button">Guardar y cerrar</button> <button class="btn" id="eC" type="button">Cerrar</button></div></div>';
   $('eC').addEventListener('click', () => { location.href = 'index.html?menu=1'; });
-  $('eG').addEventListener('click', async () => {
+  const guardarEnc = async cerrar => {
     const enc = {}; main.querySelectorAll('input[data-k]').forEach(i => enc[i.dataset.k] = i.value.trim());
-    const j = await accion('adminEncargadosGuardar', {encargados:enc}); if(j){ datos.encargados = j.encargados; toast('Encargados guardados.'); await dormir(700); location.href = 'index.html?menu=1'; }
-  });
+    const j = await accion('adminEncargadosGuardar', {encargados:enc}); if(j){ datos.encargados = j.encargados; toast('Encargados guardados.'); if(cerrar){ await dormir(700); location.href = 'index.html?menu=1'; } }
+  };
+  $('eG').addEventListener('click', () => guardarEnc(true));
+  $('eGS').addEventListener('click', () => guardarEnc(false));
 }
 function vistaVisual(){
   const a = datos.ajustes || {halloween:false};
   const oc = a.ocultas || [];
-  const SEC_OC = [['molde','Molde de secciones'],['proyeccion','Proyección Lógica'],['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina técnica'],['bodega','Bodega']];
+  const SEC_OC = [['molde','Molde de secciones'],['proyeccion','Proyección Lógica'],['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['preentrega','Revisión Pre-Entrega'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina técnica'],['bodega','Bodega']];
   main.innerHTML = '<h2>Visual</h2><p class="nota">Botones y temas que ven los demás. Lo que dejes apagado no aparece.</p><div class="tarjeta">'
     + '<div class="fila"><label class="quien2" for="vHal"><b>Botón Halloween en Calidad</b><small style="display:block;color:var(--sub);">Si está apagado, el botón no aparece y el tema queda desactivado.</small></label><input type="checkbox" id="vHal"' + (a.halloween ? ' checked' : '') + '></div>'
     + '<div class="fila"><label class="quien2" for="vPag"><b>Dejar marcar "Pagado" a mano en el Panel de Cerámica y Frague' + (new Date() < new Date(2026, 10, 20) ? ' <span class="nuevo" style="display:inline-block;margin-left:6px;vertical-align:middle;">Nuevo</span>' : '') + '</b><small style="display:block;color:var(--sub);">Apagado: Pagado solo se marca o se quita desde las liquidaciones (nadie puede tocarlo en el panel, tampoco Dev). Prendido: se puede a mano. Vuelve a apagarlo al terminar.</small></label><input type="checkbox" id="vPag"' + (a.pagadoLibre ? ' checked' : '') + '></div>'
     + '<div class="fila" style="display:block;"><b>Esconder secciones en el inicio</b><small style="display:block;color:var(--sub);margin-bottom:6px;">Las que marques no aparecen en la pantalla de inicio para nadie. El Panel de Admin no se puede esconder.</small>'
     + SEC_OC.map(s => '<div class="fila"><label class="quien2" for="vOc_' + s[0] + '">' + s[1] + '</label><input type="checkbox" class="vOc" data-s="' + s[0] + '" id="vOc_' + s[0] + '"' + (oc.indexOf(s[0]) !== -1 ? ' checked' : '') + '></div>').join('') + '</div>'
-    + '<div style="margin-top:12px;"><button class="btn primary" id="vG" type="button">Guardar y cerrar</button> <button class="btn" id="vC" type="button">Cerrar sin guardar</button></div></div>';
+    + '<div style="margin-top:12px;"><button class="btn" id="vGS" type="button">Guardar</button> <button class="btn primary" id="vG" type="button">Guardar y cerrar</button> <button class="btn" id="vC" type="button">Cerrar</button></div></div>';
   $('vC').addEventListener('click', () => { location.href = 'index.html?menu=1'; });
-  $('vG').addEventListener('click', async () => {
-    const j = await accion('adminAjustesGuardar', {ajustes:{halloween:$('vHal').checked, pagadoLibre:$('vPag').checked, ocultas:[...document.querySelectorAll('.vOc:checked')].map(x => x.dataset.s)}}); if(j){ datos.ajustes = j.ajustes; toast('Guardado.'); await dormir(700); location.href = 'index.html?menu=1'; }
-  });
+  const guardarVis = async cerrar => {
+    const j = await accion('adminAjustesGuardar', {ajustes:{halloween:$('vHal').checked, pagadoLibre:$('vPag').checked, ocultas:[...document.querySelectorAll('.vOc:checked')].map(x => x.dataset.s)}}); if(j){ datos.ajustes = j.ajustes; toast('Guardado.'); if(cerrar){ await dormir(700); location.href = 'index.html?menu=1'; } }
+  };
+  $('vG').addEventListener('click', () => guardarVis(true));
+  $('vGS').addEventListener('click', () => guardarVis(false));
 }
 async function vistaRendimiento(){
   main.innerHTML = '<h2>Rendimiento por trabajador</h2><p class="nota">Cuánto rinde cada trabajador por semana, por mes y en total, con m², fechas y asistencia.</p><div class="tarjeta" id="rdCuerpo">Cargando…</div>';
@@ -1322,7 +1326,7 @@ iniciar();
 /* ===== fin aviso de sitio ===== */
 </script>
 
-<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.52';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
+<script>try{var v=document.createElement('p');v.textContent='Versión 1.0.53';v.style.cssText='text-align:center;font-size:11px;opacity:.6;margin:18px 0 14px;';document.body.appendChild(v);}catch(e){}// ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
   const abierta = () => !!document.querySelector('.vel');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
@@ -1334,4 +1338,4 @@ iniciar();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Admin · v1.0.52 · 15-11-2026 ==== -->
+<!-- ==== VERSION: Admin · v1.0.54 · 18-11-2026 ==== -->

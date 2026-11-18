@@ -1276,7 +1276,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.26';
+const CAL_VERSION = '1.38.27';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2969,6 +2969,8 @@ window.limpiarNuevos = function(raiz){
   ];
   const COD = ['R1','R2','R3','RF'];
   const NOMCOD = {R1:'primera revisión', R2:'segunda revisión', R3:'tercera revisión', RF:'revisión final para venta'};
+  // ===== ascensores: solo se ven en protocolos; no vienen del panel =====
+  const PLAYOUT = LAYOUT.concat([{n:-90, p:'Ascensores', d:'Ascensor 1', cer:[], fra:[]}, {n:-90, p:'Ascensores', d:'Ascensor 2', cer:[], fra:[]}]);
   const ATRAS_N = 10;               // cuántos se marcan en "Más atrasados"
   const porDefecto = k => SECC.find(s => s.k === k).pts.map((t, i) => ({id: k + (i + 1), t}));
 
@@ -2994,7 +2996,7 @@ window.limpiarNuevos = function(raiz){
   }
   const pisos = () => {
     const g = new Map();
-    LAYOUT.forEach(d => { if(!g.has(d.p)) g.set(d.p, {n: d.n, p: d.p, ds: []}); g.get(d.p).ds.push(d); });
+    PLAYOUT.forEach(d => { if(!g.has(d.p)) g.set(d.p, {n: d.n, p: d.p, ds: []}); g.get(d.p).ds.push(d); });
     return [...g.values()].sort((a, b) => b.n - a.n);
   };
 
@@ -3003,7 +3005,7 @@ window.limpiarNuevos = function(raiz){
     $p('pTabs').innerHTML = SECC.map(s => '<button type="button" role="tab" data-k="' + s.k + '" aria-selected="' + (s.k === sec) + '" class="' + (s.k === sec ? 'on' : '') + '">' + s.n + '</button>').join('');
   }
   function calcular(){
-    const filas = LAYOUT.map(d => ({d, a: avance(d, sec)}));
+    const filas = PLAYOUT.map(d => ({d, a: avance(d, sec)}));
     const atras = filas.filter(x => x.a.pct < 1).sort((x, y) => x.a.ci - y.a.ci || x.a.pct - y.a.pct || x.d.n - y.d.n || String(x.d.d).localeCompare(String(y.d.d), 'es', {numeric:true}));
     const rank = new Map(); atras.slice(0, ATRAS_N).forEach((x, i) => rank.set(claveDep(x.d, sec), i + 1));
     const cumple = (x, f) => f === 'todos' ? true : COD.indexOf(f) !== -1 ? x.a.cod === f : f === '100' ? x.a.t > 0 && x.a.h === x.a.t : f === 'cero' ? x.a.h === 0 : f === 'atras' ? rank.has(claveDep(x.d, sec)) : true;
@@ -3019,14 +3021,14 @@ window.limpiarNuevos = function(raiz){
     let h = 0, t = 0;
     P.ds.forEach(d => { const x = cal.filas.find(f => f.d === d); if(x){ h += x.a.h; t += x.a.t; } });
     const pct = t ? Math.round(h * 100 / t) : 0;
-    return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc2((P.n < 0 ? 'Piso ' + P.n : 'Piso ' + P.n) + ': ' + h + ' de ' + t + ' puntos') + '" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
+    return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc2((P.p === 'Ascensores' ? 'Ascensores' : 'Piso ' + P.n) + ': ' + h + ' de ' + t + ' puntos') + '" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
   }
   function pintarTorre(){
     pintarTabs();
     const cal = calcular();
     pintarFiltros(cal);
     let n = 0;
-    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + (P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
+    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + (P.p === 'Ascensores' ? 'Asc.' : P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
       const a = cal.filas.find(x => x.d === d).a, k = claveDep(d, sec);
       const ok = a.t > 0 && a.h === a.t, par = a.h > 0 && !ok, fuera = filtro !== 'todos' && !cal.cumple({d, a}, filtro);
       if(!fuera) n++;
@@ -3066,7 +3068,7 @@ window.limpiarNuevos = function(raiz){
   }
 
   // ---------- ventana del departamento (se trabaja en una copia; "Guardar y cerrar" la aplica) ----------
-  const buscarD = (p, dd) => LAYOUT.find(x => x.p === p && String(x.d) === String(dd));
+  const buscarD = (p, dd) => PLAYOUT.find(x => x.p === p && String(x.d) === String(dd));
   function armar(){
     const r = rec(actual.d, sec), c = cur(r);
     dr = {items: items(sec).map(x => ({...x})), q: new Set(r.q), c: new Set(c.c), o: {...(c.o || {})}, nuevos: new Set(), edit: null, conf: false};
@@ -3366,4 +3368,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.26 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.27 · 18-11-2026 ==== -->
