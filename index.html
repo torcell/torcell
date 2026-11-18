@@ -700,7 +700,7 @@ async function irA(dest){
   d.innerHTML = HTML_CARGA.replace('%TIT%', TIT_CARGA[dest] || 'Cargando…') + '</div>';
   document.body.insertBefore(d, document.body.firstChild);
   // ===== mientras se abre la carga la barra sube hasta el 10 %; la sección sigue desde ahí =====
-  const DESDE = 10, t0 = performance.now(), rl = d.querySelector('#cgRell'), es = d.querySelector('#cgEst');
+  const DESDE = 0, t0 = performance.now(), rl = d.querySelector('#cgRell'), es = d.querySelector('#cgEst');
   (function sube(){
     const k = Math.min(1, (performance.now() - t0) / 560), p = DESDE * (1 - Math.pow(1 - k, 3));
     if(rl) rl.style.transform = 'scaleX(' + (p / 100) + ')';
@@ -972,4 +972,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.15 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.16 · 18-11-2026 ==== -->

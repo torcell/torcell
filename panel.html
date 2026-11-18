@@ -673,11 +673,15 @@
   #calLat{position:fixed;z-index:51;width:270px;display:none;flex-direction:column;gap:9px;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-top:4px solid var(--cc,#4f8fd6);box-shadow:0 6px 20px rgba(0,0,0,.25);padding:12px 14px 14px;overflow:auto;}
   #calLat.on{display:flex;animation:calLatIn .28s cubic-bezier(.2,.8,.25,1) both;}
   @keyframes calLatIn{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:none;}}
-  #calLat h4{margin:0;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--sub);}
-  #calLat .cl-est{font-size:15px;font-weight:800;color:var(--cc,#4f8fd6);line-height:1.25;}
-  #calLat ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
-  #calLat li{font-size:13px;display:flex;justify-content:space-between;gap:10px;border:1px solid var(--border);background:var(--panel-soft);padding:7px 9px;line-height:1.25;}
-  #calLat li b{font-weight:800;white-space:nowrap;}
+  #calLat .cl-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;color:var(--sub);}
+  #calLat .cl-est{font-size:12px;font-weight:700;color:var(--cc,#4f8fd6);text-align:right;line-height:1.25;}
+  #calLat .cl-lista{border:1px solid var(--border);background:var(--panel-soft);padding:4px 10px;}
+  #calLat .cl-fila{display:grid;grid-template-columns:minmax(0,1fr) 62px;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+  #calLat .cl-fila:last-child{border-bottom:0;}
+  #calLat .cl-fila label{display:flex;align-items:center;gap:9px;font-size:13px;min-width:0;}
+  #calLat .cl-fila input[type=checkbox]{width:18px;height:18px;accent-color:#4f8fd6;flex:0 0 auto;margin:0;pointer-events:none;}
+  #calLat .cl-cant{min-height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);background:var(--panel);font-size:14px;}
+  #calLat .cl-vacio{font-size:13px;color:var(--sub);padding:8px 0;}
   #calLat .cl-pie{font-size:12px;color:var(--sub);line-height:1.4;}
   #calLat .cl-pie span{display:block;white-space:nowrap;overflow:hidden;}
   .cl-fotos{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--border-strong);background:transparent;color:var(--text);padding:7px 10px;min-height:34px;cursor:pointer;width:100%;border-radius:0;transition:transform .08s ease,border-color .12s ease;}
@@ -2330,7 +2334,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.118';
+const APP_VERSION = '0.73.119';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4790,9 +4794,11 @@ function calLateral(){
   const est = {revisado: ['Sin observaciones', '#2e9e6a'], observado: ['Con observación', '#e0584a'], corregido: ['✓ Corregido, falta validar', '#4f8fd6'], validado: ['✓✓ Corregido y validado', '#4f8fd6'], pendiente: ['Por revisar', '#e08a1e']}[r.e] || [r.e, '#4f8fd6'];
   const items = String(r.d || '').split(', ').map(x => x.match(/^(.+) ×(\d+)$/)).filter(Boolean);
   const quien = calNombreLimpio(r.u), f = CAL_FECHA(r.ts);
-  const lista = items.length ? '<ul>' + items.map(m => '<li><span>' + escVt(m[1]) + '</span><b>×' + escVt(m[2]) + '</b></li>').join('') + '</ul>' : '';
+  const conLista = r.e === 'observado' || r.e === 'corregido' || r.e === 'validado';
+  const SIN_CANT = ['Falta Terraza'];
+  const lista = !conLista ? '' : items.length ? '<div class="cl-lista">' + items.map(m => '<div class="cl-fila"><label><input type="checkbox" checked tabindex="-1" onclick="return false"><span>' + escVt(m[1]) + '</span></label>' + (SIN_CANT.includes(m[1]) ? '<span></span>' : '<span class="cl-cant">' + escVt(m[2]) + '</span>') + '</div>').join('') + '</div>' : '<div class="cl-lista"><div class="cl-vacio">Sin detalle de observaciones</div></div>';
   box.style.setProperty('--cc', est[1]);
-  box.innerHTML = '<h4>Calidad</h4><div class="cl-est">' + escVt(est[0]) + '</div>' + lista +
+  box.innerHTML = '<div class="cl-head"><span>' + (conLista ? '¿Qué está mal?' : 'Calidad') + '</span><span class="cl-est">' + escVt(est[0]) + '</span></div>' + lista +
     ((quien || f) ? '<div class="cl-pie">' + (quien ? '<span data-nompre="Revisó: " data-nomfull="' + escVt(quien) + '">Revisó: ' + escVt(quien) + '</span>' : '') + (f ? '<span>' + escVt(f) + '</span>' : '') + '</div>' : '') + '<button type="button" class="cl-fotos" data-cf="1">📷 Ver fotos</button>';
   box.style.left = (modal.offsetLeft + modal.offsetWidth + CAL_LAT_SEP) + 'px';
   box.style.top = modal.offsetTop + 'px';
@@ -9815,4 +9821,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.118 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.119 · 18-11-2026 ==== -->
