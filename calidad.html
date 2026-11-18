@@ -66,11 +66,12 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 @media (max-width:520px){.toolbar .grp{flex:1 1 calc(50% - 10px);}}
 main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;background:color-mix(in srgb,var(--bg) 86%,transparent);border:1px solid var(--border);box-shadow:0 10px 40px rgba(0,0,0,.28);}
 .msg{font-size:12.5px;color:rgba(255,255,255,.82);margin:0 0 12px;}
-.resumen{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:16px;}
+.resumen{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:16px;}
 .res{background:var(--panel);border:1px solid var(--border);border-top:4px solid var(--strong);padding:8px 10px;display:flex;flex-direction:column;gap:2px;}
 .res b{font-size:20px;line-height:1.1;}
 .res span{font-size:11.5px;color:var(--sub);}
-.res.n{border-top-color:var(--strong);}.res.p{border-top-color:var(--warn);}.res.r{border-top-color:var(--ok);}.res.o{border-top-color:var(--bad);}
+.res.n{border-top-color:var(--strong);}.res.p{border-top-color:var(--warn);}.res.r{border-top-color:var(--ok);}.res.o{border-top-color:var(--bad);}.res.c{border-top-color:var(--accent);}.res.c b{color:var(--accent);}
+@media (max-width:600px){.resumen{grid-template-columns:repeat(6,minmax(0,1fr));}.res{grid-column:span 2;}.res.n,.res.c{grid-column:span 3;}}
 .piso{margin-bottom:20px;}
 .piso h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .lista{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
@@ -81,6 +82,7 @@ main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;b
 .tile b{font-size:17px;line-height:1.1;overflow-wrap:anywhere;min-height:22px;display:flex;align-items:center;justify-content:center;width:100%;}
 .tile.pas b{font-size:13px;letter-spacing:.04em;text-transform:uppercase;}
 .tile small{font-size:11px;font-weight:600;color:var(--warn);}
+.tile small .cr{display:none;}@media (max-width:480px){.tile small .lg{display:none;}.tile small .cr{display:inline;}}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
 #vel,#velReg,#velOp,#velFoto,#velExp{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
@@ -106,11 +108,18 @@ html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 .seg button[hidden]{display:none;}
 /* ==== invitado: solo mira ==== */
 #vel.lect #mSeg,#vel.lect #mLista,#vel.lect .fbtns{pointer-events:none;opacity:.55;}
-#vel.lect #mEditar,#vel.lect #mGuardar,#vel.lect .fbtns,#vel.lect #mElegir{display:none;}
+#vel.lect #mEditar,#vel.lect #mGuardar,#vel.lect #mGuardarSolo,#vel.lect .fbtns,#vel.lect #mElegir{display:none;}
 .avlect{font-size:12px;color:var(--sub);border:1px solid var(--border);padding:6px 9px;line-height:1.35;}.avlect[hidden]{display:none;}
 .segnota{font-size:12px;color:var(--sub);line-height:1.35;margin-top:-6px;}.segnota[hidden],#mObsToggle[hidden]{display:none;}
 .seg button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
-.tile.c{border-top-color:var(--accent);}.tile.c small{color:var(--accent);}
+.tile{position:relative;}
+.tile.c{border-top-color:var(--accent);}
+.tile.c:not(.v)::before{content:"";position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px 1px color-mix(in srgb,var(--accent) 65%,transparent);animation:luzCor 2.6s ease-in-out infinite;pointer-events:none;}
+@keyframes luzCor{0%,100%{opacity:.22;transform:scale(.8);}50%{opacity:.85;transform:scale(1);}}
+@media (prefers-reduced-motion:reduce){.tile.c:not(.v)::before{animation:none;opacity:.7;}}
+.tile.c small{white-space:nowrap;}@media (max-width:480px){.tile.c small{font-size:10px;letter-spacing:-.1px;}}
+.mval{border:1px solid var(--border);border-left:4px solid var(--accent);background:var(--soft);padding:9px 11px;display:flex;flex-direction:column;gap:7px;font-size:12.5px;line-height:1.35;}
+.mval[hidden]{display:none;}.mval b{font-size:13px;}.mval span{color:var(--sub);}.mval .btn{align-self:flex-start;}.tile.c small{color:var(--accent);}
 .archnota{border:1px solid var(--border);background:var(--soft);padding:9px 12px;font-size:12.5px;line-height:1.35;color:var(--text);}.archnota[hidden]{display:none;}
 .seg button{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .08s ease;border:1px solid var(--strong);background:var(--panel);color:var(--text);padding:10px 4px;font-size:12.5px;font-weight:600;min-height:44px;margin-left:-1px;}
 .seg button:first-child{margin-left:0;}
@@ -161,6 +170,17 @@ html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 @media (max-width:480px){.pestanas button{font-size:13px;padding-left:2px;padding-right:2px;gap:4px;}.pestanas .pcnt{font-size:10.5px;min-width:18px;padding:3px 5px;}}
 .pestanas .pcnt{font-style:normal;font-size:11px;font-weight:800;line-height:1;min-width:20px;padding:4px 6px;border-radius:999px;background:var(--warn);color:#fff;text-align:center;}
 .pestanas .pcnt.cero{background:rgba(128,128,128,.35);color:inherit;font-weight:700;}
+.pestanas button{flex-direction:column;gap:6px;padding:8px 6px 9px;}
+.pestanas .pfila{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%;}
+.pestanas .ptxt{overflow:hidden;text-overflow:ellipsis;}
+.pestanas .pnums{display:flex;align-items:center;justify-content:center;gap:5px;}
+.pestanas .pcnt.pv{background:var(--ok);}.pestanas .pcnt.po{background:var(--bad);}
+.pestanas .pcnt.pc{background:var(--accent);}.pestanas .pcnt.pc.cero{background:rgba(128,128,128,.35);}
+.pestanas .pcnt.pv.cero,.pestanas .pcnt.po.cero{background:rgba(128,128,128,.35);}
+.pestanas .pring{--p:0;flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p) * 1%),rgba(128,128,128,.35) 0);}
+.pestanas .pring b{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--panel);color:var(--text);font-size:10px;font-weight:800;letter-spacing:-.2px;line-height:1;}
+.pestanas button.on .pring b{background:color-mix(in srgb,var(--accent) 80%,var(--accent2));color:#fff;}
+@media (max-width:480px){.pestanas button{font-size:12px;}.pestanas .pfila{gap:4px;}.pestanas .pring{width:28px;height:28px;}.pestanas .pring b{width:20px;height:20px;font-size:8px;}.pestanas .pnums{gap:3px;}}
 
 .pestanas button{position:relative;background:rgba(255,255,255,.12);color:rgba(255,255,255,.78);font-weight:600;border-color:rgba(255,255,255,.28);}
 .pestanas button:hover{background:rgba(255,255,255,.26);color:#fff;border-color:var(--accent);}
@@ -256,7 +276,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 .tile{position:relative;overflow:hidden;}
 .tile.esperando{cursor:wait;opacity:.8;}
 .tile.esperando:hover{transform:none;box-shadow:none;border-color:var(--border);}
-.tile small.dias{font-size:10.5px;font-weight:600;color:var(--sub);}.tile small.dias.d1{color:var(--warn);}.tile small.dias.d2{color:var(--bad);}
+.tile small.dias{font-size:10.5px;font-weight:600;color:var(--sub);}.tile small.dias.d1{color:var(--warn);}.tile small.dias.d2{color:var(--warn);}
 .tile .espera{position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transform-origin:left;animation:esperaBarra 3s linear forwards;}
 @keyframes esperaBarra{from{transform:scaleX(0);}to{transform:scaleX(1);}}
 #gate{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);overflow:auto;}
@@ -930,8 +950,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 <p class="msg">Departamentos con cerámica y frague terminados. Toca uno para registrar la revisión.</p>
   <div class="resumen">
     <div class="res p"><b id="nPend">0</b><span>Por revisar</span></div>
-    <div class="res r"><b id="nRev">0</b><span>Revisados</span></div>
+    <div class="res r"><b id="nRev">0</b><span>Sin observaciones</span></div>
     <div class="res o"><b id="nObs">0</b><span>Observados</span></div>
+    <div class="res c"><b id="nCor">0</b><span>Por validar</span></div>
     <div class="res n"><b id="nNo">0</b><span>Sin terminar</span></div>
   </div>
   <div class="toolbar">
@@ -945,17 +966,18 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <option value="">Todos los estados</option>
       <option value="pendiente">Por revisar</option>
       <option value="nolisto">Sin terminar</option>
-      <option value="revisado">Revisados</option>
+      <option value="revisado">Sin observaciones</option>
       <option value="observado">Con observaciones</option>
-      <option value="corregido">Corregidos</option>
+      <option value="corregido">Corregidos (por validar)</option>
+      <option value="validado">Validados</option>
     </select></div>
     <div class="grp"><label for="filtroTrab">Trabajador <i class="tnuevo" data-desde="2026-11-13">Nuevo</i></label><select id="filtroTrab" aria-label="Filtrar por trabajador"><option value="">Todos los trabajadores</option></select></div>
     <div class="grp"><label for="ordenPisos">Orden de pisos</label><button type="button" class="btn primary" id="ordenPisos" aria-pressed="true">↓ Mayor a menor</button></div>
   </div>
   <div class="pestanas" id="pestanas">
-    <button type="button" class="on" data-sc="piso" aria-pressed="true"><span class="ptxt">Piso</span><i class="pcnt" hidden></i></button>
-    <button type="button" data-sc="muros" aria-pressed="false"><span class="ptxt">Muro baño</span><i class="pcnt" hidden></i></button>
-    <button type="button" data-sc="cocina" aria-pressed="false"><span class="ptxt">Muro cocina</span><i class="pcnt" hidden></i></button>
+    <button type="button" class="on" data-sc="piso" aria-pressed="true"><span class="pfila"><span class="ptxt">Piso</span><span class="pring" hidden><b></b></span></span><span class="pnums"><i class="pcnt" hidden></i><i class="pcnt pv" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
+    <button type="button" data-sc="muros" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro baño</span><span class="pring" hidden><b></b></span></span><span class="pnums"><i class="pcnt" hidden></i><i class="pcnt pv" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
+    <button type="button" data-sc="cocina" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro cocina</span><span class="pring" hidden><b></b></span></span><span class="pnums"><i class="pcnt" hidden></i><i class="pcnt pv" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
   </div>
   <div id="lista"></div>
   </section>
@@ -1114,8 +1136,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       </div>
     </div>
     <div class="pacc" id="pAcc">
-      <button type="button" class="btn" id="pCancel">Cancelar</button>
+      <button type="button" class="btn" id="pGuardarSolo">Guardar</button>
       <button type="button" class="btn primary" id="pGuardar">Guardar y cerrar</button>
+      <button type="button" class="btn" id="pCancel">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1208,6 +1231,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <button type="button" data-e="corregido" hidden>Corregido</button>
     </div>
     <div class="segnota" id="mSegNota" hidden></div>
+    <div class="mval" id="mVal" hidden><b id="mValT"></b><span id="mValS"></span><button type="button" class="btn primary" id="mValBtn" hidden>✓✓ Dar visto bueno</button></div>
     <button type="button" class="btn small" id="mObsToggle" hidden>＋ Detallar observaciones</button>
     <div class="obswrap" id="mObs">
       <div class="obsin">
@@ -1231,15 +1255,16 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     </div>
     <div class="err" id="mErr"></div>
     <div class="acciones">
-      <button class="btn" id="mCancel" type="button">Cancelar</button>
+      <button class="btn" id="mGuardarSolo" type="button">Guardar</button>
       <button class="btn primary" id="mGuardar" type="button">Guardar y cerrar</button>
+      <button class="btn" id="mCancel" type="button">Cerrar</button>
     </div>
   </div>
   <div class="lado der" id="ladoObs"><div class="cuerpo" id="cuerpoObs"></div></div>
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.23';
+const CAL_VERSION = '1.38.25';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1458,12 +1483,13 @@ function diasEspera(ts){
 const textoDias = n => n === 0 ? 'Listo hoy' : n === 1 ? 'Hace 1 día' : 'Hace ' + n + ' días';
 const claseDias = n => n >= 6 ? ' d2' : n >= 3 ? ' d1' : '';
 function etiqueta(r){
-  if(r.e === 'revisado') return '✓ Revisado';
+  if(r.e === 'revisado') return 'Sin observaciones';
+  if(r.e === 'validado') return '✓✓ Validado';
   if(r.e === 'corregido') return '✓ Corregido';
   if(r.e === 'observado') return '⚠ ' + (r.c || 1) + ' obs.';
   return 'Por revisar';
 }
-const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : e === 'corregido' ? 'c' : '';
+const claseEstado = e => e === 'revisado' ? 'r' : e === 'observado' ? 'o' : e === 'corregido' ? 'c' : e === 'validado' ? 'c v' : '';
 
 let primerPintado = true;
 let trabPendiente = leerLocal(kUsr('calidadFiltroTrab'));
@@ -1501,7 +1527,7 @@ function infoDeError(texto){
 
 function pintar(){
   if(!cargado){
-    ['nPend', 'nRev', 'nObs', 'nNo'].forEach(id => { $(id).textContent = '–'; });
+    ['nPend', 'nRev', 'nObs', 'nCor', 'nNo'].forEach(id => { $(id).textContent = '–'; });
     $('lista').innerHTML = cargando
       ? '<div class="estado" role="status"><div class="giro"></div><span>Cargando información de la base de datos…</span></div>'
       : '<div class="estado err2" role="alert"><span>No se ha podido cargar la información.<br>' + esc(errorCarga) + '</span><button class="btn" id="reintentar" type="button">Reintentar</button></div>';
@@ -1514,12 +1540,19 @@ function pintar(){
   $('nPend').textContent = cuenta('pendiente');
   document.querySelectorAll('#pestanas button').forEach(bt => {
     const sc = bt.dataset.sc, i = bt.querySelector('.pcnt'); if(!i) return;
-    const n = LAYOUT.filter(d => { const e = estado(d, sc); return e.aplica && e.ok && revision(d, sc).e === 'pendiente'; }).length;
-    i.hidden = false; i.textContent = n; i.classList.toggle('cero', n === 0);
-    i.title = n + (n === 1 ? ' departamento listo' : ' departamentos listos') + ' para revisar';
-    bt.setAttribute('aria-label', bt.querySelector('.ptxt').textContent + ': ' + n + ' listos para revisar');
+    const k = {pendiente: 0, revisado: 0, corregido: 0, observado: 0, validado: 0};
+    LAYOUT.forEach(d => { const e = estado(d, sc); if(e.aplica && e.ok){ const q = revision(d, sc).e; if(q in k) k[q]++; } });
+    const n = k.pendiente, fin = k.revisado + k.validado, co = k.corregido, ok = fin + co, ob = k.observado, tot = n + ok + ob, pc = tot ? Math.round(ok / tot * 100) : 0;
+    const poner = (el, v, t) => { el.hidden = false; el.textContent = v; el.classList.toggle('cero', v === 0); el.title = t; };
+    poner(i, n, n + (n === 1 ? ' departamento listo' : ' departamentos listos') + ' para revisar');
+    poner(bt.querySelector('.pv'), fin, fin + (fin === 1 ? ' departamento' : ' departamentos') + ' sin observaciones o validados');
+    poner(bt.querySelector('.pc'), co, co + (co === 1 ? ' departamento corregido' : ' departamentos corregidos') + ', por validar');
+    poner(bt.querySelector('.po'), ob, ob + (ob === 1 ? ' departamento' : ' departamentos') + ' con observaciones');
+    const ring = bt.querySelector('.pring'); ring.hidden = false; ring.style.setProperty('--p', pc); ring.querySelector('b').textContent = pc + '%';
+    ring.title = pc + ' % sin observaciones o corregidos (' + ok + ' de ' + tot + ' departamentos listos)';
+    bt.setAttribute('aria-label', bt.querySelector('.ptxt').textContent + ': ' + n + ' por revisar, ' + ok + ' sin observaciones o validados, ' + co + ' corregidos por validar, ' + ob + ' con observaciones, ' + pc + ' por ciento listo');
   });
-  $('nRev').textContent = cuenta('revisado') + cuenta('corregido');
+  $('nRev').textContent = cuenta('revisado') + cuenta('validado'); $('nCor').textContent = cuenta('corregido');
   $('nObs').textContent = cuenta('observado');
   $('nNo').textContent = cuenta('nolisto');
   const sel = $('filtro');
@@ -1538,7 +1571,7 @@ function pintar(){
   const nombres = [...new Set(todos.flatMap(x => x.ws))].sort((a, b) => a.localeCompare(b, 'es'));
   selT.innerHTML = '<option value="">Todos los trabajadores</option>' + nombres.map(n => `<option value="${esc(n)}"${n === trabPrevio ? ' selected' : ''}>${esc(n)}</option>`).join('');
   const tr = selT.value;
-  const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe || (fe === 'revisado' && x.r.e === 'corregido')) && (!tr || x.ws.indexOf(tr) >= 0));
+  const vis = todos.filter(x => (!soloAvance || pisosConAvance.has(x.d.p)) && (!sel.value || x.d.p === sel.value) && (!fe || x.r.e === fe) && (!tr || x.ws.indexOf(tr) >= 0));
   if(!vis.length){
     $('lista').innerHTML = '<div class="vacio">No hay departamentos para mostrar con este filtro.</div>';
     return;
@@ -1551,7 +1584,7 @@ function pintar(){
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
       ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${falta(x.e)}</small></div>`
-      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}">📷 ${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${x.r.e === 'revisado' ? '<span class="lg">Sin observaciones</span><span class="cr">Sin obs.</span>' : esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}">📷 ${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
     '</div></section>').join('');
 }
 
@@ -1599,6 +1632,19 @@ function elegir(e){
   $('mErr').textContent = '';
   ajustarSeg();
   pintarCambios();
+  pintarVal();
+}
+// Revisión final de Calidad: un corregido queda validado con el visto bueno de Calidad
+function pintarVal(){
+  const box = $('mVal'); if(!box) return;
+  const r = actual ? revision(actual) : null;
+  const f = r && (r.e === 'corregido' || r.e === 'validado');
+  box.hidden = !f;
+  if(!f) return;
+  const val = r.e === 'validado', puede = (cargo === 'Calidad' || cargo === 'Admin') && !val;
+  $('mValT').textContent = val ? '✓✓ Corregido y validado' : 'Revisión final de Calidad';
+  $('mValS').textContent = val ? 'Validado por ' + nombreCorto(r.u) + (r.ts ? ' · ' + fechaHora(r.ts) : '') : (puede ? 'El trabajador ya corrigió. Si está bien, dale el visto bueno.' : 'Corregido. Falta el visto bueno de Calidad.');
+  $('mValBtn').hidden = !puede;
 }
 // Con fotos (guardadas o archivadas) el departamento no puede quedar "sin observaciones":
 // solo se puede dejar "Corregido" (las fotos se quedan) cuando ya tenía observaciones.
@@ -1714,14 +1760,14 @@ function abrir(k){
   $('mQuien').title = r.u ? 'Revisó: ' + r.u : '';
   obsAbierto = false;
   const conFotos = nFotosActual() > 0;
-  estadoSel = (conFotos && !conObs(r.e)) ? 'observado' : r.e === 'pendiente' ? '' : r.e;
+  estadoSel = (conFotos && !conObs(r.e) && r.e !== 'validado') ? 'observado' : r.e === 'pendiente' ? '' : r.e;
   baseObs = parseItems(r);
   pintarLista(parseItems(r));
   elegir(estadoSel);
   document.body.classList.add('bloq');
   $('vel').classList.toggle('lect', soloLectura());
   $('mLect').hidden = !soloLectura();
-  $('mCancel').textContent = soloLectura() ? 'Cerrar' : 'Cancelar';
+  $('mCancel').textContent = 'Cerrar';
   $('vel').classList.add('on');
   abrirFotos(d);
 }
@@ -2348,10 +2394,11 @@ function verificarDudosos(intento){
   }, intento === 0 ? 3500 : 7000);
 }
 
-function guardarRevision(){
+function guardarRevision(mantener){
   if(!actual || soloLectura()) return;
   const sel = seleccion();
   const items = Object.keys(sel).map(t => ({t, c: sel[t]}));
+  if(estadoSel === 'validado'){ cerrarModal(); return; }
   if(!estadoSel){ $('mErr').textContent = 'Elige "Sin observaciones" o "Con observación".'; return; }
   if(estadoSel === 'revisado' && nFotosActual() > 0){ $('mErr').textContent = 'Este departamento tiene fotos: debe quedar con observación.'; return; }
   if(estadoSel === 'observado' && !items.length){
@@ -2359,7 +2406,7 @@ function guardarRevision(){
     if(!nf){ $('mErr').textContent = 'Sube al menos una foto o elige una observación.'; return; }
     items.push({t: 'Con fotos', c: nf});
   }
-  enviarRevision(clave(actual), estadoSel, items, true);
+  enviarRevision(clave(actual), estadoSel, items, !mantener);
 }
 function enviarRevision(k, estadoNuevo, items, cerrar){
   if(soloLectura()) return;
@@ -2624,7 +2671,7 @@ $('filtroVista').addEventListener('change', () => { guardarLocal(kUsr('calidadFi
 (function restaurarPreferencias(){
   const fv = leerLocal(kUsr('calidadFiltroVista')), fe = leerLocal(kUsr('calidadFiltroEstado')), pe = leerLocal(kUsr('calidadPestana'));
   if(['mov', 'todos'].indexOf(fv) >= 0) $('filtroVista').value = fv;
-  if(['pendiente', 'nolisto', 'revisado', 'observado'].indexOf(fe) >= 0) $('filtroEstado').value = fe;
+  if(['pendiente', 'nolisto', 'revisado', 'observado', 'corregido', 'validado'].indexOf(fe) >= 0) $('filtroEstado').value = fe;
   if(['muros', 'cocina'].indexOf(pe) >= 0){
     scope = pe;
     document.querySelectorAll('#pestanas button').forEach(x => { const on = x.dataset.sc === pe; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); });
@@ -2736,7 +2783,9 @@ $('impArch').addEventListener('change', async (e) => {
 
 $('eCerrar').addEventListener('click', cerrarExportar);
 $('eAccion').addEventListener('click', accionExportar);
-$('mGuardar').addEventListener('click', guardarRevision);
+$('mGuardar').addEventListener('click', () => guardarRevision(false));
+$('mGuardarSolo').addEventListener('click', () => guardarRevision(true));
+$('mValBtn').addEventListener('click', () => { if(actual && (cargo === 'Calidad' || cargo === 'Admin')) enviarRevision(clave(actual), 'validado', [], true); });
 $('mCorConf').addEventListener('click', () => { if(estadoSel === 'corregido') guardarRevision(); });
 $('mObsToggle').addEventListener('click', () => { obsAbierto = !obsAbierto; elegir(estadoSel); });
 document.addEventListener('keydown', e => {
@@ -3048,7 +3097,7 @@ window.limpiarNuevos = function(raiz){
       $p('pConfTxt').textContent = c.cod + ' se cierra y queda guardada como registro con sus checks y observaciones. ' + sig + ' empieza sin marcas. También se guardan los cambios de esta ventana.';
       $p('pConfSi').textContent = 'Pasar a ' + sig;
     }
-    $p('pGuardar').hidden = L; $p('pCancel').textContent = L ? 'Cerrar' : 'Cancelar';
+    $p('pGuardar').hidden = L; $p('pGuardarSolo').hidden = L; $p('pCancel').textContent = 'Cerrar';
     $p('pAcc').dataset.uno = L ? '1' : '';
   }
   const limpiar = t => String(t).replace(/[\u0000-\u001f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
@@ -3095,26 +3144,27 @@ window.limpiarNuevos = function(raiz){
     return {sec, piso: actual.d.p, unidad: String(actual.d.d), items: dr.items.map(i => ({id: i.id, t: i.t})), estado: {q: [...dr.q], revs}, nonce: nuevoNonce(), ts: Date.now()};
   }
   const TXT_ERR = {protocolo_desactualizado: 'Otra persona cambió este departamento mientras lo editabas. Se actualizó la información; ábrelo de nuevo.', demasiadas: 'Demasiados cambios seguidos. Espera un minuto.', repetida: 'Esa solicitud ya se envió.', solicitud_invalida: 'La hora de este aparato no coincide con la del servidor.'};
-  async function enviar(pasar){
+  async function enviar(pasar, mantener){
     if(guardando || lectura() || !actual) return;
-    guardando = true; ['pGuardar','pCancel','pPasarBtn','pConfSi','pConfNo'].forEach(i => { $p(i).disabled = true; });
+    guardando = true; ['pGuardar','pGuardarSolo','pCancel','pPasarBtn','pConfSi','pConfNo'].forEach(i => { $p(i).disabled = true; });
     const txt = $p('pGuardar').textContent; $p('pGuardar').textContent = 'Guardando…';
     try{
       const j = await llamar('calidadProtGuardar', armarEnvio(pasar), false, 30000);
       if(j && j.ok){
         PD.plantilla[j.sec] = j.plantilla; PD.deptos[j.clave] = j.dep;
         if(pasar){ armar(); msg(COD[COD.indexOf(cur(rec(actual.d, sec)).cod) - 1] + ' quedó guardada como registro.', true); pintarVentana(); pintarTorre(); }
-        else { cerrar(); pintarTorre(); }
+        else { if(!mantener) cerrar(); else msg('Guardado.', true); pintarTorre(); }
       }else if(j && j.error === 'protocolo_desactualizado'){
         aviso(TXT_ERR.protocolo_desactualizado); cerrar(); cargarProt();
       }else if(j && j.error && TXT_ERR[j.error]) msg(TXT_ERR[j.error]);
       else if(j && (j.error === 'sin_sesion' || j.error === 'sin_permiso')) { /* llamar ya avisó */ }
       else msg('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
     }catch(e){ msg('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); }
-    guardando = false; $p('pGuardar').textContent = txt; ['pGuardar','pCancel','pPasarBtn','pConfSi','pConfNo'].forEach(i => { $p(i).disabled = false; });
+    guardando = false; $p('pGuardar').textContent = txt; ['pGuardar','pGuardarSolo','pCancel','pPasarBtn','pConfSi','pConfNo'].forEach(i => { $p(i).disabled = false; });
   }
   $p('pCancel').onclick = () => { if(!guardando) cerrar(); };
   $p('pGuardar').onclick = () => enviar(false);
+  $p('pGuardarSolo').onclick = () => enviar(false, true);
   $p('pPasarBtn').onclick = () => { dr.conf = true; pintarVentana(); };
   $p('pConfNo').onclick = () => { dr.conf = false; pintarVentana(); };
   $p('pConfSi').onclick = () => enviar(true);
@@ -3289,4 +3339,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.23 · 14-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.25 · 17-11-2026 ==== -->
