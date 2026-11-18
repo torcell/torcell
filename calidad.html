@@ -174,13 +174,19 @@ html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 .pestanas .pfila{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;max-width:100%;}
 .pestanas .ptxt{overflow:hidden;text-overflow:ellipsis;}
 .pestanas .pnums{display:flex;align-items:center;justify-content:center;gap:5px;}
-.pestanas .pcnt.pv{background:var(--ok);}.pestanas .pcnt.po{background:var(--bad);}
-.pestanas .pcnt.pc{background:var(--accent);}.pestanas .pcnt.pc.cero{background:rgba(128,128,128,.35);}
-.pestanas .pcnt.pv.cero,.pestanas .pcnt.po.cero{background:rgba(128,128,128,.35);}
 .pestanas .pring{--p:0;flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p) * 1%),rgba(128,128,128,.35) 0);}
 .pestanas .pring b{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--panel);color:var(--text);font-size:10px;font-weight:800;letter-spacing:-.2px;line-height:1;}
 .pestanas button.on .pring b{background:color-mix(in srgb,var(--accent) 80%,var(--accent2));color:#fff;}
-@media (max-width:480px){.pestanas button{font-size:12px;}.pestanas .pfila{gap:4px;}.pestanas .pring{width:28px;height:28px;}.pestanas .pring b{width:20px;height:20px;font-size:8px;}.pestanas .pnums{gap:3px;}}
+.pestanas .pcnt,.pestanas .pcnt.cero{background:none;border-radius:0;min-width:0;padding:3px 5px;font-size:12px;font-weight:800;}
+.pestanas .pnums{gap:6px;}
+.pestanas .pcnt.pv{color:var(--ok);}.pestanas .pcnt.pp{color:var(--warn);}.pestanas .pcnt.po{color:var(--bad);}.pestanas .pcnt.pc{color:var(--accent);}
+.pestanas .pcnt.cero{color:var(--sub);opacity:.65;}
+.pestanas button.on .pcnt{background:rgba(8,26,34,.82);opacity:1;}
+.pestanas button.on .pcnt.pc{color:#8fc0f5;}.pestanas button.on .pcnt.cero{color:#a3bcc6;}
+.pestanas .pbarra{display:flex;width:100%;max-width:210px;height:7px;background:rgba(8,26,34,.82);gap:1px;padding:1px;}
+.pestanas .pbarra span{display:block;height:100%;min-width:0;}
+.pestanas .pbarra .b1{background:var(--ok);}.pestanas .pbarra .b2{background:var(--warn);}.pestanas .pbarra .b3{background:var(--bad);}.pestanas .pbarra .b4{background:#8fc0f5;}
+@media (max-width:480px){.pestanas button{font-size:12px;}.pestanas .pfila{gap:4px;}.pestanas .pring{width:28px;height:28px;}.pestanas .pring b{width:20px;height:20px;font-size:8px;}.pestanas .pnums{gap:2px;}.pestanas .pcnt,.pestanas .pcnt.cero{font-size:10.5px;padding:3px 3px;}.pestanas .pbarra{max-width:92px;}}
 
 .pestanas button{position:relative;background:rgba(255,255,255,.12);color:rgba(255,255,255,.78);font-weight:600;border-color:rgba(255,255,255,.28);}
 .pestanas button:hover{background:rgba(255,255,255,.26);color:#fff;border-color:var(--accent);}
@@ -975,9 +981,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="grp"><label for="ordenPisos">Orden de pisos</label><button type="button" class="btn primary" id="ordenPisos" aria-pressed="true">↓ Mayor a menor</button></div>
   </div>
   <div class="pestanas" id="pestanas">
-    <button type="button" class="on" data-sc="piso" aria-pressed="true"><span class="pfila"><span class="ptxt">Piso</span><span class="pring" hidden><b></b></span></span><span class="pnums"><i class="pcnt" hidden></i><i class="pcnt pv" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
-    <button type="button" data-sc="muros" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro baño</span><span class="pring" hidden><b></b></span></span><span class="pnums"><i class="pcnt" hidden></i><i class="pcnt pv" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
-    <button type="button" data-sc="cocina" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro cocina</span><span class="pring" hidden><b></b></span></span><span class="pnums"><i class="pcnt" hidden></i><i class="pcnt pv" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
+    <button type="button" class="on" data-sc="piso" aria-pressed="true"><span class="pfila"><span class="ptxt">Piso</span><span class="pring" hidden><b></b></span></span><span class="pbarra" hidden><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span></span><span class="pnums"><i class="pcnt pv" hidden></i><i class="pcnt pp" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
+    <button type="button" data-sc="muros" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro baño</span><span class="pring" hidden><b></b></span></span><span class="pbarra" hidden><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span></span><span class="pnums"><i class="pcnt pv" hidden></i><i class="pcnt pp" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
+    <button type="button" data-sc="cocina" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro cocina</span><span class="pring" hidden><b></b></span></span><span class="pbarra" hidden><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span></span><span class="pnums"><i class="pcnt pv" hidden></i><i class="pcnt pp" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
   </div>
   <div id="lista"></div>
   </section>
@@ -1539,7 +1545,7 @@ function pintar(){
   const cuenta = k => todos.filter(x => x.r.e === k).length;
   $('nPend').textContent = cuenta('pendiente');
   document.querySelectorAll('#pestanas button').forEach(bt => {
-    const sc = bt.dataset.sc, i = bt.querySelector('.pcnt'); if(!i) return;
+    const sc = bt.dataset.sc, i = bt.querySelector('.pp'); if(!i) return;
     const k = {pendiente: 0, revisado: 0, corregido: 0, observado: 0, validado: 0};
     LAYOUT.forEach(d => { const e = estado(d, sc); if(e.aplica && e.ok){ const q = revision(d, sc).e; if(q in k) k[q]++; } });
     const n = k.pendiente, fin = k.revisado + k.validado, co = k.corregido, ok = fin + co, ob = k.observado, tot = n + ok + ob, pc = tot ? Math.round(ok / tot * 100) : 0;
@@ -1548,6 +1554,9 @@ function pintar(){
     poner(bt.querySelector('.pv'), fin, fin + (fin === 1 ? ' departamento' : ' departamentos') + ' sin observaciones o validados');
     poner(bt.querySelector('.pc'), co, co + (co === 1 ? ' departamento corregido' : ' departamentos corregidos') + ', por validar');
     poner(bt.querySelector('.po'), ob, ob + (ob === 1 ? ' departamento' : ' departamentos') + ' con observaciones');
+    const br = bt.querySelector('.pbarra'); br.hidden = false;
+    [fin, n, ob, co].forEach((v, x) => { br.children[x].style.width = (tot ? v / tot * 100 : 0) + '%'; });
+    br.title = fin + ' sin observaciones o validados · ' + n + ' por revisar · ' + ob + ' observados · ' + co + ' corregidos por validar';
     const ring = bt.querySelector('.pring'); ring.hidden = false; ring.style.setProperty('--p', pc); ring.querySelector('b').textContent = pc + '%';
     ring.title = pc + ' % sin observaciones o corregidos (' + ok + ' de ' + tot + ' departamentos listos)';
     bt.setAttribute('aria-label', bt.querySelector('.ptxt').textContent + ': ' + n + ' por revisar, ' + ok + ' sin observaciones o validados, ' + co + ' corregidos por validar, ' + ob + ' con observaciones, ' + pc + ' por ciento listo');
