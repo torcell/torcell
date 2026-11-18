@@ -665,7 +665,41 @@
   .cal-ico.ok{color:#2e9e6a;}
   .cal-ico.obs{color:#e08a1e;}
   .vt-valor.cal-revisado{color:#2e9e6a;}
-  .vt-valor.cal-observado,.vt-valor.cal-corregido{color:#e08a1e;}
+  .vt-valor.cal-observado{color:#e08a1e;}
+  .cal-ico.cor{color:#4f8fd6;}
+  .vt-valor.cal-corregido,.vt-valor.cal-validado{color:#4f8fd6;}
+  /* ===== ventana lateral de Calidad (junto a la ventana del dpto, solo en pantallas anchas) ===== */
+  #ventanaOverlay.cal-par{padding-right:calc(20px + 282px);}
+  #calLat{position:fixed;z-index:51;width:270px;display:none;flex-direction:column;gap:9px;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-top:4px solid var(--cc,#4f8fd6);box-shadow:0 6px 20px rgba(0,0,0,.25);padding:12px 14px 14px;overflow:auto;}
+  #calLat.on{display:flex;animation:calLatIn .28s cubic-bezier(.2,.8,.25,1) both;}
+  @keyframes calLatIn{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:none;}}
+  #calLat h4{margin:0;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--sub);}
+  #calLat .cl-est{font-size:15px;font-weight:800;color:var(--cc,#4f8fd6);line-height:1.25;}
+  #calLat ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
+  #calLat li{font-size:13px;display:flex;justify-content:space-between;gap:10px;border:1px solid var(--border);background:var(--panel-soft);padding:7px 9px;line-height:1.25;}
+  #calLat li b{font-weight:800;white-space:nowrap;}
+  #calLat .cl-pie{font-size:12px;color:var(--sub);line-height:1.4;}
+  #calLat .cl-pie span{display:block;white-space:nowrap;overflow:hidden;}
+  .cl-fotos{font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--border-strong);background:transparent;color:var(--text);padding:7px 10px;min-height:34px;cursor:pointer;width:100%;border-radius:0;transition:transform .08s ease,border-color .12s ease;}
+  .cl-fotos:hover{border-color:var(--cc,#4f8fd6);}.cl-fotos:active{transform:scale(.97);}
+  .vt-sec .cl-fotos{width:auto;margin-top:8px;}
+  #calFotos{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,14,12,.6);overscroll-behavior:contain;}
+  #calFotos .cf-box{background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-top:4px solid var(--cc,#4f8fd6);width:min(460px,100%);max-height:90vh;display:flex;flex-direction:column;gap:10px;padding:14px;animation:cfIn .22s cubic-bezier(.2,.8,.25,1) both;}
+  @keyframes cfIn{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:none;}}
+  #calFotos.sale .cf-box{animation:cfOut .16s ease both;}
+  @keyframes cfOut{to{opacity:0;transform:scale(.9);}}
+  #calFotos h4{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);}
+  #calFotos .cf-cuerpo{overflow:auto;overscroll-behavior:contain;min-height:120px;}
+  #calFotos .cf-msg{color:var(--sub);font-size:13px;padding:24px 4px;text-align:center;}
+  #calFotos .cf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;}
+  #calFotos .cf-th{padding:0;border:1px solid var(--border);background:var(--panel-soft);aspect-ratio:1;overflow:hidden;cursor:pointer;border-radius:0;}
+  #calFotos .cf-th:hover{border-color:var(--cc,#4f8fd6);}.cf-th img{width:100%;height:100%;object-fit:cover;display:block;}
+  #calFotos .cf-gran img{width:100%;max-height:60vh;object-fit:contain;display:block;background:#000;}
+  #calFotos .cf-info{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.35;}
+  #calFotos .cf-pie{display:flex;gap:8px;justify-content:flex-end;}
+  #calFotos .cf-pie button{font:inherit;font-weight:700;font-size:13px;min-height:36px;padding:0 16px;border:1px solid var(--border-strong);background:transparent;color:var(--text);cursor:pointer;border-radius:0;}
+  #calFotos .cf-pie button.pri{background:var(--cc,#4f8fd6);border-color:var(--cc,#4f8fd6);color:#fff;}
+  @media (prefers-reduced-motion:reduce){#calFotos .cf-box{animation:none;}}
   .obs-ico{display:none;}
   @keyframes pisoEntra{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
   .floor-block.piso-entra{animation:pisoEntra .18s ease-out;}
@@ -2056,6 +2090,7 @@
 
 <div class="overlay" id="ventanaOverlay">
   <div class="modal" id="ventanaModal"></div>
+  <aside id="calLat" role="complementary" aria-label="Observaciones de Calidad"></aside>
 </div>
 
 <div class="overlay" id="asignarOverlay">
@@ -2295,7 +2330,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.116';
+const APP_VERSION = '0.73.118';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3314,6 +3349,7 @@ async function loadState(){
     if(remote && remote.items){ parsed = remote; fromDb = true; }
     else if(!sesionInvalida){ cargaFallo = true; }
     if(remote && remote.permisos && typeof remote.permisos === 'object'){ if(isAdmin) permisosCargos = remote.permisos; else misPermisos = remote.permisos; }
+    if(remote && remote.calidad && typeof remote.calidad === 'object') CAL_REV = remote.calidad;
   }
   let localParsed = null;
   try{
@@ -4666,6 +4702,7 @@ function abrirVentana(id){
   ventanaId = id; ventanaDestino = null;
   pintarVentana();
   document.getElementById('ventanaOverlay').classList.add('show');
+  calLateral();
 }
 function cerrarVentana(){
   closeOverlayAnimated(document.getElementById('ventanaOverlay'));
@@ -4700,7 +4737,9 @@ function calidadDe(cell){
 function calIco(cell){
   const r = calidadDe(cell); if(!r) return '';
   if(r.e === 'revisado') return '<span class="cal-ico ok" title="Calidad: revisado sin observaciones">✔</span>';
-  if(r.e === 'observado' || r.e === 'corregido') return '<span class="cal-ico obs" title="Calidad: ' + (r.e === 'corregido' ? 'corregido' : 'con observación') + '">' + (r.e === 'corregido' ? '↺' : '⚠') + '</span>';
+  if(r.e === 'validado') return '<span class="cal-ico cor" title="Calidad: corregido y validado">✓✓</span>';
+  if(r.e === 'corregido') return '<span class="cal-ico cor" title="Calidad: corregido, falta validar">✓</span>';
+  if(r.e === 'observado') return '<span class="cal-ico obs" title="Calidad: con observación">⚠</span>';
   return '';
 }
 // ===== nombres: completo si cabe en el div; si no, solo la inicial del primer apellido ("Silvia G.") =====
@@ -4738,9 +4777,33 @@ function ajustarNombres(){
   obs.observe(document.body, {childList: true, subtree: true});
   window.addEventListener('resize', pedir);
 })();
+// ===== en pantallas anchas las observaciones van en una ventana al lado (calLateral) =====
+const CAL_LAT_ANCHO = 270, CAL_LAT_SEP = 12;
+const calLadoOn = cell => !!calidadDe(cell) && window.innerWidth >= 860;
+const CAL_FECHA = ts => { if(!ts) return ''; const d = new Date(ts), z = n => String(n).padStart(2, '0'); return z(d.getDate()) + '/' + z(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); };
+function calLateral(){
+  const box = document.getElementById('calLat'), modal = document.getElementById('ventanaModal');
+  if(!box || !modal) return;
+  const cell = ventanaId ? cellById[ventanaId] : null;
+  const r = cell && calLadoOn(cell) ? calidadDe(cell) : null;
+  if(!r){ box.classList.remove('on'); return; }
+  const est = {revisado: ['Sin observaciones', '#2e9e6a'], observado: ['Con observación', '#e0584a'], corregido: ['✓ Corregido, falta validar', '#4f8fd6'], validado: ['✓✓ Corregido y validado', '#4f8fd6'], pendiente: ['Por revisar', '#e08a1e']}[r.e] || [r.e, '#4f8fd6'];
+  const items = String(r.d || '').split(', ').map(x => x.match(/^(.+) ×(\d+)$/)).filter(Boolean);
+  const quien = calNombreLimpio(r.u), f = CAL_FECHA(r.ts);
+  const lista = items.length ? '<ul>' + items.map(m => '<li><span>' + escVt(m[1]) + '</span><b>×' + escVt(m[2]) + '</b></li>').join('') + '</ul>' : '';
+  box.style.setProperty('--cc', est[1]);
+  box.innerHTML = '<h4>Calidad</h4><div class="cl-est">' + escVt(est[0]) + '</div>' + lista +
+    ((quien || f) ? '<div class="cl-pie">' + (quien ? '<span data-nompre="Revisó: " data-nomfull="' + escVt(quien) + '">Revisó: ' + escVt(quien) + '</span>' : '') + (f ? '<span>' + escVt(f) + '</span>' : '') + '</div>' : '') + '<button type="button" class="cl-fotos" data-cf="1">📷 Ver fotos</button>';
+  box.style.left = (modal.offsetLeft + modal.offsetWidth + CAL_LAT_SEP) + 'px';
+  box.style.top = modal.offsetTop + 'px';
+  box.style.maxHeight = modal.offsetHeight + 'px';
+  box.classList.add('on');
+}
+window.addEventListener('resize', () => { if(ventanaAbierta()){ pintarVentana(); calLateral(); } });
 function calidadSecHtml(cell){
   const r = calidadDe(cell); if(!r) return '';
-  const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Observación corregida', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
+  if(calLadoOn(cell)) return '';
+  const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Corregido, falta validar', validado: 'Corregido y validado', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
   const f = r.ts ? new Date(r.ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
   const det = r.d ? '<small style="display:block;white-space:normal">' + escVt(r.d) + '</small>' : '';
   const quien = calNombreLimpio(r.u);
@@ -4748,8 +4811,49 @@ function calidadSecHtml(cell){
   const tit = quien
     ? '<div class="vt-sec-title" data-nompre="Observaciones de Calidad - " data-nomfull="' + escVt(quien) + '">Observaciones de Calidad - ' + escVt(quien) + '</div>'
     : '<div class="vt-sec-title">Observaciones de Calidad</div>';
-  return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div></div></div>`;
+  return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div><button type="button" class="cl-fotos" data-cf="1">📷 Ver fotos</button></div></div>`;
 }
+// ===== ventanita con las fotos que subió Calidad (mismas acciones del servidor que usa calidad.html) =====
+const CAL_FOTOS_ERR = {sin_permiso: 'Tu cargo no tiene acceso a las fotos de Calidad.', sin_sesion: 'Tu sesión venció, vuelve a entrar.'};
+async function abrirFotosCal(){
+  const cell = ventanaId ? cellById[ventanaId] : null; if(!cell || document.getElementById('calFotos')) return;
+  const r = calidadDe(cell), base = cell.piso + '|' + cell.dpto, sc = CAL_SCOPE[cell.area];
+  const ov = document.createElement('div'); ov.id = 'calFotos';
+  ov.style.setProperty('--cc', r && r.e === 'observado' ? '#e0584a' : '#4f8fd6');
+  ov.innerHTML = '<div class="cf-box" role="dialog" aria-modal="true" aria-label="Fotos de Calidad"><h4>Fotos · ' + escVt(cell.piso + ' · ' + cell.dpto) + '</h4><div class="cf-cuerpo" id="cfCuerpo"><div class="cf-msg">Cargando fotos…</div></div><div class="cf-pie"><button type="button" id="cfVolver" hidden>Volver</button><button type="button" class="pri" id="cfCerrar">Cerrar</button></div></div>';
+  document.body.appendChild(ov);
+  const cuerpo = ov.querySelector('#cfCuerpo'), volver = ov.querySelector('#cfVolver');
+  const cerrar = () => { ov.classList.add('sale'); setTimeout(() => ov.remove(), 170); syncScrollLock(); };
+  ov.querySelector('#cfCerrar').addEventListener('click', cerrar);
+  ov.addEventListener('wheel', e => { if(!e.target.closest('.cf-cuerpo')) e.preventDefault(); }, {passive: false});
+  syncScrollLock();
+  const msg = t => { cuerpo.innerHTML = '<div class="cf-msg">' + escVt(t) + '</div>'; };
+  const fecha = ts => ts ? CAL_FECHA(ts) : '';
+  let lista = [];
+  const grilla = () => {
+    volver.hidden = true;
+    if(!lista.length) return msg('Esta revisión no tiene fotos.');
+    cuerpo.innerHTML = '<div class="cf-grid">' + lista.map((f, i) => '<button type="button" class="cf-th" data-i="' + i + '" aria-label="Foto ' + (i + 1) + '">' + (f.m ? '<img alt="" src="data:image/jpeg;base64,' + escVt(f.m) + '">' : '') + '</button>').join('') + '</div>';
+  };
+  volver.addEventListener('click', grilla);
+  cuerpo.addEventListener('click', async e => {
+    const b = e.target.closest('.cf-th'); if(!b) return;
+    const f = lista[Number(b.dataset.i)]; if(!f) return;
+    const quien = calNombreLimpio(f.u);
+    cuerpo.innerHTML = '<div class="cf-gran">' + (f.m ? '<img alt="Foto del departamento" src="data:image/jpeg;base64,' + escVt(f.m) + '">' : '') + '</div><div class="cf-info">' + escVt([fecha(f.ts), quien].filter(Boolean).join(' · ')) + '</div>';
+    volver.hidden = false;
+    let j = null; try{ j = await llamarDb('calidadFotoVer', {ids: [f.id]}); }catch(x){}
+    if(!document.getElementById('calFotos') || volver.hidden) return;
+    const full = j && j.ok && j.fotos && j.fotos[f.id];
+    if(full) cuerpo.querySelector('.cf-gran').innerHTML = '<img alt="Foto del departamento" src="data:image/jpeg;base64,' + escVt(full) + '">';
+  });
+  let j = null; try{ j = await llamarDb('calidadFotosListar', {clave: base}); }catch(x){}
+  if(!document.getElementById('calFotos')) return;
+  if(!j || !j.ok) return msg(CAL_FOTOS_ERR[j && j.error] || 'No se pudieron cargar las fotos.');
+  lista = (j.fotos || []).filter(f => !sc || !f.z || f.z === sc);
+  grilla();
+}
+document.addEventListener('click', e => { if(e.target.closest('[data-cf]')) abrirFotosCal(); });
 function pintarVentana(){
   const id = ventanaId, cell = cellById[id];
   if(!cell) return;
@@ -4788,6 +4892,8 @@ function pintarVentana(){
     </div>
     <div class="vt-foot">${isAdmin ? '<button type="button" class="btn" data-vt="guardar">Guardar</button><button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}<button type="button" class="btn" data-vt="cerrar">Cerrar</button></div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
+  document.getElementById('ventanaOverlay').classList.toggle('cal-par', calLadoOn(cell));
+  if(ventanaAbierta()) calLateral();
 }
 document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
   if(e.target.id === 'ventanaOverlay') return;
@@ -5997,8 +6103,17 @@ async function cargarAccesos(){
   seccAparatos = j.secciones || {mapa:{}, filas:0, ms:0, grande:false};
   pintarDispositivosTodos(j.cuentas, j.dispositivosTodos);
   sel.innerHTML = '<option value="">Todas las cuentas</option>' + (j.cuentas || []).map(c => `<option value="${esc(c)}"${c === cuenta ? ' selected' : ''}>${esc(c)}</option>`).join('');
-  msg.textContent = j.accesos.length ? `Últimos ${j.accesos.length} inicios de sesión${cuenta ? ' de ' + cuenta : ''}.` : '';
-  lista.innerHTML = j.accesos.length ? j.accesos.map(a => `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${esc(a.cuenta)}</span><span>${fechaHoraCambio(a.ts)}</span></div></div>`).join('')
+  msg.textContent = j.accesos.length ? `Últimos ${j.accesos.length} inicios de sesión${cuenta ? ' de ' + cuenta : ''}, agrupados por día.` : '';
+  // ===== por día: cuántas veces entraron y a qué hora =====
+  const z2 = n => String(n).padStart(2, '0'), diaDe = ts => { const d = new Date(ts); return z2(d.getDate()) + '/' + z2(d.getMonth() + 1) + '/' + d.getFullYear(); }, horaDe = ts => { const d = new Date(ts); return z2(d.getHours()) + ':' + z2(d.getMinutes()); };
+  const dias = [];
+  j.accesos.forEach(a => { const k = diaDe(a.ts); let g = dias[dias.length - 1]; if(!g || g.k !== k){ g = {k, f: []}; dias.push(g); } g.f.push(a); });
+  lista.innerHTML = dias.length ? dias.map(g => {
+    const cu = {}; g.f.forEach(a => { cu[a.cuenta] = (cu[a.cuenta] || 0) + 1; });
+    const resumen = Object.keys(cu).map(c => esc(c) + ' ×' + cu[c]).join(' · ');
+    return `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${g.k}</span><span>${g.f.length} ${g.f.length === 1 ? 'inicio' : 'inicios'}</span></div><div class="cambio-det" style="font-size:12px;color:var(--sub);margin-bottom:4px;">${resumen}</div>` +
+      g.f.map(a => `<div class="cambio-det" style="display:flex;justify-content:space-between;gap:10px;"><span>${esc(a.cuenta)}</span><b>${horaDe(a.ts)}</b></div>`).join('') + '</div>';
+  }).join('')
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay inicios de sesión registrados.</p>';
 }
 document.getElementById('irAvanceBtn').addEventListener('click', () => { window.location.href = 'avance_obra.html'; });
@@ -9700,4 +9815,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.116 · 16-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.118 · 18-11-2026 ==== -->
