@@ -1276,7 +1276,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.27';
+const CAL_VERSION = '1.38.28';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -2970,7 +2970,7 @@ window.limpiarNuevos = function(raiz){
   const COD = ['R1','R2','R3','RF'];
   const NOMCOD = {R1:'primera revisión', R2:'segunda revisión', R3:'tercera revisión', RF:'revisión final para venta'};
   // ===== ascensores: solo se ven en protocolos; no vienen del panel =====
-  const PLAYOUT = LAYOUT.concat([{n:-90, p:'Ascensores', d:'Ascensor 1', cer:[], fra:[]}, {n:-90, p:'Ascensores', d:'Ascensor 2', cer:[], fra:[]}]);
+  const PLAYOUT = LAYOUT.concat([{n:-2, p:'Piso -2', d:'Pasillo', cer:[['cer-sub2-pasillo','Pasillos',1]], fra:[]}, {n:-90, p:'Ascensores', d:'Ascensor 1', cer:[], fra:[]}, {n:-90, p:'Ascensores', d:'Ascensor 2', cer:[], fra:[]}]);
   const ATRAS_N = 10;               // cuántos se marcan en "Más atrasados"
   const porDefecto = k => SECC.find(s => s.k === k).pts.map((t, i) => ({id: k + (i + 1), t}));
 
@@ -3368,4 +3368,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.27 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.28 · 18-11-2026 ==== -->
