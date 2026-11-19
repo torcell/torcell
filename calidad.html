@@ -128,7 +128,7 @@ html:has(body.bloq){overflow:hidden;scrollbar-gutter:stable;}
 .seg button{cursor:pointer;position:relative;transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .08s ease,filter .18s ease;}
 .seg button:not(:disabled):not(.on):hover{border-color:var(--accent);z-index:1;background:color-mix(in srgb,var(--accent) 14%,var(--panel));box-shadow:inset 0 0 0 1px var(--accent),inset 0 0 14px color-mix(in srgb,var(--accent) 28%,transparent);}
 .seg button.on{box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);}
-.seg button::before{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");content:"";display:inline-block;width:1em;height:1em;vertical-align:-.15em;margin-right:5px;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;visibility:hidden;}
+.seg button::before{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");content:"";position:absolute;left:12px;top:50%;margin-top:-.5em;width:1em;height:1em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;visibility:hidden;}
 .seg button.on::before{visibility:visible;}
 .seg button.on:not(:disabled):hover{filter:brightness(1.12);z-index:1;}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;z-index:2;}
@@ -800,12 +800,80 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 #vel.lect .mcor{display:none !important;}
 
 /* ===== Iconos (conjunto Lápiz) ===== */
-.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;}
-.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");}
-.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
-.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
-.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
-.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
+.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;flex:none;}
+.ic-cer{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z'/%3E%3C/svg%3E");}
+.ic-piso{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2 8l10-5 10 5-10 5zM2 13l10 5 10-5M2 17.5l10 5 10-5'/%3E%3C/svg%3E");}
+.ic-muro{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v16H3zM3 9.5h18M3 15h18M9 4v5.5M15 9.5V15M9 15v5'/%3E%3C/svg%3E");}
+.ic-ladrillo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v16H3zM3 9.5h18M3 15h18M9 4v5.5M15 9.5V15M9 15v5'/%3E%3C/svg%3E");}
+.ic-frague{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 17l11-11 5 5-11 11zM14 6l3-3 4 4-3 3M3 21h5'/%3E%3C/svg%3E");}
+.ic-pasillos{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M7 3h10v18H7zM12 7v10M4 21h16'/%3E%3C/svg%3E");}
+.ic-ascensor{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 3h14v18H5zM12 3v18M7.5 10l2-3 2 3zM12.5 14l2 3 2-3z'/%3E%3C/svg%3E");}
+.ic-azotea{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 20h18M5 20V10l7-6 7 6v10M10 20v-6h4v6'/%3E%3C/svg%3E");}
+.ic-trazo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 21L21 3M3 21l3-6 3 3zM14 6l4 4'/%3E%3C/svg%3E");}
+.ic-tina{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12h18v3a5 5 0 01-5 5H8a5 5 0 01-5-5zM6 12V6a2 2 0 013.5-1.3M5 20l-1 2M19 20l1 2'/%3E%3C/svg%3E");}
+.ic-imper{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3l7 9a7 7 0 11-14 0zM9 14a3 3 0 003 3'/%3E%3C/svg%3E");}
+.ic-sellador{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M8 3h8v5H8zM6 8h12v3H6zM10 11v10h4V11'/%3E%3C/svg%3E");}
+.ic-caja-elec{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 4h16v16H4zM13 6l-4 6h5l-3 6'/%3E%3C/svg%3E");}
+.ic-nivel{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12h18M3 8h18M3 16h18M12 3v18'/%3E%3C/svg%3E");}
+.ic-trabajadores{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a4 4 0 110 8 4 4 0 010-8zM4 21v-3a8 8 0 0116 0v3'/%3E%3C/svg%3E");}
+.ic-bodega{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 9l9-5 9 5v11H3zM8 20v-6h8v6'/%3E%3C/svg%3E");}
+.ic-foto{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 7h5l2-3h4l2 3h5v13H3zM12 10a4 4 0 100 8 4 4 0 000-8z'/%3E%3C/svg%3E");}
+.ic-guardar{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 3h13l3 3v15H4zM8 3v6h8V3M8 21v-7h8v7'/%3E%3C/svg%3E");}
+.ic-candado{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 018 0v4'/%3E%3C/svg%3E");}
+.ic-candadoa{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 017.5-2'/%3E%3C/svg%3E");}
+.ic-reloj{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l4 3'/%3E%3C/svg%3E");}
+.ic-informe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 3h14v18H5zM9 8h6M9 12h6M9 16h4'/%3E%3C/svg%3E");}
+.ic-luna{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z'/%3E%3C/svg%3E");}
+.ic-sol{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'/%3E%3C/svg%3E");}
+.ic-estrella{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3l2.7 6 6.3.6-4.8 4.2 1.5 6.2L12 16.8 6.3 20l1.5-6.2L3 9.6 9.3 9z'/%3E%3C/svg%3E");}
+.ic-estadisticas{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 20V4M4 20h16M8 16v-5M12 16V7M16 16v-3'/%3E%3C/svg%3E");}
+.ic-paleta{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 000 18c1.5 0 2-1 2-2s-1-1.5-1-3 1-2 3-2h3a3 3 0 003-3c0-4.5-4-8-10-8zM7 10h2v2H7zM10 6.5h2v2h-2zM15 6.5h2v2h-2z'/%3E%3C/svg%3E");}
+.ic-diagnostico{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12h4l2-6 4 12 2-6h6'/%3E%3C/svg%3E");}
+.ic-correo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 5h18v14H3zM3 5l9 8 9-8'/%3E%3C/svg%3E");}
+.ic-calendario{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 5h18v16H3zM3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");}
+.ic-pago{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2 6h20v12H2zM12 9a3 3 0 100 6 3 3 0 000-6z'/%3E%3C/svg%3E");}
+.ic-caja{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 7l9-4 9 4v11l-9 4-9-4zM3 7l9 4 9-4M12 11v11'/%3E%3C/svg%3E");}
+.ic-bandeja{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 13l3-9h12l3 9v7H3zM3 13h5l1 3h6l1-3h5'/%3E%3C/svg%3E");}
+.ic-tendencia{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 17l6-6 4 4 8-9M15 6h6v6'/%3E%3C/svg%3E");}
+.ic-campana{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M6 17V11a6 6 0 0112 0v6l2 2H4zM10 21h4'/%3E%3C/svg%3E");}
+.ic-llave{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M9 3a6 6 0 100 12 6 6 0 000-12zM13 13l8 8M17 17l3-3M19 19l2-2'/%3E%3C/svg%3E");}
+.ic-engranaje{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 8a4 4 0 100 8 4 4 0 000-8zM10 2h4v3l2 1 2-2 3 3-2 2 1 2h3v4h-3l-1 2 2 2-3 3-2-2-2 1v3h-4v-3l-2-1-2 2-3-3 2-2-1-2H2v-4h3l1-2-2-2 3-3 2 2 2-1z'/%3E%3C/svg%3E");}
+.ic-carpeta{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 5h7l2 3h9v12H3z'/%3E%3C/svg%3E");}
+.ic-historial{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12a9 9 0 109-9 9 9 0 00-6.5 3M3 4v4h4M12 7v5l3 2'/%3E%3C/svg%3E");}
+.ic-impresora{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6z'/%3E%3C/svg%3E");}
+.ic-subir{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 20V5M5 11l7-7 7 7'/%3E%3C/svg%3E");}
+.ic-bajar{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4v15M5 13l7 7 7-7'/%3E%3C/svg%3E");}
+.ic-izq{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M20 12H5M11 5l-7 7 7 7'/%3E%3C/svg%3E");}
+.ic-deshacer{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3'/%3E%3C/svg%3E");}
+.ic-nota{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 3h11v4M4 3v18h14v-8M19 5l-8 8-1 3 3-1 8-8z'/%3E%3C/svg%3E");}
+.ic-prohibido{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM5.6 5.6l12.8 12.8'/%3E%3C/svg%3E");}
+.ic-celular{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M7 2h10v20H7zM11 18h2'/%3E%3C/svg%3E");}
+.ic-compu{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v12H3zM8 20h8M12 16v4'/%3E%3C/svg%3E");}
+.ic-lapiz{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 20l1-5L16 4l4 4L9 19zM14 6l4 4'/%3E%3C/svg%3E");}
+.ic-objetivo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 8a4 4 0 100 8 4 4 0 000-8z'/%3E%3C/svg%3E");}
+.ic-alarma{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 5a8 8 0 100 16 8 8 0 000-16zM12 9v4l3 2M3 6l4-3M21 6l-4-3'/%3E%3C/svg%3E");}
+.ic-rayo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M13 2L5 14h6l-1 8 8-12h-6z'/%3E%3C/svg%3E");}
+.ic-galeria{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v16H3zM3 16l5-5 4 4 3-3 6 6M14 7h3v3h-3z'/%3E%3C/svg%3E");}
+.ic-flecha{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 19L19 5M9 5h10v10'/%3E%3C/svg%3E");}
+.ic-escuadra{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 21V3l18 18zM7 16v2h2'/%3E%3C/svg%3E");}
+.ic-tarjeta{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2 5h20v14H2zM2 10h20M5 15h4'/%3E%3C/svg%3E");}
+.ic-ayuda{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM9 9.5a3 3 0 116 0c0 2-3 2-3 4M12 16.5v1.5'/%3E%3C/svg%3E");}
+.ic-papelera{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7'/%3E%3C/svg%3E");}
+.ic-lista{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M6 4h12v18H6zM9 2h6v4H9zM9 11h6M9 15h6'/%3E%3C/svg%3E");}
+.ic-casilla{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 4h16v16H4zM8 12l3 3 6-6'/%3E%3C/svg%3E");}
+.ic-mas{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4v16M4 12h16'/%3E%3C/svg%3E");}
+.ic-casco{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 17h18M5 17a7 7 0 0114 0M12 6v5M3 20h18'/%3E%3C/svg%3E");}
+.ic-circulo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4a8 8 0 100 16 8 8 0 000-16z'/%3E%3C/svg%3E");}
+.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");}
+.ic-ok2{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2.5 12.5L6.5 16.5 13 8M10 15.5l1 1L21.5 7'/%3E%3C/svg%3E");}
+.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
+.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
+.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
+.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
+.ic:not(.ib):not(:only-child){margin-left:.1em;margin-right:.1em;}
+/* icono a la izquierda del botón, texto al medio */
+button:has(>.ic.ib){position:relative;padding-left:34px;padding-right:34px;text-align:center;}
+button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-align:baseline;}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -1176,8 +1244,8 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
     <div class="fvimg" id="fvImg"></div>
     <div class="sub" id="fvInfo" style="margin-top:0;"></div>
     <div class="acciones" id="fvAcc">
-      <button class="btn" id="fvDescargar" type="button">⬇ Descargar</button>
-      <button class="btn" id="fvEditar" type="button">✏ Editar</button>
+      <button class="btn" id="fvDescargar" type="button"><i class="ic ib ic-bajar"></i>Descargar</button>
+      <button class="btn" id="fvEditar" type="button"><i class="ic ib ic-lapiz"></i>Editar</button>
       <button class="btn" id="fvBorrar" type="button">Borrar foto</button>
       <button class="btn primary" id="fvCerrar" type="button">Cerrar</button>
     </div>
@@ -1185,9 +1253,9 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <div class="fved-h" id="edTit">Editar foto</div>
       <div class="fved-bar">
         <div class="fved-g" id="edHerr">
-          <button type="button" class="btn small on" data-h="lapiz">✏ Lápiz</button>
-          <button type="button" class="btn small" data-h="circulo">◯ Círculo</button>
-          <button type="button" class="btn small" data-h="flecha">➚ Flecha</button>
+          <button type="button" class="btn small on" data-h="lapiz"><i class="ic ib ic-lapiz"></i>Lápiz</button>
+          <button type="button" class="btn small" data-h="circulo"><i class="ic ib ic-circulo"></i>Círculo</button>
+          <button type="button" class="btn small" data-h="flecha"><i class="ic ib ic-flecha"></i>Flecha</button>
           <button type="button" class="btn small" data-h="texto">Aa Texto</button>
         </div>
         <div class="fved-g" id="edCol">
@@ -1251,11 +1319,11 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       <button type="button" data-e="corregido" hidden>Corregido</button>
     </div>
     <div class="segnota" id="mSegNota" hidden></div>
-    <div class="mval" id="mVal" hidden><b id="mValT"></b><span id="mValS"></span><button type="button" class="btn primary" id="mValBtn" hidden><i class="ic ic-ok"></i><i class="ic ic-ok"></i> Dar visto bueno</button></div>
+    <div class="mval" id="mVal" hidden><b id="mValT"></b><span id="mValS"></span><button type="button" class="btn primary" id="mValBtn" hidden><i class="ic ib ic-ok2"></i>Dar visto bueno</button></div>
     <button type="button" class="btn small" id="mObsToggle" hidden>＋ Detallar observaciones</button>
     <div class="obswrap" id="mObs">
       <div class="obsin">
-        <div class="obshead"><span>¿Qué está mal?</span><button class="btn small" id="mEditar" type="button">✎ Editar opciones</button></div>
+        <div class="obshead"><span>¿Qué está mal?</span><button class="btn small" id="mEditar" type="button"><i class="ic ib ic-lapiz"></i>Editar opciones</button></div>
         <div class="obsfotos" id="mObsFotos"></div>
         <button class="btn" id="mElegir" type="button">＋ Elegir observaciones</button>
         <div class="obslista" id="mLista" hidden></div>
@@ -1263,12 +1331,12 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
       </div>
     </div>
     <div class="fotos" id="mFotos" hidden>
-      <div class="fotos-h"><b>Fotos del departamento</b><span id="mFotosN"></span><button type="button" class="btn small" id="fBajar" hidden>⬇ Descargar</button></div>
+      <div class="fotos-h"><b>Fotos del departamento</b><span id="mFotosN"></span><button type="button" class="btn small" id="fBajar" hidden><i class="ic ib ic-bajar"></i>Descargar</button></div>
       <div class="fgrid" id="mFotosGrid"></div>
       <div class="archnota" id="mArch" hidden></div>
       <div class="fbtns">
-        <button type="button" class="btn small" id="fTomar">📷 Tomar foto</button>
-        <button type="button" class="btn small" id="fGaleria">🖼 Galería</button>
+        <button type="button" class="btn small" id="fTomar"><i class="ic ib ic-foto"></i>Tomar foto</button>
+        <button type="button" class="btn small" id="fGaleria"><i class="ic ib ic-galeria"></i>Galería</button>
       </div>
       <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
       <input type="file" id="fGal" accept="image/*" multiple hidden>
@@ -1284,7 +1352,7 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.29';
+const CAL_VERSION = '1.38.30';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1607,7 +1675,7 @@ function pintar(){
     `<section class="piso"><h2>${esc(p)} · ${grupos[p].items.filter(x => x.r.e !== 'nolisto').length} de ${grupos[p].items.length} listos</h2><div class="lista">` +
     grupos[p].items.map(x => x.r.e === 'nolisto'
       ? `<div class="tile n${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}" aria-disabled="true"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${falta(x.e)}</small></div>`
-      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${x.r.e === 'revisado' ? '<span class="lg">Sin observaciones</span><span class="cr">Sin obs.</span>' : esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}">📷 ${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
+      : `<button type="button" class="tile ${claseEstado(x.r.e)}${x.d.d === 'Pasillo' ? ' pas' : ''}${anim}${espera[clave(x.d)] > Date.now() ? ' esperando' : ''}" data-k="${esc(clave(x.d))}"><b><span class="nf">${esc(x.d.d)}</span><span class="ns"><i>${esc(pisoNum(x.d))}</i>${esc(dptoCorto(x.d))}</span></b><small>${x.r.e === 'revisado' ? '<span class="lg">Sin observaciones</span><span class="cr">Sin obs.</span>' : esc(etiqueta(x.r))}</small>${totalFotos(claveBase(x.d)) ? `<i class="fcnt" title="Fotos${archivadas[claveBase(x.d)] ? ' (' + archivadas[claveBase(x.d)] + ' archivadas)' : ''}"><i class="ic ib ic-foto"></i>${totalFotos(claveBase(x.d))}</i>` : ''}${x.r.e === 'pendiente' && x.dias !== null ? `<small class="dias${claseDias(x.dias)}">${textoDias(x.dias)}</small>` : ''}${espera[clave(x.d)] > Date.now() ? `<i class="espera" style="animation-delay:-${ESPERA_MS - (espera[clave(x.d)] - Date.now())}ms"></i>` : ''}</button>`).join('') +
     '</div></section>').join('');
 }
 
@@ -1718,7 +1786,7 @@ function pintarCambios(){
 }
 function pintarResumenObs(){
   const n = nFotosActual();
-  $('mObsFotos').innerHTML = '<span>📷 Fotos: ' + n + '</span>' + (n ? '<small>Con fotos queda con observación. Cuando se arregle, marca Corregido.</small>' : '<small>Sube fotos abajo o elige las observaciones</small>');
+  $('mObsFotos').innerHTML = '<span><i class="ic ic-foto"></i> Fotos: ' + n + '</span>' + (n ? '<small>Con fotos queda con observación. Cuando se arregle, marca Corregido.</small>' : '<small>Sube fotos abajo o elige las observaciones</small>');
   const marcadas = $('mLista').querySelectorAll('input[type=checkbox]:checked').length;
   $('mElegir').textContent = listaAbierta ? '− Ocultar observaciones' : (marcadas ? '＋ Elegir observaciones (' + marcadas + ' marcadas)' : '＋ Elegir observaciones');
   const listaVisible = listaAbierta || esPC();
@@ -1850,7 +1918,7 @@ function pintarFotos(){
   ajustarSeg();
   const na = Number(archivadas[base]) || 0;
   $('mArch').hidden = !na;
-  $('mArch').textContent = na ? '📦 Hubo ' + na + ' foto' + (na === 1 ? '' : 's') + ' en este departamento y ' + (na === 1 ? 'está archivada' : 'están archivadas') + ' (descargada' + (na === 1 ? '' : 's') + ' y borrada' + (na === 1 ? '' : 's') + ' de la base para liberar espacio). El ícono conserva la cantidad de fotos.' : '';
+  $('mArch').textContent = na ? 'Hubo ' + na + ' foto' + (na === 1 ? '' : 's') + ' en este departamento y ' + (na === 1 ? 'está archivada' : 'están archivadas') + ' (descargada' + (na === 1 ? '' : 's') + ' y borrada' + (na === 1 ? '' : 's') + ' de la base para liberar espacio). El ícono conserva la cantidad de fotos.' : '';
   $('mFotosN').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length ? arr.length + ' de ' + FOTOS_MAX : na ? 'sin fotos en la base' : 'sin fotos';
   $('mFotosGrid').innerHTML = arr.map((f, i) => `<button type="button" class="fth${f.estado === 'sub' ? ' sub' : ''}" data-i="${i}" aria-label="Foto ${i + 1}">${f.m ? `<img alt="" src="data:image/jpeg;base64,${f.m}">` : ''}</button>`).join('');
   $('fTomar').disabled = $('fGaleria').disabled = arr.length >= FOTOS_MAX;
@@ -3041,7 +3109,7 @@ window.limpiarNuevos = function(raiz){
       const ok = a.t > 0 && a.h === a.t, par = a.h > 0 && !ok, fuera = filtro !== 'todos' && !cal.cumple({d, a}, filtro);
       if(!fuera) n++;
       const et = d.d === 'Pasillo' ? 'Pas.' : String(d.d);
-      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob">✎' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
+      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob"><i class="ic ic-lapiz"></i>' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
     }).join('') + '</div>' + anilloPiso(P, cal) + '</div>').join('');
     // lista de los más atrasados (en la torre pueden quedar lejos hacia abajo)
     const lista = [...cal.rank.entries()].map(([k, r]) => ({r, x: cal.filas.find(f => claveDep(f.d, sec) === k)}));
@@ -3100,7 +3168,7 @@ window.limpiarNuevos = function(raiz){
     $p('pLista').innerHTML = vis.length ? vis.map(i => {
       const ob = dr.o[i.id] || '', pv = prevObs(i.id);
       return '<div class="pit' + (dr.c.has(i.id) ? ' hecho' : '') + '" data-id="' + esc2(i.id) + '"><label><input type="checkbox"' + (dr.c.has(i.id) ? ' checked' : '') + (L ? ' disabled' : '') + '><span>' + esc2(i.t) + '</span></label>' + (dr.nuevos.has(i.id) ? '<span class="nuevo">nuevo</span>' : '') +
-        (L ? '' : '<button type="button" class="lap' + (ob ? ' con' : '') + '" title="Escribir observación" aria-label="Escribir observación">✎</button><button type="button" class="q" title="Quitar solo en este departamento" aria-label="Quitar">×</button>') +
+        (L ? '' : '<button type="button" class="lap' + (ob ? ' con' : '') + '" title="Escribir observación" aria-label="Escribir observación"><i class="ic ic-lapiz"></i></button><button type="button" class="q" title="Quitar solo en este departamento" aria-label="Quitar">×</button>') +
         (pv ? '<div class="prev">' + ant.cod + ': ' + esc2(pv) + '</div>' : '') +
         (!L && dr.edit === i.id ? '<input type="text" class="obs-in" maxlength="200" placeholder="Escribe la observación" value="' + esc2(ob) + '">' : (ob ? '<div class="obs-t">' + esc2(ob) + '</div>' : '')) + '</div>';
     }).join('') : '<div class="pvacio">No quedan puntos en este departamento.</div>';
@@ -3376,4 +3444,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.29 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.30 · 18-11-2026 ==== -->

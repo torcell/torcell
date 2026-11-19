@@ -1657,12 +1657,80 @@
 .ff-ok{margin-top:10px;font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;border-radius:0;}
 
 /* ===== Iconos (conjunto Lápiz) ===== */
-.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;}
-.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M3.5 13l5 5.5L21 4'/%3E%3C/svg%3E");}
-.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
-.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
-.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
-.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
+.ic{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;flex:none;}
+.ic-cer{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z'/%3E%3C/svg%3E");}
+.ic-piso{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2 8l10-5 10 5-10 5zM2 13l10 5 10-5M2 17.5l10 5 10-5'/%3E%3C/svg%3E");}
+.ic-muro{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v16H3zM3 9.5h18M3 15h18M9 4v5.5M15 9.5V15M9 15v5'/%3E%3C/svg%3E");}
+.ic-ladrillo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v16H3zM3 9.5h18M3 15h18M9 4v5.5M15 9.5V15M9 15v5'/%3E%3C/svg%3E");}
+.ic-frague{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 17l11-11 5 5-11 11zM14 6l3-3 4 4-3 3M3 21h5'/%3E%3C/svg%3E");}
+.ic-pasillos{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M7 3h10v18H7zM12 7v10M4 21h16'/%3E%3C/svg%3E");}
+.ic-ascensor{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 3h14v18H5zM12 3v18M7.5 10l2-3 2 3zM12.5 14l2 3 2-3z'/%3E%3C/svg%3E");}
+.ic-azotea{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 20h18M5 20V10l7-6 7 6v10M10 20v-6h4v6'/%3E%3C/svg%3E");}
+.ic-trazo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 21L21 3M3 21l3-6 3 3zM14 6l4 4'/%3E%3C/svg%3E");}
+.ic-tina{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12h18v3a5 5 0 01-5 5H8a5 5 0 01-5-5zM6 12V6a2 2 0 013.5-1.3M5 20l-1 2M19 20l1 2'/%3E%3C/svg%3E");}
+.ic-imper{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3l7 9a7 7 0 11-14 0zM9 14a3 3 0 003 3'/%3E%3C/svg%3E");}
+.ic-sellador{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M8 3h8v5H8zM6 8h12v3H6zM10 11v10h4V11'/%3E%3C/svg%3E");}
+.ic-caja-elec{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 4h16v16H4zM13 6l-4 6h5l-3 6'/%3E%3C/svg%3E");}
+.ic-nivel{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12h18M3 8h18M3 16h18M12 3v18'/%3E%3C/svg%3E");}
+.ic-trabajadores{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a4 4 0 110 8 4 4 0 010-8zM4 21v-3a8 8 0 0116 0v3'/%3E%3C/svg%3E");}
+.ic-bodega{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 9l9-5 9 5v11H3zM8 20v-6h8v6'/%3E%3C/svg%3E");}
+.ic-foto{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 7h5l2-3h4l2 3h5v13H3zM12 10a4 4 0 100 8 4 4 0 000-8z'/%3E%3C/svg%3E");}
+.ic-guardar{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 3h13l3 3v15H4zM8 3v6h8V3M8 21v-7h8v7'/%3E%3C/svg%3E");}
+.ic-candado{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 018 0v4'/%3E%3C/svg%3E");}
+.ic-candadoa{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 017.5-2'/%3E%3C/svg%3E");}
+.ic-reloj{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l4 3'/%3E%3C/svg%3E");}
+.ic-informe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 3h14v18H5zM9 8h6M9 12h6M9 16h4'/%3E%3C/svg%3E");}
+.ic-luna{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z'/%3E%3C/svg%3E");}
+.ic-sol{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'/%3E%3C/svg%3E");}
+.ic-estrella{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3l2.7 6 6.3.6-4.8 4.2 1.5 6.2L12 16.8 6.3 20l1.5-6.2L3 9.6 9.3 9z'/%3E%3C/svg%3E");}
+.ic-estadisticas{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 20V4M4 20h16M8 16v-5M12 16V7M16 16v-3'/%3E%3C/svg%3E");}
+.ic-paleta{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 000 18c1.5 0 2-1 2-2s-1-1.5-1-3 1-2 3-2h3a3 3 0 003-3c0-4.5-4-8-10-8zM7 10h2v2H7zM10 6.5h2v2h-2zM15 6.5h2v2h-2z'/%3E%3C/svg%3E");}
+.ic-diagnostico{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12h4l2-6 4 12 2-6h6'/%3E%3C/svg%3E");}
+.ic-correo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 5h18v14H3zM3 5l9 8 9-8'/%3E%3C/svg%3E");}
+.ic-calendario{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 5h18v16H3zM3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");}
+.ic-pago{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2 6h20v12H2zM12 9a3 3 0 100 6 3 3 0 000-6z'/%3E%3C/svg%3E");}
+.ic-caja{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 7l9-4 9 4v11l-9 4-9-4zM3 7l9 4 9-4M12 11v11'/%3E%3C/svg%3E");}
+.ic-bandeja{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 13l3-9h12l3 9v7H3zM3 13h5l1 3h6l1-3h5'/%3E%3C/svg%3E");}
+.ic-tendencia{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 17l6-6 4 4 8-9M15 6h6v6'/%3E%3C/svg%3E");}
+.ic-campana{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M6 17V11a6 6 0 0112 0v6l2 2H4zM10 21h4'/%3E%3C/svg%3E");}
+.ic-llave{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M9 3a6 6 0 100 12 6 6 0 000-12zM13 13l8 8M17 17l3-3M19 19l2-2'/%3E%3C/svg%3E");}
+.ic-engranaje{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 8a4 4 0 100 8 4 4 0 000-8zM10 2h4v3l2 1 2-2 3 3-2 2 1 2h3v4h-3l-1 2 2 2-3 3-2-2-2 1v3h-4v-3l-2-1-2 2-3-3 2-2-1-2H2v-4h3l1-2-2-2 3-3 2 2 2-1z'/%3E%3C/svg%3E");}
+.ic-carpeta{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 5h7l2 3h9v12H3z'/%3E%3C/svg%3E");}
+.ic-historial{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 12a9 9 0 109-9 9 9 0 00-6.5 3M3 4v4h4M12 7v5l3 2'/%3E%3C/svg%3E");}
+.ic-impresora{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6z'/%3E%3C/svg%3E");}
+.ic-subir{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 20V5M5 11l7-7 7 7'/%3E%3C/svg%3E");}
+.ic-bajar{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4v15M5 13l7 7 7-7'/%3E%3C/svg%3E");}
+.ic-izq{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M20 12H5M11 5l-7 7 7 7'/%3E%3C/svg%3E");}
+.ic-deshacer{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3'/%3E%3C/svg%3E");}
+.ic-nota{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 3h11v4M4 3v18h14v-8M19 5l-8 8-1 3 3-1 8-8z'/%3E%3C/svg%3E");}
+.ic-prohibido{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM5.6 5.6l12.8 12.8'/%3E%3C/svg%3E");}
+.ic-celular{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M7 2h10v20H7zM11 18h2'/%3E%3C/svg%3E");}
+.ic-compu{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v12H3zM8 20h8M12 16v4'/%3E%3C/svg%3E");}
+.ic-lapiz{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 20l1-5L16 4l4 4L9 19zM14 6l4 4'/%3E%3C/svg%3E");}
+.ic-objetivo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM12 8a4 4 0 100 8 4 4 0 000-8z'/%3E%3C/svg%3E");}
+.ic-alarma{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 5a8 8 0 100 16 8 8 0 000-16zM12 9v4l3 2M3 6l4-3M21 6l-4-3'/%3E%3C/svg%3E");}
+.ic-rayo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M13 2L5 14h6l-1 8 8-12h-6z'/%3E%3C/svg%3E");}
+.ic-galeria{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 4h18v16H3zM3 16l5-5 4 4 3-3 6 6M14 7h3v3h-3z'/%3E%3C/svg%3E");}
+.ic-flecha{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 19L19 5M9 5h10v10'/%3E%3C/svg%3E");}
+.ic-escuadra{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 21V3l18 18zM7 16v2h2'/%3E%3C/svg%3E");}
+.ic-tarjeta{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2 5h20v14H2zM2 10h20M5 15h4'/%3E%3C/svg%3E");}
+.ic-ayuda{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 3a9 9 0 100 18 9 9 0 000-18zM9 9.5a3 3 0 116 0c0 2-3 2-3 4M12 16.5v1.5'/%3E%3C/svg%3E");}
+.ic-papelera{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7'/%3E%3C/svg%3E");}
+.ic-lista{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M6 4h12v18H6zM9 2h6v4H9zM9 11h6M9 15h6'/%3E%3C/svg%3E");}
+.ic-casilla{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 4h16v16H4zM8 12l3 3 6-6'/%3E%3C/svg%3E");}
+.ic-mas{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4v16M4 12h16'/%3E%3C/svg%3E");}
+.ic-casco{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M3 17h18M5 17a7 7 0 0114 0M12 6v5M3 20h18'/%3E%3C/svg%3E");}
+.ic-circulo{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4a8 8 0 100 16 8 8 0 000-16z'/%3E%3C/svg%3E");}
+.ic-ok{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");}
+.ic-ok2{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M2.5 12.5L6.5 16.5 13 8M10 15.5l1 1L21.5 7'/%3E%3C/svg%3E");}
+.ic-no{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 4.5l16 15M20 4L4 20'/%3E%3C/svg%3E");}
+.ic-al{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 4v11M12 18v2'/%3E%3C/svg%3E");}
+.ic-in{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M12 10v10M12 4v2.4'/%3E%3C/svg%3E");}
+.ic-pe{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E");}
+.ic:not(.ib):not(:only-child){margin-left:.1em;margin-right:.1em;}
+/* icono a la izquierda del botón, texto al medio */
+button:has(>.ic.ib){position:relative;padding-left:34px;padding-right:34px;text-align:center;}
+button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-align:baseline;}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -1758,7 +1826,7 @@
 <div id="fantasma" aria-hidden="true"></div>
 <div class="lg" id="loginGate" role="dialog" aria-modal="true" aria-label="Inicio de sesión">
   <div class="lg-app">
-    <button class="lg-modo" id="lgModo" type="button" aria-label="Modo día o noche">🌙</button>
+    <button class="lg-modo" id="lgModo" type="button" aria-label="Modo día o noche"><i class="ic ic-luna"></i></button>
     <section class="lg-p lg-splash on" id="lgSplash"></section>
     <section class="lg-p lg-form" id="lgUrl">
       <div class="lg-cab"><img class="lg-logo" alt="CA4" width="44" height="44"><div><b>Panel de Cerámica y Frague</b><span>Obra Bellavista, La Florida</span></div></div>
@@ -1786,7 +1854,7 @@
     </div>
     <div class="status-cluster">
       <span id="dbBadge" class="db-badge off">Guardado local</span>
-      <button class="btn icon" id="toggleDark" title="Modo día/noche">🌙</button>
+      <button class="btn icon" id="toggleDark" title="Modo día/noche"><i class="ic ic-luna"></i></button>
       <select id="temaSelector" title="Tema de colores">
         <option value="tema9">Tema 1</option>
         <option value="tema6">Tema 2</option>
@@ -1796,8 +1864,8 @@
         <option value="tema8">Tema 6</option>
         <option value="tema5">🎃 Halloween (noche)</option>
       </select>
-      <button class="btn solo-admin" id="principalBtn" type="button" title="Todos los que no hayan elegido su propio tema verán este (tema y dorado)">☆ Asignar como tema principal</button>
-      <button class="btn" id="doradoBtn" type="button" title="Marco dorado: se puede usar de día y de noche">✦ Dorado: No</button>
+      <button class="btn solo-admin" id="principalBtn" type="button" title="Todos los que no hayan elegido su propio tema verán este (tema y dorado)"><i class="ic ib ic-estrella"></i>Asignar como tema principal</button>
+      <button class="btn" id="doradoBtn" type="button" title="Marco dorado: se puede usar de día y de noche"><i class="ic ib ic-estrella"></i>Dorado: No</button>
     </div>
   </header>
 
@@ -1805,11 +1873,11 @@
     <span class="role-badge guest" id="roleBadge" style="display:none;"></span>
     <button class="btn small" id="loginBtn">Iniciar sesión</button>
     <button class="btn small" id="logoutBtn" style="display:none;">Cerrar sesión</button>
-    <button class="btn small" id="irAvanceBtn" style="display:none;">📊 Dashboard de avance</button>
+    <button class="btn small" id="irAvanceBtn" style="display:none;"><i class="ic ib ic-estadisticas"></i>Dashboard de avance</button>
     <span id="ioMsg" style="font-size:11.5px;color:#c0546f;"></span>
     <button class="cs-btn" id="irMenuBtn" type="button" style="display:none;"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg><span>Cambiar de sección</span></button>
     <div class="rb-der" id="rbDer" style="display:none;">
-      <button type="button" class="btn small" id="miColorBtn">🎨 Mi color</button>
+      <button type="button" class="btn small" id="miColorBtn"><i class="ic ib ic-paleta"></i>Mi color</button>
       <div class="mc-pop" id="miColorPop"></div>
     </div>
   </div>
@@ -1821,15 +1889,15 @@
     <div class="tb-group">
       <div class="tb-title">Datos y registros</div>
       <div class="tb-btns">
-        <button class="btn primary admin-only" id="saveNowBtn">💾 Guardar ahora</button>
+        <button class="btn primary admin-only" id="saveNowBtn"><i class="ic ib ic-guardar"></i>Guardar ahora</button>
         <button class="btn admin-only" id="exportBtn">Exportar datos</button>
         <button class="btn admin-only" id="importBtn">Importar datos</button>
-        <button class="btn admin-only" id="diagnosticoBtn">🩺 Diagnóstico</button>
-        <button class="btn admin-only" id="reporteBtn">📧 Reporte semanal</button>
-        <button class="btn solo-asist" id="asistBtn">🗓 Asistencia</button>
-        <button class="btn admin-only" id="cambiosBtn">🕘 Cambios por cuenta</button>
-        <button class="btn solo-admin" id="accesosBtn">🔓 Inicios de sesión</button>
-        <button class="btn solo-admin" id="alertasBtn">🚨 Alertas</button>
+        <button class="btn admin-only" id="diagnosticoBtn"><i class="ic ib ic-diagnostico"></i>Diagnóstico</button>
+        <button class="btn admin-only" id="reporteBtn"><i class="ic ib ic-correo"></i>Reporte semanal</button>
+        <button class="btn solo-asist" id="asistBtn"><i class="ic ib ic-calendario"></i>Asistencia</button>
+        <button class="btn admin-only" id="cambiosBtn"><i class="ic ib ic-reloj"></i>Cambios por cuenta</button>
+        <button class="btn solo-admin" id="accesosBtn"><i class="ic ib ic-candadoa"></i>Inicios de sesión</button>
+        <button class="btn solo-admin" id="alertasBtn"><i class="ic ib ic-al"></i>Alertas</button>
         <input type="file" id="importFile" accept="application/json" style="display:none;">
       </div>
     </div>
@@ -1838,24 +1906,24 @@
       <div class="tb-btns">
         <button class="btn admin-only" id="toggleWorkerPanel">Gestionar trabajadores</button>
         <button class="btn admin-only" id="ratesBtn">Precios y metrajes</button>
-        <button class="btn admin-only" id="pagosHubBtn" type="button" style="position:relative;">💰 Pagos y liquidaciones<span id="pagosHubDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span></button>
-        <button class="btn admin-only" id="materialesBtn">🧱 Materiales</button>
-        <button class="btn" id="pedirBodegaBtn" type="button">📦 Pedir material a Bodega</button>
-        <button class="btn" id="trabBaseBtn" type="button">👷 BD de Trabajadores</button>
-        <button class="btn admin-only" id="peticionesBtn">📥 Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
+        <button class="btn admin-only" id="pagosHubBtn" type="button" style="position:relative;"><i class="ic ib ic-pago"></i>Pagos y liquidaciones<span id="pagosHubDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span></button>
+        <button class="btn admin-only" id="materialesBtn"><i class="ic ib ic-ladrillo"></i>Materiales</button>
+        <button class="btn" id="pedirBodegaBtn" type="button"><i class="ic ib ic-caja"></i>Pedir material a Bodega</button>
+        <button class="btn" id="trabBaseBtn" type="button"><i class="ic ib ic-trabajadores"></i>BD de Trabajadores</button>
+        <button class="btn admin-only" id="peticionesBtn"><i class="ic ib ic-bandeja"></i>Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
       </div>
     </div>
     <div class="tb-group">
       <div class="tb-title">Vista y permisos</div>
       <div class="tb-btns">
-        <button class="btn" id="statsOpenBtn">📊 Estadísticas</button>
-        <button class="btn solo-admin" id="rendBtn">📈 Rendimiento</button>
+        <button class="btn" id="statsOpenBtn"><i class="ic ib ic-estadisticas"></i>Estadísticas</button>
+        <button class="btn solo-admin" id="rendBtn"><i class="ic ib ic-tendencia"></i>Rendimiento</button>
         <button class="btn" id="supervisorWorkersBtn" style="display:none;">Trabajadores</button>
         <button class="btn admin-only" id="togglePrices">Ocultar precios</button>
-        <button class="btn admin-only" id="avisosBtn">🔔 Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
-        <button class="btn admin-only" id="permisosBtn">🔑 Permisos por cargo</button>
-        <button class="btn solo-admin" id="seccionesBtn">🔑 Permisos de secciones</button>
-        <button class="btn solo-admin" id="adminBtn">🛠 Panel de Admin</button>
+        <button class="btn admin-only" id="avisosBtn"><i class="ic ib ic-campana"></i>Avisos <span id="avisosBadge" class="avisos-badge" style="display:none;">0</span></button>
+        <button class="btn admin-only" id="permisosBtn"><i class="ic ib ic-llave"></i>Permisos por cargo</button>
+        <button class="btn solo-admin" id="seccionesBtn"><i class="ic ib ic-llave"></i>Permisos de secciones</button>
+        <button class="btn solo-admin" id="adminBtn"><i class="ic ib ic-engranaje"></i>Panel de Admin</button>
       </div>
     </div>
   </nav>
@@ -1881,7 +1949,7 @@
     <div class="grp"><label for="filterListos">Dptos listos <i class="tnuevo" data-hasta="2026-11-15">Nuevo</i></label><select id="filterListos"><option value="ocultar">Ocultar</option><option value="mostrar">Mostrar</option></select></div>
     <div class="grp"><label>Buscar Dpto</label><input type="text" id="search" placeholder="Ej: 502"></div>
     <div class="grp"><label>Orden de pisos</label><button class="btn small" id="btnOrdenPisos" aria-pressed="false"></button></div>
-    <div class="grp"><label>&nbsp;</label><button class="btn small" id="btnLimpiarFiltros">✕ Limpiar filtros</button></div>
+    <div class="grp"><label>&nbsp;</label><button class="btn small" id="btnLimpiarFiltros"><i class="ic ib ic-no"></i>Limpiar filtros</button></div>
     <div class="counter-pill" id="resultCount"></div>
   </div>
 
@@ -1898,25 +1966,25 @@
 
 <div class="overlay" id="pagosHubOverlay">
   <div class="modal" style="max-width:520px;">
-    <h3 style="margin-bottom:2px;">💰 Pagos y liquidaciones <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></h3>
+    <h3 style="margin-bottom:2px;"><i class="ic ic-pago"></i> Pagos y liquidaciones <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></h3>
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Todo lo de pagos en un solo lugar. Al abrir una opción, esta ventana se cierra.</p>
     <div class="hub-tit">Liquidaciones</div>
     <div class="hub-btns">
-      <button class="btn admin-only" id="liqOpenBtn">📄 Generar liquidación</button>
-      <button class="btn admin-only" id="liqHistBtn">🗂️ Historial de liquidaciones</button>
+      <button class="btn admin-only" id="liqOpenBtn"><i class="ic ib ic-informe"></i>Generar liquidación</button>
+      <button class="btn admin-only" id="liqHistBtn"><i class="ic ib ic-carpeta"></i>Historial de liquidaciones</button>
     </div>
     <div class="hub-tit">Fuera de la liquidación</div>
     <div class="hub-btns">
-      <button class="btn admin-only" data-abrir-aj type="button">💵 Ajustes de pago</button>
-      <button class="btn admin-only" data-abrir-pr type="button">🔒 Pagos completos retenidos</button>
+      <button class="btn admin-only" data-abrir-aj type="button"><i class="ic ib ic-pago"></i>Ajustes de pago</button>
+      <button class="btn admin-only" data-abrir-pr type="button"><i class="ic ib ic-candado"></i>Pagos completos retenidos</button>
       <button class="btn admin-only" id="retencionesBtn" style="position:relative;display:none;">
-          🔒 Retenciones pendientes
+          <i class="ic ic-candado"></i> Retenciones pendientes
           <span id="retencionesBadgeDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span>
         </button>
     </div>
     <div class="hub-tit">Cierre</div>
     <div class="hub-btns">
-      <button class="btn admin-only" id="cierreQuincenaBtn">🔒 Cerrar quincena/mes</button>
+      <button class="btn admin-only" id="cierreQuincenaBtn"><i class="ic ib ic-candado"></i>Cerrar quincena/mes</button>
     </div>
     <div class="actions"><button class="btn primary" id="pagosHubCerrar" type="button">Cerrar</button></div>
   </div>
@@ -2021,7 +2089,7 @@
 <div class="overlay" id="workerOverlay">
   <div class="modal" style="max-width:640px;">
     <h3>Gestionar trabajadores</h3>
-    <button class="btn small" id="histTodosBtn" style="margin-bottom:10px;">📜 Historial de trabajo de todos</button>
+    <button class="btn small" id="histTodosBtn" style="margin-bottom:10px;"><i class="ic ib ic-historial"></i>Historial de trabajo de todos</button>
     <label class="guest-price-toggle">
       <input type="checkbox" id="allowGuestPricesChk"> Dejar que supervisores y trabajadores vean los precios base
     </label>
@@ -2057,8 +2125,8 @@
     <div id="liqModalBody"></div>
     <div class="actions" style="flex-wrap:wrap;">
       <button class="btn primary" id="liqMarkPaidBtn"><i class="ic ic-ok"></i> Confirmar liquidación</button>
-      <button class="btn" id="liqImageBtn">📷 Guardar como imagen</button>
-      <button class="btn" id="liqPrintBtn">🖨️ Imprimir / Guardar PDF</button>
+      <button class="btn" id="liqImageBtn"><i class="ic ib ic-foto"></i>Guardar como imagen</button>
+      <button class="btn" id="liqPrintBtn"><i class="ic ib ic-impresora"></i>Imprimir / Guardar PDF</button>
       <button class="btn" id="liqCloseBtn">Cerrar</button>
     </div>
   </div>
@@ -2066,8 +2134,8 @@
 
 <div id="liqPrintArea"></div>
 
-<button id="scrollTopBtn" title="Subir" style="position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);font-size:16px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;z-index:69;">⬆</button>
-<button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:70px;right:26px;width:36px;height:36px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:15px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;z-index:70;">💾</button>
+<button id="scrollTopBtn" title="Subir" style="position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);font-size:16px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:pointer;z-index:69;"><i class="ic ic-subir"></i></button>
+<button id="floatingSaveBtn" title="Guardar" style="position:fixed;bottom:70px;right:26px;width:36px;height:36px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;font-size:15px;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.35);cursor:pointer;z-index:70;"><i class="ic ic-guardar"></i></button>
 <div id="cargandoToast" class="avl-carga">
   <span class="avl-spin"></span>
   <span id="cargandoTexto">Cargando…</span>
@@ -2075,14 +2143,14 @@
 
 
 <div id="avisoDatosViejos" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#8a6a1f;color:#fff;padding:9px 16px;font-size:12.5px;font-weight:600;border-radius:var(--radius);box-shadow:0 3px 14px rgba(0,0,0,.3);display:none;align-items:center;gap:12px;z-index:94;max-width:90vw;">
-  <span>⏱ Esto se cargó hace rato -- puede que alguien más haya guardado algo mientras tanto.</span>
+  <span><i class="ic ic-reloj"></i> Esto se cargó hace rato -- puede que alguien más haya guardado algo mientras tanto.</span>
   <button class="btn small" id="avisoDatosViejosRecargar" style="flex-shrink:0;">Recargar</button>
-  <button class="btn small" id="avisoDatosViejosCerrar" style="flex-shrink:0;">✕</button>
+  <button class="btn small" id="avisoDatosViejosCerrar" style="flex-shrink:0;"><i class="ic ic-no"></i></button>
 </div>
 
 <div class="overlay" id="pedidoBodegaOverlay">
   <div class="modal" style="max-width:520px;max-height:calc(100dvh - 24px);overflow-y:auto;">
-    <h3>📦 Pedir material a Bodega</h3>
+    <h3><i class="ic ic-caja"></i> Pedir material a Bodega</h3>
     <p style="margin:0 0 12px;font-size:12px;" id="pbHora"></p>
     <p class="pb-quien" id="pbQuien"></p>
     <div class="pb-par"><label class="pb-f" for="pbTipo">Va a<select id="pbTipo"><option value="depto">Un departamento</option><option value="piso">Un piso completo</option><option value="pasillo">Pasillos</option><option value="otro">Otro lugar</option></select></label>
@@ -2117,7 +2185,7 @@
 
 <div class="overlay" id="peticionesOverlay">
   <div class="modal" style="max-width:520px;">
-    <h3>📥 Peticiones de trabajadores</h3>
+    <h3><i class="ic ic-bandeja"></i> Peticiones de trabajadores</h3>
     <div class="pet-tabs">
       <button type="button" class="btn small primary" id="petTabPend">Pendientes</button>
       <button type="button" class="btn small" id="petTabHist">Historial</button>
@@ -2130,7 +2198,7 @@
 
 <div class="overlay" id="histTodosOverlay">
   <div class="modal" style="max-width:780px;">
-    <h3>📜 Historial de trabajo</h3>
+    <h3><i class="ic ic-historial"></i> Historial de trabajo</h3>
     <div class="hist-filtros">
       <select id="histTrabajador"></select>
       <select id="histCategoria"><option value="">Todas las categorías</option><option value="Cerámica">Cerámica</option><option value="Frague">Frague</option></select>
@@ -2143,7 +2211,7 @@
 
 <div class="overlay" id="reporteOverlay">
   <div class="modal" style="max-width:740px;">
-    <h3>📧 Reporte semanal</h3>
+    <h3><i class="ic ic-correo"></i> Reporte semanal</h3>
     <p id="reporteInfo" style="margin:0 0 8px;font-size:12px;color:var(--sub);line-height:1.5;"></p>
     <label class="chk-linea"><input type="checkbox" id="reporteTodoChk"> Incluir también lo que ya se envió antes (para ver o probar)</label>
     <label class="chk-linea"><input type="checkbox" id="reporteUltimoChk"> Último reporte: mostrar y enviar de nuevo lo que se envió la vez pasada (no cambia lo ya informado)</label>
@@ -2156,9 +2224,9 @@
     <div id="reporteContenido" style="max-height:min(52vh,440px);overflow:auto;border:1px solid var(--border);background:#eef0ed;padding:10px;"></div>
     <div class="actions" style="flex-wrap:wrap;">
       <button class="btn" id="reporteCompletarBtn" style="display:none;">Completar hoja de datos</button>
-      <button class="btn" id="reporteRestaurarBtn" title="Vuelve a marcar como nuevo todo lo hecho después de uno de los envíos anteriores">⏪ Volver a un envío…</button>
+      <button class="btn" id="reporteRestaurarBtn" title="Vuelve a marcar como nuevo todo lo hecho después de uno de los envíos anteriores"><i class="ic ib ic-deshacer"></i>Volver a un envío…</button>
       <button class="btn" id="reporteDeshacerBtn" style="display:none;" title="Vuelve a dejar como pendiente lo que se informó en el último envío">↩ Deshacer último envío</button>
-      <button class="btn" id="reporteDestBtn">⚙ Envío y correos</button>
+      <button class="btn" id="reporteDestBtn"><i class="ic ib ic-engranaje"></i>Envío y correos</button>
       <button class="btn" id="reportePruebaBtn">Enviar prueba a mi correo</button>
       <button class="btn primary" id="reporteEnviarBtn">Enviar ahora</button>
       <button class="btn" id="reporteTextoBtn">Copiar texto</button>
@@ -2170,7 +2238,7 @@
 
 <div class="overlay" id="reporteDestOverlay">
   <div class="modal" style="max-width:460px;">
-    <h3>⚙ Envío del reporte</h3>
+    <h3><i class="ic ic-engranaje"></i> Envío del reporte</h3>
     <p style="margin:0 0 6px;font-size:12px;color:var(--sub);">Correos que lo reciben (uno por línea o separados por coma)</p>
     <textarea id="reporteDestInput" rows="5" style="width:100%;" placeholder="nombre@correo.com"></textarea>
     <div style="margin:14px 0 4px;font-weight:700;font-size:12.5px;">Envío automático</div>
@@ -2197,7 +2265,7 @@
 
 <div class="overlay" id="diagnosticoOverlay">
   <div class="modal" style="max-width:520px;">
-    <h3>🩺 Diagnóstico</h3>
+    <h3><i class="ic ic-diagnostico"></i> Diagnóstico</h3>
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Cosas que conviene revisar a mano -- ninguna se corrige sola, esto solo las señala.</p>
     <div id="diagnosticoLista" style="max-height:min(60vh,420px);overflow-y:auto;"></div>
     <div class="actions"><button class="btn primary" id="diagnosticoCloseBtn">Cerrar</button></div>
@@ -2278,7 +2346,7 @@
 
 <div class="overlay" id="liqObsOverlay">
   <div class="modal" style="max-width:460px;">
-    <h3>📝 Hay observaciones registradas</h3>
+    <h3><i class="ic ic-nota"></i> Hay observaciones registradas</h3>
     <p id="liqObsIntro" style="margin:0 0 10px;font-size:12.5px;color:var(--sub);"></p>
     <div id="liqObsLista" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);padding:8px 10px;margin-bottom:6px;"></div>
     <p style="margin:0;font-size:12px;color:var(--sub);">¿Las dejas pasar, o las agregas a esta liquidación como observación?</p>
@@ -2291,7 +2359,7 @@
 
 <div class="overlay" id="retencionesOverlay">
   <div class="modal" style="max-width:420px;">
-    <h3 style="margin-bottom:12px;">🔒 Retenciones pendientes</h3>
+    <h3 style="margin-bottom:12px;"><i class="ic ic-candado"></i> Retenciones pendientes</h3>
     <div id="retencionesList"></div>
     <div class="actions"><button class="btn primary" id="retencionesCloseBtn">Cerrar</button></div>
   </div>
@@ -2299,7 +2367,7 @@
 
 <div class="overlay" id="ajOverlay">
   <div class="modal" style="max-width:560px;display:flex;flex-direction:column;max-height:88vh;">
-    <h3 style="margin-bottom:2px;">💵 Ajustes de pago <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></h3>
+    <h3 style="margin-bottom:2px;"><i class="ic ic-pago"></i> Ajustes de pago <i class="tnuevo" data-hasta="2026-11-21">Nuevo</i></h3>
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Descuentos o pagos extra por trabajador, fuera de la liquidación. No se borran: si te equivocas, se anulan. Los pendientes entran solos en la próxima liquidación del trabajador.</p>
     <div class="aj-form">
       <select id="ajTrab"></select>
@@ -2317,7 +2385,7 @@
 </div>
 <div class="overlay" id="prOverlay">
   <div class="modal" style="max-width:520px;display:flex;flex-direction:column;max-height:88vh;">
-    <h3 style="margin-bottom:2px;">🔒 Pagos completos retenidos</h3>
+    <h3 style="margin-bottom:2px;"><i class="ic ic-candado"></i> Pagos completos retenidos</h3>
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Marca a los trabajadores cuyo pago quieres dejar aparte. Todo su Terminado (lo de hoy y lo nuevo) queda fuera de las sumas, del resumen y de las liquidaciones hasta que lo liberes.</p>
     <div style="margin:0 0 8px;"><button type="button" class="btn small" id="prVerTodosBtn"></button></div>
     <div id="prLista" style="overflow-y:auto;flex:1;min-height:0;"></div>
@@ -2326,7 +2394,7 @@
 </div>
 <div class="overlay" id="statsOverlay">
   <div class="modal" style="max-width:820px;display:flex;flex-direction:column;max-height:88vh;">
-    <h3 style="margin-bottom:2px;">📊 Estadísticas — <span id="statsCatLabel"></span></h3>
+    <h3 style="margin-bottom:2px;"><i class="ic ic-estadisticas"></i> Estadísticas — <span id="statsCatLabel"></span></h3>
     <p style="margin:0 0 12px;font-size:12px;color:var(--sub);">Calculado con lo que ya está cargado en el panel. Cambia de pestaña (Cerámica/Frague) antes de abrir esto para ver esos datos.</p>
     <div id="statsBody" style="overflow-y:auto;flex:1;min-height:0;"></div>
     <div class="actions"><button class="btn primary" id="statsCloseBtn">Cerrar</button></div>
@@ -2343,7 +2411,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.121';
+const APP_VERSION = '0.73.122';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3052,7 +3120,7 @@ function actualizarAlertaDispositivos(lista, avisar){
       dispAvisados = clave;
       const d0 = dispMultiples[0], mas = dispMultiples.length > 1 ? ' (y ' + (dispMultiples.length - 1) + ' cuenta(s) más)' : '';
       avisoToast(d0.bloqueo
-        ? '⛔ ' + d0.cuenta + ' intentó entrar desde un 2.º ' + (NOMBRE_TIPO_DISP[d0.bloqueo.k] || 'aparato') + ' y se bloqueó' + mas + '. Míralo en "Inicios de sesión".'
+        ? '' + d0.cuenta + ' intentó entrar desde un 2.º ' + (NOMBRE_TIPO_DISP[d0.bloqueo.k] || 'aparato') + ' y se bloqueó' + mas + '. Míralo en "Inicios de sesión".'
         : d0.cuenta + ' ya usa ' + d0.dispositivos.length + ' aparatos' + mas + '. Míralo en "Inicios de sesión".', d0.bloqueo ? 'error' : 'ok');
     }
   }
@@ -3109,7 +3177,7 @@ function pintarDispositivosTodos(cuentas, todos){
   const nombres = Array.from(new Set([...(cuentas || []), ...Object.keys(por)])).filter(n => !/^admin\b/i.test(n)).sort((a,b) => a.localeCompare(b, 'es'));
   if(!nombres.length){ box.innerHTML = ''; return; }
   const slot = (cuenta, tipo, lista) => {
-    const tit = tipo === 'cel' ? '📱 Celular' : '💻 Computador';
+    const tit = tipo === 'cel' ? '<i class="ic ic-celular"></i> Celular' : '<i class="ic ic-compu"></i> Computador';
     if(!lista.length) return `<div class="dt-fila"><div class="dt-info"><span class="lbl">${tit}</span><small class="dt-libre">Libre · nadie lo ha usado</small></div></div>`;
     return lista.map(x => `<div class="dt-fila"><div class="dt-info"><span class="lbl">${tit} · ${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)} · último uso ${fechaHoraCambio(x.t)}</small></div><div class="dt-btns"><button type="button" class="btn small" data-disp-sec="1" aria-expanded="false">Ver entradas</button><button type="button" class="btn small" data-disp-lib="${esc(x.id)}" data-cuenta="${esc(cuenta)}" data-nombre="${esc((NOMBRE_TIPO_DISP[x.k] || 'aparato') + ' ' + (x.e || ''))}">Liberar</button></div></div><div class="dt-sec">${htmlSeccionesAparato(cuenta, x)}</div>`).join('');
   };
@@ -3126,7 +3194,7 @@ function pintarDispositivosMultiples(){
   box.innerHTML = dispMultiples.map(d => {
     const bl = d.bloqueo;
     const cab = bl
-      ? `<b>⛔ ${esc(d.cuenta)}</b><span>Intento bloqueado: 2.º ${esc(NOMBRE_TIPO_DISP[bl.k] || 'aparato')} (${esc(bl.e || '?')}) · ${fechaHoraCambio(bl.t)}${bl.n > 1 ? ' · ' + bl.n + ' intentos' : ''}</span>`
+      ? `<b><i class="ic ic-prohibido"></i> ${esc(d.cuenta)}</b><span>Intento bloqueado: 2.º ${esc(NOMBRE_TIPO_DISP[bl.k] || 'aparato')} (${esc(bl.e || '?')}) · ${fechaHoraCambio(bl.t)}${bl.n > 1 ? ' · ' + bl.n + ' intentos' : ''}</span>`
       : `<b><i class="ic ic-in"></i> ${esc(d.cuenta)}</b><span>Ya usa ${d.dispositivos.length} aparatos (el máximo permitido)</span>`;
     const filas = d.dispositivos.map(x => `<div class="disp-fila"><div class="disp-info"><span>${esc(NOMBRE_TIPO_DISP[x.k] ? NOMBRE_TIPO_DISP[x.k][0].toUpperCase() + NOMBRE_TIPO_DISP[x.k].slice(1) : 'Aparato')} · ${esc(x.e || 'Aparato')}</span><small>primera vez ${fechaHoraCambio(x.p)}<br>último uso ${fechaHoraCambio(x.t)}</small></div><button type="button" class="btn small" data-disp-lib="${esc(x.id)}" data-cuenta="${esc(d.cuenta)}" data-nombre="${esc((NOMBRE_TIPO_DISP[x.k] || 'aparato') + ' ' + (x.e || ''))}">Liberar</button></div>`).join('');
     return `<div class="disp-item${bl ? '' : ' info'}"><div class="disp-cab">${cab}</div>${filas}
@@ -3406,7 +3474,7 @@ async function loadState(){
     if(localStorage.getItem('progresoObraTheme') === 'dark'){
       document.body.classList.add('dark');
       document.documentElement.classList.add('dark');
-      document.getElementById('toggleDark').textContent = '☀️';
+      document.getElementById('toggleDark').innerHTML = '<i class="ic ic-sol"></i>';
     }
   }catch(e){}
   datosCargadosTs = Date.now();
@@ -4014,7 +4082,7 @@ function abrirRetenidoDetalle(cat){
       ${g.filas.map(f => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--border);"><span>${esc(f.txt)} <small style="color:var(--sub);">${esc(f.piso)} · ${f.m2} m²</small></span><span>${money(f.p)}</span></div>`).join('')}
       ${g.h ? detallesHtml(g.h.detalles) : ''}</div>`;
   }).join('');
-  openInputModal('🔒 Retenido · ' + cat, (html || '<p style="font-size:13px;">No hay partidas retenidas.</p>') + `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding-top:8px;border-top:2px solid var(--border-strong);"><span>Total retenido</span><span>${money(total)}</span></div>${ajustes ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding-top:4px;"><span>Ajustes (adelantos / adicionales)</span><span>${ajustes < 0 ? '- ' : '+ '}${money(Math.abs(ajustes))}</span></div><div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:800;padding-top:4px;"><span>Total al liberar</span><span>${money(total + ajustes)}</span></div>` : ''}<p style="font-size:11.5px;color:var(--sub);margin:8px 0 0;">Las partidas retenidas siguen contando dentro de Terminado hasta que se paguen. Se pagan desde "🔒 Retenciones pendientes".</p>`, () => {}, 'Cerrar');
+  openInputModal('Retenido · ' + cat, (html || '<p style="font-size:13px;">No hay partidas retenidas.</p>') + `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding-top:8px;border-top:2px solid var(--border-strong);"><span>Total retenido</span><span>${money(total)}</span></div>${ajustes ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding-top:4px;"><span>Ajustes (adelantos / adicionales)</span><span>${ajustes < 0 ? '- ' : '+ '}${money(Math.abs(ajustes))}</span></div><div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:800;padding-top:4px;"><span>Total al liberar</span><span>${money(total + ajustes)}</span></div>` : ''}<p style="font-size:11.5px;color:var(--sub);margin:8px 0 0;">Las partidas retenidas siguen contando dentro de Terminado hasta que se paguen. Se pagan desde "Retenciones pendientes".</p>`, () => {}, 'Cerrar');
   inputModalCancel.style.display = 'none';
 }
 let statsCat = 'Cerámica';
@@ -4041,7 +4109,7 @@ function renderStats(){
   const retCard = (isAdmin && r.nRet > 0) ? `<div class="stat-card money-card st-retenido"><div class="n c-retenido">${money(r.ret)}</div><div class="l">Retenido <span class="cnt">(${r.nRet})</span></div>${refLinea(r.refRet)}<button type="button" class="btn small ret-det" data-ret-det>Detalles</button></div>` : '';
   const nuevoPR = Date.now() < new Date('2026-11-21T23:59:59').getTime() ? ' <i class="tnuevo">Nuevo</i>' : '';
   const prCard = (isAdmin && (r.nPR > 0 || pagosRetenidos.length)) ? `<div class="stat-card money-card st-retenido"><div class="n c-retenido">${money(r.pr)}</div><div class="l">Pagos retenidos <span class="cnt">(${r.nPR})</span>${nuevoPR}</div>${refLinea(r.refPR)}<div class="sub2">Fuera de todas las sumas</div><button type="button" class="btn small ret-det" data-abrir-pr>Administrar</button></div>` : '';
-  const tabs = `<div class="stats-tabs"><span class="stats-rotulo">Resumen de</span>${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button><button type="button" class="frag-chip" style="margin-left:10px;" data-res-pago title="Cerámica y frague juntos">💰 resumen de pago</button>' : ''}</div>`;
+  const tabs = `<div class="stats-tabs"><span class="stats-rotulo">Resumen de</span>${['Cerámica','Frague'].map(c => `<button type="button" class="stats-tab ${c === cat ? 'activa' : ''}" data-stats-cat="${c}">${c}</button>`).join('')}${isAdmin ? '<button type="button" class="frag-chip" data-frag-det title="Margen real y detalle del frague">ver detalle</button><button type="button" class="frag-chip" style="margin-left:10px;" data-res-pago title="Cerámica y frague juntos"><i class="ic ib ic-pago"></i>resumen de pago</button>' : ''}</div>`;
   statsEl.innerHTML = tabs + `<div class="stats-grid${retCard && !separadas ? ' con-ret' : ''}">${cards}${isAdmin ? terminadoCard + cierreCard + pagadoCard + retCard + prCard : ''}</div>`;
   renderPorTrabajador();
 }
@@ -4241,7 +4309,7 @@ function prResumenHtml(){
   return `<div class="frag-h">Pagos completos retenidos (aparte, no suman arriba)</div>
     <table class="frag-tabla">${filas || '<tr><td colspan="2" style="color:var(--sub);">Ningún trabajador marcado.</td></tr>'}
     ${n ? `<tr class="tot"><td>Total retenido (${n} partida${n === 1 ? '' : 's'})</td><td>${money(cer + fra)}</td></tr>` : ''}</table>
-    <button type="button" class="btn" data-abrir-pr style="margin-top:8px;">🔒 Pagos completos retenidos</button>`;
+    <button type="button" class="btn" data-abrir-pr style="margin-top:8px;"><i class="ic ib ic-candado"></i>Pagos completos retenidos</button>`;
 }
 function abrirResumenPago(){
   const r = calcFrague();
@@ -4380,7 +4448,7 @@ function renderPorTrabajador(){
   const totalFila = '';
   el.style.display = '';
   el.classList.toggle('pt-cinco', conCierre);
-  el.innerHTML = `<details${ptSeccionAbierta ? ' open' : ''} id="ptDetalles"><summary>${isAdmin ? '👷 Avance por trabajador' : '👷 Mi avance'} <span class="pt-sub">${isAdmin ? 'cerámica y frague por separado' : 'todas las categorías'}</span></summary>
+  el.innerHTML = `<details${ptSeccionAbierta ? ' open' : ''} id="ptDetalles"><summary>${isAdmin ? '<i class="ic ic-trabajadores"></i> Avance por trabajador' : '<i class="ic ic-trabajadores"></i> Mi avance'} <span class="pt-sub">${isAdmin ? 'cerámica y frague por separado' : 'todas las categorías'}</span></summary>
     <div class="pt-cab"><div>Trabajador</div>${conCierre ? '<div>Hasta el cierre</div><div>Después del cierre</div><div>Suma terminado</div>' : '<div>Terminado (por pagar)</div>'}<div>Pagado</div></div>${filas}${totalFila}${resumenAparte}</details>`;
 }
 document.getElementById('porTrabajador').addEventListener('toggle', (e) => {
@@ -4518,7 +4586,7 @@ function matchesActiveFilters(){
 
 function priceLinesHtml(cell, st, sinBoton){
   const m2 = st.m2;
-  const editBtn = (isAdmin && !sinBoton) ? `<button class="m2-edit-btn" data-id="${cell.id}" data-action="editm2">✎ m²</button>` : '';
+  const editBtn = (isAdmin && !sinBoton) ? `<button class="m2-edit-btn" data-id="${cell.id}" data-action="editm2"><i class="ic ib ic-lapiz"></i>m²</button>` : '';
   if(!m2){
     return `<div class="price-block">${editBtn}<div class="meta-line">Sin m² registrados</div></div>`;
   }
@@ -4704,7 +4772,7 @@ function etiquetaEstado(cell, estado){
 function cellVentanaHtml(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${escVt(st.nota)}">${escVt(st.nota)}</div></div>` : '';
-  return `<div class="cell-block cell-ventana${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
+  return `<div class="cell-block cell-ventana${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
     <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</div></div>
     <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
     ${nota}
@@ -4753,7 +4821,7 @@ function calidadDe(cell){
 function calIco(cell){
   const r = calidadDe(cell); if(!r) return '';
   if(r.e === 'revisado') return '<span class="cal-ico ok" title="Calidad: revisado sin observaciones"><i class="ic ic-ok"></i></span>';
-  if(r.e === 'validado') return '<span class="cal-ico cor" title="Calidad: corregido y validado"><i class="ic ic-ok"></i><i class="ic ic-ok"></i></span>';
+  if(r.e === 'validado') return '<span class="cal-ico cor" title="Calidad: corregido y validado"><i class="ic ic-ok2"></i></span>';
   if(r.e === 'corregido') return '<span class="cal-ico cor" title="Calidad: corregido, falta validar"><i class="ic ic-ok"></i></span>';
   if(r.e === 'observado') return '<span class="cal-ico obs" title="Calidad: con observación"><i class="ic ic-al"></i></span>';
   return '';
@@ -4811,7 +4879,7 @@ function calLateral(){
   const lista = !conLista ? '' : items.length ? '<div class="cl-lista">' + items.map(m => '<div class="cl-fila"><label><input type="checkbox" checked tabindex="-1" onclick="return false"><span>' + escVt(m[1]) + '</span></label>' + (SIN_CANT.includes(m[1]) ? '<span></span>' : '<span class="cl-cant">' + escVt(m[2]) + '</span>') + '</div>').join('') + '</div>' : '<div class="cl-lista"><div class="cl-vacio">Sin detalle de observaciones</div></div>';
   box.style.setProperty('--cc', est[1]);
   box.innerHTML = '<div class="cl-head"><span>' + (conLista ? '¿Qué está mal?' : 'Calidad') + '</span><span class="cl-est">' + escVt(est[0]) + '</span></div>' + lista +
-    ((quien || f) ? '<div class="cl-pie">' + (quien ? '<span data-nompre="Revisó: " data-nomfull="' + escVt(quien) + '">Revisó: ' + escVt(quien) + '</span>' : '') + (f ? '<span>' + escVt(f) + '</span>' : '') + '</div>' : '') + '<button type="button" class="cl-fotos" data-cf="1">📷 Ver fotos</button>';
+    ((quien || f) ? '<div class="cl-pie">' + (quien ? '<span data-nompre="Revisó: " data-nomfull="' + escVt(quien) + '">Revisó: ' + escVt(quien) + '</span>' : '') + (f ? '<span>' + escVt(f) + '</span>' : '') + '</div>' : '') + '<button type="button" class="cl-fotos" data-cf="1"><i class="ic ib ic-foto"></i>Ver fotos</button>';
   box.style.left = (modal.offsetLeft + modal.offsetWidth + CAL_LAT_SEP) + 'px';
   box.style.top = modal.offsetTop + 'px';
   box.style.maxHeight = modal.offsetHeight + 'px';
@@ -4829,7 +4897,7 @@ function calidadSecHtml(cell){
   const tit = quien
     ? '<div class="vt-sec-title" data-nompre="Observaciones de Calidad - " data-nomfull="' + escVt(quien) + '">Observaciones de Calidad - ' + escVt(quien) + '</div>'
     : '<div class="vt-sec-title">Observaciones de Calidad</div>';
-  return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div><button type="button" class="cl-fotos" data-cf="1">📷 Ver fotos</button></div></div>`;
+  return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div><button type="button" class="cl-fotos" data-cf="1"><i class="ic ib ic-foto"></i>Ver fotos</button></div></div>`;
 }
 // ===== ventanita con las fotos que subió Calidad (mismas acciones del servidor que usa calidad.html) =====
 const CAL_FOTOS_ERR = {sin_permiso: 'Tu cargo no tiene acceso a las fotos de Calidad.', sin_sesion: 'Tu sesión venció, vuelve a entrar.'};
@@ -4903,10 +4971,10 @@ function pintarVentana(){
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
         <div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar"${hayCambio ? '' : ' disabled'}>Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar"${hayCambio ? '' : ' disabled'}>Confirmar cambio</button></div></div>
       <div class="vt-sec"><div class="vt-sec-title">Metraje</div>
-        <div class="vt-sec-body"><div class="vt-valor${m2 ? '' : ' vacio'}">${precio}</div>${isAdmin ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="m2">✎ Editar m²</button></div>` : ''}</div></div>
+        <div class="vt-sec-body"><div class="vt-valor${m2 ? '' : ' vacio'}">${precio}</div>${isAdmin ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="m2"><i class="ic ib ic-lapiz"></i>Editar m²</button></div>` : ''}</div></div>
       ${calidadSecHtml(cell)}
       <div class="vt-sec"><div class="vt-sec-title">Observación</div>
-        <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '✎ Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
+        <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '<i class="ic ib ic-lapiz"></i>Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
     </div>
     <div class="vt-foot">${isAdmin ? '<button type="button" class="btn" data-vt="guardar">Guardar</button><button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}<button type="button" class="btn" data-vt="cerrar">Cerrar</button></div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
@@ -5071,7 +5139,7 @@ function cellHtml(cell){
   const reverso = isAdmin ? reversoAdminHtml(cell, st) : `
           <div class="worker-row-top"><div class="worker-name ${hasWorker?'':'unassigned'}">${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</div></div>
           <div class="flip-dates">${fechasHtml(st, terminadoLabel, cell)}</div>
-          <button type="button" class="flip-back-btn" data-flipback="${cell.id}">⬅ Volver</button>`;
+          <button type="button" class="flip-back-btn" data-flipback="${cell.id}"><i class="ic ib ic-izq"></i>Volver</button>`;
   return `
     <div class="cell-flip" data-cellid="${cell.id}">
       <div class="cell-flip-inner">
@@ -5138,7 +5206,7 @@ function dzCeldaTabla(cell, st){
   const dz = document.body.classList.contains('dz-A') || document.body.classList.contains('dz-D');
   if(!dz || !vistaVentana()) return cellHtml(cell);
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-ex${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
+  return `<div class="cell-block cell-ventana dz-ex${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
     <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</span></div>
     <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
   </div>`;
@@ -5147,7 +5215,7 @@ function dzCeldaTabla(cell, st){
 const dzSel = {};
 function dzFila(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-fila${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas">📝</span>' : ''}${calIco(cell)}
+  return `<div class="cell-block cell-ventana dz-fila${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
     <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
     <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
   </div>`;
@@ -5957,9 +6025,9 @@ function pintarObjetivos(){
   const pend = objetivosPendientes();
   const hechos = OBJETIVOS.filter(o => o.hecho);
   const visibles = objetivosVerTodos ? pend : pend.slice(0, 3);
-  const itemHtml = x => `<div class="obj-item ${x.e.clase}"><div class="obj-txt"><b>🎯 ${esc(x.o.titulo)}</b>${x.o.nota ? `<span class="obj-det">${esc(x.o.nota)}</span>` : ''}<div class="obj-meta"><span class="obj-cuando">${esc(x.e.txt)}</span><span>· ${esc(fechaLarga(x.o.fecha))}</span>${chipNivel('Importancia', x.o.importancia)}</div></div>${soloVer ? '' : `<div class="obj-btns"><button type="button" class="btn small" data-obj-editar="${esc(x.o.id)}">✎ Editar</button><button type="button" class="btn small" data-obj-hecho="${esc(x.o.id)}"><i class="ic ic-ok"></i> Hecho</button></div>`}</div>`;
+  const itemHtml = x => `<div class="obj-item ${x.e.clase}"><div class="obj-txt"><b><i class="ic ic-objetivo"></i> ${esc(x.o.titulo)}</b>${x.o.nota ? `<span class="obj-det">${esc(x.o.nota)}</span>` : ''}<div class="obj-meta"><span class="obj-cuando">${esc(x.e.txt)}</span><span>· ${esc(fechaLarga(x.o.fecha))}</span>${chipNivel('Importancia', x.o.importancia)}</div></div>${soloVer ? '' : `<div class="obj-btns"><button type="button" class="btn small" data-obj-editar="${esc(x.o.id)}"><i class="ic ib ic-lapiz"></i>Editar</button><button type="button" class="btn small" data-obj-hecho="${esc(x.o.id)}"><i class="ic ic-ok"></i> Hecho</button></div>`}</div>`;
   bar.style.display = 'flex';
-  bar.innerHTML = `<div class="obj-head"><h3>🎯 Objetivos${pend.length ? ' (' + pend.length + ')' : ''}</h3>${soloVer ? '' : '<button type="button" class="btn small" id="objAgregar">+ Agregar objetivo</button>'}</div>`
+  bar.innerHTML = `<div class="obj-head"><h3><i class="ic ic-objetivo"></i> Objetivos${pend.length ? ' (' + pend.length + ')' : ''}</h3>${soloVer ? '' : '<button type="button" class="btn small" id="objAgregar">+ Agregar objetivo</button>'}</div>`
     + visibles.map(itemHtml).join('')
     + (pend.length > 3 ? `<button type="button" class="btn small obj-mas" data-obj-mas="1">${objetivosVerTodos ? 'Ver menos' : 'Ver ' + (pend.length - 3) + ' más'}</button>` : '')
     + (hechos.length ? `<button type="button" class="btn small obj-mas" data-obj-hechos="1">${objetivosVerHechos ? 'Ocultar completados' : 'Completados (' + hechos.length + ')'}</button>` : '')
@@ -6027,7 +6095,7 @@ function pintarRecordatorios(){
   if(!bar) return;
   const lista = (isAdmin || (esInvitado() && alertasInvitadoListas)) ? recordatoriosActivos() : [];
   bar.style.display = lista.length ? 'flex' : 'none';
-  bar.innerHTML = lista.map(r => `<div class="rec-item${r.atrasado ? ' atrasado' : ''}"><div class="rec-txt"><b>⏰ ${esc(r.titulo)}</b><span>${esc(r.detalle)}${r.atrasado ? ' · ATRASADO' : ''}</span></div>${isAdmin ? `<button type="button" class="btn small rec-hecho" data-rec="${esc(r.clave)}">Hecho</button>` : ''}</div>`).join('');
+  bar.innerHTML = lista.map(r => `<div class="rec-item${r.atrasado ? ' atrasado' : ''}"><div class="rec-txt"><b><i class="ic ic-alarma"></i> ${esc(r.titulo)}</b><span>${esc(r.detalle)}${r.atrasado ? ' · ATRASADO' : ''}</span></div>${isAdmin ? `<button type="button" class="btn small rec-hecho" data-rec="${esc(r.clave)}">Hecho</button>` : ''}</div>`).join('');
 }
 document.getElementById('recordatoriosBar').addEventListener('click', (e) => {
   if(!isAdmin) return;
@@ -6038,22 +6106,22 @@ setInterval(() => { actualizarAvisos(); }, 3600000);
 const AVISO_REGLAS = [
   {
     id: 'objetivos',
-    titulo: '🎯 Objetivos por cumplir',
+    titulo: 'Objetivos por cumplir',
     calcular: () => objetivosEnAviso().map(x => ({texto: `${x.o.titulo} · ${x.e.txt}`, accion: () => abrirObjetivoForm(x.o.id), boton: 'Editar'}))
   },
   {
     id: 'recordatorios',
-    titulo: '⏰ Recordatorios importantes',
+    titulo: 'Recordatorios importantes',
     calcular: () => recordatoriosActivos().map(r => ({texto: `${r.titulo} · ${r.detalle}${r.atrasado ? ' (atrasado)' : ''}`, accion: () => pedirHechoRecordatorio(r.clave), boton: 'Hecho'}))
   },
   {
     id: 'materiales-rojo',
-    titulo: '🔴 Materiales sin confirmar (piso en movimiento y el de abajo)',
+    titulo: ' Materiales sin confirmar (piso en movimiento y el de abajo)',
     calcular: () => matUnidadesTodas().filter(u => matNivel(u) === 'rojo').map(matItemAviso)
   },
   {
     id: 'materiales-amarillo',
-    titulo: '🟡 Preparar materiales (piso de arriba)',
+    titulo: ' Preparar materiales (piso de arriba)',
     calcular: () => matUnidadesTodas().filter(u => matNivel(u) === 'amarillo').map(matItemAviso)
   }
 ];
@@ -6069,7 +6137,7 @@ function actualizarAvisos(){
   if(!isAdmin){ b.style.display = 'none'; return; }
   const total = calcularAvisos().reduce((n, g) => n + g.items.length, 0);
   b.textContent = total; b.style.display = total ? 'inline-block' : 'none';
-  if(total && !avisosVistos && datosCargadosTs){ avisosVistos = true; avisoToast(`Tienes ${total} aviso(s) pendiente(s). Revísalos en 🔔 Avisos.`); }
+  if(total && !avisosVistos && datosCargadosTs){ avisosVistos = true; avisoToast(`Tienes ${total} aviso(s) pendiente(s). Revísalos en Avisos.`); }
 }
 let avisosAcciones = [];
 function abrirAvisos(){
@@ -6149,16 +6217,16 @@ const PERMISOS_FILAS = [
   ['estados', 'Marcar Partida y Terminado', 'Nunca puede marcar Pagado']
 ];
 const PERMISOS_BOTONES = [
-  ['b_estadisticas', '📊 Estadísticas', 'Ver el resumen de avance'],
+  ['b_estadisticas', 'Estadísticas', 'Ver el resumen de avance'],
   ['trabajadores', 'Trabajadores', 'Lista de trabajadores, solo lectura'],
-  ['b_baseTrabajadores', '👷 BD de Trabajadores', 'Ver y anotar en la ficha de cada trabajador'],
-  ['b_guardar', '💾 Guardar ahora', 'Forzar el guardado de lo que cambió'],
+  ['b_baseTrabajadores', 'BD de Trabajadores', 'Ver y anotar en la ficha de cada trabajador'],
+  ['b_guardar', 'Guardar ahora', 'Forzar el guardado de lo que cambió'],
   ['b_exportar', 'Exportar datos', 'Descargar una copia (sin pagos ni tarifas)'],
   ['b_importar', 'Importar datos', 'Cargar un archivo de respaldo'],
   ['b_dbUrl', 'Conectar base de datos', 'Cambiar la dirección del servidor'],
   ['b_ocultarPrecios', 'Ocultar precios', 'Esconder o mostrar los montos en pantalla'],
-  ['b_turbo', '⚡ Turbo', 'Marcar varios estados de una vez'],
-  ['b_diagnostico', '🩺 Diagnóstico', 'Ver datos técnicos de la conexión']
+  ['b_turbo', 'Turbo', 'Marcar varios estados de una vez'],
+  ['b_diagnostico', 'Diagnóstico', 'Ver datos técnicos de la conexión']
 ];
 const PERMISOS_SOLO_ADMIN = ['Gestionar trabajadores', 'Precios y metrajes', 'Generar liquidación', 'Historial de liquidaciones', 'Cerrar quincena/mes', 'Retenciones', 'Materiales', 'Permisos por cargo', 'Peticiones', 'Cambios por cuenta', 'Avisos', 'Reporte semanal'];
 const PERMISOS_COLUMNAS = [['supervisor', 'Supervisor'], ['jefe', 'Jefe de Terreno']];
@@ -6425,7 +6493,7 @@ async function abrirAdministracion(){
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
   ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:820px;width:100%;max-height:90vh;overflow:auto;padding:16px;">'
-    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🛠 Panel de Admin' + (demo ? ' (prueba)' : '') + '</b><button class="btn" id="admCerrar" type="button">Cerrar</button></div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-engranaje"></i> Panel de Admin' + (demo ? ' (prueba)' : '') + '</b><button class="btn" id="admCerrar" type="button">Cerrar</button></div>'
     + '<div style="display:flex;gap:6px;margin-bottom:12px;"><button class="btn" id="admTU" type="button">Usuarios</button><button class="btn" id="admTE" type="button">Encargados</button></div>'
     + '<div id="admCuerpo" style="font-size:13px;">Cargando…</div><div id="admMsg" style="min-height:20px;margin-top:10px;font-size:12.5px;font-weight:600;"></div></div>';
   ov.className = 'ovDin';
@@ -7157,7 +7225,7 @@ async function abrirRendimiento(){
   const demo = !DB_URL;
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
-  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:980px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;"><b style="font-size:16px;flex:1;">📈 Rendimiento por trabajador' + (demo ? ' (prueba, datos de ejemplo)' : '') + '</b><button class="btn primary" id="rdT1" type="button">Rendimiento</button><button class="btn" id="rdT2" type="button">Rendimiento 2</button><button class="btn" id="rdCerrar" type="button">Cerrar</button></div><div id="rdCuerpo" style="font-size:13px;">Cargando…</div></div>';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:980px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;"><b style="font-size:16px;flex:1;"><i class="ic ic-tendencia"></i> Rendimiento por trabajador' + (demo ? ' (prueba, datos de ejemplo)' : '') + '</b><button class="btn primary" id="rdT1" type="button">Rendimiento</button><button class="btn" id="rdT2" type="button">Rendimiento 2</button><button class="btn" id="rdCerrar" type="button">Cerrar</button></div><div id="rdCuerpo" style="font-size:13px;">Cargando…</div></div>';
   ov.className = 'ovDin';
   document.body.appendChild(ov);
   autoAlto(ov.firstElementChild, ov.querySelector('#rdCuerpo'));
@@ -7187,7 +7255,7 @@ async function abrirAlertas(){
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
   // ===== alto fijo desde que abre (así no crece ni se mueve cuando llegan los datos) y solo se desplaza la lista =====
-  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:860px;width:100%;height:min(84vh,84dvh,640px);display:flex;flex-direction:column;padding:16px;overflow:hidden;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none;"><b style="font-size:16px;flex:1;">🚨 Alertas de seguridad' + (demo ? ' (prueba, sin datos)' : '') + '</b><button class="btn" id="alCerrar" type="button">Cerrar</button></div><div id="alCuerpo" style="font-size:13px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">Cargando…</div></div>';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:860px;width:100%;height:min(84vh,84dvh,640px);display:flex;flex-direction:column;padding:16px;overflow:hidden;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none;"><b style="font-size:16px;flex:1;"><i class="ic ic-al"></i> Alertas de seguridad' + (demo ? ' (prueba, sin datos)' : '') + '</b><button class="btn" id="alCerrar" type="button">Cerrar</button></div><div id="alCuerpo" style="font-size:13px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">Cargando…</div></div>';
   ov.className = 'ovDin';
   ov.style.overscrollBehavior = 'contain'; ov.style.touchAction = 'pan-y';
   document.body.appendChild(ov);
@@ -7259,7 +7327,7 @@ async function abrirAsistencia(){
   const demo = !DB_URL;
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
-  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;">🗓 Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-calendario"></i> Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
   ov.className = 'ovDin';
   document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#asCuerpo');
@@ -7400,7 +7468,7 @@ function peticionBtnHtml(cell, st){
   else if(estado === 'proceso' && esMia) tipo = 2;
   if(!tipo) return '';
   const nombre = nombreTipoPeticion(tipo, cell);
-  if(tienePeticionMia(cell.id, tipo)) return `<div class="peticion-estado">⏳ Petición de ${nombre} enviada</div>`;
+  if(tienePeticionMia(cell.id, tipo)) return `<div class="peticion-estado"><i class="ic ic-reloj"></i> Petición de ${nombre} enviada</div>`;
   return `<button type="button" class="btn small peticion-btn" data-peticion="${cell.id}" data-tipo="${tipo}">Solicitar ${nombre}</button>`;
 }
 async function refrescarDatosTrabajador(){
@@ -7899,9 +7967,9 @@ document.getElementById('diagnosticoBtn').addEventListener('click', () => {
     const st = getState(c.id);
     return st.retenido;
   });
-  if(retenidasViejas.length) avisos.push({tipo:'info', texto: `Hay ${retenidasViejas.length} partida(s) retenida(s) para finiquito en este momento. Revisa "🔒 Retenciones pendientes" si alguna ya debería liberarse.`});
+  if(retenidasViejas.length) avisos.push({tipo:'info', texto: `Hay ${retenidasViejas.length} partida(s) retenida(s) para finiquito en este momento. Revisa "Retenciones pendientes" si alguna ya debería liberarse.`});
 
-  if(DB_URL && ultimoConteoHoja !== null && ultimoConteoHoja < ALL_CELLS.length) avisos.push({tipo:'alerta', texto: `La hoja de datos tiene ${ultimoConteoHoja} de ${ALL_CELLS.length} departamentos. El reporte semanal y las peticiones de los trabajadores necesitan la hoja completa. Entra a 📧 Reporte semanal y pulsa "Completar hoja de datos".`});
+  if(DB_URL && ultimoConteoHoja !== null && ultimoConteoHoja < ALL_CELLS.length) avisos.push({tipo:'alerta', texto: `La hoja de datos tiene ${ultimoConteoHoja} de ${ALL_CELLS.length} departamentos. El reporte semanal y las peticiones de los trabajadores necesitan la hoja completa. Entra a Reporte semanal y pulsa "Completar hoja de datos".`});
 
   if(isAdmin && dispMultiples.length) dispMultiples.forEach(d => avisos.push({tipo: d.bloqueo ? 'alerta' : 'info', texto: d.bloqueo ? `${esc(d.cuenta)} intentó entrar desde un 2.º ${esc(NOMBRE_TIPO_DISP[d.bloqueo.k] || 'aparato')} (${esc(d.bloqueo.e || '?')}) y se bloqueó. Puede que comparta su acceso. Puedes liberar un cupo en "Inicios de sesión".` : `${esc(d.cuenta)} ya usa ${d.dispositivos.length} aparatos (${d.dispositivos.map(x => esc(x.e || 'Aparato')).join(', ')}), el máximo permitido.`}));
 
@@ -8019,7 +8087,7 @@ function abrirObservacionModal(id){
         <input type="checkbox" class="obsPresetChk" value="${esc(p)}" ${selected.has(p)?'checked':''}> ${esc(p)}
       </label>`).join('') : '<p style="font-size:12px;color:var(--sub);margin:0;">No hay opciones frecuentes todavía.</p>';
   const bodyHtml = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--sub);">Dpto ${cell.dpto} · ${AREA_LABEL[cell.area]||cell.area} · ${cell.piso}</p>
-      ${isAdmin ? '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;"><button class="btn small" id="btnEditarPresets" type="button">✎ Editar opciones</button></div>' : ''}
+      ${isAdmin ? '<div style="display:flex;justify-content:flex-end;margin-bottom:6px;"><button class="btn small" id="btnEditarPresets" type="button"><i class="ic ib ic-lapiz"></i>Editar opciones</button></div>' : ''}
       <div style="max-height:190px;overflow-y:auto;border:1px solid var(--border);padding:6px 10px;margin-bottom:10px;">${presetsHtml}</div>
       <textarea id="notaInput" rows="2" placeholder="Observación libre (opcional)" style="width:100%;padding:8px;border:1px solid var(--border-strong);font-family:inherit;font-size:13px;border-radius:var(--radius);background:var(--panel);color:var(--text);">${freePart.replace(/</g,'&lt;')}</textarea>
       <p style="margin:8px 0 0;font-size:11.5px;color:var(--sub);">Deja todo vacío y guarda para quitar la observación.</p>`;
@@ -8416,7 +8484,7 @@ document.getElementById('cierreQuincenaBtn').addEventListener('click', () => {
       Lo que se marque "Terminado" DESPUÉS de la fecha que pongas acá no va a salir en las liquidaciones hasta que muevas el cierre más adelante (o lo quites).
     </p>
     ${actualTxt ? `<p style="margin:0 0 10px;font-size:12.5px;">Cierre activo: <b>${actualTxt}</b> · <button class="btn small" id="quitarCierreBtn" type="button">Quitar cierre</button></p>` : ''}
-    <div class="recordatorio-cierre">🔔 <b>Recordatorio:</b> ${anteriorTxt ? `el cierre anterior ${actualTxt ? 'a ese' : ''} fue el <b>${anteriorTxt}</b> ${actualTxt ? '<button class="btn small" id="volverCierreBtn" type="button">Volver al cierre anterior</button>' : ''}` : 'todavía no hay un cierre anterior guardado.'}</div>
+    <div class="recordatorio-cierre"><i class="ic ic-campana"></i> <b>Recordatorio:</b> ${anteriorTxt ? `el cierre anterior ${actualTxt ? 'a ese' : ''} fue el <b>${anteriorTxt}</b> ${actualTxt ? '<button class="btn small" id="volverCierreBtn" type="button">Volver al cierre anterior</button>' : ''}` : 'todavía no hay un cierre anterior guardado.'}</div>
     ${pendientesHtml}
     <div class="rate-row"><label>Nueva fecha de cierre</label><input type="datetime-local" id="cierreInput" style="width:220px;"></div>`;
   openInputModal(cierreQuincena ? 'Cambiar cierre de quincena/mes' : 'Cerrar quincena/mes', bodyHtml, () => {
@@ -8464,7 +8532,7 @@ document.getElementById('toggleDark').addEventListener('click', (e) => {
   const dark = document.body.classList.toggle('dark');
   document.documentElement.classList.toggle('dark', dark);
   setTimeout(() => document.body.classList.remove('theme-anim'), 750);
-  e.target.textContent = dark ? '☀️' : '🌙';
+  e.target.innerHTML = dark ? '<i class="ic ic-sol"></i>' : '<i class="ic ic-luna"></i>';
   try{ localStorage.setItem('progresoObraTheme', dark ? 'dark' : 'light'); }catch(err){}
 });
 
@@ -8474,9 +8542,9 @@ function aplicarNocheMarco(on){
   const b = document.body, h = document.documentElement, btn = document.getElementById('toggleDark');
   if(on){
     if(modoAntesMarco === null) modoAntesMarco = b.classList.contains('dark');
-    b.classList.add('dark'); h.classList.add('dark'); btn.textContent = '☀️';
+    b.classList.add('dark'); h.classList.add('dark'); btn.innerHTML = '<i class="ic ic-sol"></i>';
   }else if(modoAntesMarco !== null){
-    b.classList.toggle('dark', modoAntesMarco); h.classList.toggle('dark', modoAntesMarco); btn.textContent = modoAntesMarco ? '☀️' : '🌙';
+    b.classList.toggle('dark', modoAntesMarco); h.classList.toggle('dark', modoAntesMarco); btn.innerHTML = modoAntesMarco ? '<i class="ic ic-sol"></i>' : '<i class="ic ic-luna"></i>';
     modoAntesMarco = null;
   }
 }
@@ -8487,7 +8555,7 @@ try{ doradoOn = localStorage.getItem('progresoObraDorado') === '1'; }catch(err){
 function aplicarDorado(){
   const cl = document.body.classList, hal = cl.contains('tema5'), btn = document.getElementById('doradoBtn');
   cl.toggle('tema4', doradoOn && !hal);
-  btn.textContent = '✦ Dorado: ' + (doradoOn && !hal ? 'Sí' : 'No');
+  btn.innerHTML = '<i class="ic ib ic-estrella"></i>Dorado: ' + (doradoOn && !hal ? 'Sí' : 'No');
   btn.classList.toggle('primary', doradoOn && !hal);
   btn.disabled = hal;
   btn.title = hal ? 'Halloween ya trae sus propios colores' : 'Marco dorado: se puede usar de día y de noche';
@@ -8501,7 +8569,7 @@ function actualizarPrincipalBtn(){
   const b = document.getElementById('principalBtn'); if(!b) return;
   const t = temaPrincipal, c = temaActual();
   const igual = !!t && t.tema === c.tema && !!t.dorado === c.dorado;
-  b.textContent = igual ? '★ Tema principal' : '☆ Asignar como tema principal';
+  b.innerHTML = '<i class="ic ib ic-estrella"></i>' + (igual ? 'Tema principal' : 'Asignar como tema principal');
   b.classList.toggle('primary', igual);
 }
 function aplicarTemaPrincipal(){
@@ -9666,12 +9734,12 @@ async function gateOcultar(){
 function gateIniciar(){
   try{
     if(localStorage.getItem('progresoObraTheme') === 'dark'){
-      document.body.classList.add('dark'); document.documentElement.classList.add('dark'); lg('toggleDark').textContent = '☀️'; lg('lgModo').textContent = '☀️';
+      document.body.classList.add('dark'); document.documentElement.classList.add('dark'); lg('toggleDark').innerHTML = '<i class="ic ic-sol"></i>'; lg('lgModo').innerHTML = '<i class="ic ic-sol"></i>';
     }
   }catch(err){}
   document.querySelectorAll('.lg-logo').forEach(i => { i.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAvnklEQVR42u2daZRd1XXn//vce98rqTSgkkoDSCCEGITEIAswZhKDDZgxmIjEQ+asJN0du+MPnaRXBqFOVno5K510hnZim8QZVjpuRGwwxrYgxsg2RoCZkcAgbCM0gFSluVRV795zdn84+9Q79VRVUr33quqVtH9ez1WUanj33rP32fMBFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRFEVRlBMD0ltwbJh5Qu4TEfFEvM/R/t2TWHa4DhnSe9uqQh5eejeU4VgDJAwQAVgLpCQa4Hhfa4F0LWDUAmihXX2oHY+ZzQTeK47+pjueHVne72h2JR7iusLPMhE5FfejhX89YEEE3PSbZWz4m3784R+m2LLFr5VD8/29nN7BwBYMfK33IKH/CGERLNavr6gLMMFCXytQ8vXTAMwFcAqAWQBmA5gJoA1AJq/xeB5WXtMAvAfg+wB+QES9zExDvPcMwCUAbpKf6QWQHEMRMIAg4EFxhP9OAXQBeBrAs0TUp6JfFf6fu/B9N529v/u/HOnvO2duVn7kvb78g465LTWAcTAMwBo4BhwcTAZKExgC2DhwT3lq2yPbZs9e/4UXf/DsWsCsq973CSE9WQSfiDgIjwhNhwh5J4BzAZwHYL58vQPAHFEEbXKfzDgpTCcKoARgO4CDAF4c7poALARwN4D/BGAqgKLmfdIwCqDWAggKwwA4AOBhAG8D2DaU4jmZWAuk64DiVy+4+M6VXTu+ckPPPkpsAeuSc1PHSJiRMGDY30Rr/AMkBsqWkIHAxDgCxs6e0vkP9Vcuw5o1N2L9+mKiry090QU/7Pgi9G0i3BcAWCkfV8ju3xYJQPhYKzDjJQTBlN8P4HUAPSMI4fkA3g+gLIojdjmHe79mCIVg5GMhVtBqAEsAbDvZd/51QHHm9bfPW7b56X+++0gXTTMut4Qkg3OJgSEHGFGjjgAmufHsb6oxBBhGOwPIe92Mvr7L8MLbbeu8cidMYGAwPVEFv2bHnwfgWgBXiMCcJrv7TABThvGNY6GPTeTxsADCongZwMtE5IYKTsrXzhMlFtwHRMJ8LP9/qK8Vsi5OAbCKmZ8nooMnoxWwGkjXA8Xlpy+/8iPPb7r/1t69005JnSOirAQgJTYO3uEiUdtEkYZloEiBSgpkRGirMLcXlE5JTM+SxTPoR1sn/hrTE0no/WZPTnb8FMDZAC4EcA2AywAsH0Lg7RDCTUOYz+MRuQ3mewJgB4AfADhUYxUMKDhmniEK7RT5WVmODQUfw3WWAVwF4EkAm062nX81kG4EipuXXXDDVe+9t/6nD+2dtRDWFakxqWUYMNwQZiHXBF+YgMIwCIQSgAQEkDHtc+e2RCbghLIAop3yVABXA/gwgOsALIqeTxHtsuGVojUCosH1MOL3PwUgF4F30XUyMycALgawLLIcTJMUFYsCuFQsjE0no/DfuuziD16ze8eDHz3U3T4/cZaMSTLHYDAKqi6eAfNJVhVFdzGz8n0JDzxh5xy/8sxWqwqgOTu/iYTfiO/6K6IAOsW3dzWBrvQYQbIJuZTI0rAAXgLwogg7DRH8myHXenp0HdQkJWTl/ZwK4AJmbiOivpPBDViN1elGbCyuPnvlNdfv3v7wmsPdbaemzlFCiXUMMA/493ws50o+N7YaI7CRn6YKoHHhT4jIyudnAfgpAHeKuV8ewsQ3GL9ofj2+f3hvuwFsOYbQzQJwJXzq0jbxuoKr4cSdOA/AMmZ+CSd4FZtP9W0s7lqx6kOX73nngdv7u8unJs7BGGPZwfHQvuEx72QLk05SwQ/RfcvMJQDvA/Axec2WxdsX7fZZq1+SvOcMQC7m/4+O8TOnw6cvMwAVVFOVzXJDwtI9V2IobxLR4RPVCggBvxuXX3TdB7q3f/njvV3TZhnnKsaYrGCwa5692Eq7j5mkz8uIaVyGz4H/uZj9HSJALIJRmiTXGBfmHALwHQA/HkrxyXXPEv98Zo1r0+xYBANYDOBy+BqDE5L7gWQjUCy9eU3nNbt3rr/ncNe0+XC2zMYklmHht35DJ17l3KSzAJjZyM7fAeBXAfyCBMKoxr1KJukz6QbwJBHtHmG3PQc+Qt8+RptKXBOQwWdPFoprcsLt/PcAxaVnrPjAXT/YeP9dh/d2LGTrYEziRLcyAcb4wh5mVQATavpLsG+RCP+vA5gngp9j/Ep2m+37h2dRAHgjMv+H8yLPA7BKrtWNgZVDNVbJfADvZ+atRHTwRBL+jUBx55JlN1x+aPf99/R0d5xRWMcwxlqGSxls/M6fRAGlEwkziYQ/mP1zAXwawH8T4Q8mf2mS7vohSJkA2Alf+384Mu1rzf8p8LUNp8q/W/lZGgMlEH7nNADXAzgrjsGcCMK/+qJV164+3PXwr/R0dZwO62CMccywhmElemSCPXQChkDNJBH+sPN3iOD/InxBTx5dh5nEzyEsrZ/A5/4PD9P4Y+Bz/+djcHUijeH6sPCp1MskHjDpWQVkG4HihuWrrr1l59tf+6nevVM6jXMJkbHEyFNGUQaSElBOgTQRTcsnng4wLS74RlJ9zMyzAfxnEf5Z8JHvYDqbSS744f2/AV/6a4dQgCyC+AFUi3/GUvhDHCUUTc0HcC4zZ7W1CZOJtVidPgfkNy+/+NIb92x/6O4je9sXOetyMqZgX7VnSwBlQJYcnb9XBTAheoBLAD4K4Lfgu/Qq8t5bpYKvEfPfiKAdAPAqEXWPEPxrh095LkQ18j9W1x83FIXuxIvh04KT1uz/H9hYXH7m2ZfdtHvn//n4oT0zFsEVjowxubfx2QBk/KQP4wC2ABc4YSsgTAtLfex5hXbX2Rhc8z6ZhT9cm5FregnAa8f4mTPgI/JJdB/G+hnG93gFgMuYuTTZagHWSKrv7Ns+OufWffsfufXg3ks7jLOGKDUFgx2D2e8oJQeYHOAK4Pq9EjAAkigVSCNoTFIF0DQBMWLy/pr4vUEXj8fO71DtzR+rVxDifvgBHK8PE/8IjT+XiikODO5nGI814gAsha8JaAvvbbII/3rAXnv6OVf+4qZvPf/TR/bOOcMWlmAShPJe6eRLQsS/AIoKYAuf+jMJkCRVk2i4dkomgGVrokkQOGzJNGC06BcD+KQs/CCQY+Xzh7QXN0FZ8gi7KA+xYRwG8Cz8AJDhhnIuho/Ez0DzC3+OFQcICqsMn4JcAN/LPinM/vVA8eHz33f9VXt2PHBPT9es0xLnODVJkvsCHyZ4018El2tWwaAOPyfBQPLDARNZGY5kFoDEDVICSH6Pi54Wtdiua1pR+OVjBuBD8B197WhuuetQpriLFEAspMFHN6N4JTWv4f6tHAX/XokamobiLPh5BlMxuG9gPC0yiPBfzsxTWz0YGMz+Fbf/7Lxr3tv+75842DVroXHWlIwhwyCw12wJ4FIRYol4kPUWAYlw5+wVA/HgVl/ysz5AYeeXGMKgLaWFfYOWtABkYV0LX+U3M7qNzRb+YOKHOvxsmEBdAT9rLx63FX/kIXb2eBnEAeQ4st4G4C0AXwHwbq31EFlCZfH9O6Pfl43jkoqvZz58i/X35L0nzGxbLSYQzP6bl6284UPPfutfP9y3d0YnWZeCEmsBdgxn/M7vjGhnJ5171pv9hfP/ZqW6JHVAKru/E3XOITUoiiA8WXbVqkEezi5UBTCs6T8FwG1i+gfhKTV5Nwuptljo98AP4uyGH4y5W8zzfvgafYuh5+3xCAJT61rEjTZt8DX/T8rvH25g6QXw0f8UY5/7xwjxrTCs9FL4qUpvwU8Qbknhv23ZBTdcc2DHV+7p7Z4+B85ZYwwKBsiBJYfEcmXGAqns/IDf9YsEKEjSTWIB2BAMTL0ScKL6yXqXIGwH1orbYKJZARoDOK6dP/OuGy6X3bLSRAOKawJoIQK/X8zwJ+Gj8VvhB2IeQrXS0I2FDh9p/HZ0Py6HT8FhAo1JknuVwKchz2XmJ2trFlpF+C/80F1zL3/5e//20d7u6QvgLMgkWe6HeYRUXxjekbDf3UkE2BGQJ4BNvVWQWqAkWwY7XyNAIW4Q7fQkK4zDaxI0D7WMAohy3x0APg5f7hoEtZklvkW08+cAngCwHj4KvwtAD4Deid7VovtRBnARfArQRW7EeAt/bO20wfcibATwRqu0CAfhX3rzms6PPf/EMx85srdzvnOOHCWOGQ4Ma3yBD6haf20KbwHAeKEPOz+RVwyZA9gSXMHWAVww0hK8yW9d1ZYksRw4xAQmQZC0ZRRAtICWoZpq6hdBbYbvH1yJYPK/CuBBAI/Bz90/MlQwcoj3N57WEIngL42slYkMJFMUL7kSwLfFcqLQpTlR6ydE+285a/l11z+38Z/v6tm7cImzroAxhbT0Wtn5KUpskvUKAAAsAXnqA4IJA1QATkb8Jo7dM1OmJj/Jyriw6ME5roIM3tQnK75ZIgpg4BmKVTGMGdoKtEQWIIr8nwof+Z+HoU+uqdfsD+Z7KKDZBOB/AvhjIvoOER2pPRosTBWOpwuP9/2Az35cherYL27CvWjkd8SWx3kALpaiIDeRXq4f44Xi6rOWX3H1oa4HP3G4a+ESWGfJGAtf25+nfrtLxG8PvjvEV3cGqCR+pn/CQKkA0n4pCHKcb2srma93zN6wfv7pv/tKNrWoWAIKMIcQsR280Az83zI1uRpWBTAiy0UBTGvi+wsBv9Bu+20AvwPgS0TUH80UnBBhPwZz4FN/c5ugDJtxtoGJ3KgUvjJw0UTeIN/Ys7G4+oJLr7np4J5vrunpmjHHOMuGTJ4w+jNGngGmDSiXgTT1JroTwXXw5n6/mP4gILEA9QPICVTh/K00zR6YNfupZPu2277y4y2f2UemryIqz1jypkPI+cudNpCqwRYvDZxwBRDt/iSBrguiQF2jLkpI8Rnx978O4A+I6Dv+T3Krtw8vgo+4t2PwoR/NsIYaDaRCLJNLZGjouCvO+7EmeQ7IP7hi5SW3v7ftkbuPdE9fyNYxTJKDfWNPBpgMKKVAZuTMNIeBEV8MoDBALtH7pACKglApCNZxsblUzr58Sue3H5o249fXERU/u/rDp5LjgcqggaEJkUUBHqxxWzkQ2BIxAPF354v/34bq6O6kCYs9FOL8B4DPENHTomzKrXzunZxrsAw+3RZScI3k/psZTA21Dwu9+42NAN4dz2DgGiDZjPV8zcJzLr2pa9ff/MyRPdMWwBUWJkXBcIlf3alU5aVSy8i26p+HQKAVXz0t/Nz+xDIqQP5aqZR985TZj/7e13bchksoB0Czz13Unz1LSKQOwKU+VmBQDf6RrRoFIRjYqjX3pkWEP4PPcy9plvygOijDwNfY/xURPSV/y0iAsRUFPwjROage+YUmuAA5fPnuflRbqbnONRMUUgd8r8b88Q74PQDYdfffX77+yMGv3nmg67I5xlkik6YFA5a9QLOP4Cc5wH3+hcL75qmsDGe8kGYOyAogzQFjkb/TVso2dHY++sXfu+8OvoSKtatXpwC4nJcpMQQjCoaSwQ1CCQOJuAcWPijYypiJXuzyaRn+hNtzo/fVyHtzkem/A8D/AvC4/D3fs9H63WwXinCVUP/YLxtZol0AHgLwObknwZfnBhQA4CcTnRvmNoz1TVkLmI1Awa++WvqzT37qwTU9XfPPtEVumBLLABzDiOBnksOnHHAVoBC7MoHP4YdxXxn5nd8wwRWcv5qVsgdP6XzsiS984Y43/+stlXsBunfjxoEMR0bsMwnGKxOW4CFBqgFRPR+QWnyIQKtYJm0SAJyHwTP86xX+YHX1wU/Y/aqY+wkRFSMV37TC7i+lvyvh039oQAHEvQ27APw7gL+HNB1h8Ny/0boAgXb4lODiGqU+BsK/Ol0HuJvPXHHh/77+Q9/88IGuG8/iwtrUZK4AnHXgxO/KJEU6ZKXENwz2lLviOA6qkM8NO85faGvLHpgxZ8Pnf/sLt3/jFi/88RHe5XJOJXJIiAfuLCeSAoR3JVwGcOYtgcRVlYIqgOGZKwGv+FSaehdSeK4p/OGa6wHsl4U5WWY6ni4KMRQrNcON/An8eQNvy+chLVqvEgglzVPgzw1YPtY7/zpsLC79qZ+bfUPPnr+9a9+e65baIqfUJMy+n98BsBlgS353R6QASLr9OJHKPSeBDOnacwXnb5ay7JGZHRvW/fWjAzv/uiHujYkkx8nvCR2BHCJraeueQNMyCiDy/8+Db3SJd5h67l1t7cD3ADxGRJXw91r5YUR9EJdh8JFfaOBehAzI82L6J/L5T1AdqjJaxRgCikHZnisxizFhFZCtA9wNy1ddu+apb27+8KGuK07hwhpQluSMxLEf3ZX44Jul6g4Sdl/LPtKfk+SEndeuzASbc/5ammUPzup8dNM/3Hcn37MiH074R3XnJwETpgAiU3E2fLR7WoO3Lw78MXyjytOT5TSb6H7MgO+2WxxZQqaOexHcBifC/hIRhezKcwC2RN9bbzAw/J02iQPMbXaLcJjhd8eyC99/S9c7D9/Ts3feObA2S01C4vOTkxFe0ZZLLurHJ5/qK6RM1ziAQUgdoVzhfHNWzr4ys3PDfb9z3x1Dmf0nshJoBRdgqrgA5Sb8rjBjrwDwDIA3MfmYB58RmR7tsPUqgAS+jflZyElDRNQvrtGWyLWgJiz18+HPDsiapWzDDL+rzzz7shv2v/s3HzvUNe0MawsDk5Ssr+13oZsP0tQjAh6KcqwBihTgVLr4JO9nLGBzzl+XVN8f/NXIZv+JSisogBL8+fZZgyZvvBj74Gv9t0+WBxG5QxfBR9bjeEY99yQs4v3wZw1sF0vDENEB+K7HbgyO6tebEYBYcVeiSePCwjCP+as/OueGw/sevvXg3ktmO2edo9TmjH5m9IvZnyYyzstJLr+Quv4MyEve70+MVw6JdOrZ3Ef715/S+egX77vvjobNflUAdTNLfMgpTQh2mWjRvwKf+sIkMv+XiBBNr/G3R6sE4/u4C8AmIjpQU/n4llgGlcifH7Xeko+FPMf3owk1Ab+GVdl6wF5/3qr3ffq1x1/8mSP7OhcXhTVskooD+sHoT/ygjjA/KVTjhbQbwxfpDIzosoADgY1BCs5fnNKW/d8Znd+898//4vY3bzn5dv5WUgCniL+bNLDjOQyuHOwG8JbsqpPpzIBz4Gv/y6hG6evZ+ePGpzcBvCP/Fv++N+CrIw9h+MEmx7t+gvJYDGAFM6f1Kt21gPk8nstXn7H08tv2bf+7jx7pOu08Zx2TSRxH5b1h5wdQRAPdGDLaK0zxYV/gg5xgcsA5l78xpZRtmNXx6J/e+9AdfM89+ckq/MDElgJTtFCzJoRO4tRhN6rHa7U0Nb0Q5wA4OxLeekafx9H/bfAR/95op2YJiu5l5k1yr2Zj8GgzGuVzDMwUK+A5ANtGG3xdAyT3Au6Jc1Zddf3+d756Z8/eWfNgrTUmYeuF32XenC9Ljj3U9ZOM57LwPf0sXX2J9TYOF4BlzrdOzbKvd3Q+9r23t9/BRMXJLPytYgE0KvjxQgxHWR2KfOCWj8eKkCyC765rQ7WJqd5UaLjmzfADT3rD8Wo1Avk2/FkERWQdcB33PWReZsDXBCysx+dfD9j3/+VfTr9j//avfayne9YCLgrDlDjnT+wpMj+auy0BSom8YReNeSIf6Q8FOUkBuJzQbwkFc/5aVsoenNH56ON/94Xbv0FUOdmFv5UUQDOtikL82knxYKPg3/tFAQD1FULFgh8E8hXItOFhfuaQBAh3oJrWq6cmICjeRIKB543W7H8AsDf/5dfLP/uZP7n/7t6umUvZFgSTsgXAfoYfkdTYSCsvW9E+sopZ3olxQFoBqCA/2IM439xWzh7p6Hj09//q0du/McY+Pzd7azvBFUBc989j8QwmQfBvCnzd/9moP/ePmhhKN4DXZebBIFM8ytX3wJdKb23wvsU1ATMArGTm+cdTE+Ar/OCW3bim44N/9MtfvX1v101zYG0lNWlqqxV+CfxcPpMDth8o+qWnX4ZuhBl/ifj9xnrzn8H5W+1ZtmHO7Ef/8Yv/0KRo/7F1M9Oovv2kVgDc5FslfVqT6oSmOfC1/zOjHbje2v8wSPVpHKMOQkZ4vRp9n4liAY2sqQsAvO84GoRoHeAuXfML8z/23Heevf1A942nF7bI2M/wK4iRi3Bn5AUbFsgLILd+Hl8Y0e2ksSflUKpLKMD5q6VS9tCseY999/P33dGsaH+FCCx1v0yRsPuBwwOjxSfD4WmtoABstOibMf4rBBVbXgHIDlmCL/xZFAlxvfciWA+9AB6XGMBIfztYAS/DpwuD9VBvg1CwAi6Cn+uY1lg6g3x+APxLKy5Z/cvfe/Tln+/tXrKEcmtTk5qCkVl/7I5LfSFP8O0N+ThAIqc42BToS4A+6ekfOHmFOX9pSjlbP3POhg3/+C9Nq/Dr7884d4w8925IAq98CshBohYwFXFBXLUrML5JpApg0M4ffPZmmO8hcDYd1QxHSyqCSChOhR+qMacJllB4nnsAPCO5/xEj8fJvr8BH7jny5+uxvEIM4RRRArOG++b7AcbqtenCrl2/f8++PZ2LuMiLskks8cAumoh/z/CpPitXmCZAGubtoZoJsM67BYct7EttU7KvnTJnwx//xaN3fOe66/qa5fNzO7uKYxQSpk2oOmR0II3i/KqmYZ5kKy3IVpgIVIEfVHEqGpt2E++e8+BTWz+ZBPGAUyUAOAP1l+aG3H8K3/jzklz78fIafFHQdfDtvVznM4jdhzPEDXiMiPKj9A7gsOeJqUV//+V91rJLkJJjpMzV9kRppTXy2wm+jZe4ekRXUlRvWIWBSgG7pdSWfHn63O9tuv3Wn157zwrsXbq0jK1b7Vr5Vbui+7sgutZdNfc9/rd7AbMWcG/t2ZMaNl7mZaiIkUNByERFGHKS8MDJQS1KKyiAQ/CFKmfJ+6mnHbhWAcwGcDYzv0hEtsWbgc6G7/snEd564hdx7f8O8f+PeXhncAOIqJuZnxbLoR3VJiJC/XUICwBcDV+HUDsujNcCZt3yub29e7Y+doDSu061eZEZpIWcyBOEPHEyviu02wafW3L8KcvxXlIUdMgQvVZuzzd1nvbJjZ/97OGNALB1a9Me1se/+8wvdzqe2kZcgJDm8ANIgvmDpHpKME2CIGArKIDD8AUrvbIL1jv8Il5808UEfRLVKriWMv9F+ObK+5yOxmZIxqbt23Ldx+yCFDckmPw/lmDgwkgRmzoUcYghhHFh/4bquYeIdtsE69fnexec+fj2UvnOpXnOWeJ/hbMAMSPhwVFJQ0cPL3DkG36sSGBvQuRsf3L2ttfXLZw184UyHJEz3J6WkjJADimsc34mqHGAMQPXx87F8TyQ/JsBYIvC9YLSBfv2/OaplSNECRIratKE2QJiAZAMBwm5EbUARqZHFkgzZvQFxVGGn6a7hJm3t5jw+/mRXvhWwUf/TQOuSu1O/RaAV+Wk4dEI7z74DsoLUT2XoZ6ioOCGlODrARZLkHEQnwOKzwPoXXnJAy88/fifLcOR8kJyDBBROHU3eqpENaewOhF+8n+ssEDFAQfZ0cy+w3Rln7mjL6M7QMAU618JMywM+kGwMhGEhtykWS6cBh2KWGFgLlt0kp8hFk5ICRVUFMUkwrCRhqNaJ4EC2C+7Vm+DvydUpIWqtksALCeijeHAjxZxAyjy1y8RBUBobOxXuPZ34af+HNcMBPl3K4piH3xNwC0YfDBLPbGY8LPTJA7wfSLqit8TBTfg0vN3z3h503+8bXtunZ/3WSRIM7AXnqRqSsfn7hnng4K5ZAYqFjhYAHvY34BeANOdszOdP9hnCgMZh2izA4HA4KN8rTiAUfu5VBRjOihtBxGJmjC1tqepvk/oyUDHXHzBAtgMYG+TridsEjMBXMHMi2v+3kQTynHniPkf5/7raf6xkRn/IvzgD67jeRTy82/VvJdGFEEZfrrRsqG+aQtAWLfO7eqY+0dbqVQcKWBSy96kDs6JjPEKv9FI00/Ofud3DPRYYJsF3naEA87AAcjJJDlRZkFZH1F2kCg7QJQdIJMdJsqOkMn6ibJ+Q1mfvHrlY3/0ceBzoqwwJkuJKDWDFQQPcfVBYdX+o54MNIQvLP7nrmjhNXKfYkvxCgBrALSJFTDhB4FEpb+rMHjoZ73lv+Ga+wE8BV/YM+p1EFkBL0sAMa7uGy1JFJS8CL5D8KhrWy+/e/Ndt730DpV3H3TGmBwc6vtjc2JgvDED/Sy13gz0cXXn75HhnlMckLCDc4zcMQ47xmFm9DHDsYNh5/+dGdYxnLxs9NHW/jczEudQYhkIarybQHKHmKqThgfKOLn1XYBW6QXolWBdHgWe6s3ZBiHPxf+8HcAiUTTJRCs8+XSWRMgXNBAnZgxuGNoP4Fnp8hutu8OinHIAP4CP3DdSExCyCBY+zbkKwPQhSoN5LZC+vW5d5WD7jAd2p1MYBQqWUzsoSL6oR8tArwh97oC+AtjFwC7y5n0ZjAwOBgQj/+/EdA95yBIB08h3XNEwZsuxta1ECCTfP9CFOKBNq8eGt3oOulUUQAU+F72tZgev1wIw0ecrAfwmMy8gogozl1tgRsA8+MEfsyMTvt6xX6ncv1dRZ8ajplnoWVSLguoNY9U+w7MALB/KAtsi1/GjGbMfeb2tjSRWBydSNXB6rwT5Kuyr7foLYKfzpv9B9qXCJflzBQgORv7nrYJMblT4eLyvJPqcIRWJMlqMCt9mHEaMhxqFxFbnEbb62WATPhVYPu0X//NHkUnsGryucBjoNAA/D+ATzNwuM/EwEe5AdL1LRCjiISj1KICwS3dDjudq0DUhIuoSN2B/9L7qLQ0OS3+xWDzttVbAesCuBcy/v/r0Y7vKpccPpGQMszViP5B0/lnrXxAlsJuBbQx0y9fDmwy7fSH7dBIJfVhovVydtT7aG15EU4eNPAHnogVrqzUMwXJpZSugJQ4HlaaUV6IAVDNGqsfTamYC+A0AvxAdZ52M93XKx3nwKcp4CnKj17pLFMDeJmU7fijPI49kp95pQQ6+z+EK+DqPo6ztXUACIt6elr/xWtsUsIFLQWA5fbNgoF8i/0ccsIOAtw1woHpGJwquHijp3ywPCpAEnzJnoA+EftCA0I704sjUcvA+fpgwbCVdGVKUpjZySuoCjGbn6RbTs0vuY4L6BlXWxgNYLIElAD4N4JPMPE3cATOWJ9kMw0oA16I6A7GRqT9hvb0B4LUmnni0E8Am+CpN1PkcgkyEtOwKVLMBg37X5/z34OmOBf/8ZGnqngMlk1HK7BKCJT/htRc+TfQjAn5MwEGpwU/iDMHAwmEksCDYoEYGChRKADIwEvm6Oc4XYXBRUoV8A1KRAJT6/oSy/A1L1aPGqSYVqM1AI/M8/ICKHNXhHg3pFww+/WapKIHfYuazwoScUCcw1spAfv9yiYwb1D/1p4ie305RnD0NBBRrXZRdAL4ryhhorDcgKKVO+LTsvFo3QGoC0qdefmr3gfbp/3TEZACj6COg13kTu88CO60Pcuxn3/gzMM5YgoDSoIccjArYDw8d5BZUd3UnXxvNa+CsPznxkxC1Iks7Msk8wtCebOoINp50CiBaeD8E8DB8OqpZdVQkbqDEbHEagN8BsI6Zr2bmmUQ0cFjoWCiCyCyfBj8BeRoGH2A66l8ZXdvLErirhLFfTXivhbgAP5Evpw0EZoMCbhM34Oyhv201AGAHzLt7kFpUQJWCUSmAfgscdMA+5yv+Sk6Gg0gZrpEgXHEcr3yI/z6eV1Acoee/ZL01Eac7uKobvPYLsQANAh73wuuBP87rzZrF0wzTNj4GaxqAjwD4LIDfZubzgyIKr9gqkJcZ4UXHcX0JBh/4yQ1sCPHu+jp86W+z3c39AF4QKyD25+tZY1aU8Er4LsGjuBf+9N0jl131rz8wZewiEFm4nInfBfEuEBcgLsurRMQZEbfBv8p0/K+SvEbzMxkRGyJ2RHByGpFBVKLsoowlRR2LzVq9Y0Tagu9pB4Cvi8++IHIHGlVWceNLLj74CvhTic5l5o2ym+4EsIuIDg+z69a1+zNzu/j+5zVoDbrINd0L4GXp5mtKqXNNZuYpid5fES3jpA4FEFyW2fBFQdNqj2wbKA3e/ZOu+VOnP3J6f+8dZ/T0Yj+A91Ad8Rzy7WH4RzqOu9igoYscRXB5cOBvyKdKqgCOKxgoz/rL8CWkdzbJDYgfQxq5AywK4G4AN8AXwbwG4E1mfhPAAfm+fgmI1ebGQ+/BQQAHJZsx1N8ME3PDwRmNtNrayKXZIm7TWFhjFWZ+RiyMK1DfqLDaYr5U4h8XSPsxD7YCwPdu3Gh/ce0Xf+axz/739Z1M1+xnuF4QsRQIFoxcJnElCVGSAibhsYu1V/vMiQrAHWRuX1T0px2wSOD7EQBJCdbkloLCYG0HHrUieAPAt+DbSTsjgU2b+FyTyH0D/BSba2Wx90vg+bBYC30Sl4jTYhX49OIBAF8C8AiAfUPsxEGxLYOf+x/6/uuN/offfUDcpXfGShkT0S5mfgXAEfgzHKUkp6424cA58E1QLxHRkVorAABh3S/1gej2pWddOmNfcmCQdHcnCSNNubMoyFlLbC11jPmq7MAZKWcv8sHKR3rtp8/dt/veRcVBmyRImX06MXF+LkARpgPFKcAa1cmqAI658BwzPyTm8q+LsPQ1WQHE/imiHSqVxT5rGAGkSAGUJPr+BIbIWETm/3zZ/Ttqfk8je0M3/Ny/nTWme7PZIq7RKlSLq0ZrdSdR0PN0+HmB/yaKZch7TMy8deszww412RN9vncc1mYYKZJ84jf+bs8j/++3c0ftU4gZDCIn2YF0cGCN+egHrM1Ax6cEEiLaJjvrS5FwFk2+fxQJfRDqfnnFQeC4xiRYDUGvvytuw+ERBHGx+NLtDQh/fOSXkzX5Wph4NIaP5DVRcH1RELWedRbSupko9tNH9EIGBzsn/CXjxOiUmYmtEHwxecj1SzZi4ErN4AfWyrTqwSBhmMULAD4HPy8gxeCMS7MJVaMlVOc8JBh8ZoGL4lBGlMOL8IdvjDQDfwn85N8yqgdooAEF8B58oc7BsVTE8ul2+BFjjdYZxIbwPPiagJnHuG/cKq975WMlz32elQar8dD446RXIPj+qgAaWHwSiX8AwAbxyQ0a7xM41iKNi77iYrHaXduIIL4wlCBG5v80+Dn5szG4fr8R//9N+Ah971ia/3KUOEug8e3IbWykJgByLz54DCugJenvzZik9gBD7QyhJZiqg0tVAdQpjOEQSwBfgD/JNjRo5Rh75UpDKAFT8/VtEogbcgKPdB1eCB/5JtTf91/7vN4E8DwR5WNs/ofr6YKvNjxQ48/Xcz8L+KKgVQDOxKRjuhfscAdkxw8FgixXSRRlBlq4GKhlFYBUtJHEA14A8Lfwk4PiTr/xLrGoPbTjhwBekMq5o3Z/MfmvhK83aKTwJ04bHgHwwzBiazwsMfgU6LdRbdbiBhRAEIm58C3C5Rae2HwU5SkVGhglFrf7im1DRbX6j2iwFlUFUN8OFOIB/wHg90Xoghlq6wxKNfJ+QuDwPfjo+EjBv3b4zr/TIoFJ6/ibRbTzvghfpouxNP9rlFmfuBw/GsZCGO16C7GMi+F7IzABTVn1KYBymbIUZETg2Yq5n/qLy3KvBCz5UWaURMpCFcDod6AoHpAD+BqAP4LPDIRS7FDWPR7E8/deluDfUdN3I6FcLGZunG5s5MivfvhmqS0T8Djelb/bi2oBXr1zAsLauwjARWFAy2RRAgkxyHgHnyO7juCHgYSRZs3I9Z7sFsCAQEVNKl8C8KeyC5IoAoyjSxAKeZ6Nd+J4x5SPswBcBR/xboYfHkzxZ+Aj8+My6DS691ZcsK3RfWikOQiiHFcAKE0eN+AwiKWX+ATATJY3GqWLGMB6AL8rwmBrAlNjsZBqo949AF4koj0j1OCfBuB68XWB+kt/OXpO78Af+e0maLfcDB8MrKD+swyC5VCI8r5A7tUJAasCGPuglLgDG+Dber8kO2MpMpPHwiUIpcg5Bk8vGo7Txccto77queByhDME9sLn/t+bQOX7Q3FB+odRjKOxomI3abWMa2Mo40o62d6wLEYDP1//O8y8W4TiTvhW2zBJKO4ibFTRuWgn7oI/QGPHCO+vXXa2OdHP13tkeXAlt8FX5B0cL/N/iGsrmHmLXPt0DB5qMpp7HAcDF8A3Yj0OoKfFz3E84TCT8U2HoReSInwdwJ8A+Av4CHlvjaDF2dhGFlb4ne/Bn73XVSuIkVl+AXy9ewnN6fsH/HCOZ4mob4KDZTvhMwKHUK3OrPe6wtDWlfDjwxVVAKNyB1xULPQvAD4FXy/wDgYPgw2ZAlvHgnU19+ot+E62IWvw5WsXwhe6mBoffrTmf0g59sBnHXZNtPsFnw34VuSKNMMNmA/gfGbOdPdXF2DU7gAzg4gOAfguM78Fn666GT7NtATVTEGo2CxwdJXfseI6wfx/Ab4i7ijBl/czQ4T/NBw9vHO0iifUO2yGr/wrJtJElr/dy8ybxCU5u07lVhsQnQrfhv0UgM3qBqgCqMcdIACGiHYC+Htm/i58vfmHRCBnwRfmZBhcoMnRbjvUQo3731+FT//lQ/nh8h6Wwne7GfhgmYkEebQKgOAj7t8XxdMqvCdK9iq5nyFYmdShCMIYjQ+I67S5lddbqaPDepNHjgcdotovNonC97L8V6u1A6cniiaT3Te4BExEb8jR4F+D78W/URbsYvhadNRYBcPtUi4y5bfITmzjXaqm8ecyMWkbiT/E398nLse2id4Zo79dgU/BXiVWFkZQoiNZVRRZY0vhx4Ultfe3lXh304szzgf5M0pDuS8NdmhCJyDR4ODPQLSUWkcHnDAKYKgdmYiOANjGzDvgU3cPwU+kuUDM1zPEVM+O4Yun8CW/LxPRe0P9LWGuuB6nRj8XK5TjFY74RJ5tOLoEd8IQwcyZ+Tn4cWErcXSPRD1xgBTA+QCWMPPWVltb98p73btj54IyMbUxOwNQSUoBkxqhcohbPplB/uczBoyb+ENqT0gFMExADlLF9jqA1+VrS+Br0JfJxyXiIrSJm9AucYM0ih9sDubpCLvTGfDjrqYNoQBGSwIfaX8C1VbcVuItcYkq0b2qhziGcD58SnAnEbVUSvBegNcBOP/uj722+6/XlfdUYNoB7ssBYriEvDdg5BwDNl7sEwZbRkIMNgXMbgYOGOrF1JlWFcA4WgSRMmAAbzHz2wAekwDUfPjCndPk4xnwswinwufy9wP4Cvwx5kNZGnGwb6uY7Xtx7KG1Q6UIQxHTHHE5vgqJ/reCMESlwRVmfgo+f79YFEGB4591EMdfwnydA/CzGbOWW0uirJ577luVA+nUDdbYK1N207lkYBgmjAdP2J8e7IeCEAwxCuP/g9gd7C5ntL1typ/h5cd6VgPpxvHrYxnpuk4uhundT+BHhc+QHbxNFmKbBPPeAdA1zOTf8DtmizXRJgJxrPLfoRRAMKenwA8ifVNcmVa8j9PleuODTkZb8lw7abkbwI9rW6xbSA8wmOmTn/rU9DcffmwlEUquP59l2c0wBEdsjIElB2JLZBOgnEyf8sP8cP/s2csWf7+3/bQjDz30T4cwvl2sqgBGchFaZXdVFFUALaIQjuVS1PPz9QbIWlk5jUVV4iRQxsQA7oncu90jyNJceY73i3VHk69nSFEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURVEURWlB/j/0S8bSgUPjyQAAAABJRU5ErkJggg=='; });
   lg('lgModo').addEventListener('click', () => lg('toggleDark').click());
-  const sincronizar = () => { lg('lgModo').textContent = document.body.classList.contains('dark') ? '☀️' : '🌙'; };
+  const sincronizar = () => { lg('lgModo').innerHTML = document.body.classList.contains('dark') ? '<i class="ic ic-sol"></i>' : '<i class="ic ic-luna"></i>'; };
   lg('toggleDark').addEventListener('click', () => setTimeout(sincronizar, 0));
   gateArrancarBarra();
 }
@@ -9833,4 +9901,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.121 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.122 · 18-11-2026 ==== -->
