@@ -1550,11 +1550,15 @@
 .as-sem thead th.hoy{box-shadow:inset 0 -3px 0 var(--accent);}
 .as-sem thead th.nom0{cursor:default;}
 .as-sem tbody th.nom{text-align:left;padding:6px 8px;font-weight:600;background:var(--panel-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.as-sem td{padding:3px;}
+.as-sem td{padding:0;}
 @media(max-width:560px){.as-sem tbody th.nom{font-size:12.5px;padding:6px 5px;}}
 .as-c{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;height:auto;border:0;background:transparent;color:#fff;cursor:pointer;border-radius:0;font:inherit;font-size:16px;transition:background .12s;}
 .as-c:not(.on-P):not(.on-S):not(.on-F):hover:not(:disabled){background:rgba(127,127,127,.18);}
-.as-c:disabled{cursor:default;background:repeating-linear-gradient(135deg,rgba(127,127,127,.12) 0 6px,transparent 6px 12px);}
+.as-c:disabled{cursor:default;}
+.as-c.fut:disabled{background:repeating-linear-gradient(135deg,rgba(127,127,127,.12) 0 6px,transparent 6px 12px);}
+.as-c.blq.on-P,.as-c.blq.on-S,.as-c.blq.on-F{opacity:.72;}
+.as-hab{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin:10px 0 2px;}
+.as-hab input{width:18px;height:18px;margin:0;cursor:pointer;}
 .as-c.on-P{background:var(--ok,#43a047);}
 .as-c.on-S{background:var(--warn,#d99a00);}
 .as-c.on-F{background:var(--bad,#c0392b);}
@@ -2460,7 +2464,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.127';
+const APP_VERSION = '0.73.128';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -7437,7 +7441,7 @@ async function abrirAsistencia(){
   const cuerpo = ov.querySelector('#asCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
   const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  let fecha = rdHoy(), estado = {}, lista = [], cargandoSil = false, cerrando = false, vista = 'dia';
+  let fecha = rdHoy(), estado = {}, lista = [], cargandoSil = false, cerrando = false, vista = 'dia', otrosDias = false;
   const dow = f => new Date(f + 'T00:00:00Z').getUTCDay();
   const sumar = (f, n) => rdSuma(f, n);
   const cerrar = () => { asUI = null; cerrarDin(ov); };
@@ -7525,12 +7529,13 @@ async function abrirAsistencia(){
     else {
       h += '<table class="as-sem"><colgroup><col>' + dias.map(() => '<col class="cd">').join('') + '</colgroup><thead><tr><th class="nom0"></th>' + dias.map(f => '<th data-f="' + f + '" class="' + (f === hoy ? 'hoy' : '') + '" title="Ver el día"><b>' + Number(f.slice(8)) + '</b><small>' + DC[dow(f)] + '</small></th>').join('') + '</tr></thead><tbody>'
         + filas.map((n, i) => '<tr><th class="nom">' + esc(nomVis(n)) + '</th>' + dias.map(f => {
-            const x = est(f, n), dis = f > hoy || !vigente(n, f);
-            return '<td><button type="button" class="as-c ' + (x.e ? 'on-' + x.e : '') + '" data-f="' + f + '" data-i="' + i + '"' + (dis ? ' disabled' : '') + ' aria-label="' + esc(n) + ' ' + f + '">' + ico(x.e) + '</button></td>';
+            const x = est(f, n), fut = f > hoy || !vigente(n, f), blq = !fut && f !== hoy && !otrosDias;
+            return '<td><button type="button" class="as-c ' + (x.e ? 'on-' + x.e : '') + (fut ? ' fut' : '') + (blq ? ' blq' : '') + '" data-f="' + f + '" data-i="' + i + '"' + (fut || blq ? ' disabled' : '') + ' aria-label="' + esc(n) + ' ' + f + '">' + ico(x.e) + '</button></td>';
           }).join('') + '</tr>').join('')
         + '</tbody><tfoot><tr><th>Presentes</th>' + dias.map(f => '<td data-cp="' + f + '"></td>').join('') + '</tr><tr><th>Sin cancha</th>' + dias.map(f => '<td data-cs="' + f + '"></td>').join('') + '</tr></tfoot></table>'
+        + '<label class="as-hab"><input type="checkbox" id="asHab"' + (otrosDias ? ' checked' : '') + '>Habilitar marcar otros días</label>'
         + '<div class="as-ley"><span><i class="sw p"><i class="ic ic-ok"></i></i>Presente</span><span><i class="sw s"><i class="ic ic-prohibido"></i></i>Sin cancha</span></div>'
-        + '<p class="as-nota">Toca una casilla para cambiar: vacío → Presente → Sin cancha → vacío. Toca el número del día para ver ese día (motivo y hora de salida). Sábado: marca solo a quienes fueron.</p>';
+        + '<p class="as-nota">Solo se marca el día de hoy; para marcar otros días activa el check. Toca una casilla para cambiar: vacío → Presente → Sin cancha → vacío. Toca el número del día para ver ese día (motivo y hora de salida). Sábado: marca solo a quienes fueron.</p>';
     }
     h += pieHtml(false);
     cuerpo.innerHTML = h;
@@ -7546,6 +7551,7 @@ async function abrirAsistencia(){
     cuerpo.querySelector('#asSig').onclick = () => { fecha = sumar(fecha, 7); if(fecha > hoy) fecha = hoy; irSem(); };
     cuerpo.querySelector('#asHoy').onclick = () => { fecha = hoy; irSem(); };
     cuerpo.querySelectorAll('.as-sem thead th[data-f]').forEach(th => th.onclick = () => { if(th.dataset.f > hoy) return; fecha = th.dataset.f; vista = 'dia'; ir(fecha); });
+    const hab = cuerpo.querySelector('#asHab'); if(hab) hab.onchange = () => { otrosDias = hab.checked; pintarSem(); };
     const tabla = cuerpo.querySelector('.as-sem');
     if(tabla) tabla.onclick = ev => {
       const b = ev.target.closest('.as-c'); if(!b || b.disabled) return;
@@ -10072,4 +10078,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.127 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.128 · 18-11-2026 ==== -->
