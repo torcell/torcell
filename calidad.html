@@ -1353,7 +1353,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.33';
+const CAL_VERSION = '1.38.34';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -3113,11 +3113,11 @@ window.limpiarNuevos = function(raiz){
     const cal = calcular();
     pintarFiltros(cal);
     let n = 0;
-    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + (P.p === 'Azotea' ? 'Az.' : P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
+    $p('pTorre').innerHTML = pisos().map(P => '<div class="ppiso' + (P.n === -2 || P.ds.some(d => d.d !== 'Pasillo' && !/^\d+$/.test(String(d.d))) ? ' esp' : '') + '"><div class="pn">' + (P.p === 'Azotea' ? 'Az.' : P.n < 0 ? 'P' + P.n : P.n) + '</div><div class="pus">' + P.ds.map(d => {
       const a = cal.filas.find(x => x.d === d).a, k = claveDep(d, sec);
       const ok = a.t > 0 && a.h === a.t, par = a.h > 0 && !ok, fuera = filtro !== 'todos' && !cal.cumple({d, a}, filtro);
       if(!fuera) n++;
-      const et = d.d === 'Pasillo' ? 'Pas.' : String(d.d);
+      const et = d.d === 'Pasillo' ? (d.n === -2 ? 'Pasillo' : 'Pas.') : String(d.d);
       return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob"><i class="ic ic-lapiz"></i>' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
     }).join('') + '</div>' + anilloPiso(P, cal) + '</div>').join('');
     // lista de los más atrasados (en la torre pueden quedar lejos hacia abajo)
@@ -3453,4 +3453,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.33 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.38.34 · 18-11-2026 ==== -->

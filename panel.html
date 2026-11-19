@@ -828,6 +828,16 @@
   .rate-row label{font-size:12.5px;color:var(--text);}
   .rate-row input{width:110px;}
   .rate-row input[type=checkbox]{width:18px;height:18px;flex:none;}
+  /* ===== precios por trabajador ===== */
+  .rt-tit{font-size:12.5px;font-weight:700;color:var(--text);margin:14px 0 2px;}
+  .rt-nota{font-size:12px;color:var(--sub);margin:0 0 8px;}
+  .rt-fila{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .rt-fila select{flex:1 1 130px;min-width:0;}
+  .rt-fila input{flex:0 0 100px;width:100px;}
+  .rt-fila .rt-ver{flex:1 1 150px;}
+  .rt-fila .rt-ver[aria-pressed=true]{border-color:var(--ok,#2e8b57);}
+  .rt-fila .rt-del{flex:0 0 auto;}
+  #rateTrabAdd{margin:2px 0 14px;}
   .rate-row:has(input[type=checkbox]){flex-direction:row !important;align-items:center !important;gap:14px !important;}
   .modal-error{font-size:12px;color:#c0546f;min-height:16px;margin-top:6px;}
 
@@ -2016,8 +2026,10 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <h3>Precios y metrajes</h3>
     <p>Tarifas usadas para calcular los montos. Cerámica usa dos tarifas de referencia; Frague usa una sola.</p>
     <div class="rate-row"><label>Cerámica — tarifa base ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerBase"></div>
-    <div class="rate-row"><label>Cerámica — tarifa Rafael ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerRafael"></div>
-    <div class="rate-row"><label for="rateOcultarRafael">Ocultar ese monto (se ve como la tarifa base, solo en pantalla)</label><input type="checkbox" id="rateOcultarRafael"></div>
+    <div class="rt-tit">Precio distinto por trabajador <i class="tnuevo" data-hasta="2026-11-25">Nuevo</i></div>
+    <p class="rt-nota">Se le paga ese precio, pero con el check el panel lo muestra con la tarifa base (solo en pantalla).</p>
+    <div id="rateTrabLista"></div>
+    <button class="btn" id="rateTrabAdd" type="button"><i class="ic ic-mas ib"></i>Agregar precio a un trabajador</button>
     <div class="rate-row"><label>Cerámica — tarifa referencia ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerAlt"></div>
     <div class="rate-row"><label>Frague — tarifa única ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateFrague"></div>
     <div class="actions">
@@ -2411,7 +2423,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.122';
+const APP_VERSION = '0.73.123';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2742,12 +2754,24 @@ function rate1For(categoria, trabajador){
   if(categoria === 'Frague') return RATES.frague;
   const propia = trabajador && workerStatus[trabajador] && workerStatus[trabajador].tarifaPropia;
   if(propia) return propia;
-  return trabajador === 'Rafael' ? RATES.cerRafael : RATES.cerBase;
+  return tarifaTrab(trabajador) || RATES.cerBase;
+}
+// ===== precio distinto por trabajador (claves planas p_nombre / o_nombre, así las guarda el servidor) =====
+const slugTrab = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 26);
+function tarifaTrab(w){
+  const s = slugTrab(w);
+  if(s && RATES['p_' + s] > 0) return RATES['p_' + s];
+  return w === 'Rafael' ? RATES.cerRafael : 0;
+}
+function ocultaTrab(w){
+  const s = slugTrab(w);
+  if(s && RATES['p_' + s] > 0) return !!RATES['o_' + s];
+  return w === 'Rafael' && !!RATES.ocultarRafael;
 }
 
 function rate1ForDisplay(categoria, trabajador){
-  // con el check de Precios y metrajes, Rafael se ve con la tarifa base (los cálculos siguen con la real)
-  if(RATES.ocultarRafael && categoria !== 'Frague' && trabajador === 'Rafael' && !(workerStatus[trabajador] && workerStatus[trabajador].tarifaPropia)) return RATES.cerBase;
+  // con el check de Precios y metrajes, el trabajador se ve con la tarifa base (los cálculos siguen con la real)
+  if(categoria !== 'Frague' && ocultaTrab(trabajador) && !(workerStatus[trabajador] && workerStatus[trabajador].tarifaPropia)) return RATES.cerBase;
   if(isAdmin) return rate1For(categoria, trabajador);
   if(workerSession && workerSession === trabajador){
     const ws = workerStatus[trabajador] || {};
@@ -5369,10 +5393,50 @@ inputModalCancel.addEventListener('click', closeInputModal);
 inputModalConfirm.addEventListener('click', () => { if(inputConfirmHandler && inputConfirmHandler() === 'mantener') return; closeInputModal(); });
 
 const ratesOverlay = document.getElementById('ratesOverlay');
+// ===== precios por trabajador (ventana Precios y metrajes) =====
+let rateTrabFilas = [];
+function pintarRateTrab(){
+  const usados = rateTrabFilas.map(f => f.w);
+  document.getElementById('rateTrabLista').innerHTML = rateTrabFilas.map((f, i) =>
+    '<div class="rt-fila" data-i="' + i + '"><select class="rt-w" aria-label="Trabajador">' +
+    '<option value="">Elegir trabajador</option>' +
+    ALL_WORKERS.filter(w => w === f.w || !usados.includes(w)).map(w => '<option' + (w === f.w ? ' selected' : '') + ' value="' + esc(w) + '">' + esc(w) + '</option>').join('') + '</select>' +
+    '<input type="text" inputmode="decimal" autocomplete="off" data-dinero class="rt-p" aria-label="Precio por m²" placeholder="$/m²" value="' + esc(f.p) + '">' +
+    '<button type="button" class="btn rt-ver" aria-pressed="' + (f.oc ? 'true' : 'false') + '"><i class="ic ' + (f.oc ? 'ic-ok' : 'ic-circulo') + ' ib"></i>Verse como base</button>' +
+    '<button type="button" class="btn rt-del" aria-label="Quitar" title="Quitar"><i class="ic ic-papelera"></i></button></div>').join('');
+  document.getElementById('rateTrabAdd').disabled = rateTrabFilas.length >= ALL_WORKERS.length;
+}
+document.getElementById('rateTrabAdd').addEventListener('click', () => { rateTrabFilas.push({w: '', p: '', oc: false}); pintarRateTrab(); });
+document.getElementById('rateTrabLista').addEventListener('input', e => {
+  const fila = e.target.closest('.rt-fila'); if(!fila) return;
+  if(e.target.classList.contains('rt-p')) rateTrabFilas[fila.dataset.i].p = e.target.value;
+});
+document.getElementById('rateTrabLista').addEventListener('change', e => {
+  const fila = e.target.closest('.rt-fila'); if(!fila || !e.target.classList.contains('rt-w')) return;
+  rateTrabFilas[fila.dataset.i].w = e.target.value; pintarRateTrab();
+});
+document.getElementById('rateTrabLista').addEventListener('click', e => {
+  const fila = e.target.closest('.rt-fila'); if(!fila) return;
+  const f = rateTrabFilas[fila.dataset.i];
+  if(e.target.closest('.rt-ver')){ f.oc = !f.oc; pintarRateTrab(); }
+  else if(e.target.closest('.rt-del')){ rateTrabFilas.splice(fila.dataset.i, 1); pintarRateTrab(); }
+});
+function guardarRateTrab(){
+  // saca los precios anteriores y vuelve a poner los de la lista
+  Object.keys(RATES).forEach(k => { if(/^[po]_/.test(k)) delete RATES[k]; });
+  RATES.cerRafael = RATES.cerBase; RATES.ocultarRafael = 0;
+  let sinDato = 0;
+  rateTrabFilas.forEach(f => {
+    const v = numDinero(f.p), s = slugTrab(f.w);
+    if(!s || !(v > 0)){ sinDato++; return; }
+    RATES['p_' + s] = v; RATES['o_' + s] = f.oc ? 1 : 0;
+  });
+  if(sinDato) avisoToast('Hubo ' + sinDato + ' fila(s) sin trabajador o sin precio: no se guardaron.', 'alerta');
+}
 document.getElementById('ratesBtn').addEventListener('click', () => {
   document.getElementById('rateCerBase').value = milesTxt(RATES.cerBase);
-  document.getElementById('rateCerRafael').value = milesTxt(RATES.cerRafael);
-  document.getElementById('rateOcultarRafael').checked = !!RATES.ocultarRafael;
+  rateTrabFilas = ALL_WORKERS.filter(w => tarifaTrab(w) > 0).map(w => ({w: w, p: milesTxt(tarifaTrab(w)), oc: ocultaTrab(w)}));
+  pintarRateTrab();
   document.getElementById('rateCerAlt').value = milesTxt(RATES.cerAlt);
   document.getElementById('rateFrague').value = milesTxt(RATES.frague);
   ratesOverlay.classList.add('show');
@@ -5381,8 +5445,7 @@ document.getElementById('ratesCancel').addEventListener('click', () => cerrarOv(
 document.getElementById('ratesGuardar').addEventListener('click', () => guardarMantener(ratesOverlay, 'ratesSave'));
 document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.cerBase = numDinero(document.getElementById('rateCerBase').value) || RATES.cerBase;
-  RATES.cerRafael = numDinero(document.getElementById('rateCerRafael').value) || RATES.cerRafael;
-  RATES.ocultarRafael = document.getElementById('rateOcultarRafael').checked ? 1 : 0;
+  guardarRateTrab();
   RATES.cerAlt = numDinero(document.getElementById('rateCerAlt').value) || RATES.cerAlt;
   RATES.frague = numDinero(document.getElementById('rateFrague').value) || RATES.frague;
   markSettingsDirty();
@@ -9901,4 +9964,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.122 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.123 · 18-11-2026 ==== -->
