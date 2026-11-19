@@ -2039,6 +2039,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <div id="rateTrabLista"></div>
     <button class="btn" id="rateTrabAdd" type="button"><i class="ic ic-mas ib"></i>Agregar precio a un trabajador</button>
     <div class="rate-row"><label>Cerámica — tarifa referencia ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateCerAlt"></div>
+    <div class="rate-row"><label for="rateVerRef">Mostrar el precio de referencia al mostrar precios <i class="tnuevo" data-hasta="2026-11-25">Nuevo</i></label><input type="checkbox" id="rateVerRef"></div>
     <div class="rate-row"><label>Frague — tarifa única ($/m²)</label><input type="text" inputmode="decimal" autocomplete="off" data-dinero id="rateFrague"></div>
     <div class="actions">
       <button class="btn" id="ratesGuardar" type="button">Guardar</button>
@@ -2431,7 +2432,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.124';
+const APP_VERSION = '0.73.125';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4055,6 +4056,8 @@ document.getElementById('allowGuestPricesChk').addEventListener('change', (e) =>
   render();
 });
 
+// ===== precio de referencia: se muestra solo si está el check en Precios y metrajes =====
+const verRef = () => !!RATES.verRef;
 const preciosOcultos = () => document.body.classList.contains('hide-prices');
 function moneyReal(n){ if(n===null||n===undefined) return '—'; const r = Math.round(n); return (r < 0 ? '-' : '') + '$' + Math.abs(r).toLocaleString('es-CL'); }
 function money(n){ return (preciosOcultos() && n !== null && n !== undefined) ? '$ ••••' : moneyReal(n); }
@@ -4128,12 +4131,12 @@ function renderStats(){
   const separadas = preciosOcultos();
   // ===== frague junto al total (solo Admin, en la pestaña Cerámica) =====
   const fr = (isAdmin && esC) ? calcFrague().fra : null;
-  const conFra = (vFra, vCer, rf) => fr ? `<div class="sub2 fra-linea">+ Frague <b>${money(vFra)}</b></div><div class="sub2">Total con frague <b>${money(vCer + vFra)}</b></div>${rf !== undefined ? `<div class="sub2 ganancia">Margen real (− frague): ${money(rf - vCer - vFra)}</div>` : ''}` : '';
+  const conFra = (vFra, vCer, rf) => fr ? `<div class="sub2 fra-linea">+ Frague <b>${money(vFra)}</b></div><div class="sub2">Total con frague <b>${money(vCer + vFra)}</b></div>${rf !== undefined && verRef() ? `<div class="sub2 ganancia">Margen real (− frague): ${money(rf - vCer - vFra)}</div>` : ''}` : '';
   const cards = separadas
     ? defsEst.map(([k, l]) => { const n = r.counts[k]||0, pct = r.counts ? Math.round(n / (Object.values(r.counts).reduce((x, y) => x + y, 0) || 1) * 100) : 0; return `<div class="stat-card st-${k}"><div class="n c-${k}">${n}</div><div class="l">${l}</div>${(k === 'pendiente' || k === 'pagado') ? `<div class="bar"><div style="width:${pct}%; background:var(--${k});"></div></div>` : ''}</div>`; }).join('')
     : `<div class="stat-card stat-combo">${defsEst.map(([k, l]) => `<div class="combo-fila"><div class="n c-${k}">${r.counts[k]||0}</div><div class="l">${l}</div></div>`).join('')}</div>`;
-  const refLinea = rf => esC ? `<div class="sub2">REF ${money(rf)}</div>` : '';
-  const refMargen = (t, rf) => esC ? `<div class="sub2">REF ${money(rf)}</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
+  const refLinea = rf => esC && verRef() ? `<div class="sub2">REF ${money(rf)}</div>` : '';
+  const refMargen = (t, rf) => esC && verRef() ? `<div class="sub2">REF ${money(rf)}</div><div class="sub2 ganancia">Margen: ${money(rf - t)}</div>` : '';
   const terminadoCard = `<div class="stat-card money-card st-entregado"><div class="n c-entregado">${money(r.ter)}</div><div class="l">Terminado</div>${refMargen(r.ter, r.refTer)}${conFra(fr ? fr.ter : 0, r.ter, r.refTer)}</div>`;
   const seccion = (cls, rotulo, v, n, rf, vFra) => `<div class="cat-m ${cls}"><div class="l">${rotulo} <span class="cnt">(${n})</span></div><div class="n c-entregado">${money(v)}</div>${refMargen(v, rf)}${conFra(vFra, v, rf)}</div>`;
   const cierreCard = cierreQuincena ? `<div class="stat-card money-card st-entregado cierre-box">${seccion('', 'Dentro del cierre', r.dentro, r.nDentro, r.refDentro, fr ? fr.dentro : 0)}${seccion('fuera', 'Fuera del cierre', r.nuevo, r.nNuevo, r.refNuevo, fr ? fr.nuevo : 0)}</div>` : '';
@@ -4367,7 +4370,7 @@ function abrirFragueDetalle(){
     ${fila('Pagado', r.cer.pag, r.fra.pag)}
     <tr class="sub"><td>Total del proyecto<small>con m² cargados</small></td><td>${money(r.cer.total)}<small>${ptFm2(r.cer.m2)} m²</small></td><td>${money(r.fra.total)}<small>${ptFm2(r.fra.m2)} m²</small></td></tr></table>`;
   const mCer = r.cer.ref - r.cer.ter;
-  const tabla2 = `<div class="frag-h">Margen real sobre lo terminado</div><table class="frag-tabla">
+  const tabla2 = !verRef() ? '' : `<div class="frag-h">Margen real sobre lo terminado</div><table class="frag-tabla">
     <tr><td>Tarifa de referencia de cerámica</td><td>${money(r.cer.ref)}</td></tr>
     <tr class="sub"><td>− Costo de cerámica</td><td>${money(r.cer.ter)}</td></tr>
     <tr><td>Margen de cerámica</td><td>${money(mCer)}</td></tr>
@@ -4623,7 +4626,7 @@ function priceLinesHtml(cell, st, sinBoton){
     return `<div class="price-block">${editBtn}<div class="meta-line">Sin m² registrados</div></div>`;
   }
   const p1 = m2 * rate1ForDisplay(cell.categoria, st.trabajador);
-  const altHtml = cell.categoria === 'Cerámica'
+  const altHtml = cell.categoria === 'Cerámica' && verRef()
     ? `<span class="price-money"><span class="sep"> · </span><span class="alt">${money(m2 * RATES.cerAlt)}</span></span>` : '';
   return `<div class="price-block">${editBtn}<div class="price-line" data-priceof="${cell.id}"><span class="pl-m2">${m2} m²</span><span class="price-money"><span class="sep"> · </span>${money(p1)}</span>${altHtml}</div></div>`;
 }
@@ -5446,6 +5449,7 @@ document.getElementById('ratesBtn').addEventListener('click', () => {
   rateTrabFilas = ALL_WORKERS.filter(w => tarifaTrab(w) > 0).map(w => ({w: w, p: milesTxt(tarifaTrab(w)), oc: ocultaTrab(w)}));
   pintarRateTrab();
   document.getElementById('rateCerAlt').value = milesTxt(RATES.cerAlt);
+  document.getElementById('rateVerRef').checked = verRef();
   document.getElementById('rateFrague').value = milesTxt(RATES.frague);
   ratesOverlay.classList.add('show');
 });
@@ -5455,6 +5459,7 @@ document.getElementById('ratesSave').addEventListener('click', () => {
   RATES.cerBase = numDinero(document.getElementById('rateCerBase').value) || RATES.cerBase;
   guardarRateTrab();
   RATES.cerAlt = numDinero(document.getElementById('rateCerAlt').value) || RATES.cerAlt;
+  RATES.verRef = document.getElementById('rateVerRef').checked ? 1 : 0;
   RATES.frague = numDinero(document.getElementById('rateFrague').value) || RATES.frague;
   markSettingsDirty();
   scheduleSave(); updateRateFootnote(); render();
@@ -9972,4 +9977,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.124 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.125 · 18-11-2026 ==== -->
