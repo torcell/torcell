@@ -1542,14 +1542,17 @@
 .as-tabs button:first-child{margin-left:0;}
 .as-tabs button.on{background:linear-gradient(90deg,var(--accent),var(--accent2));border-color:var(--accent);color:#fff;}
 .as-rango{font-weight:700;flex:1;text-align:center;min-width:120px;}
-.as-sem{width:100%;border-collapse:collapse;table-layout:fixed;}
+.as-sem{--cs:clamp(40px,10.8vw,58px);width:100%;border-collapse:collapse;table-layout:fixed;}
+.as-sem col.cd{width:var(--cs);}
 .as-sem th,.as-sem td{border:1px solid var(--border);padding:0;text-align:center;}
 .as-sem thead th{padding:5px 0;background:var(--panel-soft);cursor:pointer;font-weight:700;line-height:1.15;}
 .as-sem thead th small{display:block;font-weight:500;color:var(--sub);font-size:11px;}
 .as-sem thead th.hoy{box-shadow:inset 0 -3px 0 var(--accent);}
-.as-sem thead th.nom0{width:30%;cursor:default;}
+.as-sem thead th.nom0{cursor:default;}
 .as-sem tbody th.nom{text-align:left;padding:6px 8px;font-weight:600;background:var(--panel-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.as-c{display:flex;align-items:center;justify-content:center;width:100%;height:40px;border:0;background:transparent;color:#fff;cursor:pointer;border-radius:0;font:inherit;font-size:16px;transition:background .12s;}
+.as-sem td{padding:3px;}
+@media(max-width:560px){.as-sem tbody th.nom{font-size:12.5px;padding:6px 5px;}}
+.as-c{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;height:auto;border:0;background:transparent;color:#fff;cursor:pointer;border-radius:0;font:inherit;font-size:16px;transition:background .12s;}
 .as-c:not(.on-P):not(.on-S):not(.on-F):hover:not(:disabled){background:rgba(127,127,127,.18);}
 .as-c:disabled{cursor:default;background:repeating-linear-gradient(135deg,rgba(127,127,127,.12) 0 6px,transparent 6px 12px);}
 .as-c.on-P{background:var(--ok,#43a047);}
@@ -2457,7 +2460,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.126';
+const APP_VERSION = '0.73.127';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -7520,7 +7523,7 @@ async function abrirAsistencia(){
     let h = tabsAs() + '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><span class="as-rango">' + fechaDMY(dias[0]) + ' al ' + fechaDMY(dias[5]) + '</span><button class="btn" type="button" id="asSig"' + (dias[5] >= hoy ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Esta semana</button></div>';
     if(!filas.length) h += '<div class="as-aviso">No hay trabajadores activos.</div>';
     else {
-      h += '<table class="as-sem"><thead><tr><th class="nom0"></th>' + dias.map(f => '<th data-f="' + f + '" class="' + (f === hoy ? 'hoy' : '') + '" title="Ver el día"><b>' + Number(f.slice(8)) + '</b><small>' + DC[dow(f)] + '</small></th>').join('') + '</tr></thead><tbody>'
+      h += '<table class="as-sem"><colgroup><col>' + dias.map(() => '<col class="cd">').join('') + '</colgroup><thead><tr><th class="nom0"></th>' + dias.map(f => '<th data-f="' + f + '" class="' + (f === hoy ? 'hoy' : '') + '" title="Ver el día"><b>' + Number(f.slice(8)) + '</b><small>' + DC[dow(f)] + '</small></th>').join('') + '</tr></thead><tbody>'
         + filas.map((n, i) => '<tr><th class="nom">' + esc(nomVis(n)) + '</th>' + dias.map(f => {
             const x = est(f, n), dis = f > hoy || !vigente(n, f);
             return '<td><button type="button" class="as-c ' + (x.e ? 'on-' + x.e : '') + '" data-f="' + f + '" data-i="' + i + '"' + (dis ? ' disabled' : '') + ' aria-label="' + esc(n) + ' ' + f + '">' + ico(x.e) + '</button></td>';
@@ -10069,4 +10072,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.126 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.127 · 18-11-2026 ==== -->
