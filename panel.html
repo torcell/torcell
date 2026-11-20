@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.152';
+const APP_VERSION = '0.73.154';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2816,16 +2816,17 @@ function rate1For(categoria, trabajador){
 // ===== precio distinto por trabajador (claves planas p_nombre / o_nombre, así las guarda el servidor) =====
 const slugTrab = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 26);
 function tarifaTrab(w){
-  const s = slugTrab(w);
-  if(s && RATES['p_' + s] > 0) return RATES['p_' + s];
+  const id = idTrab(w), s = slugTrab(w);
+  if(id && RATES['p_' + id] > 0) return RATES['p_' + id];
+  if(s && RATES['p_' + s] > 0) return RATES['p_' + s];   // formato anterior (por nombre), se pasa a ID al abrir el panel
   return w === 'Rafael' ? RATES.cerRafael : 0;
 }
 function ocultaTrab(w){
-  const s = slugTrab(w);
+  const id = idTrab(w), s = slugTrab(w);
+  if(id && RATES['p_' + id] > 0) return !!RATES['o_' + id];
   if(s && RATES['p_' + s] > 0) return !!RATES['o_' + s];
   return w === 'Rafael' && !!RATES.ocultarRafael;
 }
-
 function rate1ForDisplay(categoria, trabajador){
   // con el check de Precios y metrajes, el trabajador se ve con la tarifa base (los cálculos siguen con la real)
   if(categoria !== 'Frague' && ocultaTrab(trabajador) && !(workerStatus[trabajador] && workerStatus[trabajador].tarifaPropia)) return RATES.cerBase;
@@ -3007,7 +3008,12 @@ function rebuildWorkerList(){
 }
 // ===== ID fijo por trabajador: el nombre es solo lo que se ve =====
 const idTrab = n => (workerStatus[n] || {}).id || '';
-const nombreDeId = id => !id ? '' : (ALL_WORKERS.find(w => (workerStatus[w] || {}).id === id) || '');
+const nombreDeId = id => !id ? '' : (Object.keys(workerStatus).find(w => (workerStatus[w] || {}).id === id) || '');
+// ===== referencias a trabajadores: se guardan con el ID y en pantalla se usa el nombre actual =====
+const refsAId = lista => (lista || []).map(w => idTrab(w) || w);
+const refsANombre = lista => (lista || []).map(x => nombreDeId(x) || x).filter((w, i, v) => v.indexOf(w) === i);
+const histAId = h => (h || []).map(p => { if(!p || !p.porTrabajador) return p; const o = {}; Object.keys(p.porTrabajador).forEach(k => { const c = idTrab(k) || k; o[c] = (o[c] || 0) + p.porTrabajador[k]; }); return Object.assign({}, p, {porTrabajador: o}); });
+const histANombre = h => (h || []).map(p => { if(!p || !p.porTrabajador) return p; const o = {}; Object.keys(p.porTrabajador).forEach(k => { const c = nombreDeId(k) || k; o[c] = (o[c] || 0) + p.porTrabajador[k]; }); return Object.assign({}, p, {porTrabajador: o}); });
 // el ID sale del nombre con que se creó, así es el mismo en cada sesión aunque todavía no se haya guardado
 function nuevoIdTrab(nombre){
   let h = 2166136261;
@@ -3020,7 +3026,12 @@ function nuevoIdTrab(nombre){
 function nombreActual(n){
   if(!n || ALL_WORKERS.indexOf(n) !== -1) return n;
   const m = ALL_WORKERS.filter(x => x.indexOf(n + ' ') === 0);
-  return m.length === 1 ? m[0] : n;
+  if(m.length === 1) return m[0];
+  // nombre abreviado ("Alex V." → "Alex Villalobos"): mismo primer nombre y el resto es el comienzo de las siguientes palabras
+  const nt = slugTrab(n).split('_').filter(Boolean);
+  if(nt.length < 2) return n;
+  const m2 = ALL_WORKERS.filter(x => { const xt = slugTrab(x).split('_').filter(Boolean); return xt[0] === nt[0] && nt.slice(1).every((t, i) => (xt[i + 1] || '').indexOf(t) === 0); });
+  return m2.length === 1 ? m2[0] : n;
 }
 function unificarNombres(){
   if(!isAdmin) return;
@@ -3036,11 +3047,32 @@ function unificarNombres(){
     if(!a.wid && idTrab(a.w)){ a.wid = idTrab(a.w); hubo = true; }
     const nm = nombreDeId(a.wid); if(nm && nm !== a.w){ a.w = nm; hubo = true; }
   });
-  pagosRetenidos = pagosRetenidos.map(w => { const n = nombreActual(w); if(n !== w) hubo = true; return n; }).filter((w, i, v) => v.indexOf(w) === i);
+  pagosRetenidos = pagosRetenidos.map(w => { const n = nombreDeId(w) || nombreActual(w); if(n !== w) hubo = true; return n; }).filter((w, i, v) => v.indexOf(w) === i);
   (historialM2 || []).forEach(p => {
     const pt = p && p.porTrabajador; if(!pt) return;
-    Object.keys(pt).forEach(k => { const n = nombreActual(k); if(n !== k){ pt[n] = (pt[n] || 0) + pt[k]; delete pt[k]; hubo = true; } });
+    Object.keys(pt).forEach(k => { const n = nombreDeId(k) || nombreActual(k); if(n !== k){ pt[n] = (pt[n] || 0) + pt[k]; delete pt[k]; hubo = true; } });
   });
+  if(unificarTarifas()) hubo = true;
+  if(hubo && typeof markSettingsDirty === 'function') markSettingsDirty(undefined, true);   // se guarda con el próximo guardado, no cuenta como pendiente
+}
+// ===== las tarifas por trabajador (p_ / o_) se guardan con el ID del trabajador; las que quedaron con nombre pasan al ID =====
+function unificarTarifas(){
+  let cambio = false;
+  const toks = n => slugTrab(n).split('_').filter(Boolean);
+  const pasar = (clave, w) => {
+    const id = idTrab(w); if(!id) return;
+    if(!(RATES['p_' + id] > 0)){ RATES['p_' + id] = RATES['p_' + clave]; RATES['o_' + id] = RATES['o_' + clave] ? 1 : 0; }
+    delete RATES['p_' + clave]; delete RATES['o_' + clave]; cambio = true;
+  };
+  Object.keys(RATES).filter(k => /^p_[a-z0-9_]+$/.test(k)).forEach(k => {
+    const clave = k.slice(2);
+    const exacto = ALL_WORKERS.find(w => slugTrab(w) === clave);
+    if(exacto){ pasar(clave, exacto); return; }
+    const kt = clave.split('_').filter(Boolean);
+    const m = ALL_WORKERS.filter(w => { const wt = toks(w); return wt[0] === kt[0] && kt.slice(1).every((t, i) => (wt[i + 1] || '').indexOf(t) === 0); });
+    if(m.length === 1) pasar(clave, m[0]);
+  });
+  return cambio;
 }
 
 let avanceRemoto = 0, remotoAvance = {};
@@ -3079,11 +3111,11 @@ async function mergeRemoteBeforeSave(){
     if(remote.obsPorArea && typeof remote.obsPorArea === 'object'){
       Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(remote.obsPorArea[a])) OBS_POR_AREA[a] = remote.obsPorArea[a].filter(x => typeof x === 'string'); });
     }
-    if(isAdmin && Array.isArray(remote.pagosRetenidos) && !seccionesSucias.has('pagosRetenidos') && !seccionesTodas) pagosRetenidos = remote.pagosRetenidos.filter(x => typeof x === 'string');
+    if(isAdmin && Array.isArray(remote.pagosRetenidos) && !seccionesSucias.has('pagosRetenidos') && !seccionesTodas) pagosRetenidos = refsANombre(remote.pagosRetenidos.filter(x => typeof x === 'string'));
     if(isAdmin && Array.isArray(remote.ajustesPago) && !seccionesSucias.has('ajustesPago') && !seccionesTodas) ajustesPago = remote.ajustesPago.filter(a => a && typeof a.w === 'string');
     if(remote.cierreQuincena !== undefined) cierreQuincena = remote.cierreQuincena;
     if(remote.cierreAnterior !== undefined) cierreAnterior = remote.cierreAnterior;
-    if(Array.isArray(remote.historialM2)) historialM2 = remote.historialM2;
+    if(Array.isArray(remote.historialM2)) historialM2 = histANombre(remote.historialM2);
     if(isAdmin && remote.ceramicas && typeof remote.ceramicas === 'object') ceramicas = remote.ceramicas;
     if(isAdmin && remote.materiales) mezclarMateriales(remote.materiales);
     if(Array.isArray(remote.paymentHistory) && (remote.paymentHistory.length || !paymentHistory.length)) paymentHistory = remote.paymentHistory;
@@ -3429,7 +3461,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
+        config: { pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -3451,7 +3483,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -3504,7 +3536,7 @@ function applyLoadedPayload(parsed){
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
   if(parsed.cierreAnterior !== undefined) cierreAnterior = parsed.cierreAnterior;
-  if(Array.isArray(parsed.historialM2)) historialM2 = parsed.historialM2;
+  if(Array.isArray(parsed.historialM2)) historialM2 = histANombre(parsed.historialM2);
   if(isAdmin && parsed.ceramicas && typeof parsed.ceramicas === 'object') ceramicas = parsed.ceramicas;
   if(isAdmin && parsed.materiales) mezclarMateriales(parsed.materiales);
   if((isAdmin || esInvitado()) && parsed.recordatorios && parsed.recordatorios.hechos){
@@ -3512,7 +3544,7 @@ function applyLoadedPayload(parsed){
     if(esInvitado()) alertasInvitadoListas = true;
   }
   if((isAdmin || esInvitado()) && Array.isArray(parsed.objetivos)) OBJETIVOS = parsed.objetivos.filter(o => o && typeof o.id === 'string');
-  if(isAdmin && Array.isArray(parsed.pagosRetenidos)) pagosRetenidos = parsed.pagosRetenidos.filter(x => typeof x === 'string');
+  if(isAdmin && Array.isArray(parsed.pagosRetenidos)) pagosRetenidos = refsANombre(parsed.pagosRetenidos.filter(x => typeof x === 'string'));
   if(isAdmin && Array.isArray(parsed.ajustesPago)) ajustesPago = parsed.ajustesPago.filter(a => a && typeof a.w === 'string');
   cfgCargada = true;
   if(parsed.obsPorArea && typeof parsed.obsPorArea === 'object'){
@@ -5545,7 +5577,7 @@ function guardarRateTrab(){
   RATES.cerRafael = RATES.cerBase; RATES.ocultarRafael = 0;
   let sinDato = 0;
   rateTrabFilas.forEach(f => {
-    const v = numDinero(f.p), s = slugTrab(f.w);
+    const v = numDinero(f.p), s = idTrab(f.w) || slugTrab(f.w);
     if(!s || !(v > 0)){ sinDato++; return; }
     RATES['p_' + s] = v; RATES['o_' + s] = f.oc ? 1 : 0;
   });
@@ -10291,4 +10323,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.152 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.154 · 20-11-2026 ==== -->
