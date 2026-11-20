@@ -1522,6 +1522,7 @@
 .as-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .as-bar input[type=date]{font:inherit;padding:5px 8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:0;}
 .as-dia{font-size:13px;font-weight:700;}
+.as-carga{min-height:16px;line-height:16px;font-size:12px;color:var(--sub);margin:-4px 0 6px;}
 .as-aviso{font-size:12px;color:var(--sub);border:1px dashed var(--border);padding:7px 10px;margin-bottom:8px;}
 .as-fila{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--border);}
 .as-seg{display:flex;}
@@ -2464,7 +2465,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.129';
+const APP_VERSION = '0.73.131';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -6805,7 +6806,7 @@ function renderRendimiento2(raiz, datos, esc){
         r.reg++;
         if(x.e === 'F'){ r.F++; r.disp += 1; }
         else if(x.e === 'P'){ r.trab += 1; r.disp += 1; }
-        else if(x.e === 'S'){ r.trab += x.fr; r.disp += x.m === 'sin cancha' ? x.fr : 1; }
+        else if(x.e === 'S'){ r.trab += x.fr; r.disp += asMotObra(x.m) ? x.fr : 1; }
       });
       if(r.reg) r.dias = r.trab;
       else { const u = {}; (t.dias || []).forEach(x => { if(x.cat === cat && x.d >= da && x.d <= db && habil(x.d)) u[x.d] = 1; }); r.dias = Object.keys(u).length; }
@@ -6973,7 +6974,7 @@ function renderRendimiento(raiz, datos, esc){
       r.reg++; if(rdFecha(x.d).getUTCDay() === 6) r.sab++;
       if(x.e === 'F'){ r.F++; r.disp += 1; }
       else if(x.e === 'P'){ r.P++; r.trab += 1; r.disp += 1; }
-      else if(x.e === 'S'){ r.S++; r.trab += x.fr; r.disp += x.m === 'sin cancha' ? x.fr : 1; (x.m === 'sin cancha' ? r.sc : r.otros).push(x); }
+      else if(x.e === 'S'){ r.S++; r.trab += x.fr; r.disp += asMotObra(x.m) ? x.fr : 1; (asMotObra(x.m) ? r.sc : r.otros).push(x); }
     });
     r.conAsist = r.reg > 0;
     r.dias = r.conAsist ? r.trab : Object.keys(r.act).length;
@@ -6986,7 +6987,7 @@ function renderRendimiento(raiz, datos, esc){
     const p = [];
     if(!r.conAsist) return 'asistencia sin registrar';
     p.push(r.F ? 'Tuvo ' + r.F + (r.F === 1 ? ' falta' : ' faltas') : 'Sin faltas');
-    if(r.sc.length) p.push(r.sc.length > 2 ? 'retirado / sin cancha ' + r.sc.length + ' días' : 'retirado / sin cancha ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
+    if(r.sc.length) p.push(r.sc.length > 2 ? 'retirado por la obra ' + r.sc.length + ' días' : 'retirado por la obra ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + (asMotTxt(x.m) ? ', ' + asMotTxt(x.m) : '') + ')').join(', '));
     if(r.otros.length) p.push(r.otros.length > 2 ? 'salió antes ' + r.otros.length + ' días' : 'salió antes ' + r.otros.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
     return p.join(' · ');
   }
@@ -7386,6 +7387,13 @@ const ORD_USU = (a, b) => { const o = {1: 0, 2: 1, 4: 2, 6: 3, 5: 4, 3: 5}; retu
 // Cada marca se guarda sola, fila por fila, en una cola. Cambiar de día no espera a la base de datos.
 const ASIST_DEMO = {};
 const ASIST_CACHE = {};   // fecha -> {estado, lista}
+const ASIST_OK = {};      // fecha -> true cuando ya se trajo de la base de datos
+// ===== motivos de salida (el de la obra no resta al trabajador; 'otro' sí) =====
+const AS_MOTIVOS = [['sin cancha', 'No hay cancha'], ['no hay agua', 'No hay agua'], ['no hay luz', 'No hay luz'], ['sin materiales', 'Sin materiales'], ['complicaciones', 'Otras complicaciones'], ['otro', 'Otro (del trabajador)']];
+const asMotBase = m => String(m || '').split('|')[0];
+const asMotDet = m => String(m || '').split('|').slice(1).join('|');
+const asMotObra = m => { const b = asMotBase(m); return !!b && b !== 'otro'; };
+const asMotTxt = m => { const b = asMotBase(m), t = (AS_MOTIVOS.find(x => x[0] === b) || [])[1] || '', d = asMotDet(m); return t.toLowerCase() + (d ? ': ' + d : ''); };
 const asCola = {pend: {}, corriendo: false, fallos: 0, parada: false};
 const ASIST_BUF = {};     // fecha -> {trabajador: item} marcas en espera, aún sin guardar
 function asNBuf(){ let n = 0; Object.keys(ASIST_BUF).forEach(f => { n += Object.keys(ASIST_BUF[f]).length; }); return n; }
@@ -7394,7 +7402,7 @@ function asNPend(){ return Object.keys(asCola.pend).length; }
 function asEncolar(fecha, it){
   if(!DB_URL){
     const reg = ASIST_DEMO[fecha] = ASIST_DEMO[fecha] || {};
-    if(it.e === 'N') delete reg[it.trabajador]; else reg[it.trabajador] = {e: it.e, m: it.m, s: it.s === 'medio dia' ? 'medio día' : it.s};
+    if(it.e === 'N') delete reg[it.trabajador]; else reg[it.trabajador] = {e: it.e, m: it.m + (it.d ? '|' + it.d : ''), s: it.s === 'medio dia' ? 'medio día' : it.s};
     if(asUI) asUI();
     return;
   }
@@ -7436,7 +7444,7 @@ async function abrirAsistencia(){
   const demo = !DB_URL;
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
-  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-calendario"></i> Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;height:min(92vh,760px);max-height:min(92vh,760px);overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-calendario"></i> Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
   ov.className = 'ovDin';
   document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#asCuerpo');
@@ -7452,7 +7460,7 @@ async function abrirAsistencia(){
   function aEstado(r, f){
     f = f || r.fecha;
     const est = {}, lis = (r.trabajadores || []).concat(customWorkers.filter(n => (workerStatus[n] || {}).estado === 'activo')).filter((n, i, v) => v.indexOf(n) === i && vigente(n, f) && !esPropio(n));
-    Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; est[n] = {e: x.e, m: x.m || '', s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lis.indexOf(n) === -1) lis.push(n); });
+    Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; est[n] = {e: x.e, m: asMotBase(x.m), d: asMotDet(x.m), s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lis.indexOf(n) === -1) lis.push(n); });
     return {estado: est, lista: lis};
   }
   // Trae un día sin mostrar nada de "cargando". Las filas con cambios sin guardar no se pisan.
@@ -7461,6 +7469,7 @@ async function abrirAsistencia(){
     if(demo) r = {ok: true, registros: JSON.parse(JSON.stringify(ASIST_DEMO[f] || {})), trabajadores: activeWorkers().length ? activeWorkers() : ALL_WORKERS.slice(0, 8)};
     else { try{ r = await llamarDb('asistenciaDia', {fecha: f}); }catch(err){ r = null; } }
     if(!r || !r.ok) return false;
+    ASIST_OK[f] = true;
     if(r.ultimos) Object.assign(ULT_DIA_TRAB, r.ultimos);
     const nuevo = aEstado(r, f), ant = ASIST_CACHE[f];
     Object.keys(ASIST_BUF[f] || {}).forEach(n => { if(ant && ant.estado[n]) nuevo.estado[n] = ant.estado[n]; else delete nuevo.estado[n]; if(nuevo.lista.indexOf(n) === -1) nuevo.lista.push(n); });
@@ -7470,7 +7479,32 @@ async function abrirAsistencia(){
     if(nuevo.lista.length) listaBase = nuevo.lista;
     return cambio;
   }
-  function precargar(){ [sumar(fecha, -1), sumar(fecha, -2), sumar(fecha, 1)].forEach(f => { if(f <= rdHoy() && !ASIST_CACHE[f]) traer(f); }); }
+  // ===== carga de días y semanas: lo de atrás ya se va trayendo para que al retroceder esté listo =====
+  const enCurso = {};
+  let nCarga = 0;
+  function actCarga(){
+    const el = cuerpo.querySelector('#asCarga'); if(!el) return;
+    el.textContent = nCarga > 0 ? (vista === 'sem' ? 'Cargando semanas desde la base de datos…' : 'Cargando días desde la base de datos…') : '';
+  }
+  function traerU(f){
+    if(enCurso[f]) return enCurso[f];
+    const nuevo = !ASIST_OK[f];
+    if(nuevo){ nCarga++; actCarga(); }
+    const p = traer(f).finally(() => { delete enCurso[f]; if(nuevo){ nCarga--; actCarga(); } });
+    enCurso[f] = p; return p;
+  }
+  let genCarga = 0;
+  async function cargarLote(fechas){
+    const mi = ++genCarga, cola = fechas.filter((f, i) => fechas.indexOf(f) === i && f <= rdHoy() && dow(f) !== 0 && !ASIST_OK[f] && !enCurso[f]);
+    const trabajador = async () => { while(cola.length && !cerrando && mi === genCarga){ await traerU(cola.shift()); } };
+    await Promise.all([trabajador(), trabajador(), trabajador()]);
+  }
+  function precargar(){ cargarLote([sumar(fecha, 1), sumar(fecha, -1), sumar(fecha, -2), sumar(fecha, -3), sumar(fecha, -4), sumar(fecha, -5)]); }
+  function precargarSem(){
+    const l = rdLunes(fecha), f = [];
+    [-1, -2, 1].forEach(k => { for(let i = 0; i < 6; i++) f.push(sumar(l, k * 7 + i)); });
+    cargarLote(f);
+  }
   async function ir(f){
     if(f > rdHoy() || cerrando) return;
     fecha = f;
@@ -7478,7 +7512,7 @@ async function abrirAsistencia(){
     if(c){ estado = c.estado; lista = c.lista; }
     else { estado = {}; lista = listaBase.filter(n => vigente(n, f)); ASIST_CACHE[f] = {estado, lista}; }
     pintar();
-    const cambio = await traer(f);
+    const cambio = await traerU(f);
     if(fecha !== f || cerrando) return;
     const n = ASIST_CACHE[f]; estado = n.estado; lista = n.lista;
     if(cambio) pintar(); else avisarGuardado();
@@ -7508,15 +7542,16 @@ async function abrirAsistencia(){
       cerrando = true; cerrar();
     };
   }
-  // ===== vista semanal: lunes a sábado, un toque cambia vacío → Presente → Sin cancha → vacío =====
+  // ===== vista semanal: lunes a sábado, un toque cambia vacío → Presente → Medio día → vacío =====
   const diasSem = () => { const l = rdLunes(fecha); return [0, 1, 2, 3, 4, 5].map(i => sumar(l, i)); };
   async function irSem(){
     const dias = diasSem(), clave = dias.join();
     dias.forEach(f => { if(f <= rdHoy() && !ASIST_CACHE[f]) ASIST_CACHE[f] = {estado: {}, lista: listaBase.filter(n => vigente(n, f))}; });
     pintarSem();
-    const cambios = await Promise.all(dias.filter(f => f <= rdHoy()).map(traer));
+    const cambios = await Promise.all(dias.filter(f => f <= rdHoy()).map(traerU));
     if(vista !== 'sem' || cerrando || diasSem().join() !== clave) return;
     if(cambios.some(Boolean)) pintarSem(); else avisarGuardado();
+    precargarSem();
   }
   function pintarSem(){
     const dias = diasSem(), hoy = rdHoy(), DC = ['D','L','M','M','J','V','S'];
@@ -7525,7 +7560,7 @@ async function abrirAsistencia(){
     filas.sort((a, b) => a.localeCompare(b, 'es'));
     const est = (f, n) => (ASIST_CACHE[f] && ASIST_CACHE[f].estado[n]) || {e: ''};
     const ico = e => e === 'P' ? '<i class="ic ic-ok"></i>' : e === 'S' ? '<i class="ic ic-prohibido"></i>' : e === 'F' ? '<i class="ic ic-no"></i>' : '';
-    let h = tabsAs() + '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><span class="as-rango">' + fechaDMY(dias[0]) + ' al ' + fechaDMY(dias[5]) + '</span><button class="btn" type="button" id="asSig"' + (dias[5] >= hoy ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Esta semana</button></div>';
+    let h = tabsAs() + '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><span class="as-rango">' + fechaDMY(dias[0]) + ' al ' + fechaDMY(dias[5]) + '</span><button class="btn" type="button" id="asSig"' + (dias[5] >= hoy ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Esta semana</button></div><div class="as-carga" id="asCarga"></div>';
     if(!filas.length) h += '<div class="as-aviso">No hay trabajadores activos.</div>';
     else {
       h += '<table class="as-sem"><colgroup><col>' + dias.map(() => '<col class="cd">').join('') + '</colgroup><thead><tr><th class="nom0"></th>' + dias.map(f => '<th data-f="' + f + '" class="' + (f === hoy ? 'hoy' : '') + '" title="Ver el día"><b>' + Number(f.slice(8)) + '</b><small>' + DC[dow(f)] + '</small></th>').join('') + '</tr></thead><tbody>'
@@ -7533,10 +7568,10 @@ async function abrirAsistencia(){
             const x = est(f, n), fut = f > hoy || !vigente(n, f), blq = !fut && f !== hoy && !otrosDias;
             return '<td><button type="button" class="as-c ' + (x.e ? 'on-' + x.e : '') + (fut ? ' fut' : '') + (blq ? ' blq' : '') + '" data-f="' + f + '" data-i="' + i + '"' + (fut || blq ? ' disabled' : '') + ' aria-label="' + esc(n) + ' ' + f + '">' + ico(x.e) + '</button></td>';
           }).join('') + '</tr>').join('')
-        + '</tbody><tfoot><tr><th>Presentes</th>' + dias.map(f => '<td data-cp="' + f + '"></td>').join('') + '</tr><tr><th>Sin cancha</th>' + dias.map(f => '<td data-cs="' + f + '"></td>').join('') + '</tr></tfoot></table>'
+        + '</tbody><tfoot><tr><th>Presentes</th>' + dias.map(f => '<td data-cp="' + f + '"></td>').join('') + '</tr><tr><th>Medio día</th>' + dias.map(f => '<td data-cs="' + f + '"></td>').join('') + '</tr></tfoot></table>'
         + '<label class="as-hab"><input type="checkbox" id="asHab"' + (otrosDias ? ' checked' : '') + '>Habilitar marcar otros días</label>'
-        + '<div class="as-ley"><span><i class="sw p"><i class="ic ic-ok"></i></i>Presente</span><span><i class="sw s"><i class="ic ic-prohibido"></i></i>Sin cancha</span></div>'
-        + '<p class="as-nota">Solo se marca el día de hoy; para marcar otros días activa el check. Toca una casilla para cambiar: vacío → Presente → Sin cancha → vacío. Toca el número del día para ver ese día (motivo y hora de salida). Sábado: marca solo a quienes fueron.</p>';
+        + '<div class="as-ley"><span><i class="sw p"><i class="ic ic-ok"></i></i>Presente</span><span><i class="sw s"><i class="ic ic-prohibido"></i></i>Medio día</span></div>'
+        + '<p class="as-nota">Solo se marca el día de hoy; para marcar otros días activa el check. Toca una casilla para cambiar: vacío → Presente → Medio día → vacío. Toca el número del día para ver ese día (motivo y hora de salida). Sábado: marca solo a quienes fueron.</p>';
     }
     h += pieHtml(false);
     cuerpo.innerHTML = h;
@@ -7569,16 +7604,16 @@ async function abrirAsistencia(){
   function pintar(){
     if(vista === 'sem') return pintarSem();
     const d = dow(fecha), sab = d === 6;
-    let h = tabsAs() + '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><input type="date" id="asFecha" value="' + fecha + '" max="' + rdHoy() + '"><button class="btn" type="button" id="asSig"' + (fecha >= rdHoy() ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Hoy</button><span class="as-dia">' + DIAS[d] + '</span></div>';
+    let h = tabsAs() + '<div class="as-bar"><button class="btn" type="button" id="asAnt">◀</button><input type="date" id="asFecha" value="' + fecha + '" max="' + rdHoy() + '"><button class="btn" type="button" id="asSig"' + (fecha >= rdHoy() ? ' disabled' : '') + '>▶</button><button class="btn" type="button" id="asHoy">Hoy</button><span class="as-dia">' + DIAS[d] + '</span></div><div class="as-carga" id="asCarga"></div>';
     if(d === 0) h += '<div class="as-aviso">Los domingos no se registra asistencia.</div>';
     else {
       if(sab) h += '<div class="as-aviso">Sábado: marca solo a quienes fueron. Quien no se marca simplemente no fue (no cuenta como falta).</div>';
       h += lista.length ? lista.map((n, i) => {
         const x = estado[n] || {e: ''};
-        let f = '<div class="as-fila"><b>' + esc(n) + '</b><div class="as-seg" data-i="' + i + '"><button type="button" data-e="P" class="' + (x.e === 'P' ? 'on-P' : '') + '">Presente</button>' + (sab ? '' : '<button type="button" data-e="F" class="' + (x.e === 'F' ? 'on-F' : '') + '">Falta</button>') + '<button type="button" data-e="S" class="' + (x.e === 'S' ? 'on-S' : '') + '">Retirado / sin cancha</button></div>';
+        let f = '<div class="as-fila"><b>' + esc(n) + '</b><div class="as-seg" data-i="' + i + '"><button type="button" data-e="P" class="' + (x.e === 'P' ? 'on-P' : '') + '">Presente</button>' + (sab ? '' : '<button type="button" data-e="F" class="' + (x.e === 'F' ? 'on-F' : '') + '">Falta</button>') + '<button type="button" data-e="S" class="' + (x.e === 'S' ? 'on-S' : '') + '">Retirado / medio día</button></div>';
         if(x.e === 'S'){
           const hora = /^\d\d:\d\d$/.test(x.s) ? x.s : '';
-          f += '<div class="as-sub" data-i="' + i + '"><label>Motivo <select data-k="m"><option value="sin cancha"' + (x.m !== 'otro' ? ' selected' : '') + '>No hay cancha</option><option value="otro"' + (x.m === 'otro' ? ' selected' : '') + '>Otro</option></select></label><label>Salida <select data-k="t"><option value="medio dia"' + (x.s !== 'hora' && !hora ? ' selected' : '') + '>Medio día</option><option value="hora"' + (hora || x.s === 'hora' ? ' selected' : '') + '>A una hora</option></select></label>' + ((hora || x.s === 'hora') ? '<label>Hora <input type="time" data-k="h" value="' + (hora || '15:00') + '"></label>' : '') + '</div>';
+          f += '<div class="as-sub" data-i="' + i + '"><label>Motivo <select data-k="m">' + AS_MOTIVOS.map(o => '<option value="' + o[0] + '"' + (asMotBase(x.m || 'sin cancha') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></label><label>Salida <select data-k="t"><option value="medio dia"' + (x.s !== 'hora' && !hora ? ' selected' : '') + '>Medio día</option><option value="hora"' + (hora || x.s === 'hora' ? ' selected' : '') + '>A una hora</option></select></label>' + ((hora || x.s === 'hora') ? '<label>Hora <input type="time" data-k="h" value="' + (hora || '15:00') + '"></label>' : '') + ((x.m === 'complicaciones' || x.m === 'otro') ? '<label class="as-det">¿Qué pasó? <input type="text" data-k="d" maxlength="120" autocomplete="off" placeholder="Escribe qué pasó" value="' + esc(x.d || '') + '"></label>' : '') + '</div>';
         }
         return f + '</div>';
       }).join('') : '<div class="as-aviso">No hay trabajadores activos.</div>';
@@ -7590,7 +7625,7 @@ async function abrirAsistencia(){
     cuerpo.querySelector('#asSig').onclick = () => ir(sumar(fecha, 1));
     cuerpo.querySelector('#asHoy').onclick = () => ir(rdHoy());
     cuerpo.querySelector('#asFecha').onchange = e => { if(e.target.value) ir(e.target.value); };
-    const guardarFila = n => { const x = estado[n] || {e: ''}; (ASIST_BUF[fecha] = ASIST_BUF[fecha] || {})[n] = {trabajador: n, e: x.e || 'N', m: x.m || '', s: x.s || ''}; avisarGuardado(); };
+    const guardarFila = n => { const x = estado[n] || {e: ''}; (ASIST_BUF[fecha] = ASIST_BUF[fecha] || {})[n] = {trabajador: n, e: x.e || 'N', m: x.m || '', d: x.d || '', s: x.s || ''}; avisarGuardado(); };
     const todos = cuerpo.querySelector('#asTodos');
     if(todos) todos.onclick = () => { lista.forEach(n => { if(!estado[n] || !estado[n].e){ estado[n] = {e: 'P', m: '', s: ''}; guardarFila(n); } }); pintar(); };
     cuerpo.querySelectorAll('.as-seg button').forEach(b => b.onclick = () => {
@@ -7601,13 +7636,14 @@ async function abrirAsistencia(){
     });
     cuerpo.querySelectorAll('.as-sub').forEach(sb => {
       const n = lista[Number(sb.dataset.i)];
-      sb.querySelectorAll('[data-k]').forEach(c => c.onchange = () => {
+      sb.querySelectorAll('[data-k]').forEach(c => c[c.dataset.k === 'd' ? 'oninput' : 'onchange'] = () => {
         const k = c.dataset.k;
-        if(k === 'm') estado[n].m = c.value;
+        if(k === 'm'){ estado[n].m = c.value; if(c.value !== 'complicaciones' && c.value !== 'otro') estado[n].d = ''; }
+        if(k === 'd') estado[n].d = String(c.value || '').replace(/[<>|\r\n]/g, ' ').slice(0, 120);
         if(k === 't') estado[n].s = c.value === 'hora' ? '15:00' : 'medio dia';
         if(k === 'h') estado[n].s = c.value || '15:00';
         guardarFila(n);
-        if(k === 't') pintar();
+        if(k === 't' || k === 'm') pintar();
       });
     });
     engancharPie();
@@ -10079,4 +10115,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.129 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.131 · 18-11-2026 ==== -->

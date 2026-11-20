@@ -648,7 +648,7 @@ function renderRendimiento2(raiz, datos, esc){
         r.reg++;
         if(x.e === 'F'){ r.F++; r.disp += 1; }
         else if(x.e === 'P'){ r.trab += 1; r.disp += 1; }
-        else if(x.e === 'S'){ r.trab += x.fr; r.disp += x.m === 'sin cancha' ? x.fr : 1; }
+        else if(x.e === 'S'){ r.trab += x.fr; r.disp += (x.m && String(x.m).split('|')[0] !== 'otro') ? x.fr : 1; }
       });
       if(r.reg) r.dias = r.trab;
       else { const u = {}; (t.dias || []).forEach(x => { if(x.cat === cat && x.d >= da && x.d <= db && habil(x.d)) u[x.d] = 1; }); r.dias = Object.keys(u).length; }
@@ -815,7 +815,7 @@ function renderRendimiento(raiz, datos, esc){
       r.reg++; if(rdFecha(x.d).getUTCDay() === 6) r.sab++;
       if(x.e === 'F'){ r.F++; r.disp += 1; }
       else if(x.e === 'P'){ r.P++; r.trab += 1; r.disp += 1; }
-      else if(x.e === 'S'){ r.S++; r.trab += x.fr; r.disp += x.m === 'sin cancha' ? x.fr : 1; (x.m === 'sin cancha' ? r.sc : r.otros).push(x); }
+      else if(x.e === 'S'){ r.S++; r.trab += x.fr; const mo = !!x.m && String(x.m).split('|')[0] !== 'otro'; r.disp += mo ? x.fr : 1; (mo ? r.sc : r.otros).push(x); }
     });
     r.conAsist = r.reg > 0;
     r.dias = r.conAsist ? r.trab : Object.keys(r.act).length;
@@ -828,7 +828,7 @@ function renderRendimiento(raiz, datos, esc){
     const p = [];
     if(!r.conAsist) return 'asistencia sin registrar';
     p.push(r.F ? 'Tuvo ' + r.F + (r.F === 1 ? ' falta' : ' faltas') : 'Sin faltas');
-    if(r.sc.length) p.push(r.sc.length > 2 ? 'retirado / sin cancha ' + r.sc.length + ' días' : 'retirado / sin cancha ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
+    if(r.sc.length) p.push(r.sc.length > 2 ? 'retirado por la obra ' + r.sc.length + ' días' : 'retirado por la obra ' + r.sc.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
     if(r.otros.length) p.push(r.otros.length > 2 ? 'salió antes ' + r.otros.length + ' días' : 'salió antes ' + r.otros.map(x => fd(x.d) + ' (' + (x.s || 'medio día') + ')').join(', '));
     return p.join(' · ');
   }
