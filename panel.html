@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.146';
+const APP_VERSION = '0.73.147';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2528,7 +2528,7 @@ async function comprobarVersion(){
     try{ sessionStorage.removeItem('progresoObraIntentosAct'); }catch(e){}
     return;
   }
-  const sinGuardar = dirtyCellIds.size > 0 || settingsDirty;
+  const sinGuardar = hayPendiente();
   if(sinGuardar || document.querySelector('.overlay.show')) mostrarBannerActualizar(v);
   else recargarConVersion(v);
 }
@@ -2543,7 +2543,7 @@ async function revisionInicial(){
     try{ sessionStorage.removeItem('progresoObraIntentosAct'); }catch(e){}
     return 'al_dia';
   }
-  const sinGuardar = dirtyCellIds.size > 0 || settingsDirty;
+  const sinGuardar = hayPendiente();
   if(cargaCerrada && (sinGuardar || document.querySelector('.overlay.show'))){ mostrarBannerActualizar(v); return 'banner'; }
   msg('Actualizando versión…');
   if(!cargaCerrada) await new Promise(f => setTimeout(f, 800)); // alcanza a leerse antes de recargar
@@ -2657,7 +2657,7 @@ function matCompletarParams(){
 }
 function aplicarCeramicas(){
   if(!ceramicas || !ceramicas.zonas){ matCompletarParams(); return; }
-  if(cerCompletarCajas() && isAdmin && typeof markSettingsDirty === 'function') markSettingsDirty('ceramicas');
+  if(cerCompletarCajas() && isAdmin && typeof markSettingsDirty === 'function') markSettingsDirty('ceramicas', true);
   Object.keys(ceramicas.zonas).forEach(k => { const z = ceramicas.zonas[k]; if(z && typeof z.nota === 'string' && /dilat/i.test(z.nota)) z.nota = 'Junta de 3 mm entre cerámicas.'; if(z){ delete z.dilatCada; delete z.dilatAncho; } });
   MAT_TIPOS.forEach(([k]) => {
     const z = ceramicas.zonas[k]; if(!z) return;
@@ -2953,7 +2953,7 @@ const store = {
 let dirtyCellIds = new Set();
 let settingsDirty = false;
 let settingsVersion = 0;
-function markCellDirty(id){ dirtyCellIds.add(id); }
+function markCellDirty(id){ dirtyCellIds.add(id); refrescarBotonGuardar(); }
 const seccionesSucias = new Set();
 // ===== pagos completos retenidos: trabajadores cuyo Terminado queda fuera de toda suma y liquidación =====
 let pagosRetenidos = [];
@@ -2963,8 +2963,14 @@ const trabRetenido = w => !!w && pagosRetenidos.indexOf(w) !== -1;
 const terminadoRetenido = st => !!st && trabRetenido(st.trabajador) && resolveEstado(st) === 'entregado';
 let seccionesTodas = false;
 const matOpsPend = {set: new Set(), del: new Set()};
-function markSettingsDirty(seccion){
+// ===== estado único de guardado: todas las ventanas y avisos leen hayPendiente() =====
+// settingsUser = cambio hecho por una persona; los cambios automáticos (seguimiento, cajas) se guardan con el próximo guardado pero no cuentan como pendientes
+let settingsUser = false;
+function hayPendiente(){ return dirtyCellIds.size > 0 || settingsUser; }
+function markSettingsDirty(seccion, auto){
   settingsDirty = true; settingsVersion++;
+  if(!auto) settingsUser = true;
+  refrescarBotonGuardar();
   if(seccion) seccionesSucias.add(seccion); else seccionesTodas = true;
 }
 const baseRec = {};
@@ -3658,7 +3664,7 @@ async function doSaveCycle(){
       ultimoEnvio.secciones.forEach(x => seccionesSucias.delete(x));
       if(ultimoEnvio.todas) seccionesTodas = false;
     }
-    if(settingsVersion === versionSnap){ settingsDirty = false; seccionesSucias.clear(); seccionesTodas = false; }
+    if(settingsVersion === versionSnap){ settingsDirty = false; settingsUser = false; seccionesSucias.clear(); seccionesTodas = false; }
     aplicarFusion(ultimaFusion);
     if(ultimaMatOk && !matOpsPend.set.size && !matOpsPend.del.size){ MATERIALES.ok = {...ultimaMatOk}; matNivelesCache = null; }
     ultimaFusion = null; ultimaMatOk = null; ultimoEnvio = null;
@@ -3668,7 +3674,7 @@ async function doSaveCycle(){
   else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error', {dur: 14000});
   else if(!localOk) avisoToast('No se pudo guardar en este navegador. Descarga un respaldo para no perder los cambios.', 'error');
   return {localOk, dbOk};
-  } finally { ocultarCargando(); if(!pendientesEnCola) bloquearGuardado(false); }
+  } finally { ocultarCargando(); if(!pendientesEnCola) bloquearGuardado(false); refrescarBotonGuardar(); }
 }
 
 function mostrarGuardadoToast(){ avisoLateral('Guardado', 'exito', {dur: 3000}); }
@@ -3684,7 +3690,7 @@ function enqueueSave(){
 function scheduleSave(){}
 
 window.addEventListener('beforeunload', (e) => {
-  if(!esStaff() || (dirtyCellIds.size === 0 && !settingsDirty)) return;
+  if(!esStaff() || !hayPendiente()) return;
   clearTimeout(saveTimer);
   enqueueSave();
   e.preventDefault();
@@ -3710,7 +3716,7 @@ function resumenCambiosPendientes(){
   });
   filas.sort((a, b) => b.orden - a.orden);
   const secciones = seccionesTodas ? ['Configuración general (precios, trabajadores, ajustes)'] : Array.from(seccionesSucias).map(k => NOMBRE_SECCION_CAMBIO[k] || k);
-  return {celdas: filas.map(f => f.html), secciones: settingsDirty ? (secciones.length ? secciones : ['Configuración general']) : []};
+  return {celdas: filas.map(f => f.html), secciones: settingsUser ? (secciones.length ? secciones : ['Configuración general']) : []};
 }
 function pedirGuardar(){
   if(!isAdmin || guardandoAhora) return;
@@ -5131,7 +5137,7 @@ document.getElementById('ventanaOverlay').addEventListener('click', (e) => {
       if(estadoNumero(getState(id)) === antes && destino !== antes){ pintarVentana(); return; }   // quedó bloqueado, se avisó
     }
     if(accion === 'guardarcerrar') cerrarVentana(); else pintarVentana();
-    if(dirtyCellIds.size > 0 || settingsDirty) saveNow();
+    if(hayPendiente()) saveNow();
     return;
   }
   if(accion === 'cancelar'){ ventanaDestino = null; pintarVentana(); return; }
@@ -5662,7 +5668,7 @@ async function cerrarSesionYLimpiar(){
   location.replace('index.html?s=1');
 }
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  if(dirtyCellIds.size > 0 || settingsDirty) askConfirm('Hay cambios sin guardar. Si cierras la sesión se pierden. ¿Cerrar sesión igual?', cerrarSesionYLimpiar);
+  if(hayPendiente()) askConfirm('Hay cambios sin guardar. Si cierras la sesión se pierden. ¿Cerrar sesión igual?', cerrarSesionYLimpiar);
   else cerrarSesionYLimpiar();
 });
 document.getElementById('supervisorWorkersBtn').addEventListener('click', () => {
@@ -5915,7 +5921,7 @@ function registrarSeguimiento(seg){
       if(sig){ e.hasta = sig; e.dias = Math.max(0, diasHabiles(e.desde, sig) - 2); } else l[i] = null; });
     workerStatus[w].log = l.filter(Boolean).slice(-SEG_MAX_LOG); });
   const despues = JSON.stringify(Object.keys(workerStatus).map(w => (workerStatus[w] || {}).log || []));
-  if(antes !== despues){ markSettingsDirty(); scheduleSave(); }
+  if(antes !== despues){ markSettingsDirty(undefined, true); }
 }
 const fCorta = ts => { const d = new Date(ts); return pad2(d.getDate()) + '-' + pad2(d.getMonth() + 1); };
 function actualizarSeguimiento(){
@@ -7975,7 +7981,7 @@ const ERRORES_REPORTE = {
   ocupado: 'Hay otro envío en curso. Prueba de nuevo en unos segundos.',
   respuesta_invalida: 'El Apps Script respondió algo que el panel no entiende. Revisa que hayas publicado la última "Nueva versión".'
 };
-const sinGuardar = () => dirtyCellIds.size > 0 || settingsDirty;
+const sinGuardar = () => hayPendiente();
 const plural = t => /s$/.test(t) ? t : t + 's';
 function textoProgramacion(p){
   if(!p) return '';
@@ -9050,7 +9056,7 @@ function openWorkerHistorialModal(worker){
 }
 
 document.getElementById('liqOpenBtn').addEventListener('click', () => {
-  if(dirtyCellIds.size > 0 || settingsDirty){
+  if(hayPendiente()){
     askConfirm('Hay cambios sin guardar todavía. Si generas la liquidación ahora, va a usar lo que tienes en pantalla igual, pero conviene guardar primero para que quede en la base de datos. ¿Continuar de todas formas?', abrirConfigLiquidacion);
     return;
   }
@@ -9960,8 +9966,10 @@ document.getElementById('statsOpenBtn').addEventListener('click', () => {
 document.getElementById('statsCloseBtn').addEventListener('click', () => closeOverlayAnimated(statsOverlay));
 
 const floatingSaveBtn = document.getElementById('floatingSaveBtn');
+// ===== el botón flotante de guardar se actualiza también al guardar o al marcar cambios, no solo al hacer scroll =====
+function refrescarBotonGuardar(){ try{ updateFloatingSaveBtn(); }catch(e){} }
 function updateFloatingSaveBtn(){
-  const hayPendiente = dirtyCellIds.size > 0 || settingsDirty;
+  const hayPendiente = hayPendiente();
   document.getElementById('scrollTopBtn').style.display = window.scrollY > 260 ? 'flex' : 'none';
   const show = isAdmin && window.scrollY > 260 && hayPendiente;
   floatingSaveBtn.style.display = show ? 'flex' : 'none';
@@ -10247,4 +10255,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.146 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.147 · 20-11-2026 ==== -->
