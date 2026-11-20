@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.141';
+const APP_VERSION = '0.73.142';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -8963,7 +8963,7 @@ function liqFmtDate(ts){
 function renderLiqHistoryBox(worker, containerId){
   containerId = containerId || 'liqHistoryBox';
   const box = document.getElementById(containerId);
-  const entries = paymentHistory.filter(h => h.worker === worker).sort((a,b) => b.ts - a.ts);
+  const entries = paymentHistory.filter(h => liqMismoTrab(h.worker, worker)).sort((a,b) => b.ts - a.ts);
   if(entries.length === 0){
     box.innerHTML = '<p style="color:var(--sub);font-size:12px;margin:0;">Sin pagos ni retenciones registradas todavía para este trabajador.</p>';
     return;
@@ -9019,7 +9019,9 @@ const liqConAfp = t => t === 'finmes' || t === 'finiquito';
 const liqTipoEtiqueta = t => t === 'finiquito' ? 'Finiquito' : t === 'finmes' ? 'Fin de mes' : 'Quincena';
 const liqEsSalida = w => { const e = (workerStatus[w] || {}).estado; return e === 'inactivo' || e === 'finiquitado'; };
 // ===== pagado dentro del cierre: tiene liquidación después del cierre y nada pendiente (o su finiquito quedó retenido); al sacar un cierre nuevo se reinicia =====
-const liqPagadoEnCierre = w => (paymentHistory.some(h => h.worker === w && h.ts > (cierreQuincena || 0)) || ALL_CELLS.some(c => { const st = getState(c.id); return st.trabajador === w && st.pagado && (st.pagadoTs || 0) > (cierreQuincena || 0); })) && (!liqPagoEnCierre(w) || trabRetenido(w));
+// ===== los pagos viejos pueden estar con el nombre corto ("Edgardo" y hoy "Edgardo Perez"): vale si es el único con ese nombre =====
+const liqMismoTrab = (hw, w) => hw === w || (!!hw && w.indexOf(hw + ' ') === 0 && ALL_WORKERS.indexOf(hw) === -1 && ALL_WORKERS.filter(x => x.indexOf(hw + ' ') === 0).length === 1);
+const liqPagadoEnCierre = w => (paymentHistory.some(h => liqMismoTrab(h.worker, w) && h.ts > (cierreQuincena || 0)) || ALL_CELLS.some(c => { const st = getState(c.id); return st.trabajador === w && st.pagado && (st.pagadoTs || 0) > (cierreQuincena || 0); })) && (!liqPagoEnCierre(w) || trabRetenido(w));
 // en modo pagado solo se ve su historial, con el mismo render del historial de un trabajador
 function liqModoPagado(w){
   const pag = !!w && liqPagadoEnCierre(w);
@@ -10202,4 +10204,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.141 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.142 · 20-11-2026 ==== -->
