@@ -1034,6 +1034,14 @@
   .liq-det{font-size:11px;font-style:italic;margin-top:2px;}
   .liq-det.resta{color:#c0546f;}
   .liq-det.suma{color:var(--entregado);}
+  /* ===== selector de trabajador de liquidaciones, con cápsula verde en los pagados ===== */
+  .liq-sel{position:relative;width:220px;}
+  .liq-sel-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px;padding:6px 28px 6px 10px;font:inherit;font-size:13px;text-align:left;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);cursor:pointer;position:relative;}
+  .liq-sel-btn::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border-right:2px solid var(--sub);border-bottom:2px solid var(--sub);transform:translateY(-70%) rotate(45deg);}
+  .liq-sel-list{position:absolute;left:0;right:0;top:100%;z-index:30;max-height:220px;overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border:1px solid var(--border-strong);border-top:0;box-shadow:0 6px 16px rgba(0,0,0,.18);}
+  .liq-sel-op{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;font:inherit;font-size:13px;text-align:left;background:transparent;color:var(--text);border:0;border-bottom:1px solid var(--border);cursor:pointer;}
+  .liq-sel-op:hover,.liq-sel-op.on{background:var(--panel-soft);}
+  .liq-pg{flex:0 0 auto;font-style:normal;font-size:10px;font-weight:700;line-height:1;padding:3px 8px;border-radius:999px;background:var(--pagado);color:#fff;}
   .liq-hist-entry .tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:2px;margin-right:6px;}
   .liq-hist-entry .tag.pago{background:var(--pagado);color:#fff;}
   .liq-hist-entry .tag.retencion{background:#a97e00;color:#fff;}
@@ -2104,7 +2112,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
   <div class="modal" style="max-width:460px;">
     <h3>Generar liquidación</h3>
     <div id="liqSinAsignarWarn" style="display:none;font-size:12px;color:#8a6a1f;background:#fbf3de;border:1px solid #e6d6a3;padding:8px 10px;margin-bottom:12px;"></div>
-    <div class="rate-row"><label>Trabajador</label><select id="liqWorkerSelect" style="width:220px;"></select></div>
+    <div class="rate-row"><label>Trabajador</label><div class="liq-sel" id="liqSelWrap"><select id="liqWorkerSelect" hidden></select><button type="button" class="liq-sel-btn" id="liqSelBtn"><span class="liq-sel-n"></span></button><div class="liq-sel-list" id="liqSelList" hidden></div></div></div>
 
     <div id="liqCampos">
     <div class="rate-row"><label>Fecha de pago</label><input type="date" id="liqFecha" style="width:220px;"></div>
@@ -2472,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.140';
+const APP_VERSION = '0.73.141';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9011,7 +9019,7 @@ const liqConAfp = t => t === 'finmes' || t === 'finiquito';
 const liqTipoEtiqueta = t => t === 'finiquito' ? 'Finiquito' : t === 'finmes' ? 'Fin de mes' : 'Quincena';
 const liqEsSalida = w => { const e = (workerStatus[w] || {}).estado; return e === 'inactivo' || e === 'finiquitado'; };
 // ===== pagado dentro del cierre: tiene liquidación después del cierre y nada pendiente (o su finiquito quedó retenido); al sacar un cierre nuevo se reinicia =====
-const liqPagadoEnCierre = w => paymentHistory.some(h => h.worker === w && h.ts > (cierreQuincena || 0)) && (!liqPagoEnCierre(w) || trabRetenido(w));
+const liqPagadoEnCierre = w => (paymentHistory.some(h => h.worker === w && h.ts > (cierreQuincena || 0)) || ALL_CELLS.some(c => { const st = getState(c.id); return st.trabajador === w && st.pagado && (st.pagadoTs || 0) > (cierreQuincena || 0); })) && (!liqPagoEnCierre(w) || trabRetenido(w));
 // en modo pagado solo se ve su historial, con el mismo render del historial de un trabajador
 function liqModoPagado(w){
   const pag = !!w && liqPagadoEnCierre(w);
@@ -9023,7 +9031,23 @@ function liqModoPagado(w){
   else { box.style.maxHeight = ''; }
   return pag;
 }
+// ===== selector propio: la lista sale del select oculto =====
+function liqSelPintar(){
+  const sel = document.getElementById('liqWorkerSelect'), btn = document.getElementById('liqSelBtn'), lista = document.getElementById('liqSelList');
+  const op = sel.options[sel.selectedIndex];
+  btn.innerHTML = `<span class="liq-sel-n">${op ? esc(op.value) : 'Sin trabajadores'}</span>${op && op.dataset.pag ? '<i class="liq-pg">Pagado</i>' : ''}`;
+  lista.innerHTML = [...sel.options].map(o => `<button type="button" class="liq-sel-op${o.selected ? ' on' : ''}" data-v="${esc(o.value)}"><span>${esc(o.value)}</span>${o.dataset.pag ? '<i class="liq-pg">Pagado</i>' : ''}</button>`).join('');
+}
+document.getElementById('liqSelBtn').addEventListener('click', () => { const l = document.getElementById('liqSelList'); l.hidden = !l.hidden; });
+document.getElementById('liqSelList').addEventListener('click', e => {
+  const b = e.target.closest('.liq-sel-op'); if(!b) return;
+  const sel = document.getElementById('liqWorkerSelect'); sel.value = b.dataset.v;
+  document.getElementById('liqSelList').hidden = true;
+  sel.dispatchEvent(new Event('change'));
+});
+document.addEventListener('click', e => { if(!e.target.closest('#liqSelWrap')) document.getElementById('liqSelList').hidden = true; });
 function liqAjustarTipo(){
+  liqSelPintar();
   if(liqModoPagado(document.getElementById('liqWorkerSelect').value)) return;
   const sel = document.getElementById('liqTipoPago'), w = document.getElementById('liqWorkerSelect').value, salida = liqEsSalida(w);
   [...sel.options].forEach(o => { const fin = o.value === 'finiquito'; o.hidden = fin ? !salida : salida; o.disabled = fin ? !salida : salida; });
@@ -9045,7 +9069,7 @@ function abrirConfigLiquidacion(){
   // ===== los ya pagados van al final con la etiqueta Pagado =====
   const liqPend = ALL_WORKERS.filter(w => !esPropio(w) && liqPagoEnCierre(w) && !liqPagadoEnCierre(w));
   const liqPag = ALL_WORKERS.filter(w => !esPropio(w) && liqPagadoEnCierre(w));
-  sel.innerHTML = liqPend.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('') + liqPag.map(w => `<option value="${esc(w)}">${esc(w)} · Pagado</option>`).join('');
+  sel.innerHTML = liqPend.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('') + liqPag.map(w => `<option value="${esc(w)}" data-pag="1">${esc(w)}</option>`).join('');
   const today = new Date().toISOString().slice(0,10);
   document.getElementById('liqFecha').value = today;
   document.getElementById('liqTipoPago').value = 'quincena';
@@ -10178,4 +10202,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.140 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.141 · 20-11-2026 ==== -->
