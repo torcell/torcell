@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.148';
+const APP_VERSION = '0.73.149';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4436,10 +4436,17 @@ function prResumenHtml(){
     n++; if(c.categoria === 'Frague') fra += p; else cer += p;
     por[st.trabajador] = (por[st.trabajador] || 0) + p;
   });
-  const filas = Object.keys(por).sort((a, b) => a.localeCompare(b, 'es')).map(w => `<tr><td>${esc(w)}</td><td>${money(por[w])}</td></tr>`).join('');
+  // ===== los ajustes de pago pendientes (descuentos y pagos extra) se aplican al monto retenido de cada trabajador =====
+  let totNeto = 0;
+  const filas = Object.keys(por).sort((a, b) => a.localeCompare(b, 'es')).map(w => {
+    const aj = pendientesDe(w).reduce((s, x) => s + (x.tipo === 'resta' ? -1 : 1) * (Number(x.monto) || 0), 0);
+    const neto = por[w] + aj; totNeto += neto;
+    const det = aj ? `<div style="font-size:11px;color:var(--sub);">Bruto ${money(por[w])} · ajustes ${aj < 0 ? '-' : '+'}${money(Math.abs(aj))}</div>` : '';
+    return `<tr><td>${esc(w)}${det}</td><td>${money(neto)}</td></tr>`;
+  }).join('');
   return `<div class="frag-h">Pagos completos retenidos (aparte, no suman arriba)</div>
     <table class="frag-tabla">${filas || '<tr><td colspan="2" style="color:var(--sub);">Ningún trabajador marcado.</td></tr>'}
-    ${n ? `<tr class="tot"><td>Total retenido (${n} partida${n === 1 ? '' : 's'})</td><td>${money(cer + fra)}</td></tr>` : ''}</table>
+    ${n ? `<tr class="tot"><td>Total retenido (${n} partida${n === 1 ? '' : 's'})</td><td>${money(totNeto)}</td></tr>` : ''}</table>
     <button type="button" class="btn" data-abrir-pr style="margin-top:8px;"><i class="ic ib ic-candado"></i>Pagos completos retenidos</button>`;
 }
 function abrirResumenPago(){
@@ -10256,4 +10263,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.148 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.149 · 20-11-2026 ==== -->
