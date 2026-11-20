@@ -2464,7 +2464,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.128';
+const APP_VERSION = '0.73.129';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -6503,6 +6503,7 @@ function cerrarDin(ov){
   setTimeout(() => ov.remove(), 200);
 }
 function autoAlto(caja, cont){
+  return; // ===== sin animar el alto: la ventana no se mueve al cambiar de vista =====
   if(!window.ResizeObserver || !caja.animate || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   let prevC = cont.offsetHeight, mostrada = caja.offsetHeight, anim = null;
   new ResizeObserver(() => {
@@ -10078,4 +10079,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.128 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.129 · 18-11-2026 ==== -->
