@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.149';
+const APP_VERSION = '0.73.150';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9041,19 +9041,39 @@ function renderLiqHistoryBox(worker, containerId){
       const idx = parseInt(e.target.getAttribute('data-release'));
       const relBox = e.target.getAttribute('data-relbox');
       const entry = paymentHistory[idx];
-      askConfirm(`¿Liberar esta retención de ${entry.worker} (${money(entry.totalFinal)}) y marcarla como pagada ahora?`, () => {
-        entry.itemIds.forEach(id => {
-          if(!state[id]) return;
-          state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
-          markCellDirty(id);
-        });
-        entry.liberado = true;
-        entry.liberadoTs = Date.now();
-        markSettingsDirty();
-        enqueueSave(); render();
-        renderLiqHistoryBox(worker, relBox);
-      });
+      liberarRetenciones(entry.worker, [entry], () => renderLiqHistoryBox(worker, relBox));
     });
+  });
+}
+
+// ===== liberar y pagar retenciones: aplica los ajustes de pago pendientes del trabajador (descuentos y extras) =====
+function entradasRetenidasDe(w){ return paymentHistory.filter(h => h.type === 'retencion' && !h.liberado && liqMismoTrab(h, w)); }
+function liberarRetenciones(w, entradas, alTerminar){
+  const aj = pendientesDe(w);
+  const net = aj.reduce((s, a) => s + (a.tipo === 'resta' ? -1 : 1) * (Number(a.monto) || 0), 0);
+  const bruto = entradas.reduce((s, h) => s + (Number(h.totalFinal) || 0), 0);
+  const lista = aj.map(a => (a.tipo === 'resta' ? '-' : '+') + moneyReal(a.monto) + ' ' + a.motivo).join(', ');
+  const msg = `¿Liberar y pagar la retención de ${w}? Retenido ${moneyReal(bruto)}.` + (aj.length ? ` Ajustes: ${lista}. Neto a pagar: ${moneyReal(bruto + net)}.` : '');
+  askConfirm(msg, () => {
+    entradas.forEach(entry => {
+      entry.itemIds.forEach(id => {
+        if(!state[id]) return;
+        state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
+        markCellDirty(id);
+      });
+      entry.liberado = true;
+      entry.liberadoTs = Date.now();
+    });
+    if(aj.length){
+      const e0 = entradas[0];
+      e0.detalles = (e0.detalles || []).concat(aj.map(a => ({desc: a.motivo + (a.ref && a.motivo.indexOf(a.ref) === -1 ? ' · ' + a.ref : '') + ' (ajuste)', monto: a.monto, tipo: a.tipo, destino: 'retencion', ajusteId: a.id})));
+      e0.totalFinal = (Number(e0.totalFinal) || 0) + net;
+      aj.forEach(a => { a.aplicado = Date.now(); });
+    }
+    sacarDeRetenidosFini(w);
+    markSettingsDirty();
+    enqueueSave(); render();
+    if(alTerminar) alTerminar();
   });
 }
 
@@ -9226,7 +9246,11 @@ function generarLiquidacionInterna(){
   const incRetenido = document.getElementById('liqIncRetenido').checked;
 
   if(!worker){ document.getElementById('liqConfigError').textContent = 'Elige un trabajador.'; return; }
-  if(trabRetenido(worker)){ document.getElementById('liqConfigError').textContent = 'El pago de ' + worker + ' está retenido. Libéralo en "Pagos completos retenidos" para poder liquidarlo.'; return; }
+  if(trabRetenido(worker)){
+    const ret = entradasRetenidasDe(worker);
+    if(ret.length){ liberarRetenciones(worker, ret, () => closeOverlayAnimated(liqConfigOverlay)); return; }
+    document.getElementById('liqConfigError').textContent = 'El pago de ' + worker + ' está retenido y no tiene una liquidación de finiquito registrada. Haz primero el finiquito.'; return;
+  }
   if(!incTerminado && !incProceso && !incPagado && !incRetenido){ document.getElementById('liqConfigError').textContent = 'Elige al menos un estado.'; return; }
   if(tipoPago === 'finiquito' && dias <= 0){ document.getElementById('liqConfigError').textContent = 'Ingresa los días trabajados para el finiquito.'; document.getElementById('liqDias').focus(); return; }
 
@@ -10263,4 +10287,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.149 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.150 · 20-11-2026 ==== -->
