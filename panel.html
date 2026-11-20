@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.145';
+const APP_VERSION = '0.73.146';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2988,7 +2988,6 @@ function aplicarFusion(fusion){
 }
 
 function rebuildWorkerList(){
-  let idsNuevos = false;
   const workerSet = new Set(Object.keys(workerStatus));
   customWorkers.forEach(w => workerSet.add(w));
   Object.values(state).forEach(st => { if(st && st.trabajador) workerSet.add(st.trabajador); });
@@ -2996,17 +2995,19 @@ function rebuildWorkerList(){
   ALL_WORKERS.forEach(w => {
     if(!workerStatus[w]) workerStatus[w] = defaultWorkerEntry(w);
     if(!workerStatus[w].especialidad) workerStatus[w].especialidad = defaultWorkerEntry(w).especialidad;
-    if(isAdmin && !/^[A-Za-z0-9_-]{1,20}$/.test(workerStatus[w].id || '')){ workerStatus[w].id = nuevoIdTrab(); idsNuevos = true; }
+    if(isAdmin && !/^[A-Za-z0-9_-]{1,20}$/.test(workerStatus[w].id || '')){ workerStatus[w].id = nuevoIdTrab(w); }
   });
-  if(idsNuevos) markSettingsDirty('workerStatus');
   unificarNombres();
 }
 // ===== ID fijo por trabajador: el nombre es solo lo que se ve =====
 const idTrab = n => (workerStatus[n] || {}).id || '';
 const nombreDeId = id => !id ? '' : (ALL_WORKERS.find(w => (workerStatus[w] || {}).id === id) || '');
-function nuevoIdTrab(){
-  let id;
-  do { id = 'T' + Math.random().toString(36).slice(2, 8); } while(Object.keys(workerStatus).some(k => (workerStatus[k] || {}).id === id));
+// el ID sale del nombre con que se creó, así es el mismo en cada sesión aunque todavía no se haya guardado
+function nuevoIdTrab(nombre){
+  let h = 2166136261;
+  for(let i = 0; i < nombre.length; i++){ h ^= nombre.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  let id = 'T' + h.toString(36), n = 0;
+  while(Object.keys(workerStatus).some(k => (workerStatus[k] || {}).id === id)){ n++; id = 'T' + h.toString(36) + n; }
   return id;
 }
 // ===== nombres viejos (cortos) en pagos, ajustes, retenidos y m² por semana pasan al nombre actual, solo si es único =====
@@ -3034,7 +3035,6 @@ function unificarNombres(){
     const pt = p && p.porTrabajador; if(!pt) return;
     Object.keys(pt).forEach(k => { const n = nombreActual(k); if(n !== k){ pt[n] = (pt[n] || 0) + pt[k]; delete pt[k]; hubo = true; } });
   });
-  if(hubo) markSettingsDirty();
 }
 
 let avanceRemoto = 0, remotoAvance = {};
@@ -10247,4 +10247,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.145 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.146 · 20-11-2026 ==== -->
