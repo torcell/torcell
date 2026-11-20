@@ -940,6 +940,20 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 .ic-menos{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");}
 .ob-fila.sep{position:relative;border-top:0;}
 .ob-fila.sep::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:#ff2d3f;box-shadow:0 0 6px 1px rgba(255,45,63,.8),0 0 14px 2px rgba(255,45,63,.4);}
+/* ===== Barra de desplazamiento moderna (fina, sin flechas, el espacio queda reservado para que nada se mueva) ===== */
+:root{--sb-th:color-mix(in srgb,var(--text) 34%,transparent);--sb-th-h:color-mix(in srgb,var(--text) 58%,transparent);--sbw:10px;}
+@media (hover:none){:root{--sbw:0px;}}
+html{scrollbar-gutter:stable;}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--sb-th) transparent;}}
+*::-webkit-scrollbar{width:10px;height:10px;}
+*::-webkit-scrollbar-track,*::-webkit-scrollbar-corner{background:transparent;}
+*::-webkit-scrollbar-thumb{background:var(--sb-th);border:3px solid transparent;background-clip:content-box;border-radius:6px;}
+*::-webkit-scrollbar-thumb:hover{background:var(--sb-th-h);background-clip:content-box;}
+*::-webkit-scrollbar-button{display:none;width:0;height:0;}
+/* la barra queda en el margen de la ventana, no sobre las letras */
+.modal,#velProt .modal{scrollbar-gutter:stable;padding-right:calc(20px - var(--sbw));}
+.obslista,.oplista,.reglista,.mcor ul,.obgal{scrollbar-gutter:stable;}
+@media (hover:none){html,.modal,#velProt .modal,.obslista,.oplista,.reglista,.mcor ul,.obgal{scrollbar-gutter:auto;}}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -1450,7 +1464,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.39.1';
+const CAL_VERSION = '1.39.2';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -3784,4 +3798,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.39.1 · 19-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.39.2 · 19-11-2026 ==== -->
