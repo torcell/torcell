@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.151';
+const APP_VERSION = '0.73.152';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4550,7 +4550,9 @@ function ptDetalle(o, verPlata){
   return `<div class="pt-det"><table>${filas.map(f => {
     const c = f.c, w = o.nombre;
     const lugar = `${esc(c.categoria)} · ${esc(c.piso)} · ${c.area === 'Pasillos' ? 'Pasillo' : 'Dpto ' + esc(c.dpto)} · ${esc(AREA_LABEL[c.area] || c.area)}`;
-    const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * rate1ForDisplay(c.categoria, w)) : '';
+    // ===== en el detalle, el admin ve el precio real (el "falseado" queda solo en los departamentos de la pantalla principal) =====
+    const tar = isAdmin ? rate1For(c.categoria, w) : rate1ForDisplay(c.categoria, w);
+    const monto = verPlata && f.m2 ? ' · ' + money(f.m2 * tar) + (isAdmin ? ' (a ' + money(tar) + ' el m²)' : '') : '';
     const estTxt = f.estado === 'entregado' ? (cierreQuincena ? (f.nuevo ? 'Terminado · fuera del cierre' : 'Terminado · dentro del cierre') : 'Terminado') : (cierreQuincena ? (f.pagFuera ? 'Pagado · fuera del cierre' : 'Pagado · dentro del cierre') : 'Pagado');
     const fuera = f.estado === 'entregado' ? f.nuevo : f.pagFuera;
     const btn = (isAdmin && cierreQuincena) ? `<br><button type="button" class="btn small pt-add-cierre" data-id="${esc(f.id)}" data-estado="${f.estado}" data-dir="${fuera ? 'dentro' : 'fuera'}">${fuera ? 'Agregar al cierre' : 'Sacar del cierre'}</button>` : '';
@@ -10289,4 +10291,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.151 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.152 · 20-11-2026 ==== -->
