@@ -2106,6 +2106,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <div id="liqSinAsignarWarn" style="display:none;font-size:12px;color:#8a6a1f;background:#fbf3de;border:1px solid #e6d6a3;padding:8px 10px;margin-bottom:12px;"></div>
     <div class="rate-row"><label>Trabajador</label><select id="liqWorkerSelect" style="width:220px;"></select></div>
 
+    <div id="liqCampos">
     <div class="rate-row"><label>Fecha de pago</label><input type="date" id="liqFecha" style="width:220px;"></div>
     <div class="rate-row"><label>Tipo de pago</label>
       <select id="liqTipoPago" style="width:220px;">
@@ -2134,6 +2135,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;"><input type="checkbox" id="liqIncProceso"> En proceso / Partida</label>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px;"><input type="checkbox" id="liqIncPagado"> Ya pagado (para reimprimir)</label>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px;"><input type="checkbox" id="liqIncRetenido"> Retenidos</label>
+    </div>
 
     <button class="btn small" id="liqHistoryToggleBtn" style="margin-bottom:12px;">Ver historial de pagos de este trabajador</button>
     <div id="liqHistoryBox" style="display:none;max-height:180px;overflow-y:auto;border:1px solid var(--border);padding:8px;margin-bottom:12px;background:var(--panel-soft);"></div>
@@ -2470,7 +2472,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.137';
+const APP_VERSION = '0.73.140';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -9008,7 +9010,21 @@ document.getElementById('liqOpenBtn').addEventListener('click', () => {
 const liqConAfp = t => t === 'finmes' || t === 'finiquito';
 const liqTipoEtiqueta = t => t === 'finiquito' ? 'Finiquito' : t === 'finmes' ? 'Fin de mes' : 'Quincena';
 const liqEsSalida = w => { const e = (workerStatus[w] || {}).estado; return e === 'inactivo' || e === 'finiquitado'; };
+// ===== pagado dentro del cierre: tiene liquidación después del cierre y nada pendiente (o su finiquito quedó retenido); al sacar un cierre nuevo se reinicia =====
+const liqPagadoEnCierre = w => paymentHistory.some(h => h.worker === w && h.ts > (cierreQuincena || 0)) && (!liqPagoEnCierre(w) || trabRetenido(w));
+// en modo pagado solo se ve su historial, con el mismo render del historial de un trabajador
+function liqModoPagado(w){
+  const pag = !!w && liqPagadoEnCierre(w);
+  document.getElementById('liqCampos').style.display = pag ? 'none' : '';
+  document.getElementById('liqHistoryToggleBtn').style.display = pag ? 'none' : '';
+  document.getElementById('liqConfigGenerar').style.display = pag ? 'none' : '';
+  const box = document.getElementById('liqHistoryBox');
+  if(pag){ renderLiqHistoryBox(w); box.style.display = 'block'; box.style.maxHeight = '320px'; }
+  else { box.style.maxHeight = ''; }
+  return pag;
+}
 function liqAjustarTipo(){
+  if(liqModoPagado(document.getElementById('liqWorkerSelect').value)) return;
   const sel = document.getElementById('liqTipoPago'), w = document.getElementById('liqWorkerSelect').value, salida = liqEsSalida(w);
   [...sel.options].forEach(o => { const fin = o.value === 'finiquito'; o.hidden = fin ? !salida : salida; o.disabled = fin ? !salida : salida; });
   if(salida) sel.value = 'finiquito'; else if(sel.value === 'finiquito') sel.value = 'quincena';
@@ -9019,15 +9035,17 @@ function liqAjustarTipo(){
 }
 const liqPagoEnCierre = w => ALL_CELLS.some(cell => {
   const st = getState(cell.id);
-  if((st.trabajador || '') !== w || st.retenido || !st.m2 || resolveEstado(st) !== 'entregado') return false;
+  if((st.trabajador || '') !== w || !st.m2 || resolveEstado(st) !== 'entregado') return false;
   return !(cierreQuincena && st.terminadoTs && st.terminadoTs > cierreQuincena);
 });
 function abrirConfigLiquidacion(){
   const sel = document.getElementById('liqWorkerSelect');
 
-  // ===== sin los Sepúlveda; inactivos y finiquitados solo si tienen algo por pagar dentro del cierre =====
-  const liqWorkers = ALL_WORKERS.filter(w => !esPropio(w) && (!liqEsSalida(w) || liqPagoEnCierre(w)));
-  sel.innerHTML = liqWorkers.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
+  // ===== sin los Sepúlveda; solo quien tiene partidas terminadas dentro del cierre =====
+  // ===== los ya pagados van al final con la etiqueta Pagado =====
+  const liqPend = ALL_WORKERS.filter(w => !esPropio(w) && liqPagoEnCierre(w) && !liqPagadoEnCierre(w));
+  const liqPag = ALL_WORKERS.filter(w => !esPropio(w) && liqPagadoEnCierre(w));
+  sel.innerHTML = liqPend.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('') + liqPag.map(w => `<option value="${esc(w)}">${esc(w)} · Pagado</option>`).join('');
   const today = new Date().toISOString().slice(0,10);
   document.getElementById('liqFecha').value = today;
   document.getElementById('liqTipoPago').value = 'quincena';
@@ -9569,7 +9587,7 @@ function liqRegisterHistory(type, ids, total, detalles){
   const snapshot = liqCurrentMeta.rows.filter(r => ids.includes(r.id)).map(r => ({label:r.label, area:r.area, piso:r.piso, m2:r.m2, monto:r.precio}));
   const suma = det.filter(d => d.tipo === 'suma').reduce((s,d) => s + d.monto, 0);
   const resta = det.filter(d => d.tipo === 'resta').reduce((s,d) => s + d.monto, 0);
-  const afp = type === 'pago' ? (liqCurrentMeta.afpDescuento || 0) : 0;
+  const afp = (type === 'pago' || liqCurrentMeta.tipoPago === 'finiquito') ? (liqCurrentMeta.afpDescuento || 0) : 0;   // el finiquito queda retenido con su AFP
 
   const totalFinal = total - afp + suma - resta;
   paymentHistory.push({
@@ -9588,7 +9606,9 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
     document.getElementById('ioMsg').textContent = 'No hay nada nuevo que pagar aquí (solo mostraste partidas ya pagadas o retenidas).';
     return;
   }
-  const retainIds = liqCurrentIds.filter(id => liqRetSel.has(id));
+  // ===== finiquito: todo queda retenido (pago completo retenido) y sale de las sumas de Terminado =====
+  const esFini = liqCurrentMeta.tipoPago === 'finiquito';
+  const retainIds = esFini ? liqCurrentIds.slice() : liqCurrentIds.filter(id => liqRetSel.has(id));
   const payIds = liqCurrentIds.filter(id => !retainIds.includes(id));
   const hasPay = payIds.length > 0, hasRet = retainIds.length > 0;
 
@@ -9604,7 +9624,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
   if(detPago.length) extra += ` Detalles aplicados al pago: ${descr(detPago)}.`;
   if(detRet.length) extra += ` Detalles aplicados a lo retenido: ${descr(detRet)}.`;
 
-  const msg = (hasRet
+  const msg = esFini ? `¿Confirmar el finiquito de ${liqCurrentMeta.worker}? Sus ${retainIds.length} partida(s) quedan como pago retenido para finiquito y salen de la suma de Terminados.` + extra : (hasRet
     ? `¿Confirmar esta liquidación? Se pagarán ${payIds.length} partida(s) y se retendrán ${retainIds.length}.`
     : `¿Marcar estas ${payIds.length} partida(s) como Pagadas?`) + extra;
   askConfirm(msg, () => {
@@ -9622,11 +9642,12 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
     detPago.concat(detRet).forEach(d => { const a = d.ajusteId && ajustesPago.find(x => x.id === d.ajusteId); if(a && !a.aplicado) a.aplicado = Date.now(); });
     if(payIds.length) liqRegisterHistory('pago', payIds, payTotal, detPago);
     if(retainIds.length) liqRegisterHistory('retencion', retainIds, retainTotal, detRet);
+    if(esFini && pagosRetenidos.indexOf(liqCurrentMeta.worker) === -1){ pagosRetenidos.push(liqCurrentMeta.worker); markSettingsDirty('pagosRetenidos'); }
     markSettingsDirty();
     enqueueSave();
     render();
     document.getElementById('ioMsg').style.color = 'var(--entregado)';
-    document.getElementById('ioMsg').textContent = retainIds.length ? 'Liquidación confirmada (con retención).' : 'Partidas marcadas como Pagadas.';
+    document.getElementById('ioMsg').textContent = esFini ? 'Finiquito retenido.' : retainIds.length ? 'Liquidación confirmada (con retención).' : 'Partidas marcadas como Pagadas.';
     setTimeout(() => { document.getElementById('ioMsg').textContent=''; }, 3000);
     closeOverlayAnimated(liqViewOverlay);
   });
@@ -9773,6 +9794,12 @@ function renderStatsView(){
   `;
 }
 
+// ===== un finiquito retenido que se paga o se reincorpora saca al trabajador de "pagos completos retenidos" =====
+function sacarDeRetenidosFini(w){
+  if(paymentHistory.some(h => h.type === 'retencion' && h.tipoPago === 'finiquito' && h.worker === w && h.liberado) && pagosRetenidos.indexOf(w) !== -1){
+    pagosRetenidos = pagosRetenidos.filter(x => x !== w); markSettingsDirty('pagosRetenidos');
+  }
+}
 function getPendingRetentions(){
   const map = {};
   paymentHistory.forEach(h => {
@@ -9818,6 +9845,7 @@ function renderRetencionesList(){
             h.liberado = true; h.reincorporado = true; h.liberadoTs = Date.now();
           }
         });
+        sacarDeRetenidosFini(worker);
         markSettingsDirty();
         enqueueSave(); render();
         renderRetencionesList();
@@ -9839,6 +9867,7 @@ function renderRetencionesList(){
             h.liberado = true; h.liberadoTs = Date.now();
           }
         });
+        sacarDeRetenidosFini(worker);
         markSettingsDirty();
         enqueueSave(); render();
         renderRetencionesList();
@@ -10149,4 +10178,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.137 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.140 · 20-11-2026 ==== -->
