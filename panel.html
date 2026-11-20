@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.150';
+const APP_VERSION = '0.73.151';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4185,6 +4185,8 @@ function statsDeCategoria(cat){
       if(nuevo){ r.nuevo += p; r.refNuevo += ref; } else { r.dentro += p; r.refDentro += ref; }
     }
   });
+  // ===== los ajustes de pago pendientes de los retenidos (de esta sección) también entran en la tarjeta =====
+  if(isAdmin) pagosRetenidos.forEach(w => { pendientesDe(w).forEach(a => { if((a.seccion || 'Cerámica') === cat) r.pr += (a.tipo === 'resta' ? -1 : 1) * (Number(a.monto) || 0); }); });
   return r;
 }
 function abrirRetenidoDetalle(cat){
@@ -10287,4 +10289,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.150 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.151 · 20-11-2026 ==== -->
