@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.144';
+const APP_VERSION = '0.73.145';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3619,6 +3619,8 @@ function bloquearGuardado(v){
   document.querySelectorAll('[data-pet-aceptar],[data-pet-rechazar]').forEach(b => { b.disabled = v; });
 }
 async function doSaveCycle(){
+  // ===== sin cambios no se envía nada: ya no hay guardado completo por defecto =====
+  if(!forzarGuardadoCompleto && dirtyCellIds.size === 0 && !settingsDirty) return {localOk:true, dbOk:true};
   mostrarCargando('Guardando…');
   bloquearGuardado(true);
   try{
@@ -3680,10 +3682,6 @@ function enqueueSave(){
 }
 
 function scheduleSave(){}
-
-setInterval(() => {
-  if(esStaff() && (dirtyCellIds.size > 0 || settingsDirty)) enqueueSave();
-}, 10 * 60 * 1000);
 
 window.addEventListener('beforeunload', (e) => {
   if(!esStaff() || (dirtyCellIds.size === 0 && !settingsDirty)) return;
@@ -10249,4 +10247,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.144 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.145 · 20-11-2026 ==== -->
