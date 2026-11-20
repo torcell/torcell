@@ -85,13 +85,13 @@ main{max-width:860px;width:calc(100% - 16px);margin:14px auto 28px;padding:8px;b
 .tile small .cr{display:none;}@media (max-width:480px){.tile small .lg{display:none;}.tile small .cr{display:inline;}}
 .tile.r small{color:var(--ok);}.tile.o small{color:var(--bad);}
 .vacio{padding:36px 16px;text-align:center;color:var(--sub);border:1px dashed var(--strong);background:var(--panel);}
-#vel,#velReg,#velOp,#velFoto,#velExp{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
-#vel::before,#velReg::before,#velOp::before,#velFoto::before,#velExp::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.62);}
-:root.blur-fondo #vel::before,:root.blur-fondo #velReg::before,:root.blur-fondo #velOp::before,:root.blur-fondo #velFoto::before,:root.blur-fondo #velExp::before{-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
-#vel.on .modal,#velReg.on .modal,#velOp.on .modal,#velFoto.on .modal,#velExp.on .modal{will-change:transform,opacity;}
-#velOp,#velFoto,#velExp{z-index:60;}
-#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on{display:flex;animation:overlayIn .16s ease;}
-#vel.out,#velReg.out,#velOp.out,#velFoto.out,#velExp.out{animation:overlayOut .14s ease forwards;}
+#vel,#velReg,#velOp,#velFoto,#velExp,#velObs,#velObsFoto{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+#vel::before,#velReg::before,#velOp::before,#velFoto::before,#velExp,#velObs,#velObsFoto::before{content:'';position:absolute;inset:0;background:rgba(20,22,20,.62);}
+:root.blur-fondo #vel::before,:root.blur-fondo #velReg::before,:root.blur-fondo #velOp::before,:root.blur-fondo #velFoto::before,:root.blur-fondo #velExp,:root.blur-fondo #velObs,:root.blur-fondo #velObsFoto::before{-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);}
+#vel.on .modal,#velReg.on .modal,#velOp.on .modal,#velFoto.on .modal,#velExp.on .modal,#velObs.on .modal,#velObsFoto.on .modal{will-change:transform,opacity;}
+#velOp,#velFoto,#velExp,#velObs,#velObsFoto{z-index:60;}
+#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on,#velObs.on,#velObsFoto.on{display:flex;animation:overlayIn .16s ease;}
+#vel.out,#velReg.out,#velOp.out,#velFoto.out,#velExp.out,#velObs.out,#velObsFoto.out{animation:overlayOut .14s ease forwards;}
 @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
 @keyframes overlayOut{from{opacity:1;}to{opacity:0;}}
 @keyframes modalPop{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
@@ -875,6 +875,58 @@ main{max-width:868px;width:auto;margin:18px auto 36px;padding:20px;}
 /* icono a la izquierda del botón, texto al medio */
 button:has(>.ic.ib){position:relative;padding-left:34px;padding-right:34px;text-align:center;}
 button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-align:baseline;}
+/* ===== Observaciones (solo Ismael e Ignacio) ===== */
+#vtabs.tres{grid-template-columns:repeat(3,minmax(0,1fr));}
+#vtabs button[hidden]{display:none;}
+#vtabs button.obs{border-color:#ff2d3f;color:var(--bad);font-weight:700;background:color-mix(in srgb,#ff2d3f 9%,var(--panel));box-shadow:0 0 5px rgba(255,45,63,.5),inset 0 0 8px rgba(255,45,63,.16);animation:obsNeon 3.4s ease-in-out infinite;}
+#vtabs button.obs:hover{color:var(--bad);background:color-mix(in srgb,#ff2d3f 16%,var(--panel));border-color:#ff5a68;}
+#vtabs button.obs.on{background:linear-gradient(90deg,#b3121f,#e0263a);color:#fff;border-color:#ff5a68;box-shadow:0 0 12px 2px rgba(255,45,63,.7),inset 0 0 10px rgba(255,255,255,.16);animation:none;}
+#vtabs button.obs .pcnt{color:inherit;}
+@keyframes obsNeon{0%,100%{box-shadow:0 0 4px rgba(255,45,63,.4),inset 0 0 8px rgba(255,45,63,.14);}50%{box-shadow:0 0 11px 1px rgba(255,45,63,.8),inset 0 0 10px rgba(255,45,63,.26);}}
+@media (prefers-reduced-motion:reduce){#vtabs button.obs{animation:none;}}
+#vistaObs .ob-caja{border:1px solid #ff2d3f;box-shadow:0 0 0 1px rgba(255,45,63,.3),0 0 14px rgba(255,45,63,.5),inset 0 0 22px rgba(255,45,63,.09);background:var(--panel);padding:14px;}
+#vistaObs .msg{margin-top:0;}
+.ob-piso{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);margin:20px 0 4px;}
+.ob-piso:first-of-type{margin-top:4px;}
+.ob-fila{display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:8px 14px;align-items:center;padding:11px 0;border-top:1px solid var(--border);}
+.ob-d{font-size:16px;font-weight:800;}
+.ob-main{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.ob-zs{display:flex;flex-wrap:wrap;gap:8px 20px;min-width:0;}
+.ob-z{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.ob-zl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--sub);}
+.ob-ch{display:flex;flex-wrap:wrap;gap:5px;}
+.ob-ch1{border-radius:999px;padding:3px 10px;font-size:12.5px;background:color-mix(in srgb,var(--bad) 13%,var(--panel));border:1px solid color-mix(in srgb,var(--bad) 38%,var(--border));color:var(--text);}
+.ob-ch1.off{background:var(--soft);border-color:var(--border);color:var(--sub);}
+.ob-q{display:block;font-size:12px;color:var(--sub);max-width:100%;}
+.ob-acc{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+.ob-n{font-size:12.5px;color:var(--sub);white-space:nowrap;min-width:64px;text-align:right;}
+.ob-cor{width:136px;}
+.ob-go{min-width:40px;padding:0 !important;display:inline-flex;align-items:center;justify-content:center;}
+.ob-cor.conf{background:var(--bad);color:#fff;border-color:var(--bad);}
+.ob-vacio{padding:18px 4px;color:var(--sub);}
+@media (max-width:640px){.ob-fila{grid-template-columns:minmax(0,1fr);}.ob-acc{justify-content:space-between;}.ob-cor{flex:1 1 auto;width:auto;}.ob-n{min-width:0;}}
+.modal.obw{max-width:640px;max-height:calc(100dvh - 40px);}
+.obgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;overflow-y:auto;overscroll-behavior:contain;}
+.obz{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--sub);margin:4px 0 -2px;}
+#velObsFoto{z-index:70;}
+.ic-der{--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M9 4l8 8-8 8'/%3E%3C/svg%3E");}
+.ob-l{font-size:14px;line-height:1.4;}
+.ob-l b{color:var(--sub);font-weight:700;}
+.ob-main{gap:2px;}
+#vtabs button.obs .ptxt{white-space:nowrap;}
+#vtabs button.obs{flex-direction:row;flex-wrap:wrap;gap:4px 8px;}
+.ob-fila{padding:9px 0;}
+.ob-fila{display:grid;grid-template-columns:78px minmax(0,1fr) 288px;gap:8px 14px;align-items:center;padding:7px 0;border-top:0;}
+.ob-fila.sep{margin-top:22px;padding-top:15px;border-top:2px solid var(--strong);}
+.ob-acc{display:grid;grid-template-columns:136px 64px 40px;gap:8px;align-items:center;justify-content:end;}
+.ob-n{min-width:0;text-align:right;}
+.ob-go.vacio{display:block;width:40px;height:1px;visibility:hidden;}
+@media (max-width:640px){
+  .ob-fila{grid-template-columns:50px minmax(0,1fr);}
+  .ob-acc{grid-column:1 / -1;grid-template-columns:minmax(0,1fr) 64px 40px;justify-content:stretch;}
+  .ob-cor{width:100%;}
+  .ob-fila.sep{margin-top:26px;}
+}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -1031,6 +1083,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <div class="infobar" id="infoBar" role="status" hidden></div>
 <main>
   <div class="pestanas" id="vtabs" role="tablist" aria-label="Secciones de Calidad">
+    <button type="button" data-v="obs" id="vtObs" class="obs" aria-pressed="false" hidden><span class="ptxt">Observaciones</span><i class="pcnt" id="obN" hidden></i><i class="tnuevo" data-desde="2026-11-19">Nuevo</i></button>
     <button type="button" class="on" data-v="dptos" aria-pressed="true"><span class="ptxt">Departamentos</span></button>
     <button type="button" data-v="prot" aria-pressed="false"><span class="ptxt">Protocolos</span><i class="tnuevo" data-desde="2026-11-08">Nuevo</i></button>
   </div>
@@ -1069,6 +1122,12 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <button type="button" data-sc="cocina" aria-pressed="false"><span class="pfila"><span class="ptxt">Muro cocina</span><span class="pring" hidden><b></b></span></span><span class="pbarra" hidden><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span></span><span class="pnums"><i class="pcnt pv" hidden></i><i class="pcnt pp" hidden></i><i class="pcnt po" hidden></i><i class="pcnt pc" hidden></i></span></button>
   </div>
   <div id="lista"></div>
+  </section>
+  <section id="vistaObs" hidden>
+    <div class="ob-caja">
+      <p class="msg" id="obMsg"></p>
+      <div id="obLista"></div>
+    </div>
   </section>
   <section id="vistaProt" hidden>
     <div class="psec" id="pTabs" role="tablist" aria-label="Secciones"></div>
@@ -1240,6 +1299,29 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     </div>
   </div>
 </div>
+<div id="velObs">
+  <div class="modal obw" role="dialog" aria-modal="true" aria-labelledby="obT">
+    <h2 id="obT">Fotos</h2>
+    <div class="sub" id="obS" style="margin-top:0;"></div>
+    <div class="obgal" id="obGal"></div>
+    <div class="acciones uno">
+      <button class="btn primary" id="obCerrar" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+<div id="velObsFoto">
+  <div class="modal fv" role="dialog" aria-modal="true" aria-label="Foto de la observación">
+    <div class="fvimg" id="obImg"></div>
+    <div class="sub" id="obInfo" style="margin-top:0;"></div>
+    <div class="acciones">
+      <button class="btn" id="obAnt" type="button">Anterior</button>
+      <button class="btn" id="obSig" type="button">Siguiente</button>
+    </div>
+    <div class="acciones uno">
+      <button class="btn primary" id="obFCerrar" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
 <div id="velFoto">
   <div class="modal fv" role="dialog" aria-modal="true" aria-label="Foto del departamento">
     <div class="fvimg" id="fvImg"></div>
@@ -1353,7 +1435,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.38.34';
+const CAL_VERSION = '1.39.0';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -1474,6 +1556,7 @@ function cerrarSesion(msg){
 function pintarQuien(){
   $('quien').textContent = (cargo ? (cargo === 'Admin' && /^ismael\b/i.test(nombre || '') ? 'Dev' : cargo) + ' - ' : '') + nombre;
   ajustarFotosUI();
+  if(window.pintarObs) window.pintarObs();
 }
 
 function entrarVista(){
@@ -1511,7 +1594,7 @@ function inicialApellido(u){
   return p[0] + ' ' + (p.length >= 4 ? p[2] : p[1]).charAt(0).toUpperCase() + '.';
 }
 function ajustarNombres(){
-  document.querySelectorAll('.pill.quien i, #mQuien').forEach(el => {
+  document.querySelectorAll('.pill.quien i, #mQuien, .ob-q').forEach(el => {
     if(el.dataset.nomfull === undefined || el.dataset.nomtxt !== el.textContent) el.dataset.nomfull = el.textContent.trim();
     const full = el.dataset.nomfull; if(!full) return;
     el.style.setProperty('white-space', 'nowrap', 'important'); el.style.overflow = 'hidden'; el.style.maxWidth = '100%';
@@ -2967,7 +3050,7 @@ document.addEventListener('visibilitychange', () => {
   const R=document.documentElement, rnd=(a,b)=>a+Math.random()*(b-a);
   const quieto=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
   const activo=()=>R.classList.contains('halloween');
-  const hayVelo=()=>!!document.querySelector('#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on');
+  const hayVelo=()=>!!document.querySelector('#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on,#velObs.on,#velObsFoto.on');
   // Trayecto recto: lado y altura al azar (solo mitad superior), ángulo máx. ±20°
   function trayecto(ancho,alto,maxY){
     const W=innerWidth,H=innerHeight,dir=Math.random()<.5?1:-1;
@@ -3020,6 +3103,131 @@ document.addEventListener('visibilitychange', () => {
     };
     setTimeout(ciclo,1500);
   }
+})();
+</script>
+<script>
+// ===== Observaciones (solo Ismael e Ignacio): observados con sus fotos y botón Corregido =====
+(function(){
+  const g = id => document.getElementById(id);
+  const veObs = () => /^(ismael|ignacio)\b/i.test(String(nombre || '').trim());
+  const ZONAS = [['piso', 'Piso'], ['muros', 'Muro baño'], ['cocina', 'Muro cocina']];
+  const partir = d => String(d || '').split(', ').filter(Boolean);
+  let confKey = '', confTimer = 0, galBase = '', lista = [], fi = 0;
+
+  function datos(){
+    const por = {};
+    Object.keys(revisiones).forEach(k => {
+      const r = revisiones[k]; if(!r || r.e !== 'observado') return;
+      const q = k.split('|'); if(q.length < 3) return;
+      const base = q[0] + '|' + q[1];
+      (por[base] = por[base] || {base, p: q[0], d: q[1], z: {}}).z[q[2]] = r;
+    });
+    const arr = Object.values(por);
+    arr.forEach(x => { const l = LAYOUT.find(y => claveBase(y) === x.base); x.n = l ? l.n : (parseInt(String(x.p).replace(/[^\-\d]/g, ''), 10) || 0); });
+    arr.sort((a, b) => (a.n - b.n) * (ordenDesc ? -1 : 1) || (a.d === 'Pasillo') - (b.d === 'Pasillo') || String(a.d).localeCompare(String(b.d), 'es', {numeric: true}));
+    return arr;
+  }
+  function chips(r){
+    const c = partir(r.d);
+    if(!c.length) return '<span class="ob-ch1 off">Sin detalle</span>';
+    return c.map(t => '<span class="ob-ch1' + (/^Con fotos/.test(t) ? ' off' : '') + '">' + esc(t) + '</span>').join('');
+  }
+  function fila(x, sep){
+    const base = x.base, n = (fotosDe[base] || []).filter(f => f.estado !== 'sub').length || fotosCount[base] || 0, na = Number(archivadas[base]) || 0;
+    const txt = r => partir(r.d).map(t => t.replace(/^Palmeta\/s /, '')).join(', ') || 'Sin detalle';
+    const lineas = ZONAS.filter(z => x.z[z[0]]).map(z => (z[0] === 'piso' ? '' : '<b>' + z[1] + ':</b> ') + esc(txt(x.z[z[0]])));
+    const foto = n ? '<span class="ob-n">' + n + (n === 1 ? ' foto' : ' fotos') + '</span><button type="button" class="btn small ob-go" data-b="' + esc(base) + '" aria-label="Ver fotos de ' + esc(x.d === 'Pasillo' ? 'Pasillo' : 'Dpto ' + x.d) + '"><i class="ic ic-der"></i></button>'
+      : '<span class="ob-n">' + (na ? 'Archivadas' : 'Sin fotos') + '</span><span class="ob-go vacio"></span>';
+    const conf = confKey === base;
+    const cor = '<button type="button" class="btn small ob-cor' + (conf ? ' conf' : '') + '" data-b="' + esc(base) + '"' + (soloLectura() ? ' disabled title="Tu cuenta solo puede mirar"' : '') + '><i class="ic ib ic-ok"></i>' + (conf ? 'Confirmar' : 'Corregido') + '</button>';
+    return '<div class="ob-fila' + (sep ? ' sep' : '') + '"><div class="ob-d">' + esc(x.d === 'Pasillo' ? 'Pasillo' : x.d) + '</div><div class="ob-main">' + lineas.map(l => '<div class="ob-l">' + l + '</div>').join('') + '</div><div class="ob-acc">' + cor + foto + '</div></div>';
+  }
+  function pintarObs(){
+    const tab = g('vtObs'); if(!tab) return;
+    const ve = veObs();
+    tab.hidden = !ve; g('vtabs').classList.toggle('tres', ve);
+    if(!ve){ if(!g('vistaObs').hidden && window.ponerVistaCal) window.ponerVistaCal('dptos'); return; }
+    const d = datos(), nd = d.filter(x => x.d !== 'Pasillo').length;
+    const bn = g('obN'); bn.hidden = !d.length; bn.textContent = d.length;
+    g('obMsg').textContent = d.length ? d.length + (d.length === 1 ? ' departamento con observaciones' : ' departamentos con observaciones') : 'No hay observaciones pendientes.';
+    let h = '', pisoAct = null;
+    d.forEach(x => { const sep = pisoAct !== null && x.p !== pisoAct; pisoAct = x.p; h += fila(x, sep); });
+    g('obLista').innerHTML = h || '<div class="ob-vacio">Nada por corregir.</div>';
+    if(window.ajustarNombres) ajustarNombres();
+  }
+  window.pintarObs = pintarObs;
+
+  // ===== Corregido: pide confirmar y marca todas las zonas observadas del departamento =====
+  function corregir(base){
+    if(soloLectura()) return;
+    if(confKey !== base){
+      confKey = base; clearTimeout(confTimer);
+      confTimer = setTimeout(() => { confKey = ''; pintarObs(); }, 4000);
+      pintarObs(); return;
+    }
+    clearTimeout(confTimer); confKey = '';
+    const x = datos().find(y => y.base === base); if(!x){ pintarObs(); return; }
+    Object.keys(x.z).forEach(s => {
+      const k = base + '|' + s, r = revisiones[k]; if(!r || r.e !== 'observado') return;
+      const items = partir(r.d).map(t => { const m = t.match(/^(.*) ×(\d+)$/); return m ? {t: m[1], c: +m[2]} : {t, c: 1}; });
+      enviarRevision(k, 'corregido', items, false);
+    });
+    pintarObs();
+    avisoLateral(dptoTxt(base) + ' quedó como corregido.', 'exito');
+  }
+
+  // ===== ventana de fotos =====
+  const cerrarVel = id => { const v = g(id); if(!v.classList.contains('on') || v.classList.contains('out')) return; v.classList.add('out'); setTimeout(() => v.classList.remove('on', 'out'), 140); };
+  function pintarGal(){
+    const base = galBase, arr = (fotosDe[base] || []).filter(f => f.estado === 'ok');
+    lista = arr;
+    const est = fotosEstado[base];
+    g('obS').textContent = est === 'pidiendo' && !arr.length ? 'cargando…' : est === 'error' && !arr.length ? 'no se pudieron cargar' : arr.length + (arr.length === 1 ? ' foto' : ' fotos');
+    const zonas = ZONAS.filter(z => arr.some(f => f.z === z[0]));
+    const sinZ = arr.filter(f => !ZONAS.some(z => z[0] === f.z));
+    let h = '';
+    zonas.forEach(z => { if(zonas.length > 1 || sinZ.length) h += '<div class="obz" style="grid-column:1/-1;">' + z[1] + '</div>'; arr.forEach((f, i) => { if(f.z === z[0]) h += '<button type="button" class="fth" data-i="' + i + '" aria-label="Foto ' + (i + 1) + '">' + (f.m ? '<img alt="" src="data:image/jpeg;base64,' + f.m + '">' : '') + '</button>'; }); });
+    sinZ.forEach(f => { const i = arr.indexOf(f); h += '<button type="button" class="fth" data-i="' + i + '" aria-label="Foto ' + (i + 1) + '">' + (f.m ? '<img alt="" src="data:image/jpeg;base64,' + f.m + '">' : '') + '</button>'; });
+    g('obGal').innerHTML = h;
+  }
+  async function abrirGal(base){
+    galBase = base;
+    g('obT').textContent = dptoTxt(base);
+    g('obGal').innerHTML = ''; g('obS').textContent = 'cargando…';
+    g('velObs').classList.add('on');
+    if(!(fotosDe[base] || []).some(f => f.estado === 'ok') || !fotosFresca[base] || Date.now() - fotosFresca[base] > 20000) await traerFotos(base, true);
+    if(galBase === base) pintarGal();
+  }
+  async function verUna(i){
+    if(!lista.length) return;
+    fi = (i + lista.length) % lista.length;
+    const f = lista[fi], mi = f;
+    g('obImg').innerHTML = f.m ? '<img alt="Foto de la observación" src="data:image/jpeg;base64,' + f.m + '">' : '';
+    g('obInfo').textContent = [dptoTxt(galBase), NOMBRE_SCOPE[f.z] || '', fechaFoto(f.ts), f.u].filter(Boolean).join(' · ') + ' · ' + (fi + 1) + ' de ' + lista.length;
+    g('obAnt').disabled = g('obSig').disabled = lista.length < 2;
+    g('velObsFoto').classList.add('on');
+    const gd = await fcLeer(f.id);
+    if(gd){ if(lista[fi] === mi) g('obImg').innerHTML = '<img alt="Foto de la observación" src="data:image/jpeg;base64,' + gd + '">'; return; }
+    try{
+      const j = await llamar('calidadFotoVer', {ids: [f.id]}, false, 60000);
+      if(j && j.ok && j.fotos && j.fotos[f.id]){ fcGuardar(f.id, j.fotos[f.id]); if(lista[fi] === mi) g('obImg').innerHTML = '<img alt="Foto de la observación" src="data:image/jpeg;base64,' + j.fotos[f.id] + '">'; }
+      else if(lista[fi] === mi) g('obInfo').textContent += ' · (no se pudo cargar la foto completa)';
+    }catch(e){ if(lista[fi] === mi) g('obInfo').textContent += ' · (no se pudo cargar la foto completa)'; }
+  }
+  g('obLista').addEventListener('click', e => {
+    const c = e.target.closest('.ob-cor'); if(c){ corregir(c.dataset.b); return; }
+    const b = e.target.closest('.ob-go'); if(b) abrirGal(b.dataset.b);
+  });
+  g('obGal').addEventListener('click', e => { const b = e.target.closest('.fth'); if(b) verUna(+b.dataset.i); });
+  g('obCerrar').addEventListener('click', () => cerrarVel('velObs'));
+  g('obFCerrar').addEventListener('click', () => cerrarVel('velObsFoto'));
+  g('obAnt').addEventListener('click', () => verUna(fi - 1));
+  g('obSig').addEventListener('click', () => verUna(fi + 1));
+
+  // cada vez que la página repinta la lista de departamentos, se repinta esta también
+  const pintar0 = pintar;
+  pintar = function(){ const r = pintar0.apply(this, arguments); try{ pintarObs(); }catch(e){} return r; };
+  pintarObs();
 })();
 </script>
 <script>
@@ -3284,15 +3492,17 @@ window.limpiarNuevos = function(raiz){
   // ---------- Departamentos / Protocolos ----------
   function ponerVista(v){
     document.querySelectorAll('#vtabs button').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
-    $p('vistaDptos').hidden = v !== 'dptos'; $p('vistaProt').hidden = v !== 'prot';
-    try{ guardarLocal(kUsr('calidadVista'), v === 'prot' ? 'prot' : null); }catch(e){}
+    $p('vistaDptos').hidden = v !== 'dptos'; $p('vistaProt').hidden = v !== 'prot'; $p('vistaObs').hidden = v !== 'obs';
+    try{ guardarLocal(kUsr('calidadVista'), v === 'prot' || v === 'obs' ? v : null); }catch(e){}
+    if(v === 'obs' && window.pintarObs) window.pintarObs();
     if(v === 'prot'){ pintarTorre(); if(!PD.cargado && !PD.cargando) cargarProt(); }
   }
+  window.ponerVistaCal = ponerVista;
   $p('vtabs').addEventListener('click', e => { const b = e.target.closest('button'); if(b) ponerVista(b.dataset.v); });
   try{
-    if(leerLocal(kUsr('calidadVista')) === 'prot'){
+    if(leerLocal(kUsr('calidadVista')) === 'prot' || (leerLocal(kUsr('calidadVista')) === 'obs' && /^(ismael|ignacio)\b/i.test(String(nombre || '')))){
       // se espera a que la página termine su primera carga
-      const t = setInterval(() => { try{ if(cargado){ clearInterval(t); ponerVista('prot'); } }catch(e){} }, 400);
+      const t = setInterval(() => { try{ if(cargado){ clearInterval(t); ponerVista(leerLocal(kUsr('calidadVista'))); } }catch(e){} }, 400);
       setTimeout(() => clearInterval(t), 60000);
     }
   }catch(e){}
@@ -3443,7 +3653,7 @@ limpiarNuevos();
 /* ===== fin aviso de sitio ===== */
 // ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
-  const abierta = () => !!document.querySelector('#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on');
+  const abierta = () => !!document.querySelector('#vel.on,#velReg.on,#velOp.on,#velFoto.on,#velExp.on,#velObs.on,#velObsFoto.on');
   const puedeMover = (n, dy) => { for(; n && n !== document.documentElement; n = n.parentElement){ if(n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && (dy < 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1)) return true; } return false; };
   document.addEventListener('wheel', e => { if(abierta() && !puedeMover(e.target, e.deltaY)) e.preventDefault(); }, {passive: false});
   let y0 = 0;
@@ -3453,4 +3663,4 @@ limpiarNuevos();
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Calidad · v1.38.34 · 18-11-2026 ==== -->
+<!-- ==== VERSION: Calidad · v1.39.0 · 19-11-2026 ==== -->
