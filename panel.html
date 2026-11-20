@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.147';
+const APP_VERSION = '0.73.148';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4419,7 +4419,7 @@ document.getElementById('prGuardarBtn').addEventListener('click', () => {
   if(!igual){
     pagosRetenidos = nuevos;
     markSettingsDirty('pagosRetenidos'); scheduleSave();
-    render();
+    render(); saveNow();
     if(document.getElementById('fragOverlay').classList.contains('show')) abrirResumenPago();
     avisoToast(nuevos.length ? 'Pagos retenidos: ' + nuevos.join(', ') + '.' : 'Ya no hay pagos retenidos.', 'ok');
   }
@@ -5560,6 +5560,7 @@ document.getElementById('ratesSave').addEventListener('click', () => {
   markSettingsDirty();
   scheduleSave(); updateRateFootnote(); render();
   closeOverlayAnimated(ratesOverlay);
+  saveNow();
 });
 
 const pinOverlay = document.getElementById('pinOverlay');
@@ -5860,7 +5861,7 @@ function abrirRevisionFechas(){
       if(st.partidaTs && st.partidaTs > st.terminadoTs) st.partidaTs = st.terminadoTs;
       markCellDirty(id);
     });
-    marcarFechasRevisadas(g); scheduleSave(); render();
+    marcarFechasRevisadas(g); scheduleSave(); render(); saveNow();
     setTimeout(() => { programarAvisoFechas(); }, 300);
   }, 'Guardar y cerrar');
   document.getElementById('ffLista').addEventListener('change', e => { const r = e.target.closest('.ff-fila'); if(r) r.classList.toggle('cambio', e.target.value !== g.dia); });
@@ -6207,7 +6208,7 @@ function pintarObjetivos(){
 }
 function guardarObjetivos(){
   markSettingsDirty('objetivos');
-  scheduleSave();
+  saveNow();
   pintarObjetivos();
   actualizarAvisos();
 }
@@ -9969,9 +9970,9 @@ const floatingSaveBtn = document.getElementById('floatingSaveBtn');
 // ===== el botón flotante de guardar se actualiza también al guardar o al marcar cambios, no solo al hacer scroll =====
 function refrescarBotonGuardar(){ try{ updateFloatingSaveBtn(); }catch(e){} }
 function updateFloatingSaveBtn(){
-  const hayPendiente = hayPendiente();
+  const pendiente = hayPendiente();
   document.getElementById('scrollTopBtn').style.display = window.scrollY > 260 ? 'flex' : 'none';
-  const show = isAdmin && window.scrollY > 260 && hayPendiente;
+  const show = isAdmin && window.scrollY > 260 && pendiente;
   floatingSaveBtn.style.display = show ? 'flex' : 'none';
 }
 window.addEventListener('scroll', updateFloatingSaveBtn);
@@ -10255,4 +10256,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.147 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.148 · 20-11-2026 ==== -->
