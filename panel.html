@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.154';
+const APP_VERSION = '0.73.155';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -4430,7 +4430,10 @@ function abrirPagosRetenidos(){
   filas.sort((a, b) => (visible(b) - visible(a)) || a.w.localeCompare(b.w, 'es'));
   document.getElementById('prLista').innerHTML = filas.map(f => {
     const w = f.w, t = f.t;
-    return `<label class="pr-fila${visible(f) ? '' : ' pr-sin'}"${visible(f) ? '' : ' hidden'}><input type="checkbox" data-pr-w="${esc(w)}"${trabRetenido(w) ? ' checked' : ''}><span class="pr-nom" data-nomfull="${esc(w)}">${esc(w)}</span><span class="pr-det">${t.n} terminada${t.n === 1 ? '' : 's'} · ${money(t.monto)}</span></label>`;
+    // ===== los retenidos se ven con sus ajustes de pago pendientes aplicados, igual que en el resumen =====
+    const aj = trabRetenido(w) ? pendientesDe(w).reduce((s, x) => s + (x.tipo === 'resta' ? -1 : 1) * (Number(x.monto) || 0), 0) : 0;
+    const ajTxt = aj ? ` · ajustes ${aj < 0 ? '-' : '+'}${money(Math.abs(aj))}` : '';
+    return `<label class="pr-fila${visible(f) ? '' : ' pr-sin'}"${visible(f) ? '' : ' hidden'}><input type="checkbox" data-pr-w="${esc(w)}"${trabRetenido(w) ? ' checked' : ''}><span class="pr-nom" data-nomfull="${esc(w)}">${esc(w)}</span><span class="pr-det">${t.n} terminada${t.n === 1 ? '' : 's'} · ${money(t.monto + aj)}${ajTxt}</span></label>`;
   }).join('') || '<p style="font-size:13px;color:var(--sub);">No hay trabajadores.</p>';
   prVerTodos(false);
   document.getElementById('prOverlay').classList.add('show');
@@ -10323,4 +10326,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.154 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.155 · 20-11-2026 ==== -->
