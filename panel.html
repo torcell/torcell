@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.142';
+const APP_VERSION = '0.73.143';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2996,6 +2996,25 @@ function rebuildWorkerList(){
     if(!workerStatus[w]) workerStatus[w] = defaultWorkerEntry(w);
     if(!workerStatus[w].especialidad) workerStatus[w].especialidad = defaultWorkerEntry(w).especialidad;
   });
+  unificarNombres();
+}
+// ===== nombres viejos (cortos) en pagos, ajustes, retenidos y m² por semana pasan al nombre actual, solo si es único =====
+function nombreActual(n){
+  if(!n || ALL_WORKERS.indexOf(n) !== -1) return n;
+  const m = ALL_WORKERS.filter(x => x.indexOf(n + ' ') === 0);
+  return m.length === 1 ? m[0] : n;
+}
+function unificarNombres(){
+  if(!isAdmin) return;
+  let hubo = false;
+  (paymentHistory || []).forEach(h => { const n = nombreActual(h.worker); if(n !== h.worker){ h.worker = n; hubo = true; } });
+  (ajustesPago || []).forEach(a => { const n = nombreActual(a.w); if(n !== a.w){ a.w = n; hubo = true; } });
+  pagosRetenidos = pagosRetenidos.map(w => { const n = nombreActual(w); if(n !== w) hubo = true; return n; }).filter((w, i, v) => v.indexOf(w) === i);
+  (historialM2 || []).forEach(p => {
+    const pt = p && p.porTrabajador; if(!pt) return;
+    Object.keys(pt).forEach(k => { const n = nombreActual(k); if(n !== k){ pt[n] = (pt[n] || 0) + pt[k]; delete pt[k]; hubo = true; } });
+  });
+  if(hubo) markSettingsDirty();
 }
 
 let avanceRemoto = 0, remotoAvance = {};
@@ -3833,6 +3852,11 @@ function renombrarTrabajador(oldName, newName){
     const cIdx = customWorkers.indexOf(oldName);
     if(cIdx >= 0) customWorkers[cIdx] = newName;
     if(workerDocs[oldName]){ workerDocs[newName] = workerDocs[oldName]; delete workerDocs[oldName]; }
+    // ===== el nombre también cambia en pagos, ajustes, retenidos y m² por semana =====
+    paymentHistory.forEach(h => { if(h.worker === oldName) h.worker = newName; });
+    ajustesPago.forEach(a => { if(a.w === oldName) a.w = newName; });
+    pagosRetenidos = pagosRetenidos.map(w => w === oldName ? newName : w);
+    historialM2.forEach(p => { const pt = p && p.porTrabajador; if(pt && pt[oldName] !== undefined){ pt[newName] = (pt[newName] || 0) + pt[oldName]; delete pt[oldName]; } });
     Object.keys(state).forEach(id => {
       if(state[id].trabajador === oldName){ state[id].trabajador = newName; markCellDirty(id); }
     });
@@ -10204,4 +10228,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.142 · 20-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.143 · 20-11-2026 ==== -->
