@@ -1972,7 +1972,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
         <button class="btn admin-only" id="materialesBtn"><i class="ic ib ic-ladrillo"></i>Materiales</button>
         <button class="btn" id="pedirBodegaBtn" type="button"><i class="ic ib ic-caja"></i>Pedir material a Bodega</button>
         <button class="btn" id="trabBaseBtn" type="button"><i class="ic ib ic-trabajadores"></i>BD de Trabajadores</button>
-        <button class="btn admin-only" id="peticionesBtn"><i class="ic ib ic-bandeja"></i>Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
+        <button class="btn admin-only" id="peticionesBtn" disabled title="Desactivado por ahora"><i class="ic ib ic-bandeja"></i>Peticiones <span id="peticionesBadge" class="peticiones-badge" style="display:none;">0</span></button>
       </div>
     </div>
     <div class="tb-group">
@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.158';
+const APP_VERSION = '0.73.159';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2577,6 +2577,8 @@ const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPI
 
 const SEED_DATA = null;
 
+// ===== peticiones de trabajadores: desactivadas por ahora (la hoja queda para usarla más adelante) =====
+const PETICIONES_ACTIVAS = false;
 // ===== partidas que termina el contratista (la familia Sepúlveda): van a "No Asignado", con ID fijo y sin pago =====
 const NOM_PROPIO = 'No Asignado', ID_PROPIO = 'Tnoasig';
 const esPropio = n => n === NOM_PROPIO;
@@ -2746,6 +2748,7 @@ function aplicarBotonesPorCargo(){
     if(invitado){ b.disabled = true; b.classList.add('bloq'); b.setAttribute('aria-disabled', 'true'); b.title = 'Solo Ismael o Ignacio pueden abrir este botón'; return; }
     b.removeAttribute('aria-disabled');
     if(!b.id) return;
+    if(b.id==='peticionesBtn' && !PETICIONES_ACTIVAS){ b.disabled = true; b.classList.add('bloq'); b.title = 'Desactivado por ahora'; return; }
     if(!cargo){ b.disabled = false; b.classList.remove('bloq'); if(b.dataset.tit0) b.title = b.dataset.tit0; else b.removeAttribute('title'); return; }
     const clave = MAPA_BOTONES[b.id];
     const ok = !!clave && misPermisos[clave] === true;
@@ -7805,7 +7808,7 @@ let avisoToastTimer = null;
 function avisoToast(texto, tipo, op){ avisoLateral(texto, tipo, op); }
 function tienePeticionMia(celdaId, tipo){ return misPeticiones.some(p => p.celda === celdaId && p.tipo === tipo); }
 function peticionBtnHtml(cell, st){
-  if(!workerSession) return '';
+  if(!PETICIONES_ACTIVAS || !workerSession) return '';
   const esMia = st.trabajador === workerSession, libre = !st.trabajador;
   if(!esMia && !libre) return '';
   const estado = resolveEstado(st), frg = esFrague(cell);
@@ -7824,7 +7827,7 @@ async function refrescarDatosTrabajador(){
   }
 }
 async function cargarMisPeticiones(){
-  if(!workerSession || !DB_URL || !sessionToken) return;
+  if(!PETICIONES_ACTIVAS || !workerSession || !DB_URL || !sessionToken) return;
   try{
     const j = await llamarDb('misPeticiones');
     if(j && j.ok){
@@ -7852,7 +7855,7 @@ function actualizarBadgePeticiones(){
   b.style.display = peticionesPendientes.length ? 'inline-block' : 'none';
 }
 async function cargarPeticionesAdmin(){
-  if(!isAdmin || !DB_URL || !sessionToken) return;
+  if(!PETICIONES_ACTIVAS || !isAdmin || !DB_URL || !sessionToken) return;
   try{
     const j = await llamarDb('listarPeticiones');
     if(j && j.ok){
@@ -7949,6 +7952,7 @@ async function resolverPeticionUI(id, aceptar){
 document.getElementById('petTabPend').addEventListener('click', () => cambiarTabPeticiones('pend'));
 document.getElementById('petTabHist').addEventListener('click', () => cambiarTabPeticiones('hist'));
 document.getElementById('peticionesBtn').addEventListener('click', () => {
+  if(!PETICIONES_ACTIVAS) return;
   cambiarTabPeticiones('pend');
   document.getElementById('peticionesOverlay').classList.add('show');
   cargarPeticionesAdmin();
@@ -10382,4 +10386,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.158 · 21-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.159 · 21-11-2026 ==== -->
