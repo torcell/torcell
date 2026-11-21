@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.156';
+const APP_VERSION = '0.73.157';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2577,11 +2577,19 @@ const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPI
 
 const SEED_DATA = null;
 
-// ===== partidas que termina el contratista: van a nombre de "-" (se ve "No Asignado"); los Sepúlveda son los antiguos =====
-const NOM_PROPIO = 'No Asignado';
-const esGuion = n => /^[-–—]+$/.test(String(n || '').trim());
-const esPropio = n => esGuion(n) || /^sepulveda/.test(String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase());
-const nomVis = n => esGuion(n) ? NOM_PROPIO : n;
+// ===== partidas que termina el contratista (la familia Sepúlveda): van a "No Asignado", con ID fijo y sin pago =====
+const NOM_PROPIO = 'No Asignado', ID_PROPIO = 'Tnoasig';
+const esPropio = n => n === NOM_PROPIO;
+const nomVis = n => n;
+// los nombres que se usaban antes ("-" y Sepúlveda) pasan a No Asignado al cargar
+const nombreAntiguoPropio = n => /^[-–—]+$/.test(String(n || '').trim()) || /^sepulveda/.test(String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase());
+function unificarPropio(){
+  Object.keys(state).forEach(id => { const st = state[id]; if(st && nombreAntiguoPropio(st.trabajador)) st.trabajador = NOM_PROPIO; });
+  Object.keys(workerStatus).forEach(k => { if(nombreAntiguoPropio(k)) delete workerStatus[k]; });
+  customWorkers = customWorkers.filter(n => !nombreAntiguoPropio(n));
+  workerStatus[NOM_PROPIO] = Object.assign({estado: 'activo', especialidad: 'ceramista'}, workerStatus[NOM_PROPIO] || {}, {id: ID_PROPIO});
+  (historialM2 || []).forEach(p => { const pt = p && p.porTrabajador; if(!pt) return; Object.keys(pt).forEach(k => { if(nombreAntiguoPropio(k)){ pt[NOM_PROPIO] = (pt[NOM_PROPIO] || 0) + pt[k]; delete pt[k]; } }); });
+}
 let ALL_WORKERS = ["Anthony", "Army Luciano", "Cesar", "Edgardo", "Emmanuel", "Henrry", "Jaxene", "Jefe", "Joseph", "Luis", "Marco", "Rafael", "Ramon"];
 // Pisos que no se trabajan en esta obra (22 es el último; 23 y 24 son terraza y no sabemos si nos tocan).
 // Para volver a mostrarlos basta dejar la lista vacía: const PISOS_OCULTOS = [];
@@ -2988,7 +2996,7 @@ function aplicarFusion(fusion){
   Object.keys(fusion).forEach(id => {
     const c = cellById[id], it = fusion[id];
     if(!c || !it || typeof it !== 'object') return;
-    if(!dirtyCellIds.has(id)) state[id] = {...it};
+    if(!dirtyCellIds.has(id)) state[id] = {...it, trabajador: nombreAntiguoPropio(it.trabajador) ? NOM_PROPIO : it.trabajador};
     baseRec[id] = recordForCell(c, {...it});
   });
   matNivelesCache = null;
@@ -3547,6 +3555,7 @@ function applyLoadedPayload(parsed){
   if(isAdmin && Array.isArray(parsed.pagosRetenidos)) pagosRetenidos = refsANombre(parsed.pagosRetenidos.filter(x => typeof x === 'string'));
   if(isAdmin && Array.isArray(parsed.ajustesPago)) ajustesPago = parsed.ajustesPago.filter(a => a && typeof a.w === 'string');
   cfgCargada = true;
+  unificarPropio();
   if(parsed.obsPorArea && typeof parsed.obsPorArea === 'object'){
     Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(parsed.obsPorArea[a])) OBS_POR_AREA[a] = parsed.obsPorArea[a].filter(x => typeof x === 'string'); });
   }
@@ -4925,15 +4934,14 @@ function abrirAsignar(id){
   const cell = cellById[id], actual = state[id].trabajador || '';
   const especialidad = cell.categoria === 'Frague' ? 'fraguador' : 'ceramista';
   const activos = activeWorkers().filter(w => (workerStatus[w] || {}).especialidad === especialidad && !esPropio(w));
-  const guion = ALL_WORKERS.find(esGuion) || '-';
   const pisoCell = celdaPisoDe(cell), pw = pisoCell ? (getState(pisoCell.id).trabajador || '') : '';
   document.getElementById('asignarTitulo').textContent = actual ? 'Reasignar trabajador' : 'Asignar trabajador';
   document.getElementById('asignarSub').textContent = `Depto ${cell.dpto} · ${AREA_LABEL[cell.area] || cell.area} · ${cell.piso}`;
   let html = '';
   if(pisoCell && pw && pw !== actual) html += `<button type="button" class="asig-op piso" data-w="${esc(pw)}">Igual al Piso: ${esc(nomVis(pw))}</button>`;
   html += activos.map(w => `<button type="button" class="asig-op${w === actual ? ' actual' : ''}" data-w="${esc(w)}">${w === actual ? '<i class="ic ic-ok"></i> ' : ''}${esc(w)}</button>`).join('');
-  html += `<button type="button" class="asig-op${esGuion(actual) ? ' actual' : ''}" data-w="${esc(esGuion(actual) ? actual : guion)}">${esGuion(actual) ? '<i class="ic ic-ok"></i> ' : ''}${NOM_PROPIO}</button>`;
-  if(actual && !esGuion(actual) && !activos.includes(actual)) html += `<button type="button" class="asig-op actual" data-w="${esc(actual)}"><i class="ic ic-ok"></i> ${esc(actual)}${esPropio(actual) ? '' : '<small>(inactivo o de otra especialidad)</small>'}</button>`;
+  html += `<button type="button" class="asig-op${esPropio(actual) ? ' actual' : ''}" data-w="${esc(NOM_PROPIO)}">${esPropio(actual) ? '<i class="ic ic-ok"></i> ' : ''}${NOM_PROPIO}</button>`;
+  if(actual && !esPropio(actual) && !activos.includes(actual)) html += `<button type="button" class="asig-op actual" data-w="${esc(actual)}"><i class="ic ic-ok"></i> ${esc(actual)}${esPropio(actual) ? '' : '<small>(inactivo o de otra especialidad)</small>'}</button>`;
   if(actual) html += '<button type="button" class="asig-op nadie" data-w="">Dejar sin asignar</button>';
   const grid = document.getElementById('asignarGrid');
   grid.innerHTML = html; grid.dataset.id = id;
@@ -10368,4 +10376,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.156 · 21-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.157 · 21-11-2026 ==== -->
