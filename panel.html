@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.157';
+const APP_VERSION = '0.73.158';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2583,7 +2583,13 @@ const esPropio = n => n === NOM_PROPIO;
 const nomVis = n => n;
 // los nombres que se usaban antes ("-" y Sepúlveda) pasan a No Asignado al cargar
 const nombreAntiguoPropio = n => /^[-–—]+$/.test(String(n || '').trim()) || /^sepulveda/.test(String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase());
+// cada partida guarda el ID del trabajador: si el nombre cambió en la configuración, manda el ID
+function nombrePorIdEnPartida(it){
+  if(!it || !it.wid) return it && it.trabajador;
+  return nombreDeId(it.wid) || it.trabajador;
+}
 function unificarPropio(){
+  Object.keys(state).forEach(id => { const st = state[id]; if(st && st.wid){ const n = nombreDeId(st.wid); if(n && n !== st.trabajador) st.trabajador = n; } });
   Object.keys(state).forEach(id => { const st = state[id]; if(st && nombreAntiguoPropio(st.trabajador)) st.trabajador = NOM_PROPIO; });
   Object.keys(workerStatus).forEach(k => { if(nombreAntiguoPropio(k)) delete workerStatus[k]; });
   customWorkers = customWorkers.filter(n => !nombreAntiguoPropio(n));
@@ -2996,7 +3002,7 @@ function aplicarFusion(fusion){
   Object.keys(fusion).forEach(id => {
     const c = cellById[id], it = fusion[id];
     if(!c || !it || typeof it !== 'object') return;
-    if(!dirtyCellIds.has(id)) state[id] = {...it, trabajador: nombreAntiguoPropio(it.trabajador) ? NOM_PROPIO : it.trabajador};
+    if(!dirtyCellIds.has(id)){ const nm = nombrePorIdEnPartida(it); state[id] = {...it, trabajador: nombreAntiguoPropio(nm) ? NOM_PROPIO : nm}; }
     baseRec[id] = recordForCell(c, {...it});
   });
   matNivelesCache = null;
@@ -3437,7 +3443,7 @@ function listaPartidas(ids, max){
 function recordForCell(c, stIn){
   const st = stIn || getState(c.id);
   return { id:c.id, categoria:c.categoria, piso:c.piso, dpto:c.dpto, area:c.area,
-    areaLabel: AREA_LABEL[c.area]||c.area, trabajador: st.trabajador||'',
+    areaLabel: AREA_LABEL[c.area]||c.area, trabajador: st.trabajador||'', wid: st.trabajador ? idTrab(st.trabajador) : '',
     partida: !!st.partida, terminado: !!st.terminado, pagado: !!st.pagado, retenido: !!st.retenido,
     nota: st.nota||'', m2: (st.m2===undefined||st.m2===null) ? null : st.m2,
     partidaTs: st.partidaTs||null, terminadoTs: st.terminadoTs||null, pagadoTs: st.pagadoTs||null };
@@ -10376,4 +10382,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.157 · 21-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.158 · 21-11-2026 ==== -->
