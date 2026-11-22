@@ -2481,7 +2481,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.165';
+const APP_VERSION = '0.73.169';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3581,7 +3581,7 @@ async function dbSave(dirtyIds){
 // ===== guardado en fila =====
 // Con GUARDADO_EN_FILA en false se vuelve al guardado anterior (cada Guardar espera la respuesta del servidor).
 const GUARDADO_EN_FILA = true;
-const COLA_KEY = 'progresoObraCola', COLA_ERR_KEY = 'progresoObraColaErrores', COLA_MAX_CHARS = 3000000, COLA_AVISO_MIN = 10;
+const COLA_KEY = 'progresoObraCola', COLA_ERR_KEY = 'progresoObraColaErrores', COLA_MAX_CHARS = 3000000, COLA_AVISO_MIN = 10, COLA_LOTE = 25;
 const colaLeerClave = k => { try{ const a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a.filter(x => x && typeof x === 'object' && x.cuerpo && typeof x.n === 'string') : []; }catch(e){ return []; } };
 function colaEscribirClave(k, arr){
   try{
@@ -3596,6 +3596,7 @@ const colaErrLeer = () => colaLeerClave(COLA_ERR_KEY), colaErrEscribir = a => co
 const colaMia = () => colaLeer().filter(x => x.u === (sessionName || ''));
 const colaErrMia = () => colaErrLeer().filter(x => x.u === (sessionName || ''));
 const nonceCola = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
+let colaTope = COLA_LOTE;
 let colaEnVuelo = false, colaTimer = null, colaEspera = 0, colaDesdeTs = 0;
 
 // Deja el cambio apartado en este aparato; el envío lo hace procesarCola()
@@ -3644,32 +3645,64 @@ function avisarServidorCola(e, motivo){
 function programarReintentoCola(){
   clearTimeout(colaTimer);
   if(!colaMia().length) return;
-  colaEspera = Math.min(120000, colaEspera ? colaEspera * 3 : 5000);
+  colaEspera = Math.min(60000, colaEspera ? Math.round(colaEspera * 2.5) : 2000);
   colaTimer = setTimeout(procesarCola, colaEspera);
+}
+// ===== junta cambios seguidos de la fila en un solo envío (hasta COLA_LOTE); el último valor de cada partida manda =====
+function armarLoteCola(tope){
+  const l = colaMia(), e = l[0];
+  if(!e) return null;
+  const suelto = x => x.a !== 'saveIncremental' || x.cuerpo.secciones || x.cuerpo.matOps || x.cuerpo.configCambio;
+  if(tope <= 1 || suelto(e)) return {ents: [e], n: e.n, cuerpo: e.cuerpo};
+  const ents = [e];
+  for(let i = 1; i < l.length && ents.length < Math.min(COLA_LOTE, tope); i++){
+    const x = l[i];
+    if(suelto(x) || x.pv !== e.pv) break;
+    ents.push(x);
+  }
+  if(ents.length === 1) return {ents, n: e.n, cuerpo: e.cuerpo};
+  const porId = {};
+  ents.forEach(x => (Array.isArray(x.cuerpo.records) ? x.cuerpo.records : []).forEach(r => {
+    const antes = porId[r.id];
+    porId[r.id] = antes ? {...r, campos: [...new Set([...(antes.campos || []), ...(r.campos || [])])]} : r;
+  }));
+  return {ents, n: (e.n + '-' + ents.length).slice(0, 60), cuerpo: {...ents[ents.length - 1].cuerpo, records: Object.values(porId)}};
 }
 async function procesarCola(){
   if(colaEnVuelo || !DB_URL || !sessionToken) return;
   colaEnVuelo = true;
-  let huboEnvio = false, fallaRed = false;
+  let huboEnvio = false, fallaRed = false, errNuevos = 0, fallasSeguidas = 0, rotadas = 0;
   try{
     while(true){
-      const e = colaMia()[0];
-      if(!e) break;
+      const lote = armarLoteCola(colaTope);
+      if(!lote) break;
+      const e = lote.ents[0];
       let res = null, json = null;
       try{
-        res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({...e.cuerpo, pv: e.pv, nonce: e.n, token: sessionToken})});
+        res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({...lote.cuerpo, pv: e.pv, nonce: lote.n, token: sessionToken})});
         if(res.ok) json = await res.json();
       }catch(err){ res = null; }
       if(!res || !res.ok || !json){
         fallaRed = true;
-        const l = colaLeer(); const q = l.find(x => x.n === e.n); if(q){ q.intentos = (q.intentos || 0) + 1; colaEscribir(l); }
+        const l = colaLeer(); l.forEach(q => { if(lote.ents.some(x => x.n === q.n)) q.intentos = (q.intentos || 0) + 1; }); colaEscribir(l);
         dbStatus = 'error'; dbErrorReason = 'Sin respuesta del servidor. Tus cambios están en la fila de este aparato y se reintentan solos.';
         if(Date.now() - (e.ts || Date.now()) > COLA_AVISO_MIN * 60000) avisarServidorCola(e, '');
+        // si falla un lote, se prueba con la mitad por si uno solo está trabando a los demás
+        if(lote.ents.length > 1 && fallasSeguidas < 3){ fallasSeguidas++; colaTope = Math.max(1, Math.floor(lote.ents.length / 2)); fallaRed = false; continue; }
+        // un cambio suelto que lleva varios intentos fallidos pasa al final para no frenar a los demás (solo si ningún otro toca sus mismas partidas)
+        const idsE = new Set((e.cuerpo.records || []).map(r => r.id)), q0 = colaMia();
+        const comparte = q0.slice(1).some(x => (x.cuerpo.records || []).some(r => idsE.has(r.id)) || x.cuerpo.configCambio);
+        if(lote.ents.length === 1 && (e.intentos || 0) >= 4 && q0.length > 1 && !comparte && rotadas < 3){
+          rotadas++; fallasSeguidas = 0; fallaRed = false;
+          colaEscribir([...colaLeer().filter(x => x.n !== e.n), ...colaLeer().filter(x => x.n === e.n)]);
+          continue;
+        }
         break;
       }
       if(json.ok === true){
-        colaEscribir(colaLeer().filter(x => x.n !== e.n));
-        huboEnvio = true; colaEspera = 0;
+        colaEscribir(colaLeer().filter(x => !lote.ents.some(y => y.n === x.n)));
+        huboEnvio = true; colaEspera = 0; fallasSeguidas = 0; colaTope = Math.min(COLA_LOTE, colaTope * 2);
+        actualizarInsigniaCola();
         dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = '';
         try{ localStorage.setItem('progresoObraGuardado', String(Date.now())); }catch(err){}
         if(json.fusion){ aplicarFusion(json.fusion); render(); }
@@ -3677,6 +3710,8 @@ async function procesarCola(){
         continue;
       }
       if(json.error === 'sin_sesion'){ sesionVencida(); break; }
+      // si un lote es rechazado, se parte a la mitad hasta dar con el que falla
+      if(lote.ents.length > 1 && json.error !== 'version_vieja'){ colaTope = Math.max(1, Math.floor(lote.ents.length / 2)); continue; }
       if(json.error === 'version_vieja'){
         if(versionMenor(APP_VERSION, json.minimo)){ versionVieja(json.minimo); break; }
         const m = MOTIVOS_COLA.version_vieja_entrada();
@@ -3685,10 +3720,11 @@ async function procesarCola(){
       }
       const m = (MOTIVOS_COLA[json.error] ? MOTIVOS_COLA[json.error](json) : 'El servidor no aceptó el cambio (' + String(json.error || 'sin detalle').slice(0, 40) + ').');
       colaAErrores(e, m); avisarServidorCola(e, m);
-      avisoLateral('Un cambio no se pudo guardar: ' + m.replace(/\.$/, '') + '. Queda en la fila de errores.', 'error', {dur: 14000});
+      if(++errNuevos <= 2) avisoLateral('Un cambio no se pudo guardar: ' + m.replace(/\.$/, '') + '. Queda en la fila de errores.', 'error', {dur: 14000});
     }
   }finally{
     colaEnVuelo = false;
+    if(errNuevos > 2) avisoLateral((errNuevos - 2) + (errNuevos - 2 === 1 ? ' cambio más no se pudo guardar' : ' cambios más no se pudieron guardar') + '. Quedan en la fila de errores.', 'error', {dur: 14000});
     updateDbBadge(); actualizarInsigniaCola();
     if(fallaRed) programarReintentoCola();
     else if(huboEnvio && !colaMia().length){
@@ -10671,4 +10707,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.165 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.169 · 22-11-2026 ==== -->
