@@ -276,6 +276,7 @@
   .db-badge.off{color:var(--sub);background:var(--panel-soft);}
   .db-badge.online{color:#fff;background:var(--entregado);border-color:var(--entregado);}
   .db-badge.error{color:#fff;background:#a5334f;border-color:#a5334f;}
+  .db-badge.fila{color:#fff;background:#b7791f;border-color:#b7791f;}
 
   .admin-only{display:none;}
   .solo-asist{display:none !important;}
@@ -2480,7 +2481,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.164';
+const APP_VERSION = '0.73.165';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3223,6 +3224,8 @@ function updateDbBadge(){
     el.title = 'No hay una base de datos conectada: todo se guarda solo en este navegador. Conéctala arriba si quieres compartir los datos entre dispositivos.';
     return;
   }
+  if(GUARDADO_EN_FILA && (colaMia().length || colaErrMia().length)){ actualizarInsigniaCola(); return; }
+  el.onclick = null; el.style.cursor = '';
   if(dbStatus === 'online'){
     el.textContent = 'En línea';
     el.className = 'db-badge online';
@@ -3506,26 +3509,30 @@ async function respaldarAntesDelCierre(){
 }
 let forzarGuardadoCompleto = false;
 let ultimoConteoHoja = null;
+// ===== arma lo que se manda al guardar (lo usan el guardado directo y la fila) =====
+function armarCuerpoGuardado(dirtyIds){
+  const hayCeldas = dirtyIds && dirtyIds.size > 0;
+  const soloConfig = !hayCeldas && settingsDirty;
+  let action = 'save', records = [];
+  if(forzarGuardadoCompleto){ action = 'save'; records = buildRecords(); }
+  else if(hayCeldas){
+    action = 'saveIncremental';
+    records = [...dirtyIds].filter(id => cellById[id]).map(id => ({...recordForCell(cellById[id]), campos: camposCambiados(cellById[id])})).filter(r => r.campos.length);
+  }
+  else if(soloConfig){ action = 'saveConfigOnly'; }
+  else { records = buildRecords(); }
+  const body = { action, pv: APP_VERSION, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+  if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
+    body.secciones = [...seccionesSucias];
+    if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
+  }
+  return {action, records, body};
+}
 async function dbSave(dirtyIds){
   if(!DB_URL) return false;
-  const hayCeldas = dirtyIds && dirtyIds.size > 0;
-
-  const soloConfig = !hayCeldas && settingsDirty;
   dbErrorReason = '';
   try{
-    let action = 'save', records = [];
-    if(forzarGuardadoCompleto){ action = 'save'; records = buildRecords(); }
-    else if(hayCeldas){
-      action = 'saveIncremental';
-      records = [...dirtyIds].filter(id => cellById[id]).map(id => ({...recordForCell(cellById[id]), campos: camposCambiados(cellById[id])})).filter(r => r.campos.length);
-    }
-    else if(soloConfig){ action = 'saveConfigOnly'; }
-    else { records = buildRecords(); }
-    const body = { action, pv: APP_VERSION, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
-    if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
-      body.secciones = [...seccionesSucias];
-      if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
-    }
+    const {action, records, body} = armarCuerpoGuardado(dirtyIds);
     const opsEnviadas = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
     const seccionesEnviadas = [...seccionesSucias];
     const eranTodas = seccionesTodas;
@@ -3569,6 +3576,187 @@ async function dbSave(dirtyIds){
     updateDbBadge();
     return false;
   }
+}
+
+// ===== guardado en fila =====
+// Con GUARDADO_EN_FILA en false se vuelve al guardado anterior (cada Guardar espera la respuesta del servidor).
+const GUARDADO_EN_FILA = true;
+const COLA_KEY = 'progresoObraCola', COLA_ERR_KEY = 'progresoObraColaErrores', COLA_MAX_CHARS = 3000000, COLA_AVISO_MIN = 10;
+const colaLeerClave = k => { try{ const a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a.filter(x => x && typeof x === 'object' && x.cuerpo && typeof x.n === 'string') : []; }catch(e){ return []; } };
+function colaEscribirClave(k, arr){
+  try{
+    if(!arr.length){ localStorage.removeItem(k); return true; }
+    const t = JSON.stringify(arr);
+    if(t.length > COLA_MAX_CHARS) return false;
+    localStorage.setItem(k, t); return true;
+  }catch(e){ return false; }
+}
+const colaLeer = () => colaLeerClave(COLA_KEY), colaEscribir = a => colaEscribirClave(COLA_KEY, a);
+const colaErrLeer = () => colaLeerClave(COLA_ERR_KEY), colaErrEscribir = a => colaEscribirClave(COLA_ERR_KEY, a);
+const colaMia = () => colaLeer().filter(x => x.u === (sessionName || ''));
+const colaErrMia = () => colaErrLeer().filter(x => x.u === (sessionName || ''));
+const nonceCola = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
+let colaEnVuelo = false, colaTimer = null, colaEspera = 0, colaDesdeTs = 0;
+
+// Deja el cambio apartado en este aparato; el envío lo hace procesarCola()
+function dbEncolar(dirtyIds){
+  if(!DB_URL || !sessionToken) return false;
+  const {action, body} = armarCuerpoGuardado(dirtyIds);
+  const opsEnviadas = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
+  const cuerpo = {...body}; delete cuerpo.token; delete cuerpo.pv;
+  const cola = colaLeer();
+  cola.push({n: nonceCola(), u: sessionName || '', ts: Date.now(), pv: APP_VERSION, a: action, intentos: 0, cuerpo});
+  if(!colaEscribir(cola)) return false;
+  ultimoEnvio = {ops: opsEnviadas, secciones: [...seccionesSucias], todas: seccionesTodas};
+  ultimaFusion = null; ultimaMatOk = null;
+  colaEspera = 0;
+  actualizarInsigniaCola();
+  procesarCola();
+  return true;
+}
+const MOTIVOS_COLA = {
+  trabajador_inexistente: e => 'Hay partidas de un trabajador que ya no existe en el panel' + listaNombresCola(e),
+  trabajador_inactivo: e => 'Hay cambios de partida de un trabajador inactivo o finiquitado' + listaNombresCola(e),
+  muy_grande: () => 'El servidor rechazó el envío por ser demasiado grande.',
+  reduccion_sospechosa: () => 'El servidor frenó el envío porque traía muchas menos partidas que la base de datos.',
+  version_vieja_entrada: () => 'El cambio se armó con una versión anterior del panel y el servidor ya no la acepta.'
+};
+const listaNombresCola = j => { const l = j && Array.isArray(j.lista) ? j.lista : []; return l.length ? ' (' + l.slice(0, 4).map(x => String(x.trabajador || '?').slice(0, 30) + (x.estado ? ' · ' + x.estado : '')).join(', ') + ')' : ''; };
+function resumenEntradaCola(e){
+  const recs = Array.isArray(e.cuerpo && e.cuerpo.records) ? e.cuerpo.records : [];
+  const lugar = r => { const c = cellById[r.id]; return c ? (c.dpto === 'Pasillo' ? 'Pasillo' : 'Dpto ' + c.dpto) + ' · ' + (AREA_LABEL[c.area] || c.area) + ' (' + c.piso + ')' : String(r.id).slice(0, 30); };
+  const l = recs.slice(0, 6).map(lugar);
+  if(recs.length > 6) l.push('y ' + (recs.length - 6) + ' más');
+  if(e.cuerpo && e.cuerpo.configCambio) l.push('configuración');
+  return l;
+}
+function colaAErrores(e, motivo){
+  const errs = colaErrLeer();
+  errs.push({n: e.n, u: e.u, ts: e.ts, pv: e.pv, a: e.a, intentos: e.intentos || 0, motivo: String(motivo).slice(0, 300), cuerpo: e.cuerpo});
+  colaErrEscribir(errs);
+  colaEscribir(colaLeer().filter(x => x.n !== e.n));
+}
+function avisarServidorCola(e, motivo){
+  const recs = Array.isArray(e.cuerpo && e.cuerpo.records) ? e.cuerpo.records : [];
+  const min = Math.max(0, Math.round((Date.now() - (e.ts || Date.now())) / 60000));
+  try{ llamarDb('avisoSync', {pendientes: Math.max(1, recs.length), desdeMin: min, ids: recs.slice(0, 15).map(r => r.id), aparato: etiquetaDispositivo(), motivo: motivo || ''}).catch(() => {}); }catch(err){}
+}
+function programarReintentoCola(){
+  clearTimeout(colaTimer);
+  if(!colaMia().length) return;
+  colaEspera = Math.min(120000, colaEspera ? colaEspera * 3 : 5000);
+  colaTimer = setTimeout(procesarCola, colaEspera);
+}
+async function procesarCola(){
+  if(colaEnVuelo || !DB_URL || !sessionToken) return;
+  colaEnVuelo = true;
+  let huboEnvio = false, fallaRed = false;
+  try{
+    while(true){
+      const e = colaMia()[0];
+      if(!e) break;
+      let res = null, json = null;
+      try{
+        res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({...e.cuerpo, pv: e.pv, nonce: e.n, token: sessionToken})});
+        if(res.ok) json = await res.json();
+      }catch(err){ res = null; }
+      if(!res || !res.ok || !json){
+        fallaRed = true;
+        const l = colaLeer(); const q = l.find(x => x.n === e.n); if(q){ q.intentos = (q.intentos || 0) + 1; colaEscribir(l); }
+        dbStatus = 'error'; dbErrorReason = 'Sin respuesta del servidor. Tus cambios están en la fila de este aparato y se reintentan solos.';
+        if(Date.now() - (e.ts || Date.now()) > COLA_AVISO_MIN * 60000) avisarServidorCola(e, '');
+        break;
+      }
+      if(json.ok === true){
+        colaEscribir(colaLeer().filter(x => x.n !== e.n));
+        huboEnvio = true; colaEspera = 0;
+        dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = '';
+        try{ localStorage.setItem('progresoObraGuardado', String(Date.now())); }catch(err){}
+        if(json.fusion){ aplicarFusion(json.fusion); render(); }
+        if(json.matOk && typeof json.matOk === 'object' && !matOpsPend.set.size && !matOpsPend.del.size){ MATERIALES.ok = {...json.matOk}; matNivelesCache = null; }
+        continue;
+      }
+      if(json.error === 'sin_sesion'){ sesionVencida(); break; }
+      if(json.error === 'version_vieja'){
+        if(versionMenor(APP_VERSION, json.minimo)){ versionVieja(json.minimo); break; }
+        const m = MOTIVOS_COLA.version_vieja_entrada();
+        colaAErrores(e, m); avisarServidorCola(e, m); avisoLateral('Un cambio no se pudo guardar: ' + m, 'error', {dur: 14000});
+        continue;
+      }
+      const m = (MOTIVOS_COLA[json.error] ? MOTIVOS_COLA[json.error](json) : 'El servidor no aceptó el cambio (' + String(json.error || 'sin detalle').slice(0, 40) + ').');
+      colaAErrores(e, m); avisarServidorCola(e, m);
+      avisoLateral('Un cambio no se pudo guardar: ' + m.replace(/\.$/, '') + '. Queda en la fila de errores.', 'error', {dur: 14000});
+    }
+  }finally{
+    colaEnVuelo = false;
+    updateDbBadge(); actualizarInsigniaCola();
+    if(fallaRed) programarReintentoCola();
+    else if(huboEnvio && !colaMia().length){
+      if(Date.now() - colaDesdeTs > 2500) avisoLateral('Cambios enviados a la base de datos.', 'exito', {dur: 2500});
+      colaDesdeTs = 0;
+    }
+  }
+}
+function versionMenor(a, b){
+  const x = String(a || '').split('.').map(Number), y = String(b || '').split('.').map(Number);
+  for(let i = 0; i < 3; i++){ if((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) < (y[i] || 0); }
+  return false;
+}
+function actualizarInsigniaCola(){
+  const el = document.getElementById('dbBadge'); if(!el) return;
+  const n = colaMia().length, ne = colaErrMia().length;
+  if(n && !colaDesdeTs) colaDesdeTs = Date.now();
+  if(!n && !ne){ el.style.cursor = ''; el.onclick = null; return; }
+  el.style.cursor = 'pointer';
+  el.onclick = abrirColaGuardado;
+  if(ne){ el.textContent = 'Con errores (' + ne + ')'; el.className = 'db-badge error'; el.title = 'Hay cambios que el servidor no aceptó. Toca para verlos.'; }
+  else { el.textContent = 'En fila (' + n + ')'; el.className = 'db-badge fila'; el.title = 'Hay ' + n + (n === 1 ? ' guardado' : ' guardados') + ' esperando a confirmarse en la base de datos. Toca para verlos.'; }
+}
+function abrirColaGuardado(){
+  const cola = colaMia(), errs = colaErrMia();
+  const fecha = t => new Date(t).toLocaleString('es-CL', {timeZone: 'America/Santiago', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+  let cuerpo = '';
+  if(!cola.length && !errs.length){ cuerpo = '<p class="cp-intro">No hay nada en la fila. Todo está confirmado en la base de datos.</p>'; }
+  if(cola.length) cuerpo += '<p class="cp-intro"><b>Esperando confirmación (' + cola.length + '):</b> se envían de a uno, en orden.</p>' + cola.map(e => '<div class="cp-item"><div class="cp-tit">Guardado ' + esc(fecha(e.ts)) + (e.intentos ? '<small>' + e.intentos + ' intento(s) sin respuesta</small>' : '') + '</div>' + resumenEntradaCola(e).map(t => '<div class="cp-campo"><span>' + esc(t) + '</span></div>').join('') + '</div>').join('');
+  if(errs.length) cuerpo += '<p class="cp-intro"><b>Rechazados por el servidor (' + errs.length + '):</b></p>' + errs.map(e => '<div class="cp-item"><div class="cp-tit">' + esc(fecha(e.ts)) + '<small>' + esc(e.motivo) + '</small></div>' + resumenEntradaCola(e).map(t => '<div class="cp-campo"><span>' + esc(t) + '</span></div>').join('') + '<div class="cp-campo"><button type="button" class="btn" data-cola-descartar="' + esc(e.n) + '">Descartar este cambio</button></div></div>').join('');
+  inputModalCancel.dataset.orig = inputModalCancel.dataset.orig || inputModalCancel.textContent;
+  inputModalCancel.textContent = 'Cerrar';
+  openInputModal('Fila de guardado', cuerpo, () => {
+    if(errs.length){
+      const l = colaLeer(), mios = new Set(errs.map(x => x.n));
+      errs.forEach(x => l.push({n: x.n, u: x.u, ts: x.ts, pv: x.pv, a: x.a, intentos: 0, cuerpo: x.cuerpo}));
+      colaErrEscribir(colaErrLeer().filter(x => !mios.has(x.n)));
+      colaEscribir(l);
+    }
+    colaEspera = 0; procesarCola(); actualizarInsigniaCola();
+  }, errs.length ? 'Reintentar rechazados' : 'Reintentar ahora');
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-cola-descartar]');
+  if(!b) return;
+  const n = b.getAttribute('data-cola-descartar');
+  colaErrEscribir(colaErrLeer().filter(x => x.n !== n));
+  const it = b.closest('.cp-item'); if(it) it.remove();
+  actualizarInsigniaCola(); updateDbBadge();
+});
+window.addEventListener('online', () => { colaEspera = 0; procesarCola(); });
+document.addEventListener('visibilitychange', () => { if(!document.hidden && colaMia().length){ colaEspera = 0; procesarCola(); } });
+// ===== al abrir la página, lo que quedó en la fila se manda antes de cargar los datos (máx. 8 s) =====
+async function vaciarColaInicial(){
+  if(!GUARDADO_EN_FILA || !sessionToken || !colaMia().length) return;
+  await Promise.race([procesarCola(), new Promise(r => setTimeout(r, 8000))]);
+}
+// ===== lo que sigue en la fila se muestra en pantalla como ya guardado (aún sin confirmar) =====
+function aplicarColaAlEstado(){
+  if(!GUARDADO_EN_FILA) return;
+  colaMia().forEach(e => {
+    (Array.isArray(e.cuerpo.records) ? e.cuerpo.records : []).forEach(r => {
+      const c = cellById[r.id]; if(!c || !Array.isArray(r.campos)) return;
+      const act = getState(r.id);
+      r.campos.forEach(f => { act[f] = f === 'trabajador' ? (r.wid ? (nombreDeId(r.wid) || r.trabajador) : r.trabajador) : r[f]; });
+    });
+  });
+  actualizarInsigniaCola();
 }
 
 function applyLoadedPayload(parsed){
@@ -3737,8 +3925,12 @@ async function doSaveCycle(){
   const payload = {items:state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
-  let dbOk = true;
-  if(DB_URL){ dbOk = await dbSave(dirtySnap); }
+  let dbOk = true, enFila = false;
+  if(DB_URL){
+    // ===== con la fila, Guardar deja el cambio apartado y sale al tiro; el envío sigue solo (guardado completo y sin sesión van directo) =====
+    if(GUARDADO_EN_FILA && !guardadoCompleto && sessionToken){ enFila = dbEncolar(dirtySnap); dbOk = enFila; }
+    if(!enFila) dbOk = await dbSave(dirtySnap);
+  }
 
   if(!DB_URL || dbOk){
     dirtySnap.forEach(id => dirtyCellIds.delete(id));
@@ -3871,7 +4063,7 @@ async function saveNow(){
   const msgEl = document.getElementById('ioMsg');
   if((DB_URL && dbOk) || (!DB_URL && localOk)){
     msgEl.style.color = 'var(--entregado)';
-    msgEl.textContent = DB_URL ? 'Guardado en la base de datos por ' + (sessionName || 'sesión') + '.' : 'Guardado.';
+    { const quien = (sessionName || 'sesión').replace(/\.$/, ''); msgEl.textContent = DB_URL ? (colaMia().length ? 'Guardado por ' + quien + '. Se está enviando a la base de datos.' : 'Guardado en la base de datos por ' + quien + '.') : 'Guardado.'; }
   } else {
     msgEl.style.color = '#c0546f';
     msgEl.textContent = 'No se pudo guardar' + (DB_URL ? ' en la base de datos.' : '.');
@@ -10364,6 +10556,7 @@ setTimeout(function(){
       irAlLogin('');
       return;
     }
+    try{ await vaciarColaInicial(); }catch(err){ console.error('fila', err); }
     await loadState();
     if(versionBloqueada){
       await new Promise(f => setTimeout(f, 6000));
@@ -10373,6 +10566,7 @@ setTimeout(function(){
     if(sesionInvalida){ irAlLogin('Tu sesión venció. Ingresa tu PIN de nuevo.'); return; }
     if(cargaFallo){ irAlLogin('No se pudieron cargar los datos de la base de datos. Revisa tu conexión e ingresa tu PIN de nuevo.'); return; }
     reintentar = false;
+    try{ aplicarColaAlEstado(); }catch(err){ console.error('fila', err); }
     if(window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('datos');
     }
   }
@@ -10477,4 +10671,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.164 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.165 · 22-11-2026 ==== -->
