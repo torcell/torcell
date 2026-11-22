@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.161';
+const APP_VERSION = '0.73.162';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2488,6 +2488,20 @@ function versionMayor(a, b){
   const x = String(a).split('.').map(n => parseInt(n, 10) || 0), y = String(b).split('.').map(n => parseInt(n, 10) || 0);
   for(let i = 0; i < 3; i++){ if((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); }
   return false;
+}
+// ===== versiones viejas: antes de actualizar se borra lo guardado en este navegador (la sesión y el aparato no se tocan) =====
+const CLAVE_VER_GUARDADO = 'progresoObraVerGuardado';
+function limpiarGuardadoLocal(){
+  try{ Object.keys(localStorage).filter(k => k.indexOf('po_') === 0).forEach(k => localStorage.removeItem(k)); }catch(e){}
+  try{ if(window.storage && typeof window.storage.delete === 'function'){ window.storage.delete('progreso-obra-la-florida-v8', true); window.storage.delete('progreso-obra-la-florida-v8-docs', true); } }catch(e){}
+}
+let versionBloqueada = false;
+function versionVieja(minimo){
+  versionBloqueada = true;
+  if(hayPendiente()){ mostrarBannerActualizar(minimo || APP_VERSION); return; }
+  try{ localStorage.removeItem(CLAVE_VER_GUARDADO); }catch(e){}
+  if(window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje('Actualizando versión…');
+  recargarConVersion(minimo || APP_VERSION);
 }
 async function versionPublicada(){
   if(!/^https?:$/.test(location.protocol)) return null;
@@ -2508,6 +2522,7 @@ function mostrarBannerActualizar(v){
   b.innerHTML = `<span>Hay una versión nueva del Panel de Cerámica y Frague (v${v}). Estás usando la v${APP_VERSION}.</span><button type="button">Actualizar ahora</button>`;
   b.querySelector('button').addEventListener('click', () => {
     try{ sessionStorage.setItem('progresoObraIntentosAct', '0'); sessionStorage.setItem('progresoObraActualizadoA', v); }catch(e){}
+    limpiarGuardadoLocal();
     location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
   });
   document.body.insertBefore(b, document.body.firstChild);
@@ -2517,6 +2532,7 @@ function recargarConVersion(v){
   try{ intentos = Number(sessionStorage.getItem('progresoObraIntentosAct') || 0); }catch(e){}
   if(intentos >= 2){ mostrarBannerActualizar(v); return false; }
   try{ sessionStorage.setItem('progresoObraIntentosAct', String(intentos + 1)); sessionStorage.setItem('progresoObraActualizadoA', v); }catch(e){}
+  limpiarGuardadoLocal();
   location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
   return true;
 }
@@ -3397,7 +3413,7 @@ async function dbLoad(){
   try{
     let data = null;
     if(sessionToken){
-      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', token: sessionToken, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo(), seccion: seccionPanel()})});
+      const resP = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'loadPrivado', pv: APP_VERSION, token: sessionToken, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo(), seccion: seccionPanel()})});
       if(!resP.ok){ dbErrorReason = `El servidor respondió con error al cargar (código ${resP.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
       const jp = await resP.json();
       if(jp && jp.ok === true){ data = jp; }
@@ -3405,6 +3421,7 @@ async function dbLoad(){
         if(appListo){ sesionVencida(msgDispositivoOcupado(jp.tipo)); } else { sesionInvalida = true; limpiarSesionGuardada(); }
         return null;
       }
+      else if(jp && jp.error === 'version_vieja'){ versionVieja(jp.minimo); return null; }
       else if(jp && jp.error === 'sin_permiso'){ irAlMenu('No tienes acceso al panel de cerámica. Elige una de las secciones disponibles.'); return null; }
       else if(jp && jp.error === 'sin_sesion'){
         if(appListo){ sesionVencida(); } else { sesionInvalida = true; limpiarSesionGuardada(); }
@@ -3496,7 +3513,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, pv: APP_VERSION, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -3508,6 +3525,7 @@ async function dbSave(dirtyIds){
     if(!res.ok){ dbErrorReason = `El servidor respondió con error al guardar (código ${res.status}). Puede que la URL esté mal, o que falte volver a implementar una "Nueva versión" en el Apps Script.`; throw new Error('bad status'); }
     const json = await res.json();
     if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Ingresa tu PIN de nuevo para poder seguir guardando.'; sesionVencida(); throw new Error('sin sesion'); }
+    if(json && json.error === 'version_vieja'){ dbErrorReason = 'Esta página es una versión vieja y no puede guardar. Se actualiza para seguir.'; versionVieja(json.minimo); throw new Error('version vieja'); }
     if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = `El servidor frenó el guardado: este envío traía solo ${json.enviadas ?? '?'} partidas y la base de datos tiene ${json.existentes ?? '?'}. No se guardó nada: recarga la página y revisa tus datos.`; throw new Error('reduccion'); }
     if(json && json.error === 'perdida_sospechosa'){
       const pl = Array.isArray(json.perdidas) ? json.perdidas : [];
@@ -3596,13 +3614,14 @@ let cargaFallo = false;
 async function loadState(){
   mostrarCargando('Cargando base de datos…');
   try{
+  try{ if(localStorage.getItem(CLAVE_VER_GUARDADO) !== APP_VERSION){ limpiarGuardadoLocal(); localStorage.setItem(CLAVE_VER_GUARDADO, APP_VERSION); } }catch(e){}
   let parsed = null;
   let fromDb = false;
   if(DB_URL){
     const remote = await dbLoad();
 
     if(remote && remote.items){ parsed = remote; fromDb = true; }
-    else if(!sesionInvalida){ cargaFallo = true; }
+    else if(!sesionInvalida && !versionBloqueada){ cargaFallo = true; }
     if(remote && remote.permisos && typeof remote.permisos === 'object'){ if(isAdmin) permisosCargos = remote.permisos; else misPermisos = remote.permisos; }
     if(remote && remote.calidad && typeof remote.calidad === 'object') CAL_REV = remote.calidad;
   }
@@ -6609,11 +6628,12 @@ const ERRORES_PETICION = {
 };
 async function llamarDb(accion, extra){
   const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({action: accion, token: sessionToken, ...extra})});
+    body: JSON.stringify({action: accion, pv: APP_VERSION, token: sessionToken, ...extra})});
   if(!res.ok) return null;
   let j;
   try{ j = JSON.parse(await res.text()); }catch(e){ return {ok: false, error: 'respuesta_invalida'}; }
   if(j && j.error === 'sin_sesion' && sessionToken && accion !== 'logout') sesionVencida();
+  if(j && j.error === 'version_vieja') versionVieja(j.minimo);
   return j;
 }
 
@@ -10273,6 +10293,11 @@ setTimeout(function(){
       return;
     }
     await loadState();
+    if(versionBloqueada){
+      await new Promise(f => setTimeout(f, 6000));
+      irAlLogin('Esta página sigue en una versión vieja. Ciérrala y ábrela de nuevo, o borra los datos del sitio en el navegador.');
+      return;
+    }
     if(sesionInvalida){ irAlLogin('Tu sesión venció. Ingresa tu PIN de nuevo.'); return; }
     if(cargaFallo){ irAlLogin('No se pudieron cargar los datos de la base de datos. Revisa tu conexión e ingresa tu PIN de nuevo.'); return; }
     reintentar = false;
@@ -10379,4 +10404,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.161 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.162 · 22-11-2026 ==== -->
