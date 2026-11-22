@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="carga.css?v=3">
 <style>
   :root{
+    --rojo-tag:#c0546f; /* @@rojo-tag: rojo suave de todos los tags/insignias rojos */
     --bg:#f2f3f1; --panel:#ffffff; --panel-soft:#f8f9f7; --border:#d7dad3; --border-strong:#b9bdb3;
     --text:#2c302c; --sub:#6c716a;
     --pendiente:#6c716a; --proceso:#ffc400; --entregado:#43a047; --pagado:#2461a8;
@@ -160,7 +161,7 @@
   td.dpto-col{position:relative;}
   td.dpto-col[data-matkey]{cursor:pointer;}
   td.dpto-col.mat-pend{padding-top:28px;}
-  td.dpto-col.mat-pend::before{content:attr(data-matn);position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#c0546f;color:#fff;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
+  td.dpto-col.mat-pend::before{content:attr(data-matn);position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:var(--rojo-tag);color:#fff;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
   td.dpto-col.mat-prep{padding-top:28px;}
   td.dpto-col.mat-prep::before{content:attr(data-matn);position:absolute;top:5px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:12px;font-weight:800;line-height:18px;text-align:center;}
   .mat-tabla tr.mat-prep td.mat-nombre::before{content:'!';display:inline-block;width:16px;height:16px;margin-right:6px;border-radius:50%;background:#f2b600;color:#3a2a00;font-size:11px;line-height:16px;text-align:center;}
@@ -196,7 +197,7 @@
   .dt-sec-r.no{color:var(--sub);margin-top:4px;}
   .dt-roja{border:1px solid rgba(192,57,43,.7);border-left:4px solid #c0392b;background:rgba(192,57,43,.14);color:#c0392b;padding:8px 12px;margin-bottom:8px;font-size:12.5px;font-weight:700;}
   .dt-roja .btn{margin:6px 0 0;}
-  .disp-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#c0392b;color:#fff;font-size:11px;font-weight:800;}
+  .disp-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:var(--rojo-tag);color:#fff;font-size:11px;font-weight:800;}
   .cambio-item{border:1px solid var(--border);background:var(--panel-soft);padding:8px 10px;margin-bottom:6px;font-size:12.5px;}
   .cambio-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--sub);font-size:11.5px;margin-bottom:3px;}
   .cambio-cuenta{font-weight:700;color:var(--text);}
@@ -204,7 +205,7 @@
   .cambio-det{margin-top:2px;overflow-wrap:anywhere;}
   .banner-actualizar{position:sticky;top:0;z-index:9999;background:#7a3fa0;color:#fff;padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;text-align:center;}
   .banner-actualizar button{border:1px solid #fff;background:#fff;color:#4b2468;font-weight:700;padding:7px 14px;cursor:pointer;border-radius:0;font-family:inherit;font-size:13px;}
-  .avisos-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#c0546f;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;}
+  .avisos-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--rojo-tag);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;}
   .aviso-grupo{border:1px solid var(--border);margin-bottom:10px;background:var(--panel-soft);}
   .aviso-grupo h4{margin:0;padding:8px 10px;font-size:13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;}
   .aviso-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;font-size:12.5px;border-bottom:1px solid var(--border);}
@@ -239,7 +240,7 @@
   .mat-tabla th, .mat-tabla td{border:1px solid var(--border);padding:6px 7px;text-align:center;vertical-align:middle;}
   .mat-tabla th{background:var(--panel-soft);font-size:11.5px;color:var(--sub);position:sticky;top:0;z-index:1;}
   .mat-tabla td.mat-nombre{text-align:left;font-weight:700;white-space:nowrap;}
-  .mat-tabla tr.mat-pend td.mat-nombre::before{content:'!';display:inline-block;width:16px;height:16px;margin-right:6px;border-radius:50%;background:#c0546f;color:#fff;font-size:11px;line-height:16px;text-align:center;}
+  .mat-tabla tr.mat-pend td.mat-nombre::before{content:'!';display:inline-block;width:16px;height:16px;margin-right:6px;border-radius:50%;background:var(--rojo-tag);color:#fff;font-size:11px;line-height:16px;text-align:center;}
   .mat-tabla tr.mat-resalta td{background:rgba(255,193,7,.22);}
   .mat-tabla .mat-m2{display:block;color:var(--sub);font-size:11px;}
   .mat-tabla .mat-falta{display:block;color:#c0546f;font-size:11px;}
@@ -567,7 +568,7 @@
   .hist-row i{display:block;font-style:normal;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--sub);}
   .peticion-btn{width:100%;margin-top:4px;}
   .peticion-estado{font-size:11px;color:var(--sub);font-style:italic;text-align:center;padding:4px 0;}
-  .peticiones-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#c0546f;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;}
+  .peticiones-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--rojo-tag);color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center;}
   .peticion-item{border:1px solid var(--border);padding:8px 10px;margin-bottom:8px;background:var(--panel-soft);font-size:12.5px;}
   .peticion-item .sub{color:var(--sub);font-size:11.5px;margin:2px 0 6px;}
   .peticion-item .acciones{display:flex;gap:6px;}
@@ -817,7 +818,7 @@
   .obj-item.atrasado .obj-cuando,.obj-item.hoy .obj-cuando{color:#c0392b;}
   .obj-chip{display:inline-flex;align-items:center;gap:5px;padding:1px 9px;border-radius:999px;border:1px solid var(--border-strong);font-size:11.5px;font-weight:600;background:var(--panel);color:var(--text);}
   .obj-chip i{width:8px;height:8px;border-radius:50%;background:#9aa5a8;display:inline-block;}
-  .obj-chip.alta i{background:#c0392b;}.obj-chip.media i{background:#d99a00;}.obj-chip.baja i{background:#43a047;}
+  .obj-chip.alta i{background:var(--rojo-tag);}.obj-chip.media i{background:#d99a00;}.obj-chip.baja i{background:#43a047;}
   .obj-btns{display:flex;flex-direction:column;gap:6px;}
   .obj-btns .btn{width:100%;min-height:36px;font-weight:700;}
   .obj-mas{align-self:flex-start;}
@@ -1307,7 +1308,7 @@
   .dz-det h3.dz-m-rojo{background:#c0546f;color:#fff;padding:6px 10px;}.dz-det h3.dz-m-amar{background:#f2b600;color:#3a2a00;padding:6px 10px;}
 }
   .dz-mat{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:12px;font-weight:800;color:#fff;cursor:pointer;}
-  .dz-mat.rojo{background:#c0546f;}.dz-mat.amarillo{background:#f2b600;color:#3a2a00;}
+  .dz-mat.rojo{background:var(--rojo-tag);}.dz-mat.amarillo{background:#f2b600;color:#3a2a00;}
   .dz-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:8px 0;}
   .dz-leg i{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-2px;}
   .dz-mapa{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;}
@@ -1483,7 +1484,7 @@
 .rd-ctl input{margin-left:6px;font:inherit;}
 .rd-n small,.rd-d2 small,.rd-s small{display:block;font-size:11px;color:var(--sub);}
 .rd-barra{height:9px;background:rgba(127,127,127,.2);margin-bottom:4px;}.rd-barra i{display:block;height:100%;}
-.rd-dud{color:#c98a00;}.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--bad,#c0392b);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-gw{overflow-x:auto;}@media(max-width:640px){.py-gw .py-svg{min-width:640px;}.rd-ctl~* .py-tabs{width:100%;}.py-tabs .py-tab{flex:1 1 auto;padding:9px 4px;font-size:11.5px;}}.py-fls{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin-bottom:8px;}.py-fl{border:1px solid var(--border);border-left:3px solid var(--sub);padding:7px 9px;min-width:0;}.py-fl.up{border-left-color:var(--ok,#43a047);}.py-fl.down{border-left-color:var(--bad,#c0392b);}.py-fl small{display:block;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.py-fl b{display:block;font-size:15px;line-height:1.3;}.py-fx{display:block;font-size:12.5px;font-weight:700;color:var(--sub);}.py-fl.up .py-fx{color:var(--ok,#43a047);}.py-fl.down .py-fx{color:var(--bad,#c0392b);}.py-mas{margin-bottom:8px;font-size:12px;}.py-mas summary{cursor:pointer;color:var(--sub);padding:6px 0;}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-vis{margin:12px 0 0;}
+.rd-dud{color:#c98a00;}.rd-dif{display:inline-block;margin-left:6px;padding:0 6px;font-weight:700;font-size:11.5px;line-height:18px;border:1px solid currentColor;cursor:help;}.rd-dif.up{color:var(--ok,#43a047);}.rd-dif.down{color:var(--rojo-tag);}.rd-dif.eq{color:var(--sub);}.rd-b span{font-size:12px;}.rd-b .rd-sm,.rd-b .rd-sd{display:block;font-size:12px;line-height:1.35;}.rd-b .rd-sd{color:var(--sub);}.py-gw{overflow-x:auto;}@media(max-width:640px){.py-gw .py-svg{min-width:640px;}.rd-ctl~* .py-tabs{width:100%;}.py-tabs .py-tab{flex:1 1 auto;padding:9px 4px;font-size:11.5px;}}.py-fls{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin-bottom:8px;}.py-fl{border:1px solid var(--border);border-left:3px solid var(--sub);padding:7px 9px;min-width:0;}.py-fl.up{border-left-color:var(--ok,#43a047);}.py-fl.down{border-left-color:var(--bad,#c0392b);}.py-fl small{display:block;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.py-fl b{display:block;font-size:15px;line-height:1.3;}.py-fx{display:block;font-size:12.5px;font-weight:700;color:var(--sub);}.py-fl.up .py-fx{color:var(--ok,#43a047);}.py-fl.down .py-fx{color:var(--bad,#c0392b);}.py-mas{margin-bottom:8px;font-size:12px;}.py-mas summary{cursor:pointer;color:var(--sub);padding:6px 0;}.py-tabs{display:flex;gap:0;margin:14px 0 8px;border:1px solid var(--border-strong,var(--border));width:max-content;max-width:100%;}.py-tab{border:0;border-right:1px solid var(--border-strong,var(--border));background:var(--panel);color:var(--sub);padding:8px 18px;font-weight:600;cursor:pointer;border-radius:0;}.py-tab:last-child{border-right:0;}.py-tab.on{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;}.py-sub{font-size:12px;color:var(--sub);margin:10px 0 4px;}.py-svg{width:100%;max-width:900px;height:auto;display:block;}.py-vis{margin:12px 0 0;}
 .py-caja{border:1px solid var(--border);margin:12px 0 0;}
 .py-fc{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:7px 10px;border-top:1px solid var(--border);}
 .py-fc:first-child{border-top:0;}
@@ -1521,7 +1522,7 @@
 .py-s5{color:var(--sub);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .py-e{display:inline-block;font-style:normal;font-size:11px;font-weight:700;line-height:18px;padding:0 8px;border-radius:999px;border:1px solid currentColor;color:var(--sub);}
 .py-e.freno{color:var(--warn,#d99a00);}
-.py-e.parada{color:var(--bad,#c0392b);}
+.py-e.parada{color:var(--rojo-tag);}
 .py-e.curso{color:var(--accent);}
 .py-tip{position:fixed;z-index:100000;display:none;pointer-events:none;max-width:290px;background:var(--panel);color:var(--text);border:1px solid var(--border-strong,var(--border));box-shadow:0 6px 18px rgba(0,0,0,.28);padding:8px 10px;font-size:12px;line-height:1.5;}
 .py-tip b{display:block;margin-bottom:2px;}
@@ -2002,7 +2003,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
       <div class="tb-btns">
         <button class="btn admin-only" id="toggleWorkerPanel">Gestionar trabajadores</button>
         <button class="btn admin-only" id="ratesBtn">Precios y metrajes</button>
-        <button class="btn admin-only" id="pagosHubBtn" type="button" style="position:relative;"><i class="ic ib ic-pago"></i>Pagos y liquidaciones<span id="pagosHubDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span></button>
+        <button class="btn admin-only" id="pagosHubBtn" type="button" style="position:relative;"><i class="ic ib ic-pago"></i>Pagos y liquidaciones<span id="pagosHubDot" style="position:absolute;top:-7px;right:-7px;background:var(--rojo-tag);color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span></button>
         <button class="btn admin-only" id="materialesBtn"><i class="ic ib ic-ladrillo"></i>Materiales</button>
         <button class="btn" id="pedirBodegaBtn" type="button"><i class="ic ib ic-caja"></i>Pedir material a Bodega</button>
         <button class="btn" id="trabBaseBtn" type="button"><i class="ic ib ic-trabajadores"></i>BD de Trabajadores</button>
@@ -2075,7 +2076,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
       <button class="btn admin-only" data-abrir-pr type="button"><i class="ic ib ic-candado"></i>Pagos completos retenidos</button>
       <button class="btn admin-only" id="retencionesBtn" style="position:relative;display:none;">
           <i class="ic ic-candado"></i> Retenciones pendientes
-          <span id="retencionesBadgeDot" style="position:absolute;top:-7px;right:-7px;background:#c0546f;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span>
+          <span id="retencionesBadgeDot" style="position:absolute;top:-7px;right:-7px;background:var(--rojo-tag);color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);">!</span>
         </button>
     </div>
     <div class="hub-tit">Cierre</div>
@@ -2514,7 +2515,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.174';
+const APP_VERSION = '0.73.175';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -10766,4 +10767,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.174 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.175 · 22-11-2026 ==== -->
