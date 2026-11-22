@@ -2480,9 +2480,9 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.162';
+const APP_VERSION = '0.73.163';
 const BACKEND_REQUERIDO = 57;
-const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
+const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
 function versionMayor(a, b){
   const x = String(a).split('.').map(n => parseInt(n, 10) || 0), y = String(b).split('.').map(n => parseInt(n, 10) || 0);
@@ -2495,10 +2495,20 @@ function limpiarGuardadoLocal(){
   try{ Object.keys(localStorage).filter(k => k.indexOf('po_') === 0).forEach(k => localStorage.removeItem(k)); }catch(e){}
   try{ if(window.storage && typeof window.storage.delete === 'function'){ window.storage.delete('progreso-obra-la-florida-v8', true); window.storage.delete('progreso-obra-la-florida-v8-docs', true); } }catch(e){}
 }
+// ===== cambios sin guardar: antes de actualizar quedan aparte en este navegador y al volver se ofrecen para guardar =====
+const CLAVE_PEND = 'progresoObraPendiente';
+let actualizandoVersion = false;
+function guardarPendienteLocal(){
+  actualizandoVersion = true;
+  try{
+    if(!hayPendiente() || !sessionName) return;
+    const recs = [...dirtyCellIds].filter(id => cellById[id]).map(id => ({...recordForCell(cellById[id]), campos: camposCambiados(cellById[id])})).filter(r => r.campos.length);
+    localStorage.setItem(CLAVE_PEND, JSON.stringify({u: sessionName, v: APP_VERSION, ts: Date.now(), recs, config: !!settingsUser}));
+  }catch(e){}
+}
 let versionBloqueada = false;
 function versionVieja(minimo){
   versionBloqueada = true;
-  if(hayPendiente()){ mostrarBannerActualizar(minimo || APP_VERSION); return; }
   try{ localStorage.removeItem(CLAVE_VER_GUARDADO); }catch(e){}
   if(window.CargaPagina && CargaPagina.mensaje) CargaPagina.mensaje('Actualizando versión…');
   recargarConVersion(minimo || APP_VERSION);
@@ -2522,6 +2532,7 @@ function mostrarBannerActualizar(v){
   b.innerHTML = `<span>Hay una versión nueva del Panel de Cerámica y Frague (v${v}). Estás usando la v${APP_VERSION}.</span><button type="button">Actualizar ahora</button>`;
   b.querySelector('button').addEventListener('click', () => {
     try{ sessionStorage.setItem('progresoObraIntentosAct', '0'); sessionStorage.setItem('progresoObraActualizadoA', v); }catch(e){}
+    guardarPendienteLocal();
     limpiarGuardadoLocal();
     location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
   });
@@ -2532,6 +2543,7 @@ function recargarConVersion(v){
   try{ intentos = Number(sessionStorage.getItem('progresoObraIntentosAct') || 0); }catch(e){}
   if(intentos >= 2){ mostrarBannerActualizar(v); return false; }
   try{ sessionStorage.setItem('progresoObraIntentosAct', String(intentos + 1)); sessionStorage.setItem('progresoObraActualizadoA', v); }catch(e){}
+  guardarPendienteLocal();
   limpiarGuardadoLocal();
   location.replace(location.origin + location.pathname + '?v=' + v + '_' + Date.now() + location.hash);
   return true;
@@ -2544,9 +2556,7 @@ async function comprobarVersion(){
     try{ sessionStorage.removeItem('progresoObraIntentosAct'); }catch(e){}
     return;
   }
-  const sinGuardar = hayPendiente();
-  if(sinGuardar || document.querySelector('.overlay.show')) mostrarBannerActualizar(v);
-  else recargarConVersion(v);
+  recargarConVersion(v);
 }
 // ===== primera revisión al abrir: la pantalla de carga dice qué está pasando (solo dice lo que es cierto) =====
 let actInicial = null, cargaCerrada = false;
@@ -2559,8 +2569,6 @@ async function revisionInicial(){
     try{ sessionStorage.removeItem('progresoObraIntentosAct'); }catch(e){}
     return 'al_dia';
   }
-  const sinGuardar = hayPendiente();
-  if(cargaCerrada && (sinGuardar || document.querySelector('.overlay.show'))){ mostrarBannerActualizar(v); return 'banner'; }
   msg('Actualizando versión…');
   if(!cargaCerrada) await new Promise(f => setTimeout(f, 800)); // alcanza a leerse antes de recargar
   if(recargarConVersion(v)) return 'actualizando';
@@ -3526,6 +3534,11 @@ async function dbSave(dirtyIds){
     const json = await res.json();
     if(json && json.error === 'sin_sesion'){ dbErrorReason = 'Tu sesión venció. Ingresa tu PIN de nuevo para poder seguir guardando.'; sesionVencida(); throw new Error('sin sesion'); }
     if(json && json.error === 'version_vieja'){ dbErrorReason = 'Esta página es una versión vieja y no puede guardar. Se actualiza para seguir.'; versionVieja(json.minimo); throw new Error('version vieja'); }
+    if(json && json.error === 'trabajador_inexistente'){
+      const l = Array.isArray(json.lista) ? json.lista : [];
+      dbErrorReason = 'No se guardó nada: hay partidas de un trabajador que no existe en el panel (' + l.slice(0, 4).map(x => String(x.trabajador || '?').slice(0, 30)).join(', ') + '). Revisa la lista de trabajadores.';
+      throw new Error('trabajador inexistente');
+    }
     if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = `El servidor frenó el guardado: este envío traía solo ${json.enviadas ?? '?'} partidas y la base de datos tiene ${json.existentes ?? '?'}. No se guardó nada: recarga la página y revisa tus datos.`; throw new Error('reduccion'); }
     if(json && json.error === 'perdida_sospechosa'){
       const pl = Array.isArray(json.perdidas) ? json.perdidas : [];
@@ -3756,7 +3769,7 @@ function enqueueSave(){
 function scheduleSave(){}
 
 window.addEventListener('beforeunload', (e) => {
-  if(!esStaff() || !hayPendiente()) return;
+  if(actualizandoVersion || !esStaff() || !hayPendiente()) return;
   clearTimeout(saveTimer);
   enqueueSave();
   e.preventDefault();
@@ -3792,6 +3805,58 @@ function pedirGuardar(){
     + (r.secciones.length ? `<p class="cp-intro">También se guardarán cambios en: <b>${r.secciones.map(esc).join(', ')}</b>.</p>` : '');
   openInputModal('Cambios por guardar', cuerpo, () => { saveNow(); }, 'Guardar');
 }
+// ===== lo que quedó sin guardar cuando la página se actualizó: se muestra para guardarlo o descartarlo =====
+function revisarPendienteLocal(){
+  let p = null;
+  try{ p = JSON.parse(localStorage.getItem(CLAVE_PEND) || 'null'); }catch(e){}
+  const quitar = () => { try{ localStorage.removeItem(CLAVE_PEND); }catch(e){} };
+  if(!p) return;
+  if(!Array.isArray(p.recs)){ quitar(); return; }
+  if(!isAdmin || p.u !== sessionName) return;
+  const previos = {}, noPosible = [];
+  const etq = c => (c.dpto === 'Pasillo' ? 'Pasillo' : 'Dpto ' + c.dpto) + ' · ' + (AREA_LABEL[c.area] || c.area) + ' (' + c.piso + ')';
+  p.recs.forEach(r => {
+    const c = cellById[r.id];
+    if(!c){ noPosible.push('Una partida que ya no existe en el panel (' + String(r.id).slice(0, 40) + ').'); return; }
+    const act = getState(r.id);
+    let nombre = r.trabajador || '';
+    if(r.wid){ const n = nombreDeId(r.wid); if(n) nombre = n; }
+    const cambiaTrab = r.campos.indexOf('trabajador') !== -1;
+    if(nombre && !workerStatus[nombre]){ noPosible.push(etq(c) + ': el trabajador "' + nombre + '" ya no existe en el panel.'); return; }
+    if(!cambiaTrab && (act.trabajador || '') !== nombre){ noPosible.push(etq(c) + ': ahora la tiene otro trabajador, ese cambio ya no corresponde.'); return; }
+    const antes = {...act}; let toca = false;
+    r.campos.forEach(f => {
+      const nuevo = f === 'trabajador' ? nombre : r[f];
+      if(String(act[f] == null ? '' : act[f]) !== String(nuevo == null ? '' : nuevo)){ act[f] = nuevo; toca = true; }
+    });
+    if(toca){ previos[r.id] = antes; markCellDirty(r.id); }
+  });
+  const hayCambios = Object.keys(previos).length > 0;
+  if(!hayCambios && !noPosible.length && !p.config){ quitar(); return; }
+  const fecha = new Date(p.ts).toLocaleString('es-CL', {timeZone: 'America/Santiago', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+  const r = resumenCambiosPendientes();
+  let cuerpo = `<p class="cp-intro">La página se actualizó (${esc(fecha)}) y estos cambios tuyos no alcanzaron a guardarse:</p>`;
+  if(hayCambios) cuerpo += `<div class="cp-lista">${r.celdas.join('')}</div>`;
+  if(noPosible.length) cuerpo += `<p class="cp-intro"><b>No se pueden guardar:</b></p><ul>${noPosible.map(t => '<li>' + esc(t) + '</li>').join('')}</ul>`;
+  if(p.config) cuerpo += `<p class="cp-intro">También tenías cambios de configuración (precios, trabajadores, pagos u otros) sin guardar. Esos no se pueden recuperar: solo vivían en la pantalla hasta apretar Guardar y la página tuvo que actualizarse. Hay que hacerlos de nuevo.</p>`;
+  inputModalCancel.dataset.orig = inputModalCancel.textContent;
+  inputModalCancel.textContent = 'Cerrar sin guardar';
+  const descartar = () => {
+    Object.keys(previos).forEach(id => { state[id] = previos[id]; dirtyCellIds.delete(id); });
+    quitar(); refrescarBotonGuardar(); render();
+  };
+  inputModalCancel.addEventListener('click', descartar, {once: true});
+  openInputModal('Cambios sin guardar', cuerpo, () => {
+    inputModalCancel.removeEventListener('click', descartar);
+    if(!hayCambios){ quitar(); return; }
+    (async () => {
+      await saveNow();
+      if(!Object.keys(previos).some(id => dirtyCellIds.has(id))) quitar();
+      else avisoLateral('No se pudo guardar. Tus cambios siguen apartados en este navegador y se ofrecen de nuevo al abrir.', 'error');
+    })();
+  }, hayCambios ? 'Guardar y cerrar' : 'Entendido');
+  render();
+}
 async function saveNow(){
   if(!isAdmin || guardandoAhora) return;
   clearTimeout(saveTimer);
@@ -3799,7 +3864,7 @@ async function saveNow(){
   const msgEl = document.getElementById('ioMsg');
   if((DB_URL && dbOk) || (!DB_URL && localOk)){
     msgEl.style.color = 'var(--entregado)';
-    msgEl.textContent = DB_URL ? 'Guardado en la base de datos.' : 'Guardado.';
+    msgEl.textContent = DB_URL ? 'Guardado en la base de datos por ' + (sessionName || 'sesión') + '.' : 'Guardado.';
   } else {
     msgEl.style.color = '#c0546f';
     msgEl.textContent = 'No se pudo guardar' + (DB_URL ? ' en la base de datos.' : '.');
@@ -10322,6 +10387,7 @@ setTimeout(function(){
   appListo = true;
   await esperarActualizacion();
   gateOcultar();
+  try{ revisarPendienteLocal(); }catch(err){ console.error('pendiente', err); }
 })();
 </script>
 <script>
@@ -10404,4 +10470,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.162 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.163 · 22-11-2026 ==== -->
