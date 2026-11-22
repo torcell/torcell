@@ -2481,7 +2481,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.169';
+const APP_VERSION = '0.73.170';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3581,7 +3581,7 @@ async function dbSave(dirtyIds){
 // ===== guardado en fila =====
 // Con GUARDADO_EN_FILA en false se vuelve al guardado anterior (cada Guardar espera la respuesta del servidor).
 const GUARDADO_EN_FILA = true;
-const COLA_KEY = 'progresoObraCola', COLA_ERR_KEY = 'progresoObraColaErrores', COLA_MAX_CHARS = 3000000, COLA_AVISO_MIN = 10, COLA_LOTE = 25;
+const COLA_KEY = 'progresoObraCola', COLA_ERR_KEY = 'progresoObraColaErrores', COLA_MAX_CHARS = 3000000, COLA_AVISO_MIN = 10, COLA_LOTE = 20;
 const colaLeerClave = k => { try{ const a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a.filter(x => x && typeof x === 'object' && x.cuerpo && typeof x.n === 'string') : []; }catch(e){ return []; } };
 function colaEscribirClave(k, arr){
   try{
@@ -10707,4 +10707,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.169 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.170 · 22-11-2026 ==== -->
