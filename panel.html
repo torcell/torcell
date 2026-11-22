@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.160';
+const APP_VERSION = '0.73.161';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2594,7 +2594,6 @@ function unificarPropio(){
   Object.keys(state).forEach(id => { const st = state[id]; if(st && st.wid){ const n = nombreDeId(st.wid); if(n && n !== st.trabajador) st.trabajador = n; } });
   Object.keys(state).forEach(id => { const st = state[id]; if(st && nombreAntiguoPropio(st.trabajador)) st.trabajador = NOM_PROPIO; });
   Object.keys(workerStatus).forEach(k => { if(nombreAntiguoPropio(k)) delete workerStatus[k]; });
-  customWorkers = customWorkers.filter(n => !nombreAntiguoPropio(n));
   workerStatus[NOM_PROPIO] = Object.assign({estado: 'activo', especialidad: 'ceramista'}, workerStatus[NOM_PROPIO] || {}, {id: ID_PROPIO});
   (historialM2 || []).forEach(p => { const pt = p && p.porTrabajador; if(!pt) return; Object.keys(pt).forEach(k => { if(nombreAntiguoPropio(k)){ pt[NOM_PROPIO] = (pt[NOM_PROPIO] || 0) + pt[k]; delete pt[k]; } }); });
 }
@@ -2948,7 +2947,6 @@ let state = {};
 let workerStatus = {};
 let workerDocs = {};
 const AFP_OPTIONS = ['Capital','Cuprum','Habitat','Modelo','PlanVital','ProVida','Uno'];
-let customWorkers = [];
 let saveTimer = null;
 
 const store = {
@@ -3013,7 +3011,6 @@ function aplicarFusion(fusion){
 
 function rebuildWorkerList(){
   const workerSet = new Set(Object.keys(workerStatus));
-  customWorkers.forEach(w => workerSet.add(w));
   Object.values(state).forEach(st => { if(st && st.trabajador) workerSet.add(st.trabajador); });
   ALL_WORKERS = Array.from(workerSet);
   ALL_WORKERS.forEach(w => {
@@ -3117,7 +3114,6 @@ async function mergeRemoteBeforeSave(){
         });
       });
     }
-    if(remote.customWorkers && remote.customWorkers.length) customWorkers = remote.customWorkers;
     if(remote.rates && Object.keys(remote.rates).length) RATES = {...RATES, ...remote.rates};
     if(typeof remote.allowGuestPrices === 'boolean') allowGuestPrices = remote.allowGuestPrices;
     if(typeof remote.pagadoLibre === 'boolean') pagadoLibre = remote.pagadoLibre;
@@ -3478,7 +3474,7 @@ async function respaldarAntesDelCierre(){
       body: JSON.stringify({
         action:'respaldoCierre', token: sessionToken,
         datos: buildRecords(),
-        config: { pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
+        config: { pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos} }
       })
     });
   }catch(err){ console.error('No se pudo hacer el respaldo del cierre', err); }
@@ -3500,7 +3496,7 @@ async function dbSave(dirtyIds){
     }
     else if(soloConfig){ action = 'saveConfigOnly'; }
     else { records = buildRecords(); }
-    const body = { action, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
+    const body = { action, records, pagosRetenidos: isAdmin ? refsAId(pagosRetenidos) : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus: sanitizedWorkerStatusForDb(), rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2: histAId(historialM2), materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, configCambio: settingsDirty || forzarGuardadoCompleto, token: sessionToken };
     if(!forzarGuardadoCompleto && settingsDirty && !seccionesTodas && seccionesSucias.size){
       body.secciones = [...seccionesSucias];
       if(seccionesSucias.has('materiales')) body.matOps = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -3543,7 +3539,6 @@ function applyLoadedPayload(parsed){
   if(!parsed) return;
   state = parsed.items || {};
   workerStatus = parsed.workerStatus || {};
-  customWorkers = parsed.customWorkers || [];
   if(parsed.rates) RATES = {...RATES, ...parsed.rates};
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
   if(typeof parsed.pagadoLibre === 'boolean') pagadoLibre = parsed.pagadoLibre;
@@ -3644,6 +3639,7 @@ async function loadState(){
     const d = await store.get(STORAGE_KEY + '-docs');
     if(d && d.value){ workerDocs = JSON.parse(d.value); }
     else if(localParsed && localParsed.workerDocs){ workerDocs = localParsed.workerDocs; }
+    migrarDocsAId();
   }catch(e){}
 
   try{
@@ -3661,6 +3657,7 @@ let saveChain = Promise.resolve();
 let lastDocsSaved = null;
 
 async function saveDocsIfChanged(){
+  migrarDocsAId();
   const str = JSON.stringify(workerDocs);
   if(str === lastDocsSaved) return true;
   const ok = await store.set(STORAGE_KEY + '-docs', str);
@@ -3700,7 +3697,7 @@ async function doSaveCycle(){
       return {localOk:false, dbOk:false, cancelado:true};
     }
   }
-  const payload = {items:state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, customWorkers, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
+  const payload = {items:state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, rates:RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas, paymentHistory, afpRates:AFP_RATES, obsPorArea:cfgCargada ? OBS_POR_AREA : undefined, objetivos:cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales:MATERIALES, recordatorios:{hechos:recordatoriosHechos}};
   const localOk = await store.set(STORAGE_KEY, JSON.stringify(payload));
   await saveDocsIfChanged();
   let dbOk = true;
@@ -3923,9 +3920,7 @@ function renombrarTrabajador(oldName, newName){
     if(idx >= 0) ALL_WORKERS[idx] = newName;
     workerStatus[newName] = workerStatus[oldName];
     delete workerStatus[oldName];
-    const cIdx = customWorkers.indexOf(oldName);
-    if(cIdx >= 0) customWorkers[cIdx] = newName;
-    if(workerDocs[oldName]){ workerDocs[newName] = workerDocs[oldName]; delete workerDocs[oldName]; }
+    if(!idTrab(newName) && workerDocs[oldName]){ workerDocs[newName] = workerDocs[oldName]; delete workerDocs[oldName]; }
     // ===== el nombre también cambia en pagos, ajustes, retenidos y m² por semana =====
     paymentHistory.forEach(h => { if(h.worker === oldName) h.worker = newName; });
     ajustesPago.forEach(a => { if(a.w === oldName) a.w = newName; });
@@ -4003,9 +3998,20 @@ function fileToDataUrl(file){
   });
 }
 
+// ===== documentos adjuntos: se guardan con el ID del trabajador, así cambiar el nombre no los pierde =====
+const docKey = w => idTrab(w) || w;
+function migrarDocsAId(){
+  Object.keys(workerDocs).forEach(k => {
+    const id = idTrab(k);
+    if(!id || id === k || !Array.isArray(workerDocs[k])) return;
+    workerDocs[id] = (workerDocs[id] || []).concat(workerDocs[k]);
+    delete workerDocs[k];
+  });
+}
 function renderWorkerDocsList(worker){
+  migrarDocsAId();
   const box = document.getElementById('datosDocsList');
-  const docs = workerDocs[worker] || [];
+  const docs = workerDocs[docKey(worker)] || [];
   if(!docs.length){ box.innerHTML = '<p style="font-size:12px;color:var(--sub);margin:4px 0;">Sin archivos guardados.</p>'; return; }
   box.innerHTML = docs.map((d, i) => `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;font-size:12px;">
@@ -4015,7 +4021,7 @@ function renderWorkerDocsList(worker){
   box.querySelectorAll('[data-remove-doc]').forEach(b => {
     b.addEventListener('click', (e) => {
       const idx = parseInt(e.target.getAttribute('data-remove-doc'));
-      workerDocs[worker].splice(idx, 1);
+      workerDocs[docKey(worker)].splice(idx, 1);
       scheduleSave();
       renderWorkerDocsList(worker);
     });
@@ -4079,8 +4085,8 @@ function openWorkerDatosModal(worker){
       document.getElementById('addWorkerMsg').textContent = '';
     }
     const dataUrl = await fileToDataUrl(file);
-    if(!workerDocs[worker]) workerDocs[worker] = [];
-    workerDocs[worker].push({name:file.name, type:file.type, dataUrl});
+    if(!workerDocs[docKey(worker)]) workerDocs[docKey(worker)] = [];
+    workerDocs[docKey(worker)].push({name:file.name, type:file.type, dataUrl});
     scheduleSave();
     renderWorkerDocsList(worker);
     e.target.value = '';
@@ -4103,7 +4109,6 @@ function sinActividadTrab(n){
 function quitarTrabajadorLocal(n){
   if(typeof wkQuitados !== 'undefined') wkQuitados.push(n);
   delete workerStatus[n];
-  const i = customWorkers.indexOf(n); if(i >= 0) customWorkers.splice(i, 1);
   const j = ALL_WORKERS.indexOf(n); if(j >= 0) ALL_WORKERS.splice(j, 1);
 }
 document.addEventListener('click', (e) => {
@@ -4178,7 +4183,6 @@ document.getElementById('addWorkerBtn').addEventListener('click', () => {
     if(d.fin && d.fin < d.inicio) return err('El finiquito no puede ser antes del ingreso.');
     ALL_WORKERS.push(name);
     workerStatus[name] = {estado: d.fin && d.fin < rdHoy() ? 'finiquitado' : 'activo', especialidad: d.especialidad, inicio: d.inicio, fin: d.fin, ingreso: d.ingreso};
-    customWorkers.push(name);
     markSettingsDirty();
     populateFilters(); renderWorkerPanel(); render();
     saveNow(); // se guarda al tiro para que Asistencia lo vea
@@ -7576,7 +7580,7 @@ async function abrirAsistencia(){
   const vigente = (n, f) => { const w = workerStatus[n] || {}, ini = w.inicio || (/^\d{4}-\d{2}-\d{2}$/.test(w.contratoFecha || '') ? w.contratoFecha : ''); return !(ini && ini > f) && !(w.fin && w.fin < f); };
   function aEstado(r, f){
     f = f || r.fecha;
-    const est = {}, lis = (r.trabajadores || []).concat(customWorkers.filter(n => (workerStatus[n] || {}).estado === 'activo')).filter((n, i, v) => v.indexOf(n) === i && vigente(n, f) && !esPropio(n));
+    const est = {}, lis = (r.trabajadores || []).concat(Object.keys(workerStatus).filter(n => (workerStatus[n] || {}).estado === 'activo')).filter((n, i, v) => v.indexOf(n) === i && vigente(n, f) && !esPropio(n));
     Object.keys(r.registros || {}).forEach(n => { const x = r.registros[n]; est[n] = {e: x.e, m: asMotBase(x.m), d: asMotDet(x.m), s: x.s === 'medio día' ? 'medio dia' : (x.s || '')}; if(lis.indexOf(n) === -1) lis.push(n); });
     return {estado: est, lista: lis};
   }
@@ -8726,7 +8730,7 @@ document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
 // ===== Ventana Gestionar trabajadores =====
 const workerOverlay = document.getElementById('workerOverlay');
 let wkSnap = null, wkQuitados = [];
-function wkTomarSnap(){ wkSnap = JSON.stringify({ws: workerStatus, cw: customWorkers}); wkQuitados = []; }
+function wkTomarSnap(){ wkSnap = JSON.stringify({ws: workerStatus}); wkQuitados = []; }
 document.getElementById('toggleWorkerPanel').addEventListener('click', () => {
   wkTomarSnap();
   renderWorkerPanel();
@@ -8741,11 +8745,10 @@ document.getElementById('workerGuardarSolo').addEventListener('click', () => gua
 // Cerrar: deshace lo editado en la ventana (lo ya quitado no vuelve)
 document.getElementById('workerCerrarSin').addEventListener('click', () => {
   workerOverlay._mantener = false;
-  if(wkSnap && wkSnap !== JSON.stringify({ws: workerStatus, cw: customWorkers})){
+  if(wkSnap && wkSnap !== JSON.stringify({ws: workerStatus})){
     const o = JSON.parse(wkSnap);
     Object.keys(workerStatus).forEach(k => delete workerStatus[k]); Object.assign(workerStatus, o.ws);
-    customWorkers.length = 0; o.cw.forEach(n => customWorkers.push(n));
-    wkQuitados.forEach(n => { delete workerStatus[n]; const i = customWorkers.indexOf(n); if(i >= 0) customWorkers.splice(i, 1); });
+    wkQuitados.forEach(n => { delete workerStatus[n]; });
     rebuildWorkerList(); render();
   }
   closeOverlayAnimated(workerOverlay);
@@ -8998,7 +9001,7 @@ document.getElementById('dbBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const payload = { items: state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, customWorkers, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas: isAdmin ? ceramicas : undefined, permisos: isAdmin ? permisosCargos : undefined, calidad: CAL_REV, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
+  const payload = { items: state, pagosRetenidos: isAdmin ? pagosRetenidos : undefined, ajustesPago: isAdmin ? ajustesPago : undefined, workerStatus, rates: RATES, allowGuestPrices, espaciadoDptos, temaPrincipal, ceramicas: isAdmin ? ceramicas : undefined, permisos: isAdmin ? permisosCargos : undefined, calidad: CAL_REV, paymentHistory, afpRates: AFP_RATES, obsPorArea: cfgCargada ? OBS_POR_AREA : undefined, objetivos: cfgCargada ? OBJETIVOS : undefined, cierreQuincena, cierreAnterior, historialM2, materiales: MATERIALES, recordatorios:{hechos:recordatoriosHechos}, workerDocs, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -10376,4 +10379,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.160 · 21-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.161 · 22-11-2026 ==== -->
