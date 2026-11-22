@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.163';
+const APP_VERSION = '0.73.164';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3539,6 +3539,11 @@ async function dbSave(dirtyIds){
       dbErrorReason = 'No se guardó nada: hay partidas de un trabajador que no existe en el panel (' + l.slice(0, 4).map(x => String(x.trabajador || '?').slice(0, 30)).join(', ') + '). Revisa la lista de trabajadores.';
       throw new Error('trabajador inexistente');
     }
+    if(json && json.error === 'trabajador_inactivo'){
+      const l = Array.isArray(json.lista) ? json.lista : [];
+      dbErrorReason = 'No se guardó nada: hay cambios de partida de trabajadores inactivos o finiquitados (' + l.slice(0, 4).map(x => String(x.trabajador || '?').slice(0, 30) + ' · ' + (x.estado === 'finiquitado' ? 'finiquitado' : 'inactivo')).join(', ') + '). Vuelve a ponerlo activo o quítale ese cambio.';
+      throw new Error('trabajador inactivo');
+    }
     if(json && json.error === 'reduccion_sospechosa'){ dbErrorReason = `El servidor frenó el guardado: este envío traía solo ${json.enviadas ?? '?'} partidas y la base de datos tiene ${json.existentes ?? '?'}. No se guardó nada: recarga la página y revisa tus datos.`; throw new Error('reduccion'); }
     if(json && json.error === 'perdida_sospechosa'){
       const pl = Array.isArray(json.perdidas) ? json.perdidas : [];
@@ -3823,6 +3828,8 @@ function revisarPendienteLocal(){
     if(r.wid){ const n = nombreDeId(r.wid); if(n) nombre = n; }
     const cambiaTrab = r.campos.indexOf('trabajador') !== -1;
     if(nombre && !workerStatus[nombre]){ noPosible.push(etq(c) + ': el trabajador "' + nombre + '" ya no existe en el panel.'); return; }
+    const estT = nombre && (workerStatus[nombre] || {}).estado;
+    if(estT && estT !== 'activo' && (r.campos.indexOf('trabajador') !== -1 || r.campos.indexOf('partida') !== -1 || r.campos.indexOf('terminado') !== -1)){ noPosible.push(etq(c) + ': ' + nombre + ' ahora está ' + (estT === 'finiquitado' ? 'finiquitado' : 'inactivo') + ' y no se le pueden guardar cambios de partida.'); return; }
     if(!cambiaTrab && (act.trabajador || '') !== nombre){ noPosible.push(etq(c) + ': ahora la tiene otro trabajador, ese cambio ya no corresponde.'); return; }
     const antes = {...act}; let toca = false;
     r.campos.forEach(f => {
@@ -10470,4 +10477,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.163 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.164 · 22-11-2026 ==== -->
