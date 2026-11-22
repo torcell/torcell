@@ -638,6 +638,9 @@
   .ovDin>div{animation:modalPop .28s cubic-bezier(.22,.8,.3,1);}
   .ovDin.ovCierra{animation:overlayOut .2s ease forwards;}
   .ovDin.ovCierra>div{animation:modalPopOut .2s cubic-bezier(.4,0,.6,1) forwards;}
+  /* ===== capa propia mientras la ventana se anima: se dibuja una vez y la tarjeta solo se escala, sin redibujar cada cuadro ===== */
+  .overlay.show, .overlay.overlayClosing, .ovDin{will-change:opacity;}
+  .overlay.show .modal, .overlay.overlayClosing .modal, .ovDin>div{will-change:transform,opacity;backface-visibility:hidden;}
   @media (prefers-reduced-motion:reduce){ .modal,.modal.modalClosing,.ovDin,.ovDin>div{animation-duration:.01s !important;} }
   @keyframes roleFlash{ 0%{filter:brightness(1);} 40%{filter:brightness(1.7);} 100%{filter:brightness(1);} }
   .role-flash{ animation:roleFlash .5s ease; }
@@ -1794,6 +1797,11 @@
 /* icono a la izquierda del botón, texto al medio */
 button:has(>.ic.ib){position:relative;padding-left:34px;padding-right:34px;text-align:center;}
 button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-align:baseline;}
+
+  /* ===== Cápsulas y tags: el texto va centrado horizontal y vertical (protocolo del proyecto); ajuste fino por la tinta del texto ===== */
+  .db-badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px 5px;}
+  .role-badge{display:inline-flex;align-items:center;justify-content:center;padding:6.5px 11.6px 5.5px 12.4px;}
+  .lh-fila .tag{padding:0 6px 2px;}
 </style>
 <script>
 // ===== Avisos: al desaparecer uno, los de abajo suben con animación =====
@@ -2481,7 +2489,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.170';
+const APP_VERSION = '0.73.172';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5854,6 +5862,32 @@ function closeOverlayAnimated(overlayEl){
     modal.classList.remove('modalClosing');
   }, 200);
 }
+
+// ===== precalentar ventanas: una ventana de mentira (casi transparente) abre y cierra una vez al cargar, con iconos, botones y tablas, para que la primera ventana real ya salga fluida =====
+function precalentarVentanas(){
+  if(window.__precalentado || document.hidden) return;
+  window.__precalentado = true;
+  try{
+    const iconos = [];
+    for(const hoja of document.styleSheets){
+      let reglas; try{ reglas = hoja.cssRules; }catch(e){ continue; }
+      for(const r of reglas){ const m = r.selectorText && /^\.ic-([\w-]+)$/.exec(r.selectorText); if(m) iconos.push('<i class="ic ic-' + m[1] + '"></i>'); }
+    }
+    const w = document.createElement('div');
+    w.id = 'zPrecarga'; w.setAttribute('aria-hidden', 'true'); w.inert = true;
+    w.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;opacity:.01;pointer-events:none;z-index:2147483000;';
+    w.innerHTML = '<div class="overlay show"><div class="modal"><h3>Precarga</h3><div>' + iconos.join('') + '</div>'
+      + '<div class="row"><button class="btn primary" type="button">Guardar</button><button class="btn" type="button">Cerrar</button><span class="db-badge online">En línea</span><i class="tnuevo">Nuevo</i></div>'
+      + '<input type="text" value="Texto"><select><option>Uno</option><option>Dos</option></select>'
+      + '<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></tbody></table></div></div>'
+      + '<div class="avl"><div>Lateral</div></div>';
+    document.body.appendChild(w);
+    const ov = w.querySelector('.overlay'), md = w.querySelector('.modal'), av = w.querySelector('.avl');
+    setTimeout(() => { ov.classList.add('overlayClosing'); md.classList.add('modalClosing'); av.classList.add('sale'); }, 450);
+    setTimeout(() => w.remove(), 800);
+  }catch(e){ console.warn('precarga de ventanas', e); }
+}
+window.addEventListener('load', () => setTimeout(() => (window.requestIdleCallback || setTimeout)(precalentarVentanas), 1800));
 function closeModal(){ closeOverlayAnimated(overlay); pendingAction = null; }
 modalCancel.addEventListener('click', closeModal);
 modalConfirm.addEventListener('click', () => { if(pendingAction) pendingAction(); closeModal(); });
@@ -10707,4 +10741,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.170 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.172 · 22-11-2026 ==== -->
