@@ -2480,7 +2480,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.159';
+const APP_VERSION = '0.73.160';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 10 * 60 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3959,7 +3959,7 @@ function renderWorkerPanel(){
     const ini = iniDe(w);
     return `
     <div class="worker-row">
-      <div class="wname">${esc(nomVis(w))}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}${CONTRATO_PEND.has(w) ? '<small>Contrato · sin asistencia aún</small>' : ''}</div>
+      <div class="wname">${esc(nomVis(w))}${ini ? `<small>desde ${ini.split('-').reverse().join('-')}</small>` : ''}</div>
       <div class="wcontrols">
         <select data-worker="${esc(w)}" data-field="especialidad">
           <option value="ceramista" ${ws.especialidad==='ceramista'?'selected':''}>Ceramista</option>
@@ -3972,7 +3972,7 @@ function renderWorkerPanel(){
         </select>
         <button class="rename-btn" data-worker-datos="${esc(w)}" title="Ver/editar datos del trabajador">Datos</button>
         <button class="rename-btn" data-worker-historial="${esc(w)}" title="Ver historial de pagos">Historial</button>
-        ${CONTRATO_PEND.has(w) ? `<button class="rename-btn" data-worker-quitar="${esc(w)}" title="No llegó: quitarlo del panel">Quitar</button>` : ''}
+        ${sinActividadTrab(w) ? `<button class="rename-btn" data-worker-quitar="${esc(w)}" title="Sin asistencia ni avance: quitarlo del panel">Quitar</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -4088,62 +4088,29 @@ function openWorkerDatosModal(worker){
 }
 
 // ===== Contratos: el trabajador entra solo al firmar el contrato =====
-let CONTRATO_PEND = new Set(); // creados por contrato y todavía sin asistencia ni avance (se pueden quitar)
+// ===== Quitar trabajador a mano: solo si no tiene asistencia, partidas, pagos ni ajustes =====
+function sinActividadTrab(n){
+  if(esPropio(n)) return false;
+  const id = idTrab(n);
+  if(Object.keys(state).some(k => state[k] && state[k].trabajador === n)) return false;
+  if(ULT_DIA_TRAB[n]) return false;
+  if(paymentHistory.some(h => h && (h.worker === n || (id && h.wid === id)))) return false;
+  if(ajustesPago.some(a => a && (a.w === n || (id && a.wid === id)))) return false;
+  if(pagosRetenidos.some(w => w === n || (id && w === id))) return false;
+  if(historialM2.some(h => h && h.porTrabajador && (h.porTrabajador[n] !== undefined || (id && h.porTrabajador[id] !== undefined)))) return false;
+  return true;
+}
 function quitarTrabajadorLocal(n){
   if(typeof wkQuitados !== 'undefined') wkQuitados.push(n);
   delete workerStatus[n];
   const i = customWorkers.indexOf(n); if(i >= 0) customWorkers.splice(i, 1);
   const j = ALL_WORKERS.indexOf(n); if(j >= 0) ALL_WORKERS.splice(j, 1);
-  CONTRATO_PEND.delete(n);
 }
-let sincContratosOcupado = false;
-async function sincronizarContratos(){
-  if(sincContratosOcupado || !DB_URL || !sessionToken || !(isAdmin || isJefe)) return;
-  sincContratosOcupado = true;
-  try{
-    const r = await llamarDb('contratosEstado');
-    if(!r || !r.ok) return;
-    const pend = (r.pendientes || []).filter(n => typeof n === 'string');
-    const quitados = (r.quitados || []).filter(n => typeof n === 'string');
-    let cambio = false; const nuevos = [];
-    quitados.forEach(n => { if(workerStatus[n]){ quitarTrabajadorLocal(n); cambio = true; } });
-    if(pend.some(n => ALL_WORKERS.indexOf(n) < 0)){
-      const rem = await dbLoad();
-      if(rem && rem.workerStatus){
-        Object.keys(rem.workerStatus).forEach(n => {
-          if(workerStatus[n] && ALL_WORKERS.indexOf(n) >= 0) return;
-          workerStatus[n] = rem.workerStatus[n]; nuevos.push(n);
-          if(ALL_WORKERS.indexOf(n) < 0) ALL_WORKERS.push(n);
-          if(customWorkers.indexOf(n) < 0) customWorkers.push(n);
-        });
-        cambio = cambio || nuevos.length > 0;
-      }
-    }
-    const ruts = r.ruts && typeof r.ruts === 'object' ? r.ruts : {};
-    Object.keys(ruts).forEach(n => { if(workerStatus[n] && !workerStatus[n].rut && typeof ruts[n] === 'string') workerStatus[n].rut = ruts[n].slice(0, 14); });
-    // ===== datos del contrato (solo si el campo está vacío; quedan en este equipo, no van a la config compartida) =====
-    const dc = r.datos && typeof r.datos === 'object' ? r.datos : {};
-    const LIM = {nacionalidad: 40, direccion: 120, correo: 80};
-    Object.keys(dc).forEach(n => {
-      const w = workerStatus[n], d = dc[n]; if(!w || !d || typeof d !== 'object') return;
-      Object.keys(LIM).forEach(k => { if(!w[k] && typeof d[k] === 'string' && d[k].trim()) w[k] = d[k].replace(/[<>]/g, '').trim().slice(0, LIM[k]); });
-    });
-    const antes = Array.from(CONTRATO_PEND).sort().join('|');
-    CONTRATO_PEND = new Set(pend.filter(n => workerStatus[n]));
-    if(antes !== Array.from(CONTRATO_PEND).sort().join('|')) cambio = true;
-    if(cambio){ populateFilters(); renderWorkerPanel(); render(); }
-    if(nuevos.length) avisoToast('Entró por contrato: ' + nuevos.join(', ') + '.', 'ok');
-    if(quitados.length) avisoToast('Se quitaron por no tener asistencia: ' + quitados.join(', ') + '.', 'alerta');
-  }catch(e){}
-  finally{ sincContratosOcupado = false; }
-}
-setTimeout(() => { if(!document.hidden) sincronizarContratos(); }, 7000); setTimeout(() => { if(!document.hidden) sincronizarContratos(); }, 25000);
-setInterval(() => { if(!document.hidden) sincronizarContratos(); }, 180000);
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-worker-quitar]'); if(!b) return;
   const w = b.getAttribute('data-worker-quitar');
-  openInputModal('Quitar trabajador', `<p style="font-size:13px;margin:0 0 8px;"><b>${esc(w)}</b> se creó por contrato y todavía no tiene asistencia ni avance.</p><p style="font-size:12px;color:var(--sub);margin:0;">Se borra su ficha del panel. El contrato queda guardado en el generador. Si llega otro día, haz un contrato nuevo.</p>`, () => {
-    llamarDb('trabajadorQuitar', {nombre: w}).then(r => {
+  openInputModal('Quitar trabajador', `<p style="font-size:13px;margin:0 0 8px;"><b>${esc(w)}</b> no tiene asistencia, partidas ni pagos.</p><p style="font-size:12px;color:var(--sub);margin:0;">Se borra su ficha del panel. Queda guardado en el registro de quitados por si hay que restaurarlo.</p>`, () => {
+    llamarDb('trabajadorQuitar', {nombre: w, wid: idTrab(w)}).then(r => {
       if(r && r.ok){ quitarTrabajadorLocal(w); populateFilters(); renderWorkerPanel(); render(); avisoToast(w + ' quitado del panel.', 'ok'); }
       else avisoToast((r && r.error) || 'No se pudo quitar.', 'error');
     });
@@ -4168,14 +4135,37 @@ function leerIngreso(){
   const ok = x => /^\d{4}-\d{2}-\d{2}$/.test(x) ? x : '';
   return {especialidad: v('nwCargo') === 'fraguador' ? 'fraguador' : 'ceramista', inicio: ok(v('nwInicio')), fin: ok(v('nwFin')), ingreso: METODOS_ENTRADA.indexOf(v('nwMetodo')) >= 0 ? v('nwMetodo') : ''};
 }
+// ===== contratos recientes: solo ayudan a escribir el nombre; el trabajador se crea al guardar =====
+async function cargarContratosRecientes(){
+  let lista = [];
+  try{
+    if(DB_URL && sessionToken){
+      const r = await llamarDb('contratosRecientes');
+      if(r && r.ok && Array.isArray(r.lista)) lista = r.lista.filter(x => x && typeof x.nombre === 'string' && x.nombre.trim());
+    }
+  }catch(e){}
+  const sel = document.getElementById('nwContrato'); if(!sel) return;
+  const yaEsta = n => ALL_WORKERS.some(w => w.toLowerCase() === n.toLowerCase());
+  lista = lista.filter(x => !yaEsta(x.nombre));
+  sel.innerHTML = lista.length
+    ? '<option value="">Elegir (opcional)</option>' + lista.map(x => `<option value="${esc(x.nombre)}">${esc(x.nombre)}${/^\d{4}-\d{2}-\d{2}$/.test(x.ingreso || '') ? ' · ' + x.ingreso.split('-').reverse().join('/') : ''}</option>`).join('')
+    : '<option value="">Sin contratos recientes</option>';
+  sel.disabled = !lista.length;
+  sel.addEventListener('change', () => {
+    if(!sel.value) return;
+    const inp = document.getElementById('nwNombre'); if(inp){ inp.value = sel.value; inp.focus(); }
+  });
+}
 document.getElementById('addWorkerBtn').addEventListener('click', () => {
   document.getElementById('addWorkerMsg').textContent = '';
   const body = `
+    <div class="rate-row"><label for="nwContrato">Contrato <i class="tnuevo" data-hasta="2026-11-28">Nuevo</i></label><select id="nwContrato" style="width:220px;" disabled><option value="">Buscando…</option></select></div>
     <div class="rate-row"><label>Nombre y apellido</label><input type="text" id="nwNombre" maxlength="60" style="width:220px;" placeholder="Ej: Juan Pérez" autocomplete="off"></div>
     ${controlesIngreso({especialidad:'ceramista', inicio: rdHoy()})}
     ${ultimoDiaHtml('')}
     <p style="margin:2px 0 4px;font-size:11px;color:var(--sub);">Al guardar queda activo y aparece en Asistencia, donde puedes marcar los días que ya trabajó desde su ingreso.</p>
     <div class="add-worker-msg" id="nwMsg" style="color:#c0546f;"></div>`;
+  cargarContratosRecientes();
   openInputModal('Nuevo trabajador', body, () => {
     const err = t => { document.getElementById('nwMsg').textContent = t; return 'mantener'; };
     const name = document.getElementById('nwNombre').value.replace(/\s+/g, ' ').trim();
@@ -8738,7 +8728,7 @@ const workerOverlay = document.getElementById('workerOverlay');
 let wkSnap = null, wkQuitados = [];
 function wkTomarSnap(){ wkSnap = JSON.stringify({ws: workerStatus, cw: customWorkers}); wkQuitados = []; }
 document.getElementById('toggleWorkerPanel').addEventListener('click', () => {
-  sincronizarContratos(); wkTomarSnap();
+  wkTomarSnap();
   renderWorkerPanel();
   workerOverlay.classList.add('show');
 });
@@ -10386,4 +10376,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.159 · 21-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.160 · 21-11-2026 ==== -->
