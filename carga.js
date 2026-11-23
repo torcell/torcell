@@ -1,4 +1,4 @@
-/* ===== carga.js 1.2.0 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.2.1 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
@@ -115,29 +115,32 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     error: function(destino, tipo){
       if(st.err) return st.err;
       if(st.cerrando){ location.replace(destino); return Promise.resolve(); }
-      var avisado = false;
-      if(tipo !== 'caduco') avisarIntento(tipo).then(function(ok){ avisado = !!ok; var b = document.getElementById('cgBtnAviso'); if(b && ok) marcarAviso(b); });
+      // el aviso automático de intrusos (sin cuenta / sin permiso) sigue saliendo en silencio; el botón nunca se aprieta solo
+      if(tipo === 'nosesion' || tipo === 'permiso') avisarIntento(tipo);
       st.err = (async function(){
         var motivo = motivoDe(tipo);
+        // cuenta ya abierta en otro aparato: el botón pide que se libere el cupo
+        var libera = /ya está abierta en otro/i.test(motivo);
+        var rotulo = libera ? 'Pedir liberación' : 'Dar aviso', hecho = libera ? 'Solicitud enviada' : 'Aviso enviado';
         await abierta;
         cancelAnimationFrame(st.raf); st.meta = 88;
         var ci = document.getElementById('cgIn');
         // ===== se reemplaza todo lo de entre las líneas por el motivo y los botones =====
         var f = document.createElement('div'); f.className = 'cgfalla'; f.setAttribute('role', 'alert');
         f.innerHTML = '<div class="cgfmsg"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span></span></div>'
-          + '<div class="cgbtns"><button type="button" class="cgbtn cgbtn1" id="cgBtnOk">Entendido</button><button type="button" class="cgbtn" id="cgBtnAviso">Dar aviso</button></div>';
+          + '<div class="cgbtns"><button type="button" class="cgbtn cgbtn1" id="cgBtnOk">Entendido</button><button type="button" class="cgbtn" id="cgBtnAviso"></button></div>';
         f.querySelector('span').textContent = motivo;
         ci.appendChild(f);
-        el.classList.add('cgerror'); ci.classList.add('cgtiembla');
         var bOk = document.getElementById('cgBtnOk'), bAv = document.getElementById('cgBtnAviso');
+        bAv.textContent = rotulo;
+        el.classList.add('cgerror'); ci.classList.add('cgtiembla');
         bOk.addEventListener('click', function(){ bOk.disabled = true; location.replace(destino); });
-        if(avisado) marcarAviso(bAv);
         bAv.addEventListener('click', function(){
           if(bAv.disabled) return;
           bAv.disabled = true; bAv.textContent = 'Enviando…';
-          avisarIntento(tipo === 'caduco' ? 'sesion' : tipo, true).then(function(ok){
-            if(ok){ avisado = true; marcarAviso(bAv); }
-            else { bAv.disabled = false; bAv.textContent = 'Reintentar aviso'; }
+          avisarIntento(libera ? 'liberacion' : (tipo === 'caduco' ? 'sesion' : tipo), true).then(function(ok){
+            if(ok){ bAv.textContent = hecho; bAv.classList.add('cgok'); }
+            else { bAv.disabled = false; bAv.textContent = 'Reintentar'; }
           });
         });
         setTimeout(function(){ try{ bOk.focus({preventScroll: true}); }catch(e){} }, 60);
@@ -210,7 +213,6 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     var ctl = new AbortController(), to = setTimeout(function(){ ctl.abort(); }, 3000);
     fetch('https://ipwho.is/', {signal: ctl.signal}).then(function(r){ return r.json(); }).then(function(g){ clearTimeout(to); enviar(g && g.success !== false ? {ip: g.ip, ciudad: g.city, region: g.region, pais: g.country, isp: (g.connection && (g.connection.isp || g.connection.org)) || '', lat: g.latitude, lon: g.longitude, zona: (g.timezone && g.timezone.id) || ''} : null); }).catch(function(){ clearTimeout(to); enviar(null); });
   }catch(e){ listo(false); } }); }
-  function marcarAviso(b){ b.disabled = true; b.textContent = 'Aviso enviado'; b.classList.add('cgok'); }
   window.salirConError = function(destino, tipo){ if(tipo && window.CargaPagina && document.getElementById('cargaGlobal') && !st.cerrando) return window.CargaPagina.error(destino, tipo); location.replace(destino); };
   if(window.__gateErr) window.CargaPagina.error(window.__gateErr.d, window.__gateErr.t);
   setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);
