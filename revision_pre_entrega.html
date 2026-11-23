@@ -947,7 +947,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <body class="sin-sesion">
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Revisión Pre-Entrega</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=9"></script>
+<script src="carga.js?v=10"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <header class="top">
   <div class="brand">
@@ -1216,17 +1216,6 @@ const TIEMPO_MAX = 30000;
 const TIEMPO_INICIAL = 45000;
 
 const NOMBRE_TIPO_DISP = {cel: 'celular', pc: 'computador'};
-function msgDispositivoOcupado(tipo){
-  if(tipo === 'unico') return 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.';
-  return 'Esta cuenta ya está abierta en otro ' + (tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Solo se permite 1 computador y 1 celular/tablet. Pídele al administrador que libere el cupo.';
-}
-function etiquetaDispositivo(){
-  const u = navigator.userAgent || '';
-  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
-  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
-  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
-  return so + ' · ' + nav;
-}
 async function llamar(action, extra, rapido, limite){
   const ctl = new AbortController();
   const tope = setTimeout(() => ctl.abort(), limite || TIEMPO_MAX);
@@ -1245,13 +1234,6 @@ async function llamar(action, extra, rapido, limite){
 }
 
 
-function nuevoNonce(){
-  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  const b = new Uint8Array(16);
-  (window.crypto || {getRandomValues: a => a.forEach((_, i) => { a[i] = Math.floor(Math.random() * 256); })}).getRandomValues(b);
-  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 // La pantalla de carga vive en la página (CargaPagina)
 function cargaCortar(){ if(window.CargaPagina) CargaPagina.cortar(); }
@@ -1276,7 +1258,6 @@ const API = {
   guardar: (piso, unidad, m, ver) => llamar('preEntregaGuardar', {piso, unidad, m, ver, nonce: nuevoNonce(), ts: Date.now()}, false, 30000)
 };
 function pintarQuien(){ $p('quien').textContent = nombre; }
-function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $p('irPanel').addEventListener('click', e => irMenuCarga(e.currentTarget));
 $p('salir').addEventListener('click', () => {
   const t = token;

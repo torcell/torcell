@@ -1076,7 +1076,7 @@ html{scrollbar-gutter:stable;}
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Calidad</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=9"></script>
+<script src="carga.js?v=10"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <aside class="hist" id="hist" aria-label="Historial de cambios"><div class="hcab"><b>Historial <span id="hCuenta"></span><i class="tnuevo" data-desde="2026-11-08">Nuevo</i></b><button type="button" class="hatras" id="hAtras" title="Volver atrás: deshace el último Revisado" aria-label="Volver atrás" disabled>↶</button></div><div id="hLista"></div></aside>
 <div id="cielo" aria-hidden="true"></div>
@@ -1514,7 +1514,6 @@ const ESPERA_MS = 3000;
 const espera = {};
 
 const $ = id => document.getElementById(id);
-const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 let scope = 'piso';
 let ordenDesc = true;
 try{ ordenDesc = localStorage.getItem('calidadOrdenPisos') !== 'asc'; }catch(e){}
@@ -1536,17 +1535,6 @@ const TIEMPO_MAX = 30000;
 const TIEMPO_INICIAL = 45000;
 
 const NOMBRE_TIPO_DISP = {cel: 'celular', pc: 'computador'};
-function msgDispositivoOcupado(tipo){
-  if(tipo === 'unico') return 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.';
-  return 'Esta cuenta ya está abierta en otro ' + (tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Solo se permite 1 computador y 1 celular/tablet. Pídele al administrador que libere el cupo.';
-}
-function etiquetaDispositivo(){
-  const u = navigator.userAgent || '';
-  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
-  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
-  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
-  return so + ' · ' + nav;
-}
 async function llamar(action, extra, rapido, limite){
   const ctl = new AbortController();
   const tope = setTimeout(() => ctl.abort(), limite || TIEMPO_MAX);
@@ -1565,19 +1553,6 @@ async function llamar(action, extra, rapido, limite){
 }
 
 const dormir = ms => new Promise(r => setTimeout(r, ms));
-function animAlto(v, a, b, ms){
-  return new Promise(res => {
-    let t = 0, last = null;
-    const paso = ts => {
-      if(last === null) last = ts;
-      t += Math.min(ts - last, 24); last = ts;
-      const k = Math.min(1, t / ms), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      v.style.height = (a + (b - a) * e) + 'px';
-      if(k < 1) requestAnimationFrame(paso); else res();
-    };
-    requestAnimationFrame(paso);
-  });
-}
 // La pantalla de carga vive en la página (CargaPagina): se abre y se cierra sola con animaciones CSS.
 function cargaMostrar(){}
 function cargaCortar(){ if(window.CargaPagina) CargaPagina.cortar(); }
@@ -1660,13 +1635,6 @@ function revision(d, sc){
   return d.n <= PISO_REVISADO_HASTA && d.d !== 'Pasillo' ? {e:'revisado', d:'', c:0, base:true} : {e:'pendiente', d:'', c:0};
 }
 
-function nuevoNonce(){
-  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  const b = new Uint8Array(16);
-  (window.crypto || {getRandomValues: a => a.forEach((_, i) => { a[i] = Math.floor(Math.random() * 256); })}).getRandomValues(b);
-  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
 
 function marcarEspera(k){
   espera[k] = Date.now() + ESPERA_MS;
@@ -2005,7 +1973,6 @@ const esAdminCal = () => cargo === 'Admin';
 // solo Admin y Calidad editan; el resto entra como invitado (solo mira)
 const soloLectura = () => !(cargo === 'Admin' || cargo === 'Calidad');
 function ajustarFotosUI(){ $('expDatos').hidden = $('impDatos').hidden = !esAdminCal(); $('verFotos').hidden = !(fotosOk && esAdminCal()); $('irPanel').hidden = false; }
-function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $('irPanel').addEventListener('click', e => irMenuCarga(e.currentTarget));
 function dptoTxt(base){ const q = base.split('|'); return q[0] + ' · ' + (q[1] === 'Pasillo' ? 'Pasillo' : 'Dpto ' + q[1]); }
 function fechaFoto(ts){ return ts ? new Date(ts).toLocaleString('es-CL', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : ''; }
@@ -3493,7 +3460,6 @@ window.limpiarNuevos = function(raiz){
   const rec = (d, sk) => PD.deptos[claveDep(d, sk)] || vacio();
   const cur = r => r.revs[r.revs.length - 1];
   const hoy = () => new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'short'});
-  const esc2 = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const nomDep = d => d.d === 'Pasillo' ? 'Pasillo' : /^\d+$/.test(String(d.d)) ? 'Dpto ' + d.d : String(d.d);
   const lectura = () => soloLectura();
 
@@ -3531,7 +3497,7 @@ window.limpiarNuevos = function(raiz){
     let h = 0, t = 0;
     P.ds.forEach(d => { const x = cal.filas.find(f => f.d === d); if(x){ h += x.a.h; t += x.a.t; } });
     const pct = t ? Math.round(h * 100 / t) : 0;
-    return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc2(P.p + ': ' + h + ' de ' + t + ' puntos') + '" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
+    return '<div class="pan' + (pct >= 100 ? ' ok' : '') + '" style="--p:' + pct + '" title="' + esc(P.p + ': ' + h + ' de ' + t + ' puntos') + '" role="img" aria-label="Avance del piso ' + pct + '%"><span>' + pct + '%</span></div>';
   }
   function pintarTorre(){
     pintarTabs();
@@ -3543,12 +3509,12 @@ window.limpiarNuevos = function(raiz){
       const ok = a.t > 0 && a.h === a.t, par = a.h > 0 && !ok, fuera = filtro !== 'todos' && !cal.cumple({d, a}, filtro);
       if(!fuera) n++;
       const et = d.d === 'Pasillo' ? (d.n === -2 ? 'Pasillo' : 'Pas.') : String(d.d);
-      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc2(d.p) + '" data-d="' + esc2(d.d) + '" title="' + esc2(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc2(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob"><i class="ic ic-lapiz"></i>' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b><span class="dl">' + esc2(et) + '</span><span class="dc">' + esc2(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
+      return '<button type="button" class="pcel' + (ok ? ' ok' : par ? ' par' : '') + (fuera ? ' fuera' : '') + '" data-p="' + esc(d.p) + '" data-d="' + esc(d.d) + '" title="' + esc(d.p + ' · ' + nomDep(d)) + '" aria-label="' + esc(d.p + ' ' + nomDep(d)) + ': ' + a.h + ' de ' + a.t + ', ' + a.cod + '"><span class="rv">' + a.cod + '</span>' + (a.obs ? '<span class="ob"><i class="ic ic-lapiz"></i>' + a.obs + '</span>' : '') + (filtro === 'atras' && cal.rank.has(k) ? '<span class="rk">' + cal.rank.get(k) + '</span>' : '') + '<b><span class="dl">' + esc(et) + '</span><span class="dc">' + esc(/^\d{3,4}$/.test(et) ? et.slice(-2) : et) + '</span></b><small>' + a.h + '/' + a.t + '</small><span class="bar" style="width:' + Math.round(a.pct * 100) + '%"></span></button>';
     }).join('') + '</div>' + anilloPiso(P, cal) + '</div>').join('');
     // lista de los más atrasados (en la torre pueden quedar lejos hacia abajo)
     const lista = [...cal.rank.entries()].map(([k, r]) => ({r, x: cal.filas.find(f => claveDep(f.d, sec) === k)}));
     $p('pAtras').hidden = filtro !== 'atras' || !lista.length;
-    $p('pAtras').innerHTML = lista.map(({r, x}) => '<button type="button" class="pat" data-p="' + esc2(x.d.p) + '" data-d="' + esc2(x.d.d) + '"><b>' + r + '</b><span>' + esc2(x.d.p + ' · ' + nomDep(x.d)) + '</span><small>' + x.a.cod + ' · ' + Math.round(x.a.pct * 100) + '%</small></button>').join('');
+    $p('pAtras').innerHTML = lista.map(({r, x}) => '<button type="button" class="pat" data-p="' + esc(x.d.p) + '" data-d="' + esc(x.d.d) + '"><b>' + r + '</b><span>' + esc(x.d.p + ' · ' + nomDep(x.d)) + '</span><small>' + x.a.cod + ' · ' + Math.round(x.a.pct * 100) + '%</small></button>').join('');
     const nom = SECC.find(s => s.k === sec).n;
     const completos = cal.filas.filter(x => x.a.t > 0 && x.a.h === x.a.t).length;
     $p('pResu').innerHTML = '<b>' + nom + '</b> · ' + completos + ' de ' + cal.filas.length + ' completos' + (filtro !== 'todos' ? ' · mostrando ' + n : '');
@@ -3573,7 +3539,7 @@ window.limpiarNuevos = function(raiz){
   }
   function estado(t, reintentar){
     const b = $p('pEstado'); b.hidden = !t;
-    b.innerHTML = t ? '<span>' + esc2(t) + '</span>' + (reintentar ? '<button type="button" class="btn small" id="pReint">Reintentar</button>' : '') : '';
+    b.innerHTML = t ? '<span>' + esc(t) + '</span>' + (reintentar ? '<button type="button" class="btn small" id="pReint">Reintentar</button>' : '') : '';
     const r = $p('pReint'); if(r) r.onclick = () => cargarProt();
   }
 
@@ -3601,22 +3567,22 @@ window.limpiarNuevos = function(raiz){
     $p('pRev').textContent = c.cod; $p('pRev').title = NOMCOD[c.cod];
     $p('pLista').innerHTML = vis.length ? vis.map(i => {
       const ob = dr.o[i.id] || '', pv = prevObs(i.id);
-      return '<div class="pit' + (dr.c.has(i.id) ? ' hecho' : '') + '" data-id="' + esc2(i.id) + '"><label><input type="checkbox"' + (dr.c.has(i.id) ? ' checked' : '') + (L ? ' disabled' : '') + '><span>' + esc2(i.t) + '</span></label>' + (dr.nuevos.has(i.id) ? '<span class="nuevo">nuevo</span>' : '') +
+      return '<div class="pit' + (dr.c.has(i.id) ? ' hecho' : '') + '" data-id="' + esc(i.id) + '"><label><input type="checkbox"' + (dr.c.has(i.id) ? ' checked' : '') + (L ? ' disabled' : '') + '><span>' + esc(i.t) + '</span></label>' + (dr.nuevos.has(i.id) ? '<span class="nuevo">nuevo</span>' : '') +
         (L ? '' : '<button type="button" class="lap' + (ob ? ' con' : '') + '" title="Escribir observación" aria-label="Escribir observación"><i class="ic ic-lapiz"></i></button><button type="button" class="q" title="Quitar solo en este departamento" aria-label="Quitar">×</button>') +
-        (pv ? '<div class="prev">' + ant.cod + ': ' + esc2(pv) + '</div>' : '') +
-        (!L && dr.edit === i.id ? '<input type="text" class="obs-in" maxlength="200" placeholder="Escribe la observación" value="' + esc2(ob) + '">' : (ob ? '<div class="obs-t">' + esc2(ob) + '</div>' : '')) + '</div>';
+        (pv ? '<div class="prev">' + ant.cod + ': ' + esc(pv) + '</div>' : '') +
+        (!L && dr.edit === i.id ? '<input type="text" class="obs-in" maxlength="200" placeholder="Escribe la observación" value="' + esc(ob) + '">' : (ob ? '<div class="obs-t">' + esc(ob) + '</div>' : '')) + '</div>';
     }).join('') : '<div class="pvacio">No quedan puntos en este departamento.</div>';
     const h = vis.filter(i => dr.c.has(i.id)).length;
     $p('pProg').style.width = (vis.length ? Math.round(h / vis.length * 100) : 0) + '%';
     $p('pAgrega').hidden = L; $p('pAyuda').hidden = L;
     $p('pQuitDet').hidden = L || !quit.length;
     $p('pQuitSum').textContent = 'Quitados en este departamento (' + quit.length + ')';
-    $p('pQuit').innerHTML = quit.map(i => '<div class="pit" data-id="' + esc2(i.id) + '"><span class="t">' + esc2(i.t) + '</span><button type="button" class="btn small" data-r="1">Restaurar</button></div>').join('');
+    $p('pQuit').innerHTML = quit.map(i => '<div class="pit" data-id="' + esc(i.id) + '"><span class="t">' + esc(i.t) + '</span><button type="button" class="btn small" data-r="1">Restaurar</button></div>').join('');
     // las revisiones cerradas quedan como registro y no se pueden cambiar
     const cer = r.revs.slice(0, -1);
     $p('pHist').hidden = !cer.length;
     $p('pHistSum').textContent = 'Historial de revisiones (' + cer.length + ')';
-    $p('pHistC').innerHTML = cer.slice().reverse().map(x => '<div class="hrev"><h4><span class="prev-cod">' + esc2(x.cod) + '</span>' + esc2(x.fecha) + ' · ' + x.snap.filter(z => z.hecho).length + '/' + x.snap.length + ' puntos</h4>' + x.snap.map(z => '<div class="l"><b class="' + (z.hecho ? 'ok' : 'no') + '">' + (z.hecho ? '<i class="ic ic-ok"></i>' : '<i class="ic ic-no"></i>') + '</b><div>' + esc2(z.t) + (z.obs ? '<em>' + esc2(z.obs) + '</em>' : '') + '</div></div>').join('') + '</div>').join('');
+    $p('pHistC').innerHTML = cer.slice().reverse().map(x => '<div class="hrev"><h4><span class="prev-cod">' + esc(x.cod) + '</span>' + esc(x.fecha) + ' · ' + x.snap.filter(z => z.hecho).length + '/' + x.snap.length + ' puntos</h4>' + x.snap.map(z => '<div class="l"><b class="' + (z.hecho ? 'ok' : 'no') + '">' + (z.hecho ? '<i class="ic ic-ok"></i>' : '<i class="ic ic-no"></i>') + '</b><div>' + esc(z.t) + (z.obs ? '<em>' + esc(z.obs) + '</em>' : '') + '</div></div>').join('') + '</div>').join('');
     const sig = COD[COD.indexOf(c.cod) + 1];
     $p('pPasar').hidden = L || !sig;
     if(sig && !L){

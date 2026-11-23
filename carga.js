@@ -1,8 +1,48 @@
-/* ===== carga.js 1.2.2 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.3.0 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
 // (los estilos están en carga.css, que cada página carga en el <head>)
+
+// ===== @@comun-codigo: funciones que usan varias páginas (antes estaban copiadas en cada una) =====
+// Si hay que arreglar una, se arregla acá y vale para todas.
+// ----- texto seguro para meter en HTML (escapa & < > " ' `) -----
+function esc(t){ return String(t == null ? '' : t).replace(/[&<>"'`]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]; }); }
+// ----- nombre del aparato (así lo ve el servidor para el cupo de dispositivos) -----
+function etiquetaDispositivo(){
+  const u = navigator.userAgent || '';
+  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
+  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
+  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
+  return so + ' · ' + nav;
+}
+function msgDispositivoOcupado(tipo){
+  if(tipo === 'unico') return 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.';
+  return 'Esta cuenta ya está abierta en otro ' + (tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Solo se permite 1 computador y 1 celular/tablet. Pídele al administrador que libere el cupo.';
+}
+function nuevoNonce(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const b = new Uint8Array(16);
+  (window.crypto || {getRandomValues: a => a.forEach((_, i) => { a[i] = Math.floor(Math.random() * 256); })}).getRandomValues(b);
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+// ----- anima el alto de un elemento de a a b (px) en ms milisegundos -----
+function animAlto(v, a, b, ms){
+  return new Promise(res => {
+    let t = 0, last = null;
+    const paso = ts => {
+      if(last === null) last = ts;
+      t += Math.min(ts - last, 24); last = ts;
+      const k = Math.min(1, t / ms), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      v.style.height = (a + (b - a) * e) + 'px';
+      if(k < 1) requestAnimationFrame(paso); else res();
+    };
+    requestAnimationFrame(paso);
+  });
+}
+// ----- botón "volver al menú" con la pantalla de carga -----
+function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 
 // ===== motor (solo en las páginas que tienen la pantalla de carga puesta en el HTML) =====
 if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && document.getElementById('cgTit')){

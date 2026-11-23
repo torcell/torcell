@@ -1921,7 +1921,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=9"></script>
+<script src="carga.js?v=10"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
@@ -2521,7 +2521,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.182';
+const APP_VERSION = '0.73.183';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3330,20 +3330,9 @@ function avisarSeccion(){
   llamarDb('accesoSeccion', {dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo(), seccion: sec}).catch(() => {});
 }
 document.addEventListener('visibilitychange', () => { if(!document.hidden) avisarSeccion(); });
-function etiquetaDispositivo(){
-  const u = navigator.userAgent || '';
-  const ipadComoMac = /Macintosh/.test(u) && (navigator.maxTouchPoints || 0) > 1;
-  const so = (/iPhone|iPad|iPod/.test(u) || ipadComoMac) ? 'iPhone/iPad' : /Android/.test(u) ? 'Android' : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Otro';
-  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
-  return so + ' · ' + nav;
-}
 let dispMultiples = [];
 let dispAvisados = '';
 const NOMBRE_TIPO_DISP = {cel: 'celular', pc: 'computador'};
-function msgDispositivoOcupado(tipo){
-  if(tipo === 'unico') return 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.';
-  return 'Esta cuenta ya está abierta en otro ' + (tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Solo se permite 1 computador y 1 celular/tablet. Pídele al administrador que libere el cupo.';
-}
 function actualizarAlertaDispositivos(lista, avisar){
   dispMultiples = Array.isArray(lista) ? lista : [];
   const b = document.getElementById('accesosBtn');
@@ -5314,16 +5303,15 @@ function abrirAsignar(id){
 }
 
 const vistaVentana = () => esInvitado() || (document.body.classList.contains('tema3') && !workerSession && (isAdmin || puede('estados') || puede('asignar') || puede('notas')));
-const escVt = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 function etiquetaEstado(cell, estado){
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
   return estado === 'pagado' ? 'Pagado' : estado === 'entregado' ? terminadoLabel : estado === 'proceso' && !esFrague(cell) ? 'Partida' : 'Pendiente';
 }
 function cellVentanaHtml(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${escVt(st.nota)}">${escVt(st.nota)}</div></div>` : '';
+  const nota = st.nota ? `<div class="nota-row"><div class="nota-line" title="${esc(st.nota)}">${esc(st.nota)}</div></div>` : '';
   return `<div class="cell-block cell-ventana${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
-    <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</div></div>
+    <div class="worker-row-top"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</div></div>
     <div class="checks-row" data-checksof="${cell.id}"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span></div>
     ${nota}
     <div class="cv-pie">${priceLinesHtml(cell, st, true)}<div class="cv-abrir">Abrir ›</div></div>
@@ -5438,10 +5426,10 @@ function calLateral(){
   const quien = calNombreLimpio(r.u), f = CAL_FECHA(r.ts);
   const conLista = r.e === 'observado' || r.e === 'corregido' || r.e === 'validado';
   const SIN_CANT = ['Falta Terraza'];
-  const lista = !conLista ? '' : items.length ? '<div class="cl-lista">' + items.map(m => '<div class="cl-fila"><label><input type="checkbox" checked tabindex="-1" onclick="return false"><span>' + escVt(m[1]) + '</span></label>' + (SIN_CANT.includes(m[1]) ? '<span></span>' : '<span class="cl-cant">' + escVt(m[2]) + '</span>') + '</div>').join('') + '</div>' : '<div class="cl-lista"><div class="cl-vacio">Sin detalle de observaciones</div></div>';
+  const lista = !conLista ? '' : items.length ? '<div class="cl-lista">' + items.map(m => '<div class="cl-fila"><label><input type="checkbox" checked tabindex="-1" onclick="return false"><span>' + esc(m[1]) + '</span></label>' + (SIN_CANT.includes(m[1]) ? '<span></span>' : '<span class="cl-cant">' + esc(m[2]) + '</span>') + '</div>').join('') + '</div>' : '<div class="cl-lista"><div class="cl-vacio">Sin detalle de observaciones</div></div>';
   box.style.setProperty('--cc', est[1]);
-  box.innerHTML = '<div class="cl-head"><span>' + (conLista ? '¿Qué está mal?' : 'Calidad') + '</span><span class="cl-est">' + escVt(est[0]) + '</span></div>' + lista +
-    ((quien || f) ? '<div class="cl-pie">' + (quien ? '<span data-nompre="Revisó: " data-nomfull="' + escVt(quien) + '">Revisó: ' + escVt(quien) + '</span>' : '') + (f ? '<span>' + escVt(f) + '</span>' : '') + '</div>' : '') + '<button type="button" class="cl-fotos" data-cf="1"><i class="ic ib ic-foto"></i>Ver fotos</button>';
+  box.innerHTML = '<div class="cl-head"><span>' + (conLista ? '¿Qué está mal?' : 'Calidad') + '</span><span class="cl-est">' + esc(est[0]) + '</span></div>' + lista +
+    ((quien || f) ? '<div class="cl-pie">' + (quien ? '<span data-nompre="Revisó: " data-nomfull="' + esc(quien) + '">Revisó: ' + esc(quien) + '</span>' : '') + (f ? '<span>' + esc(f) + '</span>' : '') + '</div>' : '') + '<button type="button" class="cl-fotos" data-cf="1"><i class="ic ib ic-foto"></i>Ver fotos</button>';
   box.style.left = (modal.offsetLeft + modal.offsetWidth + CAL_LAT_SEP) + 'px';
   box.style.top = modal.offsetTop + 'px';
   box.style.maxHeight = modal.offsetHeight + 'px';
@@ -5453,11 +5441,11 @@ function calidadSecHtml(cell){
   if(calLadoOn(cell)) return '';
   const nom = {revisado: 'Revisado, sin observaciones', observado: 'Con observación', corregido: 'Corregido, falta validar', validado: 'Corregido y validado', pendiente: 'Pendiente de revisar'}[r.e] || r.e;
   const f = r.ts ? new Date(r.ts).toLocaleDateString('es-CL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
-  const det = r.d ? '<small style="display:block;white-space:normal">' + escVt(r.d) + '</small>' : '';
+  const det = r.d ? '<small style="display:block;white-space:normal">' + esc(r.d) + '</small>' : '';
   const quien = calNombreLimpio(r.u);
-  const fecha = f ? '<small style="display:block;white-space:normal">' + escVt(f) + '</small>' : '';
+  const fecha = f ? '<small style="display:block;white-space:normal">' + esc(f) + '</small>' : '';
   const tit = quien
-    ? '<div class="vt-sec-title" data-nompre="Observaciones de Calidad - " data-nomfull="' + escVt(quien) + '">Observaciones de Calidad - ' + escVt(quien) + '</div>'
+    ? '<div class="vt-sec-title" data-nompre="Observaciones de Calidad - " data-nomfull="' + esc(quien) + '">Observaciones de Calidad - ' + esc(quien) + '</div>'
     : '<div class="vt-sec-title">Observaciones de Calidad</div>';
   return `<div class="vt-sec">${tit}<div class="vt-sec-body"><div class="vt-valor cal-${r.e}">${nom}${det}${fecha}</div><button type="button" class="cl-fotos" data-cf="1"><i class="ic ib ic-foto"></i>Ver fotos</button></div></div>`;
 }
@@ -5468,32 +5456,32 @@ async function abrirFotosCal(){
   const r = calidadDe(cell), base = cell.piso + '|' + cell.dpto, sc = CAL_SCOPE[cell.area];
   const ov = document.createElement('div'); ov.id = 'calFotos';
   ov.style.setProperty('--cc', r && r.e === 'observado' ? '#e0584a' : '#4f8fd6');
-  ov.innerHTML = '<div class="cf-box" role="dialog" aria-modal="true" aria-label="Fotos de Calidad"><h4>Fotos · ' + escVt(cell.piso + ' · ' + cell.dpto) + '</h4><div class="cf-cuerpo" id="cfCuerpo"><div class="cf-msg">Cargando fotos…</div></div><div class="cf-pie"><button type="button" id="cfVolver" hidden>Volver</button><button type="button" class="pri" id="cfCerrar">Cerrar</button></div></div>';
+  ov.innerHTML = '<div class="cf-box" role="dialog" aria-modal="true" aria-label="Fotos de Calidad"><h4>Fotos · ' + esc(cell.piso + ' · ' + cell.dpto) + '</h4><div class="cf-cuerpo" id="cfCuerpo"><div class="cf-msg">Cargando fotos…</div></div><div class="cf-pie"><button type="button" id="cfVolver" hidden>Volver</button><button type="button" class="pri" id="cfCerrar">Cerrar</button></div></div>';
   document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#cfCuerpo'), volver = ov.querySelector('#cfVolver');
   const cerrar = () => { ov.classList.add('sale'); setTimeout(() => ov.remove(), 170); syncScrollLock(); };
   ov.querySelector('#cfCerrar').addEventListener('click', cerrar);
   ov.addEventListener('wheel', e => { if(!e.target.closest('.cf-cuerpo')) e.preventDefault(); }, {passive: false});
   syncScrollLock();
-  const msg = t => { cuerpo.innerHTML = '<div class="cf-msg">' + escVt(t) + '</div>'; };
+  const msg = t => { cuerpo.innerHTML = '<div class="cf-msg">' + esc(t) + '</div>'; };
   const fecha = ts => ts ? CAL_FECHA(ts) : '';
   let lista = [];
   const grilla = () => {
     volver.hidden = true;
     if(!lista.length) return msg('Esta revisión no tiene fotos.');
-    cuerpo.innerHTML = '<div class="cf-grid">' + lista.map((f, i) => '<button type="button" class="cf-th" data-i="' + i + '" aria-label="Foto ' + (i + 1) + '">' + (f.m ? '<img alt="" src="data:image/jpeg;base64,' + escVt(f.m) + '">' : '') + '</button>').join('') + '</div>';
+    cuerpo.innerHTML = '<div class="cf-grid">' + lista.map((f, i) => '<button type="button" class="cf-th" data-i="' + i + '" aria-label="Foto ' + (i + 1) + '">' + (f.m ? '<img alt="" src="data:image/jpeg;base64,' + esc(f.m) + '">' : '') + '</button>').join('') + '</div>';
   };
   volver.addEventListener('click', grilla);
   cuerpo.addEventListener('click', async e => {
     const b = e.target.closest('.cf-th'); if(!b) return;
     const f = lista[Number(b.dataset.i)]; if(!f) return;
     const quien = calNombreLimpio(f.u);
-    cuerpo.innerHTML = '<div class="cf-gran">' + (f.m ? '<img alt="Foto del departamento" src="data:image/jpeg;base64,' + escVt(f.m) + '">' : '') + '</div><div class="cf-info">' + escVt([fecha(f.ts), quien].filter(Boolean).join(' · ')) + '</div>';
+    cuerpo.innerHTML = '<div class="cf-gran">' + (f.m ? '<img alt="Foto del departamento" src="data:image/jpeg;base64,' + esc(f.m) + '">' : '') + '</div><div class="cf-info">' + esc([fecha(f.ts), quien].filter(Boolean).join(' · ')) + '</div>';
     volver.hidden = false;
     let j = null; try{ j = await llamarDb('calidadFotoVer', {ids: [f.id]}); }catch(x){}
     if(!document.getElementById('calFotos') || volver.hidden) return;
     const full = j && j.ok && j.fotos && j.fotos[f.id];
-    if(full) cuerpo.querySelector('.cf-gran').innerHTML = '<img alt="Foto del departamento" src="data:image/jpeg;base64,' + escVt(full) + '">';
+    if(full) cuerpo.querySelector('.cf-gran').innerHTML = '<img alt="Foto del departamento" src="data:image/jpeg;base64,' + esc(full) + '">';
   });
   let j = null; try{ j = await llamarDb('calidadFotosListar', {clave: base}); }catch(x){}
   if(!document.getElementById('calFotos')) return;
@@ -5522,12 +5510,12 @@ function pintarVentana(){
   const hayCambio = destino !== actual;
   document.getElementById('ventanaModal').innerHTML = `
     <div class="vt-head">
-      <div><h3>${escVt(titulo)}</h3><div class="vt-sub">${escVt(cell.categoria)} · ${escVt(AREA_LABEL[cell.area] || cell.area)} · ${escVt(cell.piso)}</div></div>
+      <div><h3>${esc(titulo)}</h3><div class="vt-sub">${esc(cell.categoria)} · ${esc(AREA_LABEL[cell.area] || cell.area)} · ${esc(cell.piso)}</div></div>
       <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
     </div>
     <div class="vt-body">
       <div class="vt-sec"><div class="vt-sec-title">Trabajador</div>
-        <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}"${hasWorker ? ' data-nomfull="' + escVt(nomVis(st.trabajador)) + '"' : ''}>${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</div>${botonesTrab}</div></div>
+        <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}"${hasWorker ? ' data-nomfull="' + esc(nomVis(st.trabajador)) + '"' : ''}>${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</div>${botonesTrab}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Estado</div>
         ${estadoNumero(st) === 0 && motivoBloqueoPartida(cell) ? '<p class="est-aviso" style="text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;">' + avisoCortoBloqueo(motivoBloqueoPartida(cell), cell) + '</p>' : ''}
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
@@ -5536,7 +5524,7 @@ function pintarVentana(){
         <div class="vt-sec-body"><div class="vt-valor${m2 ? '' : ' vacio'}">${precio}</div>${isAdmin ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="m2"><i class="ic ib ic-lapiz"></i>Editar m²</button></div>` : ''}</div></div>
       ${calidadSecHtml(cell)}
       <div class="vt-sec"><div class="vt-sec-title">Observación</div>
-        <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? escVt(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '<i class="ic ib ic-lapiz"></i>Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
+        <div class="vt-sec-body"><div class="vt-valor${st.nota ? '' : ' vacio'}">${st.nota ? esc(st.nota) : 'Sin observaciones'}</div>${puede('notas') ? `<div class="vt-acciones"><button type="button" class="btn small" data-vt="nota">${st.nota ? '<i class="ic ib ic-lapiz"></i>Editar' : '+ Agregar'}</button></div>` : ''}</div></div>
     </div>
     <div class="vt-foot">${isAdmin ? '<button type="button" class="btn" data-vt="guardar">Guardar</button><button type="button" class="btn primary" data-vt="guardarcerrar">Guardar y cerrar</button>' : ''}<button type="button" class="btn" data-vt="cerrar">Cerrar</button></div>`;
   document.getElementById('ventanaModal').classList.toggle('vt-lectura', esInvitado());
@@ -5769,7 +5757,7 @@ function dzCeldaTabla(cell, st){
   if(!dz || !vistaVentana()) return cellHtml(cell);
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   return `<div class="cell-block cell-ventana dz-ex${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
-    <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</span></div>
+    <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</span></div>
     <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
   </div>`;
 }
@@ -5778,7 +5766,7 @@ const dzSel = {};
 function dzFila(cell, st){
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   return `<div class="cell-block cell-ventana dz-fila${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
-    <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? escVt(nomVis(st.trabajador)) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
+    <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
     <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
   </div>`;
 }
@@ -6850,7 +6838,6 @@ async function cargarAccesos(){
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay inicios de sesión registrados.</p>';
 }
 document.getElementById('irAvanceBtn').addEventListener('click', () => { window.location.href = 'avance_obra.html'; });
-function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 document.getElementById('irMenuBtn').addEventListener('click', e => irMenuCarga(e.currentTarget));
 document.getElementById('accesosBtn').addEventListener('click', () => { document.getElementById('accesosCuenta').value = ''; document.getElementById('accesosOverlay').classList.add('show'); cargarAccesos(); });
 document.getElementById('accesosCuenta').addEventListener('change', cargarAccesos);
@@ -8378,7 +8365,6 @@ document.addEventListener('input', e => {
   let c = 0, k = 0; for(; k < el.value.length && c < n; k++){ if(/[\d,]/.test(el.value[k])) c++; }
   try{ el.setSelectionRange(k, k); }catch(err){}
 });
-const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[ch]));
 const DIAS_PROG = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const ERRORES_REPORTE = {
   sin_sesion: 'Tu sesión venció. Vuelve a iniciar sesión.',

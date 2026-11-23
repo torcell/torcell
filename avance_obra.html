@@ -451,7 +451,7 @@ footer{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-be
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando dashboard de avance</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=9"></script>
+<script src="carga.js?v=10"></script>
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div class="wrap">
   <header class="top">
@@ -982,12 +982,6 @@ const AREAS = ["Piso", "Muro baño", "Muro cocina", "Muro", "Pasillo"];
 // leo la misma sesión del panel (mismo sitio); si no hay sesión quedan los datos de prueba
 const URL_BASE_DEFECTO = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
 function leerSes(k){ try { return sessionStorage.getItem(k) || localStorage.getItem(k) || null; } catch (e) { return null; } }
-function etiquetaDispositivo(){
-  const u = navigator.userAgent || "";
-  const so = /iPhone|iPad|iPod/.test(u) ? "iPhone/iPad" : /Android/.test(u) ? "Android" : /Windows/.test(u) ? "Windows" : /Mac OS X|Macintosh/.test(u) ? "Mac" : /Linux/.test(u) ? "Linux" : "Otro";
-  const nav = /Edg\//.test(u) ? "Edge" : /OPR\/|Opera/.test(u) ? "Opera" : /SamsungBrowser/.test(u) ? "Samsung" : /Firefox|FxiOS/.test(u) ? "Firefox" : /Chrome|CriOS/.test(u) ? "Chrome" : /Safari/.test(u) ? "Safari" : "Navegador";
-  return so + " · " + nav;
-}
 let AVISO_SIN_SESION = "";
 async function cargarReales(){
   const token = leerSes("progresoObraToken");
@@ -1414,7 +1408,6 @@ const ORD_B = { ya: 0, hoy: 1, pronto: 2, ok: 3, cub: 4 };
 
 // funciones chicas que ocupo en todas las vistas
 const $ = id => document.getElementById(id);
-const esc = t => String(t == null ? '' : t).replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 const T = (k, txt) => `<span class="term" data-term="${k}">${txt ?? TERMS[k][0]}</span>`;
 const pct = (x, d = 1) => (x * 100).toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
 const num = (x, d = 1) => x.toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -1512,7 +1505,6 @@ const TIPFN = {
 // vistas
 $("corteTxt").textContent = fmt(CONFIG.corte);
 const CARGOS = { "1": "Admin", "2": "Supervisor", "3": "Contratista", "4": "Jefe de Terreno", "5": "Calidad", "6": "Oficina Técnica" };
-function irMenuCarga(b){ if(b.classList.contains('btn-marcado')) return; b.classList.add('btn-marcado'); b.setAttribute('aria-pressed','true'); if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?menu=1','Volviendo al menú…',Promise.resolve()); else location.href='index.html?menu=1'; }
 $("irMenu").addEventListener("click", e => irMenuCarga(e.currentTarget));
 function irAlMenu(msg){ try { sessionStorage.setItem("progresoObraAvisoGate", msg); } catch (e) {} salirConError('index.html?menu=1','permiso'); }
 if (MR) {
