@@ -1531,6 +1531,8 @@
 .py-tip{position:fixed;z-index:100000;display:none;pointer-events:none;max-width:290px;background:var(--panel);color:var(--text);border:1px solid var(--border-strong,var(--border));box-shadow:0 6px 18px rgba(0,0,0,.28);padding:8px 10px;font-size:12px;line-height:1.5;}
 .py-tip b{display:block;margin-bottom:2px;}
 @media (max-width:640px){.py-sr{grid-template-columns:minmax(0,1fr) auto auto;gap:2px 10px;}.py-sh{display:none;}.py-s3{grid-column:1;grid-row:2;}.py-s4{grid-column:3;grid-row:1;}.py-s2{grid-column:2;grid-row:1;}.py-s5{grid-column:2 / 4;grid-row:2;text-align:right;}.py-cap{flex-basis:100%;}.py-fc .py-cks{width:100%;}.py-fc .py-tabs{width:100%;}}
+/* @@rend2-semanal */
+@media (min-width:641px){.r2-sr{grid-template-columns:minmax(120px,1.3fr) 90px 130px 96px;}}.r2-svg{width:100%;max-width:900px;height:auto;display:block;}@media(max-width:640px){.py-gw .r2-svg{min-width:640px;}}
 .py-nota{font-size:12.5px;margin:6px 0 4px;}.rd-nota summary{cursor:pointer;font-weight:600;}
 .rd-d2{text-align:center;font-weight:600;}
 .rd-s{text-align:center;}
@@ -2519,7 +2521,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.178';
+const APP_VERSION = '0.73.179';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -7242,172 +7244,108 @@ function rdFecha(s){ return new Date(s + 'T00:00:00Z'); }
 function rdSuma(s, n){ const d = rdFecha(s); d.setUTCDate(d.getUTCDate() + n); return rdIso(d); }
 function rdLunes(s){ const d = rdFecha(s); return rdSuma(s, -((d.getUTCDay() + 6) % 7)); }
 function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-/* ===== Rendimiento 2 v1 (compartido: panel y admin) · reparto 50/50, quincena por cierres, sin sábados ni feriados ===== */
-const R2_INICIO_OBRA = '2026-05-29';
-// feriados nacionales (el servidor manda su propia lista; esta es por si falta)
-const R2_FERIADOS = ['2026-06-29', '2026-07-16', '2026-09-18', '2026-09-19', '2026-10-12', '2026-10-31', '2026-11-01', '2026-12-08', '2026-12-25', '2027-01-01', '2027-03-26', '2027-03-27'];
-function r2Mediana(v){ if(!v.length) return null; v = v.slice().sort((a, b) => a - b); const m = v.length >> 1; return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; }
+/* ===== Rendimiento 2 · proyección de cerámica por semana y rendimiento semanal (sin asistencia) ===== */
+// @@rend2-semanal
+const R2_INICIO = '2026-05-29', R2_FIN = '2027-01-01';   // semana 1 y término oficial
+const r2E = {off: {'Muro': true}, ritmo: 4};
 function renderRendimiento2(raiz, datos, esc){
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
-  const hoy = rdHoy();
-  const FER = {}; (datos.feriados && datos.feriados.length ? datos.feriados : R2_FERIADOS).forEach(f => { FER[f] = 1; });
-  const habil = d => { const w = rdFecha(d).getUTCDay(); return w >= 1 && w <= 5 && !FER[d]; };   // lunes a viernes, sin feriados
-  const fT = d => { const x = rdFecha(d); return x.getUTCDate() + ' ' + RD_MC[x.getUTCMonth()]; };
-  const rg = (a, b) => fT(a) + ' – ' + fT(b);
-  const trabs = datos.trabajadores || [], partidas = datos.partidas || [];
-  const CATS = ['Cerámica', 'Frague'];
-  // ===== grupo de cada trabajador =====
-  const grupo = {};
-  trabs.forEach(t => {
-    if(t.especialidad === 'fraguador') { grupo[t.nombre] = 'Frague'; return; }
-    if(t.especialidad === 'ceramista') { grupo[t.nombre] = 'Cerámica'; return; }
-    let c = 0, f = 0; partidas.forEach(p => { if(p.w === t.nombre){ if(p.cat === 'Frague') f += p.m2; else c += p.m2; } });
-    grupo[t.nombre] = f > c ? 'Frague' : 'Cerámica';
-  });
-  // ===== reparto 50/50: lo que empieza y termina el mismo día cuenta entero; lo demás, mitad al empezar y mitad al terminar =====
-  const cred = {}, ter = {};
-  const add = (o, w, x) => { (o[w] = o[w] || []).push(x); };
-  partidas.forEach(p => {
-    if(p.fin) add(ter, p.w, {cat: p.cat, d: p.fin, m2: p.m2});
-    if(p.fin && (!p.ini || p.ini === p.fin)) add(cred, p.w, {cat: p.cat, d: p.fin, m2: p.m2, mitad: false});
-    else {
-      add(cred, p.w, {cat: p.cat, d: p.ini, m2: p.m2 / 2, mitad: true, otro: p.fin || ''});
-      if(p.fin) add(cred, p.w, {cat: p.cat, d: p.fin, m2: p.m2 / 2, mitad: true, otro: p.ini});
-    }
-  });
-  // ===== períodos =====
-  function periodos(vista){
-    const L = [];
-    if(vista === 'semana'){
-      for(let l = rdLunes(R2_INICIO_OBRA); l <= hoy; l = rdSuma(l, 7)) L.push({id: l, a: l, b: rdSuma(l, 6), n: 'Semana ' + (L.length + 1) + ' · ' + rg(l, rdSuma(l, 4))});
-    } else if(vista === 'mes'){
-      let a = new Date(R2_INICIO_OBRA.substring(0, 7) + '-01T00:00:00Z'); const z = new Date(hoy.substring(0, 7) + '-01T00:00:00Z');
-      while(a <= z){ const b = new Date(Date.UTC(a.getUTCFullYear(), a.getUTCMonth() + 1, 0)); L.push({id: rdIso(a), a: rdIso(a), b: rdIso(b), n: RD_MES[a.getUTCMonth()] + ' ' + a.getUTCFullYear()}); a.setUTCMonth(a.getUTCMonth() + 1); }
-    } else if(vista === 'quincena'){
-      let br = (datos.cierres || []).slice().sort().map(d => ({d, real: true}));
-      if(!br.length){ let v = hoy; while(rdFecha(v).getUTCDay() !== 5) v = rdSuma(v, -1); br = [{d: v, real: false}]; }
-      while(br[br.length - 1].d < hoy) br.push({d: rdSuma(br[br.length - 1].d, 14), real: false});
-      while(rdSuma(br[0].d, -13) > R2_INICIO_OBRA) br.unshift({d: rdSuma(br[0].d, -14), real: false});
-      br.forEach((x, i) => {
-        let a = i ? rdSuma(br[i - 1].d, 1) : rdSuma(x.d, -13); if(a < R2_INICIO_OBRA) a = R2_INICIO_OBRA;
-        L.push({id: x.d, a, b: x.d, real: x.real, n: 'Quincena ' + (i + 1) + ' · ' + rg(a, x.d) + (x.real ? ' · cierre registrado' : ' · cierre estimado')});
-      });
-    }
-    return L;
-  }
-  // ===== cálculo de un trabajador en un rango y categoría =====
-  function calcT(t, a, b, cat){
-    let da = a, db = b; if(t.inicio && t.inicio > da) da = t.inicio; if(t.fin && t.fin < db) db = t.fin;
-    const r = {m2: 0, cruza: 0, ter: 0, excl: 0, trab: 0, disp: 0, F: 0, reg: 0, dias: 0, porDia: null, asistPct: null};
-    if(da > db) return r;
-    (cred[t.nombre] || []).forEach(c => {
-      if(c.cat !== cat || c.d < da || c.d > db) return;
-      if(!habil(c.d)){ r.excl += c.m2; return; }
-      r.m2 += c.m2; if(c.mitad && (c.otro === '' || c.otro < a || c.otro > b)) r.cruza += c.m2;
+  const fF = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
+  const corto = n => { const p = String(n).trim().split(/\s+/); return p[0] + (p[1] ? ' ' + p[1].charAt(0).toUpperCase() + '.' : ''); };
+  const hoy = rdHoy(), lunHoy = rdLunes(hoy);
+  const dias = (a, b) => Math.round((rdFecha(b) - rdFecha(a)) / 864e5);
+  const nuevo = Date.now() < new Date('2026-11-30T23:59:59').getTime() ? ' <i class="tnuevo">Nuevo</i>' : '';
+  const box = raiz.closest('.ovDin > div') || raiz.parentElement;
+  const f1 = x => x.toFixed(1);
+  function pintar(){
+    const E = r2E, sem = {}, pt = {}, areas = [];
+    let K = 0, hecho = 0, sinF = 0;
+    // ===== el avance sale de cada partida: m² y día en que se marcó terminada =====
+    ALL_CELLS.forEach(c => {
+      if(c.categoria !== 'Cerámica') return;
+      const st = getState(c.id), m = Number(st.m2); if(!(m > 0)) return;
+      if(areas.indexOf(c.area) < 0) areas.push(c.area);
+      if(E.off[c.area]) return;
+      K += m; if(!(st.terminado || st.pagado)) return; hecho += m;
+      const d = st.terminadoTs ? diaLocalDe(st.terminadoTs) : '';
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > hoy){ sinF += m; return; }
+      const l = rdLunes(d); sem[l] = (sem[l] || 0) + m;
+      if(st.trabajador){ const o = pt[l] || (pt[l] = {}); o[st.trabajador] = (o[st.trabajador] || 0) + m; }
     });
-    (ter[t.nombre] || []).forEach(c => { if(c.cat === cat && c.d >= da && c.d <= db) r.ter += c.m2; });
-    if(grupo[t.nombre] === cat){
-      (t.asistencia || []).forEach(x => {
-        if(x.d < da || x.d > db || !habil(x.d)) return;
-        r.reg++;
-        if(x.e === 'F'){ r.F++; r.disp += 1; }
-        else if(x.e === 'P'){ r.trab += 1; r.disp += 1; }
-        else if(x.e === 'S'){ r.trab += x.fr; r.disp += asMotObra(x.m) ? x.fr : 1; }
-      });
-      if(r.reg) r.dias = r.trab;
-      else { const u = {}; (t.dias || []).forEach(x => { if(x.cat === cat && x.d >= da && x.d <= db && habil(x.d)) u[x.d] = 1; }); r.dias = Object.keys(u).length; }
-    }
-    r.porDia = r.dias ? r.m2 / r.dias : null;
-    r.asistPct = r.disp ? r.trab / r.disp * 100 : null;
-    return r;
+    const orden = ['Piso', 'Muro Baños', 'Muro Cocina', 'Muro', 'Pasillos'];
+    const ar = orden.filter(a => areas.indexOf(a) >= 0).concat(areas.filter(a => orden.indexOf(a) < 0));
+    const lab = a => a === 'Muro' ? 'Piso -1' : (AREA_LABEL[a] || a);
+    const fuera = ar.filter(a => E.off[a]).map(lab);
+    const cab = '<div class="rd-tit">Proyección · Cerámica por semana' + (fuera.length ? ' · sin ' + esc(fuera.join(', ')) : '') + nuevo + '</div>';
+    const ctl = '<div class="py-caja"><div class="py-fc"><span class="py-cap">Partidas</span><div class="py-cks">' + ar.map(a => '<label class="py-ck"><input type="checkbox" data-r2a="' + esc(a) + '"' + (E.off[a] ? '' : ' checked') + '><span>' + esc(lab(a)) + '</span></label>').join('') + '</div></div>'
+      + '<div class="py-fc"><span class="py-cap">Ritmo</span><div class="py-tabs" role="group" aria-label="Semanas para calcular el ritmo">' + [[4, '4 semanas'], [8, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab r2-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-r2r="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div></div>';
+    const pon = h => { const t0 = box ? box.scrollTop : 0; raiz.innerHTML = h; if(box) box.scrollTop = t0; };
+    const claves = Object.keys(sem).sort();
+    if(!ar.length){ pon(cab + '<div class="rd-vacio">No hay partidas de cerámica con m² cargados.</div>'); return; }
+    if(!(K > 0)){ pon(cab + ctl + '<div class="rd-vacio">Marca al menos una partida para ver la proyección.</div>'); return; }
+    if(hecho >= K - 0.001){ pon(cab + ctl + '<div class="rd-vacio">Lo marcado ya está terminado: ' + fmt(K) + ' m².</div>'); return; }
+    if(!claves.length){ pon(cab + ctl + '<div class="rd-vacio">Todavía no hay m² terminados con fecha en lo marcado.</div>'); return; }
+    // ===== semanas, de lunes a domingo =====
+    const l0 = claves[0] < rdLunes(R2_INICIO) ? claves[0] : rdLunes(R2_INICIO), S = [];
+    for(let l = l0; l <= lunHoy; l = rdSuma(l, 7)) S.push({l, n: S.length + 1, fin: rdSuma(l, 6), m: sem[l] || 0, cur: l === lunHoy && hoy < rdSuma(l, 4)});
+    const fi = S.findIndex(w => w.l === claves[0]);
+    const base = sinF; let ac = base; S.forEach(w => { ac += w.m; w.cum = ac; });
+    const lleva = ac, falta = K - lleva;
+    const hechas = S.filter(w => !w.cur && w.l >= claves[0]);
+    const usa = E.ritmo ? hechas.slice(-E.ritmo) : hechas;
+    const rit = usa.length ? usa.reduce((s, w) => s + w.m, 0) / usa.length : null;
+    const med = (() => { const v = hechas.filter(w => w.m > 0).map(w => w.m).sort((a, b) => a - b), q = v.length; return q ? (q % 2 ? v[(q - 1) / 2] : (v[q / 2 - 1] + v[q / 2]) / 2) : 0; })();
+    S.forEach((w, k) => { w.est = w.cur ? 'curso' : w.l < claves[0] ? 'normal' : !(w.m > 0) ? 'parada' : (med && w.m < med * 0.6) ? 'freno' : 'normal'; w.ant = k ? S[k - 1] : null; });
+    // ===== término estimado y lo necesario por semana para la fecha oficial =====
+    const dEst = rit > 0 ? Math.min(720, Math.ceil(falta / rit * 7)) : null, fEst = dEst != null ? rdSuma(hoy, dEst) : null;
+    const dOf = dias(hoy, R2_FIN), nec = dOf > 0 ? falta / (dOf / 7) : null, dif = fEst != null ? dias(R2_FIN, fEst) : null;
+    const ritTxt = !E.ritmo ? 'toda la obra' : usa.length < E.ritmo ? 'últimas ' + usa.length + (usa.length === 1 ? ' semana' : ' semanas') : 'últimas ' + E.ritmo + ' semanas';
+    const kpi = (b, s, t) => '<div title="' + esc(t) + '"><b>' + b + '</b><span>' + s + '</span></div>';
+    let h = cab + '<div class="rd-res">'
+      + kpi(fmt(lleva / K * 100) + ' %', 'avance · ' + fmt(lleva) + ' de ' + fmt(K) + ' m²', 'Terminado: ' + fmt(lleva) + ' m². Falta: ' + fmt(falta) + ' m².' + (base > 0 ? ' Sin fecha de término: ' + fmt(base) + ' m².' : ''))
+      + kpi(rit != null ? '~' + fmt(rit) + ' m²' : '—', 'por semana · ' + (rit != null ? ritTxt : 'falta una semana completa'), 'Promedio de las semanas completas con registro (lunes a domingo).')
+      + kpi(fEst ? fF(fEst) : '—', 'término estimado' + (dif == null ? '' : dif === 0 ? ' · justo en la fecha oficial' : ' · ' + Math.abs(dif) + (Math.abs(dif) === 1 ? ' día ' : ' días ') + (dif > 0 ? 'después' : 'antes') + ' del oficial'), 'Con el ritmo semanal de arriba, lo que falta se termina en esta fecha.')
+      + (nec != null ? kpi('~' + fmt(nec) + ' m²', 'por semana para el ' + fF(R2_FIN), 'Lo que hay que hacer cada semana para terminar en la fecha oficial.') : '')
+      + '</div>' + ctl;
+    // ===== gráfico: acumulado al cierre de cada semana =====
+    const Wd = 900, H = 260, L = 50, R = 16, T = 16, B = 26;
+    const xo = d => (dias(l0, d) + 1) / 7, xHoy = xo(hoy), xPl = xo(R2_INICIO) - 1 / 7, xFin = xo(R2_FIN), xEst = fEst ? xo(fEst) : 0;
+    const x1 = Math.max(xFin, xEst, xHoy + 2) + 0.6, y1 = K * 1.06;
+    const X = x => L + x / x1 * (Wd - L - R), Y = y => T + (1 - y / y1) * (H - T - B);
+    let s = '<div class="py-gw"><svg viewBox="0 0 ' + Wd + ' ' + H + '" class="r2-svg" role="img" aria-label="Avance acumulado de cerámica por semana y proyección de término">';
+    [0, 0.25, 0.5, 0.75, 1].forEach(p => { const y = Y(K * p); s += '<line x1="' + L + '" x2="' + (Wd - R) + '" y1="' + f1(y) + '" y2="' + f1(y) + '" stroke="var(--border)"' + (p === 1 ? ' stroke-dasharray="5 4"' : '') + '/><text x="' + (L - 6) + '" y="' + f1(y + 3) + '" font-size="10" text-anchor="end" fill="var(--sub)">' + fmt(Math.round(K * p)) + '</text>'; });
+    const paso = Math.max(1, Math.ceil(x1 / 14));
+    for(let n = paso; n < x1; n += paso) s += '<line x1="' + f1(X(n)) + '" x2="' + f1(X(n)) + '" y1="' + (H - B) + '" y2="' + (H - B + 4) + '" stroke="var(--sub)"/><text x="' + f1(X(n)) + '" y="' + (H - 8) + '" font-size="10" text-anchor="middle" fill="var(--sub)">S' + n + '</text>';
+    s += '<line x1="' + f1(X(xPl)) + '" y1="' + f1(Y(0)) + '" x2="' + f1(X(xFin)) + '" y2="' + f1(Y(K)) + '" stroke="var(--ok,#43a047)" stroke-width="1.5" stroke-dasharray="9 4"/><circle cx="' + f1(X(xFin)) + '" cy="' + f1(Y(K)) + '" r="4" fill="var(--ok,#43a047)" stroke="var(--panel)" stroke-width="2"/><text x="' + f1(X(xFin) - 7) + '" y="' + f1(Y(K) - 6) + '" font-size="10" text-anchor="end" fill="var(--ok,#43a047)">oficial ' + fmt(0) .replace('0', '') + fF(R2_FIN).substring(0, 5) + '</text>';
+    const xF = fi;
+    if(base > 0 && xF > xPl) s += '<line x1="' + f1(X(xPl)) + '" y1="' + f1(Y(0)) + '" x2="' + f1(X(xF)) + '" y2="' + f1(Y(base)) + '" stroke="var(--accent)" stroke-width="2" stroke-dasharray="2 5"/>';
+    const pts = [[xF, base]]; S.forEach((w, k) => { if(k >= fi) pts.push([k === S.length - 1 ? xHoy : k + 1, w.cum, w]); });
+    s += '<polyline fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round" points="' + pts.map(p => f1(X(p[0])) + ',' + f1(Y(p[1]))).join(' ') + '"/>';
+    pts.forEach(p => { if(p[2]) s += '<circle cx="' + f1(X(p[0])) + '" cy="' + f1(Y(p[1])) + '" r="3" fill="var(--accent)" stroke="var(--panel)" stroke-width="1.5"><title>Semana ' + p[2].n + ' · ' + fF(p[2].l) + ' al ' + fF(p[2].fin) + ': ' + fmt(p[2].m) + ' m² en la semana, ' + fmt(p[2].cum) + ' m² en total</title></circle>'; });
+    if(rit > 0){ const xe = Math.min(xHoy + falta / rit, xHoy + 720 / 7), ye = Math.min(K, lleva + rit * (xe - xHoy));
+      s += '<line x1="' + f1(X(xHoy)) + '" y1="' + f1(Y(lleva)) + '" x2="' + f1(X(xe)) + '" y2="' + f1(Y(ye)) + '" stroke="var(--warn,#d99a00)" stroke-width="2" stroke-dasharray="7 4"/><circle cx="' + f1(X(xe)) + '" cy="' + f1(Y(ye)) + '" r="4" fill="var(--warn,#d99a00)" stroke="var(--panel)" stroke-width="2"/><text x="' + f1(X(xe) - 7) + '" y="' + f1(Y(ye) + 26) + '" font-size="10" text-anchor="end" fill="var(--warn,#d99a00)">' + fF(fEst).substring(0, 5) + '</text>'; }
+    s += '<line x1="' + f1(X(xHoy)) + '" x2="' + f1(X(xHoy)) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--sub)" stroke-dasharray="3 3"/><text x="' + f1(X(xHoy) - 4) + '" y="' + (H - B - 5) + '" font-size="10" text-anchor="end" fill="var(--sub)">hoy</text></svg></div>';
+    const ley = (c, d, t) => '<span><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="' + c + '" stroke-width="2.4"' + (d ? ' stroke-dasharray="' + d + '"' : '') + '/></svg>' + t + '</span>';
+    h += s + '<div class="py-ley">' + ley('var(--accent)', '', 'Real, al cierre de cada semana') + (base > 0 && xF > xPl ? ley('var(--accent)', '2 4', 'Sin fecha por semana') : '') + (rit > 0 ? ley('var(--warn,#d99a00)', '6 3', 'Proyección') : '') + ley('var(--ok,#43a047)', '8 3', 'Plan oficial') + '</div>';
+    // ===== rendimiento semanal =====
+    const EST = {curso: 'En curso', parada: 'Parada', freno: 'Freno', normal: 'Normal'};
+    const dfs = (a, b) => { if(!(b > 0)) return {c: 'eq', t: '—'}; const p = Math.round((a - b) / b * 100); return p === 0 ? {c: 'eq', t: 'igual'} : p > 0 ? {c: 'up', t: '+' + p + ' %'} : {c: 'down', t: '−' + Math.abs(p) + ' %'}; };
+    const fila = w => {
+      const d = w.cur || !w.ant || w.ant.l < claves[0] ? {c: 'eq', t: '—'} : dfs(w.m, w.ant.m);
+      const gente = Object.keys(pt[w.l] || {}).sort((a, b) => pt[w.l][b] - pt[w.l][a]).map(n => corto(n) + ': ' + fmt(pt[w.l][n]) + ' m²');
+      const t = 'Semana ' + w.n + ' · ' + fF(w.l) + ' al ' + fF(w.fin) + '\n' + fmt(w.m) + ' m² del equipo' + (w.cur ? ' (semana en curso)' : '') + (gente.length ? '\n' + gente.join('\n') : '');
+      return '<div class="py-sr r2-sr ' + w.est + '" title="' + esc(t).replace(/\n/g, '&#10;') + '"><span class="py-s1">S' + w.n + ' · ' + esc(fF(w.l).substring(0, 5) + ' – ' + fF(w.fin).substring(0, 5)) + '</span><b class="py-s2">' + fmt(w.m) + ' m²</b><span class="py-s3 ' + d.c + '">' + d.t + '</span><span class="py-s4"><i class="py-e ' + w.est + '">' + EST[w.est] + '</i></span></div>';
+    };
+    const filas = S.filter((w, k) => k >= fi).slice().reverse().map(fila), frenos = S.filter(w => w.est === 'freno' || w.est === 'parada');
+    h += '<div class="rd-tit">Rendimiento semanal · Cerámica</div><div class="py-sub" title="Parada: semana sin m². Freno: menos del 60 % de una semana normal.">' + (med ? 'Semana normal: ' + fmt(med) + ' m² · ' : '') + (frenos.length ? 'con freno o parada: <b>' + frenos.map(w => 'S' + w.n).join(', ') + '</b>' : 'sin frenos ni paradas') + '</div>'
+      + '<div class="py-sems"><div class="py-sr r2-sr py-sh"><span class="py-s1">Semana</span><span class="py-s2">m²</span><span class="py-s3">Contra la anterior</span><span class="py-s4">Estado</span></div>' + filas.slice(0, 8).join('') + '</div>'
+      + (filas.length > 8 ? '<details class="py-mas"><summary>Ver semanas anteriores (' + (filas.length - 8) + ')</summary><div class="py-sems">' + filas.slice(8).join('') + '</div></details>' : '')
+      + '<details class="rd-nota"><summary>Cómo se calcula</summary>Cada partida cuenta entera en la semana (lunes a domingo) en que se marcó terminada. El ritmo es el promedio de m² por semana de las semanas completas elegidas; la semana en curso no entra. El término estimado sale de dividir lo que falta por ese ritmo. La obra empieza a contar el 29/05/2026 y la fecha oficial es el 01/01/2027. No se usa la asistencia.</details>';
+    pon(h);
   }
-  const hayEnCat = (t, cat) => grupo[t.nombre] === cat || (cred[t.nombre] || []).some(c => c.cat === cat);
-  // ===== meta por día: la estimada sale de la mediana de semanas completas ya trabajadas =====
-  const metaEst = {};
-  CATS.forEach(cat => {
-    const v = [];
-    periodos('semana').forEach(w => { if(w.b >= hoy) return; trabs.forEach(t => { if(grupo[t.nombre] !== cat) return; const r = calcT(t, w.a, w.b, cat); if(r.dias >= 3 && r.m2 > 0) v.push(r.m2 / r.dias); }); });
-    metaEst[cat] = v.length >= 3 ? Math.round(r2Mediana(v) * 10) / 10 : null;
-  });
-  let metaUsr = {}; try{ metaUsr = JSON.parse(localStorage.getItem('rend2Meta') || '{}') || {}; }catch(e){}
-  const metaDe = cat => (Number(metaUsr[cat]) > 0 ? Number(metaUsr[cat]) : metaEst[cat]);
-  // ===== controles =====
-  raiz.innerHTML = '<div class="rd-ctl"><label>Ver por <select id="r2V"><option value="dia">Día</option><option value="semana">Semana</option><option value="quincena" selected>Quincena</option><option value="mes">Mes</option><option value="total">Total</option></select></label>'
-    + '<label id="r2SD">Día <input type="date" id="r2D" max="' + hoy + '"></label><label id="r2SP">Período <select id="r2P"></select></label></div><div id="r2Out"></div>';
-  const $ = id => raiz.querySelector('#' + id);
-  $('r2D').value = hoy;
-  function llenar(){
-    const v = $('r2V').value, L = periodos(v);
-    $('r2SD').style.display = v === 'dia' ? '' : 'none'; $('r2SP').style.display = (v === 'dia' || v === 'total') ? 'none' : '';
-    $('r2P').innerHTML = L.slice().reverse().map(p => '<option value="' + esc(p.id) + '">' + esc(p.n) + '</option>').join('');
-    const act = L.find(p => p.a <= hoy && hoy <= p.b); if(act) $('r2P').value = act.id;
-  }
-  function metaHtml(cat){
-    const e = metaEst[cat], u = Number(metaUsr[cat]) > 0 ? Number(metaUsr[cat]) : null;
-    return '<div class="rd-sub">Meta por día de ' + esc(cat) + ' (m² por persona): <input type="number" min="0" step="0.5" class="r2-meta" data-cat="' + esc(cat) + '" value="' + (u != null ? u : (e != null ? e : '')) + '" style="width:80px;"> '
-      + (u != null ? '<b>definida por ti</b> · <button type="button" class="rd-hbtn r2-reset" data-cat="' + esc(cat) + '" style="width:auto;display:inline-block;">usar la estimada' + (e != null ? ' (' + fmt(e) + ')' : '') + '</button>' : (e != null ? '<b>estimada</b> con la mediana de las semanas completas anteriores' : 'sin datos suficientes para estimarla: escribe una'))
-      + '</div>';
-  }
-  function pinta(){
-    const v = $('r2V').value; let a, b, titulo, sub = '';
-    if(v === 'dia'){ a = b = $('r2D').value || hoy; const d = rdFecha(a); titulo = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][d.getUTCDay()] + ' ' + fT(a); if(!habil(a)) sub = 'Sábado, domingo o feriado: no cuenta en el rendimiento.'; }
-    else if(v === 'total'){ a = R2_INICIO_OBRA; b = hoy; titulo = 'Total desde el inicio de la obra'; }
-    else { const p = periodos(v).find(x => x.id === $('r2P').value); if(!p){ $('r2Out').innerHTML = '<div class="rd-vacio">Sin períodos.</div>'; return; } a = p.a; b = p.b; titulo = p.n; if(v === 'quincena' && !p.real) sub = 'Este cierre no está registrado en el panel: se estimó cada 14 días (viernes). Si fue de 3 semanas, falta registrarlo con "Cerrar quincena/mes".'; }
-    let h = '<div class="rd-tit">' + esc(titulo) + '</div>' + (sub ? '<div class="rd-sub">' + esc(sub) + '</div>' : '');
-    let hubo = false;
-    CATS.forEach(cat => {
-      const filas = trabs.filter(t => hayEnCat(t, cat)).map(t => ({t, r: calcT(t, a, b, cat)})).filter(f => f.r.m2 > 0 || f.r.dias > 0 || f.r.excl > 0);
-      if(!filas.length) return; hubo = true;
-      const meta = metaDe(cat);
-      filas.forEach(f => { f.meta = meta && f.r.dias ? meta * f.r.dias : null; f.cump = f.meta ? f.r.m2 / f.meta * 100 : null; });
-      const tm = filas.reduce((s, f) => s + f.r.m2, 0), td = filas.reduce((s, f) => s + f.r.dias, 0), tt = filas.reduce((s, f) => s + f.r.ter, 0), te = filas.reduce((s, f) => s + f.r.excl, 0);
-      const tmeta = filas.reduce((s, f) => s + (f.meta || 0), 0), tcm = filas.reduce((s, f) => s + (f.meta ? f.r.m2 : 0), 0);
-      const max = Math.max(1, ...filas.map(f => f.r.m2));
-      const col = p => p == null ? 'var(--sub)' : p >= 100 ? 'var(--ok,#43a047)' : p >= 80 ? 'var(--warn,#c98a00)' : 'var(--bad,#c0392b)';
-      h += '<div class="rd-tit">' + esc(cat) + '</div>' + metaHtml(cat)
-        + '<div class="rd-res"><div><b>' + fmt(tm) + ' m²</b><span>del equipo (reparto 50/50)</span></div><div><b>' + fmt(td) + '</b><span>días trabajados</span></div><div><b>' + (td ? fmt(tm / td) + ' m²' : '—') + '</b><span>por día trabajado</span></div><div><b>' + (tmeta ? Math.round(tcm / tmeta * 100) + '%' : '—') + '</b><span>de la meta' + (tmeta ? '' : ' (sin meta)') + '</span></div></div>'
-        + '<div class="rd-sub">Terminado en el período (como se paga): <b>' + fmt(tt) + ' m²</b>' + (te > 0.05 ? ' · hecho en sábado, domingo o feriado, fuera del rendimiento: <b>' + fmt(te) + ' m²</b>' : '') + '</div>'
-        + '<div class="rd-tabla">' + filas.slice().sort((x, y) => (y.cump == null ? -1 : y.cump) - (x.cump == null ? -1 : x.cump) || y.r.m2 - x.r.m2).map((f, i) => {
-          const r = f.r;
-          return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. <b>' + esc(f.t.nombre) + ': ' + fmt(r.m2) + ' m²</b></span><small>' + fmt(r.dias) + (r.reg ? (r.dias === 1 ? ' día trabajado' : ' días trabajados') : (r.dias === 1 ? ' día con actividad (sin asistencia)' : ' días con actividad (sin asistencia)')) + (r.porDia != null ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + (f.meta ? ' · meta del período ' + fmt(f.meta) + ' m²' : '') + '</small>'
-            + (r.cruza > 0.05 ? '<small class="rd-mm">Incluye <b>' + fmt(r.cruza) + ' m²</b> de partidas que cruzan el corte (media cuenta en cada lado).</small>' : '')
-            + (r.F ? '<small class="rd-mm">' + r.F + (r.F === 1 ? ' falta' : ' faltas') + '</small>' : '') + '</div>'
-            + '<div class="rd-b"><div class="rd-barra"><i style="width:' + (r.m2 / max * 100) + '%;background:' + col(f.cump) + '"></i></div><span class="rd-sm"><b>' + fmt(r.m2) + ' m²</b> contados</span></div>'
-            + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
-            + '<div class="rd-d2" style="color:' + col(f.cump) + '">' + (f.cump == null ? '—' : Math.round(f.cump) + '%') + '<small>de la meta</small></div></div></div>';
-        }).join('') + '</div>';
-    });
-    if(!hubo) h += '<div class="rd-vacio">Sin datos en este período.</div>';
-    h += '<details class="rd-nota"><summary>Cómo se calcula</summary><b>Reparto 50/50.</b> Una partida que empieza y termina el mismo día cuenta entera ese día. Una que dura más días cuenta la mitad de sus m² el día que empieza y la otra mitad el día que termina; si cruza el corte, cada mitad cae en su período. Una partida aún en curso ya cuenta su primera mitad. <b>Días trabajados:</b> los de la asistencia (presente = 1, se fue antes = la fracción trabajada). <b>No cuentan</b> sábados, domingos ni feriados: ni sus m² ni sus días, y nadie queda con falta. <b>Meta del período</b> = meta por día × días trabajados; el % es m² contados ÷ meta. <b>Quincena:</b> de sábado a viernes según los cierres registrados en el panel; el día del cierre pertenece a la quincena que cierra. El "terminado en el período" es lo que se paga (cuenta entero al terminar) y no se usa para el %.</details>';
-    $('r2Out').innerHTML = h;
-  }
-  raiz.addEventListener('change', e => {
-    const t = e.target;
-    if(t.id === 'r2V'){ llenar(); pinta(); }
-    else if(t.id === 'r2D' || t.id === 'r2P') pinta();
-    else if(t.classList && t.classList.contains('r2-meta')){
-      const n = parseFloat(String(t.value).replace(',', '.')); metaUsr[t.getAttribute('data-cat')] = n > 0 && n < 1000 ? Math.round(n * 10) / 10 : 0;
-      try{ localStorage.setItem('rend2Meta', JSON.stringify(metaUsr)); }catch(err){} pinta();
-    }
-  });
-  raiz.addEventListener('click', e => {
-    const b = e.target.closest('.r2-reset'); if(!b) return;
-    delete metaUsr[b.getAttribute('data-cat')]; try{ localStorage.setItem('rend2Meta', JSON.stringify(metaUsr)); }catch(err){} pinta();
-  });
-  llenar(); pinta();
-}
-// datos de ejemplo para la copia de prueba (parten de los de rendDemo)
-function rendDemo2(){
-  const b = rendDemo(), partidas = [];
-  b.trabajadores.forEach(t => t.dias.forEach(x => {
-    if(!(x.m2 > 0)) return;
-    const w = rdFecha(x.d).getUTCDay(), largo = x.t >= 2 && w !== 6;
-    const ini = largo ? rdSuma(x.d, w === 1 ? -3 : -1) : x.d;
-    partidas.push({w: t.nombre, cat: x.cat, m2: Math.round(x.m2 * (largo ? 1.8 : 1) * 10) / 10, ini, fin: x.d});
-  }));
-  let v = rdHoy(); while(rdFecha(v).getUTCDay() !== 5 || v > rdHoy()) v = rdSuma(v, -1);
-  const cierres = []; for(let k = 5; k >= 0; k--) cierres.push(rdSuma(v, -14 * k - (k === 2 ? 7 : 0)));
-  return Object.assign(b, {partidas, cierres, feriados: R2_FERIADOS});
+  raiz.onchange = e => { const a = e.target.closest('input[data-r2a]'); if(a){ r2E.off[a.getAttribute('data-r2a')] = !a.checked; pintar(); } };
+  raiz.onclick = e => { const t = e.target.closest('.r2-tab'); if(t){ r2E.ritmo = Number(t.getAttribute('data-r2r')); pintar(); } };
+  pintar();
 }
 function rendDemo(){
   const nombres = ['Rafael', 'Raymond', 'Luis', 'Pedro', 'Marcos', 'Iván'];
@@ -7849,11 +7787,11 @@ async function abrirRendimiento(){
   const cuerpo = ov.querySelector('#rdCuerpo'), cache = {};
   async function ver(n){
     ov.querySelector('#rdT1').classList.toggle('primary', n === 1); ov.querySelector('#rdT2').classList.toggle('primary', n === 2);
-    const acc = n === 1 ? 'rendimientoDatos' : 'rendimiento2Datos';
     cuerpo.textContent = 'Cargando…';
+    if(n === 2){ cuerpo.textContent = ''; const c2 = document.createElement('div'); cuerpo.appendChild(c2); renderRendimiento2(c2, null, esc); return; }   // @@rend2-semanal: sale de las partidas del panel, no pide nada al servidor
     if(!cache[n]){
-      if(demo){ await new Promise(r => setTimeout(r, 250)); cache[n] = n === 1 ? rendDemo() : rendDemo2(); }
-      else { cache[n] = await llamarDb(acc); }
+      if(demo){ await new Promise(r => setTimeout(r, 250)); cache[n] = rendDemo(); }
+      else { cache[n] = await llamarDb('rendimientoDatos'); }
     }
     const datos = cache[n];
     if(!datos || !datos.ok){ cache[n] = null; cuerpo.textContent = 'No se pudo cargar. Revisa la conexión y que el Apps Script esté publicado en la versión ' + (n === 1 ? '64' : '103') + ' o más nueva.'; return; }
