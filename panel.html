@@ -2521,7 +2521,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.180';
+const APP_VERSION = '0.73.181';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2993,10 +2993,12 @@ function agregarPisos(todos){
   const lote = pisosCola.slice(pisosRender, todos ? undefined : pisosRender + PISOS_LOTE);
   pisosRender += lote.length;
   const h = lote.map(pisosFn).filter(Boolean).join('');
+  const antes = cola.previousElementSibling;
   if(h) cola.insertAdjacentHTML('beforebegin', h);
+  const nuevos = []; for(let n = antes ? antes.nextElementSibling : cola.parentElement.firstElementChild; n && n !== cola; n = n.nextElementSibling) nuevos.push(n);   // @@lag-pisos: solo se ajustan los pisos recién dibujados, no todos los de arriba
   if(pisosRender >= pisosCola.length){ cola.remove(); if(obsPisos){ obsPisos.disconnect(); obsPisos = null; } }
   else if(obsPisos){ obsPisos.unobserve(cola); obsPisos.observe(cola); }   // vuelve a mirar si todavía queda cerca
-  equalizeRowNameHeights(); ajustarTamanoDpto(); ajustarNombresMovil(); igualarAltoCeldasTrabajador();
+  equalizeRowNameHeights(nuevos.flatMap(n => [...n.querySelectorAll('table.dept-table tbody tr')])); ajustarTamanoDpto(nuevos); ajustarNombresMovil(nuevos); igualarAltoCeldasTrabajador();
 }
 function asegurarPiso(piso){
   while(document.getElementById('pisosCola') && ![...document.querySelectorAll('#content .floor-block')].some(f => f.dataset.piso === piso)) agregarPisos();
@@ -5390,15 +5392,27 @@ function _desborda(el){
   return el.scrollWidth > el.clientWidth + 1;
 }
 function ajustarNombres(){
+  // @@lag-nombres: solo toca los nombres nuevos o cuyo contenedor cambió de ancho; lecturas juntas y escrituras juntas (antes forzaba un recálculo por nombre y se repetía en cada cambio de la página)
+  const cambian = [];
   document.querySelectorAll('.worker-name:not(.unassigned), [data-nomfull]').forEach(el => {
     if(el.dataset.nomfull === undefined) el.dataset.nomfull = el.dataset.calnom || el.textContent.trim();
     const full = el.dataset.nomfull, pre = el.dataset.nompre || '';
     if(!full || full === 'Sin asignar') return;
-    el.style.setProperty('white-space', 'nowrap', 'important'); el.style.overflow = 'hidden';   // gana a las reglas del celular que dejaban partir el nombre en 2 líneas
-    if(getComputedStyle(el).display === 'inline'){ el.style.display = 'inline-block'; el.style.maxWidth = '100%'; el.style.verticalAlign = 'bottom'; }
-    el.textContent = pre + full;
-    if(_desborda(el)) el.textContent = pre + nombreCorto(full);
+    const caja = el.parentElement, clave = pre + full + '|' + (caja ? caja.clientWidth : 0);
+    if(el.__nomClave === clave) return;
+    cambian.push({el, full, pre, clave, inline: el.__nomEst ? false : getComputedStyle(el).display === 'inline'});
   });
+  cambian.forEach(n => {
+    const el = n.el;
+    if(!el.__nomEst){
+      el.style.setProperty('white-space', 'nowrap', 'important'); el.style.overflow = 'hidden';   // gana a las reglas del celular que dejaban partir el nombre en 2 líneas
+      if(n.inline){ el.style.display = 'inline-block'; el.style.maxWidth = '100%'; el.style.verticalAlign = 'bottom'; }
+      el.__nomEst = 1;
+    }
+    el.textContent = n.pre + n.full;
+  });
+  const largos = cambian.map(n => _desborda(n.el));
+  cambian.forEach((n, k) => { if(largos[k]) n.el.textContent = n.pre + nombreCorto(n.full); n.el.__nomClave = n.clave; });
 }
 // vuelve a ajustar cuando el panel se vuelve a dibujar o cambia el tamaño de la pantalla
 (function(){
@@ -8673,11 +8687,11 @@ function dptoCortoPanel(piso, dpto){
 }
 
 /* Nombre del trabajador en celular: nombre y apellido si caben; si no, nombre + inicial del apellido; si tampoco, solo el nombre. */
-function ajustarNombresMovil(){
+function ajustarNombresMovil(raices){
   if(!window.matchMedia('(max-width:700px)').matches) return;
   // Se hace por rondas (escribir todo, medir todo) para que el navegador calcule el diseño 3 veces en total y no una vez por nombre.
   const lista = [];
-  document.querySelectorAll('.cell-ventana .worker-name:not(.unassigned)').forEach(el => {
+  (Array.isArray(raices) ? raices : [document]).forEach(r => r.querySelectorAll('.cell-ventana .worker-name:not(.unassigned)').forEach(el => {
     const fb = el.closest('.floor-block');
     if(fb && fb.dataset.na && fb.dataset.na !== '1') return;
     if(el.dataset.shown === undefined || el.dataset.shown !== el.textContent) el.dataset.full = el.textContent;
@@ -8685,7 +8699,7 @@ function ajustarNombresMovil(){
     const opciones = [full];
     if(t.length > 1){ opciones.push(t[0] + ' ' + t[t.length - 1].charAt(0).toUpperCase() + '.'); opciones.push(t[0]); }
     lista.push({el, opciones});
-  });
+  }));
   let pend = lista;
   for(let ronda = 0; ronda < 3 && pend.length; ronda++){
     pend.forEach(x => { const o = x.opciones[Math.min(ronda, x.opciones.length - 1)]; if(x.el.textContent !== o) x.el.textContent = o; x.el.dataset.shown = o; });
@@ -8700,13 +8714,13 @@ function ajustarNombresMovil(){
 }
 let tNombresMovil = null;
 window.addEventListener('resize', () => { clearTimeout(tNombresMovil); tNombresMovil = setTimeout(() => { document.querySelectorAll('.cell-ventana .worker-name[data-full]').forEach(el => { el.textContent = el.dataset.full; delete el.dataset.shown; }); ajustarNombresMovil(); }, 150); });
-function ajustarTamanoDpto(){
-  document.querySelectorAll('table.dept-table td.dpto-col').forEach(td => {
+function ajustarTamanoDpto(raices){
+  (Array.isArray(raices) ? raices : [document]).forEach(r => r.querySelectorAll('table.dept-table td.dpto-col').forEach(td => {
     const nf = td.querySelector('.nf');
     const len = (nf ? nf.textContent : td.textContent).trim().length;
     td.classList.toggle('dpto-corto', len > 0 && len <= 4);
     td.classList.toggle('dpto-largo', len > 8 || len > 5 && /^(azotea|pasillos)$/i.test((nf ? nf.textContent : '').trim()));
-  });
+  }));
 }
 
 function equalizeRowNameHeights(filas){
