@@ -2521,7 +2521,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.179';
+const APP_VERSION = '0.73.180';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -7247,7 +7247,8 @@ function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.
 /* ===== Rendimiento 2 · proyección de cerámica por semana y rendimiento semanal (sin asistencia) ===== */
 // @@rend2-semanal
 const R2_INICIO = '2026-05-29', R2_FIN = '2027-01-01';   // semana 1 y término oficial
-const r2E = {off: {'Muro': true}, ritmo: 4};
+const R2_SOLO = ['Piso', 'Muro Baños'];
+const r2E = {off: {'Muro': true}, ritmo: 4, solo: false};   // solo: piso y muro baño, pisos 2 al 22
 function renderRendimiento2(raiz, datos, esc){
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
   const fF = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
@@ -7265,7 +7266,7 @@ function renderRendimiento2(raiz, datos, esc){
       if(c.categoria !== 'Cerámica') return;
       const st = getState(c.id), m = Number(st.m2); if(!(m > 0)) return;
       if(areas.indexOf(c.area) < 0) areas.push(c.area);
-      if(E.off[c.area]) return;
+      if(E.solo ? !(R2_SOLO.indexOf(c.area) >= 0 && c.pisoNum >= 2 && c.pisoNum <= 22) : E.off[c.area]) return;
       K += m; if(!(st.terminado || st.pagado)) return; hecho += m;
       const d = st.terminadoTs ? diaLocalDe(st.terminadoTs) : '';
       if(!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > hoy){ sinF += m; return; }
@@ -7275,9 +7276,9 @@ function renderRendimiento2(raiz, datos, esc){
     const orden = ['Piso', 'Muro Baños', 'Muro Cocina', 'Muro', 'Pasillos'];
     const ar = orden.filter(a => areas.indexOf(a) >= 0).concat(areas.filter(a => orden.indexOf(a) < 0));
     const lab = a => a === 'Muro' ? 'Piso -1' : (AREA_LABEL[a] || a);
-    const fuera = ar.filter(a => E.off[a]).map(lab);
-    const cab = '<div class="rd-tit">Proyección · Cerámica por semana' + (fuera.length ? ' · sin ' + esc(fuera.join(', ')) : '') + nuevo + '</div>';
-    const ctl = '<div class="py-caja"><div class="py-fc"><span class="py-cap">Partidas</span><div class="py-cks">' + ar.map(a => '<label class="py-ck"><input type="checkbox" data-r2a="' + esc(a) + '"' + (E.off[a] ? '' : ' checked') + '><span>' + esc(lab(a)) + '</span></label>').join('') + '</div></div>'
+    const fuera = E.solo ? [] : ar.filter(a => E.off[a]).map(lab);
+    const cab = '<div class="rd-tit">Proyección · Cerámica por semana' + (E.solo ? ' · solo piso y muro baño, pisos 2 al 22' : '') + (fuera.length ? ' · sin ' + esc(fuera.join(', ')) : '') + nuevo + '</div>';
+    const ctl = '<div class="py-caja"><div class="py-fc"><span class="py-cap">Filtro</span><div class="py-tabs" role="group" aria-label="Filtro de partidas"><button type="button" class="py-tab r2-tab' + (E.solo ? ' on' : '') + '" data-r2s="1" aria-pressed="' + E.solo + '">Solo piso y muro baño · pisos 2 al 22</button></div></div><div class="py-fc"><span class="py-cap">Partidas</span><div class="py-cks">' + ar.map(a => '<label class="py-ck"><input type="checkbox" data-r2a="' + esc(a) + '"' + (E.solo ? ' disabled' : '') + (E.off[a] ? '' : ' checked') + '><span>' + esc(lab(a)) + '</span></label>').join('') + '</div></div>'
       + '<div class="py-fc"><span class="py-cap">Ritmo</span><div class="py-tabs" role="group" aria-label="Semanas para calcular el ritmo">' + [[4, '4 semanas'], [8, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab r2-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-r2r="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div></div>';
     const pon = h => { const t0 = box ? box.scrollTop : 0; raiz.innerHTML = h; if(box) box.scrollTop = t0; };
     const claves = Object.keys(sem).sort();
@@ -7344,7 +7345,7 @@ function renderRendimiento2(raiz, datos, esc){
     pon(h);
   }
   raiz.onchange = e => { const a = e.target.closest('input[data-r2a]'); if(a){ r2E.off[a.getAttribute('data-r2a')] = !a.checked; pintar(); } };
-  raiz.onclick = e => { const t = e.target.closest('.r2-tab'); if(t){ r2E.ritmo = Number(t.getAttribute('data-r2r')); pintar(); } };
+  raiz.onclick = e => { const t = e.target.closest('.r2-tab'); if(!t) return; if(t.hasAttribute('data-r2s')) r2E.solo = !r2E.solo; else r2E.ritmo = Number(t.getAttribute('data-r2r')); pintar(); };
   pintar();
 }
 function rendDemo(){
