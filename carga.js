@@ -1,4 +1,4 @@
-/* ===== carga.js 1.1.2 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.2.0 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
@@ -84,41 +84,63 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   var DIAS_ROL = {1: 30, 2: 14, 3: 7, 4: 14, 5: 30, 6: 7, 7: 7};
   var DIAS0 = 0;
   try{ var h0 = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; DIAS0 = DIAS_ROL[h0.rol] || 0; }catch(e){}
-  function textoCaduco(destino){
-    var a = /menu=1/.test(destino || '') ? 'el menú' : 'la pantalla de inicio de sesión';
-    return 'Tu sesión caducó' + (DIAS0 ? ' (tu sesión caduca cada ' + DIAS0 + ' días)' : '') + '. Volviendo a ' + a + '…';
+  // @@carga-error: motivos precisos. Primero el mensaje exacto que dejó la página (p. ej. "Esta cuenta ya está abierta en otro aparato…"); si no hay, uno según lo que pasó, con cargo y sección
+  var SECC = {panel: 'Panel de Cerámica y Frague', calidad: 'Calidad', bodega: 'Bodega', jefe_terreno: 'Jefe de Terreno', oficina_tecnica: 'Oficina Técnica', avance_obra: 'Avance de obra', admin: 'Administración', molde: 'Molde', proyeccion_logica: 'Proyección Lógica', revision_pre_entrega: 'Revisión pre-entrega', generador_documentos: 'Generador de documentos', index: 'Inicio'};
+  var CARGOS = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega'};
+  function seccionActual(){ var p = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, ''); return SECC[p] || ''; }
+  function cargoActual(){
+    try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {};
+      if(h.rol === 1 && /^ismael\b/i.test(String(h.nombre || ''))) return 'Dev';
+      return CARGOS[h.rol] || ''; }catch(e){ return ''; }
   }
-  function textoSinCuenta(destino){
-    var a = /menu=1/.test(destino || '') ? 'el menú' : 'la pantalla de inicio de sesión';
-    return 'Entraste a esta sección sin una cuenta iniciada. Volviendo a ' + a + '…';
+  // mensajes genéricos que las páginas dejan para la pantalla de inicio de sesión: no sirven como motivo, se reemplazan por uno preciso
+  var GENERICOS = /^(No tienes acceso a esa sección\. Elige una de las disponibles\.|Tu sesión venció\. (Ingresa tu PIN|Entra) de nuevo\.)$/;
+  function motivoDe(tipo){
+    var g = ''; try{ g = String(sessionStorage.getItem('progresoObraAvisoGate') || '').trim(); }catch(e){}
+    if(g && !GENERICOS.test(g)) return g;
+    var sec = seccionActual(), cargo = cargoActual();
+    if(tipo === 'nosesion') return 'No hay ninguna cuenta iniciada en este aparato: entraste a ' + (sec ? '«' + sec + '»' : 'esta sección') + ' sin iniciar sesión.';
+    if(tipo === 'permiso') return 'Tu cuenta' + (cargo ? ' (' + cargo + ')' : '') + ' no tiene acceso a ' + (sec ? '«' + sec + '»' : 'esta sección') + '.';
+    if(tipo === 'caduco') return 'Tu sesión caducó o el servidor ya no la reconoce' + (DIAS0 ? ' (tu sesión dura ' + DIAS0 + ' días)' : '') + '. Hay que iniciar sesión de nuevo.';
+    return 'Esta cuenta ya tiene una sesión activa en este aparato.';
   }
   window.CargaPagina = {
     el: el,
     mensaje: function(t){ st.msg = String(t || ''); },
+    motivo: motivoDe,   // @@carga-error (también lo usan las pruebas)
     espera: function(k){ st.reg.forEach(function(r){ if(r.k === k) r.on = true; }); },
     hecho: hito,
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
+    // @@carga-error: pantalla de error nueva. Dice el motivo entre las dos líneas, se queda quieta (sin cuenta regresiva) y da dos botones: Entendido y Dar aviso
     error: function(destino, tipo){
       if(st.err) return st.err;
-      if(tipo !== 'caduco') avisarIntento(tipo);
       if(st.cerrando){ location.replace(destino); return Promise.resolve(); }
+      var avisado = false;
+      if(tipo !== 'caduco') avisarIntento(tipo).then(function(ok){ avisado = !!ok; var b = document.getElementById('cgBtnAviso'); if(b && ok) marcarAviso(b); });
       st.err = (async function(){
-        var TXT = {sesion: 'Ya hay una cuenta activa, volviendo a pantalla de sesión.', permiso: 'No te corresponde estar aquí, volviendo al menú.', nosesion: textoSinCuenta(destino), caduco: textoCaduco(destino)};
-        document.getElementById('cgErrTxt').textContent = TXT[tipo] || TXT.sesion;
+        var motivo = motivoDe(tipo);
         await abierta;
-        st.meta = 88; est.classList.remove('cglisto');
-        while(st.prog < 89.4 || st.prog > 91) await dormir(30);
-        el.classList.add('cgerror'); document.getElementById('cgIn').classList.add('cgtiembla');
-        /* el texto largo ocupa más líneas: se sube el bloque para que siga centrado entre las dos líneas rojas */
-        var tx = document.getElementById('cgErrTxt'), ci = document.getElementById('cgIn');
-        if(tx && ci){ var extra = Math.max(0, tx.offsetHeight - 16); ci.style.transition = 'margin-bottom .3s ease'; ci.style.marginBottom = extra + 'px'; }
-        if(tipo === 'permiso'){ var sc = document.getElementById('cgScan'); if(sc){ var pasos = ['Obteniendo información del intruso…', 'Obteniendo dirección IP…', 'Obteniendo latitud y longitud…', 'Obteniendo proveedor de internet…', 'Identificando el aparato…', 'Enviando aviso a Ismael…']; pasos.forEach(function(t, k){ setTimeout(function(){ sc.textContent = t; }, k * 800); }); } }
-        var pista = document.getElementById('cgPista'); if(pista) pista.setAttribute('aria-label', 'Error');
-        st.volver = true;
-        if(tipo === 'caduco' || tipo === 'nosesion') await dormir(1800);   // tiempo para leer el aviso
-        while(st.prog > 0.6) await dormir(30);
-        await dormir(250);
-        location.replace(destino);
+        cancelAnimationFrame(st.raf); st.meta = 88;
+        var ci = document.getElementById('cgIn');
+        // ===== se reemplaza todo lo de entre las líneas por el motivo y los botones =====
+        var f = document.createElement('div'); f.className = 'cgfalla'; f.setAttribute('role', 'alert');
+        f.innerHTML = '<div class="cgfmsg"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span></span></div>'
+          + '<div class="cgbtns"><button type="button" class="cgbtn cgbtn1" id="cgBtnOk">Entendido</button><button type="button" class="cgbtn" id="cgBtnAviso">Dar aviso</button></div>';
+        f.querySelector('span').textContent = motivo;
+        ci.appendChild(f);
+        el.classList.add('cgerror'); ci.classList.add('cgtiembla');
+        var bOk = document.getElementById('cgBtnOk'), bAv = document.getElementById('cgBtnAviso');
+        bOk.addEventListener('click', function(){ bOk.disabled = true; location.replace(destino); });
+        if(avisado) marcarAviso(bAv);
+        bAv.addEventListener('click', function(){
+          if(bAv.disabled) return;
+          bAv.disabled = true; bAv.textContent = 'Enviando…';
+          avisarIntento(tipo === 'caduco' ? 'sesion' : tipo, true).then(function(ok){
+            if(ok){ avisado = true; marcarAviso(bAv); }
+            else { bAv.disabled = false; bAv.textContent = 'Reintentar aviso'; }
+          });
+        });
+        setTimeout(function(){ try{ bOk.focus({preventScroll: true}); }catch(e){} }, 60);
       })();
       return st.err;
     },
@@ -179,15 +201,16 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     }
   };
   /* Avisa al administrador (por el servidor) que alguien llegó a esta pantalla de error */
-  function avisarIntento(tipo){ try{
+  function avisarIntento(tipo, manual){ return new Promise(function(listo){ try{
     var cu = ''; try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; cu = h.nombre || h.cuenta || ''; }catch(e){}
     var n = navigator, c = n.connection || {}, inf = {lang: String(n.language || ''), langs: (n.languages || []).slice(0, 4).join(','), tz: '', pant: screen.width + 'x' + screen.height, ratio: window.devicePixelRatio || 1, plat: String((n.userAgentData && n.userAgentData.platform) || n.platform || ''), movil: !!(n.userAgentData && n.userAgentData.mobile), red: String(c.effectiveType || ''), ref: String(document.referrer || '').substring(0, 80), hora: new Date().toString().substring(0, 60)};
     try{ inf.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(e){}
-    var enviar = function(geo){ inf.geo = geo || null; fetch('https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec', {method:'POST', keepalive:true, headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'alertaAcceso', tipo: tipo, pagina: location.pathname.split('/').pop() || 'index', ua: String(navigator.userAgent || '').substring(0, 120), cuenta: cu, info: inf})}).catch(function(){}); };
+    var enviar = function(geo){ inf.geo = geo || null; fetch('https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec', {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'alertaAcceso', tipo: tipo, manual: !!manual, pagina: location.pathname.split('/').pop() || 'index', ua: String(navigator.userAgent || '').substring(0, 120), cuenta: cu, info: inf})}).then(function(r){ return r.json(); }).then(function(j){ listo(!!(j && j.ok)); }).catch(function(){ listo(false); }); };
     /* IP y ubicación aproximada: las da un servicio externo (ipwho.is); si no responde en 3 s, el aviso sale igual con el resto de los datos */
     var ctl = new AbortController(), to = setTimeout(function(){ ctl.abort(); }, 3000);
     fetch('https://ipwho.is/', {signal: ctl.signal}).then(function(r){ return r.json(); }).then(function(g){ clearTimeout(to); enviar(g && g.success !== false ? {ip: g.ip, ciudad: g.city, region: g.region, pais: g.country, isp: (g.connection && (g.connection.isp || g.connection.org)) || '', lat: g.latitude, lon: g.longitude, zona: (g.timezone && g.timezone.id) || ''} : null); }).catch(function(){ clearTimeout(to); enviar(null); });
-  }catch(e){} }
+  }catch(e){ listo(false); } }); }
+  function marcarAviso(b){ b.disabled = true; b.textContent = 'Aviso enviado'; b.classList.add('cgok'); }
   window.salirConError = function(destino, tipo){ if(tipo && window.CargaPagina && document.getElementById('cargaGlobal') && !st.cerrando) return window.CargaPagina.error(destino, tipo); location.replace(destino); };
   if(window.__gateErr) window.CargaPagina.error(window.__gateErr.d, window.__gateErr.t);
   setTimeout(function(){ if(window.CargaPagina) window.CargaPagina.fin(); }, 25000);

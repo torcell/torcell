@@ -1,4 +1,4 @@
-/* ===== carga.css 1.1.1 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
+/* ===== carga.css 1.2.0 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
    Va en el <head> de cada página para que la carga salga con estilo desde el primer cuadro. */
 /* ===== misma letra y mismo tamaño en todas las páginas: no hereda nada de la página ===== */
 #cargaGlobal,#cargaGlobal *{font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif !important;font-style:normal !important;font-variant:normal;font-stretch:normal;font-synthesis:none;text-transform:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -66,3 +66,19 @@
 #cargaGlobal .cgquieta .cgpista{opacity:1;animation:none;}
 @keyframes cgPistaEntra{from{opacity:0;}to{opacity:1;}}
 @media(prefers-reduced-motion:reduce){#cargaGlobal .cgrell{transition:none;}}
+
+/* ===== @@carga-error: pantalla de error. Reemplaza lo de entre las dos líneas por el motivo y dos botones (Entendido y Dar aviso); no hay cuenta regresiva ===== */
+#cargaGlobal.cgerror .cgin > small,#cargaGlobal.cgerror .cgin > b,#cargaGlobal.cgerror .cgin > .cgcarga,#cargaGlobal.cgerror .cgin > .cgmsg,#cargaGlobal.cgerror .cgin > .cgerr{display:none !important;}
+#cargaGlobal .cgfalla{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;}
+#cargaGlobal .cgfmsg{display:flex;align-items:flex-start;justify-content:center;gap:10px;max-width:min(520px,94%);font-size:15px;line-height:1.35;font-weight:700;letter-spacing:.2px;color:#ff8a8a;text-align:left;}
+#cargaGlobal .cgfmsg svg{flex:none;margin-top:1px;}
+#cargaGlobal .cgbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+#cargaGlobal .cgbtn{min-width:132px;height:34px;padding:0 18px;border:1px solid rgba(255,255,255,.75);border-radius:0;background:transparent;color:#fff;font-size:13px !important;font-weight:700 !important;letter-spacing:.3px;cursor:pointer;transition:background-color .15s ease,color .15s ease,transform .1s ease;}
+#cargaGlobal .cgbtn:hover:not(:disabled){background:rgba(255,255,255,.14);}
+#cargaGlobal .cgbtn:active:not(:disabled){transform:scale(.97);}
+#cargaGlobal .cgbtn1{background:#fff;color:#7a1f1f;border-color:#fff;}
+#cargaGlobal .cgbtn1:hover:not(:disabled){background:#ffe3e3;}
+#cargaGlobal .cgbtn:disabled{cursor:default;opacity:.7;}
+#cargaGlobal .cgbtn.cgok{opacity:1;border-color:#9fe3a8;color:#9fe3a8;}
+#cargaGlobal .cgbtn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+@media(max-width:480px){#cargaGlobal .cgfmsg{font-size:14px;}#cargaGlobal .cgbtn{min-width:120px;}}
