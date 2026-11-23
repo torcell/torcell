@@ -2521,7 +2521,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.181';
+const APP_VERSION = '0.73.182';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -6046,17 +6046,33 @@ async function recargarTrasLogin(){
   populateFilters(); renderWorkerPanel(); updateRateFootnote();
   datosCargadosTs = Date.now(); render();
 }
-async function checkLoginRemote(pin){
-  mostrarCargando('Verificando…');
+// @@login-reintento: "ocupado" o señal débil se reintenta solo; no se muestra como PIN incorrecto
+async function checkLoginRemoteUna(pin){
+  const ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+  const corte = ctl ? setTimeout(() => ctl.abort(), 20000) : 0;
   try{
     const res = await fetch(DB_URL, {
-      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, signal: ctl ? ctl.signal : undefined,
       body: JSON.stringify({action:'login', pin, dispositivo: dispositivoId(), dispositivoEtiqueta: etiquetaDispositivo()})
     });
     if(!res.ok) return null;
     const json = await res.json();
     return (json && typeof json.ok === 'boolean') ? json : null;
-  }catch(err){ return null; } finally { ocultarCargando(); }
+  }catch(err){ return null; } finally { if(corte) clearTimeout(corte); }
+}
+async function checkLoginRemote(pin){
+  mostrarCargando('Verificando…');
+  try{
+    let res = null;
+    for(let i = 0; i < 4; i++){
+      res = await checkLoginRemoteUna(pin);
+      const reintentar = res === null || (res && !res.ok && res.error === 'ocupado');
+      if(!reintentar || i === 3) break;
+      mostrarCargando(res === null ? 'Señal débil, reintentando…' : 'Servidor ocupado, reintentando…');
+      await new Promise(r => setTimeout(r, 1200 + i * 800));
+    }
+    return res;
+  } finally { ocultarCargando(); }
 }
 
 document.getElementById('pinConfirm').addEventListener('click', async () => {
@@ -6076,6 +6092,7 @@ document.getElementById('pinConfirm').addEventListener('click', async () => {
     pinError.textContent = res.error === 'demasiados_intentos'
       ? 'Demasiados PIN incorrectos seguidos. Espera unos minutos y vuelve a intentar.'
       : res.error === 'dispositivo_ocupado' ? msgDispositivoOcupado(res.tipo)
+      : res.error === 'ocupado' ? 'El servidor sigue ocupado. Tu PIN no se contó como error; prueba de nuevo en unos segundos.'
       : 'PIN incorrecto.';
     return;
   }

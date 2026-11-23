@@ -614,13 +614,28 @@ function etiquetaDispositivo(){
   const nav = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung' : /Firefox|FxiOS/.test(u) ? 'Firefox' : /Chrome|CriOS/.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
   return so + ' · ' + nav;
 }
-async function llamarLogin(extra){
+// @@login-reintento: si el servidor responde "ocupado" (está copiando datos) o la señal falla, se reintenta solo en vez de mostrar "PIN incorrecto"
+async function llamarLoginUna(extra){
+  const ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+  const corte = ctl ? setTimeout(() => ctl.abort(), 20000) : 0;
   try{
-    const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(Object.assign({action:'login', dispositivo: ls('progresoObraDisp') || '', dispositivoEtiqueta: etiquetaDispositivo()}, extra))});
+    const res = await fetch(DB_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, signal: ctl ? ctl.signal : undefined, body: JSON.stringify(Object.assign({action:'login', dispositivo: ls('progresoObraDisp') || '', dispositivoEtiqueta: etiquetaDispositivo()}, extra))});
     if(!res.ok) return null;
     const j = await res.json();
     return (j && typeof j.ok === 'boolean') ? j : null;
   }catch(e){ return null; }
+  finally{ if(corte) clearTimeout(corte); }
+}
+async function llamarLogin(extra){
+  let res = null;
+  for(let i = 0; i < 4; i++){
+    res = await llamarLoginUna(extra);
+    const reintentar = res === null || (res && !res.ok && res.error === 'ocupado');
+    if(!reintentar || i === 3) break;
+    gateMensaje(res === null ? 'Señal débil, reintentando…' : 'El servidor está ocupado, reintentando…');
+    await new Promise(r => setTimeout(r, 1200 + i * 800));
+  }
+  return res;
 }
 
 async function llamarApi(extra){
@@ -750,6 +765,7 @@ function resultado(res, recordar, via){
   if(res === null){ gateMensaje('No se pudo conectar. Revisa tu internet e intenta de nuevo.', true); return; }
   if(!res.ok){
     if(res.error === 'dispositivo_ocupado'){ sacudir(); gate.pin = ''; gatePintar(); gateMensaje(res.tipo === 'unico' ? 'Esta cuenta ya está abierta en otro aparato. Por defecto solo se permite 1 aparato por cuenta. Cierra la sesión allá o pídele al administrador que te autorice un celular/tablet.' : 'Esta cuenta ya está abierta en otro ' + (res.tipo === 'pc' ? 'computador' : 'celular o tablet') + '. Cierra la sesión allá o pídele al administrador que libere el cupo.', true); return; }
+    if(res.error === 'ocupado'){ gateMensaje('El servidor sigue ocupado. Tu PIN no se contó como error; toca Entrar de nuevo en unos segundos.', true); return; }
     if(res.error === 'bloqueado'){ gate.pin = ''; gatePintar(); bloqueadoFlujo(res); return; }
     if(res.error === 'demasiados_intentos'){ sacudir(); gate.pin = ''; gatePintar(); gateBloquear(30, 'Demasiados intentos seguidos.'); return; }
     if(via === 'google'){ gateMensaje('Ese Gmail no está autorizado. Pídele al administrador que lo agregue.', true); return; }
@@ -979,4 +995,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.19 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.20 · 23-11-2026 ==== -->
