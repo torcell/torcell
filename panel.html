@@ -2454,7 +2454,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.184';
+const APP_VERSION = '0.73.185';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5832,9 +5832,11 @@ function closeOverlayAnimated(overlayEl){
 }
 
 // ===== precalentar ventanas: una ventana de mentira (casi transparente) abre y cierra una vez al cargar, con iconos, botones y tablas, para que la primera ventana real ya salga fluida =====
+// @@precarga-en-carga: ahora corre mientras se ve la pantalla de carga (espera de red = CPU libre) y devuelve una promesa; la carga no termina hasta que acaba
 function precalentarVentanas(){
-  if(window.__precalentado || document.hidden) return;
+  if(window.__precalentado || document.hidden) return Promise.resolve();
   window.__precalentado = true;
+  return new Promise(listo => {
   try{
     const iconos = [];
     for(const hoja of document.styleSheets){
@@ -5851,11 +5853,13 @@ function precalentarVentanas(){
       + '<div class="avl"><div>Lateral</div></div>';
     document.body.appendChild(w);
     const ov = w.querySelector('.overlay'), md = w.querySelector('.modal'), av = w.querySelector('.avl');
-    setTimeout(() => { ov.classList.add('overlayClosing'); md.classList.add('modalClosing'); av.classList.add('sale'); }, 450);
-    setTimeout(() => w.remove(), 800);
-  }catch(e){ console.warn('precarga de ventanas', e); }
+    setTimeout(() => { ov.classList.add('overlayClosing'); md.classList.add('modalClosing'); av.classList.add('sale'); }, 350);
+    setTimeout(() => { w.remove(); listo(); }, 650);
+  }catch(e){ console.warn('precarga de ventanas', e); listo(); }
+  });
 }
-window.addEventListener('load', () => setTimeout(() => (window.requestIdleCallback || setTimeout)(precalentarVentanas), 1800));
+window.__precalentadoP = new Promise(r => { window.__precalentadoR = r; });
+(function(){ const arrancar = () => { const ir = () => precalentarVentanas().then(window.__precalentadoR); if(window.requestIdleCallback) requestIdleCallback(ir, {timeout: 400}); else setTimeout(ir, 50); }; if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar, {once: true}); else arrancar(); })();
 function closeModal(){ closeOverlayAnimated(overlay); pendingAction = null; }
 modalCancel.addEventListener('click', closeModal);
 modalConfirm.addEventListener('click', () => { if(pendingAction) pendingAction(); closeModal(); });
@@ -6991,12 +6995,21 @@ const DEMO_USUARIOS = [
   {nombre: 'Jefe de Bodega', cargo: 'Jefe de Bodega', base: ['bodega'], extra: [], doble: false},
   {nombre: 'Rafael', cargo: 'Trabajador', base: ['panel'], extra: [], doble: false}
 ];
-async function abrirPermisosSecciones(){
+// ===== @@dedupe: línea de leyenda de los gráficos (antes estaba copiada en 3 funciones) =====
+const leyLinea = (c, d, t) => '<span><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="' + c + '" stroke-width="2.4"' + (d ? ' stroke-dasharray="' + d + '"' : '') + '/></svg>' + t + '</span>';
+// ===== @@dedupe: deja una partida como hecha y pagada (antes copiado en 3 lugares) =====
+function marcarPagado(id){ state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false; }
+// ===== @@ventana-din: ventana flotante hecha por código (antes este armado estaba copiado en 5 lugares) =====
+function nuevaVentanaDin(){
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
-  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><b style="font-size:16px;flex:1;">Permisos de secciones</b><button type="button" class="btn small" id="secCerrar">Cerrar</button></div><p style="margin:0 0 12px;font-size:12.5px;color:var(--sub);">Cada persona entra solo a lo suyo. Marca una sección para dejarla entrar como invitada. Por defecto cada cuenta usa un solo aparato (PC, celular o tablet); marca «Celular / tablet extra» para permitirle además un segundo aparato. Los cambios se guardan al marcar y valen la próxima vez que abra el menú.</p><div id="secCuerpo" style="font-size:13px;">Cargando…</div></div>';
   ov.className = 'ovDin';
   document.body.appendChild(ov);
+  return ov;
+}
+async function abrirPermisosSecciones(){
+  const ov = nuevaVentanaDin(); // @@ventana-din
+  ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><b style="font-size:16px;flex:1;">Permisos de secciones</b><button type="button" class="btn small" id="secCerrar">Cerrar</button></div><p style="margin:0 0 12px;font-size:12.5px;color:var(--sub);">Cada persona entra solo a lo suyo. Marca una sección para dejarla entrar como invitada. Por defecto cada cuenta usa un solo aparato (PC, celular o tablet); marca «Celular / tablet extra» para permitirle además un segundo aparato. Los cambios se guardan al marcar y valen la próxima vez que abra el menú.</p><div id="secCuerpo" style="font-size:13px;">Cargando…</div></div>';
   autoAlto(ov.firstElementChild, ov.querySelector('#secCuerpo'));
   const cerrar = () => cerrarDin(ov);
   ov.querySelector('#secCerrar').addEventListener('click', cerrar);
@@ -7059,14 +7072,11 @@ const ADM_DEMO = {
 };
 async function abrirAdministracion(){
   const demo = !DB_URL;
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  const ov = nuevaVentanaDin(); // @@ventana-din
   ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:820px;width:100%;max-height:90vh;overflow:auto;padding:16px;">'
     + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-engranaje"></i> Panel de Admin' + (demo ? ' (prueba)' : '') + '</b><button class="btn" id="admCerrar" type="button">Cerrar</button></div>'
     + '<div style="display:flex;gap:6px;margin-bottom:12px;"><button class="btn" id="admTU" type="button">Usuarios</button><button class="btn" id="admTE" type="button">Encargados</button></div>'
     + '<div id="admCuerpo" style="font-size:13px;">Cargando…</div><div id="admMsg" style="min-height:20px;margin-top:10px;font-size:12.5px;font-weight:600;"></div></div>';
-  ov.className = 'ovDin';
-  document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#admCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
   ov.addEventListener('click', e => { if(e.target.id === 'admCerrar') cerrarDin(ov); });
@@ -7277,8 +7287,7 @@ function renderRendimiento2(raiz, datos, esc){
     if(rit > 0){ const xe = Math.min(xHoy + falta / rit, xHoy + 720 / 7), ye = Math.min(K, lleva + rit * (xe - xHoy));
       s += '<line x1="' + f1(X(xHoy)) + '" y1="' + f1(Y(lleva)) + '" x2="' + f1(X(xe)) + '" y2="' + f1(Y(ye)) + '" stroke="var(--warn,#d99a00)" stroke-width="2" stroke-dasharray="7 4"/><circle cx="' + f1(X(xe)) + '" cy="' + f1(Y(ye)) + '" r="4" fill="var(--warn,#d99a00)" stroke="var(--panel)" stroke-width="2"/><text x="' + f1(X(xe) - 7) + '" y="' + f1(Y(ye) + 26) + '" font-size="10" text-anchor="end" fill="var(--warn,#d99a00)">' + fF(fEst).substring(0, 5) + '</text>'; }
     s += '<line x1="' + f1(X(xHoy)) + '" x2="' + f1(X(xHoy)) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--sub)" stroke-dasharray="3 3"/><text x="' + f1(X(xHoy) - 4) + '" y="' + (H - B - 5) + '" font-size="10" text-anchor="end" fill="var(--sub)">hoy</text></svg></div>';
-    const ley = (c, d, t) => '<span><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="' + c + '" stroke-width="2.4"' + (d ? ' stroke-dasharray="' + d + '"' : '') + '/></svg>' + t + '</span>';
-    h += s + '<div class="py-ley">' + ley('var(--accent)', '', 'Real, al cierre de cada semana') + (base > 0 && xF > xPl ? ley('var(--accent)', '2 4', 'Sin fecha por semana') : '') + (rit > 0 ? ley('var(--warn,#d99a00)', '6 3', 'Proyección') : '') + ley('var(--ok,#43a047)', '8 3', 'Plan oficial') + '</div>';
+    h += s + '<div class="py-ley">' + leyLinea('var(--accent)', '', 'Real, al cierre de cada semana') + (base > 0 && xF > xPl ? leyLinea('var(--accent)', '2 4', 'Sin fecha por semana') : '') + (rit > 0 ? leyLinea('var(--warn,#d99a00)', '6 3', 'Proyección') : '') + leyLinea('var(--ok,#43a047)', '8 3', 'Plan oficial') + '</div>';
     // ===== rendimiento semanal =====
     const EST = {curso: 'En curso', parada: 'Parada', freno: 'Freno', normal: 'Normal'};
     const dfs = (a, b) => { if(!(b > 0)) return {c: 'eq', t: '—'}; const p = Math.round((a - b) / b * 100); return p === 0 ? {c: 'eq', t: 'igual'} : p > 0 ? {c: 'up', t: '+' + p + ' %'} : {c: 'down', t: '−' + Math.abs(p) + ' %'}; };
@@ -7530,8 +7539,7 @@ function renderRendimiento(raiz, datos, esc){
     if(E.proy && estI != null){ const ye = Math.min(P.K, lleva + v * (estI - hasta)); s += '<line x1="' + f1(X(hasta)) + '" y1="' + f1(Y(lleva)) + '" x2="' + f1(X(estI)) + '" y2="' + f1(Y(ye)) + '" stroke="var(--warn,#d99a00)" stroke-width="2" stroke-dasharray="7 4"/><circle cx="' + f1(X(estI)) + '" cy="' + f1(Y(ye)) + '" r="4" fill="var(--warn,#d99a00)" stroke="var(--panel)" stroke-width="2"/><text x="' + f1(X(estI) - 7) + '" y="' + f1(Y(ye) + 28) + '" font-size="10" text-anchor="end" fill="var(--text)">estimado ' + pyFd(estD) + '</text>'; }
     s += '<line x1="' + f1(X(hasta)) + '" x2="' + f1(X(hasta)) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--sub)" stroke-dasharray="3 3"/><text x="' + f1(X(hasta) - 4) + '" y="' + (H - B - 5) + '" font-size="10" text-anchor="end" fill="var(--sub)">hoy</text><circle cx="' + f1(X(hasta)) + '" cy="' + f1(Y(lleva)) + '" r="4" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>'
       + '<line class="py-cl" x1="0" x2="0" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--text)" stroke-width="1" visibility="hidden"/><circle class="py-cc" r="4.5" fill="var(--panel)" stroke="var(--text)" stroke-width="2" visibility="hidden"/></svg></div>';
-    const ley = (c, d, t) => '<span><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="' + c + '" stroke-width="2.4"' + (d ? ' stroke-dasharray="' + d + '"' : '') + '/></svg>' + t + '</span>';
-    h += s + '<div class="py-ley">' + ley('var(--accent)', '', 'Real') + (P.i0 > 0 ? ley('var(--accent)', '2 4', 'Sin fecha por día') : '') + (E.proy && estI != null ? ley('var(--warn,#d99a00)', '6 3', 'Proyección') : '') + (E.plan ? ley('var(--ok,#43a047)', '8 3', 'Plan oficial') : '') + '</div>';
+    h += s + '<div class="py-ley">' + leyLinea('var(--accent)', '', 'Real') + (P.i0 > 0 ? leyLinea('var(--accent)', '2 4', 'Sin fecha por día') : '') + (E.proy && estI != null ? leyLinea('var(--warn,#d99a00)', '6 3', 'Proyección') : '') + (E.plan ? leyLinea('var(--ok,#43a047)', '8 3', 'Plan oficial') : '') + '</div>';
     g = {Wd, L, R, x0, x1, X, Y}; proyF = E.proy && estI != null ? i => Math.min(P.K, lleva + v * (i - hasta)) : null; planF = E.plan ? i => Math.min(P.K, P.K * i / Math.max(1, finI)) : null;
     }
     // ===== semanas =====
@@ -7554,7 +7562,6 @@ function renderRendimiento(raiz, datos, esc){
   function pyAlt(P, Q, o){
     const m = pyEstado.vista, K = P.K, hasta = o.hasta, lleva = o.lleva, finI = o.finI, f1 = x => x.toFixed(1);
     const Wd = 900, H = 290, L = 50, R = 16, T = 16, B = 26;
-    const ley = (c, d, t) => '<span><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="' + c + '" stroke-width="2.4"' + (d ? ' stroke-dasharray="' + d + '"' : '') + '/></svg>' + t + '</span>';
     const cu = (c, t) => '<span><i class="py-cu" style="background:' + c + '"></i>' + t + '</span>';
     const rejilla = (tope, Y) => [0, 0.25, 0.5, 0.75, 1].map(p => { const y = Y(tope * p); return '<line x1="' + L + '" x2="' + (Wd - R) + '" y1="' + f1(y) + '" y2="' + f1(y) + '" stroke="var(--border)"/><text x="' + (L - 6) + '" y="' + f1(y + 3) + '" font-size="10" text-anchor="end" fill="var(--sub)">' + fmt(Math.round(tope * p)) + '</text>'; }).join('');
     if(m === 'vel'){
@@ -7569,7 +7576,7 @@ function renderRendimiento(raiz, datos, esc){
       });
       if(Q.med) s += '<line x1="' + L + '" x2="' + (Wd - R) + '" y1="' + f1(Y(Q.med)) + '" y2="' + f1(Y(Q.med)) + '" stroke="var(--text)" stroke-width="1.5" stroke-dasharray="5 4"/>';
       if(o.nec) s += '<line x1="' + L + '" x2="' + (Wd - R) + '" y1="' + f1(Y(o.nec)) + '" y2="' + f1(Y(o.nec)) + '" stroke="var(--ok,#43a047)" stroke-width="1.5" stroke-dasharray="9 4"/>';
-      return {h: s + '</svg></div><div class="py-ley">' + cu('var(--accent)', 'Semana') + cu('var(--warn,#d99a00)', 'Freno') + (Q.med ? ley('var(--text)', '5 4', 'Semana normal · ' + fmt(Q.med) + ' m²') : '') + (o.nec ? ley('var(--ok,#43a047)', '8 3', 'Necesario para el ' + pyFd(FIN_OFICIAL) + ' · ' + fmt(o.nec) + ' m²') : '') + '</div>', g: null};
+      return {h: s + '</svg></div><div class="py-ley">' + cu('var(--accent)', 'Semana') + cu('var(--warn,#d99a00)', 'Freno') + (Q.med ? leyLinea('var(--text)', '5 4', 'Semana normal · ' + fmt(Q.med) + ' m²') : '') + (o.nec ? leyLinea('var(--ok,#43a047)', '8 3', 'Necesario para el ' + pyFd(FIN_OFICIAL) + ' · ' + fmt(o.nec) + ' m²') : '') + '</div>', g: null};
     }
     // ===== ritmos: uno solo, o tres para el abanico (peores, normales y mejores semanas) =====
     let fan = null;
@@ -7605,8 +7612,8 @@ function renderRendimiento(raiz, datos, esc){
     s += recta(vP, 'var(--warn,#d99a00)', '7 4', 2)
       + '<line x1="' + f1(X(hasta)) + '" x2="' + f1(X(hasta)) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--sub)" stroke-dasharray="3 3"/><text x="' + f1(X(hasta) - 4) + '" y="' + (H - B - 5) + '" font-size="10" text-anchor="end" fill="var(--sub)">hoy</text><circle cx="' + f1(X(hasta)) + '" cy="' + f1(Y(lleva)) + '" r="4" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>'
       + '<line class="py-cl" x1="0" x2="0" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--text)" stroke-width="1" visibility="hidden"/><circle class="py-cc" r="4.5" fill="var(--panel)" stroke="var(--text)" stroke-width="2" visibility="hidden"/></svg></div>';
-    const l = ley('var(--accent)', '', 'Real') + (fan ? ley('var(--ok,#43a047)', '3 3', 'Optimista · ' + fdI(iO)) + ley('var(--warn,#d99a00)', '6 3', 'Probable · ' + fdI(iP)) + ley('var(--bad,#c0392b)', '3 3', 'Pesimista · ' + fdI(iS)) : ley('var(--warn,#d99a00)', '6 3', 'Proyección · ' + fdI(iP)))
-      + (m === 's' ? ley('var(--ok,#43a047)', '8 3', 'Plan oficial · ' + pyFd(FIN_OFICIAL)) : ley('var(--ok,#43a047)', '4 3', 'Oficial · ' + pyFd(FIN_OFICIAL)));
+    const l = leyLinea('var(--accent)', '', 'Real') + (fan ? leyLinea('var(--ok,#43a047)', '3 3', 'Optimista · ' + fdI(iO)) + leyLinea('var(--warn,#d99a00)', '6 3', 'Probable · ' + fdI(iP)) + leyLinea('var(--bad,#c0392b)', '3 3', 'Pesimista · ' + fdI(iS)) : leyLinea('var(--warn,#d99a00)', '6 3', 'Proyección · ' + fdI(iP)))
+      + (m === 's' ? leyLinea('var(--ok,#43a047)', '8 3', 'Plan oficial · ' + pyFd(FIN_OFICIAL)) : leyLinea('var(--ok,#43a047)', '4 3', 'Oficial · ' + pyFd(FIN_OFICIAL)));
     return {h: s + '<div class="py-ley">' + l + '</div>', g: {Wd, L, R, x0: 0, x1, X, Y}, proy: vP > 0 ? i => Math.min(K, lleva + vP * (i - hasta)) : null, plan: m === 's' ? planS : null, fan};
   }
   // ===== etiqueta flotante de detalle =====
@@ -7729,11 +7736,8 @@ function renderRendimiento(raiz, datos, esc){
 
 async function abrirRendimiento(){
   const demo = !DB_URL;
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  const ov = nuevaVentanaDin(); // @@ventana-din
   ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:980px;width:100%;max-height:92vh;overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;"><b style="font-size:16px;flex:1;"><i class="ic ic-tendencia"></i> Rendimiento por trabajador' + (demo ? ' (prueba, datos de ejemplo)' : '') + '</b><button class="btn primary" id="rdT1" type="button">Rendimiento</button><button class="btn" id="rdT2" type="button">Rendimiento 2</button><button class="btn" id="rdCerrar" type="button">Cerrar</button></div><div id="rdCuerpo" style="font-size:13px;">Cargando…</div></div>';
-  ov.className = 'ovDin';
-  document.body.appendChild(ov);
   autoAlto(ov.firstElementChild, ov.querySelector('#rdCuerpo'));
   ov.addEventListener('click', e => { if(e.target.id === 'rdCerrar') cerrarDin(ov); });
   const cuerpo = ov.querySelector('#rdCuerpo'), cache = {};
@@ -7758,13 +7762,10 @@ document.getElementById('rendBtn').addEventListener('click', abrirRendimiento);
 /* ===== Alertas de seguridad (solo administrador): intentos de entrada, PIN incorrecto, guardados que borraban datos ===== */
 async function abrirAlertas(){
   const demo = !DB_URL;
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  const ov = nuevaVentanaDin(); // @@ventana-din
   // ===== alto fijo desde que abre (así no crece ni se mueve cuando llegan los datos) y solo se desplaza la lista =====
   ov.innerHTML = '<div style="background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:860px;width:100%;height:min(84vh,84dvh,640px);display:flex;flex-direction:column;padding:16px;overflow:hidden;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none;"><b style="font-size:16px;flex:1;"><i class="ic ic-al"></i> Alertas de seguridad' + (demo ? ' (prueba, sin datos)' : '') + '</b><button class="btn" id="alCerrar" type="button">Cerrar</button></div><div id="alCuerpo" style="font-size:13px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">Cargando…</div></div>';
-  ov.className = 'ovDin';
   ov.style.overscrollBehavior = 'contain'; ov.style.touchAction = 'pan-y';
-  document.body.appendChild(ov);
   ov.addEventListener('click', e => { if(e.target.id === 'alCerrar') cerrarDin(ov); });
   const cuerpo = ov.querySelector('#alCuerpo');
   if(demo){ cuerpo.textContent = 'En la copia de prueba no hay servidor, así que no hay alertas para mostrar.'; return; }
@@ -7838,11 +7839,8 @@ window.addEventListener('beforeunload', e => { if(asNPend() || asNBuf()){ e.prev
 
 async function abrirAsistencia(){
   const demo = !DB_URL;
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;';
+  const ov = nuevaVentanaDin(); // @@ventana-din
   ov.innerHTML = '<div style="position:relative;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;height:min(92vh,760px);max-height:min(92vh,760px);overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-calendario"></i> Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
-  ov.className = 'ovDin';
-  document.body.appendChild(ov);
   const cuerpo = ov.querySelector('#asCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
   const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -9384,7 +9382,7 @@ function liberarRetenciones(w, entradas, alTerminar){
     entradas.forEach(entry => {
       entry.itemIds.forEach(id => {
         if(!state[id]) return;
-        state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
+        marcarPagado(id);
         markCellDirty(id);
       });
       entry.liberado = true;
@@ -10105,7 +10103,7 @@ document.getElementById('liqMarkPaidBtn').addEventListener('click', () => {
   askConfirm(msg, () => {
     let payTotal = 0, retainTotal = 0;
     payIds.forEach(id => {
-      state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
+      marcarPagado(id);
       payTotal += liqCurrentMeta.rows.find(r => r.id === id).precio;
       markCellDirty(id);
     });
@@ -10336,7 +10334,7 @@ function renderRetencionesList(){
           if(h.type === 'retencion' && !h.liberado && h.worker === worker){
             h.itemIds.forEach(id => {
               if(!state[id]) return;
-              state[id].partida = true; state[id].terminado = true; state[id].pagado = true; state[id].retenido = false;
+              marcarPagado(id);
               markCellDirty(id);
             });
             h.liberado = true; h.liberadoTs = Date.now();
@@ -10491,7 +10489,7 @@ function gateArrancarBarra(){}
 async function gateOcultar(){
   const conCarga = lg('lgSplash').classList.contains('on') && window.CargaPagina;
   gate.el.classList.add('off'); document.body.classList.remove('lg-on'); cancelAnimationFrame(gate.raf);
-  if(conCarga) await CargaPagina.fin();
+  if(conCarga){ await Promise.race([window.__precalentadoP, dormir(1200)]); await CargaPagina.fin(); } // @@precarga-en-carga: las ventanas ya salen fluidas la primera vez
 }
 function gateIniciar(){
   try{
