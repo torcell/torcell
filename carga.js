@@ -1,4 +1,4 @@
-/* ===== carga.js 1.2.1 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
+/* ===== carga.js 1.2.2 · pantalla de carga compartida (Obra Bellavista, La Florida) =====
    Un solo archivo para todas las páginas: estilos + motor de la carga.
    Si se cambia algo de la pantalla de carga, se cambia SOLO acá. */
 
@@ -9,7 +9,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
 (function(){
   var el = document.getElementById('cargaGlobal'), v = document.getElementById('cgV3'), rell = document.getElementById('cgRell'), est = document.getElementById('cgEst'), tit = document.getElementById('cgTit'), msgEl = document.getElementById('cgMsg');
   var textoBase = tit.textContent;
-  var plantilla = el.outerHTML.replace('cg3 cgquieta', 'cg3 cgabre');   // la copia para salir siempre se abre con animación
+  var plantilla = el.outerHTML.replace('cg3 cgquieta', 'cg3 cgabre');   // copia para la salida
   // ===== viene del menú: la carga ya está abierta ahí, así que acá sigue de largo sin abrirse otra vez =====
   var entrando = false;
   try{ entrando = sessionStorage.getItem('cargaEntrando') === '1'; sessionStorage.removeItem('cargaEntrando'); }catch(e){}
@@ -19,7 +19,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   if(entrando){ try{ desde = Math.max(0, Math.min(40, parseFloat(sessionStorage.getItem('cargaDesde')) || 0)); sessionStorage.removeItem('cargaDesde'); }catch(e){} }
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
   var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
-  // Espera a que terminen las animaciones CSS de un elemento (por evento, no por tiempo). Si ya terminaron, sigue de inmediato.
+  // espera que terminen las animaciones del elemento
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));
   }
@@ -30,7 +30,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     msgEl._t = txt; msgEl.style.transition = 'opacity .18s ease'; msgEl.style.opacity = '0';
     setTimeout(function(){ if(msgEl._t === txt){ msgEl.textContent = txt; msgEl.style.opacity = '1'; } }, 190);
   }
-  // Progreso real: cada paso que termina suma su parte; mientras uno está en curso la barra avanza solo hasta la mitad de ese paso
+  // progreso real, cada paso suma su parte
   function hito(k){
     for(var i = 0; i < st.reg.length; i++){ if(st.reg[i].k === k && st.reg[i].on && !st.reg[i].ok){ st.reg[i].ok = true; st.ultHito = performance.now(); } }
   }
@@ -59,7 +59,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     if(st.meta < 100 && !st.err) ponerMsg(textoEstado(t));
     if(el.isConnected) st.raf = requestAnimationFrame(bucle);
   }
-  // la barra se queda en ese % hasta que el navegador pinta por primera vez (así lo primero que se ve es el mismo número); tope de 600 ms por si no avisa
+  // la barra espera el primer pintado (tope 600 ms)
   if(desde){
     st.prog = desde; st.hold = 1;
     var soltar = function(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ st.hold = 0; }); }); };
@@ -84,7 +84,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   var DIAS_ROL = {1: 30, 2: 14, 3: 7, 4: 14, 5: 30, 6: 7, 7: 7};
   var DIAS0 = 0;
   try{ var h0 = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; DIAS0 = DIAS_ROL[h0.rol] || 0; }catch(e){}
-  // @@carga-error: motivos precisos. Primero el mensaje exacto que dejó la página (p. ej. "Esta cuenta ya está abierta en otro aparato…"); si no hay, uno según lo que pasó, con cargo y sección
+  // @@carga-error: motivo exacto; si no hay, uno según el caso
   var SECC = {panel: 'Panel de Cerámica y Frague', calidad: 'Calidad', bodega: 'Bodega', jefe_terreno: 'Jefe de Terreno', oficina_tecnica: 'Oficina Técnica', avance_obra: 'Avance de obra', admin: 'Administración', molde: 'Molde', proyeccion_logica: 'Proyección Lógica', revision_pre_entrega: 'Revisión pre-entrega', generador_documentos: 'Generador de documentos', index: 'Inicio'};
   var CARGOS = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega'};
   function seccionActual(){ var p = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, ''); return SECC[p] || ''; }
@@ -93,7 +93,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
       if(h.rol === 1 && /^ismael\b/i.test(String(h.nombre || ''))) return 'Dev';
       return CARGOS[h.rol] || ''; }catch(e){ return ''; }
   }
-  // mensajes genéricos que las páginas dejan para la pantalla de inicio de sesión: no sirven como motivo, se reemplazan por uno preciso
+  // mensajes genéricos: no sirven de motivo
   var GENERICOS = /^(No tienes acceso a esa sección\. Elige una de las disponibles\.|Tu sesión venció\. (Ingresa tu PIN|Entra) de nuevo\.)$/;
   function motivoDe(tipo){
     var g = ''; try{ g = String(sessionStorage.getItem('progresoObraAvisoGate') || '').trim(); }catch(e){}
@@ -111,11 +111,11 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
     espera: function(k){ st.reg.forEach(function(r){ if(r.k === k) r.on = true; }); },
     hecho: hito,
     cortar: function(){ if(st.err) return; cancelAnimationFrame(st.raf); if(el.parentNode) el.remove(); },
-    // @@carga-error: pantalla de error nueva. Dice el motivo entre las dos líneas, se queda quieta (sin cuenta regresiva) y da dos botones: Entendido y Dar aviso
+    // @@carga-error: motivo entre las líneas y dos botones, sin cuenta regresiva
     error: function(destino, tipo){
       if(st.err) return st.err;
       if(st.cerrando){ location.replace(destino); return Promise.resolve(); }
-      // el aviso automático de intrusos (sin cuenta / sin permiso) sigue saliendo en silencio; el botón nunca se aprieta solo
+      // aviso a admins en silencio; el botón no se aprieta solo
       if(tipo === 'nosesion' || tipo === 'permiso') avisarIntento(tipo);
       st.err = (async function(){
         var motivo = motivoDe(tipo);
@@ -125,7 +125,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
         await abierta;
         cancelAnimationFrame(st.raf); st.meta = 88;
         var ci = document.getElementById('cgIn');
-        // ===== se reemplaza todo lo de entre las líneas por el motivo y los botones =====
+        // ===== motivo y botones =====
         var f = document.createElement('div'); f.className = 'cgfalla'; f.setAttribute('role', 'alert');
         f.innerHTML = '<div class="cgfmsg"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span></span></div>'
           + '<div class="cgbtns"><button type="button" class="cgbtn cgbtn1" id="cgBtnOk">Entendido</button><button type="button" class="cgbtn" id="cgBtnAviso"></button></div>';
@@ -195,7 +195,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
         st.cerrando = true;
         v.classList.remove('cgabre'); v.classList.remove('cgquieta'); v.classList.add('cgcierra');
         await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-        // el fondo se desvanece al mismo tiempo que las franjas se juntan (sin tiempo muerto con la pantalla vacía)
+        // el fondo se va mientras las franjas se juntan
         el.classList.add('cgsale');
         await Promise.all([terminadas(v), new Promise(function(r){ var t = setTimeout(r, 1100); el.addEventListener('transitionend', function f(e){ if(e.target !== el) return; clearTimeout(t); el.removeEventListener('transitionend', f); r(); }); })]);
         CargaPagina.cortar();

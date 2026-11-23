@@ -487,6 +487,8 @@
   .lg-salir{background:none;border:0;color:var(--sub);text-decoration:underline;font-size:13px;padding:6px;}
   .lg-hecho{align-items:center;justify-content:center;gap:14px;text-align:center;background:var(--lg-azul);color:#fff;}
   .lg-hecho{padding:0;}
+  /* @@bienvenida-cuadros: mismo fondo de cuadros del lado izquierdo del inicio */
+  .lg-hecho{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 48px),repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 48px),linear-gradient(170deg,#0b2b36 0%,#0b2b36 52%,#2f6f8f 135%);}
   .v3{position:relative;width:100%;height:0;}
   .v3 .bd{position:absolute;left:0;right:0;height:2px;background:#fff;}
   .v3 .t{top:0;}.v3 .bt{bottom:0;}
@@ -588,7 +590,7 @@
   </div>
 </div>
 <script>
-const GOOGLE_CLIENT_ID = 'PEGA_AQUI_TU_ID_DE_CLIENTE.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = ''; // @@google-login: vacío = sin botón de Google
 const DEFAULT_DB_URL = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
 const PAGINAS = {molde: 'molde.html', proyeccion: 'proyeccion_logica.html', panel: 'panel.html', calidad: 'calidad.html', preentrega: 'revision_pre_entrega.html', avance: 'avance_obra.html', oficina: 'oficina_tecnica.html', terreno: 'jefe_terreno.html', bodega: 'bodega.html', admin: 'admin.html'};
 const SECC_BASE = {1: ['molde', 'panel', 'calidad', 'preentrega', 'avance', 'terreno', 'oficina', 'bodega', 'admin'], 2: ['panel'], 3: ['panel'], 4: ['terreno', 'calidad', 'avance'], 5: ['calidad'], 6: ['oficina', 'avance'], 7: ['bodega']};
@@ -911,7 +913,7 @@ async function alRecibirGoogle(resp){
   resultado(res, lg('lgRecordar').checked, 'google');
 }
 function iniciarGoogle(){
-  if(GOOGLE_CLIENT_ID.indexOf('PEGA_AQUI') === 0) return;
+  if(!GOOGLE_CLIENT_ID) return;
   const s = document.createElement('script');
   s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.defer = true;
   s.onload = () => {
@@ -977,4 +979,4 @@ function iniciarGoogle(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Inicio / login · v1.1.18 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Inicio / login · v1.1.19 · 22-11-2026 ==== -->

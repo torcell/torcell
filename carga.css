@@ -1,4 +1,4 @@
-/* ===== carga.css 1.2.1 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
+/* ===== carga.css 1.2.2 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
    Va en el <head> de cada página para que la carga salga con estilo desde el primer cuadro. */
 /* ===== misma letra y mismo tamaño en todas las páginas: no hereda nada de la página ===== */
 #cargaGlobal,#cargaGlobal *{font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif !important;font-style:normal !important;font-variant:normal;font-stretch:normal;font-synthesis:none;text-transform:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
