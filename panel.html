@@ -2519,7 +2519,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.177';
+const APP_VERSION = '0.73.178';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3766,7 +3766,7 @@ async function procesarCola(){
     updateDbBadge(); actualizarInsigniaCola();
     if(fallaRed) programarReintentoCola();
     else if(huboEnvio && !colaMia().length){
-      if(Date.now() - colaDesdeTs > 2500) avisoLateral('Cambios enviados a la base de datos.', 'exito', {dur: 2500});
+      mostrarGuardadoToast(); // @@aviso-guardado: recién aquí, con el servidor confirmado
       colaDesdeTs = 0;
     }
   }
@@ -4020,7 +4020,8 @@ async function doSaveCycle(){
     ultimaFusion = null; ultimaMatOk = null; ultimoEnvio = null;
   }
   render();
-  if(localOk && (!DB_URL || dbOk)) mostrarGuardadoToast();
+  // @@aviso-guardado: con la fila no se avisa al apartar el cambio; el "Guardado" sale cuando el servidor lo confirma (procesarCola)
+  if(localOk && (!DB_URL || dbOk)){ if(!enFila) mostrarGuardadoToast(); }
   else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error', {dur: 14000});
   else if(!localOk) avisoToast('No se pudo guardar en este navegador. Descarga un respaldo para no perder los cambios.', 'error');
   return {localOk, dbOk};
@@ -4137,7 +4138,7 @@ async function saveNow(){
   const msgEl = document.getElementById('ioMsg');
   if((DB_URL && dbOk) || (!DB_URL && localOk)){
     msgEl.style.color = 'var(--entregado)';
-    { const quien = (sessionName || 'sesión').replace(/\.$/, ''); msgEl.textContent = DB_URL ? (colaMia().length ? 'Guardado por ' + quien + '. Se está enviando a la base de datos.' : 'Guardado en la base de datos por ' + quien + '.') : 'Guardado.'; }
+    { const quien = (sessionName || 'sesión').replace(/\.$/, ''); msgEl.textContent = DB_URL ? (colaMia().length ? 'En fila, se está enviando a la base de datos.' : 'Guardado en la base de datos por ' + quien + '.') : 'Guardado.'; }
   } else {
     msgEl.style.color = '#c0546f';
     msgEl.textContent = 'No se pudo guardar' + (DB_URL ? ' en la base de datos.' : '.');
@@ -10503,9 +10504,17 @@ function syncScrollLock(){
     scrollLocked = false;
   }
 }
-const overlayObserver = new MutationObserver(syncScrollLock);
+// @@lag-celular: el bloqueo de scroll se revisa una vez por cuadro y solo si cambió una ventana (antes corría en cada cambio del body)
+let syncLockPend = false;
+function pedirSyncScrollLock(){
+  if(syncLockPend) return;
+  syncLockPend = true;
+  requestAnimationFrame(() => { syncLockPend = false; syncScrollLock(); });
+}
+const overlayObserver = new MutationObserver(pedirSyncScrollLock);
 // las ventanas creadas por código (ovDin) también bloquean el scroll de la página de atrás
-new MutationObserver(syncScrollLock).observe(document.body, {childList: true});
+const esOvDin = n => n.nodeType === 1 && n.classList && n.classList.contains('ovDin');
+new MutationObserver(recs => { if(recs.some(r => [...r.addedNodes, ...r.removedNodes].some(esOvDin))) pedirSyncScrollLock(); }).observe(document.body, {childList: true});
 document.querySelectorAll('.overlay').forEach(el => overlayObserver.observe(el, {attributes:true, attributeFilter:['class']}));
 
 let resizeTimer = null;
@@ -10771,4 +10780,4 @@ setTimeout(function(){
 </script>
 </body>
 </html>
-<!-- ==== VERSION: Panel · v0.73.177 · 22-11-2026 ==== -->
+<!-- ==== VERSION: Panel · v0.73.178 · 22-11-2026 ==== -->
