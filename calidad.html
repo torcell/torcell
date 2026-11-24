@@ -3726,7 +3726,8 @@ limpiarNuevos();
     ocupado = false; pintar();
   });
   window.addEventListener('resize', estado);
-  setInterval(estado, 1500);
+  // @@sin-reloj-hist: se acomoda hasta que la página cargó; después solo con el cambio de tamaño (antes cada 1,5 s para siempre)
+  const tEst = setInterval(() => { estado(); if(typeof cargado !== 'undefined' && cargado) clearInterval(tEst); }, 400);
   if(window.__histPend !== undefined) window.histCargar(window.__histPend);
 })();
 </script>

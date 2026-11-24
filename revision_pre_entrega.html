@@ -1197,7 +1197,7 @@ async function cargarInicial(){
   }
 }
 document.addEventListener('visibilitychange', () => { if(!document.hidden && token && !actual) cargar(); });
-setInterval(() => { if(!document.hidden && token && !actual) cargar(); }, 60000);
+// @@sin-reloj-revision: sin actualización por tiempo; solo revisa cambios al volver a mostrar la página (regla de Calidad)
 if(token && nombre){ pintarQuien(); document.body.classList.remove('sin-sesion'); cargarInicial(); }
 else{ cerrarSesion(''); }
 </script>

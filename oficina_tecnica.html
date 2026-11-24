@@ -478,7 +478,11 @@ if(window.CargaPagina) CargaPagina.fin();
   ['beforeinput','input','keydown','paste','drop'].forEach(function(ev){
     document.addEventListener(ev, function(e){ if(e.target && e.target.closest && e.target.closest('main') && (ev !== 'keydown' || e.key === 'Enter' || e.key.length === 1)){ e.preventDefault(); e.stopPropagation(); } }, true);
   });
-  setInterval(function(){ document.querySelectorAll('main [contenteditable],main input,main select,main textarea').forEach(function(x){ if(x.getAttribute('contenteditable') !== null) x.setAttribute('contenteditable','false'); else x.disabled = true; }); }, 600);
+  // @@sin-reloj-lectura: se bloquea una vez y de nuevo solo cuando la página vuelve a dibujarse (antes se repetía cada 0,6 s)
+  var bloquear = function(){ document.querySelectorAll('main [contenteditable],main input,main select,main textarea').forEach(function(x){ if(x.getAttribute('contenteditable') !== null) x.setAttribute('contenteditable','false'); else x.disabled = true; }); };
+  bloquear();
+  var rafBl = 0;
+  if(m) new MutationObserver(function(){ if(rafBl) return; rafBl = requestAnimationFrame(function(){ rafBl = 0; bloquear(); }); }).observe(m, {childList: true, subtree: true});
 })();
 // ===== Con una ventana abierta, la página de atrás no se mueve (rueda y dedo). Las ventanas solo se cierran con sus botones =====
 (function(){
