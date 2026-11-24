@@ -402,7 +402,7 @@ header.top .cs-btn{height:34px;width:170px;padding:0 10px;}
 <body>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Admin</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
-<script src="carga.js?v=10"></script>
+<script src="carga.js?v=11"></script>
 <script src="rendimiento.js?v=1"></script><!-- @@rendimiento-comun -->
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 
@@ -435,8 +435,10 @@ const $ = id => document.getElementById(id);
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 function ls(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function hub(){ try{ const t = sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion'); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
-const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['preentrega','Revisión Pre-Entrega'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['bodega','Bodega'],['admin','Panel de Admin']];
-const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
+const SECC = [['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['preentrega','Revisión Pre-Entrega'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina Técnica'],['obra','Administrador de obra'],['bodega','Bodega'],['admin','Panel de Admin']];
+const PROPIA_SECC = {'Calidad': 'calidad', 'Jefe de Terreno': 'terreno', 'Oficina Técnica': 'oficina', 'Administrador de obra': 'obra', 'Jefe de Bodega': 'bodega', 'Trabajador': 'panel', 'Supervisor': 'panel'};
+// @@cargo-obra: lista de cargos que se pueden crear (el número es el rol del .gs)
+const CARGOS_ADMIN = [[3,'Trabajador'],[2,'Supervisor'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica'],[7,'Jefe de Bodega'],[8,'Administrador de obra']];
 const seccionPropia = u => PROPIA_SECC[u.cargo] || (u.base && u.base[0]) || '';
 const SECC_INV = SECC.filter(x => x[0] !== 'admin');
 const ERR = {nombre_repetido:'Ya existe una persona con ese nombre.',nombre_invalido:'El nombre debe tener al menos 2 letras.',fecha_invalida:'Elige una fecha futura.',datos_invalidos:'Datos no válidos. Recarga la lista.',rol_invalido:'Cargo no válido.',sin_sesion:'Tu sesión venció. Vuelve a entrar desde el menú.',pin_incorrecto:'Ese no es tu PIN.',muchos_intentos:'Demasiados intentos. Espera 10 minutos.',ya_existe:'Ya hay un trabajador con ese nombre en el panel.',ya_restaurado:'Ese ya fue restaurado.'};
@@ -458,7 +460,7 @@ const BD = (function(){
       {fila:7,nombre:'Ismael S.',cargo:'Admin',rol:1,bloqueo:null,base:['panel','calidad','preentrega','avance','terreno','oficina','bodega','admin'],extra:[],doble:false}],
     encargados:{panel:'Ismael S.',calidad:'Silvia Gonzalez',preentrega:'Ismael S.',avance:'Alejandro Sandoval',terreno:'Alejandro Sandoval',oficina:'Edwin Carroz',bodega:'Jefe de Bodega',admin:'Ismael S.'}};
   const guardar = () => { try{ localStorage.setItem('pruebaAdminHtml', JSON.stringify(estado)); }catch(e){} };
-  const CARGO = {2:'Supervisor',3:'Trabajador',4:'Jefe de Terreno',5:'Calidad',6:'Oficina Técnica',7:'Jefe de Bodega'};
+  const CARGO = Object.fromEntries(CARGOS_ADMIN);
   const BASE = {2:['panel'],3:['panel'],4:['terreno','calidad','avance'],5:['calidad'],6:['oficina','avance'],7:['bodega']};
   const pin = () => String(100000 + Math.floor(Math.random()*899999));
   const por = f => estado.usuarios.find(u => u.fila === f);
@@ -603,7 +605,7 @@ function vistaUsuarios(){
   const nf = $('nuevoF');
   $('nuevoB').addEventListener('click', () => {
     nf.hidden = !nf.hidden; if(nf.hidden) return;
-    nf.innerHTML = '<div class="fila-f"><input id="nN" placeholder="Nombre y apellido" maxlength="60"><select id="nR"><option value="3">Trabajador</option><option value="2">Supervisor</option><option value="4">Jefe de Terreno</option><option value="5">Calidad</option><option value="6">Oficina Técnica</option><option value="7">Jefe de Bodega</option></select><button class="btn primary" id="nG" type="button">Crear y generar PIN</button></div>';
+    nf.innerHTML = '<div class="fila-f"><input id="nN" placeholder="Nombre y apellido" maxlength="60"><select id="nR">' + CARGOS_ADMIN.map(([v, n]) => '<option value="' + v + '">' + n + '</option>').join('') + '</select><button class="btn primary" id="nG" type="button">Crear y generar PIN</button></div>';
     $('nG').addEventListener('click', async () => {
       const nombre = $('nN').value.trim(), rol = Number($('nR').value);
       if(nombre.length < 2){ toast(ERR.nombre_invalido, true); return; }
@@ -625,7 +627,7 @@ function vistaUsuarios(){
         const j = await accion('adminRenombrar', {...base, nuevo}); if(!j) return; u.nombre = nuevo; toast('Nombre cambiado.'); vistaUsuarios();
       });
     } else if(a === 'car'){
-      ex.innerHTML = '<div class="fila-f"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="cS">' + [[2,'Supervisor'],[3,'Trabajador'],[4,'Jefe de Terreno'],[5,'Calidad'],[6,'Oficina Técnica'],[7,'Jefe de Bodega']].map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" id="cG" type="button">Guardar cargo</button></div><div class="nota" style="margin:6px 0 0;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
+      ex.innerHTML = '<div class="fila-f"><span>Cargo de <b>' + esc(u.nombre) + '</b>:</span><select id="cS">' + CARGOS_ADMIN.map(([v, n]) => '<option value="' + v + '"' + (v === u.rol ? ' selected' : '') + '>' + n + '</option>').join('') + '</select><button class="btn primary" id="cG" type="button">Guardar cargo</button></div><div class="nota" style="margin:6px 0 0;">Cambian sus secciones base y sale de sus aparatos para volver a entrar.</div>';
       $('cG').addEventListener('click', async () => { const rol = Number($('cS').value); const j = await accion('adminCargo', {...base, rol}); if(!j) return; u.rol = rol; u.cargo = j.cargo; toast('Cargo cambiado.'); vistaUsuarios(); });
     } else if(a === 'pin'){
       ex.innerHTML = '<div class="fila-f"><span>¿Generar un PIN nuevo para <b>' + esc(u.nombre) + '</b>? El anterior deja de servir.</span><button class="btn primary" id="pG" type="button">Sí, generar</button></div>';
@@ -677,7 +679,7 @@ function vistaEncargados(){
 function vistaVisual(){
   const a = datos.ajustes || {halloween:false};
   const oc = a.ocultas || [];
-  const SEC_OC = [['molde','Molde de secciones'],['proyeccion','Proyección Lógica'],['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['preentrega','Revisión Pre-Entrega'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina técnica'],['bodega','Bodega']];
+  const SEC_OC = [['molde','Molde de secciones'],['proyeccion','Proyección Lógica'],['panel','Panel de Cerámica y Frague'],['calidad','Control de calidad'],['preentrega','Revisión Pre-Entrega'],['avance','Dashboard de avance'],['terreno','Jefe de Terreno'],['oficina','Oficina técnica'],['obra','Administrador de obra'],['bodega','Bodega']];
   main.innerHTML = '<h2>Visual</h2><p class="nota">Botones y temas que ven los demás. Lo que dejes apagado no aparece.</p><div class="tarjeta">'
     + '<div class="fila"><label class="quien2" for="vHal"><b>Botón Halloween en Calidad</b><small style="display:block;color:var(--sub);">Si está apagado, el botón no aparece y el tema queda desactivado.</small></label><input type="checkbox" id="vHal"' + (a.halloween ? ' checked' : '') + '></div>'
     + '<div class="fila"><label class="quien2" for="vPag"><b>Dejar marcar "Pagado" a mano en el Panel de Cerámica y Frague' + (new Date() < new Date(2026, 10, 20) ? ' <span class="nuevo" style="display:inline-block;margin-left:6px;vertical-align:middle;">Nuevo</span>' : '') + '</b><small style="display:block;color:var(--sub);">Apagado: Pagado solo se marca o se quita desde las liquidaciones (nadie puede tocarlo en el panel, tampoco Dev). Prendido: se puede a mano. Vuelve a apagarlo al terminar.</small></label><input type="checkbox" id="vPag"' + (a.pagadoLibre ? ' checked' : '') + '></div>'

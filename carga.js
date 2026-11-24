@@ -121,12 +121,12 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   }
   paginaLista().then(function(){ hito('pagina'); });
   /* ===== Texto de sesión caducada: los días salen del rol guardado al abrir la página ===== */
-  var DIAS_ROL = {1: 30, 2: 14, 3: 7, 4: 14, 5: 30, 6: 7, 7: 7};
+  var DIAS_ROL = {1: 30, 2: 14, 3: 7, 4: 14, 5: 30, 6: 7, 7: 7, 8: 7};
   var DIAS0 = 0;
   try{ var h0 = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {}; DIAS0 = DIAS_ROL[h0.rol] || 0; }catch(e){}
   // @@carga-error: motivo exacto; si no hay, uno según el caso
-  var SECC = {panel: 'Panel de Cerámica y Frague', calidad: 'Calidad', bodega: 'Bodega', jefe_terreno: 'Jefe de Terreno', oficina_tecnica: 'Oficina Técnica', avance_obra: 'Avance de obra', admin: 'Administración', molde: 'Molde', proyeccion_logica: 'Proyección Lógica', revision_pre_entrega: 'Revisión pre-entrega', generador_documentos: 'Generador de documentos', index: 'Inicio'};
-  var CARGOS = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega'};
+  var SECC = {panel: 'Panel de Cerámica y Frague', calidad: 'Calidad', bodega: 'Bodega', jefe_terreno: 'Jefe de Terreno', oficina_tecnica: 'Oficina Técnica', administrador_obra: 'Administrador de obra', avance_obra: 'Avance de obra', admin: 'Administración', molde: 'Molde', proyeccion_logica: 'Proyección Lógica', revision_pre_entrega: 'Revisión pre-entrega', generador_documentos: 'Generador de documentos', index: 'Inicio'};
+  var CARGOS = {1: 'Administrador', 2: 'Supervisor', 3: 'Trabajador', 4: 'Jefe de Terreno', 5: 'Calidad', 6: 'Oficina Técnica', 7: 'Jefe de Bodega', 8: 'Administrador de obra'};
   function seccionActual(){ var p = (location.pathname.split('/').pop() || 'index').replace(/\.html$/, ''); return SECC[p] || ''; }
   function cargoActual(){
     try{ var h = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null') || {};

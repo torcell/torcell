@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="img/icono-16.png?v=1">
+<link rel="icon" type="image/png" sizes="32x32" href="img/icono-32.png?v=1">
+<link rel="icon" type="image/png" sizes="48x48" href="img/icono-48.png?v=1">
+<link rel="apple-touch-icon" href="img/apple-touch.png?v=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<script>(function(){try{var t=sessionStorage.getItem('hubSesion')||localStorage.getItem('hubSesion');var h=t?JSON.parse(t):null;if(h&&h.secciones&&h.secciones.indexOf('obra')===-1){try{sessionStorage.setItem('progresoObraAvisoGate','No tienes acceso a esa sección. Elige una de las disponibles.');}catch(e){}window.__gateErr={d:'index.html?menu=1',t:'permiso'};}}catch(e){}})();</script>
+<title>Administrador de obra · Obra Bellavista</title>
+<link rel="stylesheet" href="carga.css?v=5">
+<script id="temasComun">(function(){var K='obraTemaComun',L=[["claro", "Claro"], ["oscuro", "Oscuro"], ["obra", "Obra"], ["verde-azul", "Verde azulado"]],D='sistema';
+function ok(v){for(var i=0;i<L.length;i++)if(L[i][0]===v)return true;return false;}
+function pon(t){document.documentElement.setAttribute('data-tema',t);}
+var t='';try{t=localStorage.getItem(K)||'';}catch(e){}
+if(!ok(t))t=D==='sistema'?(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro'):D;
+pon(t);
+document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('temaComun');if(!b)return;
+function pinta(){for(var i=0;i<L.length;i++)if(L[i][0]===t)b.textContent='Tema: '+L[i][1];}
+pinta();b.addEventListener('click',function(){var i=0;for(;i<L.length;i++)if(L[i][0]===t)break;t=L[(i+1)%L.length][0];pon(t);try{localStorage.setItem(K,t);}catch(e){}pinta();});});
+})();</script>
+<style>
+:root{--bg:#f2f3f1;--panel:#fff;--text:#1d2327;--sub:#5d666c;--line:#c9cdcb;--head:#0b2b36;--acc:#0b6b86;--ok:#1d7a3e;--warn:#b26a00;--bad:#b3261e;--okb:#e2f3e7;--warnb:#fbefd9;--badb:#fbe3e1;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 'Segoe UI',system-ui,sans-serif}
+header{background:var(--head);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header .t{flex:1;min-width:200px}
+header h1{margin:0;font-size:18px}
+header p{margin:2px 0 0;font-size:12.5px;opacity:.8}
+.btn{border:2px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:0;text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:36px}
+.btn:hover{background:rgba(127,127,127,.18)}
+.btn:active{transform:scale(.97)}
+main{padding:12px 16px 40px;max-width:1280px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.card{background:var(--panel);border:2px solid var(--line);grid-column:span 12;min-width:0}
+@media (min-width:900px){.card.m{grid-column:span 6}}
+.card h2{margin:0;padding:10px 12px;font-size:15px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:8px}
+.card h2 .n{font-weight:500;font-size:12px;color:var(--sub);margin-left:auto}
+.cu{padding:10px 12px;overflow-x:auto}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+#cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
+
+.brand-logo{height:38px;width:auto;flex:none;display:block;padding-right:14px;border-right:1px solid rgba(255,255,255,.35);}
+.foot-logo{display:block;height:32px;width:auto;margin:26px auto 14px;opacity:.9;}
+.btn-marcado{background:#2f6f8f !important;color:#fff !important;border-color:#2f6f8f !important;pointer-events:none;}
+  /* ===== Cambiar de sección: botón igual en todas las páginas (valores de «Selectores de opciones», azul) ===== */
+  .cs-btn{
+    --caja-fondo:rgba(33,52,64,.88); --caja-linea:rgba(214,226,232,.8); --sel-borde:rgba(240,250,252,.95); --sel-claro:#74d1e0; --sel-brillo:rgba(90,200,225,.25);
+    --m:transparent 0%, rgba(0,0,0,.12) 5%, rgba(0,0,0,.27) 10%, rgba(0,0,0,.42) 15%, rgba(0,0,0,.56) 20%, rgba(0,0,0,.69) 25%, rgba(0,0,0,.80) 30%, rgba(0,0,0,.89) 35%, rgba(0,0,0,.95) 40%, rgba(0,0,0,.99) 45%, #000 50%, rgba(0,0,0,.99) 55%, rgba(0,0,0,.95) 60%, rgba(0,0,0,.89) 65%, rgba(0,0,0,.80) 70%, rgba(0,0,0,.69) 75%, rgba(0,0,0,.56) 80%, rgba(0,0,0,.42) 85%, rgba(0,0,0,.27) 90%, rgba(0,0,0,.12) 95%, transparent 100%;
+    position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:200px;min-width:0;padding:.42em 18px;
+    border-radius:0;cursor:pointer;font-weight:600;font-size:12px;line-height:1.25;font-family:inherit;color:#f2f6f8;text-shadow:0 1px 2px rgba(0,0,0,.7);
+    background:var(--caja-fondo);border:2px solid var(--caja-linea);box-shadow:none;
+    transition:background .3s ease,border-color .3s ease,text-shadow .2s ease;}
+  .cs-btn span,.cs-btn svg{position:relative;z-index:1;}
+  .cs-btn svg{color:#9aa5a8;flex:none;}
+  .cs-btn::before{content:"";position:absolute;inset:0;z-index:0;opacity:0;transition:opacity .2s ease;pointer-events:none;
+    background:linear-gradient(to bottom,var(--sel-borde) 0 1px,var(--sel-claro) 1px,color-mix(in srgb,var(--sel-claro) 20%,transparent) 50%,var(--sel-claro) calc(100% - 1px),var(--sel-borde) calc(100% - 1px));
+    -webkit-mask:linear-gradient(to right,var(--m));mask:linear-gradient(to right,var(--m));}
+  .cs-btn::after{content:"";position:absolute;left:25%;right:25%;top:-4px;bottom:-4px;z-index:0;opacity:0;transition:opacity .2s ease;pointer-events:none;
+    background:radial-gradient(ellipse at center,var(--sel-brillo),transparent 70%);filter:blur(4px);}
+  .cs-btn:hover::before,.cs-btn:hover::after,.cs-btn:focus-visible::before,.cs-btn:focus-visible::after{opacity:1;}
+  .cs-btn:hover,.cs-btn:focus-visible{text-shadow:0 0 .4em rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.6);}
+  .cs-btn:focus-visible{outline:2px solid var(--sel-claro);outline-offset:2px;}
+  .cs-btn:active{transform:translateY(1px);}
+  .cs-btn.btn-marcado{border-color:var(--sel-claro);}
+  /* cerrar sesión y cambiar de sección al final de la barra */
+  /* ===== botones de la barra: misma altura, centrados y mismo ancho ===== */
+  header{align-items:center;}
+  header .btn,header .cs-btn,header .btn-menu{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;height:34px !important;min-height:34px !important;width:170px !important;min-width:0 !important;margin:0 !important;padding:0 10px !important;font-size:12px !important;line-height:1.2;text-align:center;white-space:nowrap;}
+  header .cs-btn{gap:6px;}
+  
+/* ===== Temas comunes: Claro, Oscuro, Obra ===== */
+:root{--c-bg:#f2f3f1;--c-panel:#fff;--c-soft:#f8f9f7;--c-border:#d7dad3;--c-strong:#b9bdb3;--c-text:#2c302c;--c-sub:#6c716a;--c-accent:#2f6f8f;--c-accent2:#7a3fa0;--c-ok:#2e8b3a;--c-warn:#f07c00;--c-bad:#c0392b;--c-okb:#e2f3e7;--c-warnb:#fbefd9;--c-badb:#fbe3e1;--c-head:#0f2f3b;}
+:root[data-tema="claro"]{color-scheme:light;}
+:root[data-tema="oscuro"]{color-scheme:dark;--c-bg:#14181a;--c-panel:#1d2326;--c-soft:#232a2d;--c-border:#333c40;--c-strong:#46525a;--c-text:#e6eaea;--c-sub:#9aa5a8;--c-accent:#4f8fd6;--c-ok:#4fb85b;--c-warn:#ff9a1f;--c-bad:#e5604f;--c-okb:#1d3a27;--c-warnb:#3d2e12;--c-badb:#43201d;--c-head:#1d2326;}
+:root[data-tema="obra"]{color-scheme:dark;--c-bg:#0b2b36;--c-panel:#10384a;--c-soft:#0d3242;--c-border:#24505f;--c-strong:#3d6d7e;--c-text:#eef4f6;--c-sub:#a3bcc6;--c-accent:#4f8fd6;--c-accent2:#2f6f8f;--c-ok:#43b97f;--c-warn:#f0a23a;--c-bad:#ef6a5e;--c-okb:#143f33;--c-warnb:#3d3416;--c-badb:#4a2523;--c-head:#0b2b36;}
+.cs-btn{box-shadow:none !important;}
+:root[data-tema="claro"],:root[data-tema="oscuro"],:root[data-tema="obra"]{--bg:var(--c-bg);--panel:var(--c-panel);--text:var(--c-text);--sub:var(--c-sub);--line:var(--c-border);--head:var(--c-head);--acc:var(--c-accent);--ok:var(--c-ok);--warn:var(--c-warn);--bad:var(--c-bad);--okb:var(--c-okb);--warnb:var(--c-warnb);--badb:var(--c-badb);}
+/* ===== Cabecera común ===== */
+header{background:var(--head);}
+:root[data-tema="claro"] header,:root[data-tema="oscuro"] header,:root[data-tema="obra"] header{background:var(--panel);color:var(--text);border-bottom:1px solid var(--border);}
+header .brand-logo{border-right:1px solid rgba(255,255,255,.35);}
+:root[data-tema="claro"] header .brand-logo,:root[data-tema="oscuro"] header .brand-logo,:root[data-tema="obra"] header .brand-logo{border-right-color:var(--c-strong);}
+header .brand-logo.lt{display:none;}
+:root[data-tema="claro"] header .brand-logo.lt{display:block;}
+:root[data-tema="claro"] header .brand-logo.dk{display:none;}
+header::after{content:"";order:5;flex-basis:100%;height:0;}
+header #temaComun,header #guardarBtn{order:10;}
+header #irMenuA{order:98;margin-left:auto !important;}
+header #salir{order:99;}
+:root[data-tema="claro"] header .btn,:root[data-tema="oscuro"] header .btn,:root[data-tema="obra"] header .btn{background:var(--panel);color:var(--text);border:1px solid var(--c-strong);font-weight:600;}
+:root[data-tema="claro"] header .btn:hover,:root[data-tema="oscuro"] header .btn:hover,:root[data-tema="obra"] header .btn:hover{background:var(--c-soft);border-color:var(--c-accent);}
+:root[data-tema="claro"] header p,:root[data-tema="oscuro"] header p,:root[data-tema="obra"] header p{color:var(--sub);opacity:1;}
+@media (max-width:520px){header #irMenuA{margin-left:0 !important;}}
+
+/* ===== @@obra-admin: anillos de avance ===== */
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px;}
+.rc{background:var(--panel);border:2px solid var(--line);padding:14px;display:flex;align-items:center;gap:14px;min-width:0;}
+.rc b{display:block;font-size:14px;}
+.rc small{display:block;color:var(--sub);font-size:12px;margin-top:2px;}
+.an{--p:0;--c:var(--acc);position:relative;flex:none;width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p) * 1%),color-mix(in srgb,var(--sub) 28%,var(--panel)) 0);display:flex;align-items:center;justify-content:center;}
+.an::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--panel);}
+.an span{position:relative;font-size:14px;font-weight:800;line-height:1;}
+.an.cal{--c:var(--ok);}
+.an.ok{background:var(--c);}
+.an.gr{width:96px;height:96px;}
+.an.gr::before{inset:10px;}
+.an.gr span{font-size:21px;}
+.pisos{display:grid;gap:0;}
+.pf{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(0,1fr);align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);}
+.pf:last-child{border-bottom:0;}
+.pf .np{font-weight:800;font-size:15px;}
+.pf .cd{display:flex;align-items:center;gap:10px;min-width:0;}
+.pf .cd small{color:var(--sub);font-size:12px;line-height:1.3;}
+.pf .cd small b{color:var(--text);}
+.lh{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(0,1fr);gap:12px;padding:0 4px 6px;font-size:11.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid var(--line);}
+.msg{padding:18px 12px;color:var(--sub);}
+.tnuevo{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--acc);color:#fff;padding:1px 6px;margin-left:8px;}
+@media (max-width:620px){
+  .pf,.lh{grid-template-columns:48px minmax(0,1fr) minmax(0,1fr);gap:8px;}
+  .pf .cd{flex-direction:column;align-items:flex-start;gap:4px;}
+  .an{width:52px;height:52px;}.an::before{inset:6px;}.an span{font-size:12px;}
+}
+</style>
+</head>
+<body>
+<div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando panel de Administrador de obra</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
+
+<script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
+<script src="carga.js?v=11"></script>
+<script src="torre.js?v=1"></script><!-- @@torre-comun -->
+<script src="flujo.js?v=1"></script><!-- @@flujo-comun -->
+<script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
+<header>
+  <img class="brand-logo lt" alt="Constructora Cerro Apoquindo" src="img/logo-claro.png?v=1"><img class="brand-logo dk" alt="Constructora Cerro Apoquindo" src="img/logo-oscuro.png?v=1"><div class="t"><h1>Administrador de obra</h1><p>Obra Bellavista · La Florida · <span id="quien">Administrador de obra</span></p></div>
+  <button class="cs-btn" id="irMenuA" type="button"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg><span>Cambiar de sección</span></button>
+  <button class="btn" id="temaComun" type="button">Tema</button>
+  <button class="btn" id="salir" type="button">Cerrar sesión</button>
+</header>
+<script>
+document.getElementById('irMenuA').addEventListener('click', function(e){ e.preventDefault(); irMenuCarga(e.currentTarget); });
+</script>
+<main>
+  <section class="res" id="res" aria-label="Resumen de la obra"></section>
+  <div class="grid">
+    <section class="card"><h2>Avance por piso<span class="tnuevo" data-desde="2026-11-24">Nuevo</span><span class="n" id="nPisos"></span></h2><div class="cu"><div id="pisos"><p class="msg">Cargando…</p></div></div></section>
+    <section class="card"><h2>Flujo de trabajo en obra<span class="tnuevo" data-desde="2026-11-24">Nuevo</span></h2><div class="cu"><div id="flujoRaiz"></div></div></section>
+  </div>
+  <p class="pie">Terminado por el subcontrato: todas las partidas de cerámica y frague del piso en Terminado. Calidad: partes del dpto (piso, muro baño, muro cocina) sin observaciones o validadas. · Versión 0.1.0</p>
+</main>
+<script>
+// ===== Administrador de obra · v0.1.0 · 24-11-2026 =====
+(function(){
+  const URL_DB = 'https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec';
+  let hub = null;
+  try{ hub = JSON.parse(sessionStorage.getItem('hubSesion') || localStorage.getItem('hubSesion') || 'null'); }catch(e){}
+  const tok = hub && hub.token || '', nom = hub && hub.nombre || '';
+  if(!tok){ try{ sessionStorage.setItem('progresoObraAvisoGate', ''); }catch(e){} salirConError('index.html?s=1', 'nosesion'); return; }
+  const llamar = body => fetch(URL_DB, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(body)}).then(r => r.json());
+  try{ llamar({action: 'miAcceso', token: tok, seccion: 'obra', dispositivo: (function(){ try{ return localStorage.getItem('progresoObraDisp') || ''; }catch(e){ return ''; } })()}).then(j => {
+    if(j && j.error === 'sin_sesion'){ try{ sessionStorage.setItem('progresoObraAvisoGate', 'Tu sesión venció. Ingresa tu PIN de nuevo.'); }catch(e){} salirConError('index.html?s=1', 'caduco'); }
+    else if(j && j.ok && j.secciones && j.secciones.indexOf('obra') === -1){ try{ sessionStorage.setItem('progresoObraAvisoGate', 'No tienes acceso a esa sección. Elige una de las disponibles.'); }catch(e){} salirConError('index.html?menu=1', 'permiso'); }
+  }).catch(() => {}); }catch(e){}
+  if(nom) document.getElementById('quien').textContent = nom + ' · Administrador de obra';
+  document.getElementById('salir').addEventListener('click', () => {
+    let trabajo = Promise.resolve();
+    try{ trabajo = Promise.race([fetch(URL_DB, {method: 'POST', keepalive: true, headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: 'logout', token: tok})}).catch(() => {}), new Promise(r => setTimeout(r, 2500))]); }catch(e){}
+    try{ localStorage.removeItem('hubSesion'); sessionStorage.removeItem('hubSesion'); }catch(e){}
+    if(window.CargaPagina && window.CargaPagina.salir) window.CargaPagina.salir('index.html?s=1', 'Volviendo a inicio de sesión…', trabajo);
+    else trabajo.then(() => location.replace('index.html?s=1'));
+  });
+
+  // ===== etiqueta "Nuevo": dura 7 días desde la fecha (data-desde) =====
+  document.querySelectorAll('.tnuevo[data-desde]').forEach(e => {
+    const f = String(e.dataset.desde).split('-').map(Number);
+    if(!f[0] || Date.now() >= new Date(f[0], (f[1] || 1) - 1, (f[2] || 1) + 7).getTime()) e.remove();
+  });
+
+  // ===== anillos y filas =====
+  const pct = (h, t) => t ? Math.round(h * 100 / t) : 0;
+  const anillo = (p, cls, grande) => '<div class="an ' + cls + (grande ? ' gr' : '') + (p >= 100 ? ' ok' : '') + '" style="--p:' + p + '" role="img" aria-label="' + p + '%"><span>' + p + '%</span></div>';
+  const nombrePiso = P => P.p === 'Azotea' ? 'Azotea' : P.n < 0 ? 'Piso ' + P.n : 'Piso ' + P.n;
+  function pintar(datos){
+    const pisos = resumenPisos(datos.celdas || {}, datos.revisiones || {});
+    const T = pisos.reduce((a, P) => ({sh: a.sh + P.sub.h, st: a.st + P.sub.t, ch: a.ch + P.cal.h, ct: a.ct + P.cal.t, dh: a.dh + P.dpto.h, dt: a.dt + P.dpto.t, ph: a.ph + (P.dpto.t && P.dpto.h === P.dpto.t ? 1 : 0)}), {sh: 0, st: 0, ch: 0, ct: 0, dh: 0, dt: 0, ph: 0});
+    document.getElementById('res').innerHTML =
+      '<div class="rc">' + anillo(pct(T.sh, T.st), 'sub', true) + '<div><b>Terminado por el subcontrato</b><small>' + T.sh + ' de ' + T.st + ' partidas</small></div></div>' +
+      '<div class="rc">' + anillo(pct(T.ch, T.ct), 'cal', true) + '<div><b>Calidad</b><small>' + T.ch + ' de ' + T.ct + ' partes sin observaciones o validadas</small></div></div>' +
+      '<div class="rc"><div><b>' + T.dh + ' de ' + T.dt + ' dptos completos</b><small>' + T.ph + ' de ' + pisos.length + ' pisos completos</small></div></div>';
+    document.getElementById('nPisos').textContent = pisos.length + ' pisos';
+    document.getElementById('pisos').innerHTML = '<div class="lh"><span>Piso</span><span>Subcontrato</span><span>Calidad</span></div><div class="pisos">' + pisos.map(P => {
+      const ps = pct(P.sub.h, P.sub.t), pc = pct(P.cal.h, P.cal.t);
+      return '<div class="pf"><span class="np">' + esc(P.p === 'Azotea' ? 'Azotea' : P.n) + '</span>' +
+        '<div class="cd">' + anillo(ps, 'sub') + '<small><b>' + P.sub.h + ' de ' + P.sub.t + '</b> partidas<br>' + P.dpto.h + ' de ' + P.dpto.t + ' dptos listos</small></div>' +
+        '<div class="cd">' + anillo(pc, 'cal') + '<small><b>' + P.cal.h + ' de ' + P.cal.t + '</b> partes<br>sin observaciones</small></div></div>';
+    }).join('') + '</div>';
+  }
+  function error(txt){ document.getElementById('pisos').innerHTML = '<p class="msg">' + esc(txt) + '</p>'; }
+  async function cargar(){
+    let j = null;
+    try{ j = await llamar({action: 'obraDatos', token: tok}); }catch(e){ j = null; }
+    if(j && j.error === 'sin_sesion'){ salirConError('index.html?s=1', 'caduco'); return; }
+    if(!j || !j.ok){ error('No se pudieron cargar los datos. Revisa la conexión y vuelve a abrir la página.'); return; }
+    pintar(j);
+  }
+  // al volver a la pestaña se vuelve a pedir (sin reloj)
+  let ult = Date.now();
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - ult > 30000){ ult = Date.now(); cargar(); } });
+  dibujarFlujo(document.getElementById('flujoRaiz'));
+  cargar().then(() => { if(window.CargaPagina) CargaPagina.fin(); });
+})();
+</script>
+</body>
+</html>
