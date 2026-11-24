@@ -2454,7 +2454,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.185';
+const APP_VERSION = '0.73.186';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -5250,11 +5250,11 @@ function cellVentanaHtml(cell, st){
     <div class="cv-pie">${priceLinesHtml(cell, st, true)}<div class="cv-abrir">Abrir ›</div></div>
   </div>`;
 }
-let ventanaId = null, ventanaDestino = null;
+let ventanaId = null, ventanaDestino = null, ventanaAvisoReserva = '';
 const ventanaAbierta = () => !!ventanaId && document.getElementById('ventanaOverlay').classList.contains('show');
 function abrirVentana(id){
   if(!cellById[id]) return;
-  ventanaId = id; ventanaDestino = null;
+  ventanaId = id; ventanaDestino = null; ventanaAvisoReserva = '';
   pintarVentana();
   document.getElementById('ventanaOverlay').classList.add('show');
   calLateral();
@@ -5436,11 +5436,17 @@ function pintarVentana(){
   const botonesTrab = puede('asignar') || puede('estados') ? `
       <div class="vt-acciones">
         ${(!st.pagado && pisoCell && pw && pw !== st.trabajador) ? `<button type="button" class="btn small" data-vt="igual">Igual al Piso</button>` : ''}
-        ${asignacionBloqueada(st) ? '' : `<button type="button" class="btn small" data-vt="asignar">${hasWorker ? 'Reasignar' : 'Asignar'}</button>`}
+        ${asignacionBloqueada(st) ? '<button type="button" class="btn small" disabled tabindex="-1" aria-hidden="true" style="visibility:hidden;">Reasignar</button>' : `<button type="button" class="btn small" data-vt="asignar">${hasWorker ? 'Reasignar' : 'Asignar'}</button>`} <!-- @@ventana-fija: el botón bloqueado deja su lugar (invisible) para que la ventana no cambie de alto -->
       </div>` : '';
   const m2 = st.m2;
   const precio = m2 ? `${m2} m²<small><span class="price-money">${money(m2 * rate1ForDisplay(cell.categoria, st.trabajador))}</span></small>` : 'Sin m² registrados';
   const hayCambio = destino !== actual;
+  // @@ventana-fija: el aviso de "primero asigna un trabajador" deja su lugar reservado (invisible) cuando desaparece, así la ventana no cambia de alto ni se mueve al asignar o confirmar
+  const motAviso = estadoNumero(st) === 0 ? motivoBloqueoPartida(cell) : null;
+  const estiloAviso = 'text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;';
+  if(motAviso){ const t = avisoCortoBloqueo(motAviso, cell); if(t.length > ventanaAvisoReserva.length) ventanaAvisoReserva = t; }
+  const avisoEstadoHtml = motAviso ? '<p class="est-aviso" style="' + estiloAviso + '">' + avisoCortoBloqueo(motAviso, cell) + '</p>'
+    : ventanaAvisoReserva ? '<p class="est-aviso" aria-hidden="true" style="' + estiloAviso + 'visibility:hidden;">' + ventanaAvisoReserva + '</p>' : '';
   document.getElementById('ventanaModal').innerHTML = `
     <div class="vt-head">
       <div><h3>${esc(titulo)}</h3><div class="vt-sub">${esc(cell.categoria)} · ${esc(AREA_LABEL[cell.area] || cell.area)} · ${esc(cell.piso)}</div></div>
@@ -5450,7 +5456,7 @@ function pintarVentana(){
       <div class="vt-sec"><div class="vt-sec-title">Trabajador</div>
         <div class="vt-sec-body"><div class="vt-valor${hasWorker ? '' : ' vacio'}"${hasWorker ? ' data-nomfull="' + esc(nomVis(st.trabajador)) + '"' : ''}>${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</div>${botonesTrab}</div></div>
       <div class="vt-sec"><div class="vt-sec-title">Estado</div>
-        ${estadoNumero(st) === 0 && motivoBloqueoPartida(cell) ? '<p class="est-aviso" style="text-align:left;margin:0;padding:8px 14px 0;font-size:12px;color:#c0546f;font-weight:600;">' + avisoCortoBloqueo(motivoBloqueoPartida(cell), cell) + '</p>' : ''}
+        ${avisoEstadoHtml}
         <div class="vt-pasos">${pasosVentanaHtml(cell, st, destino)}</div>
         <div class="vt-confirma"><button type="button" class="btn small" data-vt="cancelar"${hayCambio ? '' : ' disabled'}>Deshacer</button><button type="button" class="btn small primary" data-vt="confirmar"${hayCambio ? '' : ' disabled'}>Confirmar cambio</button></div></div>
       <div class="vt-sec"><div class="vt-sec-title">Metraje</div>

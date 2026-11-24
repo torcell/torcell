@@ -1391,7 +1391,7 @@ html{scrollbar-gutter:stable;}
   </div>
 </div>
 <script>
-const CAL_VERSION = '1.40.1';
+const CAL_VERSION = '1.40.2';
 try{ document.getElementById('verCal').textContent = 'Versión ' + CAL_VERSION; }catch(e){}
 // mismo link que DEFAULT_DB_URL del index
 const DB_URL = "https://script.google.com/macros/s/AKfycbyYlsRuk-ptv1FPIQFy4bMoffTfoa39ujpH6CF9isJAdh_Y6zfwfBNyJmTMxcmcJ1LX/exec";
@@ -3004,7 +3004,7 @@ document.addEventListener('keydown', e => {
   else if(e.target.classList.contains('cant')){ e.preventDefault(); guardarRevision(); }
 });
 document.addEventListener('visibilitychange', () => { if(!document.hidden && token) cargar(); });
-setInterval(() => { if(!document.hidden && token) cargar(); }, 60000);
+// @@calidad-sin-refresco: hay una sola persona de Calidad por sección, así que no se actualiza por tiempo; solo se revisan cambios al volver a abrir o mostrar la página (la línea de arriba)
 
 if(token && nombre){ entrarVista(); cargarInicial(); }
 else{ cerrarSesion(''); }
