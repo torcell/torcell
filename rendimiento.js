@@ -29,7 +29,7 @@ function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.
 // @@rend2-semanal
 const R2_INICIO = '2026-05-29', R2_FIN = '2027-01-01';   // semana 1 y término oficial
 const R2_SOLO = ['Piso', 'Muro Baños'];
-const r2E = {off: {'Muro': true}, ritmo: 4, solo: false};   // solo: piso y muro baño, pisos 2 al 22
+const r2E = {off: {'Muro': true}, ritmo: 0, solo: false, extra: 0};   // ritmo 0 = toda la obra; extra = trabajadores que se suman o restan al equipo   // solo: piso y muro baño, pisos 2 al 22
 function renderRendimiento2(raiz, datos, esc){
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
   const fF = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
@@ -59,13 +59,13 @@ function renderRendimiento2(raiz, datos, esc){
     const fuera = E.solo ? [] : ar.filter(a => E.off[a]).map(lab);
     const cab = '<div class="rd-tit">Proyección · Cerámica por semana' + (E.solo ? ' · solo piso y muro baño, pisos 2 al 22' : '') + (fuera.length ? ' · sin ' + esc(fuera.join(', ')) : '') + nuevo + '</div>';
     const ctl = '<div class="py-caja"><div class="py-fc"><span class="py-cap">Filtro</span><div class="py-tabs" role="group" aria-label="Filtro de partidas"><button type="button" class="py-tab r2-tab' + (E.solo ? ' on' : '') + '" data-r2s="1" aria-pressed="' + E.solo + '">Solo piso y muro baño · pisos 2 al 22</button></div></div><div class="py-fc"><span class="py-cap">Partidas</span><div class="py-cks">' + ar.map(a => '<label class="py-ck"><input type="checkbox" data-r2a="' + esc(a) + '"' + (E.solo ? ' disabled' : '') + (E.off[a] ? '' : ' checked') + '><span>' + esc(lab(a)) + '</span></label>').join('') + '</div></div>'
-      + '<div class="py-fc"><span class="py-cap">Ritmo</span><div class="py-tabs" role="group" aria-label="Semanas para calcular el ritmo">' + [[4, '4 semanas'], [8, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab r2-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-r2r="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div></div>';
+      + '<div class="py-fc"><span class="py-cap">Ritmo</span><div class="py-tabs" role="group" aria-label="Semanas para calcular el ritmo">' + [[4, '4 semanas'], [8, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab r2-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-r2r="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div><div class="py-fc"><span class="py-cap">Trabajadores</span><div class="py-tabs" role="group" aria-label="Sumar o restar trabajadores al equipo"><button type="button" class="py-tab r2-tab" data-r2x="-1" aria-label="Restar un trabajador">−</button><span class="py-tab r2-eq" title="Trabajadores del equipo: el promedio de las semanas elegidas, más o menos los que sumes">%EQ%</span><button type="button" class="py-tab r2-tab" data-r2x="1" aria-label="Sumar un trabajador">+</button></div></div></div>';
     const pon = h => { const t0 = box ? box.scrollTop : 0; raiz.innerHTML = h; if(box) box.scrollTop = t0; };
     const claves = Object.keys(sem).sort();
     if(!ar.length){ pon(cab + '<div class="rd-vacio">No hay partidas de cerámica con m² cargados.</div>'); return; }
-    if(!(K > 0)){ pon(cab + ctl + '<div class="rd-vacio">Marca al menos una partida para ver la proyección.</div>'); return; }
-    if(hecho >= K - 0.001){ pon(cab + ctl + '<div class="rd-vacio">Lo marcado ya está terminado: ' + fmt(K) + ' m².</div>'); return; }
-    if(!claves.length){ pon(cab + ctl + '<div class="rd-vacio">Todavía no hay m² terminados con fecha en lo marcado.</div>'); return; }
+    if(!(K > 0)){ pon(cab + ctl.replace('%EQ%', '—') + '<div class="rd-vacio">Marca al menos una partida para ver la proyección.</div>'); return; }
+    if(hecho >= K - 0.001){ pon(cab + ctl.replace('%EQ%', '—') + '<div class="rd-vacio">Lo marcado ya está terminado: ' + fmt(K) + ' m².</div>'); return; }
+    if(!claves.length){ pon(cab + ctl.replace('%EQ%', '—') + '<div class="rd-vacio">Todavía no hay m² terminados con fecha en lo marcado.</div>'); return; }
     // ===== semanas, de lunes a domingo =====
     const l0 = claves[0] < rdLunes(R2_INICIO) ? claves[0] : rdLunes(R2_INICIO), S = [];
     for(let l = l0; l <= lunHoy; l = rdSuma(l, 7)) S.push({l, n: S.length + 1, fin: rdSuma(l, 6), m: sem[l] || 0, cur: l === lunHoy && hoy < rdSuma(l, 4)});
@@ -74,7 +74,11 @@ function renderRendimiento2(raiz, datos, esc){
     const lleva = ac, falta = K - lleva;
     const hechas = S.filter(w => !w.cur && w.l >= claves[0]);
     const usa = E.ritmo ? hechas.slice(-E.ritmo) : hechas;
-    const rit = usa.length ? usa.reduce((s, w) => s + w.m, 0) / usa.length : null;
+    const ritBase = usa.length ? usa.reduce((s, w) => s + w.m, 0) / usa.length : null;
+    // ===== @@rend2-equipo: cuántos trabajadores rindieron en esas semanas; cada uno que se suma o resta aporta el promedio de uno =====
+    const nT = usa.length ? Math.max(1, usa.reduce((s, w) => s + Object.keys(pt[w.l] || {}).length, 0) / usa.length) : 1;
+    E.extra = Math.max(E.extra, 1 - Math.round(nT));
+    const rit = ritBase != null ? ritBase * (nT + E.extra) / nT : null;
     const med = (() => { const v = hechas.filter(w => w.m > 0).map(w => w.m).sort((a, b) => a - b), q = v.length; return q ? (q % 2 ? v[(q - 1) / 2] : (v[q / 2 - 1] + v[q / 2]) / 2) : 0; })();
     S.forEach((w, k) => { w.est = w.cur ? 'curso' : w.l < claves[0] ? 'normal' : !(w.m > 0) ? 'parada' : (med && w.m < med * 0.6) ? 'freno' : 'normal'; w.ant = k ? S[k - 1] : null; });
     // ===== término estimado y lo necesario por semana para la fecha oficial =====
@@ -84,10 +88,10 @@ function renderRendimiento2(raiz, datos, esc){
     const kpi = (b, s, t) => '<div title="' + esc(t) + '"><b>' + b + '</b><span>' + s + '</span></div>';
     let h = cab + '<div class="rd-res">'
       + kpi(fmt(lleva / K * 100) + ' %', 'avance · ' + fmt(lleva) + ' de ' + fmt(K) + ' m²', 'Terminado: ' + fmt(lleva) + ' m². Falta: ' + fmt(falta) + ' m².' + (base > 0 ? ' Sin fecha de término: ' + fmt(base) + ' m².' : ''))
-      + kpi(rit != null ? '~' + fmt(rit) + ' m²' : '—', 'por semana · ' + (rit != null ? ritTxt : 'falta una semana completa'), 'Promedio de las semanas completas con registro (lunes a domingo).')
+      + kpi(rit != null ? '~' + fmt(rit) + ' m²' : '—', 'por semana · ' + (rit != null ? ritTxt + (E.extra ? ' · ' + (E.extra > 0 ? '+' : '−') + Math.abs(E.extra) + (Math.abs(E.extra) === 1 ? ' trabajador' : ' trabajadores') : '') : 'falta una semana completa'), 'Promedio de las semanas completas con registro (lunes a domingo).')
       + kpi(fEst ? fF(fEst) : '—', 'término estimado' + (dif == null ? '' : dif === 0 ? ' · justo en la fecha oficial' : ' · ' + Math.abs(dif) + (Math.abs(dif) === 1 ? ' día ' : ' días ') + (dif > 0 ? 'después' : 'antes') + ' del oficial'), 'Con el ritmo semanal de arriba, lo que falta se termina en esta fecha.')
       + (nec != null ? kpi('~' + fmt(nec) + ' m²', 'por semana para el ' + fF(R2_FIN), 'Lo que hay que hacer cada semana para terminar en la fecha oficial.') : '')
-      + '</div>' + ctl;
+      + '</div>' + ctl.replace('%EQ%', fmt(nT + E.extra));
     // ===== gráfico: acumulado al cierre de cada semana =====
     const Wd = 900, H = 260, L = 50, R = 16, T = 16, B = 26;
     const xo = d => (dias(l0, d) + 1) / 7, xHoy = xo(hoy), xPl = xo(R2_INICIO) - 1 / 7, xFin = xo(R2_FIN), xEst = fEst ? xo(fEst) : 0;
@@ -126,7 +130,7 @@ function renderRendimiento2(raiz, datos, esc){
     const gw = raiz.querySelector('.py-gw'); if(gw) gw.scrollLeft = Math.max(0, X(xHoy) / Wd * gw.scrollWidth - gw.clientWidth * 0.7);
   }
   raiz.onchange = e => { const a = e.target.closest('input[data-r2a]'); if(a){ r2E.off[a.getAttribute('data-r2a')] = !a.checked; pintar(); } };
-  raiz.onclick = e => { const t = e.target.closest('.r2-tab'); if(!t) return; if(t.hasAttribute('data-r2s')) r2E.solo = !r2E.solo; else r2E.ritmo = Number(t.getAttribute('data-r2r')); pintar(); };
+  raiz.onclick = e => { const t = e.target.closest('.r2-tab'); if(!t) return; if(t.hasAttribute('data-r2s')) r2E.solo = !r2E.solo; else if(t.hasAttribute('data-r2x')) r2E.extra += Number(t.getAttribute('data-r2x')); else r2E.ritmo = Number(t.getAttribute('data-r2r')); pintar(); };
   pintar();
 }
 // ===== datos de ejemplo para las pruebas sin servidor =====
