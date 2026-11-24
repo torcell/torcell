@@ -1396,6 +1396,18 @@
   body.tema5 .tab.active::after,body.tema5 .stats-tab.activa::after{display:none;}
   body.tema5 .cell-td.cell-ajeno{background:#140c1b;}
   body.tema5 .site-foot,body.tema5 .site-foot *{color:#bba6d8;}
+/* @@luz-cambios: luz de prueba arriba a la izquierda */
+#luzCambios{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:calc(env(safe-area-inset-left,0px) + 8px);z-index:9998;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 16px);font:600 12px/1.2 'Segoe UI',system-ui,sans-serif;color:#222;background:rgba(255,255,255,.94);border:1px solid #c9c9c4;border-radius:999px;padding:5px 10px 5px 8px;box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:default}
+#luzCambios .lzp{width:12px;height:12px;border-radius:50%;background:#9a9a96;flex:none;transition:background .25s}
+#luzCambios.verde .lzp{background:#2e8b57}
+#luzCambios.ambar{cursor:pointer;border-color:#d9922b}
+#luzCambios.ambar .lzp{background:#d9922b;animation:lzlat 1.3s ease-in-out infinite}
+#luzCambios .lzm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#luzCambios .lzm:empty{display:none}
+body:has(.ovAsist) #luzCambios{display:none}
+@keyframes lzlat{0%,100%{box-shadow:0 0 0 0 rgba(217,146,43,.55)}50%{box-shadow:0 0 0 6px rgba(217,146,43,0)}}
+@media (prefers-reduced-motion:reduce){#luzCambios.ambar .lzp{animation:none}}
+@media (prefers-color-scheme:dark){#luzCambios{background:rgba(34,34,34,.94);color:#eee;border-color:#555}}
 </style>
 <script id="temasMarca">
 /* @@temas-carga: temas.css (decorados Halloween, 220 KB) solo se baja si se usa el tema 5; queda en esta misma posición del orden de estilos */
@@ -1771,6 +1783,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 </script>
 </head>
 <body class="lg-on">
+<div id="luzCambios" role="status" aria-live="polite" title="Sin datos todavía" hidden><span class="lzp"></span><span class="lzm"></span></div>
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
@@ -2375,7 +2388,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.187';
+const APP_VERSION = '0.73.189';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3162,6 +3175,39 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('offline', () => { dbStatus = 'error'; dbErrorReason = 'Tu dispositivo se quedó sin internet.'; updateDbBadge(); });
 window.addEventListener('online', () => { pingDb(); });
 
+// @@luz-cambios: luz de prueba. Pregunta cada 30 s (solo con la pestaña a la vista) cuál fue el último cambio guardado.
+// No recarga datos ni toca los otros temporizadores: solo avisa. Al tocar el aviso ámbar, recarga la página.
+(function(){
+  const el = document.getElementById('luzCambios'); if(!el) return;
+  const msg = el.querySelector('.lzm');
+  let base = null, hayOtro = false, ocupado = false, ultimo = 0;
+  const quienCorto = q => { const t = String(q || '').split(' - '); return t.length > 1 ? nombreCorto(t.slice(1).join(' - ')) : (t[0] || 'Alguien'); };
+  const poner = (est, txt, tip) => { el.className = est; el.hidden = false; msg.textContent = txt || ''; el.title = tip || ''; };
+  async function mirar(){
+    if(!DB_URL || !sessionToken || ocupado) return;
+    ocupado = true; ultimo = Date.now();
+    try{
+      const r = await llamarDb('ultimoCambio', {});
+      if(!r || !r.ok){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); return; }
+      const firma = (r.ts || 0) + '|' + (r.n || 0);
+      if(base === null){ base = firma; }
+      else if(firma !== base){
+        base = firma;
+        if(!r.mio){
+          hayOtro = true;
+          const lugar = r.celda ? ' · ' + String(r.celda).split(' · ').slice(0, 2).join(' · ') : '';
+          poner('ambar', quienCorto(r.quien) + ' hizo un cambio' + lugar, 'Toca para actualizar la página');
+        }
+      }
+      if(!hayOtro) poner('verde', '', 'Al día: nadie más ha cambiado nada desde que abriste');
+    }catch(e){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); }
+    finally{ ocupado = false; }
+  }
+  el.addEventListener('click', () => { if(el.classList.contains('ambar')) location.reload(); });
+  setInterval(() => { if(!document.hidden) mirar(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - ultimo > 30000) mirar(); });
+  setTimeout(mirar, 4000);
+})();
 const DATOS_VIEJOS_MS = 2 * 60 * 60 * 1000;
 function revisarDatosViejos(){
   if(!DB_URL || !datosCargadosTs || avisoDatosViejosDescartado) return;
@@ -7227,6 +7273,7 @@ window.addEventListener('beforeunload', e => { if(asNPend() || asNBuf()){ e.prev
 async function abrirAsistencia(){
   const demo = !DB_URL;
   const ov = nuevaVentanaDin(); // @@ventana-din
+  ov.classList.add('ovAsist'); // @@luz-cambios: en asistencia no se muestra la luz
   ov.innerHTML = '<div style="position:relative;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;height:min(92vh,760px);max-height:min(92vh,760px);overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-calendario"></i> Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
   const cuerpo = ov.querySelector('#asCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
