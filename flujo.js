@@ -2,7 +2,7 @@
 // @@flujo-comun
 // Los datos están en FLUJO: para cambiar una labor se cambia aquí y se ve igual en todas las páginas.
 const FLUJO = [
-  {rol: 'Oficina Técnica · Edwin', color: '#2e7d4f', pasos: [
+  {rol: 'Oficina Técnica', color: '#2e7d4f', pasos: [
     {t: 'Planificar', l: ['Programa y avance físico', 'Avance financiero', 'Hormigonado semanal', 'Reunión de obra']},
     {t: 'Controlar documentos', l: ['Planos y especificaciones', 'Registros del contrato', 'Cambios de proyecto', 'Versiones vigentes']},
     {t: 'Cubicar y pagar', l: ['Cubicaciones por partida', 'Control de cantidades', 'Estados de pago', 'Cuadros de subcontratos']},
