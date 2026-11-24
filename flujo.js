@@ -19,6 +19,7 @@ const FLUJO_ENLACES = [{col: 0, baja: true, txt: 'programa semanal'}, {col: 3, b
 const FLUJO_CSS = `
 .fl{--fl-gris:#8a9399;--fl-sep:34px;}
 .fl-fila{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--fl-sep);}
+.fl-sec{background:rgba(128,138,148,.11);border:1px solid var(--line,var(--border,#c9cdcb));padding:10px 14px 16px;}
 .fl-rol{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin:0 0 6px;}
 .fl-caja{position:relative;border:1px solid var(--line,var(--border,#c9cdcb));background:var(--panel,#fff);min-width:0;}
 .fl-ce{padding:9px 12px;color:#fff;font-weight:700;font-size:13.5px;}
@@ -27,7 +28,7 @@ const FLUJO_CSS = `
 .fl-cu li:last-child{border-bottom:0;}
 .fl-caja:not(:last-child)::after{content:"";position:absolute;top:21px;right:calc(-1 * var(--fl-sep) + 4px);width:calc(var(--fl-sep) - 8px);height:2px;background:var(--fl-gris);}
 .fl-caja:not(:last-child)::before{content:"";position:absolute;top:15px;right:calc(-1 * var(--fl-sep) + 4px);border:7px solid transparent;border-left:9px solid var(--fl-gris);border-right:0;z-index:1;}
-.fl-medio{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--fl-sep);height:78px;}
+.fl-medio{padding:0 14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--fl-sep);height:78px;}
 .fl-enl{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:12px;}
 .fl-enl svg{flex:none;width:14px;height:62px;}
 .fl-sep{height:0;}
@@ -43,8 +44,8 @@ function flechaVert(baja){
 }
 function dibujarFlujo(raiz){
   if(!document.getElementById('flujoCss')){ const s = document.createElement('style'); s.id = 'flujoCss'; s.textContent = FLUJO_CSS; document.head.appendChild(s); }
-  const fila = f => '<p class="fl-rol">' + esc(f.rol) + '</p><div class="fl-fila">' + f.pasos.map(p =>
-    '<div class="fl-caja"><div class="fl-ce" style="background:' + f.color + '">' + esc(p.t) + '</div><ul class="fl-cu">' + p.l.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>').join('') + '</div>';
+  const fila = f => '<div class="fl-sec"><p class="fl-rol">' + esc(f.rol) + '</p><div class="fl-fila">' + f.pasos.map(p =>
+    '<div class="fl-caja"><div class="fl-ce" style="background:' + f.color + '">' + esc(p.t) + '</div><ul class="fl-cu">' + p.l.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>').join('') + '</div></div>';
   const medio = '<div class="fl-medio">' + [0, 1, 2, 3].map(c => { const e = FLUJO_ENLACES.find(x => x.col === c); return e ? '<div class="fl-enl">' + flechaVert(e.baja) + '<span>' + esc(e.txt) + '</span></div>' : '<div></div>'; }).join('') + '</div>';
   raiz.innerHTML = '<div class="fl">' + fila(FLUJO[0]) + medio + fila(FLUJO[1]) + '</div>';
 }
