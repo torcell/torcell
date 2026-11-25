@@ -33,7 +33,7 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
 
-  html{overflow-y:scroll;background:#f2f3f1;transition:background-color .6s ease;}
+  html{overflow-y:scroll;scrollbar-gutter:stable;background:#f2f3f1;transition:background-color .6s ease;}
   html.dark{background:#14171a;color-scheme:dark;}
   body{
     background:var(--bg);
@@ -2190,7 +2190,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.199';
+const APP_VERSION = '0.73.200';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -9292,10 +9292,10 @@ function syncScrollLock(){
   const anyOpen = document.querySelector('.overlay.show, .ovDin:not(.ovCierra)') !== null;
   if(anyOpen && !scrollLocked){
     scrollLockY = window.scrollY;
-    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overflowY = 'hidden';
     scrollLocked = true;
   } else if(!anyOpen && scrollLocked){
-    document.documentElement.style.overflow = '';
+    document.documentElement.style.overflowY = '';
     scrollLocked = false;
   }
 }
