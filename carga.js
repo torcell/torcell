@@ -58,7 +58,7 @@ if(document.getElementById('cargaGlobal') && document.getElementById('cgV3') && 
   var desde = 0;
   if(entrando){ try{ desde = Math.max(0, Math.min(40, parseFloat(sessionStorage.getItem('cargaDesde')) || 0)); sessionStorage.removeItem('cargaDesde'); }catch(e){} }
   var dormir = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
-  var st = {meta: 88, reg: [{k: 'pagina', w: 20, ok: false, on: true}, {k: 'version', w: 15, ok: false, on: false}, {k: 'datos', w: 45, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
+  var st = {meta: 88, reg: [{k: 'pagina', w: 10, ok: false, on: true}, {k: 'version', w: 10, ok: false, on: false}, {k: 'datos', w: 60, ok: false, on: false}, {k: 'dibujo', w: 20, ok: false, on: true}], ultHito: performance.now() + 350, prog: 0, t0: performance.now() + 350, raf: 0, fin: null, err: null, volver: false, cerrando: false, msg: ''};
   // espera que terminen las animaciones del elemento
   function terminadas(nodo){
     return Promise.all((nodo.getAnimations ? nodo.getAnimations({subtree: true}) : []).map(function(a){ return a.finished.catch(function(){}); }));

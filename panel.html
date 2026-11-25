@@ -2187,7 +2187,9 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.197';
+// @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
+if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
+const APP_VERSION = '0.73.198';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -2300,7 +2302,6 @@ setTimeout(() => {
     try{ sessionStorage.removeItem('progresoObraActualizadoA'); }catch(e){}
     if(avisarA === APP_VERSION) setTimeout(() => avisoToast('Panel actualizado a la versión ' + APP_VERSION + '.', 'ok'), 1200);
   }
-  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('version');
   actInicial = revisionInicial().then(r => { if(r !== 'actualizando' && window.CargaPagina && CargaPagina.hecho) CargaPagina.hecho('version'); return r; });
 }, 0);
 document.addEventListener('visibilitychange', () => {
@@ -9423,7 +9424,6 @@ setTimeout(function(){
 
 (async function init(){
   gateIniciar();
-  if(window.CargaPagina && CargaPagina.espera) CargaPagina.espera('datos');
   let pidioUrl = false;
   if(!DB_URL){
     await dormir(1300);
