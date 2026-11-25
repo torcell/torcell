@@ -701,7 +701,7 @@
   @keyframes pisoEntra{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
   
   .piso-nav{display:none;gap:4px;margin:0 0 0 10px;align-self:center;}
-  .tnuevo{display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#2f6f8f;color:#fff;font:700 9px/1.4 inherit;font-style:normal;letter-spacing:.4px;text-transform:uppercase;vertical-align:middle;}
+  .tnuevo{margin-left:4px;border-radius:999px;background:#2f6f8f;color:#fff;font-size:9px;font-weight:700;font-style:normal;text-transform:uppercase;}
   .piso-flecha{font:inherit;font-size:12px;line-height:1;width:30px;height:30px;padding:0;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-radius:0;cursor:pointer;transition:background .12s ease,border-color .12s ease,transform .08s ease;}
   .piso-flecha:hover:not(:disabled){border-color:var(--accent);background:var(--panel-soft);}
   .piso-flecha:active:not(:disabled){transform:scale(.92);}
@@ -1613,7 +1613,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
 <script src="carga.js?v=11"></script>
-<script src="rendimiento.js?v=3" defer></script><!-- @@rendimiento-comun -->
+<script src="rendimiento.js?v=5" defer></script><!-- @@rendimiento-comun -->
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
@@ -2190,7 +2190,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.202';
+const APP_VERSION = '0.73.204';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -7056,7 +7056,7 @@ async function abrirAsistencia(){
     m.textContent = textoGuardado(); m.style.color = asCola.fallos ? 'var(--bad,#c0392b)' : (asNBuf() && !asNPend() ? 'var(--text)' : 'var(--sub)');
   }
   // ===== pestañas Día / Semana =====
-  const tabsAs = () => '<div class="as-tabs"><button type="button" data-v="dia" class="' + (vista === 'dia' ? 'on' : '') + '">Día</button><button type="button" data-v="sem" class="' + (vista === 'sem' ? 'on' : '') + '">Semana <i class="tnuevo" data-hasta="2026-11-26">Nuevo</i></button></div>';
+  const tabsAs = () => '<div class="as-tabs"><button type="button" data-v="dia" class="' + (vista === 'dia' ? 'on' : '') + '">Día</button><button type="button" data-v="sem" class="' + (vista === 'sem' ? 'on' : '') + '">Semana</button></div>';
   function engancharTabs(){
     cuerpo.querySelectorAll('.as-tabs button').forEach(b => b.onclick = () => { if(vista === b.dataset.v) return; vista = b.dataset.v; if(vista === 'sem') irSem(); else ir(fecha); });
   }

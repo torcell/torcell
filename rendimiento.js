@@ -205,10 +205,12 @@ function renderRendimiento(raiz, datos, esc, opc){
   /* estadística de un trabajador en un rango de fechas */
   function stat(t, desde, hasta, cat){
     if(t.inicio && t.inicio > desde) desde = t.inicio; if(t.fin && t.fin < hasta) hasta = t.fin; // ===== solo cuenta entre su inicio y su finiquito =====
-    const r = {dud: 0, sinInfo: false, m2: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
+    const r = {dud: 0, sinInfo: false, m2: 0, m2a: 0, n: 0, act: {}, P: 0, S: 0, F: 0, trab: 0, disp: 0, sc: [], otros: [], reg: 0, sab: 0};
+    // @@rend-desde-asistencia: el promedio por jornada usa solo los m² desde el primer día con asistencia del trabajador; antes de eso no hay con qué dividir
+    const as0 = (t.asistencia || []).reduce((a, x) => !a || x.d < a ? x.d : a, '');
     t.dias.forEach(x => { if(x.d >= desde && x.d <= hasta && (!cat || x.cat === cat)){
-      if(x.dud){ r.dud++; if(desde === hasta){ r.sinInfo = true; return; } r.m2 += promEsc(x.cat, rdLunes(x.d)); r.act[x.d] = 1; return; }
-      r.m2 += x.m2; r.n += x.n; r.act[x.d] = 1; } });
+      if(x.dud){ r.dud++; if(desde === hasta){ r.sinInfo = true; return; } const pe = promEsc(x.cat, rdLunes(x.d)); r.m2 += pe; if(as0 && x.d >= as0) r.m2a += pe; r.act[x.d] = 1; return; }
+      r.m2 += x.m2; if(as0 && x.d >= as0) r.m2a += x.m2; r.n += x.n; r.act[x.d] = 1; } });
     (t.asistencia || []).forEach(x => {
       if(x.d < desde || x.d > hasta) return;
       r.reg++; if(rdFecha(x.d).getUTCDay() === 6) r.sab++;
@@ -217,8 +219,8 @@ function renderRendimiento(raiz, datos, esc, opc){
       else if(x.e === 'S'){ r.S++; r.trab += x.fr; r.disp += asMotObra(x.m) ? x.fr : 1; (asMotObra(x.m) ? r.sc : r.otros).push(x); }
     });
     r.conAsist = r.reg > 0;
-    r.dias = r.conAsist ? r.trab : Object.keys(r.act).length;
-    r.porDia = r.dias ? r.m2 / r.dias : 0;
+    r.dias = r.trab;   // solo jornadas con asistencia registrada
+    r.porDia = r.dias ? r.m2a / r.dias : 0;
     r.asistPct = r.disp ? r.trab / r.disp * 100 : null;
     return r;
   }
@@ -510,7 +512,7 @@ function renderRendimiento(raiz, datos, esc, opc){
     const topD = conMm.length ? conMm.reduce((a, f) => f.mm.dia.max > a.mm.dia.max ? f : a) : null, botD = conMm.length ? conMm.reduce((a, f) => f.mm.dia.min < a.mm.dia.min ? f : a) : null;
     const lineaMm = f => {
       const d = f.mm.dia, w = f.mm.sem; if(!d) return '';
-      let h = '<small class="rd-mm">Por día: prom <b>' + fmt(d.prom) + '</b> · máx <b>' + fmt(d.max) + '</b> (' + fd(d.maxK) + ') · mín <b>' + fmt(d.min) + '</b> (' + fd(d.minK) + ')</small>';
+      let h = '';   // @@rend-sin-por-dia: ya no se muestran cifras por día; los m² se miden por semana
       if(vista !== 'dia' && vista !== 'semana' && w) h += '<small class="rd-mm">Por semana: prom <b>' + fmt(w.prom) + '</b> · máx <b>' + fmt(w.max) + '</b> (S' + infoSem(w.maxK).n + ') · mín <b>' + fmt(w.min) + '</b> (S' + infoSem(w.minK).n + ')</small>';
       return h;
     };
@@ -546,7 +548,7 @@ function renderRendimiento(raiz, datos, esc, opc){
       + '</div><div class="rd-tit">Ranking</div><div class="rd-tabla">' + ord.map((f, i) => {
         const r = f.r, p = f.pct;
         const frase = '<b>' + esc(f.nombre) + ': ' + (r.sinInfo ? 'sin dato' : fmt(r.m2) + ' m²') + '</b> · ' + (vista === 'semana' ? infoSem($('rdSem').value).corto : esc(titulo));
-        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + fmt(r.dias) + (r.conAsist ? ' días trabajados' : ' días con actividad (sin asistencia)') + (r.dias && !r.sinInfo ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + (r.sinInfo ? '<small class="rd-dud">Sin información garantizada: se marcaron muchos terminados juntos este día y las fechas no están revisadas.</small>' : r.dud ? '<small class="rd-dud">' + r.dud + (r.dud === 1 ? ' día' : ' días') + ' con terminados juntos sin revisar: ahí se usó el promedio del equipo.</small>' : '') + lineaMm(f) + lineaPot(f) + '</div>'
+        return '<div class="rd-row"><div class="rd-f"><div class="rd-n"><span class="rd-fr">' + (i + 1) + '. ' + frase + '</span><small>' + r.n + ' partidas · ' + (r.conAsist ? fmt(r.dias) + ' días trabajados' : 'sin asistencia registrada') + (r.dias && !r.sinInfo ? ' · ' + fmt(r.porDia) + ' m² por día' : '') + '</small>' + (r.sinInfo ? '<small class="rd-dud">Sin información garantizada: se marcaron muchos terminados juntos este día y las fechas no están revisadas.</small>' : r.dud ? '<small class="rd-dud">' + r.dud + (r.dud === 1 ? ' día' : ' días') + ' con terminados juntos sin revisar: ahí se usó el promedio del equipo.</small>' : '') + lineaMm(f) + lineaPot(f) + '</div>'
           + '<div class="rd-b"' + (p == null ? '' : ' title="' + Math.round(p) + '% del promedio por día"') + '><div class="rd-barra"><i style="width:' + (r.m2 / maxM2 * 100) + '%;background:' + (p == null ? 'var(--sub)' : color(p)) + '"></i></div><span class="rd-sm"><b>' + (r.sinInfo ? 'sin dato' : fmt(r.m2) + ' m²') + '</b> ' + (vista === 'semana' ? 'en la semana' : vista === 'dia' ? 'en el día' : vista === 'mes' ? 'en el mes' : 'en total') + '</span><span class="rd-sd">' + (r.sinInfo ? 'sin información garantizada' : r.dias ? 'estimado por día: <b>~' + fmt(r.porDia) + ' m²</b>' + (p == null ? '' : (() => { const dif = Math.round(p - 100), t = Math.abs(dif) < 3 ? 'eq' : dif > 0 ? 'up' : 'down'; return ' <span class="rd-dif ' + t + '" title="' + (t === 'eq' ? 'Rinde casi igual al promedio del equipo: no mueve el término de la proyección.' : dif > 0 ? 'Rinde ' + dif + '% sobre el promedio del equipo (m² por día trabajado): con este ritmo termina antes en la proyección.' : 'Rinde ' + Math.abs(dif) + '% bajo el promedio del equipo (m² por día trabajado): con este ritmo termina después en la proyección.') + '">' + (t === 'eq' ? '≈ promedio' : (dif > 0 ? '+' : '−') + Math.abs(dif) + ' %') + '</span>'; })()) : 'sin días para estimar') + '</span></div>'
           + '<div class="rd-d2">' + (r.asistPct == null ? '—' : Math.round(r.asistPct) + '%') + '<small>asistencia</small></div>'
           + '<div class="rd-hb"><button type="button" class="rd-hbtn" aria-expanded="false">Historial</button></div></div><div class="rd-hp" hidden>' + hist(f) + '</div></div>';
