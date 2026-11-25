@@ -1218,9 +1218,10 @@
   body.dz-D .cell-td.st-entregado{background:color-mix(in srgb,var(--entregado) 22%,var(--panel));box-shadow:none;}
   body.dz-D .cell-td.st-pagado{background:color-mix(in srgb,var(--pagado) 24%,var(--panel));box-shadow:none;}
 
-  
-  
-  
+  /* @@nombre-sin-caja: en el Tema 1 el nombre va suelto, sin fondo ni borde */
+  .dz-ex .worker-name{background:none;border:0;padding:0;font-size:15px;box-shadow:none;}
+  .dz-ex .worker-name.unassigned{border:0;font-weight:500;}
+  .dz-ex .estado-badge{width:min(var(--ancho-estado),96px);}
   .dz-ex.cell-ventana{flex-direction:column;align-items:flex-start;gap:3px;padding:4px 2px;}
   .dz-ex1{display:flex;align-items:center;gap:8px;min-width:0;}
   .dz-ex1 .worker-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2189,7 +2190,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.198';
+const APP_VERSION = '0.73.199';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
