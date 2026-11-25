@@ -1,0 +1,30 @@
+/* ===== Código sin uso quitado del panel en 0.73.197 (nadie lo llamaba) ===== */
+function guardarSesionLocal(res, recordar){
+  limpiarSesionGuardada();
+  const st = recordar ? localStorage : sessionStorage;
+  try{
+    st.setItem('progresoObraToken', res.token || ''); st.setItem('progresoObraName', res.nombre || ''); st.setItem('progresoObraRol', String(res.rol));
+    if(res.dispositivo) localStorage.setItem('progresoObraDisp', res.dispositivo);
+  }catch(err){}
+}
+function aplicarRolDeLogin(res){
+  sessionToken = res.token || null; sessionName = res.nombre || '';
+  isAdmin = res.rol === 1; isSupervisor = res.rol === 2; isJefe = res.rol === 4;
+  workerSession = res.rol === 3 ? sessionName : null;
+}
+async function refrescarDatosTrabajador(){
+  const remote = await dbLoad();
+  if(remote && remote.items && Object.keys(remote.items).length){
+    applyLoadedPayload(remote); populateFilters(); datosCargadosTs = Date.now(); render();
+  }
+}
+function gateMensajeSplash(){}
+function gateBucle(){}
+const rolActual = () => isAdmin ? 1 : isSupervisor ? 2 : isJefe ? 4 : workerSession ? 3 : 0;
+const calNombreCorto = nombreCorto;
+let avisoToastTimer = null;
+const GATE_MSG_PASO = 480;
+const GATE_MSGS_INICIO = ['Haciendo mezcla…', 'Colocando carga de pegamento…', 'Colocando cerámica…', 'Cortando cerámica…', 'Viendo cómo pisan antes de 48 hrs…', 'Comprobando tu sesión…'];
+const CAL_PISO_REVISADO_HASTA = 9; // igual que calidad.html: hasta ese piso se da por revisado si no hay registro
+const OBS_ANTIGUAS = ['Falta Dintel','Falta Terraza','Piso Incompleto','Muro Incompleto','Palmetas Cabeceadas','Palmetas Sopladas','Falta Tina','Pavimento en mal estado','Tabiquería en mal estado','No se puede hacer Piso','No se puede hacer baño','No se puede hacer terraza'];
+function gateArrancarBarra(){}
