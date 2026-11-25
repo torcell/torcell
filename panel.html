@@ -2388,7 +2388,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.191';
+const APP_VERSION = '0.73.193';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2938,14 +2938,16 @@ function camposCambiados(c){
 }
 let ultimaFusion = null, ultimaMatOk = null, ultimoEnvio = null;
 function aplicarFusion(fusion){
-  if(!fusion || typeof fusion !== 'object') return;
+  const cambiadas = [];   // @@celda-sola: qué celdas se tocaron, para redibujar solo esas
+  if(!fusion || typeof fusion !== 'object') return cambiadas;
   Object.keys(fusion).forEach(id => {
     const c = cellById[id], it = fusion[id];
     if(!c || !it || typeof it !== 'object') return;
-    if(!dirtyCellIds.has(id)){ const nm = nombrePorIdEnPartida(it); state[id] = {...it, trabajador: nombreAntiguoPropio(nm) ? NOM_PROPIO : nm}; }
+    if(!dirtyCellIds.has(id)){ const nm = nombrePorIdEnPartida(it); state[id] = {...it, trabajador: nombreAntiguoPropio(nm) ? NOM_PROPIO : nm}; cambiadas.push(id); }
     baseRec[id] = recordForCell(c, {...it});
   });
   matNivelesCache = null;
+  return cambiadas;
 }
 
 function rebuildWorkerList(){
@@ -3180,6 +3182,21 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('offline', () => { dbStatus = 'error'; dbErrorReason = 'Tu dispositivo se quedó sin internet.'; updateDbBadge(); });
 window.addEventListener('online', () => { pingDb(); });
 
+// @@cambio-ajeno: trae lo guardado por otra cuenta y cambia solo las celdas distintas (por ID), sin redibujar la lista ni recargar.
+// No toca celdas con cambios sin guardar ni los ajustes; si algo no se puede leer, no hace nada.
+async function aplicarCambiosAjenos(){
+  if(!DB_URL || !sessionToken) return -1;
+  const remote = await dbLoad();
+  if(!remote || !remote.items) return -1;
+  const ids = [];
+  Object.keys(remote.items).forEach(id => {
+    if(!cellById[id] || dirtyCellIds.has(id) || colaTieneCelda(id)) return;
+    if(JSON.stringify(state[id] || null) === JSON.stringify(remote.items[id])) return;
+    state[id] = remote.items[id]; baseRec[id] = recordForCell(cellById[id]); ids.push(id);
+  });
+  if(ids.length) refrescarCeldas(ids);
+  return ids.length;
+}
 // @@luz-cambios: luz de prueba. Pregunta cada 30 s (solo con la pestaña a la vista) cuál fue el último cambio guardado.
 // No recarga datos ni toca los otros temporizadores: solo avisa. Al tocar el aviso ámbar, recarga la página.
 (function(){
@@ -3201,14 +3218,20 @@ window.addEventListener('online', () => { pingDb(); });
         if(!r.mio){
           hayOtro = true;
           const lugar = r.celda ? ' · ' + String(r.celda).split(' · ').slice(0, 2).join(' · ') : '';
-          poner('ambar', quienCorto(r.quien) + ' hizo un cambio' + lugar, 'Toca para actualizar la página');
+          const quien = quienCorto(r.quien) + ' hizo un cambio' + lugar;
+          poner('ambar', quien, 'Actualizando…');
+          aplicarCambiosAjenos().then(n => {   // @@cambio-ajeno
+            if(n < 0) poner('ambar', quien, 'No se pudo actualizar solo: toca para recargar la página');
+            else{ hayOtro = false; poner('ambar', quien + (n ? ' · ya está en pantalla' : ''), 'Cambio aplicado sin recargar'); setTimeout(() => { if(!hayOtro) poner('verde', '', 'Al día'); }, 6000); }
+            if(n < 0) hayOtro = true;
+          }).catch(() => { hayOtro = true; poner('ambar', quien, 'No se pudo actualizar solo: toca para recargar la página'); });
         }
       }
       if(!hayOtro) poner('verde', '', 'Al día: nadie más ha cambiado nada desde que abriste');
     }catch(e){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); }
     finally{ ocupado = false; }
   }
-  el.addEventListener('click', () => { if(el.classList.contains('ambar')) location.reload(); });
+  el.addEventListener('click', () => { if(el.classList.contains('ambar') && hayOtro) location.reload(); });
   setInterval(() => { if(!document.hidden) mirar(); }, 30000);
   document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - ultimo > 30000) mirar(); });
   setTimeout(mirar, 4000);
@@ -3536,6 +3559,10 @@ let colaTope = COLA_LOTE;
 let colaEnVuelo = false, colaTimer = null, colaEspera = 0, colaDesdeTs = 0;
 
 // Deja el cambio apartado en este aparato; el envío lo hace procesarCola()
+// @@cambio-ajeno: ¿hay un envío en la cola que ya lleve esta celda? (no se pisa con lo que trae otra cuenta)
+function colaTieneCelda(id){
+  try{ return colaLeer().some(e => e && e.cuerpo && Array.isArray(e.cuerpo.records) && e.cuerpo.records.some(r => r && r.id === id)); }catch(e){ return true; }
+}
 function dbEncolar(dirtyIds){
   if(!DB_URL || !sessionToken) return false;
   const {action, body} = armarCuerpoGuardado(dirtyIds);
@@ -3641,7 +3668,7 @@ async function procesarCola(){
         actualizarInsigniaCola();
         dbStatus = 'online'; dbLastOkTs = Date.now(); dbErrorReason = '';
         try{ localStorage.setItem('progresoObraGuardado', String(Date.now())); }catch(err){}
-        if(json.fusion){ aplicarFusion(json.fusion); render(); }
+        if(json.fusion){ const ids = aplicarFusion(json.fusion); refrescarCeldas(ids); }   // @@celda-sola
         if(json.matOk && typeof json.matOk === 'object' && !matOpsPend.set.size && !matOpsPend.del.size){ MATERIALES.ok = {...json.matOk}; matNivelesCache = null; }
         continue;
       }
@@ -3876,6 +3903,9 @@ async function doSaveCycle(){
   try{
   const dirtySnap = new Set(dirtyCellIds);
   const versionSnap = settingsVersion;
+  // @@celda-sola: si lo único que cambió son partidas (sin ajustes, precios ni materiales), al terminar se redibujan solo esas celdas
+  const soloCeldas = dirtySnap.size > 0 && !forzarGuardadoCompleto;
+  let celdasFusion = [];
 
   const guardadoCompleto = forzarGuardadoCompleto || (dirtySnap.size === 0 && !settingsDirty);
   if(guardadoCompleto){
@@ -3913,11 +3943,11 @@ async function doSaveCycle(){
       if(ultimoEnvio.todas) seccionesTodas = false;
     }
     if(settingsVersion === versionSnap){ settingsDirty = false; settingsUser = false; seccionesSucias.clear(); seccionesTodas = false; }
-    aplicarFusion(ultimaFusion);
+    celdasFusion = aplicarFusion(ultimaFusion);
     if(ultimaMatOk && !matOpsPend.set.size && !matOpsPend.del.size){ MATERIALES.ok = {...ultimaMatOk}; matNivelesCache = null; }
     ultimaFusion = null; ultimaMatOk = null; ultimoEnvio = null;
   }
-  render();
+  if(soloCeldas && (!DB_URL || dbOk)) refrescarCeldas([...dirtySnap, ...celdasFusion]); else render();   // @@celda-sola
   // @@aviso-guardado: con la fila no se avisa al apartar el cambio; el "Guardado" sale cuando el servidor lo confirma (procesarCola)
   if(localOk && (!DB_URL || dbOk)){ if(!enFila) mostrarGuardadoToast(); }
   else if(DB_URL && !dbOk) avisoToast('No se pudo guardar en la base de datos. ' + (dbErrorReason || 'Tus cambios siguen pendientes y se reintentarán.'), 'error', {dur: 14000});
@@ -6111,13 +6141,15 @@ function matChecksPendientes(u){
   return req.length ? req.filter(c => !matAreaListo(u, c)).length : 1;
 }
 function matNivel(u){ return matPendiente(u) ? (matNiveles()[u.pisoNum] || null) : null; }
+// @@celda-sola: el título y el número del círculo salen de acá, para el dibujo completo y para la actualización de una celda
+const matTituloTd = (u, nv) => matTitulo(nv) + (u && nv ? ' · checks de materiales pendientes: ' + matChecksPendientes(u) : '');
 const matTitulo = (nv) => nv === 'rojo' ? 'Materiales sin confirmar: piso en movimiento o el de abajo' : nv === 'amarillo' ? 'Piso de arriba: empieza a preparar y pedir materiales' : 'Ver materiales';
 function matAtributos(key){
   if(!isAdmin || !key) return ' class="dpto-col"';
   const u = matUnidadPorClave()[key];
   const nv = u ? matNivel(u) : null;
   const cls = nv === 'rojo' ? ' mat-pend' : nv === 'amarillo' ? ' mat-prep' : '';
-  return ` class="dpto-col${cls}" data-matkey="${esc(key)}" data-matn="${u && nv ? matChecksPendientes(u) : ''}" title="${matTitulo(nv)}${u && nv ? ' · checks de materiales pendientes: ' + matChecksPendientes(u) : ''}"`;
+  return ` class="dpto-col${cls}" data-matkey="${esc(key)}" data-matn="${u && nv ? matChecksPendientes(u) : ''}" title="${matTituloTd(u, nv)}"`;
 }
 function matCalculo(celda){
   const m2 = Number(getState(celda.id).m2) || 0;
@@ -8400,7 +8432,8 @@ function actualizarMarcasMateriales(){
     const nv = u ? matNivel(u) : null;
     td.classList.toggle('mat-pend', nv === 'rojo');
     td.classList.toggle('mat-prep', nv === 'amarillo');
-    td.title = matTitulo(nv);
+    td.setAttribute('data-matn', u && nv ? matChecksPendientes(u) : '');
+    td.title = matTituloTd(u, nv);
   });
 }
 function refrescarCelda(id){
@@ -8408,18 +8441,25 @@ function refrescarCelda(id){
   const bloque = cont.querySelector(`[data-cellid="${id}"]`);
   const tr = bloque ? bloque.closest('tr') : null;
   if(!tr || matchesActiveFilters()){ render(); return; }
-  tr.querySelectorAll('td.cell-td').forEach(td => {
-    const b = td.querySelector('[data-cellid]');
-    if(!b) return;
-    const cid = b.getAttribute('data-cellid');
-    const cell = cellById[cid];
-    if(!cell) return;
-    td.className = 'cell-td ' + claseEstadoTd(getState(cid));
-    td.innerHTML = dzCeldaTabla(cell, getState(cid));
+  refrescarCeldas([id]);
+}
+// @@celda-sola: redibuja solo las partidas (piso, muro baño, muro cocina) que cambiaron; no toca el resto del dpto ni la lista
+function refrescarCeldas(ids){
+  const lista = [...new Set(ids)].filter(id => cellById[id]);
+  if(lista.length > 40){ render(); return; }
+  const cont = document.getElementById('content');
+  const filas = new Set();
+  lista.forEach(id => {
+    const b = cont.querySelector(`[data-cellid="${id}"]`);
+    const td = b ? b.closest('td.cell-td') : null;
+    if(!td) return;
+    td.className = 'cell-td ' + claseEstadoTd(getState(id));
+    td.innerHTML = dzCeldaTabla(cellById[id], getState(id));
+    filas.add(td.closest('tr'));
   });
   matNivelesCache = null;
   actualizarMarcasMateriales();
-  equalizeRowNameHeights([tr]);
+  if(filas.size) equalizeRowNameHeights([...filas]);
   igualarAltoCeldasTrabajador();
   renderStats();
   updateRetencionesIndicator();
