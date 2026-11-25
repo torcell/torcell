@@ -797,8 +797,8 @@
     .vt-fecha{white-space:normal;text-align:right;}
   }
 
-  .floor-block{content-visibility:auto;contain-intrinsic-size:auto 1250px;}
-  @media (max-width:700px){ .floor-block{contain-intrinsic-size:auto 2100px;} }
+  .floor-block{content-visibility:auto;contain-intrinsic-size:auto var(--alto-piso,1250px);}   /* @@ancla-pisos: --alto-piso se mide con los pisos que están a la vista */
+  @media (max-width:700px){ .floor-block{contain-intrinsic-size:auto var(--alto-piso,2100px);} }
   .rec-bar{display:none;flex-direction:column;gap:6px;margin-bottom:16px;}
   .rec-item{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:10px;align-items:stretch;border:1px solid rgba(196,152,0,.7);border-left:6px solid var(--proceso);background:rgba(255,196,0,.16);padding:8px 10px;}
   .rec-item.atrasado{border-color:rgba(192,57,43,.7);border-left-color:#c0392b;background:rgba(192,57,43,.14);}
@@ -2388,7 +2388,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.189';
+const APP_VERSION = '0.73.191';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -2903,7 +2903,12 @@ const store = {
 let dirtyCellIds = new Set();
 let settingsDirty = false;
 let settingsVersion = 0;
-function markCellDirty(id){ dirtyCellIds.add(id); refrescarBotonGuardar(); }
+// @@no-saltar-listos: el dpto que se está trabajando no se esconde al quedar listo (si no, al guardar el contenido se acorta y la pantalla salta de piso)
+const dptosEnTrabajo = new Set();
+function markCellDirty(id){
+  dirtyCellIds.add(id); refrescarBotonGuardar();
+  const c = cellById[id]; if(c) dptosEnTrabajo.add(c.pisoNum + '|' + c.dpto);
+}
 const seccionesSucias = new Set();
 // ===== pagos completos retenidos: trabajadores cuyo Terminado queda fuera de toda suma y liquidación =====
 let pagosRetenidos = [];
@@ -4865,12 +4870,19 @@ function renderPorTrabajador(){
   const verPlata = isAdmin || (!!workerSession && !!ws.vePrecioReal);
   let datos = ptDatos();
   if(workerSession && !isAdmin && !datos.length) datos = [{key: workerSession + '|C', nombre: workerSession, frague: false, ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}, partida: 0, celdas: []}];
+  // @@pt-sin-movimiento: el admin no ve a los finiquitados ni a quien no tiene nada terminado, en partida o retenido (solo pagos viejos); los totales siguen sumando a los que no son finiquitados
+  let datosTodos = null;
+  if(isAdmin){
+    datos = datos.filter(o => (workerStatus[o.nombre] || defaultWorkerEntry(o.nombre)).estado !== 'finiquitado');
+    datosTodos = datos;
+    datos = datos.filter(o => o.ent.n || o.partida || o.retenidas);
+  }
   datos.sort((a, b) => (b.ent.monto - a.ent.monto) || (b.ent.m2 - a.ent.m2) || a.nombre.localeCompare(b.nombre, 'es'));
   if(!datos.length){ el.style.display = 'none'; el.innerHTML = ''; return; }
   const vacioTot = () => ({ent: {n: 0, m2: 0, monto: 0}, dentro: {n: 0, m2: 0, monto: 0}, nuevo: {n: 0, m2: 0, monto: 0}, pag: {n: 0, m2: 0, monto: 0}});
   const sumar = (lista) => { const t = vacioTot(); lista.forEach(o => ['ent', 'dentro', 'nuevo', 'pag'].forEach(k => { t[k].n += o[k].n; t[k].m2 += o[k].m2; t[k].monto += o[k].monto; })); return t; };
   const listaCer = datos.filter(o => !o.frague), listaFra = datos.filter(o => o.frague);
-  const tot = sumar(listaCer), totFra = sumar(listaFra);
+  const tot = sumar((datosTodos || datos).filter(o => !o.frague)), totFra = sumar((datosTodos || datos).filter(o => o.frague));
   const conCierre = !!cierreQuincena;
   const colsTerminado = (o) => conCierre
     ? ptCol(o.dentro, verPlata) + ptCol(o.nuevo, verPlata) + ptCol(o.ent, verPlata).replace('class="pt-col"', 'class="pt-col suma"')
@@ -8202,7 +8214,32 @@ document.getElementById('content').addEventListener('change', (e) => {
   render();
 });
 window.matchMedia('(max-width:700px)').addEventListener('change', () => { if(typeof render === 'function' && document.getElementById('content').children.length) render(); });
+// @@ancla-pisos: render() reemplaza los pisos y el navegador olvida el alto que tenían (vuelve a 1250 px); sin esto lo que estaba en pantalla se corre varios pisos
+function anclaPantalla(){
+  const bl = document.querySelectorAll('#content .floor-block[data-piso]');
+  for(const b of bl){ const r = b.getBoundingClientRect(); if(r.bottom > 140) return {piso: b.getAttribute('data-piso'), top: r.top}; }
+  return null;
+}
+function medirAltoPiso(){
+  const h = [...document.querySelectorAll('#content .floor-block[data-piso]')].map(b => b.getBoundingClientRect()).filter(r => r.bottom > 0 && r.top < innerHeight).map(r => r.height);
+  if(!h.length) return;
+  const m = h.reduce((x, y) => x + y, 0) / h.length;
+  if(m > 150) document.documentElement.style.setProperty('--alto-piso', m.toFixed(2) + 'px');
+}
+let tMedirPiso = null;
+window.addEventListener('scroll', () => { clearTimeout(tMedirPiso); tMedirPiso = setTimeout(medirAltoPiso, 250); }, {passive: true});
+function volverAAncla(a){
+  if(!a) return;
+  const b = [...document.querySelectorAll('#content .floor-block[data-piso]')].find(x => x.getAttribute('data-piso') === a.piso);
+  if(!b) return;
+  const d = b.getBoundingClientRect().top - a.top;
+  if(Math.abs(d) < 2) return;
+  if(scrollLocked){ scrollLockY += d; document.body.style.top = (-scrollLockY) + 'px'; }   // con una ventana abierta la página está fija: se corrige donde vuelve a quedar
+  else window.scrollBy({top: d, behavior: 'instant'});
+}
 function render(){
+  medirAltoPiso();
+  const ancla = anclaPantalla();
   matNivelesCache = null;
   programarAvisoFechas();
   if(vistaPisos === 'mov') poblarFiltroPiso();
@@ -8220,8 +8257,8 @@ function render(){
     listosOcultos = 0;
     const vistos = new Set();
     const visibleBlocks = !ocultarListos ? bloquesVista : bloquesVista.map(b => {
-      const depts = b.depts.filter(d => { const l = listoDpto(b.pisoNum, d.dpto); if(l) vistos.add(b.pisoNum + '|' + d.dpto); return !l; });
-      const pas = b.pasillo && listoDpto(b.pisoNum, 'Pasillo') ? (vistos.add(b.pisoNum + '|Pasillo'), null) : b.pasillo;
+      const depts = b.depts.filter(d => { const l = listoDpto(b.pisoNum, d.dpto) && !dptosEnTrabajo.has(b.pisoNum + '|' + d.dpto); if(l) vistos.add(b.pisoNum + '|' + d.dpto); return !l; });
+      const pas = b.pasillo && listoDpto(b.pisoNum, 'Pasillo') && !dptosEnTrabajo.has(b.pisoNum + '|Pasillo') ? (vistos.add(b.pisoNum + '|Pasillo'), null) : b.pasillo;
       return Object.assign({}, b, {depts: depts, pasillo: pas});
     }).filter(b => b.depts.length || b.pasillo);
     listosOcultos = vistos.size;
@@ -8235,6 +8272,8 @@ function render(){
       '<p style="color:var(--sub);text-align:center;padding:40px 0;">No hay partidas que coincidan con el filtro.</p>';
   }
   contentEl.innerHTML = barraAreasMovil() + html;
+  volverAAncla(ancla);   // @@ancla-pisos
+  if(ancla){ const y0 = scrollY; requestAnimationFrame(() => requestAnimationFrame(() => { if(scrollLocked || Math.abs(scrollY - y0) < 2) volverAAncla(ancla); })); }   // los pisos cercanos toman su alto real un cuadro después
   vigilarCola();
   actualizarAvisos();
   equalizeRowNameHeights();
@@ -8403,6 +8442,7 @@ document.getElementById('filterVista').addEventListener('change', (e) => {
 });
 document.getElementById('filterListos').addEventListener('change', (e) => {
   ocultarListos = e.target.value !== 'mostrar';
+  dptosEnTrabajo.clear();   // @@no-saltar-listos
   try{ localStorage.setItem('progresoObraListosV1', ocultarListos ? 'ocultar' : 'mostrar'); }catch(err){}
   render();
 });
