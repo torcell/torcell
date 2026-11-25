@@ -263,7 +263,7 @@ function renderRendimiento(raiz, datos, esc, opc){
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
   // ===== Proyección de cerámica: recta según el ritmo real, con detalle al pasar el cursor =====
-  const pyEstado = {extra: 0, off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 28};
+  const pyEstado = {extra: 0, off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 0};
   const PY_MS = 864e5, PY_DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
   let pyM = null;
   const pyFd = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
