@@ -284,8 +284,6 @@
   body.puede-asist .solo-asist{display:inline-flex !important;}
   .solo-admin{display:none !important;}
   body.is-admin .solo-admin{display:inline-flex !important;}
-  #doradoBtn{display:none !important;}
-  body.es-ismael #doradoBtn{display:inline-flex !important;}
   body.is-admin .admin-only{display:inline-flex;}
   body.is-admin .admin-only.block{display:block;}
   body.is-supervisor #tbGroups .admin-only{display:inline-flex;}
@@ -650,17 +648,14 @@
     transition: background-color .6s ease, color .5s ease, border-color .5s ease !important;
   }
 
-  body.tema1, body.tema3{
+   body.tema3{
     --pagado:#0d9488; --pagado-bg:rgba(13,148,136,.14); --pagado-border:rgba(13,148,136,.45);
     --pagado-pill-bg:rgba(13,148,136,.55); --pagado-pill-text:#eafaf7;
   }
-  body.tema2{
-    --pagado:#7c3aed; --pagado-bg:rgba(124,58,237,.14); --pagado-border:rgba(124,58,237,.45);
-    --pagado-pill-bg:rgba(124,58,237,.55); --pagado-pill-text:#f3ecff;
-  }
+  
 
 
-  body.is-guest .rb-der,body.is-guest #principalBtn,body.is-guest .solo-admin,body.is-guest .admin-only,body.is-guest .solo-asist{display:none !important;}
+  body.is-guest .rb-der,body.is-guest .solo-admin,body.is-guest .admin-only,body.is-guest .solo-asist{display:none !important;}
   /* el invitado ve los botones de la barra, pero bloqueados (solo Ismael e Ignacio los abren) */
   body.is-guest #tbGroups .admin-only:not([style*="display:none"]):not([style*="display: none"]),body.is-guest #tbGroups .solo-admin,body.is-guest #tbGroups .solo-asist{display:inline-flex !important;}
   .vt-lectura .vt-confirma,.vt-lectura .vt-acciones{display:none !important;}
@@ -1193,49 +1188,9 @@
   .lg-cuerpo p.lg-expl{margin:0;font-size:13px;color:var(--sub);line-height:1.45;}
   .lg-modo{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:5;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-size:16px;padding:0;}
 
-  /* ===== Tema 4 · Marco dorado (solo noche) ===== */
-  body.tema4{
-    --marco-oscuro:#463714; --marco-oro:#785a28; --marco-oro-vivo:#c89b3c; --marco-hueco:#010a13;
-    --marco-fondo:#1a1c21; --marco-fondo-arriba:#0c0d0f;
-    --panel:#1a1c21; --panel-soft:#14161a; --border:#1e2126; --border-strong:#785a28;
-    --text:#f0e6d2; --sub:#a09b8c; --accent:#c89b3c; --accent2:#785a28; --radius:0px;
-    --pagado:#0d9488; --pagado-bg:rgba(13,148,136,.14); --pagado-border:rgba(13,148,136,.45);
-    --pagado-pill-bg:rgba(13,148,136,.55); --pagado-pill-text:#eafaf7;
-    color-scheme:dark;
-  }
-  /* El marco: todo contenedor con borde, sombra o fondo propio */
-  body.tema4 :is(.tb-group,.toolbar,.pt,.stat-card,.modal,.mc-pop,.obj-item,.worker-panel,.vt-sec,.rec-item,.aviso-grupo,.lg-app){
-    position:relative;
-    border:2px solid transparent;
-    border-image:linear-gradient(to right,var(--marco-oscuro) 0%,var(--marco-oro) 40%) 1;
-    background:linear-gradient(180deg,var(--marco-fondo-arriba) 0%,var(--marco-fondo) 70%);
-    border-radius:0; box-shadow:none;
-  }
-  body.tema4 .overlay{background:rgba(1,10,19,.72);}
   /* Colores que daban información: se conservan como una franja interior */
-  body.tema4 .stat-card.st-pendiente{box-shadow:inset 0 3px 0 var(--pendiente);}
-  body.tema4 .stat-card.st-proceso{box-shadow:inset 0 3px 0 var(--proceso);}
-  body.tema4 .stat-card.st-entregado{box-shadow:inset 0 3px 0 var(--entregado);}
-  body.tema4 .stat-card.st-pagado{box-shadow:inset 0 3px 0 var(--pagado);}
-  body.tema4 .stat-card.st-retenido{box-shadow:inset 0 3px 0 #a97e00;}
-  body.tema4 .rec-item{box-shadow:inset 6px 0 0 var(--proceso);background:linear-gradient(180deg,#1d1a0e 0%,#1a1810 70%);}
-  body.tema4 .rec-item.atrasado{box-shadow:inset 6px 0 0 #c0392b;background:linear-gradient(180deg,#26100e 0%,#1d1210 70%);}
-  body.tema4 .obj-item{box-shadow:inset 6px 0 0 var(--accent);}
-  body.tema4 .pt{border-top-width:2px;}
+
   /* Encabezado de la ventana de departamento y del panel */
-  body.tema4 .vt-head{background:linear-gradient(90deg,var(--marco-oscuro),var(--marco-fondo));color:var(--text);border-bottom:1px solid var(--marco-oro);}
-  body.tema4 #ventanaOverlay .vt-head h3{color:var(--text);}
-  body.tema4 header.top{border-image:linear-gradient(90deg,var(--marco-oscuro),var(--marco-oro-vivo)) 1;}
-  body.tema4 .vt-sec-title{background:var(--marco-fondo-arriba);border-bottom-color:var(--separador,#1e2126);}
-  /* Botones: esquinas rectas; con acento, borde dorado */
-  body.tema4 .btn,body.tema4 select,body.tema4 input,body.tema4 textarea,body.tema4 .tab,body.tema4 .stats-tab{border-radius:0;}
-  body.tema4 .btn{background:var(--marco-fondo);border-color:var(--marco-oro);color:var(--text);}
-  body.tema4 .btn:hover:not(:disabled){border-color:var(--marco-oro-vivo);}
-  body.tema4 .btn.primary{background:linear-gradient(180deg,#2a2210,#1f1a0d);border-color:var(--marco-oro-vivo);color:#f6e7bd;}
-  body.tema4 .tab.active,body.tema4 .stats-tab.activa{background:linear-gradient(180deg,#3a2d12,#2a2210);color:#f6e7bd;border-color:var(--marco-oro-vivo);}
-  body.tema4 select,body.tema4 input[type=text],body.tema4 input[type=number],body.tema4 textarea{background:var(--marco-fondo-arriba);border-color:var(--marco-oro);color:var(--text);}
-  body.tema4 .floor-title h2{position:relative;border:2px solid transparent;border-image:linear-gradient(to right,var(--marco-oscuro) 0%,var(--marco-oro) 40%) 1;background:linear-gradient(180deg,var(--marco-fondo-arriba) 0%,var(--marco-fondo) 70%);border-radius:0;box-shadow:none;padding:5px 12px;}
-  body.tema4 .floor-title .line{background:var(--marco-oro);}
 
   /* Rendimiento: el difuminado del fondo y el brillo infinito de las pestañas quedan guardados pero apagados.
      Para volver a encenderlos: agrega la clase "blur-fondo" o "brillo-pestanas" al <body>. */
@@ -1245,48 +1200,31 @@
   .overlay.show .modal{will-change:transform,opacity;}
 
 
-  /* ===== Temas A–D: formas de ver pisos y departamentos ===== */
+  /* ===== Pisos y departamentos: tabla con ventana ===== */
   .ribbon-flag.estado-badge{display:inline-flex;align-items:center;justify-content:center;height:26px;padding-top:0;padding-bottom:0;line-height:1;}
   .vt-head .ribbon-flag.estado-badge{width:auto;}
-  body.dz-A table.dept-table,body.dz-D table.dept-table{border-collapse:collapse;border-spacing:0 !important;}
-  body.dz-A table.dept-table :is(th,td),body.dz-D table.dept-table :is(th,td){border:1px solid var(--border-strong);}
-  body.dz-A table.dept-table td.cell-td,body.dz-D table.dept-table td.cell-td{border-left-width:4px;}
-  body.dz-A table.dept-table td.cell-td.st-pendiente,body.dz-D table.dept-table td.cell-td.st-pendiente{border-left-color:var(--pendiente);}
-  body.dz-A table.dept-table td.cell-td.st-proceso,body.dz-D table.dept-table td.cell-td.st-proceso{border-left-color:var(--proceso);}
-  body.dz-A table.dept-table td.cell-td.st-entregado,body.dz-D table.dept-table td.cell-td.st-entregado{border-left-color:var(--entregado);}
-  body.dz-A table.dept-table td.cell-td.st-pagado,body.dz-D table.dept-table td.cell-td.st-pagado{border-left-color:var(--pagado);}
-  body.dz-A td.dpto-col,body.dz-D td.dpto-col{position:sticky;left:0;z-index:3;}
-  /* Temas 5 y 8: el "!" de materiales va en la esquina, sin agregar altura al cuadro */
-  body.dz-A table.dept-table td.dpto-col.mat-pend,body.dz-A table.dept-table td.dpto-col.mat-prep,
+  body.dz-D table.dept-table{border-collapse:collapse;border-spacing:0 !important;}
+  body.dz-D table.dept-table :is(th,td){border:1px solid var(--border-strong);}
+  body.dz-D table.dept-table td.cell-td{border-left-width:4px;}
+  body.dz-D table.dept-table td.cell-td.st-pendiente{border-left-color:var(--pendiente);}
+  body.dz-D table.dept-table td.cell-td.st-proceso{border-left-color:var(--proceso);}
+  body.dz-D table.dept-table td.cell-td.st-entregado{border-left-color:var(--entregado);}
+  body.dz-D table.dept-table td.cell-td.st-pagado{border-left-color:var(--pagado);}
+  body.dz-D td.dpto-col{position:sticky;left:0;z-index:3;}
+  /* El "!" de materiales va en la esquina, sin agregar altura al cuadro */
+  
   body.dz-D table.dept-table td.dpto-col.mat-pend,body.dz-D table.dept-table td.dpto-col.mat-prep{padding-top:8px;}
-  @media (max-width:700px){body.dz-A table.dept-table td.dpto-col.mat-pend,body.dz-A table.dept-table td.dpto-col.mat-prep,body.dz-D table.dept-table td.dpto-col.mat-pend,body.dz-D table.dept-table td.dpto-col.mat-prep{padding-top:4px;}
-  body.dz-A td.dpto-col.mat-pend::before,body.dz-A td.dpto-col.mat-prep::before,body.dz-D td.dpto-col.mat-pend::before,body.dz-D td.dpto-col.mat-prep::before{top:0;left:0;width:12px;height:12px;font-size:9px;line-height:12px;}}
-  body.dz-A td.dpto-col.mat-pend::before,body.dz-A td.dpto-col.mat-prep::before,
+  @media (max-width:700px){body.dz-D table.dept-table td.dpto-col.mat-pend,body.dz-D table.dept-table td.dpto-col.mat-prep{padding-top:4px;}
+  body.dz-D td.dpto-col.mat-pend::before,body.dz-D td.dpto-col.mat-prep::before{top:0;left:0;width:12px;height:12px;font-size:9px;line-height:12px;}}
+  
   body.dz-D td.dpto-col.mat-pend::before,body.dz-D td.dpto-col.mat-prep::before{top:3px;left:3px;margin-left:0;width:15px;height:15px;font-size:10px;line-height:15px;}
-  body.dz-A .cell-td[class*="st-"]{background:var(--panel);box-shadow:none;}
-  body.dz-A table.dept-table tbody tr:nth-child(even) td.cell-td[class*="st-"]{background:var(--panel-soft);}
+  
+  
   body.dz-D .cell-td.st-pendiente{background:color-mix(in srgb,var(--pendiente) 16%,var(--panel));box-shadow:none;}
   body.dz-D .cell-td.st-proceso{background:color-mix(in srgb,var(--proceso) 24%,var(--panel));box-shadow:none;}
   body.dz-D .cell-td.st-entregado{background:color-mix(in srgb,var(--entregado) 22%,var(--panel));box-shadow:none;}
   body.dz-D .cell-td.st-pagado{background:color-mix(in srgb,var(--pagado) 24%,var(--panel));box-shadow:none;}
-  .dz-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
-  @media (min-width:1100px){.dz-cards{grid-template-columns:repeat(4,minmax(0,1fr));}}
-  .dz-card{background:var(--panel);border:1px solid var(--border-strong);min-width:0;}
-  .dz-ch{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--panel-soft);border-bottom:1px solid var(--border-strong);}
-  .dz-ch b{font-size:18px;color:var(--text);margin-right:auto;}
-  .dz-seg,.dz-bars{display:flex;gap:2px;}
-  .dz-seg i{display:block;width:22px;height:8px;}
-  .dz-bars i{display:block;flex:1;height:8px;}
-  .dz-seg i,.dz-bars i,.dz-leg i{background:var(--border-strong);}
-  :is(.dz-seg,.dz-bars,.dz-leg) i.st-pendiente{background:var(--pendiente);}
-  :is(.dz-seg,.dz-bars,.dz-leg) i.st-proceso{background:var(--proceso);}
-  :is(.dz-seg,.dz-bars,.dz-leg) i.st-entregado{background:var(--entregado);}
-  :is(.dz-seg,.dz-bars,.dz-leg) i.st-pagado{background:var(--pagado);}
-  .dz-fl{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--border);}
-  .dz-ch + .dz-fl{border-top:0;}
-  .dz-cards .dz-fl{grid-template-columns:minmax(0,1fr);gap:4px;padding:8px 10px;}
-  .dz-fila .dz-info{flex:1 1 auto;}
-  .dz-fila .worker-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
   :is(.dz-fila,.dz-ex) .worker-name{background:none;border:0;padding:0;font-size:15px;box-shadow:none;}
   :is(.dz-fila,.dz-ex) .worker-name.unassigned{border:0;font-weight:500;}
   :is(.dz-ex,.dz-fila) .estado-badge{width:min(var(--ancho-estado),96px);}
@@ -1294,126 +1232,20 @@
   .dz-ex1{display:flex;align-items:center;gap:8px;min-width:0;}
   .dz-ex1 .worker-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .dz-ex2 .price-block{justify-content:flex-start;}
-  .dz-ar{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--sub);}
-  .dz-cl{min-width:0;}
-  .dz-fila.cell-ventana{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;}
-  .dz-fila .dz-info{min-width:0;display:flex;flex-direction:column;gap:2px;}
-  .dz-fila .estado-badge{flex:none;align-self:center;}
 
-.dz-ch .ns,.dz-tile .ns{display:none;}.dz-ch .ns i,.dz-tile .ns i{font-style:normal;display:block;font-size:10px;line-height:1;opacity:.85;}.dz-ch .ns i::before,.dz-tile .ns i::before{content:"P";}.dz-ch .ns i.az::before,.dz-tile .ns i.az::before{content:none;}
-@media (max-width:700px){
-  .dz-ch b .nf,.dz-tile b .nf{display:none !important;}
-  .dz-ch b .ns,.dz-tile b .ns{display:block !important;line-height:1;}
-  .dz-tile b .ns{font-size:19px;margin-bottom:0;}.dz-tile b{margin-bottom:8px;}
-  .dz-ch b{font-size:20px;}
-  .dz-mat{display:none !important;}
-  .dz-ch.dz-m-rojo,.dz-tile.dz-m-rojo{background:#c0546f !important;color:#fff !important;}.dz-ch.dz-m-rojo b,.dz-tile.dz-m-rojo b{color:#fff !important;}
-  .dz-ch.dz-m-amar,.dz-tile.dz-m-amar{background:#f2b600 !important;color:#3a2a00 !important;}.dz-ch.dz-m-amar b,.dz-tile.dz-m-amar b{color:#3a2a00 !important;}
-  .dz-det h3.dz-m-rojo{background:#c0546f;color:#fff;padding:6px 10px;}.dz-det h3.dz-m-amar{background:#f2b600;color:#3a2a00;padding:6px 10px;}
-}
-  .dz-mat{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:12px;font-weight:800;color:#fff;cursor:pointer;}
-  .dz-mat.rojo{background:var(--rojo-tag);}.dz-mat.amarillo{background:#f2b600;color:#3a2a00;}
-  .dz-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:8px 0;}
-  .dz-leg i{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-2px;}
-  .dz-mapa{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;}
-  .dz-tile{font:inherit;background:var(--panel);border:1px solid var(--border-strong);color:var(--text);padding:10px 8px 8px;cursor:pointer;text-align:center;border-radius:0;}
-  .dz-tile b{display:block;font-size:19px;margin-bottom:8px;}
-  .dz-tile:hover{border-color:var(--accent);}
-  .dz-tile.on{outline:2px solid var(--accent);}
-  .dz-det{margin-top:12px;background:var(--panel);border:1px solid var(--border-strong);border-left:5px solid var(--accent);padding:6px 4px;}
-  .dz-det h3{margin:6px 10px 4px;font-size:15px;color:var(--text);display:flex;align-items:center;gap:8px;}
-  .dz-det .dz-fl:first-of-type{border-top:0;}
   @media (max-width:700px){
     .ribbon-flag.estado-badge{height:22px;}
-    .dz-cards{grid-template-columns:1fr;}
-    .dz-det .dz-fl{grid-template-columns:70px minmax(0,1fr);}
+    
+    
   }
 
-
-  /* ===== Dorado de día: mismo marco, con colores claros ===== */
-  body.tema4:not(.dark){
-    --marco-oscuro:#dcc994; --marco-oro:#b8892f; --marco-oro-vivo:#8f6a14; --marco-hueco:#f3ecd9;
-    --marco-fondo:#fbf5e6; --marco-fondo-arriba:#fffdf7;
-    --panel:#fffaf0; --panel-soft:#f6eedc; --border:#e6d9b8; --border-strong:#b8892f;
-    --text:#2b2210; --sub:#6f6040; --accent:#8f6a14; --accent2:#b8892f;
-    color-scheme:light;
-  }
-  body.tema4:not(.dark) .overlay{background:rgba(70,52,12,.42);}
-  body.tema4:not(.dark) .rec-item{background:linear-gradient(180deg,#fffaea 0%,#fbf1d6 70%);}
-  body.tema4:not(.dark) .rec-item.atrasado{background:linear-gradient(180deg,#fdeae4 0%,#fbe0d8 70%);}
-  body.tema4:not(.dark) .btn.primary{background:linear-gradient(180deg,#f6e6b4,#ebd18c);color:#3a2a05;}
-  body.tema4:not(.dark) .tab.active,body.tema4:not(.dark) .stats-tab.activa{background:linear-gradient(180deg,#f6e6b4,#ebd18c);color:#3a2a05;}
-  body.tema4:not(.dark) .vt-sec-title{border-bottom-color:var(--border);}
-
-  /* ===== Tema 5 · Halloween (solo noche). Sin animaciones infinitas ni difuminados, para no cargar la página. ===== */
-  html:has(body.tema5){background:#0b0610;}
-  body.tema5{
-    --bg:#0b0610; --panel:#1c1226; --panel-soft:#160e1e; --border:#33204a; --border-strong:#6b3fa0;
-    --text:#f4ebff; --sub:#bba6d8; --accent:#ff7a18; --accent2:#8a2be2; --radius:0px;
-    --pendiente:#8f8aa3; --proceso:#ffb300; --entregado:#6fcf3a;
-    --pagado:#c06bff; --pagado-bg:rgba(192,107,255,.16); --pagado-border:rgba(192,107,255,.5);
-    --pagado-pill-bg:rgba(192,107,255,.55); --pagado-pill-text:#fbf2ff;
-    --telarana:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64' fill='none' stroke='%23e9dcff' stroke-opacity='.28' stroke-width='1'%3E%3Cg transform='translate(64 0) scale(-1 1)'%3E%3Cpath d='M0 0L64 0M0 0L58 22M0 0L44 44M0 0L22 58M0 0L0 64'/%3E%3Cpath d='M14 0Q12 12 0 14M28 0Q24 24 0 28M42 0Q36 36 0 42M56 0Q48 48 0 56'/%3E%3C/g%3E%3C/svg%3E");
-    background:var(--bg); color-scheme:dark;
-  }
   /* Cielo y niebla: una sola capa fija, sin repintar al hacer scroll */
-  html:has(body.tema5){background:radial-gradient(circle at 90% 4%,rgba(255,150,40,.30) 0,rgba(255,122,24,.10) 9%,transparent 22%),radial-gradient(ellipse at 15% 0%,rgba(138,43,226,.28),transparent 55%),linear-gradient(to top,rgba(138,43,226,.22),transparent 120px),linear-gradient(180deg,#1a0b2a 0,#0b0610 900px) #0b0610;}
-  body.tema5 :is(.tb-group,.toolbar,.pt,.stat-card,.modal,.mc-pop,.obj-item,.worker-panel,.vt-sec,.rec-item,.aviso-grupo,.lg-app){
-    background:var(--telarana) top right / 46px no-repeat, linear-gradient(180deg,#221432 0%,var(--panel) 75%);
-    border:1px solid var(--border-strong); border-top:3px solid var(--accent); border-radius:0;
-    box-shadow:0 2px 10px rgba(0,0,0,.45);
-  }
-  body.tema5 .vt-sec,body.tema5 .aviso-grupo,body.tema5 .obj-item,body.tema5 .rec-item{border-top-width:1px;background-size:34px;}
-  body.tema5 .modal,body.tema5 .lg-app{box-shadow:0 0 0 1px rgba(255,122,24,.35),0 10px 30px rgba(0,0,0,.6);}
-  body.tema5 .overlay{background:rgba(8,3,14,.74);}
-  body.tema5 .stat-card.st-pendiente{border-top-color:var(--pendiente);}
-  body.tema5 .stat-card.st-proceso{border-top-color:var(--proceso);}
-  body.tema5 .stat-card.st-entregado{border-top-color:var(--entregado);}
-  body.tema5 .stat-card.st-pagado{border-top-color:var(--pagado);}
-  body.tema5 .stat-card.st-retenido{border-top-color:#ffb300;}
-  body.tema5 .rec-item{border-left:6px solid var(--proceso);}
-  body.tema5 .rec-item.atrasado{border-left-color:#ff3b30;background:var(--telarana) top right / 34px no-repeat,linear-gradient(180deg,#2e1018,#1c1226);}
+
   /* Título, encabezado y detalles */
-  body.tema5 header.top{border-image:linear-gradient(90deg,var(--accent),var(--accent2),transparent) 1;}
-  body.tema5 header.top h1{color:#fff3e0;text-shadow:0 0 14px rgba(255,122,24,.55),0 2px 0 #3a1068;letter-spacing:.3px;}
-  body.tema5 header.top h1::before{content:"🎃 ";}
-  body.tema5 .vt-head{background:linear-gradient(90deg,#c2410c,#6d28d9);color:#fff;}
-  body.tema5 #ventanaOverlay .vt-head h3::before{content:"🦇 ";}
-  body.tema5 .vt-sec-title{background:#140b1c;border-bottom-color:var(--border);color:#ffb878;}
-  body.tema5 .floor-title h2{background:linear-gradient(90deg,#3a1d12,#24133a);border:1px solid var(--accent);color:#ffe2c2;}
-  body.tema5 .floor-title h2::before{content:"🕸️ ";}
-  body.tema5 .floor-title .line{background:linear-gradient(90deg,var(--accent),var(--accent2),transparent);height:2px;}
-  body.tema5 .stats-rotulo,body.tema5 .tb-group > label,body.tema5 .tb-group-title{color:#ffb878;}
+
   /* Botones: esquinas rectas, borde morado y brillo naranja al pasar */
-  body.tema5 .btn{background:#1a1024;border-color:var(--border-strong);color:var(--text);border-radius:0;}
-  body.tema5 .btn:hover:not(:disabled){border-color:var(--accent);box-shadow:0 0 10px rgba(255,122,24,.45);}
-  body.tema5 .btn.primary{background:linear-gradient(90deg,#c2410c,#6d28d9);border-color:var(--accent);color:#fff;}
-  body.tema5 .tab,body.tema5 .stats-tab,body.tema5 select,body.tema5 input,body.tema5 textarea{border-radius:0;}
-  body.tema5 .tab.active,body.tema5 .stats-tab.activa{background:linear-gradient(90deg,#ea580c,#7c3aed);color:#fff;border-color:var(--accent);}
-  body.tema5 select,body.tema5 input[type=text],body.tema5 input[type=number],body.tema5 textarea{background:#120a1a;border-color:var(--border-strong);color:var(--text);}
-  body.tema5 .role-badge.admin{background:linear-gradient(90deg,#ea580c,#7c3aed);}
-  body.tema5 .tab.active,body.tema5 .stats-tab.activa{animation:none;}
-  body.tema5 .tab.active::after,body.tema5 .stats-tab.activa::after{display:none;}
-  body.tema5 .cell-td.cell-ajeno{background:#140c1b;}
-  body.tema5 .site-foot,body.tema5 .site-foot *{color:#bba6d8;}
-/* @@luz-cambios: luz de prueba arriba a la izquierda */
-#luzCambios{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:calc(env(safe-area-inset-left,0px) + 8px);z-index:9998;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 16px);font:600 12px/1.2 'Segoe UI',system-ui,sans-serif;color:#222;background:rgba(255,255,255,.94);border:1px solid #c9c9c4;border-radius:999px;padding:5px 10px 5px 8px;box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:default}
-#luzCambios .lzp{width:12px;height:12px;border-radius:50%;background:#9a9a96;flex:none;transition:background .25s}
-#luzCambios.verde .lzp{background:#2e8b57}
-#luzCambios.ambar{cursor:pointer;border-color:#d9922b}
-#luzCambios.ambar .lzp{background:#d9922b;animation:lzlat 1.3s ease-in-out infinite}
-#luzCambios .lzm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#luzCambios .lzm:empty{display:none}
-body:has(.ovAsist) #luzCambios{display:none}
-@keyframes lzlat{0%,100%{box-shadow:0 0 0 0 rgba(217,146,43,.55)}50%{box-shadow:0 0 0 6px rgba(217,146,43,0)}}
-@media (prefers-reduced-motion:reduce){#luzCambios.ambar .lzp{animation:none}}
-@media (prefers-color-scheme:dark){#luzCambios{background:rgba(34,34,34,.94);color:#eee;border-color:#555}}
+
 </style>
-<script id="temasMarca">
-/* @@temas-carga: temas.css (decorados Halloween, 220 KB) solo se baja si se usa el tema 5; queda en esta misma posición del orden de estilos */
-window.cargarTemas = function(){ if(document.getElementById('temasCss')) return; var m = document.getElementById('temasMarca'), l = document.createElement('link'); l.id = 'temasCss'; l.rel = 'stylesheet'; l.href = 'temas.css?v=1'; m.parentNode.insertBefore(l, m); };
-try{ if(localStorage.getItem('progresoObraTemaV3') === 'tema5') cargarTemas(); }catch(e){}
-</script>
 <style>
 
 #cargaGlobal{position:fixed;inset:0;width:100vw;z-index:99990;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%);}
@@ -1782,8 +1614,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 })();
 </script>
 </head>
-<body class="lg-on">
-<div id="luzCambios" role="status" aria-live="polite" title="Sin datos todavía" hidden><span class="lzp"></span><span class="lzm"></span></div>
+<body class="lg-on tema3 tema9 dz-D">
 <div id="cargaGlobal" role="status" aria-live="polite"><div class="cg3 cgabre" id="cgV3"><div class="cgbd cgt"></div><div class="cgbd cgbt"></div><div class="cgfondo"></div><div class="cgin" id="cgIn"><small>Obra Bellavista, La Florida</small><b id="cgTit">Cargando Panel de Cerámica y Frague</b><div class="cgcarga"><div class="cgpista" role="progressbar" aria-label="Cargando" id="cgPista"><div class="cgrell" id="cgRell"></div></div><div class="cgest" id="cgEst">0%</div><div class="cgscan" id="cgScan" aria-hidden="true"></div></div><div class="cgmsg" id="cgMsg"></div><div class="cgerr" id="cgErr" aria-live="assertive"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3 22 20.5H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/><path d="M12 9.5v5.2" stroke="currentColor" stroke-width="2.2"/><rect x="11" y="16.4" width="2" height="2" fill="currentColor"/></svg><span id="cgErrTxt"></span></div></div></div></div>
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
@@ -1825,18 +1656,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <div class="status-cluster">
       <span id="dbBadge" class="db-badge off">Guardado local</span>
       <button class="btn icon" id="toggleDark" title="Modo día/noche"><i class="ic ic-luna"></i></button>
-      <select id="temaSelector" title="Tema de colores">
-        <option value="tema9">Tema 1</option>
-        <option value="tema6">Tema 2</option>
-        <option value="tema1">Tema 3</option>
-        <option value="tema3">Tema 4</option>
-        <option value="tema7">Tema 5</option>
-        <option value="tema8">Tema 6</option>
-        <option value="tema5">🎃 Halloween (noche)</option>
-      </select>
-      <button class="btn solo-admin" id="principalBtn" type="button" title="Todos los que no hayan elegido su propio tema verán este (tema y dorado)"><i class="ic ib ic-estrella"></i>Asignar como tema principal</button>
-      <button class="btn" id="doradoBtn" type="button" title="Marco dorado: se puede usar de día y de noche"><i class="ic ib ic-estrella"></i>Dorado: No</button>
-    </div>
+</div>
   </header>
 
   <div class="role-bar">
@@ -2388,7 +2208,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
-const APP_VERSION = '0.73.193';
+const APP_VERSION = '0.73.194';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 30 * 1000;
 let ultimaRevisionVersion = 0;
@@ -3060,7 +2880,7 @@ async function mergeRemoteBeforeSave(){
     if(typeof remote.pagadoLibre === 'boolean') pagadoLibre = remote.pagadoLibre;
     if(typeof remote.espaciadoDptos === 'boolean') espaciadoDptos = remote.espaciadoDptos;
     if(remote.calidad && typeof remote.calidad === 'object') CAL_REV = remote.calidad;
-    if(remote.temaPrincipal && typeof remote.temaPrincipal === 'object'){ temaPrincipal = remote.temaPrincipal; aplicarTemaPrincipal(); }
+    if(remote.temaPrincipal && typeof remote.temaPrincipal === 'object') temaPrincipal = remote.temaPrincipal;   // se conserva para no borrarlo de la base
     if((isAdmin || esInvitado()) && Array.isArray(remote.objetivos) && !seccionesSucias.has('objetivos') && !seccionesTodas) OBJETIVOS = remote.objetivos.filter(o => o && typeof o.id === 'string');
     if(remote.obsPorArea && typeof remote.obsPorArea === 'object'){
       Object.keys(OBS_POR_AREA_BASE).forEach(a => { if(Array.isArray(remote.obsPorArea[a])) OBS_POR_AREA[a] = remote.obsPorArea[a].filter(x => typeof x === 'string'); });
@@ -3182,60 +3002,6 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('offline', () => { dbStatus = 'error'; dbErrorReason = 'Tu dispositivo se quedó sin internet.'; updateDbBadge(); });
 window.addEventListener('online', () => { pingDb(); });
 
-// @@cambio-ajeno: trae lo guardado por otra cuenta y cambia solo las celdas distintas (por ID), sin redibujar la lista ni recargar.
-// No toca celdas con cambios sin guardar ni los ajustes; si algo no se puede leer, no hace nada.
-async function aplicarCambiosAjenos(){
-  if(!DB_URL || !sessionToken) return -1;
-  const remote = await dbLoad();
-  if(!remote || !remote.items) return -1;
-  const ids = [];
-  Object.keys(remote.items).forEach(id => {
-    if(!cellById[id] || dirtyCellIds.has(id) || colaTieneCelda(id)) return;
-    if(JSON.stringify(state[id] || null) === JSON.stringify(remote.items[id])) return;
-    state[id] = remote.items[id]; baseRec[id] = recordForCell(cellById[id]); ids.push(id);
-  });
-  if(ids.length) refrescarCeldas(ids);
-  return ids.length;
-}
-// @@luz-cambios: luz de prueba. Pregunta cada 30 s (solo con la pestaña a la vista) cuál fue el último cambio guardado.
-// No recarga datos ni toca los otros temporizadores: solo avisa. Al tocar el aviso ámbar, recarga la página.
-(function(){
-  const el = document.getElementById('luzCambios'); if(!el) return;
-  const msg = el.querySelector('.lzm');
-  let base = null, hayOtro = false, ocupado = false, ultimo = 0;
-  const quienCorto = q => { const t = String(q || '').split(' - '); return t.length > 1 ? nombreCorto(t.slice(1).join(' - ')) : (t[0] || 'Alguien'); };
-  const poner = (est, txt, tip) => { el.className = est; el.hidden = false; msg.textContent = txt || ''; el.title = tip || ''; };
-  async function mirar(){
-    if(!DB_URL || !sessionToken || ocupado) return;
-    ocupado = true; ultimo = Date.now();
-    try{
-      const r = await llamarDb('ultimoCambio', {});
-      if(!r || !r.ok){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); return; }
-      const firma = (r.ts || 0) + '|' + (r.n || 0);
-      if(base === null){ base = firma; }
-      else if(firma !== base){
-        base = firma;
-        if(!r.mio){
-          hayOtro = true;
-          const lugar = r.celda ? ' · ' + String(r.celda).split(' · ').slice(0, 2).join(' · ') : '';
-          const quien = quienCorto(r.quien) + ' hizo un cambio' + lugar;
-          poner('ambar', quien, 'Actualizando…');
-          aplicarCambiosAjenos().then(n => {   // @@cambio-ajeno
-            if(n < 0) poner('ambar', quien, 'No se pudo actualizar solo: toca para recargar la página');
-            else{ hayOtro = false; poner('ambar', quien + (n ? ' · ya está en pantalla' : ''), 'Cambio aplicado sin recargar'); setTimeout(() => { if(!hayOtro) poner('verde', '', 'Al día'); }, 6000); }
-            if(n < 0) hayOtro = true;
-          }).catch(() => { hayOtro = true; poner('ambar', quien, 'No se pudo actualizar solo: toca para recargar la página'); });
-        }
-      }
-      if(!hayOtro) poner('verde', '', 'Al día: nadie más ha cambiado nada desde que abriste');
-    }catch(e){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); }
-    finally{ ocupado = false; }
-  }
-  el.addEventListener('click', () => { if(el.classList.contains('ambar') && hayOtro) location.reload(); });
-  setInterval(() => { if(!document.hidden) mirar(); }, 30000);
-  document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - ultimo > 30000) mirar(); });
-  setTimeout(mirar, 4000);
-})();
 const DATOS_VIEJOS_MS = 2 * 60 * 60 * 1000;
 function revisarDatosViejos(){
   if(!DB_URL || !datosCargadosTs || avisoDatosViejosDescartado) return;
@@ -3559,10 +3325,6 @@ let colaTope = COLA_LOTE;
 let colaEnVuelo = false, colaTimer = null, colaEspera = 0, colaDesdeTs = 0;
 
 // Deja el cambio apartado en este aparato; el envío lo hace procesarCola()
-// @@cambio-ajeno: ¿hay un envío en la cola que ya lleve esta celda? (no se pisa con lo que trae otra cuenta)
-function colaTieneCelda(id){
-  try{ return colaLeer().some(e => e && e.cuerpo && Array.isArray(e.cuerpo.records) && e.cuerpo.records.some(r => r && r.id === id)); }catch(e){ return true; }
-}
 function dbEncolar(dirtyIds){
   if(!DB_URL || !sessionToken) return false;
   const {action, body} = armarCuerpoGuardado(dirtyIds);
@@ -3766,7 +3528,7 @@ function applyLoadedPayload(parsed){
   if(typeof parsed.allowGuestPrices === 'boolean') allowGuestPrices = parsed.allowGuestPrices;
   if(typeof parsed.pagadoLibre === 'boolean') pagadoLibre = parsed.pagadoLibre;
   if(typeof parsed.espaciadoDptos === 'boolean') espaciadoDptos = parsed.espaciadoDptos;
-  if(parsed.temaPrincipal && typeof parsed.temaPrincipal === 'object'){ temaPrincipal = parsed.temaPrincipal; if(typeof aplicarTemaPrincipal === 'function') aplicarTemaPrincipal(); }
+  if(parsed.temaPrincipal && typeof parsed.temaPrincipal === 'object') temaPrincipal = parsed.temaPrincipal;
   if(Array.isArray(parsed.paymentHistory)) paymentHistory = parsed.paymentHistory;
   if(parsed.afpRates && Object.keys(parsed.afpRates).length) AFP_RATES = {...AFP_RATES, ...parsed.afpRates};
   if(parsed.cierreQuincena !== undefined) cierreQuincena = parsed.cierreQuincena;
@@ -5000,9 +4762,9 @@ function soloUltimoPisoFlechas(){
 document.addEventListener('click', (e) => {
   if(!esInvitado()) return;
   const t = e.target; if(!t.closest) return;
-  const OK = '.avls, [data-abrir], [data-obj-mas], [data-obj-hechos], .tab, #catTabs, .areas-movil, .piso-flecha, .dz-tile, #btnOrdenPisos, #btnLimpiarFiltros, #toggleDark, #logoutBtn, #irMenuBtn, #scrollTopBtn, #ventanaOverlay, .toolbar select, .toolbar input, #temaSelector, #doradoBtn, #mvbarP, #mvbar, .stats-tab, .stat-card, .overlay .modal, .toast';
+  const OK = '.avls, [data-abrir], [data-obj-mas], [data-obj-hechos], .tab, #catTabs, .areas-movil, .piso-flecha, #btnOrdenPisos, #btnLimpiarFiltros, #toggleDark, #logoutBtn, #irMenuBtn, #scrollTopBtn, #ventanaOverlay, .toolbar select, .toolbar input, #temaSelector, #doradoBtn, #mvbarP, #mvbar, .stats-tab, .stat-card, .overlay .modal, .toast';
   if(t.closest(OK)) return;
-  if(t.closest('button, [role="button"], a[href], input[type="checkbox"], [data-matkey], [data-dzmat], [data-vt], [data-vtn]')){ e.stopPropagation(); e.preventDefault(); }
+  if(t.closest('button, [role="button"], a[href], input[type="checkbox"], [data-matkey], [data-vt], [data-vtn]')){ e.stopPropagation(); e.preventDefault(); }
 }, true);
 document.addEventListener('click', (e) => {
   const b = e.target.closest && e.target.closest('.piso-flecha');
@@ -5091,7 +4853,7 @@ function notaHtml(cell, st){
 function checksHtml(cell, st){
   const terminadoLabel = TERMINADO_LABEL[cell.area] || 'Terminado';
 
-  if(!puede('estados') || vistaCompactaAdmin()){
+  if(!puede('estados')){
     const estado = resolveEstado(st);
     const label = estado==='pagado' ? 'Pagado' : estado==='entregado' ? terminadoLabel : estado==='proceso' && !esFrague(cell) ? 'Partida' : 'Pendiente';
     return `<div class="checks-row" data-checksof="${cell.id}"><button type="button" class="ribbon-flag estado-badge estado-${estado}" data-flipbtn="${cell.id}"${isAdmin ? ' title="Toca para cambiar el estado"' : ''}>${label}</button></div>`;
@@ -5141,7 +4903,6 @@ function fechasHtml(st, terminadoLabel, cell){
   if(!filas.length) return `<p class="flip-sin-fechas">Todavía no hay ningún cambio de estado registrado.</p>`;
   return filas.map(([label, ts]) => `<div class="flip-fecha-row"><span>${label}</span><span>${fechaCortaHora(ts)}</span></div>`).join('');
 }
-const vistaCompactaAdmin = () => isAdmin && document.body.classList.contains('tema1');
 const estadoNumero = st => st.pagado ? 3 : st.terminado ? 2 : st.partida ? 1 : 0;
 function fechaCortaMovil(ts){
   return new Date(ts).toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'2-digit'});
@@ -5629,7 +5390,7 @@ function cellHtml(cell){
         ${priceLinesHtml(cell, st)}
         ${notaHtml(cell, st)}
       </div>`;
-  if(puede('estados') && !vistaCompactaAdmin()){
+  if(puede('estados')){
     return `<div class="cell-block" data-cellid="${cell.id}">${frontInner}</div>`;
   }
 
@@ -5701,88 +5462,13 @@ function renderFloorTable(fb){
 }
 
 function dzCeldaTabla(cell, st){
-  const dz = document.body.classList.contains('dz-A') || document.body.classList.contains('dz-D');
-  if(!dz || !vistaVentana()) return cellHtml(cell);
+  if(!vistaVentana()) return cellHtml(cell);
   const hasWorker = !!st.trabajador, estado = resolveEstado(st);
   return `<div class="cell-block cell-ventana dz-ex${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
     <div class="dz-ex1"><span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span><span class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</span></div>
     <div class="dz-ex2">${priceLinesHtml(cell, st, true)}</div>
   </div>`;
 }
-/* ---- Diseños B y C de los temas nuevos: tarjetas por dpto y mapa del piso ---- */
-const dzSel = {};
-function dzFila(cell, st){
-  const hasWorker = !!st.trabajador, estado = resolveEstado(st);
-  return `<div class="cell-block cell-ventana dz-fila${celdaFragueBloqueada(cell) ? ' cell-bloq' : ''}" data-cellid="${cell.id}" data-abrir="${cell.id}" role="button" tabindex="0"${celdaFragueBloqueada(cell) ? ' aria-disabled="true" title="Primero su cerámica debe estar Terminada"' : ' title="Abrir para ver y editar"'}>${st.nota ? '<span class="obs-ico" title="Tiene observaciones: ábrelo para verlas"><i class="ic ic-nota"></i></span>' : ''}${calIco(cell)}
-    <div class="dz-info"><div class="worker-name ${hasWorker ? '' : 'unassigned'}" data-namefor="${cell.id}">${hasWorker ? esc(nomVis(st.trabajador)) : 'Sin asignar'}</div>${priceLinesHtml(cell, st, true)}</div>
-    <span class="ribbon-flag estado-badge estado-${estado}">${etiquetaEstado(cell, estado)}</span>
-  </div>`;
-}
-function dzAreasHtml(fb, d, filtering){
-  return (d.esPasillo ? ['Pasillos'] : areasVista(fb)).map(area => {
-    const c = d.cells[area];
-    let cuerpo;
-    if(!c) cuerpo = '<span class="cell-empty">—</span>';
-    else if(filtering && !passesFilters(cellById[c.id])) cuerpo = '<span class="cell-empty">(no coincide)</span>';
-    else{
-      const cell = cellById[c.id], st = getState(c.id);
-      cuerpo = vistaVentana() ? dzFila(cell, st) : `<div class="cell-td ${claseEstadoTd(st)}">${cellHtml(cell)}</div>`;
-    }
-    return `<div class="dz-fl"><span class="dz-ar">${AREA_LABEL[area] || area}</span><div class="dz-cl">${cuerpo}</div></div>`;
-  }).join('');
-}
-function dzSegHtml(fb, d, clase){
-  if(d.esPasillo) return `<span class="${clase}"><i class="st-${resolveEstado(getState(d.cells.Pasillos.id))}"></i></span>`;
-  return `<span class="${clase}">${areasVista(fb).map(area => { const c = d.cells[area]; return c ? `<i class="st-${resolveEstado(getState(c.id))}"></i>` : '<i></i>'; }).join('')}</span>`;
-}
-function dzNum(fb, d){
-  return `<span class="nf">${d.dpto}</span><span class="ns"><i${fb.pisoNum === 25 ? ' class="az"' : ''}>${fb.pisoNum === 25 ? '' : esc(String(fb.piso).replace(/^Piso\s*/i, ''))}</i>${esc(dptoCortoPanel(fb.piso, d.dpto))}</span>`;
-}
-function dzMatClase(fb, d){
-  if(!isAdmin || fb.categoria !== 'Cerámica') return '';
-  const u = matUnidadPorClave()[fb.piso + '|' + d.dpto], nv = u ? matNivel(u) : null;
-  return nv ? (nv === 'rojo' ? ' dz-m-rojo' : ' dz-m-amar') : '';
-}
-function dzMatHtml(fb, d){
-  if(!isAdmin || fb.categoria !== 'Cerámica') return '';
-  const key = fb.piso + '|' + d.dpto, u = matUnidadPorClave()[key], nv = u ? matNivel(u) : null;
-  return nv ? `<span class="dz-mat ${nv === 'rojo' ? 'rojo' : 'amarillo'}" data-dzmat="${esc(key)}" title="${matTitulo(nv)} · checks de materiales pendientes: ${matChecksPendientes(u)}">${matChecksPendientes(u)}</span>` : '';
-}
-function dzFiltrados(fb){
-  const filtering = matchesActiveFilters();
-  return {filtering, deptRows: fb.depts.filter(d => !filtering || areasVista(fb).some(area => { const c = d.cells[area]; return c && passesFilters(cellById[c.id]); }))};
-}
-function dzTitulo(fb, n){
-  return `<div class="floor-title"><h2>${fb.piso}</h2>${pisoFlechasHtml(fb.piso)}<div class="line"></div><div class="badge">${n} departamento(s)</div></div>`;
-}
-function renderFloorCards(fb){
-  const {filtering, deptRows} = dzFiltrados(fb);
-  if(!deptRows.length) return '';
-  // Igual que en Calidad: 4 tarjetas arriba y abajo las que sobran + el Pasillo al final
-  const filas = deptRows.concat((fb.pasillo && cellById[fb.pasillo.id] && (!filtering || passesFilters(cellById[fb.pasillo.id]))) ? [{dpto: 'Pasillo', esPasillo: true, cells: {Pasillos: fb.pasillo}}] : []);
-  return `<div class="floor-block" data-piso="${esc(fb.piso)}">${dzTitulo(fb, deptRows.length)}<div class="dz-cards">${filas.map(d => d.esPasillo ? `
-    <div class="dz-card"><div class="dz-ch"><b>Pasillo</b>${dzSegHtml(fb, d, 'dz-seg')}</div>${dzAreasHtml(fb, d, filtering)}</div>` : `
-    <div class="dz-card"><div class="dz-ch${dzMatClase(fb, d)}"><b>${dzNum(fb, d)}</b>${dzMatHtml(fb, d)}${dzSegHtml(fb, d, 'dz-seg')}</div>${dzAreasHtml(fb, d, filtering)}</div>`).join('')}</div></div>`;
-}
-function renderFloorMapa(fb){
-  const {filtering, deptRows} = dzFiltrados(fb);
-  if(!deptRows.length) return '';
-  if(!deptRows.some(d => d.dpto === dzSel[fb.piso])) dzSel[fb.piso] = deptRows[0].dpto;
-  const sel = deptRows.find(d => d.dpto === dzSel[fb.piso]);
-  const leg = ['pendiente', 'proceso', 'entregado', 'pagado'].map(e => `<span><i class="st-${e}"></i>${e === 'proceso' ? 'Partida' : e === 'entregado' ? 'Terminado' : e[0].toUpperCase() + e.slice(1)}</span>`).join('');
-  return `<div class="floor-block" data-piso="${esc(fb.piso)}">${dzTitulo(fb, deptRows.length)}<div class="dz-leg">${leg}</div>
-    <div class="dz-mapa">${deptRows.map(d => `<button type="button" class="dz-tile${d.dpto === sel.dpto ? ' on' : ''}${dzMatClase(fb, d)}" data-dzpiso="${esc(fb.piso)}" data-dzdpto="${esc(d.dpto)}"><b>${dzNum(fb, d)}</b>${dzSegHtml(fb, d, 'dz-bars')}</button>`).join('')}</div>
-    <div class="dz-det"><h3 class="${dzMatClase(fb, sel).trim()}">Departamento ${sel.dpto} ${dzMatHtml(fb, sel)}</h3>${dzAreasHtml(fb, sel, filtering)}</div></div>`;
-}
-document.getElementById('content').addEventListener('click', (e) => {
-  const t = e.target.closest && e.target.closest('.dz-tile');
-  if(!t) return;
-  const piso = t.getAttribute('data-dzpiso');
-  dzSel[piso] = t.getAttribute('data-dzdpto');
-  const fb = FLOOR_BLOCKS.find(f => f.categoria === activeCategoria && f.piso === piso), bl = t.closest('.floor-block');
-  if(fb && bl) bl.outerHTML = renderFloorMapa(fb);
-});
-
 function renderPasillosTable(){
   const filtering = matchesActiveFilters();
   const byFloor = {};
@@ -7317,7 +7003,6 @@ window.addEventListener('beforeunload', e => { if(asNPend() || asNBuf()){ e.prev
 async function abrirAsistencia(){
   const demo = !DB_URL;
   const ov = nuevaVentanaDin(); // @@ventana-din
-  ov.classList.add('ovAsist'); // @@luz-cambios: en asistencia no se muestra la luz
   ov.innerHTML = '<div style="position:relative;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);max-width:720px;width:100%;height:min(92vh,760px);max-height:min(92vh,760px);overflow:auto;padding:16px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><b style="font-size:16px;flex:1;"><i class="ic ic-calendario"></i> Asistencia' + (demo ? ' (prueba, no se guarda en la base real)' : '') + '</b></div><div id="asCuerpo" style="font-size:13px;"></div></div>';
   const cuerpo = ov.querySelector('#asCuerpo');
   autoAlto(ov.firstElementChild, cuerpo);
@@ -8294,10 +7979,9 @@ function render(){
       return Object.assign({}, b, {depts: depts, pasillo: pas});
     }).filter(b => b.depts.length || b.pasillo);
     listosOcultos = vistos.size;
-    const dz = ['A', 'B', 'C', 'D'].find(l => document.body.classList.contains('dz-' + l));
     // ===== los pisos se dibujan de a poco: siempre unos pisos más abajo de lo que se ve, así ya están listos cuando se llega =====
-    const rend = dz === 'B' ? renderFloorCards : dz === 'C' ? renderFloorMapa : renderFloorTable;
-    const sig = [activeCategoria, pisoFilterVal, vistaPisos, ocultarListos, ordenPisosDesc, document.getElementById('filterEstado').value, document.getElementById('filterTrabajador').value, document.getElementById('search').value, dz].join('|');
+    const rend = renderFloorTable;
+    const sig = [activeCategoria, pisoFilterVal, vistaPisos, ocultarListos, ordenPisosDesc, document.getElementById('filterEstado').value, document.getElementById('filterTrabajador').value, document.getElementById('search').value].join('|');
     if(sig !== sigPisos){ sigPisos = sig; pisosRender = PISOS_INICIO; }
     pisosCola = visibleBlocks; pisosFn = rend;
     html = (visibleBlocks.slice(0, pisosRender).map(rend).filter(Boolean).join('') + (visibleBlocks.length > pisosRender ? '<div id="pisosCola" aria-hidden="true" style="height:1px"></div>' : '')) ||
@@ -8343,7 +8027,6 @@ function alClickContenido(e){
   let el;
   if((el = t.closest('[data-abrir]'))){ if(el.classList.contains('cell-bloq')) return; abrirVentana(el.getAttribute('data-abrir')); return; }
   if((el = t.closest('td.dpto-col[data-matkey]'))){ abrirMateriales(el.getAttribute('data-matkey')); return; }
-  if((el = t.closest('[data-dzmat]'))){ abrirMateriales(el.getAttribute('data-dzmat')); return; }
   if((el = t.closest('.assign-btn[data-id]'))){ if(puede('estados') || puede('asignar')) abrirAsignar(el.getAttribute('data-id')); return; }
   if((el = t.closest('.mismo-piso-btn'))){
     if(!(puede('estados') || puede('asignar'))) return;
@@ -8453,7 +8136,8 @@ function refrescarCeldas(ids){
     const b = cont.querySelector(`[data-cellid="${id}"]`);
     const td = b ? b.closest('td.cell-td') : null;
     if(!td) return;
-    td.className = 'cell-td ' + claseEstadoTd(getState(id));
+    const brillo = td.classList.contains('flash');   // @@brillo-celda: si el brillo del cambio sigue en marcha, no se corta
+    td.className = 'cell-td ' + claseEstadoTd(getState(id)) + (brillo ? ' flash' : '');
     td.innerHTML = dzCeldaTabla(cellById[id], getState(id));
     filas.add(td.closest('tr'));
   });
@@ -8656,7 +8340,6 @@ document.getElementById('turboBtn')?.addEventListener('click', (e) => {
   render();
 });
 document.getElementById('toggleDark').addEventListener('click', (e) => {
-  if(document.body.classList.contains('tema5')){ avisoToast('Este tema es solo nocturno. Cambia de tema para volver al modo día.'); return; }
   document.body.classList.add('theme-anim'); void document.body.offsetWidth;
   const dark = document.body.classList.toggle('dark');
   document.documentElement.classList.toggle('dark', dark);
@@ -8665,98 +8348,6 @@ document.getElementById('toggleDark').addEventListener('click', (e) => {
   try{ localStorage.setItem('progresoObraTheme', dark ? 'dark' : 'light'); }catch(err){}
 });
 
-// Marco dorado es un tema solo nocturno: fuerza la noche y, al salir, devuelve el modo que tenías.
-let modoAntesMarco = null;
-function aplicarNocheMarco(on){
-  const b = document.body, h = document.documentElement, btn = document.getElementById('toggleDark');
-  if(on){
-    if(modoAntesMarco === null) modoAntesMarco = b.classList.contains('dark');
-    b.classList.add('dark'); h.classList.add('dark'); btn.innerHTML = '<i class="ic ic-sol"></i>';
-  }else if(modoAntesMarco !== null){
-    b.classList.toggle('dark', modoAntesMarco); h.classList.toggle('dark', modoAntesMarco); btn.innerHTML = modoAntesMarco ? '<i class="ic ic-sol"></i>' : '<i class="ic ic-luna"></i>';
-    modoAntesMarco = null;
-  }
-}
-// Temas 5 a 8: cada uno cambia la forma de ver pisos y departamentos y funciona de día y de noche.
-const TEMAS_DZ = {tema6: 'A', tema7: 'B', tema8: 'C', tema9: 'D'};
-let doradoOn = false;
-try{ doradoOn = localStorage.getItem('progresoObraDorado') === '1'; }catch(err){}
-function aplicarDorado(){
-  const cl = document.body.classList, hal = cl.contains('tema5'), btn = document.getElementById('doradoBtn');
-  cl.toggle('tema4', doradoOn && !hal);
-  btn.innerHTML = '<i class="ic ib ic-estrella"></i>Dorado: ' + (doradoOn && !hal ? 'Sí' : 'No');
-  btn.classList.toggle('primary', doradoOn && !hal);
-  btn.disabled = hal;
-  btn.title = hal ? 'Halloween ya trae sus propios colores' : 'Marco dorado: se puede usar de día y de noche';
-  actualizarPrincipalBtn();
-}
-function temaActual(){
-  const v = document.getElementById('temaSelector').value;
-  return {tema: v, dorado: !!doradoOn && v !== 'tema5'};
-}
-function actualizarPrincipalBtn(){
-  const b = document.getElementById('principalBtn'); if(!b) return;
-  const t = temaPrincipal, c = temaActual();
-  const igual = !!t && t.tema === c.tema && !!t.dorado === c.dorado;
-  b.innerHTML = '<i class="ic ib ic-estrella"></i>' + (igual ? 'Tema principal' : 'Asignar como tema principal');
-  b.classList.toggle('primary', igual);
-}
-function aplicarTemaPrincipal(){
-  if(!temaPrincipal) return;
-  let propio = null;
-  try{ propio = localStorage.getItem('progresoObraTemaV3'); }catch(err){}
-  if(propio === null){
-    doradoOn = !!temaPrincipal.dorado;
-    const tp = temaPrincipal.tema || 'tema9';
-    aplicarTema(tp);
-    document.getElementById('temaSelector').value = tp;
-  }
-  actualizarPrincipalBtn();
-}
-function aplicarTema(v){
-  if(v === 'tema5') cargarTemas(); // @@temas-carga
-  const cl = document.body.classList;
-  cl.remove('tema1', 'tema2', 'tema3', 'tema5', 'tema6', 'tema7', 'tema8', 'tema9', 'dz-A', 'dz-B', 'dz-C', 'dz-D');
-  if(TEMAS_DZ[v]) cl.add('tema3', v, 'dz-' + TEMAS_DZ[v]);
-  else{
-    if(v) cl.add(v);
-    if(v === 'tema5') cl.add('tema3');
-  }
-  aplicarNocheMarco(v === 'tema5');
-  aplicarDorado();
-  actualizarPrincipalBtn();
-}
-['pointerdown', 'focus'].forEach(ev => document.getElementById('temaSelector').addEventListener(ev, cargarTemas, {once: true})); // @@temas-carga: se baja antes de elegir, para que no aparezca tarde
-document.getElementById('temaSelector').addEventListener('change', (e) => {
-  document.body.classList.add('theme-anim'); void document.body.offsetWidth;
-  aplicarTema(e.target.value);
-  if(ventanaId) cerrarVentana();
-  render();
-  setTimeout(() => document.body.classList.remove('theme-anim'), 750);
-  try{ localStorage.setItem('progresoObraTemaV3', e.target.value); }catch(err){}
-});
-document.getElementById('principalBtn').addEventListener('click', () => {
-  if(!isAdmin) return;
-  temaPrincipal = temaActual();
-  markSettingsDirty('temaPrincipal');
-  enqueueSave();
-  actualizarPrincipalBtn();
-  avisoToast('Listo: este tema quedó como principal para quienes no hayan elegido otro.');
-});
-document.getElementById('doradoBtn').addEventListener('click', () => {
-  doradoOn = !doradoOn;
-  document.body.classList.add('theme-anim'); void document.body.offsetWidth;
-  aplicarDorado();
-  setTimeout(() => document.body.classList.remove('theme-anim'), 750);
-  try{ localStorage.setItem('progresoObraDorado', doradoOn ? '1' : '0'); }catch(err){}
-});
-try{
-  let guardado = localStorage.getItem('progresoObraTemaV3');
-  if(guardado === 'tema4'){ guardado = 'tema3'; doradoOn = true; try{ localStorage.setItem('progresoObraDorado', '1'); localStorage.setItem('progresoObraTemaV3', 'tema3'); }catch(err){} }
-  const tema = guardado === null || guardado === '' ? 'tema9' : guardado;
-  if(tema === 'tema1' || tema === 'tema3' || tema === 'tema5' || TEMAS_DZ[tema]){ aplicarTema(tema); document.getElementById('temaSelector').value = tema; }
-  else aplicarDorado();
-}catch(err){ aplicarDorado(); }
 document.getElementById('saveNowBtn').addEventListener('click', pedirGuardar);
 
 document.getElementById('dbBtn')?.addEventListener('click', () => {

@@ -1,0 +1,85 @@
+/* ===== Luz de cambios (guardada, apagada) =====
+   Quitada del panel en 0.73.194. Para volver a ponerla: pegar cada bloque en su lugar (ver "dónde" arriba de cada uno)
+   y en el Apps Script debe seguir la acción ultimoCambio. ===== */
+
+/* ---- dónde: <style> del panel, al final ---- */
+/* @@luz-cambios: luz de prueba arriba a la izquierda */
+#luzCambios{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:calc(env(safe-area-inset-left,0px) + 8px);z-index:9998;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 16px);font:600 12px/1.2 'Segoe UI',system-ui,sans-serif;color:#222;background:rgba(255,255,255,.94);border:1px solid #c9c9c4;border-radius:999px;padding:5px 10px 5px 8px;box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:default}
+#luzCambios .lzp{width:12px;height:12px;border-radius:50%;background:#9a9a96;flex:none;transition:background .25s}
+#luzCambios.verde .lzp{background:#2e8b57}
+#luzCambios.ambar{cursor:pointer;border-color:#d9922b}
+#luzCambios.ambar .lzp{background:#d9922b;animation:lzlat 1.3s ease-in-out infinite}
+#luzCambios .lzm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#luzCambios .lzm:empty{display:none}
+body:has(.ovAsist) #luzCambios{display:none}
+@keyframes lzlat{0%,100%{box-shadow:0 0 0 0 rgba(217,146,43,.55)}50%{box-shadow:0 0 0 6px rgba(217,146,43,0)}}
+@media (prefers-reduced-motion:reduce){#luzCambios.ambar .lzp{animation:none}}
+@media (prefers-color-scheme:dark){#luzCambios{background:rgba(34,34,34,.94);color:#eee;border-color:#555}}
+
+/* ---- dónde: justo después de <body ...> ---- */
+<div id="luzCambios" role="status" aria-live="polite" title="Sin datos todavía" hidden><span class="lzp"></span><span class="lzm"></span></div>
+
+/* ---- dónde: antes de const DATOS_VIEJOS_MS ---- */
+// @@cambio-ajeno: trae lo guardado por otra cuenta y cambia solo las celdas distintas (por ID), sin redibujar la lista ni recargar.
+// No toca celdas con cambios sin guardar ni los ajustes; si algo no se puede leer, no hace nada.
+async function aplicarCambiosAjenos(){
+  if(!DB_URL || !sessionToken) return -1;
+  const remote = await dbLoad();
+  if(!remote || !remote.items) return -1;
+  const ids = [];
+  Object.keys(remote.items).forEach(id => {
+    if(!cellById[id] || dirtyCellIds.has(id) || colaTieneCelda(id)) return;
+    if(JSON.stringify(state[id] || null) === JSON.stringify(remote.items[id])) return;
+    state[id] = remote.items[id]; baseRec[id] = recordForCell(cellById[id]); ids.push(id);
+  });
+  if(ids.length) refrescarCeldas(ids);
+  return ids.length;
+}
+// @@luz-cambios: luz de prueba. Pregunta cada 30 s (solo con la pestaña a la vista) cuál fue el último cambio guardado.
+// No recarga datos ni toca los otros temporizadores: solo avisa. Al tocar el aviso ámbar, recarga la página.
+(function(){
+  const el = document.getElementById('luzCambios'); if(!el) return;
+  const msg = el.querySelector('.lzm');
+  let base = null, hayOtro = false, ocupado = false, ultimo = 0;
+  const quienCorto = q => { const t = String(q || '').split(' - '); return t.length > 1 ? nombreCorto(t.slice(1).join(' - ')) : (t[0] || 'Alguien'); };
+  const poner = (est, txt, tip) => { el.className = est; el.hidden = false; msg.textContent = txt || ''; el.title = tip || ''; };
+  async function mirar(){
+    if(!DB_URL || !sessionToken || ocupado) return;
+    ocupado = true; ultimo = Date.now();
+    try{
+      const r = await llamarDb('ultimoCambio', {});
+      if(!r || !r.ok){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); return; }
+      const firma = (r.ts || 0) + '|' + (r.n || 0);
+      if(base === null){ base = firma; }
+      else if(firma !== base){
+        base = firma;
+        if(!r.mio){
+          hayOtro = true;
+          const lugar = r.celda ? ' · ' + String(r.celda).split(' · ').slice(0, 2).join(' · ') : '';
+          const quien = quienCorto(r.quien) + ' hizo un cambio' + lugar;
+          poner('ambar', quien, 'Actualizando…');
+          aplicarCambiosAjenos().then(n => {   // @@cambio-ajeno
+            if(n < 0) poner('ambar', quien, 'No se pudo actualizar solo: toca para recargar la página');
+            else{ hayOtro = false; poner('ambar', quien + (n ? ' · ya está en pantalla' : ''), 'Cambio aplicado sin recargar'); setTimeout(() => { if(!hayOtro) poner('verde', '', 'Al día'); }, 6000); }
+            if(n < 0) hayOtro = true;
+          }).catch(() => { hayOtro = true; poner('ambar', quien, 'No se pudo actualizar solo: toca para recargar la página'); });
+        }
+      }
+      if(!hayOtro) poner('verde', '', 'Al día: nadie más ha cambiado nada desde que abriste');
+    }catch(e){ if(!hayOtro) poner('gris', '', 'Sin conexión con el aviso de cambios'); }
+    finally{ ocupado = false; }
+  }
+  el.addEventListener('click', () => { if(el.classList.contains('ambar') && hayOtro) location.reload(); });
+  setInterval(() => { if(!document.hidden) mirar(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - ultimo > 30000) mirar(); });
+  setTimeout(mirar, 4000);
+})();
+
+/* ---- dónde: antes de function dbEncolar ---- */
+// @@cambio-ajeno: ¿hay un envío en la cola que ya lleve esta celda? (no se pisa con lo que trae otra cuenta)
+function colaTieneCelda(id){
+  try{ return colaLeer().some(e => e && e.cuerpo && Array.isArray(e.cuerpo.records) && e.cuerpo.records.some(r => r && r.id === id)); }catch(e){ return true; }
+}
+
+/* ---- dónde: en la ventana de Asistencia, donde se crea el overlay (ov) ---- */
+  ov.classList.add('ovAsist'); // @@luz-cambios: en asistencia no se muestra la luz
