@@ -267,7 +267,6 @@ function renderRendimiento(raiz, datos, esc, opc){
   const PY_MS = 864e5, PY_DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
   let pyM = null;
   const pyFd = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
-  const pyCorto = n => { const p = String(n).trim().split(/\s+/); return p[0] + (p[1] ? ' ' + p[1].charAt(0).toUpperCase() + '.' : ''); };
   function pyDif(act, ant){
     if(!(ant > 0)) return {c: 'eq', t: '—'};
     const p = Math.round((act - ant) / ant * 100);
@@ -314,8 +313,8 @@ function renderRendimiento(raiz, datos, esc, opc){
         Object.keys(pt).forEach(d => { if(d >= l && d <= fin){ m2 += pt[d]; dd[d] = 1; } });
         (g.t.asistencia || []).forEach(x => { if(x.d >= l && x.d <= fin){ if(x.e === 'F') F++; else if(x.e === 'P' || x.e === 'S') as++; } });
         return {n: g.t.nombre, m2, dias: Object.keys(dd).length, as, F};
-      }).sort((x, y) => y.m2 - x.m2);
-      S.push({l, fin, m, n, det, par: det.filter(x => !(x.m2 > 0)), cur: l === hoyLun && hoy < rdSuma(l, 4), parcial: !S.length && P.d0 > l, inf: infoSem(l)});
+      }).filter(x => x.m2 > 0).sort((x, y) => y.m2 - x.m2);   // @@rend-solo-con-m2: quien no tiene m² no se muestra ni cuenta; entra solo cuando los tenga
+      S.push({l, fin, m, n, det, cur: l === hoyLun && hoy < rdSuma(l, 4), parcial: !S.length && P.d0 > l, inf: infoSem(l)});
     }
     const hechas = S.filter(w => !w.cur && !w.parcial && w.m > 0).map(w => w.m).sort((a, b) => a - b), q = hechas.length;
     const med = q ? (q % 2 ? hechas[(q - 1) / 2] : (hechas[q / 2 - 1] + hechas[q / 2]) / 2) : 0;
@@ -351,7 +350,7 @@ function renderRendimiento(raiz, datos, esc, opc){
     const ck = (k, t) => '<label class="py-ck"><input type="checkbox" data-pyk="' + k + '"' + (E[k] ? ' checked' : '') + '><span>' + t + '</span></label>';
     h += '<div class="py-caja">' + ckA
       + filaCtl('Ritmo', '<div class="py-tabs" role="group" aria-label="Ritmo para proyectar">' + [[28, '4 semanas'], [56, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-pyr="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div>')
-      + filaCtl('Sumar', '<div class="py-mm" role="group" aria-label="Ceramistas que se suman desde hoy"><button type="button" class="py-b" data-pyx="-1" aria-label="Quitar un ceramista"' + (E.extra <= 0 ? ' disabled' : '') + '>−</button><output class="py-n"' + tip('<b>Ceramistas que se suman desde hoy</b>Cada uno rinde en promedio ~' + fmt(pw) + ' m² por semana (' + fmt(pw / 5) + ' por día hábil), según lo que hicieron los ceramistas con nombre en ' + ritTxt + '. No cuenta el trabajo de No Asignado.') + '>' + E.extra + '</output><button type="button" class="py-b" data-pyx="1" aria-label="Sumar un ceramista"' + (!pw || E.extra >= 12 ? ' disabled' : '') + '>+</button></div><span class="py-aviso">' + (pw ? 'cada uno rinde ~' + fmt(pw) + ' m² por semana' + (E.extra ? ' · +' + fmt(add * 7) + ' m² por semana en total' : '') : 'sin datos para calcular el promedio') + '</span>')
+      + filaCtl('Agregar trabajador', '<div class="py-mm" role="group" aria-label="Ceramistas que se suman desde hoy"><button type="button" class="py-b" data-pyx="-1" aria-label="Quitar un ceramista"' + (E.extra <= 0 ? ' disabled' : '') + '>−</button><output class="py-n"' + tip('<b>Ceramistas que se suman desde hoy</b>Cada uno rinde en promedio ~' + fmt(pw) + ' m² por semana (' + fmt(pw / 5) + ' por día hábil), según lo que hicieron los ceramistas con nombre en ' + ritTxt + '. No cuenta el trabajo de No Asignado.') + '>' + E.extra + '</output><button type="button" class="py-b" data-pyx="1" aria-label="Sumar un ceramista"' + (!pw || E.extra >= 12 ? ' disabled' : '') + '>+</button></div><span class="py-aviso">' + (pw ? 'cada uno rinde ~' + fmt(pw) + ' m² por semana' + (E.extra ? ' · +' + fmt(add * 7) + ' m² por semana en total' : '') : 'sin datos para calcular el promedio') + '</span>')
       + filaCtl('Mostrar', E.vista === 'simple' ? ck('proy', 'Proyección') + ck('plan', 'Plan oficial') + ck('freno', 'Semanas con freno') + ck('barras', 'm² por semana') : '<span class="py-aviso">Estos checks se usan en la vista Simple.</span>') + '</div>';
     h += '<div class="py-tabs py-vis" role="tablist">' + [['simple', 'Simple'], ['burnup', 'Burn-up'], ['s', 'Curva S'], ['abanico', 'Abanico'], ['vel', 'Velocidad']].map(t => '<button type="button" role="tab" class="py-tab' + (E.vista === t[0] ? ' on' : '') + '" data-pyv="' + t[0] + '" aria-selected="' + (E.vista === t[0]) + '">' + t[1] + '</button>').join('') + '</div>';
     let g = null, proyF = null, planF = null, fan = null;
@@ -381,14 +380,13 @@ function renderRendimiento(raiz, datos, esc, opc){
     const EST = {curso: 'En curso', parada: 'Parada', freno: 'Freno', normal: 'Normal'};
     const fila = w => {
       const d = !w.ant || w.ant.parcial ? {c: 'eq', t: '—'} : w.cur ? pyDif(w.n ? w.m / w.n : 0, w.ant.n ? w.ant.m / w.ant.n : 0) : pyDif(w.m, w.ant.m);
-      const par = w.par.map(x => pyCorto(x.n)), parTxt = !par.length ? '—' : par.slice(0, 3).join(', ') + (par.length > 3 ? ' +' + (par.length - 3) : '');
       const t = '<b>Semana ' + w.inf.n + ' · ' + pyFd(w.l) + ' al ' + pyFd(w.fin) + '</b>Equipo: ' + fmt(w.m) + ' m² en ' + w.n + (w.n === 1 ? ' día' : ' días') + (w.parcial ? ' (el registro por día empieza esta semana)' : '') + (w.cur ? ' (en curso; se compara por día)' : '')
-        + (w.det.length ? '<br>' + w.det.map(x => esc(x.n) + ': ' + (x.m2 > 0 ? fmt(x.m2) + ' m² · ' + x.dias + (x.dias === 1 ? ' día' : ' días') : 'sin m²' + (x.as ? ' · asistió ' + x.as + (x.as === 1 ? ' día' : ' días') + (x.F ? ', faltó ' + x.F : '') : x.F ? ' · faltó ' + x.F + (x.F === 1 ? ' día' : ' días') : ' · sin asistencia registrada'))).join('<br>') : '');
-      return '<div class="py-sr ' + w.est + '"' + tip(t) + '><span class="py-s1">S' + w.inf.n + ' · ' + esc(w.inf.rango) + '</span><b class="py-s2">' + fmt(w.m) + ' m²</b><span class="py-s3 ' + d.c + '">' + d.t + '</span><span class="py-s4"><i class="py-e ' + w.est + '">' + EST[w.est] + '</i></span><span class="py-s5">' + esc(parTxt) + '</span></div>';
+        + (w.det.length ? '<br>' + w.det.map(x => esc(x.n) + ': ' + fmt(x.m2) + ' m² · ' + x.dias + (x.dias === 1 ? ' día' : ' días')).join('<br>') : '');
+      return '<div class="py-sr r2-sr ' + w.est + '"' + tip(t) + '><span class="py-s1">S' + w.inf.n + ' · ' + esc(w.inf.rango) + '</span><b class="py-s2">' + fmt(w.m) + ' m²</b><span class="py-s3 ' + d.c + '">' + d.t + '</span><span class="py-s4"><i class="py-e ' + w.est + '">' + EST[w.est] + '</i></span></div>';
     };
     const filas = Q.S.slice().reverse().map(fila), frenos = Q.S.filter(w => w.est === 'freno' || w.est === 'parada');
-    h += '<div class="py-sub"' + tip('<b>Cómo se marca</b>Parada: semana sin m².<br>Freno: menos del 60 % de una semana normal (mediana: ' + fmt(Q.med) + ' m²).<br>Sin avance: ceramistas vigentes esa semana que no registraron m².') + '>Semanas · ' + (frenos.length ? 'con freno o parada: <b>' + frenos.map(w => 'S' + w.inf.n).join(', ') + '</b>' : 'sin frenos ni paradas') + '</div>'
-      + '<div class="py-sems"><div class="py-sr py-sh"><span class="py-s1">Semana</span><span class="py-s2">m²</span><span class="py-s3">Contra la anterior</span><span class="py-s4">Estado</span><span class="py-s5">Sin avance</span></div>' + filas.slice(0, 8).join('') + '</div>'
+    h += '<div class="py-sub"' + tip('<b>Cómo se marca</b>Parada: semana sin m².<br>Freno: menos del 60 % de una semana normal (mediana: ' + fmt(Q.med) + ' m²).') + '>Semanas · ' + (frenos.length ? 'con freno o parada: <b>' + frenos.map(w => 'S' + w.inf.n).join(', ') + '</b>' : 'sin frenos ni paradas') + '</div>'
+      + '<div class="py-sems"><div class="py-sr r2-sr py-sh"><span class="py-s1">Semana</span><span class="py-s2">m²</span><span class="py-s3">Contra la anterior</span><span class="py-s4">Estado</span></div>' + filas.slice(0, 8).join('') + '</div>'
       + (filas.length > 8 ? '<details class="py-mas"><summary>Ver semanas anteriores (' + (filas.length - 8) + ')</summary><div class="py-sems">' + filas.slice(8).join('') + '</div></details>' : '');
     pyM = {P, Q, hasta, tips, g, proy: proyF, plan: planF, fan};
     return h;
