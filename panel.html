@@ -415,6 +415,7 @@
 
   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px;}
   .toolbar .grp{display:flex;flex-direction:column;gap:4px;}
+  .toolbar .grp[hidden]{display:none;}
   .toolbar-tit{flex:0 0 100%;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);}   /* @@filtros-titulo */
   .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
   /* ===== armonía de la barra: etiquetas y controles con alto fijo, así nada se descuadra ===== */
@@ -1739,6 +1740,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
     <div class="grp"><label>Buscar Dpto</label><input type="text" id="search" placeholder="Ej: 502"></div>
     <div class="grp"><label>Orden de pisos</label><button class="btn small" id="btnOrdenPisos" aria-pressed="false"></button></div>
     <div class="grp"><label>&nbsp;</label><button class="btn small" id="btnLimpiarFiltros"><i class="ic ib ic-no"></i>Limpiar filtros</button></div>
+    <div class="grp" id="grpAsignarUnico" hidden><label>&nbsp;</label><button class="btn small" id="btnAsignarUnico" type="button"></button></div>   <!-- @@asignar-unico -->
     <div class="counter-pill" id="resultCount"></div>
   </div>
 
@@ -2190,7 +2192,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.208';
+const APP_VERSION = '0.73.209';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -4925,12 +4927,33 @@ function asignarTrabajador(id, w){
   scheduleSave(); refrescarCelda(id);
 }
 // ===== @@asignar-unico: si el área tiene un solo trabajador activo, la celda sin trabajador queda con él al marcarla =====
+function unicoDelArea(cat){
+  const esp = cat === 'Frague' ? 'fraguador' : 'ceramista';
+  const activos = activeWorkers().filter(w => (workerStatus[w] || {}).especialidad === esp && !esPropio(w));
+  return activos.length === 1 ? activos[0] : null;
+}
 function asignarUnicoDelArea(id){
   if(!state[id] || state[id].trabajador) return;
-  const esp = cellById[id].categoria === 'Frague' ? 'fraguador' : 'ceramista';
-  const activos = activeWorkers().filter(w => (workerStatus[w] || {}).especialidad === esp && !esPropio(w));
-  if(activos.length === 1) state[id].trabajador = activos[0];
+  const w = unicoDelArea(cellById[id].categoria);
+  if(w) state[id].trabajador = w;   // solo se pone el nombre
 }
+// ===== @@asignar-unico: botón en los filtros para asignarlo a todos los departamentos listos que no tienen trabajador =====
+const celdasListasSinTrabajador = cat => ALL_CELLS.filter(c => c.categoria === cat && c.dpto !== 'Pasillo' && !state[c.id].trabajador && resolveEstado(state[c.id]) === 'pendiente' && !motivoBloqueoPartida(c, true));
+function actualizarAsignarUnico(){
+  const g = document.getElementById('grpAsignarUnico'); if(!g) return;
+  const w = (activeCategoria === 'Pasillos' || !(puede('estados') || puede('asignar'))) ? null : unicoDelArea(activeCategoria);
+  const n = w ? celdasListasSinTrabajador(activeCategoria).length : 0;
+  g.hidden = !n;
+  if(n) document.getElementById('btnAsignarUnico').textContent = 'Asignar a ' + nomVis(w) + ' los ' + n + ' listos';
+}
+document.getElementById('btnAsignarUnico').addEventListener('click', () => {
+  const w = unicoDelArea(activeCategoria), ids = w ? celdasListasSinTrabajador(activeCategoria).map(c => c.id) : [];
+  if(!ids.length) return;
+  askConfirm('¿Asignar a ' + nomVis(w) + ' los ' + ids.length + ' departamentos listos de ' + activeCategoria + ' que no tienen trabajador? Solo se les pone el nombre.', () => {
+    ids.forEach(id => { state[id].trabajador = w; markCellDirty(id); });
+    scheduleSave(); refrescarCeldas(ids); actualizarAsignarUnico();
+  });
+});
 function abrirAsignar(id){
   if(asignacionBloqueada(state[id])){ avisoToast(msgReasignarBloqueado(), 'error'); return; }
   const cell = cellById[id], actual = state[id].trabajador || '';
@@ -7791,6 +7814,7 @@ function render(){
   const cellsForCount = activeCategoria === 'Pasillos'
     ? ALL_CELLS.filter(c => c.area === 'Pasillos' && passesFilters(c))
     : ALL_CELLS.filter(c => c.categoria === activeCategoria && c.area !== 'Pasillos' && passesFilters(c));
+  actualizarAsignarUnico();
   document.getElementById('resultCount').textContent = cellsForCount.length + ' partidas visibles' + (ocultarListos && listosOcultos ? ' · ' + listosOcultos + ' listos ocultos' : '');
 
   renderStats();
