@@ -415,6 +415,7 @@
 
   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px;}
   .toolbar .grp{display:flex;flex-direction:column;gap:4px;}
+  .toolbar-tit{flex:0 0 100%;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);}   /* @@filtros-titulo */
   .toolbar label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);}
   /* ===== armonía de la barra: etiquetas y controles con alto fijo, así nada se descuadra ===== */
   .toolbar label{height:16px;display:flex;align-items:center;white-space:nowrap;}
@@ -1719,7 +1720,8 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
   <div class="stats" id="stats"></div>
   <div id="porTrabajador" class="pt" style="display:none;"></div>
 
-  <div class="toolbar">
+  <div class="toolbar" id="toolbarFiltros">
+    <div class="toolbar-tit">Filtros</div>   <!-- @@filtros-titulo -->
     <div class="grp grp-piso"><label>Piso</label><select id="filterPiso"></select></div>
     <div class="grp"><label>Mostrar</label><select id="filterVista"><option value="todos">Con y sin avance</option><option value="mov">Solo con avance</option></select></div>
     <div class="grp"><label>Trabajador</label><select id="filterTrabajador"></select></div>
@@ -2188,7 +2190,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.207';
+const APP_VERSION = '0.73.208';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -3822,22 +3824,15 @@ function updateRateFootnote(){
 }
 
 let switchingCat = false;
-// ===== al cambiar de pestaña (Cerámica / Frague) se queda en el mismo piso =====
 function pisoEnPantalla(){
   const bl = document.querySelectorAll('#content .floor-block[data-piso]');
   for(const b of bl){ if(b.getBoundingClientRect().bottom > 140) return b.getAttribute('data-piso'); }
   return null;
 }
-function irAlPisoCercano(piso){
-  if(!piso || !pisosCola || !pisosCola.length) return;
-  const num = numDePiso(piso);
-  if(isNaN(num)) return;
-  let mejor = 0, dif = Infinity;
-  pisosCola.forEach((b, i) => { const d = Math.abs(b.pisoNum - num); if(d < dif){ dif = d; mejor = i; } });
-  if(mejor >= pisosRender){ pisosRender = mejor + PISOS_LOTE + 1; render(); }
-  if(pisosCola[mejor].pisoNum !== num) avisoToast('En ' + activeCategoria + ' no hay partidas por mostrar en el Piso ' + num + ' (sin avance o ya listas). Se muestra desde el Piso ' + pisosCola[mejor].pisoNum + '.');
-  const el = document.querySelector('#content .floor-block[data-piso="' + String(pisosCola[mejor].piso).replace(/"/g, '\\"') + '"]');
-  if(el) window.scrollTo({top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 130), behavior: 'instant'});
+// ===== @@filtros-arriba: al cambiar de pestaña la página sube hasta dejar el recuadro de filtros completo arriba =====
+function irAFiltros(){
+  const t = document.getElementById('toolbarFiltros');
+  if(t) window.scrollTo({top: Math.max(0, t.getBoundingClientRect().top + window.scrollY - 10), behavior: 'instant'});
 }
 function switchCategoria(newCat){
   if(newCat === activeCategoria || switchingCat) return;
@@ -3857,7 +3852,7 @@ function switchCategoria(newCat){
     // ===== en "Solo con avance" el piso donde estaba se fuerza a mostrarse en la otra pestaña, aunque ahí todavía no tenga avance =====
     if(pisoRef && vistaPisos === 'mov' && FLOOR_BLOCKS.some(f => f.categoria === newCat && f.piso === pisoRef)) pisosExtra.add(pisoRef);
     render();
-    irAlPisoCercano(pisoRef);
+    irAFiltros();
     contentEl.style.transition = 'none';
     contentEl.style.transform = `translateX(${dir * 30}px)`;
     requestAnimationFrame(() => {
@@ -4859,6 +4854,7 @@ function aplicarEstadoDestino(id, destino){
       if(n === 2){ st.terminado = true; st.terminadoTs = ahora; if(!st.partidaTs) st.partidaTs = ahora; }
       if(n === 3){ st.pagado = true; st.pagadoTs = ahora; if(!st.terminadoTs) st.terminadoTs = ahora; if(!st.partidaTs) st.partidaTs = ahora; }
     }
+    if(destino >= 1) asignarUnicoDelArea(id);
     if(destino >= 2) matCheckTerminado(id);
   } else {
     if(destino < 3){ st.pagado = false; st.pagadoTs = null; }
@@ -4927,6 +4923,13 @@ function asignarTrabajador(id, w){
   state[id].trabajador = w;
   markCellDirty(id);
   scheduleSave(); refrescarCelda(id);
+}
+// ===== @@asignar-unico: si el área tiene un solo trabajador activo, la celda sin trabajador queda con él al marcarla =====
+function asignarUnicoDelArea(id){
+  if(!state[id] || state[id].trabajador) return;
+  const esp = cellById[id].categoria === 'Frague' ? 'fraguador' : 'ceramista';
+  const activos = activeWorkers().filter(w => (workerStatus[w] || {}).especialidad === esp && !esPropio(w));
+  if(activos.length === 1) state[id].trabajador = activos[0];
 }
 function abrirAsignar(id){
   if(asignacionBloqueada(state[id])){ avisoToast(msgReasignarBloqueado(), 'error'); return; }
@@ -7870,6 +7873,7 @@ function alCambioContenido(e){
   const verb = willBeOn ? 'Marcar' : 'Quitar marca de';
   askConfirm(`¿${verb} "${flagLabel}" en ${label} — ${AREA_LABEL[cell.area]||cell.area} (${cell.piso})?${cascadeNote}`, () => {
     state[id][flag] = willBeOn;
+    if(willBeOn && (flag === 'partida' || flag === 'terminado')) asignarUnicoDelArea(id);
     if(flag === 'partida'){
       state[id].partidaTs = willBeOn ? Date.now() : null;
       if(!willBeOn){ state[id].terminado = false; state[id].pagado = false; state[id].terminadoTs = null; state[id].pagadoTs = null; }
