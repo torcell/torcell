@@ -499,7 +499,8 @@ function renderRendimiento(raiz, datos, esc, opc){
     else if(vista === 'mes'){ const m = $('rdMes').value; desde = m + '-01'; hasta = m + '-31'; titulo = RD_MES[Number(m.substring(5)) - 1] + ' ' + m.substring(0, 4); sub = 'Suma por la fecha real de cada día: las semanas que mezclan dos meses se reparten día a día.'; }
     else { desde = '0000-01-01'; hasta = '9999-12-31'; titulo = 'Total acumulado'; sub = 'Desde la semana ' + 1 + ' (' + fd(primera) + ') hasta hoy · ' + todasSem.length + ' semanas.'; }
     titulo = etq + ' · ' + titulo;
-    const filas = lista.filter(t => !(t.inicio && t.inicio > hasta) && !(t.fin && t.fin < desde)).map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}));
+    const filas = lista.filter(t => !(t.inicio && t.inicio > hasta) && !(t.fin && t.fin < desde)).map(t => ({t, nombre: t.nombre, r: stat(t, desde, hasta, cat), mm: minmax(t, desde, hasta, cat)}))
+      .filter(f => f.r.m2 > 0);   // @@rend-solo-con-m2: sin m² en el período no se muestra ni entra al promedio (tampoco finiquitados sin trabajo ahí); aparece cuando los tenga
     if(!filas.some(f => f.r.m2 > 0 || f.r.reg > 0 || f.r.dias > 0)){ if(cat === 'Frague'){ out.innerHTML = ''; return; } out.innerHTML = '<div class="rd-tit">' + esc(titulo) + '</div><div class="rd-vacio">No hay trabajo terminado ni asistencia registrada en este período.</div>'; return; }
     const act = filas.filter(f => f.r.dias > 0 && !f.r.sinInfo);
     const totM2 = filas.reduce((a, f) => a + f.r.m2, 0), totDias = act.reduce((a, f) => a + f.r.dias, 0);
