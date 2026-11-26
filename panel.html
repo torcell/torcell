@@ -626,6 +626,11 @@
   @keyframes modalPop{ from{opacity:0; transform:scale(.8);} to{opacity:1; transform:scale(1);} }
   @keyframes modalPopOut{ from{opacity:1; transform:scale(1);} to{opacity:0; transform:scale(.8);} }
   .modal.modalClosing{ animation:modalPopOut .2s cubic-bezier(.4,0,.6,1) forwards; }
+  /* ===== @@ventana-vertical: las ventanas que cargan datos esperan a tenerlos y se abren hacia arriba y abajo desde el centro ===== */
+  @keyframes modalVert{ from{clip-path:inset(50% 0 50% 0);} to{clip-path:inset(0 0 0 0);} }
+  @keyframes modalVertOut{ from{clip-path:inset(0 0 0 0);opacity:1;} to{clip-path:inset(50% 0 50% 0);opacity:.4;} }
+  .overlay.vert .modal{animation:modalVert .34s cubic-bezier(.2,.7,.2,1) both;}
+  .overlay.vert .modal.modalClosing{animation:modalVertOut .24s ease-in forwards;}
   .ovDin{animation:overlayIn .16s ease;}
   .ovDin>div{animation:modalPop .28s cubic-bezier(.22,.8,.3,1);}
   .ovDin.ovCierra{animation:overlayOut .2s ease forwards;}
@@ -1314,7 +1319,7 @@
 /* ===== indicador "Guardando… / Cargando…" con el mismo estilo del aviso lateral ===== */
 .avl-carga {
   --av: #2fa3b8;
-  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);   /* @@cartel-arriba */
   z-index: 9998; display: none; align-items: center; justify-content: center; gap: 12px;
   min-width: 220px; max-width: min(440px, calc(100vw - 32px));
   padding: 12px 20px 14px; text-align: center;
@@ -1338,7 +1343,7 @@
 
 /* ===== contenedor (arriba al centro) ===== */
 .avls {
-  position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px));
+  position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px));   /* @@cartel-arriba */
   transform: translateX(-50%); z-index: 9999;
   width: min(440px, calc(100vw - 32px));
   display: grid; gap: 10px; pointer-events: none;
@@ -1399,7 +1404,7 @@
 @media (prefers-reduced-motion: reduce) {
   .avl, .avl > * { animation-duration: .01s !important; }
 }
-.avls{top:calc(60px + env(safe-area-inset-top,0px));}   /* debajo de "Cargando…" */
+body.cargando-on .avls{top:calc(10px + 50px + 10px + env(safe-area-inset-top,0px));}   /* @@cartel-arriba: con "Cargando…" visible, los avisos bajan debajo de él */
 
 /* ===== Aviso de terminados juntos (fechas por revisar) ===== */
 #avisosSeg{position:fixed;left:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:340px;}
@@ -2190,7 +2195,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.204';
+const APP_VERSION = '0.73.205';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -3545,13 +3550,14 @@ function mostrarCargando(texto){
   const el = document.getElementById('cargandoToast');
   document.getElementById('cargandoTexto').textContent = texto || 'Cargando…';
   el.style.display = 'flex';
+  document.body.classList.add('cargando-on');
 
   clearTimeout(cargandoWatchdog);
-  cargandoWatchdog = setTimeout(() => { cargandoContador = 0; el.style.display = 'none'; }, 15000);
+  cargandoWatchdog = setTimeout(() => { cargandoContador = 0; el.style.display = 'none'; document.body.classList.remove('cargando-on'); }, 15000);
 }
 function ocultarCargando(){
   cargandoContador = Math.max(0, cargandoContador - 1);
-  if(cargandoContador === 0){ document.getElementById('cargandoToast').style.display = 'none'; clearTimeout(cargandoWatchdog); }
+  if(cargandoContador === 0){ document.getElementById('cargandoToast').style.display = 'none'; document.body.classList.remove('cargando-on'); clearTimeout(cargandoWatchdog); }
 }
 
 let cargaFallo = false;
@@ -5492,6 +5498,18 @@ let pendingAction = null;
 function askConfirm(text, onConfirm){ modalText.textContent = text; pendingAction = onConfirm; overlay.classList.add('show'); }
 
 // ===== botones Guardar / Guardar y cerrar / Cerrar =====
+// ===== @@ventana-vertical: abre una ventana solo cuando ya cargó lo suyo; mientras tanto sale "Cargando…" =====
+const ventanasCargando = {};
+async function abrirConCarga(overlayId, cargar){
+  if(ventanasCargando[overlayId]) return;
+  ventanasCargando[overlayId] = true;
+  mostrarCargando('Cargando…');
+  try{ await cargar(); }catch(e){}
+  ocultarCargando();
+  ventanasCargando[overlayId] = false;
+  const ov = document.getElementById(overlayId);
+  ov.classList.add('vert', 'show');
+}
 function cerrarOv(el){ el._mantener = false; closeOverlayAnimated(el); }
 function guardarMantener(el, btnId){ el._mantener = true; setTimeout(() => { el._mantener = false; }, 6000); document.getElementById(btnId).click(); }
 function closeOverlayAnimated(overlayEl){
@@ -6421,7 +6439,7 @@ async function cargarCambios(){
   lista.innerHTML = j.cambios.length ? j.cambios.map(c => `<div class="cambio-item"><div class="cambio-meta"><span class="cambio-cuenta">${esc(c.cuenta)}</span><span>${fechaHoraCambio(c.ts)}</span></div><div class="cambio-celda">${esc(c.celda)}</div><div class="cambio-det"><b>${esc(c.campo)}:</b> ${esc(c.antes === '' ? '—' : c.antes)} → ${esc(c.despues === '' ? '—' : c.despues)}</div></div>`).join('')
     : '<p style="color:var(--sub);font-size:13px;text-align:center;padding:20px 0;">Todavía no hay cambios registrados.</p>';
 }
-document.getElementById('cambiosBtn').addEventListener('click', () => { document.getElementById('cambiosCuenta').value = ''; document.getElementById('cambiosOverlay').classList.add('show'); cargarCambios(); });
+document.getElementById('cambiosBtn').addEventListener('click', () => { document.getElementById('cambiosCuenta').value = ''; abrirConCarga('cambiosOverlay', cargarCambios); });
 document.getElementById('cambiosCuenta').addEventListener('change', cargarCambios);
 document.getElementById('cambiosRefrescarBtn').addEventListener('click', cargarCambios);
 async function cargarAccesos(){
@@ -6454,7 +6472,7 @@ async function cargarAccesos(){
 }
 document.getElementById('irAvanceBtn').addEventListener('click', () => { window.location.href = 'avance_obra.html'; });
 document.getElementById('irMenuBtn').addEventListener('click', e => irMenuCarga(e.currentTarget));
-document.getElementById('accesosBtn').addEventListener('click', () => { document.getElementById('accesosCuenta').value = ''; document.getElementById('accesosOverlay').classList.add('show'); cargarAccesos(); });
+document.getElementById('accesosBtn').addEventListener('click', () => { document.getElementById('accesosCuenta').value = ''; abrirConCarga('accesosOverlay', cargarAccesos); });
 document.getElementById('accesosCuenta').addEventListener('change', cargarAccesos);
 document.getElementById('accesosRefrescarBtn').addEventListener('click', cargarAccesos);
 document.getElementById('accesosCerrarBtn').addEventListener('click', () => closeOverlayAnimated(document.getElementById('accesosOverlay')));
@@ -7383,8 +7401,7 @@ document.getElementById('reporteBtn').addEventListener('click', () => {
   document.getElementById('reporteTodoChk').checked = false;
   document.getElementById('reporteUltimoChk').checked = false;
   reporteCamposEditados = false;
-  document.getElementById('reporteOverlay').classList.add('show');
-  refrescarReporte();
+  abrirConCarga('reporteOverlay', refrescarReporte);
 });
 document.getElementById('reporteTodoChk').addEventListener('change', async () => {
   if(document.getElementById('reporteTodoChk').checked) document.getElementById('reporteUltimoChk').checked = false;
