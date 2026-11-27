@@ -1,4 +1,4 @@
-/* ===== carga.css 1.2.3 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
+/* ===== carga.css 1.2.4 · estilos de la pantalla de carga (Obra Bellavista, La Florida) =====
    Va en el <head> de cada página para que la carga salga con estilo desde el primer cuadro. */
 /* ===== misma letra y mismo tamaño en todas las páginas: no hereda nada de la página ===== */
 #cargaGlobal,#cargaGlobal *{font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif !important;font-style:normal !important;font-variant:normal;font-stretch:normal;font-synthesis:none;text-transform:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
@@ -83,5 +83,6 @@
 #cargaGlobal .cgbtn:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 @media(max-width:480px){#cargaGlobal .cgfmsg{font-size:14px;}#cargaGlobal .cgbtn{min-width:128px;}}
 
-/* @@carga-sin-barra: mientras se ve la carga no hay barra de scroll ni espacio reservado, así queda centrada y quieta igual en todas las páginas */
-html:has(#cargaGlobal){overflow:hidden !important;scrollbar-gutter:auto !important;}
+/* @@carga-sin-barra: durante la carga la barra queda invisible pero ocupa su lugar (así el panel no se corre al terminar) y ese borde se pinta del color de la carga */
+html:has(#cargaGlobal){overflow-y:scroll !important;scrollbar-gutter:stable !important;background:linear-gradient(135deg,#0b2b36 0%,#13505f 55%,#2f6f8f 100%) fixed;}
+html:has(#cargaGlobal)::-webkit-scrollbar-thumb,html:has(#cargaGlobal)::-webkit-scrollbar-track,html:has(#cargaGlobal)::-webkit-scrollbar-corner{background:transparent !important;}
