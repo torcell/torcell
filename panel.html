@@ -145,6 +145,7 @@
   #floatingSaveBtn:not(:disabled):hover{filter:brightness(1.1);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent), 0 2px 10px rgba(0,0,0,.35) !important;}
   #scrollTopBtn:hover{border-color:var(--accent) !important;color:var(--accent) !important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent) !important;}
   #floatingSaveBtn:active, #scrollTopBtn:active{transform:scale(.92);}
+  body:has(.overlay.show, .ovDin) #scrollTopBtn, body:has(.overlay.show, .ovDin) #floatingSaveBtn{display:none !important;}   /* @@flotantes-sin-ventana */
   .ret-fila{padding:10px 0 8px;border-bottom:1px solid var(--border);}   /* @@retenciones-botones */
   .ret-botones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;}
   .ret-botones .btn{margin:0;width:100%;min-width:0;white-space:nowrap;padding-left:6px;padding-right:6px;}
@@ -1255,10 +1256,11 @@
 .as-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .as-bar input[type=date]{font:inherit;padding:5px 8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--text);border-radius:0;}
 .as-dia{font-size:13px;font-weight:700;}
-.as-carga{position:absolute;left:0;right:0;top:50%;height:0;z-index:3;pointer-events:none;}
-.as-carga .cg{position:absolute;left:50%;top:-16px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;width:max-content;max-width:92%;padding:6px 14px;background:var(--panel);color:var(--text);border:1px solid var(--border-strong);border-radius:16px;font-size:12px;line-height:1.3;opacity:0;transition:opacity .2s;box-shadow:0 2px 10px rgba(0,0,0,.2);}
+.as-carga{position:absolute;right:16px;top:14px;height:0;z-index:3;pointer-events:none;max-width:calc(100% - 150px);}   /* @@carga-asistencia-arriba: arriba a la derecha, junto al título, sin tapar los días */
+.as-carga .cg{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;padding:3px 10px;background:var(--panel);color:var(--sub);border:1px solid var(--border-strong);border-radius:16px;font-size:11px;line-height:1.3;opacity:0;transition:opacity .2s;}
+.as-carga .cg .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .as-carga.on .cg{opacity:1;}
-.as-carga .cg i{flex:0 0 auto;width:14px;height:14px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--accent);animation:girar .7s linear infinite;}
+.as-carga .cg i{flex:0 0 auto;width:11px;height:11px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--accent);animation:girar .7s linear infinite;}
 .as-aviso{font-size:12px;color:var(--sub);border:1px dashed var(--border);padding:7px 10px;margin-bottom:8px;}
 .as-fila{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--border);}
 .as-seg{display:flex;}
@@ -2193,7 +2195,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.214';
+const APP_VERSION = '0.73.215';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
