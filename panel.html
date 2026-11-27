@@ -2193,7 +2193,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.213';
+const APP_VERSION = '0.73.214';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -2751,6 +2751,7 @@ function aplicarFusion(fusion){
   return cambiadas;
 }
 
+let idsSinGuardar = false;   // @@id-al-crear
 function rebuildWorkerList(){
   const workerSet = new Set(Object.keys(workerStatus));
   Object.values(state).forEach(st => { if(st && st.trabajador) workerSet.add(st.trabajador); });
@@ -2758,8 +2759,9 @@ function rebuildWorkerList(){
   ALL_WORKERS.forEach(w => {
     if(!workerStatus[w]) workerStatus[w] = defaultWorkerEntry(w);
     if(!workerStatus[w].especialidad) workerStatus[w].especialidad = defaultWorkerEntry(w).especialidad;
-    if(isAdmin && !/^[A-Za-z0-9_-]{1,20}$/.test(workerStatus[w].id || '')){ workerStatus[w].id = nuevoIdTrab(w); }
+    if(asegurarIdTrab(w)) idsSinGuardar = true;
   });
+  if(idsSinGuardar && isAdmin) markSettingsDirty(undefined, true);
   unificarNombres();
 }
 // ===== ID fijo por trabajador: el nombre es solo lo que se ve =====
@@ -2771,6 +2773,13 @@ const refsANombre = lista => (lista || []).map(x => nombreDeId(x) || x).filter((
 const histAId = h => (h || []).map(p => { if(!p || !p.porTrabajador) return p; const o = {}; Object.keys(p.porTrabajador).forEach(k => { const c = idTrab(k) || k; o[c] = (o[c] || 0) + p.porTrabajador[k]; }); return Object.assign({}, p, {porTrabajador: o}); });
 const histANombre = h => (h || []).map(p => { if(!p || !p.porTrabajador) return p; const o = {}; Object.keys(p.porTrabajador).forEach(k => { const c = nombreDeId(k) || k; o[c] = (o[c] || 0) + p.porTrabajador[k]; }); return Object.assign({}, p, {porTrabajador: o}); });
 // el ID sale del nombre con que se creó, así es el mismo en cada sesión aunque todavía no se haya guardado
+// @@id-al-crear: todo trabajador nuevo nace con ID; esta es la única función que lo asigna
+function asegurarIdTrab(w){
+  const e = workerStatus[w];
+  if(!isAdmin || !e || /^[A-Za-z0-9_-]{1,20}$/.test(e.id || '')) return false;
+  e.id = nuevoIdTrab(w);
+  return true;
+}
 function nuevoIdTrab(nombre){
   let h = 2166136261;
   for(let i = 0; i < nombre.length; i++){ h ^= nombre.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
@@ -3236,6 +3245,7 @@ function armarCuerpoGuardado(dirtyIds){
 async function dbSave(dirtyIds){
   if(!DB_URL) return false;
   dbErrorReason = '';
+  if(idsSinGuardar && dirtyIds && dirtyIds.size){ idsSinGuardar = false; await dbSave(new Set()); }   // @@id-al-crear: primero los IDs, después las partidas
   try{
     const {action, records, body} = armarCuerpoGuardado(dirtyIds);
     const opsEnviadas = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
@@ -3307,6 +3317,7 @@ let colaEnVuelo = false, colaTimer = null, colaEspera = 0, colaDesdeTs = 0;
 // Deja el cambio apartado en este aparato; el envío lo hace procesarCola()
 function dbEncolar(dirtyIds){
   if(!DB_URL || !sessionToken) return false;
+  if(idsSinGuardar && dirtyIds && dirtyIds.size){ idsSinGuardar = false; dbEncolar(new Set()); }   // @@id-al-crear: primero los IDs, después las partidas
   const {action, body} = armarCuerpoGuardado(dirtyIds);
   const opsEnviadas = {set: [...matOpsPend.set], del: [...matOpsPend.del]};
   const cuerpo = {...body}; delete cuerpo.token; delete cuerpo.pv;
@@ -4205,6 +4216,7 @@ document.getElementById('addWorkerBtn').addEventListener('click', () => {
     if(d.fin && d.fin < d.inicio) return err('El finiquito no puede ser antes del ingreso.');
     ALL_WORKERS.push(name);
     workerStatus[name] = {estado: d.fin && d.fin < rdHoy() ? 'finiquitado' : 'activo', especialidad: d.especialidad, inicio: d.inicio, fin: d.fin, ingreso: d.ingreso};
+    asegurarIdTrab(name);
     markSettingsDirty();
     populateFilters(); renderWorkerPanel(); render();
     saveNow(); // se guarda al tiro para que Asistencia lo vea
