@@ -2193,7 +2193,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.210';
+const APP_VERSION = '0.73.211';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -4000,7 +4000,7 @@ function renderWorkerPanel(){
       if(!workerStatus[w]) workerStatus[w] = defaultWorkerEntry(w);
       workerStatus[w][field] = e.target.value;
       markSettingsDirty();
-      scheduleSave(); populateFilters(); render();
+      scheduleSave(); populateFilters(); wkRedibujar();
     });
   });
   listEl.querySelectorAll('[data-worker-datos]').forEach(btn => {
@@ -8013,6 +8013,10 @@ document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
 const workerOverlay = document.getElementById('workerOverlay');
 let wkSnap = null, wkQuitados = [];
 function wkTomarSnap(){ wkSnap = JSON.stringify({ws: workerStatus}); wkQuitados = []; }
+// @@gestionar-sin-lag: dentro de la ventana no se redibuja el panel de atrás en cada clic; se hace una sola vez al cerrar o guardar
+let wkPend = false;
+function wkRedibujar(){ if(workerOverlay.classList.contains('show')){ wkPend = true; return; } wkPend = false; render(); }
+function wkVaciarPend(){ if(!wkPend) return; setTimeout(() => { if(wkPend){ wkPend = false; render(); } }, 260); }
 document.getElementById('toggleWorkerPanel').addEventListener('click', () => {
   wkTomarSnap();
   renderWorkerPanel();
@@ -8022,6 +8026,7 @@ document.getElementById('workerGuardarCerrar').addEventListener('click', () => {
   scheduleSave(); saveNow();
   closeOverlayAnimated(workerOverlay);
   wkTomarSnap();
+  wkVaciarPend();
 });
 document.getElementById('workerGuardarSolo').addEventListener('click', () => guardarMantener(workerOverlay, 'workerGuardarCerrar'));
 // Cerrar: deshace lo editado en la ventana (lo ya quitado no vuelve)
@@ -8031,9 +8036,10 @@ document.getElementById('workerCerrarSin').addEventListener('click', () => {
     const o = JSON.parse(wkSnap);
     Object.keys(workerStatus).forEach(k => delete workerStatus[k]); Object.assign(workerStatus, o.ws);
     wkQuitados.forEach(n => { delete workerStatus[n]; });
-    rebuildWorkerList(); render();
+    rebuildWorkerList(); wkPend = true;
   }
   closeOverlayAnimated(workerOverlay);
+  wkVaciarPend();
 });
 // la rueda fuera de la lista no mueve la página de atrás
 workerOverlay.addEventListener('wheel', (e) => { if(!e.target.closest('#workerList')) e.preventDefault(); }, {passive:false});
