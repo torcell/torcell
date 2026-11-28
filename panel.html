@@ -1622,7 +1622,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 <script>try{if(sessionStorage.getItem('cargaEntrando')==='1')document.getElementById('cgV3').className='cg3 cgquieta';}catch(e){}</script>
 <script src="carga.js?v=11"></script>
-<script src="rendimiento.js?v=7" defer></script><!-- @@rendimiento-comun -->
+<script src="rendimiento.js?v=8" defer></script><!-- @@rendimiento-comun -->
 <script>if(!window.CargaPagina){var o=document.getElementById('cargaGlobal');if(o)o.style.display='none';window.CargaPagina={el:null,cortar:function(){},espera:function(){},hecho:function(){},mensaje:function(){},fin:function(){return Promise.resolve();},error:function(d){if(d)location.replace(d);return Promise.resolve();},salir:function(d){if(d)location.replace(d);return Promise.resolve();}};window.salirConError=function(d){if(d)location.replace(d);};}</script>
 <div id="cielo" aria-hidden="true"></div>
 <div id="ramas" aria-hidden="true"></div>
@@ -2195,7 +2195,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.216';
+const APP_VERSION = '0.73.217';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;

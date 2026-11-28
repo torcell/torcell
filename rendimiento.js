@@ -27,6 +27,7 @@ function rdLunes(s){ const d = rdFecha(s); return rdSuma(s, -((d.getUTCDay() + 6
 function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 /* ===== Rendimiento 2 · proyección de cerámica por semana y rendimiento semanal (sin asistencia) ===== */
 // @@rend2-semanal
+// @@proy-ultima-semana: en Rendimiento 2 el ritmo 1 = la última semana completa
 const R2_INICIO = '2026-05-29', R2_FIN = '2027-01-01';   // semana 1 y término oficial
 const R2_SOLO = ['Piso', 'Muro Baños'];
 const r2E = {off: {'Muro': true}, ritmo: 0, solo: false, extra: 0};   // ritmo 0 = toda la obra; extra = trabajadores que se suman o restan al equipo   // solo: piso y muro baño, pisos 2 al 22
@@ -59,7 +60,7 @@ function renderRendimiento2(raiz, datos, esc){
     const fuera = E.solo ? [] : ar.filter(a => E.off[a]).map(lab);
     const cab = '<div class="rd-tit">Proyección · Cerámica por semana' + (E.solo ? ' · solo piso y muro baño, pisos 2 al 22' : '') + (fuera.length ? ' · sin ' + esc(fuera.join(', ')) : '') + nuevo + '</div>';
     const ctl = '<div class="py-caja"><div class="py-fc"><span class="py-cap">Filtro</span><div class="py-tabs" role="group" aria-label="Filtro de partidas"><button type="button" class="py-tab r2-tab' + (E.solo ? ' on' : '') + '" data-r2s="1" aria-pressed="' + E.solo + '">Solo piso y muro baño · pisos 2 al 22</button></div></div><div class="py-fc"><span class="py-cap">Partidas</span><div class="py-cks">' + ar.map(a => '<label class="py-ck"><input type="checkbox" data-r2a="' + esc(a) + '"' + (E.solo ? ' disabled' : '') + (E.off[a] ? '' : ' checked') + '><span>' + esc(lab(a)) + '</span></label>').join('') + '</div></div>'
-      + '<div class="py-fc"><span class="py-cap">Ritmo</span><div class="py-tabs" role="group" aria-label="Semanas para calcular el ritmo">' + [[4, '4 semanas'], [8, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab r2-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-r2r="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div><div class="py-fc"><span class="py-cap">Trabajadores</span><div class="py-tabs" role="group" aria-label="Sumar o restar trabajadores al equipo"><button type="button" class="py-tab r2-tab" data-r2x="-1" aria-label="Restar un trabajador">−</button><span class="py-tab r2-eq" title="Trabajadores del equipo: el promedio de las semanas elegidas, más o menos los que sumes">%EQ%</span><button type="button" class="py-tab r2-tab" data-r2x="1" aria-label="Sumar un trabajador">+</button></div></div></div>';
+      + '<div class="py-fc"><span class="py-cap">Ritmo</span><div class="py-tabs" role="group" aria-label="Semanas para calcular el ritmo">' + [[1, 'Última semana <small>(si sigue sin freno)</small>'], [4, '4 semanas'], [8, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab r2-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-r2r="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div><div class="py-fc"><span class="py-cap">Trabajadores</span><div class="py-tabs" role="group" aria-label="Sumar o restar trabajadores al equipo"><button type="button" class="py-tab r2-tab" data-r2x="-1" aria-label="Restar un trabajador">−</button><span class="py-tab r2-eq" title="Trabajadores del equipo: el promedio de las semanas elegidas, más o menos los que sumes">%EQ%</span><button type="button" class="py-tab r2-tab" data-r2x="1" aria-label="Sumar un trabajador">+</button></div></div></div>';
     const pon = h => { const t0 = box ? box.scrollTop : 0; raiz.innerHTML = h; if(box) box.scrollTop = t0; };
     const claves = Object.keys(sem).sort();
     if(!ar.length){ pon(cab + '<div class="rd-vacio">No hay partidas de cerámica con m² cargados.</div>'); return; }
@@ -84,7 +85,7 @@ function renderRendimiento2(raiz, datos, esc){
     // ===== término estimado y lo necesario por semana para la fecha oficial =====
     const dEst = rit > 0 ? Math.min(720, Math.ceil(falta / rit * 7)) : null, fEst = dEst != null ? rdSuma(hoy, dEst) : null;
     const dOf = dias(hoy, R2_FIN), nec = dOf > 0 ? falta / (dOf / 7) : null, dif = fEst != null ? dias(R2_FIN, fEst) : null;
-    const ritTxt = !E.ritmo ? 'toda la obra' : usa.length < E.ritmo ? 'últimas ' + usa.length + (usa.length === 1 ? ' semana' : ' semanas') : 'últimas ' + E.ritmo + ' semanas';
+    const ritTxt = !E.ritmo ? 'toda la obra' : E.ritmo === 1 ? (usa.length ? 'la última semana' : 'sin semanas') : usa.length < E.ritmo ? 'últimas ' + usa.length + (usa.length === 1 ? ' semana' : ' semanas') : 'últimas ' + E.ritmo + ' semanas';
     const kpi = (b, s, t) => '<div title="' + esc(t) + '"><b>' + b + '</b><span>' + s + '</span></div>';
     let h = cab + '<div class="rd-res">'
       + kpi(fmt(lleva / K * 100) + ' %', 'avance · ' + fmt(lleva) + ' de ' + fmt(K) + ' m²', 'Terminado: ' + fmt(lleva) + ' m². Falta: ' + fmt(falta) + ' m².' + (base > 0 ? ' Sin fecha de término: ' + fmt(base) + ' m².' : ''))
