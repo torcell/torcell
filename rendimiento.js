@@ -4,7 +4,7 @@
 // ===== estilos: se cargan solos junto con este archivo; rendimientoListo avisa cuando ya están puestos =====
 window.rendimientoListo = new Promise(ok => {
   if(document.getElementById('rendimientoCss')) return ok();
-  const l = document.createElement('link'); l.id = 'rendimientoCss'; l.rel = 'stylesheet'; l.href = 'rendimiento.css?v=1';
+  const l = document.createElement('link'); l.id = 'rendimientoCss'; l.rel = 'stylesheet'; l.href = 'rendimiento.css?v=2';
   l.onload = l.onerror = () => ok();
   const s0 = document.head.querySelector('style'); document.head.insertBefore(l, s0);   // antes de los estilos de la página, así ella puede ajustar lo suyo (cápsulas, temas)
 });
@@ -268,6 +268,8 @@ function renderRendimiento(raiz, datos, esc, opc){
   const pyEstado = {extra: 0, off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 0};
   const PY_MS = 864e5, PY_DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
   let pyM = null;
+  // @@proy-ultima-semana: los ritmos salen de esta sola lista (días hacia atrás; 0 = toda la obra); el último va entre paréntesis
+  const PY_RITMOS = [[7, 'Última semana <small>(si sigue sin freno)</small>', 'últimos 7 días'], [28, '4 semanas', 'últimas 4 semanas'], [56, '8 semanas', 'últimas 8 semanas'], [0, 'Toda la obra', 'toda la obra']];
   const pyFd = d => d.substring(8, 10) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
   function pyDif(act, ant){
     if(!(ant > 0)) return {c: 'eq', t: '—'};
@@ -341,7 +343,7 @@ function renderRendimiento(raiz, datos, esc, opc){
     const pw = pn ? pm / pn : 0, add = E.extra * pw / 7, v = v0 + add;
     const finI = P.idx(FIN_OFICIAL), fI = r => r > 0 ? Math.min(hasta + 720, hasta + Math.ceil(falta / r)) : null, estI = fI(v), estD = estI != null ? rdSuma(P.ini, estI) : null, est0 = fI(v0);
     const tips = [], tip = h => ' data-pt="' + (tips.push(h) - 1) + '"';
-    const ritTxt = E.ritmo === 28 ? 'últimas 4 semanas' : E.ritmo === 56 ? 'últimas 8 semanas' : 'toda la obra';
+    const ritTxt = (PY_RITMOS.find(t => t[0] === E.ritmo) || PY_RITMOS[3])[2];
     const nec = finI > hasta ? falta / (finI - hasta) * 7 : null, dif = estI != null ? estI - finI : null;
     const kpi = (b, s, t) => '<div class="py-k"' + tip(t) + '><b>' + b + '</b><span>' + s + '</span></div>';
     let h = cab + '<div class="rd-res">'
@@ -351,7 +353,7 @@ function renderRendimiento(raiz, datos, esc, opc){
       + '</div>';
     const ck = (k, t) => '<label class="py-ck"><input type="checkbox" data-pyk="' + k + '"' + (E[k] ? ' checked' : '') + '><span>' + t + '</span></label>';
     h += '<div class="py-caja">' + ckA
-      + filaCtl('Ritmo', '<div class="py-tabs" role="group" aria-label="Ritmo para proyectar">' + [[28, '4 semanas'], [56, '8 semanas'], [0, 'Toda la obra']].map(t => '<button type="button" class="py-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-pyr="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div>')
+      + filaCtl('Ritmo', '<div class="py-tabs" role="group" aria-label="Ritmo para proyectar">' + PY_RITMOS.map(t => '<button type="button" class="py-tab' + (E.ritmo === t[0] ? ' on' : '') + '" data-pyr="' + t[0] + '" aria-pressed="' + (E.ritmo === t[0]) + '">' + t[1] + '</button>').join('') + '</div>')
       + filaCtl('Agregar trabajador', '<div class="py-mm" role="group" aria-label="Ceramistas que se suman desde hoy"><button type="button" class="py-b" data-pyx="-1" aria-label="Quitar un ceramista"' + (E.extra <= 0 ? ' disabled' : '') + '>−</button><output class="py-n"' + tip('<b>Ceramistas que se suman desde hoy</b>Cada uno rinde en promedio ~' + fmt(pw) + ' m² por semana (' + fmt(pw / 5) + ' por día hábil), según lo que hicieron los ceramistas con nombre en ' + ritTxt + '. No cuenta el trabajo de No Asignado.') + '>' + E.extra + '</output><button type="button" class="py-b" data-pyx="1" aria-label="Sumar un ceramista"' + (!pw || E.extra >= 12 ? ' disabled' : '') + '>+</button></div><span class="py-aviso">' + (pw ? 'cada uno rinde ~' + fmt(pw) + ' m² por semana' + (E.extra ? ' · +' + fmt(add * 7) + ' m² por semana en total' : '') : 'sin datos para calcular el promedio') + '</span>')
       + filaCtl('Mostrar', E.vista === 'simple' ? ck('proy', 'Proyección') + ck('plan', 'Plan oficial') + ck('freno', 'Semanas con freno') + ck('barras', 'm² por semana') : '<span class="py-aviso">Estos checks se usan en la vista Simple.</span>') + '</div>';
     h += '<div class="py-tabs py-vis" role="tablist">' + [['simple', 'Simple'], ['burnup', 'Burn-up'], ['s', 'Curva S'], ['abanico', 'Abanico'], ['vel', 'Velocidad']].map(t => '<button type="button" role="tab" class="py-tab' + (E.vista === t[0] ? ' on' : '') + '" data-pyv="' + t[0] + '" aria-selected="' + (E.vista === t[0]) + '">' + t[1] + '</button>').join('') + '</div>';
