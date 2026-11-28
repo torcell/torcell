@@ -43,7 +43,9 @@ function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.
 // @@proy-ultima-semana: en Rendimiento 2 el ritmo 1 = la última semana completa
 const R2_INICIO = '2026-05-29', R2_FIN = '2027-01-01';   // semana 1 y término oficial
 const R2_SOLO = ['Piso', 'Muro Baños'];
-const r2E = {off: {'Muro': true}, ritmo: 0, solo: false, extra: 0};   // ritmo 0 = toda la obra; extra = trabajadores que se suman o restan al equipo   // solo: piso y muro baño, pisos 2 al 22
+// @@proy-checks-inicio: al abrir solo van marcadas Piso y Muro Baño; las dos proyecciones parten de esta misma lista
+const rdOffInicio = () => ({'Muro': true, 'Muro Cocina': true, 'Pasillos': true});
+const r2E = {off: rdOffInicio(), ritmo: 0, solo: false, extra: 0};   // ritmo 0 = toda la obra; extra = trabajadores que se suman o restan al equipo   // solo: piso y muro baño, pisos 2 al 22
 function renderRendimiento2(raiz, datos, esc){
   datos = rdSoloHabiles(datos);   // @@ritmo-lunes-viernes
   const fmt = n => (Math.round(n * 10) / 10).toLocaleString('es-CL');
@@ -282,7 +284,7 @@ function renderRendimiento(raiz, datos, esc, opc){
   const color = pct => pct >= 100 ? 'var(--ok,#43a047)' : pct >= 70 ? 'var(--warn,#d99a00)' : 'var(--bad,#c0392b)';
   const spark = serie => { const m = Math.max(1, ...serie), p = serie.map((v, i) => (serie.length > 1 ? i / (serie.length - 1) * 78 : 39).toFixed(1) + ',' + (22 - v / m * 20).toFixed(1)).join(' '); return '<svg viewBox="0 0 80 24" width="80" height="24" aria-hidden="true"><polyline points="' + p + '" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg>'; };
   // ===== Proyección de cerámica: recta según el ritmo real, con detalle al pasar el cursor =====
-  const pyEstado = {extra: 0, off: {'Muro': true}, vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 0};
+  const pyEstado = {extra: 0, off: rdOffInicio(), vista: 'simple', proy: true, plan: true, freno: true, barras: false, ritmo: 0};
   const PY_MS = 864e5, PY_DC = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
   let pyM = null;
   // @@proy-ultima-semana: los ritmos salen de esta sola lista (días hábiles hacia atrás; 0 = toda la obra); el último va entre paréntesis
