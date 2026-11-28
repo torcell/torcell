@@ -24,6 +24,8 @@ function rdIso(d){ return d.toISOString().substring(0, 10); }
 function rdFecha(s){ return new Date(s + 'T00:00:00Z'); }
 function rdSuma(s, n){ const d = rdFecha(s); d.setUTCDate(d.getUTCDate() + n); return rdIso(d); }
 function rdLunes(s){ const d = rdFecha(s); return rdSuma(s, -((d.getUTCDay() + 6) % 7)); }
+// @@ritmo-lunes-viernes: el ritmo solo cuenta lunes a viernes; el sábado es avance extra y no entra al cálculo
+function rdHabil(s){ const w = rdFecha(s).getUTCDay(); return w > 0 && w < 6; }
 function rdHoy(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 /* ===== Rendimiento 2 · proyección de cerámica por semana y rendimiento semanal (sin asistencia) ===== */
 // @@rend2-semanal
@@ -41,7 +43,7 @@ function renderRendimiento2(raiz, datos, esc){
   const box = raiz.closest('.ovDin > div') || raiz.parentElement;
   const f1 = x => x.toFixed(1);
   function pintar(){
-    const E = r2E, sem = {}, pt = {}, areas = [];
+    const E = r2E, sem = {}, lv = {}, pt = {}, areas = [];
     let K = 0, hecho = 0, sinF = 0;
     // ===== el avance sale de cada partida: m² y día en que se marcó terminada =====
     (datos.cer || []).forEach(c => {
@@ -51,7 +53,7 @@ function renderRendimiento2(raiz, datos, esc){
       K += m; if(!c.hecho) return; hecho += m;
       const d = c.dia || '';
       if(!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > hoy){ sinF += m; return; }
-      const l = rdLunes(d); sem[l] = (sem[l] || 0) + m;
+      const l = rdLunes(d); sem[l] = (sem[l] || 0) + m; if(rdHabil(d)) lv[l] = (lv[l] || 0) + m;
       if(c.w){ const o = pt[l] || (pt[l] = {}); o[c.w] = (o[c.w] || 0) + m; }
     });
     const orden = ['Piso', 'Muro Baños', 'Muro Cocina', 'Muro', 'Pasillos'];
@@ -69,13 +71,13 @@ function renderRendimiento2(raiz, datos, esc){
     if(!claves.length){ pon(cab + ctl.replace('%EQ%', '—') + '<div class="rd-vacio">Todavía no hay m² terminados con fecha en lo marcado.</div>'); return; }
     // ===== semanas, de lunes a domingo =====
     const l0 = claves[0] < rdLunes(R2_INICIO) ? claves[0] : rdLunes(R2_INICIO), S = [];
-    for(let l = l0; l <= lunHoy; l = rdSuma(l, 7)) S.push({l, n: S.length + 1, fin: rdSuma(l, 6), m: sem[l] || 0, cur: l === lunHoy && hoy < rdSuma(l, 4)});
+    for(let l = l0; l <= lunHoy; l = rdSuma(l, 7)) S.push({l, n: S.length + 1, fin: rdSuma(l, 6), m: sem[l] || 0, lv: lv[l] || 0, cur: l === lunHoy && hoy < rdSuma(l, 4)});
     const fi = S.findIndex(w => w.l === claves[0]);
     const base = sinF; let ac = base; S.forEach(w => { ac += w.m; w.cum = ac; });
     const lleva = ac, falta = K - lleva;
     const hechas = S.filter(w => !w.cur && w.l >= claves[0]);
     const usa = E.ritmo ? hechas.slice(-E.ritmo) : hechas;
-    const ritBase = usa.length ? usa.reduce((s, w) => s + w.m, 0) / usa.length : null;
+    const ritBase = usa.length ? usa.reduce((s, w) => s + w.lv, 0) / usa.length : null;
     // ===== @@rend2-equipo: cuántos trabajadores rindieron en esas semanas; cada uno que se suma o resta aporta el promedio de uno =====
     const nT = usa.length ? Math.max(1, usa.reduce((s, w) => s + Object.keys(pt[w.l] || {}).length, 0) / usa.length) : 1;
     E.extra = Math.max(E.extra, 1 - Math.round(nT));
@@ -89,7 +91,7 @@ function renderRendimiento2(raiz, datos, esc){
     const kpi = (b, s, t) => '<div title="' + esc(t) + '"><b>' + b + '</b><span>' + s + '</span></div>';
     let h = cab + '<div class="rd-res">'
       + kpi(fmt(lleva / K * 100) + ' %', 'avance · ' + fmt(lleva) + ' de ' + fmt(K) + ' m²', 'Terminado: ' + fmt(lleva) + ' m². Falta: ' + fmt(falta) + ' m².' + (base > 0 ? ' Sin fecha de término: ' + fmt(base) + ' m².' : ''))
-      + kpi(rit != null ? '~' + fmt(rit) + ' m²' : '—', 'por semana · ' + (rit != null ? ritTxt + (E.extra ? ' · ' + (E.extra > 0 ? '+' : '−') + Math.abs(E.extra) + (Math.abs(E.extra) === 1 ? ' trabajador' : ' trabajadores') : '') : 'falta una semana completa'), 'Promedio de las semanas completas con registro (lunes a domingo).')
+      + kpi(rit != null ? '~' + fmt(rit) + ' m²' : '—', 'por semana · ' + (rit != null ? ritTxt + (E.extra ? ' · ' + (E.extra > 0 ? '+' : '−') + Math.abs(E.extra) + (Math.abs(E.extra) === 1 ? ' trabajador' : ' trabajadores') : '') : 'falta una semana completa'), 'Promedio de las semanas completas con registro, solo de lunes a viernes: el sábado es avance extra y no cuenta para el ritmo.')
       + kpi(fEst ? fF(fEst) : '—', 'término estimado' + (dif == null ? '' : dif === 0 ? ' · justo en la fecha oficial' : ' · ' + Math.abs(dif) + (Math.abs(dif) === 1 ? ' día ' : ' días ') + (dif > 0 ? 'después' : 'antes') + ' del oficial'), 'Con el ritmo semanal de arriba, lo que falta se termina en esta fecha.')
       + (nec != null ? kpi('~' + fmt(nec) + ' m²', 'por semana para el ' + fF(R2_FIN), 'Lo que hay que hacer cada semana para terminar en la fecha oficial.') : '')
       + '</div>' + ctl.replace('%EQ%', fmt(nT + E.extra));
@@ -125,7 +127,7 @@ function renderRendimiento2(raiz, datos, esc){
     h += '<div class="rd-tit">Rendimiento semanal · Cerámica</div><div class="py-sub" title="Parada: semana sin m². Freno: menos del 60 % de una semana normal.">' + (med ? 'Semana normal: ' + fmt(med) + ' m² · ' : '') + (frenos.length ? 'con freno o parada: <b>' + frenos.map(w => 'S' + w.n).join(', ') + '</b>' : 'sin frenos ni paradas') + '</div>'
       + '<div class="py-sems"><div class="py-sr r2-sr py-sh"><span class="py-s1">Semana</span><span class="py-s2">m²</span><span class="py-s3">Contra la anterior</span><span class="py-s4">Estado</span></div>' + filas.slice(0, 8).join('') + '</div>'
       + (filas.length > 8 ? '<details class="py-mas"><summary>Ver semanas anteriores (' + (filas.length - 8) + ')</summary><div class="py-sems">' + filas.slice(8).join('') + '</div></details>' : '')
-      + '<details class="rd-nota"><summary>Cómo se calcula</summary>Cada partida cuenta entera en la semana (lunes a domingo) en que se marcó terminada. El ritmo es el promedio de m² por semana de las semanas completas elegidas; la semana en curso no entra. El término estimado sale de dividir lo que falta por ese ritmo. La obra empieza a contar el 29/05/2026 y la fecha oficial es el 01/01/2027. No se usa la asistencia.</details>';
+      + '<details class="rd-nota"><summary>Cómo se calcula</summary>Cada partida cuenta entera en la semana (lunes a domingo) en que se marcó terminada. El ritmo es el promedio de m² por semana de las semanas completas elegidas, contando solo de lunes a viernes (el sábado es avance extra y no entra); la semana en curso no entra. El término estimado sale de dividir lo que falta por ese ritmo. La obra empieza a contar el 29/05/2026 y la fecha oficial es el 01/01/2027. No se usa la asistencia.</details>';
     pon(h);
     // en celular el gráfico es más ancho que la pantalla: se deja mirando el día de hoy y no el principio
     const gw = raiz.querySelector('.py-gw'); if(gw) gw.scrollLeft = Math.max(0, X(xHoy) / Wd * gw.scrollWidth - gw.clientWidth * 0.7);
@@ -311,15 +313,15 @@ function renderRendimiento(raiz, datos, esc, opc){
     });
     const S = [];
     for(let l = rdLunes(P.d0); l <= hoyLun; l = rdSuma(l, 7)){
-      const fin = rdSuma(l, 6); let m = 0, n = 0;
-      for(let k = 0; k < 7; k++){ const x = P.diario[rdSuma(l, k)] || 0; if(x > 0){ m += x; n++; } }
+      const fin = rdSuma(l, 6); let m = 0, n = 0, lv = 0;
+      for(let k = 0; k < 7; k++){ const x = P.diario[rdSuma(l, k)] || 0; if(x > 0){ m += x; n++; if(k < 5) lv += x; } }
       const det = gente.filter(g => g.a <= fin && g.b >= l).map(g => {
         let m2 = 0, as = 0, F = 0; const dd = {}, pt = P.porTrab[g.t.nombre] || {};
         Object.keys(pt).forEach(d => { if(d >= l && d <= fin){ m2 += pt[d]; dd[d] = 1; } });
         (g.t.asistencia || []).forEach(x => { if(x.d >= l && x.d <= fin){ if(x.e === 'F') F++; else if(x.e === 'P' || x.e === 'S') as++; } });
         return {n: g.t.nombre, m2, dias: Object.keys(dd).length, as, F};
       }).filter(x => x.m2 > 0).sort((x, y) => y.m2 - x.m2);   // @@rend-solo-con-m2: quien no tiene m² no se muestra ni cuenta; entra solo cuando los tenga
-      S.push({l, fin, m, n, det, cur: l === hoyLun && hoy < rdSuma(l, 4), parcial: !S.length && P.d0 > l, inf: infoSem(l)});
+      S.push({l, fin, m, lv, n, det, cur: l === hoyLun && hoy < rdSuma(l, 4), parcial: !S.length && P.d0 > l, inf: infoSem(l)});
     }
     const hechas = S.filter(w => !w.cur && !w.parcial && w.m > 0).map(w => w.m).sort((a, b) => a - b), q = hechas.length;
     const med = q ? (q % 2 ? hechas[(q - 1) / 2] : (hechas[q / 2 - 1] + hechas[q / 2]) / 2) : 0;
@@ -336,11 +338,13 @@ function renderRendimiento(raiz, datos, esc, opc){
     const ckA = filaCtl('Partidas', areas.map(a => '<label class="py-ck"><input type="checkbox" data-pya="' + esc(a) + '"' + (E.off[a] ? '' : ' checked') + '><span>' + esc(pyLab(a)) + '</span></label>').join(''));
     if(P.msg){ pyM = null; return cab + '<div class="py-caja">' + ckA + '</div><div class="rd-vacio">' + P.msg + '</div>'; }
     const hasta = P.n - 1, lleva = P.cum[hasta], falta = P.K - lleva;
-    const a0 = E.ritmo ? Math.max(0, hasta - E.ritmo) : 0, v0 = (lleva - P.cum[a0]) / Math.max(1, hasta - a0);
+    const a0 = E.ritmo ? Math.max(0, hasta - E.ritmo) : 0;
+    let finde = 0; for(let i = a0 + 1; i <= hasta; i++){ const d = rdSuma(P.ini, i); if(!rdHabil(d)) finde += P.diario[d] || 0; }   // @@ritmo-lunes-viernes
+    const v0 = (lleva - P.cum[a0] - finde) / Math.max(1, hasta - a0);
     const Q = pySemanas(P);
     // ===== rendimiento promedio de un ceramista: m² de los que tienen nombre ÷ semanas-trabajador del mismo período =====
     let pm = 0, pn = 0; { const l0 = rdLunes(rdSuma(P.ini, a0));
-      Q.S.forEach(w => { if(w.cur || w.l < l0) return; Object.keys(P.porTrab).forEach(nm => { if(sepul(nm)) return; let m = 0; for(let k = 0; k < 7; k++) m += P.porTrab[nm][rdSuma(w.l, k)] || 0; if(m > 0){ pm += m; pn++; } }); }); }
+      Q.S.forEach(w => { if(w.cur || w.l < l0) return; Object.keys(P.porTrab).forEach(nm => { if(sepul(nm)) return; let m = 0; for(let k = 0; k < 5; k++) m += P.porTrab[nm][rdSuma(w.l, k)] || 0; if(m > 0){ pm += m; pn++; } }); }); }
     const pw = pn ? pm / pn : 0, add = E.extra * pw / 7, v = v0 + add;
     const finI = P.idx(FIN_OFICIAL), fI = r => r > 0 ? Math.min(hasta + 720, hasta + Math.ceil(falta / r)) : null, estI = fI(v), estD = estI != null ? rdSuma(P.ini, estI) : null, est0 = fI(v0);
     const tips = [], tip = h => ' data-pt="' + (tips.push(h) - 1) + '"';
@@ -419,7 +423,7 @@ function renderRendimiento(raiz, datos, esc, opc){
     // ===== ritmos: uno solo, o tres para el abanico (peores, normales y mejores semanas) =====
     let fan = null;
     if(m === 'abanico'){
-      const ws = Q.S.filter(w => !w.cur && !w.parcial).slice(-12).map(w => w.m).sort((a, b) => a - b), n = ws.length;
+      const ws = Q.S.filter(w => !w.cur && !w.parcial).slice(-12).map(w => w.lv).sort((a, b) => a - b), n = ws.length;
       if(n >= 3){ const k = Math.max(1, Math.round(n / 4)), pr = a => a.reduce((x, y) => x + y, 0) / a.length, med = n % 2 ? ws[(n - 1) / 2] : (ws[n / 2 - 1] + ws[n / 2]) / 2;
         fan = {pes: pr(ws.slice(0, k)) / 7 + o.add, prob: med / 7 + o.add, opt: pr(ws.slice(-k)) / 7 + o.add, n, k, f: (v, i) => Math.min(K, lleva + v * (i - hasta))}; }
     }
