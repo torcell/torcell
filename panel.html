@@ -2195,7 +2195,7 @@ button>.ic.ib{position:absolute;left:10px;top:50%;margin-top:-.525em;vertical-al
 
 // @@barra-real: se declaran desde el inicio todos los pasos de la carga, así la barra parte en 0% y solo sube con lo que realmente cargó
 if(window.CargaPagina && CargaPagina.espera){ CargaPagina.espera('version'); CargaPagina.espera('datos'); }
-const APP_VERSION = '0.73.221';
+const APP_VERSION = '0.73.222';
 const BACKEND_REQUERIDO = 57;
 const REVISAR_VERSION_CADA_MS = 5 * 60 * 1000;   // @@version-liviana: antes 30 s bajando la página entera; ahora lee un archivo de pocos bytes
 const REVISAR_VERSION_AL_VOLVER_MS = 60 * 1000;
@@ -5966,10 +5966,10 @@ setInterval(() => { if(isAdmin){ actualizarAvisoFechas(); actualizarSeguimiento(
 // ===== Seguimiento: partidas demoradas y trabajadores frenados =====
 const SEG_MIN_MUESTRAS = 3, SEG_MAX_LOG = 40, SEG_DIAS_VIGENTE = 21;
 function contenedorSeg(){ let c = document.getElementById('avisosSeg'); if(!c){ c = document.createElement('div'); c.id = 'avisosSeg'; document.body.appendChild(c); } return c; }
-// días contados con el día de inicio y el de término, sin domingos
+// días contados con el día de inicio y el de término, solo de lunes a viernes (@@ritmo-lunes-viernes: sábado y domingo no cuentan)
 function diasHabiles(a, b){
   const d = new Date(a), f = new Date(b); d.setHours(12, 0, 0, 0); f.setHours(12, 0, 0, 0);
-  let n = 0, tope = 0; while(d <= f && tope++ < 400){ if(d.getDay() !== 0) n++; d.setDate(d.getDate() + 1); } return n;
+  let n = 0, tope = 0; while(d <= f && tope++ < 400){ if(d.getDay() % 6 !== 0) n++; d.setDate(d.getDate() + 1); } return n;
 }
 function calcularSeguimiento(){
   const ahora = Date.now(), res = {demoras: [], frenados: []};
@@ -5994,7 +5994,7 @@ function calcularSeguimiento(){
         if(!resuelta.x && !resuelta.m && d && d.n >= SEG_MIN_MUESTRAS && dias > d.max && st.partidaTs > ahora - SEG_DIAS_VIGENTE * 86400000) res.demoras.push({w, id: c.id, ini: st.partidaTs, dias, max: d.max});
       }
       if(st.terminado && st.terminadoTs && st.terminadoTs > ultimo) ultimo = st.terminadoTs; });
-    if(!enCurso && ultimo && ahora - ultimo < 30 * 86400000 && new Date().getDay() !== 0){
+    if(!enCurso && ultimo && ahora - ultimo < 30 * 86400000 && new Date().getDay() % 6 !== 0){
       const dias = diasHabiles(ultimo, ahora) - 1;
       if(dias >= 1) res.frenados.push({w, desde: ultimo, dias});
     }
